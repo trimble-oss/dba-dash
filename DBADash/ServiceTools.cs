@@ -1,9 +1,12 @@
-﻿using Serilog;
+﻿using Microsoft.Data.SqlClient;
+using Serilog;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Management;
+using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Security.Principal;
 using System.ServiceProcess;
@@ -368,6 +371,279 @@ namespace DBADash
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Checks if the current service account (the account running the DBA Dash service) has sufficient permissions to perform an upgrade.
+        /// This validates that:
+        /// 1. The service folder is accessible and writable
+        /// 2. The service can be stopped and started
+        /// 3. The service account has db_owner access to all SQL repository databases
+        /// </summary>
+        /// <param name="config">The collection configuration containing service name and destination connections</param>
+        /// <returns>True if the service account has sufficient permissions, false otherwise</returns>
+        public static bool CanServiceAccountPerformUpgrade(CollectionConfig config)
+        {
+            try
+            {
+                // Check if service folder is writable
+                if (!CanWriteToServiceFolder())
+                {
+                    Log.Warning("Service account does not have write permissions to service folder");
+                    return false;
+                }
+
+                // Check if service can be stopped and started (permissions to control the service)
+                if (!CanControlService(config.ServiceName))
+                {
+                    Log.Warning("Service account does not have permissions to control the service (stop/start)");
+                    return false;
+                }
+
+                // Check if any DBA Dash processes are running that cannot be terminated
+                if (!CanTerminateRunningProcesses())
+                {
+                    Log.Warning("Service account does not have permissions to terminate one or more running DBA Dash processes");
+                    return false;
+                }
+
+                // Check if the database principal in each connection string has CONTROL permission on all SQL repository databases (typically granted via db_owner)
+                if (!CanAccessRepositoryDatabaseWithControlPermission(config.AllDestinations))
+                {
+                    Log.Warning("Database principal does not have CONTROL permission on all repository databases (typically granted via db_owner role)");
+                    return false;
+                }
+
+                Log.Information("Service account has sufficient permissions for upgrade");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error validating service account upgrade permissions");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Checks if the service folder is writable by attempting to create and delete a test file.
+        /// </summary>
+        /// <returns>True if the service folder is writable, false otherwise</returns>
+        private static bool CanWriteToServiceFolder()
+        {
+            try
+            {
+                var testFilePath = Path.Combine(Path.GetDirectoryName(ServicePath) ?? AppContext.BaseDirectory, $".upgrade-check-{Guid.NewGuid():N}");
+                using (File.Create(testFilePath, 1, FileOptions.DeleteOnClose)) { }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Debug(ex, "Service folder write test failed");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Checks if the service can be controlled (stopped and started) by attempting to open it
+        /// with SERVICE_STOP access rights via the SCM. This accurately reflects whether the
+        /// current account can stop the service, unlike reading ServiceController.Status which
+        /// only requires SERVICE_QUERY_STATUS.
+        /// </summary>
+        /// <param name="serviceName">The name of the service to check, or null to use the service from path</param>
+        /// <returns>True if the service account has stop permissions, false otherwise</returns>
+        private static bool CanControlService(string serviceName = null)
+        {
+            try
+            {
+                ServiceInfo serviceInfo;
+
+                if (!string.IsNullOrEmpty(serviceName))
+                {
+                    serviceInfo = GetServiceInfoFromName(serviceName);
+                    if (serviceInfo == null)
+                    {
+                        Log.Warning("DBA Dash service {serviceName} not found", serviceName);
+                        return false;
+                    }
+                }
+                else
+                {
+                    serviceInfo = GetServiceInfoFromPath();
+                    if (serviceInfo == null)
+                    {
+                        Log.Warning("DBA Dash service not found");
+                        return false;
+                    }
+                }
+
+                // Open the SCM and then the service with SERVICE_STOP access to verify actual stop permission
+                var scm = NativeMethods.OpenSCManager(null, null, NativeMethods.SC_MANAGER_CONNECT);
+                if (scm == IntPtr.Zero)
+                {
+                    Log.Warning("Could not open SCM to verify service stop permissions");
+                    return false;
+                }
+                try
+                {
+                    var svc = NativeMethods.OpenService(scm, serviceInfo.Name, NativeMethods.SERVICE_STOP | NativeMethods.SERVICE_START);
+                    if (svc == IntPtr.Zero)
+                    {
+                        Log.Warning("Service account does not have stop/start permissions on service {serviceName}", serviceInfo.Name);
+                        return false;
+                    }
+                    NativeMethods.CloseServiceHandle(svc);
+                }
+                finally
+                {
+                    NativeMethods.CloseServiceHandle(scm);
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Debug(ex, "Service control check failed");
+                return false;
+            }
+        }
+
+        private static class NativeMethods
+        {
+            internal const uint SC_MANAGER_CONNECT = 0x0001;
+            internal const uint SERVICE_STOP = 0x0020;
+            internal const uint SERVICE_START = 0x0010;
+            internal const uint PROCESS_TERMINATE = 0x0001;
+
+            [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+            internal static extern IntPtr OpenSCManager(string machineName, string databaseName, uint dwAccess);
+
+            [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+            internal static extern IntPtr OpenService(IntPtr hSCManager, string lpServiceName, uint dwDesiredAccess);
+
+            [DllImport("advapi32.dll", SetLastError = true)]
+            [return: MarshalAs(UnmanagedType.Bool)]
+            internal static extern bool CloseServiceHandle(IntPtr hSCObject);
+
+            [DllImport("kernel32.dll", SetLastError = true)]
+            internal static extern IntPtr OpenProcess(uint dwDesiredAccess, bool bInheritHandle, int dwProcessId);
+
+            [DllImport("kernel32.dll", SetLastError = true)]
+            [return: MarshalAs(UnmanagedType.Bool)]
+            internal static extern bool CloseHandle(IntPtr hObject);
+        }
+
+        private static readonly string[] UpgradeProcessNames = ["DBADash", "DBADashServiceConfigTool", "DBADashConfig", "DBADashService"];
+
+        /// <summary>
+        /// Checks whether any DBA Dash processes currently running from the service folder can be terminated
+        /// by the current account. Processes not running from this installation path are ignored.
+        /// </summary>
+        private static bool CanTerminateRunningProcesses()
+        {
+            try
+            {
+                var serviceDir = (Path.GetDirectoryName(ServicePath) ?? AppContext.BaseDirectory).TrimEnd(Path.DirectorySeparatorChar)
+                    + Path.DirectorySeparatorChar;
+
+                foreach (var name in UpgradeProcessNames)
+                {
+                    foreach (var proc in Process.GetProcessesByName(name))
+                    {
+                        try
+                        {
+                            string procPath = null;
+                            try { procPath = proc.MainModule?.FileName; } catch { /* access denied reading path */ }
+
+                            // Only care about processes running from this installation
+                            if (procPath == null || !procPath.StartsWith(serviceDir, StringComparison.OrdinalIgnoreCase))
+                                continue;
+
+                            var handle = NativeMethods.OpenProcess(NativeMethods.PROCESS_TERMINATE, false, proc.Id);
+                            if (handle == IntPtr.Zero)
+                            {
+                                Log.Warning("Cannot terminate process {name} (PID {pid}): insufficient permissions", name, proc.Id);
+                                return false;
+                            }
+                            NativeMethods.CloseHandle(handle);
+                        }
+                        finally
+                        {
+                            proc.Dispose();
+                        }
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Debug(ex, "Process termination permission check failed");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Checks if the database principal in each destination connection string has CONTROL permission
+        /// on the repository database. For integrated-security connections this is the Windows service
+        /// account; for SQL-auth connections it is the SQL login specified in the connection string.
+        /// CONTROL permission is typically granted via the db_owner role, but other grants can satisfy it too.
+        /// Non-SQL destinations are excluded from the check as they don't require this permission for upgrades.
+        /// </summary>
+        /// <param name="destinations">The list of destination connections</param>
+        /// <returns>True if the database principal has CONTROL permission on all SQL destinations, false otherwise</returns>
+        private static bool CanAccessRepositoryDatabaseWithControlPermission(List<DBADashConnection> destinations)
+        {
+            try
+            {
+                if (destinations == null || destinations.Count == 0)
+                {
+                    Log.Debug("No destination connections to validate");
+                    return true; // No SQL destinations to check
+                }
+
+                // Filter to only SQL destinations - non-SQL destinations don't need CONTROL permission for upgrades
+                var sqlDestinations = destinations.Where(d => d.Type == DBADashConnection.ConnectionType.SQL).ToList();
+
+                if (sqlDestinations.Count == 0)
+                {
+                    Log.Debug("No SQL destination connections to validate");
+                    return true; // No SQL destinations to check
+                }
+
+                bool allHaveAccess = true;
+
+                foreach (var destination in sqlDestinations)
+                {
+                    using var cn = new SqlConnection(destination.ConnectionString);
+
+                    cn.Open();
+
+                    using var cmd = new SqlCommand("SELECT HAS_PERMS_BY_NAME(NULL, 'DATABASE', 'CONTROL')", cn);
+
+                    var scalarResult = cmd.ExecuteScalar();
+
+                    // HAS_PERMS_BY_NAME can return NULL if the permission check cannot be evaluated
+                    // Treat NULL or DBNull as 0 (no permission) to avoid InvalidCastException
+                    var result = scalarResult == null || scalarResult == DBNull.Value ? 0 : Convert.ToInt32(scalarResult);
+
+                    if (result > 0)
+                    {
+                        Log.Information("Database principal has CONTROL permission (e.g. via db_owner) in repository database: {database}", destination.InitialCatalog());
+                    }
+                    else
+                    {
+                        Log.Warning("Database principal does not have CONTROL permission in repository database: {database}. Grant db_owner or equivalent CONTROL permission.", destination.InitialCatalog());
+                        allHaveAccess = false;
+                    }
+                }
+
+                return allHaveAccess;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error checking CONTROL permission on repository database");
+                return false;
+            }
         }
     }
 }

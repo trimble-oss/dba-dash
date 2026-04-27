@@ -115,15 +115,16 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AsyncKeyedLock" Version="8.0.2" />
-    <PackageReference Include="AWSSDK.Core" Version="4.0.3.32" />
-    <PackageReference Include="AWSSDK.S3" Version="4.0.22" />
-    <PackageReference Include="AWSSDK.SQS" Version="4.0.2.26" />
-    <PackageReference Include="Azure.Core" Version="1.53.0" />
+    <PackageReference Include="AWSSDK.Core" Version="4.0.4" />
+    <PackageReference Include="AWSSDK.S3" Version="4.0.22.1" />
+    <PackageReference Include="AWSSDK.SQS" Version="4.0.2.27" />
+    <PackageReference Include="Azure.Core" Version="1.54.0" />
     <PackageReference Include="Azure.Identity" Version="1.21.0" />
     <PackageReference Include="Humanizer.Core" Version="3.0.10" />
     <PackageReference Include="MailKit" Version="4.16.0" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="10.0.7" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.4" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.1" />
+    <PackageReference Include="Microsoft.Data.SqlClient.Extensions.Azure" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.7" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.7" />
     <PackageReference Include="Microsoft.Identity.Client" Version="4.83.3" />
