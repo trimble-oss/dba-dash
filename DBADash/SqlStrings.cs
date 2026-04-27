@@ -39,6 +39,7 @@ namespace DBADash
         public static string Databases => GetSqlString("Databases");
         public static string DatabasesHADR => GetSqlString("DatabasesHADR");
         public static string DBConfig => GetSqlString("DBConfig");
+        public static string DatabaseExtendedProperties => GetSqlString("DatabaseExtendedProperties");
         public static string DBFiles => GetSqlString("DBFiles");
         public static string DBTuningOptions => GetSqlString("DBTuningOptions");
         public static string Drives => GetSqlString("Drives");

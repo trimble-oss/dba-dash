@@ -96,6 +96,7 @@ namespace DBADash
                 { CollectionType.LogRestores, 120 },
                 { CollectionType.ServerExtraProperties, 120 },
                 { CollectionType.DBConfig, 120 },
+                { CollectionType.DatabaseExtendedProperties, 120 },
                 { CollectionType.Corruption, 120 },
                 { CollectionType.OSInfo, 120 },
                 { CollectionType.TraceFlags, 120 },

@@ -6,6 +6,7 @@ namespace DBADashGUI.CustomReports
     {
         public SystemReports()
         {
+            Add(DatabaseExtendedPropertiesReport.Instance);
             Add(DatabaseFinderReport.Instance);
             Add(DeletedDatabasesReport.Instance);
             Add(FailedLoginsReport.Instance);

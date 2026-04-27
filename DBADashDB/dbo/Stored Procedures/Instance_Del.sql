@@ -207,6 +207,24 @@ BEGIN
 				AND D.DatabaseID = DCH.DatabaseID
 				)
 
+	DELETE DEPH
+	FROM dbo.DatabaseExtendedPropertiesHistory DEPH
+	WHERE EXISTS(
+				SELECT 1 
+				FROM dbo.Databases D
+				WHERE D.InstanceID = @InstanceID
+				AND D.DatabaseID = DEPH.DatabaseID
+				)
+
+	DELETE DEP
+	FROM dbo.DatabaseExtendedProperties DEP
+	WHERE EXISTS(
+				SELECT 1 
+				FROM dbo.Databases D
+				WHERE D.InstanceID = @InstanceID
+				AND D.DatabaseID = DEP.DatabaseID
+				)
+
 	EXEC dbo.DBFileSnapshot_Del @InstanceID=@InstanceID,@DaysToKeep=0
 
 	DELETE dbo.DBFileThresholds

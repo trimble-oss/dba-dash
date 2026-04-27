@@ -214,7 +214,8 @@ namespace DBADashGUI
             Tags,
             TableSize,
             TuningRecommendations,
-            PoolsAndGroups
+            PoolsAndGroups,
+            DatabaseExtendedProperties
         }
 
         private static readonly List<Main.Tabs> InstanceOnlyTabs = new() { Main.Tabs.PerformanceSummary, Tabs.Metrics, Tabs.Waits, Tabs.Memory, Tabs.RunningQueries };
@@ -241,6 +242,7 @@ namespace DBADashGUI
         private TabPage tabTuningRecommendations;
         private TabPage tabPoolsAndGroups;
         private TabPage tabPerformance;
+        private TabPage tabDatabaseExtendedProperties;
 
         public Main(CommandLineOptions opts)
         {
@@ -299,6 +301,15 @@ namespace DBADashGUI
                 PreventReportOverwrite = true
             };
             tabPerformance.Controls.Add(perfView);
+
+            tabDatabaseExtendedProperties = new TabPage("Extended Properties") { Name = Tabs.DatabaseExtendedProperties.TabName() };
+            var extPropView = new CustomReportView()
+            {
+                Dock = DockStyle.Fill,
+                Report = DatabaseExtendedPropertiesReport.Instance,
+                PreventReportOverwrite = true
+            };
+            tabDatabaseExtendedProperties.Controls.Add(extPropView);
         }
 
         public TabPage GetCommunityToolsTabPage(ProcedureExecutionMessage.CommunityProcs proc)
@@ -1264,6 +1275,10 @@ namespace DBADashGUI
             else if (n.Type == SQLTreeItem.TreeType.RecycleBin)
             {
                 allowedTabs.Add(tabDeletedInstances);
+            }
+            else if (n.Type == SQLTreeItem.TreeType.DatabaseExtendedProperties)
+            {
+                allowedTabs.Add(tabDatabaseExtendedProperties);
             }
             else if (n.Type == SQLTreeItem.TreeType.CommunityTool)
             {

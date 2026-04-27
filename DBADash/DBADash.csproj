@@ -64,6 +64,7 @@
 	<EmbeddedResource Include="SQL\SQLDatabaseRoleMembers.sql" />
 	<EmbeddedResource Include="SQL\SQLDatabases.sql" />
 	<EmbeddedResource Include="SQL\SQLDatabasesHADR.sql" />
+	<EmbeddedResource Include="SQL\SQLDatabaseExtendedProperties.sql" />
 	<EmbeddedResource Include="SQL\SQLDBConfig.sql" />
 	<EmbeddedResource Include="SQL\SQLDBFiles.sql" />
 	<EmbeddedResource Include="SQL\SQLDBTuningOptions.sql" />
