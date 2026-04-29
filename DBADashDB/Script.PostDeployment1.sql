@@ -2114,6 +2114,13 @@ END
 -- Disable lock escalation to improve concurrency.  In most cases we will be below the lock escalation threshold, but we could be slightly over it in some edge cases.
 ALTER TABLE dbo.DBFiles SET (LOCK_ESCALATION = DISABLE);
 ALTER TABLE dbo.DBFileSnapshot SET (LOCK_ESCALATION = DISABLE);
+
+/* 
+	Changes between 4.7.1 and 4.8.0 resulted in Alert.ActiveAlerts table rebuild which can reset the identity value.
+	This can cause issues closing alerts due to re-use of identity values.  The proc below will detect and fix the issue for existing deployments.
+*/
+EXEC Alert.ActiveAlerts_FixIdentitySeed;
+
 /* 
 	Update extended property to indicate that a DB deployment is no longer in progress, allowing the GUI to continue loading.
 */

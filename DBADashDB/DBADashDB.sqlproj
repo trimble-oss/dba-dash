@@ -888,6 +888,7 @@
     <Build Include="Alert\Procedures\NotificationChannelGroup_Get.sql" />
     <Build Include="dbo\Stored Procedures\DatabaseExtendedProperties_Get.sql" />
     <Build Include="dbo\Stored Procedures\DatabaseExtendedPropertiesHistory_Get.sql" />
+    <Build Include="Alert\Procedures\ActiveAlerts_FixIdentitySeed.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
