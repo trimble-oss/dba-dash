@@ -35,7 +35,7 @@ jobs:
         run: dotnet build DBADashGUI -o DBADashBuild\DBADashGUIOnly
 
       - name: Add msbuild to PATH
-        uses: microsoft/setup-msbuild@v2
+        uses: microsoft/setup-msbuild@v3
         
       - name: Build DB
         run: msbuild dbadashdb -property:Configuration=CLI
