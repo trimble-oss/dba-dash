@@ -16,6 +16,7 @@ using System.IO;
 using System.Linq;
 using System.ServiceProcess;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static DBADash.DBADashConnection;
@@ -1223,7 +1224,10 @@ namespace DBADashServiceConfig
             if (lastFatalErrorPrompt >= lastWrite) return;
             if (this.InvokeRequired)
             {
-                await this.InvokeAsync(ProcessFatalErrorAsync);
+                await this.InvokeAsync(async (CancellationToken _) =>
+                {
+                    await ProcessFatalErrorAsync();
+                }, CancellationToken.None);
                 return;
             }
             lastFatalErrorPrompt = lastWrite;
@@ -2103,8 +2107,6 @@ namespace DBADashServiceConfig
                 await ValidateDestinationAsync(); // DB could be upgraded on service start so refresh destination
             }
         }
-
-        private static ServiceLog ServiceLogForm;
 
         private async void BttnViewServiceLog_Click(object sender, EventArgs e)
         {

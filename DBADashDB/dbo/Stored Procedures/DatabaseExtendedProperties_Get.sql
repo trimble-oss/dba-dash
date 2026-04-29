@@ -7,7 +7,7 @@ AS
 SELECT  I.InstanceID,
         D.DatabaseID,
         I.InstanceDisplayName,
-        D.Name AS [Database],
+        D.name AS [Database],
         EP.Name AS [Property],
         EP.Value,
         EP.ValidFrom
@@ -22,4 +22,4 @@ WHERE EXISTS (
 AND (@DatabaseID <=0 OR @DatabaseID IS NULL OR EP.DatabaseID = @DatabaseID)
 AND D.IsActive = 1
 AND I.IsActive = 1
-ORDER BY I.InstanceDisplayName, D.Name, EP.Name
+ORDER BY I.InstanceDisplayName, D.name, EP.Name

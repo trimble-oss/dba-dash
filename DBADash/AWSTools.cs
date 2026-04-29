@@ -117,7 +117,7 @@ namespace DBADash
             RegionCache.TryGetValue(host, out var authRegion);
             if (authRegion != null)
                 return authRegion;
-            string? authRegionCandidate = null;
+            string authRegionCandidate = null;
             var parts = host.Split('.');
             if (parts.Length >= 3 && parts[0].Equals("s3", StringComparison.OrdinalIgnoreCase))
             {

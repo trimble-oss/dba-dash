@@ -41,7 +41,7 @@ namespace DBADashConfig.Test
                 SecretKey = "¬=!dxlFmeasnXObWkKxadBkxF3pIKu5dkpvL6frRLrTgDA="
             };
             var key = cfg.GetSecretKey();
-            Assert.AreEqual(key, "ThisIsWhatTheTextShouldBe");
+            Assert.AreEqual("ThisIsWhatTheTextShouldBe", key);
         }
 
         [TestMethod]

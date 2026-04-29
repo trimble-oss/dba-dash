@@ -109,8 +109,8 @@ namespace DBADashConfig.Test
 
             var conn = cfg.SourceConnections.FirstOrDefault(c => c.ConnectionID == connectionID);
             Assert.IsNotNull(conn);
-            Assert.AreEqual(conn.UseDualEventSession, true);
-            Assert.AreEqual(conn.PersistXESessions, false);
+            Assert.AreEqual(true, conn.UseDualEventSession);
+            Assert.AreEqual(false, conn.PersistXESessions);
         }
 
         [TestMethod]

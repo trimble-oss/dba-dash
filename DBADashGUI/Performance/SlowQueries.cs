@@ -866,7 +866,7 @@ namespace DBADashGUI
             }
 
             dgvSlow.AutoGenerateColumns = false;
-            dgvSlow.Columns["colContextInfo"].Visible = dt.Rows.Cast<DataRow>().Any(row => row["context_info"] != DBNull.Value && (row["context_info"] as string is not "0x" or "" or null));
+            dgvSlow.Columns["colContextInfo"].Visible = dt.Rows.Cast<DataRow>().Any(row => row["context_info"] != DBNull.Value && row["context_info"] as string is not "0x" and not "");
 
             dgvSlow.DataSource = new DataView(dt);
             if (autoSizeColumnsToolStripMenuItem.Checked)

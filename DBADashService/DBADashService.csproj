@@ -11,6 +11,7 @@
     <ApplicationIcon>cmd.ico</ApplicationIcon>
     <Configurations>Debug;Release;CLI</Configurations>
     <NeutralLanguage>en-GB</NeutralLanguage>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug2|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>

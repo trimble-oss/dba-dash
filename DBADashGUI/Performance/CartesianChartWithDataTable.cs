@@ -74,8 +74,6 @@ namespace DBADashGUI.Performance
             }
         }
 
-        public SKColor? DefaultFill;
-
         public void UpdateColumnVisibility(Dictionary<string, ColumnMetaData> columns)
         {
             foreach (var s in Series.OfType<LineSeries<DateTimePoint>>())

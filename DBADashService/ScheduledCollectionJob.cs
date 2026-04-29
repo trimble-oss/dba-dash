@@ -202,7 +202,7 @@ namespace DBADashService
             // Try cache
             if (_priorityCache.TryGetValue(schedule, out var cached))
             {
-                map.Put("Priority", (int)cached);
+                map["Priority"] = (int)cached;
                 return cached;
             }
 
@@ -211,7 +211,7 @@ namespace DBADashService
 
             // Persist for subsequent runs
             _priorityCache[schedule] = computed;
-            map.Put("Priority", (int)computed);
+            map["Priority"] = (int)computed;
 
             return computed;
         }

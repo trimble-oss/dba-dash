@@ -11,6 +11,9 @@
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <Configurations>Debug;Release;CLI</Configurations>
     <ApplicationHighDpiMode>SystemAware</ApplicationHighDpiMode>
+    <NoWarn>$(NoWarn);NU1701;1701;1702;CA1416</NoWarn>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <Deterministic>True</Deterministic>
   </PropertyGroup>
   <PropertyGroup />
   <PropertyGroup>
@@ -22,18 +25,6 @@
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Debug2\</OutputPath>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <NoWarn>1701;1702;CA1416</NoWarn>
-    <Deterministic>True</Deterministic>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <NoWarn>1701;1702;CA1416</NoWarn>
-    <Deterministic>True</Deterministic>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CLI|AnyCPU'">
-    <NoWarn>1701;1702;CA1416</NoWarn>
-    <Deterministic>True</Deterministic>
   </PropertyGroup>
   <ItemGroup>
     <AdditionalFiles Remove="app.manifest" />

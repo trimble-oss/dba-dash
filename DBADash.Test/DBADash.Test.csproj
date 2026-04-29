@@ -9,6 +9,7 @@
     <StartupObject></StartupObject>
 
     <Configurations>Debug;Release;CLI</Configurations>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>

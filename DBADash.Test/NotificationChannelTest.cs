@@ -240,7 +240,7 @@ namespace DBADashConfig.Test
         {
             // Arrange
             var testAlert = CreateTestAlert(isResolved: true);
-            var emailChannel = CreateEmailChannel(resolutionToEmail: null);
+            var emailChannel = CreateEmailChannel(resolutionToEmail: null!);
 
             // Act
             var result = emailChannel.GetRecipientEmail(testAlert);

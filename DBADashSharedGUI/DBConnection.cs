@@ -25,6 +25,7 @@ namespace DBADash
         private SqlAuthenticationMethod SelectedAuthenticationMethod => cboAuthType.SelectedItem is KeyValuePair<SqlAuthenticationMethod, string> selectedPair ? selectedPair.Key : SqlAuthenticationMethod.ActiveDirectoryIntegrated;
         private SqlConnectionEncryptOption SelectedEncryptionOption => cboEncryption.SelectedItem is KeyValuePair<SqlConnectionEncryptOption, string> selectedPair ? selectedPair.Key : SqlConnectionEncryptOption.Mandatory;
 
+#pragma warning disable CS0618 // ActiveDirectoryPassword is deprecated but still supported for backward compatibility and user choice
         private bool IsPasswordSupported => SelectedAuthenticationMethod is SqlAuthenticationMethod.SqlPassword
             or SqlAuthenticationMethod.ActiveDirectoryPassword
             or SqlAuthenticationMethod.ActiveDirectoryServicePrincipal;
@@ -32,6 +33,7 @@ namespace DBADash
         private bool IsUserNameSupported => SelectedAuthenticationMethod is SqlAuthenticationMethod.SqlPassword
             or SqlAuthenticationMethod.ActiveDirectoryInteractive or SqlAuthenticationMethod.ActiveDirectoryPassword
             or SqlAuthenticationMethod.ActiveDirectoryServicePrincipal or SqlAuthenticationMethod.ActiveDirectoryManagedIdentity;
+
 
         private static Dictionary<SqlAuthenticationMethod, string> AuthenticationMethods =>
             new()
@@ -45,6 +47,8 @@ namespace DBADash
                 { SqlAuthenticationMethod.ActiveDirectoryManagedIdentity, "Microsoft Entra Managed Identity"},
                 { SqlAuthenticationMethod.ActiveDirectoryDefault, "Microsoft Entra Default" }
             };
+
+#pragma warning restore CS0618
 
         private static Dictionary<SqlConnectionEncryptOption, string> EncryptionOptions => new()
         {

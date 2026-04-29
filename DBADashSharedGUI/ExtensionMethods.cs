@@ -109,7 +109,7 @@ namespace DBADashSharedGUI
 
         public static Task InvokeAsync(this Control control, Func<Task> func)
         {
-            var tcs = new TaskCompletionSource<object?>();
+            var tcs = new TaskCompletionSource<object>();
             control.BeginInvoke(new Action(async () =>
             {
                 try

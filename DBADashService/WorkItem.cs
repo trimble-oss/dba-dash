@@ -27,7 +27,15 @@ namespace DBADashService
 
         private WorkItemState _state;
 
-        private WorkItemState State { get => _state ?? GetState(Source.ConnectionString); }
+        private WorkItemState State 
+        { 
+            get 
+            {
+                _state ??= GetState(Source.ConnectionString);
+                return _state;
+            }
+        }
+
         public DateTime? PreviousFireTime { get; set; }
         public string Schedule { get; set; } // Track which schedule this work item belongs to
 

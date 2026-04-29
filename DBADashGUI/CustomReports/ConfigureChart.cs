@@ -25,8 +25,6 @@ namespace DBADashGUI.CustomReports
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int? ChartId { get; set; }
 
-        private bool _suspendPreview;
-
         // Background preview scheduling
         private long _nextPreviewTicks = long.MaxValue; // UTC ticks when next preview is due
 
@@ -190,23 +188,23 @@ namespace DBADashGUI.CustomReports
                 switch (c)
                 {
                     case TextBox tb:
-                        tb.TextChanged += (_, _) => { if (!_suspendPreview) SchedulePreview(); };
+                        tb.TextChanged += (_, _) => { SchedulePreview(); };
                         break;
 
                     case ComboBox cb:
-                        cb.SelectedIndexChanged += (_, _) => { if (!_suspendPreview) SchedulePreview(); };
+                        cb.SelectedIndexChanged += (_, _) => { SchedulePreview(); };
                         break;
 
                     case CheckBox chk:
-                        chk.CheckedChanged += (_, _) => { if (!_suspendPreview) SchedulePreview(); };
+                        chk.CheckedChanged += (_, _) => { SchedulePreview(); };
                         break;
 
                     case NumericUpDown num:
-                        num.ValueChanged += (_, _) => { if (!_suspendPreview) SchedulePreview(); };
+                        num.ValueChanged += (_, _) => { SchedulePreview(); };
                         break;
 
                     case CheckedListBox clb:
-                        clb.ItemCheck += (_, e) => { if (!_suspendPreview) BeginInvoke((Action)SchedulePreview); };
+                        clb.ItemCheck += (_, e) => { BeginInvoke((Action)SchedulePreview); };
                         break;
                 }
 

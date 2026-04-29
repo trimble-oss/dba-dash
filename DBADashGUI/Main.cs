@@ -833,10 +833,9 @@ namespace DBADashGUI
                     var dbVersion = DBValidations.GetDBVersion(connectionString);
                     if (dbVersion.DeployInProgress || dbVersion.Version == Version.Parse("0.0.0.0")) return;
                 }
-                catch (Exception ex)
+                catch
                 {
-                    Task.Delay(1000);
-                    return;
+                    return; // Timer will retry on next tick (1000ms interval)
                 }
                 tmr.Stop();
                 tmr.Dispose();
