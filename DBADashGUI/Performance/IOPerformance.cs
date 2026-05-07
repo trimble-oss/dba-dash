@@ -62,6 +62,8 @@ namespace DBADashGUI.Performance
             if (_context == null) return;
             instanceID = _context.InstanceID;
             databaseID = _context.DatabaseID;
+            PopulateFileGroupFilter();
+            GetDrives();
             RefreshData();
         }
 
