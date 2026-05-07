@@ -126,6 +126,8 @@ namespace DBADashGUI.CustomReports
 
         private readonly ToolStripMenuItem CellRowColCountToolStripMenuItem = new ToolStripMenuItem();
         private readonly ToolStripMenuItem RowColumnCountToolStripMenuItem = new ToolStripMenuItem();
+        private readonly ToolStripMenuItem CellColumnStatsToolStripMenuItem = new ToolStripMenuItem() { Visible = false };
+        private readonly ToolStripMenuItem ColumnStatsToolStripMenuItem = new ToolStripMenuItem() { Visible = false };
 
         public int ClickedColumnIndex { get; private set; } = -1;
         public int ClickedRowIndex { get; private set; } = -1;
@@ -195,6 +197,7 @@ namespace DBADashGUI.CustomReports
                     clearFilter,
                     new ToolStripSeparator(),
                     RowColumnCountToolStripMenuItem,
+                    ColumnStatsToolStripMenuItem,
                     new ToolStripSeparator(),
                 }
             );
@@ -206,6 +209,9 @@ namespace DBADashGUI.CustomReports
                 saveTable.DropDownItems[0].Enabled = DataSource is DataTable or DataView;
                 hideColumn.Visible = ClickedColumnIndex >= 0;
                 RowColumnCountToolStripMenuItem.Text = GetRowColCount;
+                var stats = GetColumnStats(ClickedColumnIndex);
+                ColumnStatsToolStripMenuItem.Text = stats;
+                ColumnStatsToolStripMenuItem.Visible = !string.IsNullOrEmpty(stats);
                 freezeColumn.Text = ClickedColumnIndex >= 0 && Columns[ClickedColumnIndex].Frozen ? "Unfreeze Column" : "Freeze Column";
                 freezeColumn.Visible = ClickedColumnIndex >= 0;
                 freezeColumn.Checked = ClickedColumnIndex >= 0 && Columns[ClickedColumnIndex].Frozen;
@@ -300,6 +306,7 @@ namespace DBADashGUI.CustomReports
                     cellClearFilterMenuItem,
                     filterSeparator,
                     CellRowColCountToolStripMenuItem,
+                    CellColumnStatsToolStripMenuItem,
                     new ToolStripSeparator(),
                 }
             );
@@ -327,6 +334,9 @@ namespace DBADashGUI.CustomReports
                 editFilter.Visible = isDataView;
                 saveTable.DropDownItems[0].Enabled = DataSource is DataTable or DataView;
                 CellRowColCountToolStripMenuItem.Text = GetRowColCount;
+                var stats = GetColumnStats(ClickedColumnIndex);
+                CellColumnStatsToolStripMenuItem.Text = stats;
+                CellColumnStatsToolStripMenuItem.Visible = !string.IsNullOrEmpty(stats);
             };
         }
 
@@ -453,6 +463,85 @@ namespace DBADashGUI.CustomReports
         }
 
         private string GetRowColCount => $"Rows: {Rows.Count}   |   Cols: {Columns.Cast<DataGridViewColumn>().Count(column => column.Visible)}";
+
+        private string GetColumnStats(int columnIndex)
+        {
+            if (columnIndex < 0 || columnIndex >= Columns.Count) return string.Empty;
+            var col = Columns[columnIndex];
+            var valueType = col.ValueType;
+            if (valueType == null || !valueType.IsNumericType()) return string.Empty;
+
+            (int Count, decimal Sum, decimal Min, decimal Max) agg;
+            try
+            {
+                agg = Rows.Cast<DataGridViewRow>()
+                    .Where(r => !r.IsNewRow && r.Cells[columnIndex].Value is not null and not DBNull)
+                    .Select(r => TryConvertToDecimal(r.Cells[columnIndex].Value, out var d) ? d : (decimal?)null)
+                    .Where(v => v.HasValue)
+                    .Select(v => v!.Value)
+                    .Aggregate((Count: 0, Sum: 0m, Min: decimal.MaxValue, Max: decimal.MinValue),
+                        (a, v) => (a.Count + 1, checked(a.Sum + v), v < a.Min ? v : a.Min, v > a.Max ? v : a.Max));
+            }
+            catch (OverflowException)
+            {
+                return string.Empty;
+            }
+
+            if (agg.Count == 0) return string.Empty;
+
+            var avg = agg.Sum / agg.Count;
+
+            // Stats are formatted using the column's default cell style format if specified, otherwise using a smart format that shows integers without decimal places and small fractions with up to 4 significant figures.
+            var fmt = col.DefaultCellStyle.Format;
+            string Format(decimal v)
+            {
+                if (!string.IsNullOrEmpty(fmt))
+                {
+                    try
+                    {
+                        var formatted = v.ToString(fmt, CultureInfo.CurrentCulture);
+                        if (!string.IsNullOrEmpty(formatted)) return formatted;
+                    }
+                    catch (FormatException)
+                    {
+                        // Fall back to the smart formatter when the user-supplied format string is invalid.
+                    }
+                }
+                return FormatSmart(v);
+            }
+
+            return $"Sum: {Format(agg.Sum)}   |   Avg: {Format(avg)}   |   Min: {Format(agg.Min)}   |   Max: {Format(agg.Max)}";
+        }
+
+        private static bool TryConvertToDecimal(object value, out decimal result)
+        {
+            try
+            {
+                result = Convert.ToDecimal(value);
+                return true;
+            }
+            catch (Exception ex) when (ex is InvalidCastException or OverflowException or FormatException)
+            {
+                result = 0;
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Formats a decimal using a significant-digit-aware format: integers display without decimal places,
+        /// small fractions use up to 4 significant figures, and other values use N2.
+        /// </summary>
+        private static string FormatSmart(decimal value)
+        {
+            if (value == decimal.Truncate(value))
+                return value.ToString("N0", CultureInfo.CurrentCulture);
+
+            var abs = Math.Abs(value);
+            if (abs > 0 && abs < 0.01m)
+                return value.ToString("G4", CultureInfo.CurrentCulture);
+
+            return value.ToString("N2", CultureInfo.CurrentCulture);
+        }
 
         public bool HasFilter => !string.IsNullOrEmpty(RowFilter);
 
