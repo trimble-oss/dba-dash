@@ -38,9 +38,9 @@ namespace DBADash
         /// </summary>
         public string S3Path { get; set; }
 
-        private readonly CacheItemPolicy policy = new()
+        private static CacheItemPolicy NewPolicy() => new()
         {
-            SlidingExpiration = TimeSpan.FromMinutes(60)
+            AbsoluteExpiration = DateTimeOffset.UtcNow.AddMinutes(10)
         };
 
         public string AgentIdentifier => Convert.ToBase64String(MD5.HashData(System.Text.Encoding.UTF8.GetBytes(string.Concat(AgentServiceName, AgentHostName, AgentPath))));
@@ -50,6 +50,8 @@ namespace DBADash
         ///</summary>
         public int GetDBADashAgentID(string connectionString)
         {
+            ArgumentException.ThrowIfNullOrEmpty(connectionString);
+
             int agentID;
             var cacheKey =
                 // Caching takes all properties into account + connection string (as we could be writing to multiple repositories and the agent could have different IDs for each).  Base off MD5 hash which should be sufficient for this use case.
@@ -63,15 +65,19 @@ namespace DBADash
                 Log.Information("Update DBADashAgent");
                 agentID = Update(connectionString);
                 Log.Information("DBADashAgentID: {0}", agentID);
-                if (cache.Contains(agentID
-                        .ToString()))
+                var connectionHash = Convert.ToBase64String(MD5.HashData(System.Text.Encoding.UTF8.GetBytes(connectionString)));
+                var agentIdKey = $"{agentID}|{connectionHash}"; // Namespace by connection to avoid collisions across repositories
+                var oldCacheKey = cache.Get(agentIdKey) as string;
+                if (!string.IsNullOrEmpty(oldCacheKey))
                 {
-                    // Remove old cache entry which will prevent updates if settings are toggled back and forth
-                    cache.Remove((string)cache[agentID.ToString()]);
+                    // Remove old cacheKey entry which will prevent updates if settings are toggled back and forth
+                    cache.Remove(oldCacheKey);
+                    cache.Remove(agentIdKey);
                     Log.Debug("Removed old cache entry for agentID: {0}", agentID);
                 }
-                cache.Add(cacheKey, agentID, policy);
-                cache.Add(agentID.ToString(), cacheKey, policy); // Add reverse lookup so we can identify the cache key to remove if settings are toggled back and forth
+                var policy = NewPolicy();
+                cache.Set(cacheKey, agentID, policy);
+                cache.Set(agentIdKey, cacheKey, policy); // Add reverse lookup so we can identify the cache key to remove if settings are toggled back and forth
             }
             return agentID;
         }
