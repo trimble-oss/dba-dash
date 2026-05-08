@@ -18,6 +18,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace DBADash
 {
@@ -1308,7 +1309,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             return dt;
         }
 
-        private async Task<object> GetSlowQueriesAsync()
+        private async Task<XElement> GetSlowQueriesAsync()
         {
             SqlConnectionStringBuilder builder = new(ConnectionString)
             {
@@ -1324,20 +1325,29 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             cmd.Parameters.AddWithValue("UseDualSession", Source.UseDualEventSession);
             cmd.Parameters.AddWithValue("MaxTargetMemory", Source.SlowQueryTargetMaxMemoryKB);
             cmd.Parameters.AddWithValue("CollectGroupIDAndPoolID", collectGroupIDAndPoolID);
-            return await cmd.ExecuteScalarAsync();
+            await using var reader = await cmd.ExecuteReaderAsync(CommandBehavior.SequentialAccess | CommandBehavior.SingleResult | CommandBehavior.SingleRow);
+            if (!await reader.ReadAsync() || reader.IsDBNull(0))
+                return null;
+            using var textReader = reader.GetTextReader(0);
+            var settings = new System.Xml.XmlReaderSettings
+            {
+                Async = true,
+                DtdProcessing = System.Xml.DtdProcessing.Prohibit,
+                XmlResolver = null,
+            };
+            using var xmlReader = System.Xml.XmlReader.Create(textReader, settings);
+            return await XElement.LoadAsync(xmlReader, LoadOptions.None, CancellationToken.None);
         }
 
         private async Task CollectSlowQueriesAsync()
         {
             if (!IsXESupported) return;
             var result = await GetSlowQueriesAsync();
-            if (result == DBNull.Value)
+            if (result == null)
             {
                 throw new Exception("Result is NULL");
             }
-            var ringBuffer = (string)result;
-            if (ringBuffer.Length <= 0) return;
-            var dt = XETools.XEStrToDT(ringBuffer, out RingBufferTargetAttributes ringBufferAtt);
+            var dt = XETools.XEStrToDT(result, out RingBufferTargetAttributes ringBufferAtt);
             dt.TableName = "SlowQueries";
             AddDT(dt);
             var dtAtt = ringBufferAtt.GetTable();

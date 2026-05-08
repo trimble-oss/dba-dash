@@ -64,8 +64,12 @@ namespace DBADash
 
         public static DataTable XEStrToDT(string xe, out RingBufferTargetAttributes ringBufferAtt)
         {
+            return XEStrToDT(XElement.Parse(xe), out ringBufferAtt);
+        }
+
+        public static DataTable XEStrToDT(XElement el, out RingBufferTargetAttributes ringBufferAtt)
+        {
             var dt = GetXELSchema();
-            var el = XElement.Parse(xe);
             ringBufferAtt = new RingBufferTargetAttributes();
 
             if (int.TryParse(el.Attribute("truncated")?.Value, out var truncatedValue))
