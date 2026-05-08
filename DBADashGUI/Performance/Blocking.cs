@@ -1,8 +1,8 @@
 ﻿using DBADash;
 using DBADashGUI.Charts;
-using DBADashGUI.CommunityTools;
 using DBADashGUI.CustomReports;
 using DBADashGUI.Theme;
+using System.Threading.Tasks;
 using LiveChartsCore;
 using LiveChartsCore.Defaults;
 using LiveChartsCore.Measure;
@@ -66,6 +66,12 @@ namespace DBADashGUI.Performance
         // Strongly-typed reference to the deadlock scatter series for tooltip rendering
         private ScatterSeries<ObservablePoint, RectangleGeometry> _deadlockSeries;
 
+        // Store deadlock rows to support click-through to sp_BlitzLock with narrowed date range
+        private List<DataRow> _deadlockRows;
+
+        // Date grouping used when fetching deadlock data (minutes); used to compute click date window
+        private int _deadlockDateGroupingMin;
+
         // Track total deadlock count for button display
         private long _totalDeadlockCount = 0;
 
@@ -114,7 +120,7 @@ namespace DBADashGUI.Performance
             return dt;
         }
 
-        private DataTable GetDeadlocksDT()
+        private (DataTable dt, int dateGroupingMin) GetDeadlocksDT()
         {
             using var cn = new SqlConnection(Common.ConnectionString);
             using var cmd = new SqlCommand("dbo.Deadlocks_Get", cn) { CommandType = CommandType.StoredProcedure };
@@ -128,7 +134,7 @@ namespace DBADashGUI.Performance
             cmd.CommandTimeout = Config.DefaultCommandTimeout;
             DataTable dt = new();
             da.Fill(dt);
-            return dt;
+            return (dt, dateGroupingMin);
         }
 
         private double MaxPointShapeDiameter => maxBlockedTime switch
@@ -176,7 +182,18 @@ namespace DBADashGUI.Performance
                 ToggleError(false);
 
                 var dt = Metric.BlockingSnapshots ? GetDT() : new DataTable();
-                var deadlockDt = Metric.Deadlocks ? GetDeadlocksDT() : new DataTable();
+                DataTable deadlockDt;
+                if (Metric.Deadlocks)
+                {
+                    var result = GetDeadlocksDT();
+                    deadlockDt = result.dt;
+                    _deadlockDateGroupingMin = result.dateGroupingMin;
+                }
+                else
+                {
+                    deadlockDt = new DataTable();
+                    _deadlockDateGroupingMin = 0;
+                }
 
                 // Create theme-aware paint for labels
                 var labelPaint = CreateLabelPaint();
@@ -307,11 +324,13 @@ namespace DBADashGUI.Performance
 
                 if (deadlockDt.Rows.Count > 0)
                 {
-                    var deadlockPoints = deadlockDt.Rows.Cast<DataRow>()
+                    _deadlockRows = deadlockDt.Rows.Cast<DataRow>()
+                        .Where(r => Convert.ToDouble(r["DeadlockCount"]) > 0)
+                        .ToList();
+                    var deadlockPoints = _deadlockRows
                         .Select(r => new ObservablePoint(
                             ((DateTime)r["SnapshotDate"]).ToAppTimeZone().Ticks,
                             Convert.ToDouble(r["DeadlockCount"])))
-                        .Where(p => p.Y > 0)
                         .ToArray();
 
                     // Calculate total deadlock count for button display
@@ -331,6 +350,7 @@ namespace DBADashGUI.Performance
                 else
                 {
                     _deadlockSeries = null;
+                    _deadlockRows = null;
                     _totalDeadlockCount = 0;
                 }
 
@@ -467,7 +487,7 @@ namespace DBADashGUI.Performance
 
         private void ChartBlocking_MouseMove(object sender, MouseEventArgs e)
         {
-            if (_rows == null || _rows.Count == 0)
+            if ((_rows == null || _rows.Count == 0) && (_deadlockRows == null || _deadlockRows.Count == 0))
             {
                 chartBlocking.Cursor = Cursors.Default;
                 return;
@@ -491,8 +511,9 @@ namespace DBADashGUI.Performance
 
             var firstPoint = foundPoints.FirstOrDefault();
 
-            // Show hand cursor only for clickable blocking points (not deadlock series)
-            chartBlocking.Cursor = firstPoint is not null && firstPoint.Context?.Series != _deadlockSeries
+            // Show hand cursor for clickable blocking points and for deadlock squares (when user has access)
+            chartBlocking.Cursor = firstPoint is not null &&
+                (firstPoint.Context?.Series != _deadlockSeries || HasDeadlockReportAccess)
                 ? Cursors.Hand
                 : Cursors.Default;
         }
@@ -509,7 +530,7 @@ namespace DBADashGUI.Performance
 
         private void ChartBlocking_MouseDown(object sender, MouseEventArgs e)
         {
-            if (_rows == null || _rows.Count == 0)
+            if ((_rows == null || _rows.Count == 0) && (_deadlockRows == null || _deadlockRows.Count == 0))
             {
                 return;
             }
@@ -519,8 +540,21 @@ namespace DBADashGUI.Performance
                 new LiveChartsCore.Drawing.LvcPointD(e.Location.X, e.Location.Y));
 
             var firstPoint = foundPoints.FirstOrDefault();
-            if (firstPoint is null || firstPoint.Context?.Series == _deadlockSeries)
+            if (firstPoint is null)
             {
+                return;
+            }
+
+            // Handle deadlock square clicks: open sp_BlitzLock with a narrowed date range
+            if (firstPoint.Context?.Series == _deadlockSeries)
+            {
+                if (_deadlockRows == null) return;
+                var idx = firstPoint.Index;
+                if (idx < 0 || idx >= _deadlockRows.Count) return;
+                var deadlockRow = _deadlockRows[idx];
+                var snapshotDateUtc = (DateTime)deadlockRow["SnapshotDate"];
+                var fromUtc = snapshotDateUtc.AddMinutes(-Math.Max(_deadlockDateGroupingMin, 1));
+                _ = ShowDeadlockReportAsync(fromUtc, snapshotDateUtc);
                 return;
             }
             // Try to map the clicked ChartPoint back to the original row.
@@ -605,29 +639,30 @@ namespace DBADashGUI.Performance
 
         private async void ShowDeadlocks_Click(object sender, EventArgs e)
         {
+            await ShowDeadlockReportAsync(DateRange.FromUTC, DateRange.ToUTC);
+        }
+
+        private Task ShowDeadlockReportAsync(DateTime fromUtc, DateTime toUtc)
+        {
             if (!HasDeadlockReportAccess)
             {
                 MessageBox.Show("You do not have access to this report.");
-                return;
+                return Task.CompletedTask;
             }
+            var fromInstance = fromUtc.AddMinutes(-CurrentContext.UTCOffset);
+            var toInstance = toUtc.AddMinutes(-CurrentContext.UTCOffset);
             var reportViewer = new CustomReportViewer() { LoadDirectExecutionReport = true };
             var context = CurrentContext.DeepCopy();
             context.ObjectID = 0;
             context.ObjectName = string.Empty;
             context.Report = DeadlockReport;
             reportViewer.Context = context;
-
-            // Convert date range to instance local time
-            var fromDateUtc = DateRange.FromUTC;
-            var toDateUtc = DateRange.ToUTC;
-            var fromDateInstance = fromDateUtc.AddMinutes(-CurrentContext.UTCOffset);
-            var toDateInstance = toDateUtc.AddMinutes(-CurrentContext.UTCOffset);
             var customParams = DeadlockReport.GetCustomSqlParameters();
             customParams.RemoveAll(p => p.Param.ParameterName.Equals("@StartDate", StringComparison.OrdinalIgnoreCase) || p.Param.ParameterName.Equals("@EndDate", StringComparison.OrdinalIgnoreCase));
-            customParams.Add(new CustomSqlParameter { Param = new SqlParameter("@StartDate", fromDateInstance) { DbType = DbType.DateTime } });
-            customParams.Add(new CustomSqlParameter { Param = new SqlParameter("@EndDate", toDateInstance) { DbType = DbType.DateTime } });
+            customParams.Add(new CustomSqlParameter { Param = new SqlParameter("@StartDate", fromInstance) { DbType = DbType.DateTime } });
+            customParams.Add(new CustomSqlParameter { Param = new SqlParameter("@EndDate", toInstance) { DbType = DbType.DateTime } });
             reportViewer.CustomParams = customParams;
-            await reportViewer.ShowDialogAsync();
+            return reportViewer.ShowDialogAsync();
         }
 
         private bool HasDeadlockReportAccess => CurrentContext != null &&
