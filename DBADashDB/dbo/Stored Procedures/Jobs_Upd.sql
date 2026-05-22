@@ -127,7 +127,7 @@ BEGIN
 		has_server = T.has_server,
 		has_step = T.has_step,
 		DDLID = DDL.DDLID,
-		Isactive=1,
+		IsActive=1,
 		SnapshotCreatedDate = ISNULL(J.SnapshotCreatedDate,@SnapshotDate),
 		SnapshotUpdatedDate = @SnapshotDate
 	FROM dbo.Jobs J
@@ -157,7 +157,8 @@ BEGIN
 							J.has_schedule,
 							J.has_server,
 							J.has_step,
-							J.DDLID
+							J.DDLID,
+							J.IsActive
 			INTERSECT 
 					SELECT T.job_id,
 							T.originating_server,
@@ -182,7 +183,8 @@ BEGIN
 							T.has_schedule,
 							T.has_server,
 							T.has_step,
-							DDL.DDLID
+							DDL.DDLID,
+							CAST(1 AS BIT) AS IsActive
 				)
 
 	COMMIT
