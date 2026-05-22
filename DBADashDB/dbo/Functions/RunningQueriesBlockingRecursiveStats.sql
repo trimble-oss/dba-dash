@@ -15,7 +15,7 @@ WITH R AS (
 	UNION ALL
 	SELECT RQ.session_id, RQ.wait_time,0 AS IsDirect
 	FROM R 
-	JOIN dbo.RunningQueries RQ ON RQ.blocking_session_id = R.session_id
+	JOIN dbo.RunningQueries RQ WITH(FORCESEEK) ON RQ.blocking_session_id = R.session_id
 	WHERE RQ.session_id<>@session_id
 	AND RQ.InstanceID = @InstanceID
 	AND RQ.SnapshotDateUTC = @SnapshotDateUTC
