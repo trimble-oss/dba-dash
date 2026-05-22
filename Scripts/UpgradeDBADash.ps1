@@ -143,8 +143,10 @@ $path = [System.IO.Path]::Combine((Get-Location),"DBADash.dll")
 $existingVersion=[System.Version](Get-Item $path).VersionInfo.ProductVersion
 
 $servicePath = [System.IO.Path]::Combine((Get-Location),"DBADashService.exe")
+$aiServicePath = [System.IO.Path]::Combine((Get-Location),"DBADashAI.dll")
 
 $serviceName = (Get-CimInstance -ClassName Win32_Service | Where-Object { $_.PathName -ilike "*$servicePath*" } | Select-Object -First 1 -ExpandProperty Name)
+$aiServiceName = (Get-CimInstance -ClassName Win32_Service | Where-Object { $_.PathName -ilike "*$aiServicePath*" } | Select-Object -First 1 -ExpandProperty Name)
 
 $versionCompare = $existingVersion.CompareTo($newVersion)
 
@@ -231,6 +233,16 @@ if ($versionCompare -eq -1 -or $ForceUpgrade){
         Write-Host "Stopping Service: $serviceName"
         Stop-Service -Name $serviceName -ErrorAction Stop
     }
+    # Stop DBADashAI service if running
+    $aiServiceWasRunning = $false
+    if($aiServiceName -ne $null){
+        $aiServiceStatus = (Get-Service -Name $aiServiceName -ErrorAction Ignore).Status
+        if($aiServiceStatus -eq 'Running'){
+            $aiServiceWasRunning = $true
+            Write-Host "Stopping DBADashAI Service: $aiServiceName"
+            Stop-Service -Name $aiServiceName -ErrorAction Stop
+        }
+    }
     # Stop the GUI if running - we don't want locks on any files
     # Append a separator before the wildcard so paths like C:\DBA\ don't match C:\DBA2\...
     Write-Host "Stop processes"
@@ -258,6 +270,11 @@ if ($versionCompare -eq -1 -or $ForceUpgrade){
     if($serviceName -ne $null){
         Write-Host "Starting Service. This can take some time while the repository database is upgraded..."
         Start-Service $serviceName
+    }
+    # Start DBADashAI service if it was running before upgrade
+    if($aiServiceWasRunning){
+        Write-Host "Starting DBADashAI Service: $aiServiceName"
+        Start-Service $aiServiceName
     }
     # Option to start GUI after upgrade
     if($StartGUI){
