@@ -1649,7 +1649,7 @@ namespace DBADashGUI.Performance
             }
             else if (Convert.ToString(e.Value)?.Length > 1000)
             {
-                e.Value = Convert.ToString(e.Value).Truncate(997) + "...";
+                e.Value = Convert.ToString(e.Value).Truncate(1000, "...");
             }
             else if (new[] { "colBlockCount", "colBlockedCountRecursive", "colBlockingSessionID" }.Contains(
                          dgv.Columns[e.ColumnIndex].Name))

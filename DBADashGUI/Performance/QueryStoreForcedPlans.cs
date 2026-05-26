@@ -13,6 +13,7 @@ using DBADashGUI.SchemaCompare;
 using static DBADashGUI.Messaging.MessagingHelper;
 using DBADashGUI.Interface;
 using System.Drawing;
+using DBADash;
 
 namespace DBADashGUI.Performance
 {
