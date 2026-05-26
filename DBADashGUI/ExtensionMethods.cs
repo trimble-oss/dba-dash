@@ -24,15 +24,6 @@ namespace DBADashGUI
 {
     public static class ExtensionMethods
     {
-        public static string Truncate(this string value, int maxLength)
-        {
-            if (string.IsNullOrEmpty(value))
-            {
-                return value;
-            }
-
-            return value[..Math.Min(value.Length, maxLength)];
-        }
 
         private static readonly FrozenSet<Type> NumericTypes =
         [

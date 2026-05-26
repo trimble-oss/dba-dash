@@ -127,6 +127,7 @@ namespace DBADashGUI.CustomReports
         private readonly ToolStripMenuItem CellRowColCountToolStripMenuItem = new ToolStripMenuItem();
         private readonly ToolStripMenuItem RowColumnCountToolStripMenuItem = new ToolStripMenuItem();
         private readonly ToolStripMenuItem CellColumnStatsToolStripMenuItem = new ToolStripMenuItem() { Visible = false };
+        private readonly ToolStripMenuItem SelectedCellsStatsToolStripMenuItem = new ToolStripMenuItem() { Visible = false };
         private readonly ToolStripMenuItem ColumnStatsToolStripMenuItem = new ToolStripMenuItem() { Visible = false };
 
         public int ClickedColumnIndex { get; private set; } = -1;
@@ -307,6 +308,7 @@ namespace DBADashGUI.CustomReports
                     filterSeparator,
                     CellRowColCountToolStripMenuItem,
                     CellColumnStatsToolStripMenuItem,
+                    SelectedCellsStatsToolStripMenuItem,
                     new ToolStripSeparator(),
                 }
             );
@@ -337,6 +339,9 @@ namespace DBADashGUI.CustomReports
                 var stats = GetColumnStats(ClickedColumnIndex);
                 CellColumnStatsToolStripMenuItem.Text = stats;
                 CellColumnStatsToolStripMenuItem.Visible = !string.IsNullOrEmpty(stats);
+                var selectedStats = GetSelectedCellsStats();
+                SelectedCellsStatsToolStripMenuItem.Text = selectedStats;
+                SelectedCellsStatsToolStripMenuItem.Visible = !string.IsNullOrEmpty(selectedStats);
             };
         }
 
@@ -491,26 +496,235 @@ namespace DBADashGUI.CustomReports
 
             var avg = agg.Sum / agg.Count;
 
-            // Stats are formatted using the column's default cell style format if specified, otherwise using a smart format that shows integers without decimal places and small fractions with up to 4 significant figures.
-            var fmt = col.DefaultCellStyle.Format;
-            string Format(decimal v)
+            return $"[{col.HeaderText.Replace("\n"," ").Truncate(30,"...")}] Sum: {FormatStatsValue(agg.Sum, col.DefaultCellStyle.Format)}   |   Avg: {FormatStatsValue(avg, col.DefaultCellStyle.Format)}   |   Min: {FormatStatsValue(agg.Min, col.DefaultCellStyle.Format)}   |   Max: {FormatStatsValue(agg.Max, col.DefaultCellStyle.Format)}";
+        }
+
+        /// <summary>
+        /// Calculate aggregate statistics for the current cell selection when more than one cell is selected.
+        /// Stats are only returned when the selected numeric cells use compatible numeric formatting semantics.
+        /// </summary>
+        private string GetSelectedCellsStats()
+        {
+            var selectedCellCount = SelectedCells.Count;
+            if (selectedCellCount <= 1) return string.Empty;
+
+            var agg = (Count: 0, Sum: 0m, Min: decimal.MaxValue, Max: decimal.MinValue);
+            string exactFormat = null;
+            string formatCompatibilitySignature = null;
+
+            try
             {
-                if (!string.IsNullOrEmpty(fmt))
+                foreach (DataGridViewCell cell in SelectedCells)
                 {
-                    try
+                    if (cell.RowIndex < 0 || cell.ColumnIndex < 0) continue;
+                    if (cell.OwningRow.IsNewRow || !cell.OwningRow.Visible) continue;
+
+                    var value = cell.Value;
+                    if (value is null or DBNull) continue;
+
+                    var valueType = cell.OwningColumn?.ValueType;
+                    if (valueType == null || !valueType.IsNumericType()) continue;
+
+                    if (!TryConvertToDecimal(value, out var decimalValue)) continue;
+
+                    var cellFormat = string.IsNullOrEmpty(cell.Style.Format) ? cell.InheritedStyle.Format : cell.Style.Format;
+                    var cellFormatCompatibilitySignature = GetNumericFormatCompatibilitySignature(cellFormat);
+                    if (formatCompatibilitySignature == null)
                     {
-                        var formatted = v.ToString(fmt, CultureInfo.CurrentCulture);
-                        if (!string.IsNullOrEmpty(formatted)) return formatted;
+                        formatCompatibilitySignature = cellFormatCompatibilitySignature;
+                        exactFormat = cellFormat;
                     }
-                    catch (FormatException)
+                    else if (!string.Equals(formatCompatibilitySignature, cellFormatCompatibilitySignature, StringComparison.Ordinal))
                     {
-                        // Fall back to the smart formatter when the user-supplied format string is invalid.
+                        return string.Empty;
                     }
+                    else if (!string.Equals(exactFormat, cellFormat, StringComparison.Ordinal))
+                    {
+                        exactFormat = null;
+                    }
+
+                    agg = (
+                        agg.Count + 1,
+                        checked(agg.Sum + decimalValue),
+                        decimalValue < agg.Min ? decimalValue : agg.Min,
+                        decimalValue > agg.Max ? decimalValue : agg.Max);
                 }
-                return FormatSmart(v);
+            }
+            catch (OverflowException)
+            {
+                return string.Empty;
             }
 
-            return $"Sum: {Format(agg.Sum)}   |   Avg: {Format(avg)}   |   Min: {Format(agg.Min)}   |   Max: {Format(agg.Max)}";
+            if (agg.Count == 0) return string.Empty;
+
+            var avg = agg.Sum / agg.Count;
+            var selectedCellsInfo = selectedCellCount == agg.Count ? selectedCellCount.ToString() : $"{selectedCellCount} (" + agg.Count + " numeric)";
+            return $"Selected Cells: {selectedCellsInfo}   |   Sum: {FormatStatsValue(agg.Sum, exactFormat)}   |   Avg: {FormatStatsValue(avg, exactFormat)}   |   Min: {FormatStatsValue(agg.Min, exactFormat)}   |   Max: {FormatStatsValue(agg.Max, exactFormat)}";
+        }
+
+        /// <summary>
+        /// Build a compatibility signature for a numeric format string so columns with equivalent scaling semantics
+        /// can be aggregated together even if they differ only by precision.
+        /// </summary>
+        private static string GetNumericFormatCompatibilitySignature(string format)
+        {
+            if (string.IsNullOrWhiteSpace(format)) return "scale:none|div0|pct0|permille0";
+
+            format = format.Trim();
+            if (IsStandardNumericFormat(format))
+            {
+                return GetStandardNumericFormatCompatibilitySignature(format);
+            }
+
+            var sections = format.Split(';');
+            return string.Join(";", sections.Select(GetCustomNumericFormatSectionCompatibilitySignature));
+        }
+
+        /// <summary>
+        /// Build a compatibility signature for a standard numeric format specifier.
+        /// Signatures are normalized to align with equivalent custom format scaling semantics.
+        /// </summary>
+        private static string GetStandardNumericFormatCompatibilitySignature(string format)
+        {
+            return char.ToUpperInvariant(format[0]) switch
+            {
+                'C' => "scale:currency|div0|pct0|permille0",
+                'P' => "scale:percent|div0|pct1|permille0",
+                _ => "scale:none|div0|pct0|permille0"
+            };
+        }
+
+        /// <summary>
+        /// Build a compatibility signature for a custom numeric format section based on scaling commas,
+        /// percent symbols, and per-mille symbols.
+        /// </summary>
+        private static string GetCustomNumericFormatSectionCompatibilitySignature(string formatSection)
+        {
+            var strippedSection = StripFormatLiterals(formatSection);
+            var percentCount = strippedSection.Count(c => c == '%');
+            var perMilleCount = strippedSection.Count(c => c == '‰');
+            var hasCurrency = ContainsCurrencySymbol(strippedSection);
+            var scalingCommaCount = GetScalingCommaCount(strippedSection);
+            var scaleName = GetCustomFormatScaleName(percentCount, perMilleCount, hasCurrency);
+            return $"scale:{scaleName}|div{scalingCommaCount}|pct{percentCount}|permille{perMilleCount}";
+        }
+
+        /// <summary>
+        /// Determine the scale category for a custom numeric format section.
+        /// </summary>
+        private static string GetCustomFormatScaleName(int percentCount, int perMilleCount, bool hasCurrency = false)
+        {
+            if (hasCurrency) return "currency";
+            if (percentCount > 0) return "percent";
+            if (perMilleCount > 0) return "permille";
+            return "none";
+        }
+
+        /// <summary>
+        /// Detect whether a stripped (literal-free) format section contains a currency symbol.
+        /// Checks for the generic currency placeholder ($) and the current culture's currency symbol.
+        /// </summary>
+        private static bool ContainsCurrencySymbol(string strippedSection)
+        {
+            if (strippedSection.Contains('$')) return true;
+            var currencySymbol = NumberFormatInfo.CurrentInfo.CurrencySymbol;
+            return !string.IsNullOrEmpty(currencySymbol) && strippedSection.Contains(currencySymbol, StringComparison.Ordinal);
+        }
+
+        /// <summary>
+        /// Check whether the format string uses a standard numeric format specifier such as N2, C0, or P1.
+        /// </summary>
+        private static bool IsStandardNumericFormat(string format)
+        {
+            if (string.IsNullOrEmpty(format) || !char.IsLetter(format[0])) return false;
+            return format.Length == 1 || format[1..].All(char.IsDigit);
+        }
+
+        /// <summary>
+        /// Remove quoted and escaped literal content from a custom numeric format string so only formatting tokens remain.
+        /// </summary>
+        private static string StripFormatLiterals(string format)
+        {
+            var sb = new StringBuilder(format.Length);
+            var inSingleQuotes = false;
+            var inDoubleQuotes = false;
+            var escaped = false;
+
+            foreach (var c in format)
+            {
+                if (escaped)
+                {
+                    escaped = false;
+                    continue;
+                }
+
+                switch (c)
+                {
+                    case '\\':
+                        escaped = true;
+                        continue;
+                    case '\'':
+                        if (!inDoubleQuotes)
+                        {
+                            inSingleQuotes = !inSingleQuotes;
+                            continue;
+                        }
+                        break;
+                    case '"':
+                        if (!inSingleQuotes)
+                        {
+                            inDoubleQuotes = !inDoubleQuotes;
+                            continue;
+                        }
+                        break;
+                }
+
+                if (!inSingleQuotes && !inDoubleQuotes)
+                {
+                    sb.Append(c);
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Count the scaling commas that appear after the last integer placeholder in a custom numeric format section.
+        /// These commas divide the displayed value by powers of one thousand.
+        /// </summary>
+        private static int GetScalingCommaCount(string formatSection)
+        {
+            var decimalPointIndex = formatSection.IndexOf('.');
+            var integerSection = decimalPointIndex >= 0 ? formatSection[..decimalPointIndex] : formatSection;
+            var lastPlaceholderIndex = integerSection.LastIndexOfAny(['#', '0']);
+            if (lastPlaceholderIndex < 0) return 0;
+
+            var scalingCommaCount = 0;
+            for (var i = lastPlaceholderIndex + 1; i < integerSection.Length && integerSection[i] == ','; i++)
+            {
+                scalingCommaCount++;
+            }
+
+            return scalingCommaCount;
+        }
+
+        private static string FormatStatsValue(decimal value, string format)
+        {
+            // Stats are formatted using the column's default cell style format if specified, otherwise using a smart format that shows integers without decimal places and small fractions with up to 4 significant figures.
+            if (!string.IsNullOrEmpty(format))
+            {
+                try
+                {
+                    var formatted = value.ToString(format, CultureInfo.CurrentCulture);
+                    if (!string.IsNullOrEmpty(formatted)) return formatted;
+                }
+                catch (FormatException)
+                {
+                    // Fall back to the smart formatter when the user-supplied format string is invalid.
+                }
+            }
+
+            return FormatSmart(value);
         }
 
         private static bool TryConvertToDecimal(object value, out decimal result)

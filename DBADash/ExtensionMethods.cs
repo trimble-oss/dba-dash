@@ -38,17 +38,37 @@ namespace DBADash
             return JsonConvert.DeserializeObject<T>(serialized, settings);
         }
 
-        public static string Truncate(this string value, int maxLength, bool ellipsis = false)
+        public static string Truncate(this string value, int maxLength, bool ellipsis) => Truncate(value, maxLength, ellipsis ? "..." : null);
+
+
+        public static string Truncate(this string value, int maxLength, string ellipsis = null)
         {
-            if (string.IsNullOrEmpty(value)) return value;
-            if (ellipsis)
+            if (maxLength < 0)
             {
-                return value.Length <= maxLength ? value : value[..(maxLength - 3)] + "...";
+                throw new ArgumentOutOfRangeException(nameof(maxLength));
             }
-            else
+
+            if (!string.IsNullOrEmpty(ellipsis) && ellipsis.Length >= maxLength)
             {
-                return value.Length <= maxLength ? value : value[..maxLength];
+                throw new ArgumentException("Ellipsis length must be less than maxLength.", nameof(ellipsis));
             }
+
+            if (string.IsNullOrEmpty(value) || value.Length <= maxLength)
+            {
+                return value;
+            }
+
+            if (maxLength == 0)
+            {
+                return string.Empty;
+            }
+
+            if (string.IsNullOrEmpty(ellipsis))
+            {
+                return value[..maxLength];
+            }
+
+            return value[..(maxLength - ellipsis.Length)] + ellipsis;
         }
 
         /// <summary>
