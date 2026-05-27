@@ -120,6 +120,7 @@
     <Folder Include="AI\Stored Procedures\" />
     <Folder Include="DBADash\Scripts\" />
     <Folder Include="AI\Tables\" />
+    <Folder Include="Migration\" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\LogRestoreThresholds.sql" />
@@ -929,6 +930,8 @@
     <Build Include="AI\Stored Procedures\ServiceConfig_Heartbeat.sql" />
     <Build Include="Security\AIService.sql" />
     <Build Include="Security\AIUser.sql" />
+    <Build Include="Migration\DBFileSnapshot.sql" />
+    <Build Include="Security\Migration.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
