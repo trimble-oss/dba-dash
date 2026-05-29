@@ -23,6 +23,7 @@ namespace DBADashGUI.DBADashAlerts.Rules
         public enum RuleTypes
         {
             AGHealth,
+            BackupAlert,
             CollectionDates,
             Counter,
             CPU,
@@ -43,6 +44,7 @@ namespace DBADashGUI.DBADashAlerts.Rules
                 RuleTypes.Wait => new WaitRule(),
                 RuleTypes.Counter => new CounterRule(),
                 RuleTypes.AGHealth => new AGHealthRule(),
+                RuleTypes.BackupAlert => new BackupAlertRule(),
                 RuleTypes.DatabaseStatus => new DatabaseStatusRule(),
                 RuleTypes.DriveSpace => new DriveSpaceRule(),
                 RuleTypes.CollectionDates => new CollectionDatesRule(),
@@ -238,6 +240,7 @@ namespace DBADashGUI.DBADashAlerts.Rules
                 RuleTypes.AgentJob => string.IsNullOrEmpty(details) ? new AgentJobRule() : JsonConvert.DeserializeObject<AgentJobRule>(details),
                 RuleTypes.Offline => string.IsNullOrEmpty(details) ? new OfflineRule() : JsonConvert.DeserializeObject<OfflineRule>(details),
                 RuleTypes.Restart => string.IsNullOrEmpty(details) ? new RestartRule() : JsonConvert.DeserializeObject<RestartRule>(details),
+                RuleTypes.BackupAlert => string.IsNullOrEmpty(details) ? new BackupAlertRule() : JsonConvert.DeserializeObject<BackupAlertRule>(details),
                 RuleTypes.SQLAgentAlert => string.IsNullOrEmpty(details) ? new SQLAgentAlertRule() : JsonConvert.DeserializeObject<SQLAgentAlertRule>(details),
                 _ => throw new NotImplementedException()
             };
