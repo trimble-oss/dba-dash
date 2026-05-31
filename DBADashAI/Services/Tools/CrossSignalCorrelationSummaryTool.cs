@@ -29,6 +29,8 @@ namespace DBADashAI.Services.Tools
             var blockingRows = results.Count > 2 ? results[2] : new List<Dictionary<string, object?>>();
             var deadlockRows = results.Count > 3 ? results[3] : new List<Dictionary<string, object?>>();
             var driveRows = results.Count > 4 ? results[4] : new List<Dictionary<string, object?>>();
+            var jobFailureRows = results.Count > 5 ? results[5] : new List<Dictionary<string, object?>>();
+            var failedLoginRows = results.Count > 6 ? results[6] : new List<Dictionary<string, object?>>();
 
             var instances = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             void AddInstances(IEnumerable<Dictionary<string, object?>> rows)
@@ -45,6 +47,8 @@ namespace DBADashAI.Services.Tools
             AddInstances(blockingRows);
             AddInstances(deadlockRows);
             AddInstances(driveRows);
+            AddInstances(jobFailureRows);
+            AddInstances(failedLoginRows);
 
             var correlated = instances.Select(instance =>
             {
@@ -59,14 +63,20 @@ namespace DBADashAI.Services.Tools
                 var deadlocks = deadlockRows.Where(r => string.Equals(Get(r, "InstanceDisplayName"), instance, StringComparison.OrdinalIgnoreCase))
                                             .Sum(r => ToDecimal(Get(r, "DeadlockCountEstimate")));
                 var driveRisk = driveRows.Count(r => string.Equals(Get(r, "InstanceDisplayName"), instance, StringComparison.OrdinalIgnoreCase));
+                var jobFailures = jobFailureRows.Where(r => string.Equals(Get(r, "InstanceDisplayName"), instance, StringComparison.OrdinalIgnoreCase))
+                                                .Sum(r => ToDecimal(Get(r, "JobFailureCount")));
+                var failedLogins = failedLoginRows.Where(r => string.Equals(Get(r, "InstanceDisplayName"), instance, StringComparison.OrdinalIgnoreCase))
+                                                  .Sum(r => ToDecimal(Get(r, "FailedLogins")));
 
                 var signalCount = 0;
                 if (unresolvedAlerts > 0 || p1Alerts > 0) signalCount++;
                 if (waits > 0 || blocking > 0) signalCount++;
                 if (deadlocks > 0) signalCount++;
                 if (driveRisk > 0) signalCount++;
+                if (jobFailures > 0) signalCount++;
+                if (failedLogins > 0) signalCount++;
 
-                var riskScore = (p1Alerts * 5m) + (unresolvedAlerts * 2m) + waits + blocking + (deadlocks * 5m) + (driveRisk * 3m);
+                var riskScore = (p1Alerts * 5m) + (unresolvedAlerts * 2m) + waits + blocking + (deadlocks * 5m) + (driveRisk * 3m) + (jobFailures * 2m) + failedLogins;
 
                 return new
                 {
@@ -78,6 +88,8 @@ namespace DBADashAI.Services.Tools
                     BlockedWaitSec = Math.Round(blocking, 2),
                     DeadlockCount = deadlocks,
                     DriveRiskCount = driveRisk,
+                    JobFailureCount = jobFailures,
+                    FailedLoginCount = failedLogins,
                     RiskScore = Math.Round(riskScore, 2)
                 };
             })
@@ -88,7 +100,7 @@ namespace DBADashAI.Services.Tools
 
             return new AiToolResult
             {
-                RowCount = alertRows.Count + waitsRows.Count + blockingRows.Count + deadlockRows.Count + driveRows.Count,
+                RowCount = alertRows.Count + waitsRows.Count + blockingRows.Count + deadlockRows.Count + driveRows.Count + jobFailureRows.Count + failedLoginRows.Count,
                 Data = new
                 {
                     generatedUtc = DateTime.UtcNow,
@@ -97,14 +109,16 @@ namespace DBADashAI.Services.Tools
                     waitsRows,
                     blockingRows,
                     deadlockRows,
-                    driveRows
+                    driveRows,
+                    jobFailureRows,
+                    failedLoginRows
                 },
                 Evidence =
                 [
                     new AiEvidenceItem
                     {
-                        Source = "ActiveAlerts + Waits + Blocking + Deadlocks + DriveStatus",
-                        Detail = "Cross-signal correlation to identify systemic risk clusters by instance"
+                        Source = "ActiveAlerts + Waits + Blocking + Deadlocks + DriveStatus + JobHistory + FailedLogins",
+                        Detail = "Cross-signal correlation to identify systemic risk clusters by instance, including job failures and failed logins"
                     }
                 ]
             };

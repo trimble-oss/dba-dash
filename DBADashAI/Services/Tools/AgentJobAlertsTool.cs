@@ -15,11 +15,11 @@ namespace DBADashAI.Services.Tools
 
         public string Name => ToolName;
 
-        public string Description => "List agent job alerts and job status details including fail counts, last success/failure, duration stats, and step failures.";
+        public string Description => "List agent job alerts and job status details including fail counts, last success/failure, duration stats, step failures, and the actual failure error messages from job history.";
 
-        public string InputHint => "Use for questions about failed jobs, job alerts, job status, job history, job duration, SQL Agent incidents, or which jobs are failing.";
+        public string InputHint => "Use for questions about failed jobs, job alerts, job status, job history, job duration, the error/reason a job failed, SQL Agent incidents, or which jobs are failing.";
 
-        public string[] Keywords => ["job", "jobs", "agent", "agent job", "failed", "failure", "failing", "job fail", "schedule", "scheduled", "running long", "stuck", "hung", "executing", "step", "job history", "sql agent", "sqlagent", "maintenance plan", "job status", "job duration", "step fail"];
+        public string[] Keywords => ["job", "jobs", "agent", "agent job", "failed", "failure", "failing", "job fail", "schedule", "scheduled", "running long", "stuck", "hung", "executing", "step", "job history", "sql agent", "sqlagent", "maintenance plan", "job status", "job duration", "step fail", "error", "error message", "why failed", "reason", "missing procedure"];
 
         public async Task<AiToolResult> RunAsync(AiAskRequest request, CancellationToken cancellationToken)
         {
@@ -31,14 +31,15 @@ namespace DBADashAI.Services.Tools
                 {
                     generatedUtc = DateTime.UtcNow,
                     jobAlerts = results.ElementAtOrDefault(0) ?? [],
-                    jobStatus = results.ElementAtOrDefault(1) ?? []
+                    jobStatus = results.ElementAtOrDefault(1) ?? [],
+                    jobFailureMessages = results.ElementAtOrDefault(2) ?? []
                 },
                 Evidence =
                 [
                     new AiEvidenceItem
                     {
-                        Source = "Alert.ActiveAlerts + dbo.AgentJobStatus",
-                        Detail = "Agent job alerts and job status details with fail counts, durations, and step failure info for jobs in warning/critical status."
+                        Source = "Alert.ActiveAlerts + dbo.AgentJobStatus + dbo.JobHistory",
+                        Detail = "Agent job alerts, job status details with fail counts, durations, and step failure info, plus the actual failure error messages from job history for jobs in warning/critical status."
                     }
                 ]
             };

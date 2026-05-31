@@ -80,6 +80,7 @@ INSERT INTO AI.ExampleQuestions (Category, Question, SortOrder) VALUES
 (N'Cross-Signal Analysis', N'Show likely root-cause clusters across the estate.', 0),
 (N'Cross-Signal Analysis', N'What are the top systemic risks where multiple signals align?', 0),
 (N'Cross-Signal Analysis', N'Which instances have the highest multi-signal risk score?', 0),
+(N'Cross-Signal Analysis', N'Which instances have job failures and failed logins occurring together?', 0),
 
 --  Instance Inventory (existing) 
 (N'Instance Inventory', N'How many instances are Enterprise Edition vs Standard Edition?', 0),
@@ -97,6 +98,23 @@ INSERT INTO AI.ExampleQuestions (Category, Question, SortOrder) VALUES
 (N'Jobs', N'Which jobs failed today?', 0),
 (N'Jobs', N'Are any job steps silently failing?', 1),
 (N'Jobs', N'Which jobs have the most failures in the last 24 hours?', 2),
+(N'Jobs', N'Why did the failing jobs fail and what were the exact error messages?', 3),
+(N'Jobs', N'What error message is each failed job step returning?', 4),
+(N'Jobs', N'Are any jobs failing because of a missing stored procedure or object?', 5),
+(N'Jobs', N'Which job step is failing and what is the root cause?', 6),
+(N'Jobs', N'Which job steps are configured to continue on failure and may be silently failing?', 7),
+(N'Jobs', N'Do any failing job steps have no retry attempts configured?', 8),
+
+--  Memory (new) 
+(N'Memory', N'Where is memory being used across our instances?', 0),
+(N'Memory', N'Which memory clerks are consuming the most memory?', 1),
+(N'Memory', N'Is there any sign of plan cache bloat from ad-hoc queries?', 2),
+
+--  Security (new) 
+(N'Security', N'Are there any failed logins in the last 24 hours?', 0),
+(N'Security', N'Which logins or client hosts are failing to authenticate the most?', 1),
+(N'Security', N'Are we seeing any signs of a brute-force login attempt?', 2),
+(N'Security', N'Are any job failures caused by login or permission errors?', 3),
 
 --  Operational Hygiene (existing) 
 (N'Operational Hygiene', N'Show unresolved vs resolved-unacknowledged alert counts by instance.', 0),

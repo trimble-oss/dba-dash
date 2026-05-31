@@ -126,6 +126,88 @@ namespace DBADashAI.Services
                 score += 5;
             }
 
+            if (tool.Name == "agent-job-alerts")
+            {
+                var mentionsJob = question.Contains("job", StringComparison.OrdinalIgnoreCase)
+                                  || question.Contains("agent", StringComparison.OrdinalIgnoreCase)
+                                  || question.Contains("maintenance plan", StringComparison.OrdinalIgnoreCase)
+                                  || question.Contains("step", StringComparison.OrdinalIgnoreCase);
+                var asksFailure = question.Contains("fail", StringComparison.OrdinalIgnoreCase)
+                                  || question.Contains("error", StringComparison.OrdinalIgnoreCase)
+                                  || question.Contains("why", StringComparison.OrdinalIgnoreCase)
+                                  || question.Contains("reason", StringComparison.OrdinalIgnoreCase)
+                                  || question.Contains("message", StringComparison.OrdinalIgnoreCase)
+                                  || question.Contains("missing", StringComparison.OrdinalIgnoreCase)
+                                  || question.Contains("stuck", StringComparison.OrdinalIgnoreCase)
+                                  || question.Contains("hung", StringComparison.OrdinalIgnoreCase);
+                if (mentionsJob)
+                {
+                    score += 4;
+                    if (asksFailure)
+                    {
+                        // Strongly prefer the job tool for "why did job X fail / what was the error" questions
+                        score += 4;
+                    }
+                }
+            }
+
+            if (tool.Name == "failed-logins-summary")
+            {
+                var asksFailedLogins = question.Contains("failed login", StringComparison.OrdinalIgnoreCase)
+                                       || question.Contains("login fail", StringComparison.OrdinalIgnoreCase)
+                                       || question.Contains("login failure", StringComparison.OrdinalIgnoreCase)
+                                       || question.Contains("authentication", StringComparison.OrdinalIgnoreCase)
+                                       || question.Contains("18456", StringComparison.OrdinalIgnoreCase)
+                                       || question.Contains("brute force", StringComparison.OrdinalIgnoreCase)
+                                       || question.Contains("bad password", StringComparison.OrdinalIgnoreCase)
+                                       || ((question.Contains("login", StringComparison.OrdinalIgnoreCase)
+                                            || question.Contains("logon", StringComparison.OrdinalIgnoreCase))
+                                           && (question.Contains("fail", StringComparison.OrdinalIgnoreCase)
+                                               || question.Contains("error", StringComparison.OrdinalIgnoreCase)
+                                               || question.Contains("denied", StringComparison.OrdinalIgnoreCase)));
+                if (asksFailedLogins)
+                {
+                    score += 5;
+                }
+            }
+
+            if (tool.Name == "memory-clerk-summary")
+            {
+                var asksMemoryClerk = question.Contains("memory clerk", StringComparison.OrdinalIgnoreCase)
+                                      || question.Contains("buffer pool", StringComparison.OrdinalIgnoreCase)
+                                      || question.Contains("plan cache", StringComparison.OrdinalIgnoreCase)
+                                      || question.Contains("stolen memory", StringComparison.OrdinalIgnoreCase)
+                                      || question.Contains("cache bloat", StringComparison.OrdinalIgnoreCase)
+                                      || ((question.Contains("memory", StringComparison.OrdinalIgnoreCase)
+                                           || question.Contains("ram", StringComparison.OrdinalIgnoreCase))
+                                          && (question.Contains("where", StringComparison.OrdinalIgnoreCase)
+                                              || question.Contains("breakdown", StringComparison.OrdinalIgnoreCase)
+                                              || question.Contains("consum", StringComparison.OrdinalIgnoreCase)
+                                              || question.Contains("using", StringComparison.OrdinalIgnoreCase)));
+                if (asksMemoryClerk)
+                {
+                    score += 5;
+                }
+            }
+
+            if (tool.Name == "job-step-config-summary")
+            {
+                var asksStepConfig = question.Contains("job step", StringComparison.OrdinalIgnoreCase)
+                                     || question.Contains("step config", StringComparison.OrdinalIgnoreCase)
+                                     || question.Contains("silently failing", StringComparison.OrdinalIgnoreCase)
+                                     || question.Contains("silent failure", StringComparison.OrdinalIgnoreCase)
+                                     || question.Contains("continue on failure", StringComparison.OrdinalIgnoreCase)
+                                     || question.Contains("on failure", StringComparison.OrdinalIgnoreCase)
+                                     || question.Contains("retry attempt", StringComparison.OrdinalIgnoreCase)
+                                     || ((question.Contains("step", StringComparison.OrdinalIgnoreCase)
+                                          || question.Contains("retry", StringComparison.OrdinalIgnoreCase))
+                                         && question.Contains("config", StringComparison.OrdinalIgnoreCase));
+                if (asksStepConfig)
+                {
+                    score += 5;
+                }
+            }
+
             if (tool.Name == "instance-metadata-summary")
             {
                 // Suppress metadata scoring when the question clearly targets another domain

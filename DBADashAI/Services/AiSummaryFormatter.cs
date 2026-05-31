@@ -35,7 +35,9 @@ namespace DBADashAI.Services
 
             sb.AppendLine();
             sb.AppendLine("Response requirements:");
-            sb.AppendLine("- Use markdown headings exactly: ## Summary, ## Top Findings, ## Recommended Actions, ## Confidence");
+            sb.AppendLine("- Follow the FORMAT and SEVERITY AND VISUAL EMPHASIS rules from the system prompt exactly");
+            sb.AppendLine("- Use the headings: ## Summary, ## Top Findings, ## Recommended Actions, ## Confidence (in that order, and no others)");
+            sb.AppendLine("- Prefix each finding with a stoplight icon (🔴 Critical, 🟡 Warning, 🟢 Healthy/Informational) and order findings most-critical-first");
             sb.AppendLine("- Only use facts present in tool data and ranked evidence");
             sb.AppendLine("- Do not include evidence citation tokens like '(Evidence #1)' in the final response");
             sb.AppendLine("- If data is insufficient, explicitly state uncertainty");
