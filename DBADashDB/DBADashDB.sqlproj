@@ -726,6 +726,9 @@
     <Build Include="AI\Stored Procedures\WorkloadPressure_Get.sql" />
     <Build Include="AI\Stored Procedures\ExampleQuestions_Get.sql" />
     <Build Include="AI\Stored Procedures\Models_Get.sql" />
+    <Build Include="AI\Stored Procedures\FailedLoginsRisk_Get.sql" />
+    <Build Include="AI\Stored Procedures\JobStepConfig_Get.sql" />
+    <Build Include="AI\Stored Procedures\MemoryClerkUsage_Get.sql" />
     <Build Include="dbo\Stored Procedures\JobTimeline_Get.sql" />
     <Build Include="dbo\Stored Procedures\JobCategories_Get.sql" />
     <Build Include="dbo\Stored Procedures\JobErrorAck.sql" />

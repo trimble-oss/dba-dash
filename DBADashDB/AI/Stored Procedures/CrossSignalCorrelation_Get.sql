@@ -70,3 +70,31 @@ FROM dbo.DriveStatus ds
 WHERE ds.Status IN (1,2)
   AND (@InstanceFilter IS NULL OR ds.InstanceDisplayName LIKE @InstanceFilter + '%')
 ORDER BY ds.Status ASC, ds.PctFreeSpace ASC
+
+/* Result set 6: Job failure error codes by instance (correlate failed jobs with other signals) */
+SELECT TOP (@MaxRows)
+	i.InstanceDisplayName,
+	COUNT(*) AS JobFailureCount,
+	COUNT(DISTINCT jh.job_id) AS DistinctFailingJobs,
+	MAX(jh.RunDateTime) AS LastFailure
+FROM dbo.JobHistory jh
+INNER JOIN dbo.Instances i ON i.InstanceID = jh.InstanceID
+WHERE jh.run_status = 0
+  AND jh.RunDateTime >= DATEADD(HOUR, -@HoursBack, SYSUTCDATETIME())
+  AND i.IsActive = 1
+  AND (@InstanceFilter IS NULL OR i.InstanceDisplayName LIKE @InstanceFilter + '%')
+GROUP BY i.InstanceDisplayName
+ORDER BY JobFailureCount DESC
+
+/* Result set 7: Failed login counts by instance (correlate auth failures with job/login errors) */
+SELECT TOP (@MaxRows)
+	i.InstanceDisplayName,
+	COUNT(*) AS FailedLogins,
+	MAX(fl.LogDate) AS LastFailedLogin
+FROM dbo.FailedLogins fl
+INNER JOIN dbo.Instances i ON i.InstanceID = fl.InstanceID
+WHERE fl.LogDate >= DATEADD(HOUR, -@HoursBack, SYSUTCDATETIME())
+  AND i.IsActive = 1
+  AND (@InstanceFilter IS NULL OR i.InstanceDisplayName LIKE @InstanceFilter + '%')
+GROUP BY i.InstanceDisplayName
+ORDER BY FailedLogins DESC

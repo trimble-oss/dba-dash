@@ -187,6 +187,9 @@ builder.Services.AddScoped<IAiTool, TableSizeSummaryTool>();
 builder.Services.AddScoped<IAiTool, OSPerformanceSummaryTool>();
 builder.Services.AddScoped<IAiTool, OperationalHygieneSummaryTool>();
 builder.Services.AddScoped<IAiTool, CrossSignalCorrelationSummaryTool>();
+builder.Services.AddScoped<IAiTool, FailedLoginsSummaryTool>();
+builder.Services.AddScoped<IAiTool, MemoryClerkSummaryTool>();
+builder.Services.AddScoped<IAiTool, JobStepConfigSummaryTool>();
 
 // Rate limiting: per-IP token bucket applied to costly AI endpoints.
 // Configured via "RateLimiting" in appsettings.json; defaults allow short bursts
