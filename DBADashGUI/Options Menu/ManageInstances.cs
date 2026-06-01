@@ -34,6 +34,7 @@ namespace DBADashGUI
         private async void RefreshData()
         {
             var dt = await CommonData.GetInstancesAsync(Tags, null);
+            dt.Columns["IsHidden"].ReadOnly = false;
             dgv.AutoGenerateColumns = false;
             dgv.DataSource = new DataView(dt);
         }
