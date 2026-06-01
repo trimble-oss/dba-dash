@@ -57,7 +57,7 @@ namespace DBADashService
 
         public virtual async Task ExecuteAsync(CollectionConfig config, CancellationToken cancellationToken)
         {
-            if (Types == null || Types.Length == 0)
+            if (!(Types?.Length > 0 || CustomCollections?.Count > 0))
                 return;
 
             var dequeueLatencyMs = EnqueueSW.ElapsedMilliseconds;
