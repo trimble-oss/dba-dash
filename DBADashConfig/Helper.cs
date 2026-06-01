@@ -167,6 +167,23 @@ namespace DBADashConfig
                 CollectTaskWaits = o.CollectTaskWaits ?? false,
                 CollectCursors = o.CollectCursors ?? false
             };
+            // Table size collection options (nullable: omit to use defaults)
+            if (o.TableSizeCollectionThresholdMB.HasValue)
+            {
+                source.TableSizeCollectionThresholdMB = o.TableSizeCollectionThresholdMB.Value;
+            }
+            if (o.TableSizeDatabases != null)
+            {
+                source.TableSizeDatabases = o.TableSizeDatabases;
+            }
+            if (o.TableSizeMaxTableThreshold.HasValue)
+            {
+                source.TableSizeMaxTableThreshold = o.TableSizeMaxTableThreshold.Value;
+            }
+            if (o.TableSizeMaxDatabaseThreshold.HasValue)
+            {
+                source.TableSizeMaxDatabaseThreshold = o.TableSizeMaxDatabaseThreshold.Value;
+            }
             if (!o.SkipValidation)
             {
                 Log.Information("Validating connection...");
