@@ -57,6 +57,18 @@ SetAWS - Set AWS Credentials")]
         [Option("SchemaSnapshotDBs", Default = "", Required = false, HelpText = "Comma-separated list of databases to include in a schema snapshot.  Use \" * \" to snapshot all databases.")]
         public string? SchemaSnapshotDBs { get; set; }
 
+        [Option("TableSizeCollectionThresholdMB", Required = false, HelpText = "Table size collection threshold in MB. Omit to use the collector default.")]
+        public int? TableSizeCollectionThresholdMB { get; set; }
+
+        [Option("TableSizeDatabases", Required = false, HelpText = "Comma-separated list of databases to include in table size collection. Use \"*\" to include all databases. Omit to use the collector default.")]
+        public string? TableSizeDatabases { get; set; }
+
+        [Option("TableSizeMaxTableThreshold", Required = false, HelpText = "Databases with more tables than this threshold are skipped during table size collection. Omit to use the collector default.")]
+        public int? TableSizeMaxTableThreshold { get; set; }
+
+        [Option("TableSizeMaxDatabaseThreshold", Required = false, HelpText = "Table size collection is aborted if the server has more databases than this threshold. Omit to use the collector default.")]
+        public int? TableSizeMaxDatabaseThreshold { get; set; }
+
         [Option("SkipValidation", Default = false, Required = false, HelpText = "Option to skip the validation check on the source connection string")]
         public bool SkipValidation { get; set; }
 

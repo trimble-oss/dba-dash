@@ -57,10 +57,10 @@ namespace DBADashConfig.Test
         }
 
         [TestMethod]
-        [DataRow("SQL1", "Data Source=SQL1;Integrated Security=SSPI", false, false, true, false, true, false, true, false, true)]
-        [DataRow("SQL2", "Data Source=SQL2;Integrated Security=SSPI", true, false, false, true, false, true, false, true, true)]
-        [DataRow("SQL3", "Data Source=SQL3;Integrated Security=SSPI", false, true, false, false, true, true, false, true, false)]
-        public void AddConnectionTest(string connectionID, string connectionString, bool persistXE, bool useDualSession, bool tempdb, bool tranBeginTime, bool collectSessionWaits, bool writeToSecondaryDest, bool scriptAgentJobs, bool taskWaits, bool collectCursors)
+        [DataRow("SQL1", "Data Source=SQL1;Integrated Security=SSPI", false, false, true, false, true, false, true, false, true, -1, "", -1, -1)]
+        [DataRow("SQL2", "Data Source=SQL2;Integrated Security=SSPI", true, false, false, true, false, true, false, true, true, 100, "master", 10, 2)]
+        [DataRow("SQL3", "Data Source=SQL3;Integrated Security=SSPI", false, true, false, false, true, true, false, true, false, 50, "db1,db2", 100, 5)]
+        public void AddConnectionTest(string connectionID, string connectionString, bool persistXE, bool useDualSession, bool tempdb, bool tranBeginTime, bool collectSessionWaits, bool writeToSecondaryDest, bool scriptAgentJobs, bool taskWaits, bool collectCursors, int tableSizeCollectionThresholdMB, string tableSizeDatabases, int tableSizeMaxTableThreshold, int tableSizeMaxDatabaseThreshold)
         {
             const bool skipValidation = true;
             var args =
@@ -68,6 +68,22 @@ namespace DBADashConfig.Test
             if (!collectSessionWaits)
             {
                 args += " --NoCollectSessionWaits";
+            }
+            if (tableSizeCollectionThresholdMB != -1)
+            {
+                args += $" --TableSizeCollectionThresholdMB {tableSizeCollectionThresholdMB}";
+            }
+            if (!string.IsNullOrEmpty(tableSizeDatabases))
+            {
+                args += $" --TableSizeDatabases \"{tableSizeDatabases}\"";
+            }
+            if (tableSizeMaxTableThreshold != -1)
+            {
+                args += $" --TableSizeMaxTableThreshold {tableSizeMaxTableThreshold}";
+            }
+            if (tableSizeMaxDatabaseThreshold != -1)
+            {
+                args += $" --TableSizeMaxDatabaseThreshold {tableSizeMaxDatabaseThreshold}";
             }
             var psi = new ProcessStartInfo("DBADashConfig", args);
             Helper.RunProcess(psi);
@@ -86,6 +102,11 @@ namespace DBADashConfig.Test
             Assert.AreEqual(conn.ScriptAgentJobs, scriptAgentJobs, "Test ScriptAgentJobs");
             Assert.AreEqual(conn.CollectTaskWaits, taskWaits, "Test CollectTaskWaits");
             Assert.AreEqual(conn.CollectCursors, collectCursors, "Test CollectCursors");
+            Assert.AreEqual(conn.TableSizeCollectionThresholdMB, tableSizeCollectionThresholdMB == -1 ? null : (int?)tableSizeCollectionThresholdMB, "Test TableSizeCollectionThresholdMB");
+            // Treat null and empty string as equivalent for TableSizeDatabases
+            Assert.AreEqual(tableSizeDatabases ?? string.Empty, conn.TableSizeDatabases ?? string.Empty, "Test TableSizeDatabases");
+            Assert.AreEqual(conn.TableSizeMaxTableThreshold, tableSizeMaxTableThreshold == -1 ? null : (int?)tableSizeMaxTableThreshold, "Test TableSizeMaxTableThreshold");
+            Assert.AreEqual(conn.TableSizeMaxDatabaseThreshold, tableSizeMaxDatabaseThreshold == -1 ? null : (int?)tableSizeMaxDatabaseThreshold, "Test TableSizeMaxDatabaseThreshold");
 
             // test removal
             args = $"-a Remove --ConnectionID {connectionID}";
