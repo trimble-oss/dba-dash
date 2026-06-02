@@ -72,6 +72,7 @@ namespace DBADashServiceConfig
             lblSchedulerThreads = new System.Windows.Forms.Label();
             chkQueueBasedScheduling = new System.Windows.Forms.CheckBox();
             label24 = new System.Windows.Forms.Label();
+            lnkAutomaticUpdates = new System.Windows.Forms.LinkLabel();
             picConfigFileAccess = new System.Windows.Forms.PictureBox();
             lblConfigFileAccess = new System.Windows.Forms.Label();
             pnlBottom = new System.Windows.Forms.Panel();
@@ -677,6 +678,19 @@ namespace DBADashServiceConfig
             label24.TabIndex = 56;
             label24.Text = "Low priority max thread %";
             toolTip1.SetToolTip(label24, "Maximum % of worker threads to use for Low priority queue.  Used to prevent slower, less frequently run collections from consuming all the available worker threads.");
+            // 
+            // lnkAutomaticUpdates
+            // 
+            lnkAutomaticUpdates.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            lnkAutomaticUpdates.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            lnkAutomaticUpdates.Location = new System.Drawing.Point(334, 172);
+            lnkAutomaticUpdates.Name = "lnkAutomaticUpdates";
+            lnkAutomaticUpdates.Size = new System.Drawing.Size(779, 78);
+            lnkAutomaticUpdates.TabIndex = 27;
+            lnkAutomaticUpdates.TabStop = true;
+            lnkAutomaticUpdates.Text = "Configure automatic updates...";
+            toolTip1.SetToolTip(lnkAutomaticUpdates, resources.GetString("lnkAutomaticUpdates.ToolTip"));
+            lnkAutomaticUpdates.LinkClicked += AutomaticUpdates_LinkClicked;
             // 
             // picConfigFileAccess
             // 
@@ -1952,6 +1966,7 @@ namespace DBADashServiceConfig
             // 
             // tabDest
             // 
+            tabDest.Controls.Add(lnkAutomaticUpdates);
             tabDest.Controls.Add(lblRunningAs);
             tabDest.Controls.Add(bttnViewServiceLog);
             tabDest.Controls.Add(bttnRestartAsAdmin);
@@ -2029,7 +2044,7 @@ namespace DBADashServiceConfig
             // 
             lblServerNameWarning.AutoSize = true;
             lblServerNameWarning.ForeColor = System.Drawing.Color.FromArgb(228, 147, 37);
-            lblServerNameWarning.Location = new System.Drawing.Point(103, 209);
+            lblServerNameWarning.Location = new System.Drawing.Point(8, 469);
             lblServerNameWarning.Name = "lblServerNameWarning";
             lblServerNameWarning.Size = new System.Drawing.Size(554, 20);
             lblServerNameWarning.TabIndex = 25;
@@ -2407,6 +2422,7 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.Label label24;
         private System.Windows.Forms.NumericUpDown numLowMaxThreadPct;
         private System.Windows.Forms.Label lblRunningAs;
+        private System.Windows.Forms.LinkLabel lnkAutomaticUpdates;
     }
 }
 

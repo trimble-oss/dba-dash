@@ -1003,6 +1003,16 @@ namespace DBADashServiceConfig
                 chkLowPriorityMaxThreadPct.Enabled = chkQueueBasedScheduling.CheckState != CheckState.Unchecked;
                 chkLowPriorityMaxThreadPct.Checked = collectionConfig.LowPriorityQueueMaxThreadPercentage.HasValue;
                 numLowMaxThreadPct.Value = Convert.ToInt32(collectionConfig.GetLowPriorityQueueMaxThreadPercentage() * 100);
+                string upgradeCheckSchedule;
+                try
+                {
+                    upgradeCheckSchedule = string.IsNullOrEmpty(collectionConfig.UpgradeCheckCron) ? string.Empty : CronExpressionDescriptor.ExpressionDescriptor.GetDescription(collectionConfig.UpgradeCheckCron);
+                }
+                catch (Exception)
+                {
+                    upgradeCheckSchedule = "Invalid Cron Expression";
+                }
+                lnkAutomaticUpdates.Text = string.IsNullOrEmpty(upgradeCheckSchedule) ? "Configure Automatic Updates..." : $"Automatic Update Checks: {upgradeCheckSchedule}";
                 UpdateThreadCount();
                 UpdateSummaryCron();
                 UpdateScanInterval();
@@ -3115,6 +3125,69 @@ namespace DBADashServiceConfig
                 // ignore if not installed
             }
             await RefreshAiServiceStatusAsync();
+        }
+
+        private void AutomaticUpdates_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            using var frm = new CronExpressionBuilder(collectionConfig.UpgradeCheckCron);
+            if (frm.ShowDialog() == DialogResult.OK)
+            {
+                collectionConfig.UpgradeCheckCron = string.IsNullOrEmpty(frm.CronExpression) ? null : frm.CronExpression;
+
+                if (!string.IsNullOrEmpty(collectionConfig.UpgradeCheckCron))
+                {
+                    WarnIfScheduleTooFrequent(collectionConfig.UpgradeCheckCron);
+                }
+
+                string description;
+                try
+                {
+                    description = string.IsNullOrEmpty(collectionConfig.UpgradeCheckCron)
+                        ? string.Empty
+                        : CronExpressionDescriptor.ExpressionDescriptor.GetDescription(collectionConfig.UpgradeCheckCron);
+                }
+                catch
+                {
+                    description = "Invalid Cron Expression";
+                }
+                lnkAutomaticUpdates.Text = string.IsNullOrEmpty(description)
+                    ? "Configure Automatic Updates..."
+                    : $"Automatic Update Checks: {description}";
+                SetJson();
+            }
+        }
+
+        private static void WarnIfScheduleTooFrequent(string cronExpression)
+        {
+            try
+            {
+                if (!Quartz.CronExpression.IsValidExpression(cronExpression))
+                {
+                    return;
+                }
+
+                var cron = new Quartz.CronExpression(cronExpression);
+                var now = DateTimeOffset.UtcNow;
+                var next = cron.GetNextValidTimeAfter(now);
+                var afterNext = next.HasValue ? cron.GetNextValidTimeAfter(next.Value) : null;
+
+                if (next.HasValue && afterNext.HasValue)
+                {
+                    var interval = afterNext.Value - next.Value;
+                    if (interval < TimeSpan.FromMinutes(10))
+                    {
+                        MessageBox.Show(
+                            $"The schedule runs every {interval.Humanize()}. Running update checks more frequently than every 10 minutes may cause GitHub API rate limit issues. Consider using a less frequent schedule.",
+                            "Warning",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Warning);
+                    }
+                }
+            }
+            catch
+            {
+                // Unable to parse - validation will be handled elsewhere
+            }
         }
     }
 }
