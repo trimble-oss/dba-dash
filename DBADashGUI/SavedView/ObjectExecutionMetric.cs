@@ -13,6 +13,10 @@ namespace DBADashGUI
 
         public string Measure { get; set; } = "TotalDuration";
 
+        public int TopRows { get; set; } = 5;
+
+        public bool IncludeOther { get; set; } = true;
+
         public IMetricChart GetChart()
         {
             return new ObjectExecution() { Metric = this };

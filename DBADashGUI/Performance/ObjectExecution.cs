@@ -30,17 +30,66 @@ namespace DBADashGUI.Performance
             lblError.BringToFront();
         }
 
+        private bool isLoading;
+
+        /// <summary>
+        /// Apply settings from the Metric object to the UI controls.
+        /// Called during Load after menu items are created.
+        /// </summary>
+        private void LoadSettingsFromMetric()
+        {
+            isLoading = true;
+            try
+            {
+                // Apply IncludeOther
+                includeOtherToolStripMenuItem.Checked = Metric.IncludeOther;
+
+                // Apply TopRows
+                var top = Metric.TopRows;
+                if (top > 0)
+                {
+                    var matching = tsTop.DropDownItems.OfType<ToolStripMenuItem>().FirstOrDefault(i => i != includeOtherToolStripMenuItem && i.Tag != null && i.Tag.ToString() == top.ToString());
+                    if (matching != null)
+                    {
+                        tsTop.Tag = matching.Tag;
+                        tsTop.Text = "Top " + matching.Tag;
+                        foreach (var itm in tsTop.DropDownItems.OfType<ToolStripMenuItem>().Where(item => item != includeOtherToolStripMenuItem))
+                        {
+                            itm.Checked = itm == matching;
+                        }
+                    }
+                }
+
+                // Apply Measure
+                if (measures.ContainsKey(Metric.Measure))
+                {
+                    foreach (ToolStripMenuItem itm in tsMeasures.DropDownItems)
+                    {
+                        itm.Checked = itm.Name == Metric.Measure;
+                    }
+                    tsMeasures.Text = measures[Metric.Measure].DisplayName;
+                }
+            }
+            catch(Exception ex)
+            {
+                Common.ShowExceptionDialog(ex, "Error loading object execution stats saved settings");
+            }
+            finally
+            {
+                isLoading = false;
+            }
+        }
+
         public class DateModel
         {
             public DateTime DateTime { get; set; }
             public double Value { get; set; }
         }
 
-        private int TopRows => tsTop.Tag == null ? 10 : Convert.ToInt32(tsTop.Tag);
-        private bool IncludeOther => includeOtherToolStripMenuItem.Checked;
+        private int TopRows => Metric.TopRows;
+        private bool IncludeOther => Metric.IncludeOther;
 
         private int instanceID;
-        private DateTime chartMaxDate = DateTime.MinValue;
 
         private int mins;
         private long objectID;
@@ -213,6 +262,7 @@ namespace DBADashGUI.Performance
                 itm.Click += Itm_Click;
                 tsMeasures.DropDownItems.Add(itm);
             }
+            LoadSettingsFromMetric();
         }
 
         private void TsDateGrouping_Click(object sender, EventArgs e)
@@ -257,11 +307,16 @@ namespace DBADashGUI.Performance
             {
                 itm.Checked = itm == ts;
             }
+            if (!isLoading)
+            {
+                Metric.TopRows = Convert.ToInt32(ts.Tag);
+            }
             RefreshData();
         }
 
         private void includeOtherToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            Metric.IncludeOther = includeOtherToolStripMenuItem.Checked;
             RefreshData();
         }
 
