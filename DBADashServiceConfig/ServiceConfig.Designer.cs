@@ -52,7 +52,6 @@ namespace DBADashServiceConfig
             bttnSrcFolder = new System.Windows.Forms.Button();
             bttnS3Src = new System.Windows.Forms.Button();
             pictureBox2 = new System.Windows.Forms.PictureBox();
-            bttnDeployDatabase = new System.Windows.Forms.Button();
             bttnConnect = new System.Windows.Forms.Button();
             bttnDestFolder = new System.Windows.Forms.Button();
             bttnS3 = new System.Windows.Forms.Button();
@@ -73,6 +72,8 @@ namespace DBADashServiceConfig
             chkQueueBasedScheduling = new System.Windows.Forms.CheckBox();
             label24 = new System.Windows.Forms.Label();
             lnkAutomaticUpdates = new System.Windows.Forms.LinkLabel();
+            lnkAutoUpgradeDB = new System.Windows.Forms.LinkLabel();
+            lnkDeployDatabase = new System.Windows.Forms.LinkLabel();
             picConfigFileAccess = new System.Windows.Forms.PictureBox();
             lblConfigFileAccess = new System.Windows.Forms.Label();
             pnlBottom = new System.Windows.Forms.Panel();
@@ -93,6 +94,7 @@ namespace DBADashServiceConfig
             numAlertPollingFrequency = new System.Windows.Forms.NumericUpDown();
             chkProcessAlerts = new System.Windows.Forms.CheckBox();
             groupBox3 = new System.Windows.Forms.GroupBox();
+            lnkSummaryRefreshCron = new System.Windows.Forms.LinkLabel();
             chkLowPriorityMaxThreadPct = new System.Windows.Forms.CheckBox();
             numLowMaxThreadPct = new System.Windows.Forms.NumericUpDown();
             chkSchedulerThreads = new System.Windows.Forms.CheckBox();
@@ -190,13 +192,11 @@ namespace DBADashServiceConfig
             grpService = new System.Windows.Forms.GroupBox();
             lnkInstall = new System.Windows.Forms.LinkLabel();
             lblServiceStatus = new System.Windows.Forms.Label();
-            chkAutoUpgradeRepoDB = new System.Windows.Forms.CheckBox();
             lblVersionInfo = new System.Windows.Forms.Label();
             label7 = new System.Windows.Forms.Label();
             txtDestination = new System.Windows.Forms.TextBox();
             tab1 = new ThemedTabControl();
             tabMessaging = new System.Windows.Forms.TabPage();
-            lnkSummaryRefreshCron = new System.Windows.Forms.LinkLabel();
             ((System.ComponentModel.ISupportInitialize)errorProvider1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox3).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
@@ -434,18 +434,6 @@ namespace DBADashServiceConfig
             pictureBox2.TabIndex = 14;
             pictureBox2.TabStop = false;
             toolTip1.SetToolTip(pictureBox2, resources.GetString("pictureBox2.ToolTip"));
-            // 
-            // bttnDeployDatabase
-            // 
-            bttnDeployDatabase.Location = new System.Drawing.Point(103, 93);
-            bttnDeployDatabase.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            bttnDeployDatabase.Name = "bttnDeployDatabase";
-            bttnDeployDatabase.Size = new System.Drawing.Size(214, 29);
-            bttnDeployDatabase.TabIndex = 5;
-            bttnDeployDatabase.Text = "Deploy/Update Database";
-            toolTip1.SetToolTip(bttnDeployDatabase, "Click to create/upgrade your DBA Dash repository database");
-            bttnDeployDatabase.UseVisualStyleBackColor = true;
-            bttnDeployDatabase.Click += BttnDeployDatabase_Click;
             // 
             // bttnConnect
             // 
@@ -690,6 +678,34 @@ namespace DBADashServiceConfig
             toolTip1.SetToolTip(lnkAutomaticUpdates, resources.GetString("lnkAutomaticUpdates.ToolTip"));
             lnkAutomaticUpdates.LinkClicked += AutomaticUpdates_LinkClicked;
             // 
+            // lnkAutoUpgradeDB
+            // 
+            lnkAutoUpgradeDB.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            lnkAutoUpgradeDB.Image = Properties.Resources.Warning_yellow_7231_16x16;
+            lnkAutoUpgradeDB.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            lnkAutoUpgradeDB.Location = new System.Drawing.Point(103, 123);
+            lnkAutoUpgradeDB.Name = "lnkAutoUpgradeDB";
+            lnkAutoUpgradeDB.Size = new System.Drawing.Size(567, 25);
+            lnkAutoUpgradeDB.TabIndex = 28;
+            lnkAutoUpgradeDB.TabStop = true;
+            lnkAutoUpgradeDB.Text = "Enable auto upgrade of repository database on service start (recommended)";
+            lnkAutoUpgradeDB.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            toolTip1.SetToolTip(lnkAutoUpgradeDB, resources.GetString("lnkAutoUpgradeDB.ToolTip"));
+            lnkAutoUpgradeDB.LinkClicked += AutoUpgradeDB_LinkClicked;
+            // 
+            // lnkDeployDatabase
+            // 
+            lnkDeployDatabase.AutoSize = true;
+            lnkDeployDatabase.Enabled = false;
+            lnkDeployDatabase.Location = new System.Drawing.Point(103, 59);
+            lnkDeployDatabase.Name = "lnkDeployDatabase";
+            lnkDeployDatabase.Size = new System.Drawing.Size(312, 20);
+            lnkDeployDatabase.TabIndex = 29;
+            lnkDeployDatabase.TabStop = true;
+            lnkDeployDatabase.Text = "Deploy/Update repository database manually";
+            toolTip1.SetToolTip(lnkDeployDatabase, "Option to deploy the database manually.  This is usually done automatically for you on service start.");
+            lnkDeployDatabase.LinkClicked += DeployDatabase_LinkClicked;
+            // 
             // picConfigFileAccess
             // 
             picConfigFileAccess.Image = Properties.Resources.Security_Shields_Alert_32xLG_color;
@@ -740,7 +756,7 @@ namespace DBADashServiceConfig
             tabJson.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
             tabJson.Size = new System.Drawing.Size(1129, 722);
             tabJson.TabIndex = 6;
-            tabJson.Text = "Json";
+            tabJson.Text = "JSON";
             tabJson.UseVisualStyleBackColor = true;
             // 
             // txtJson
@@ -942,6 +958,17 @@ namespace DBADashServiceConfig
             groupBox3.TabIndex = 38;
             groupBox3.TabStop = false;
             groupBox3.Text = "Miscellaneous";
+            // 
+            // lnkSummaryRefreshCron
+            // 
+            lnkSummaryRefreshCron.AutoSize = true;
+            lnkSummaryRefreshCron.Location = new System.Drawing.Point(286, 102);
+            lnkSummaryRefreshCron.Name = "lnkSummaryRefreshCron";
+            lnkSummaryRefreshCron.Size = new System.Drawing.Size(230, 20);
+            lnkSummaryRefreshCron.TabIndex = 58;
+            lnkSummaryRefreshCron.TabStop = true;
+            lnkSummaryRefreshCron.Text = "Configure summary auto refresh...";
+            lnkSummaryRefreshCron.LinkClicked += LnkSummaryRefreshCron_LinkClicked;
             // 
             // chkLowPriorityMaxThreadPct
             // 
@@ -1933,6 +1960,8 @@ namespace DBADashServiceConfig
             // 
             // tabDest
             // 
+            tabDest.Controls.Add(lnkDeployDatabase);
+            tabDest.Controls.Add(lnkAutoUpgradeDB);
             tabDest.Controls.Add(lnkAutomaticUpdates);
             tabDest.Controls.Add(lblRunningAs);
             tabDest.Controls.Add(bttnViewServiceLog);
@@ -1944,10 +1973,8 @@ namespace DBADashServiceConfig
             tabDest.Controls.Add(grpService);
             tabDest.Controls.Add(bttnS3);
             tabDest.Controls.Add(bttnDestFolder);
-            tabDest.Controls.Add(chkAutoUpgradeRepoDB);
             tabDest.Controls.Add(bttnConnect);
             tabDest.Controls.Add(lblVersionInfo);
-            tabDest.Controls.Add(bttnDeployDatabase);
             tabDest.Controls.Add(label7);
             tabDest.Controls.Add(txtDestination);
             tabDest.Location = new System.Drawing.Point(4, 39);
@@ -2082,24 +2109,10 @@ namespace DBADashServiceConfig
             lblServiceStatus.TabIndex = 23;
             lblServiceStatus.Text = "Service Status";
             // 
-            // chkAutoUpgradeRepoDB
-            // 
-            chkAutoUpgradeRepoDB.AutoSize = true;
-            chkAutoUpgradeRepoDB.Checked = true;
-            chkAutoUpgradeRepoDB.CheckState = System.Windows.Forms.CheckState.Checked;
-            chkAutoUpgradeRepoDB.Location = new System.Drawing.Point(103, 60);
-            chkAutoUpgradeRepoDB.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            chkAutoUpgradeRepoDB.Name = "chkAutoUpgradeRepoDB";
-            chkAutoUpgradeRepoDB.Size = new System.Drawing.Size(321, 24);
-            chkAutoUpgradeRepoDB.TabIndex = 8;
-            chkAutoUpgradeRepoDB.Text = "Auto upgrade repository DB on service start";
-            chkAutoUpgradeRepoDB.UseVisualStyleBackColor = true;
-            chkAutoUpgradeRepoDB.CheckedChanged += ChkAutoUpgradeRepoDB_CheckedChanged;
-            // 
             // lblVersionInfo
             // 
             lblVersionInfo.AutoSize = true;
-            lblVersionInfo.Location = new System.Drawing.Point(103, 127);
+            lblVersionInfo.Location = new System.Drawing.Point(103, 91);
             lblVersionInfo.Name = "lblVersionInfo";
             lblVersionInfo.Size = new System.Drawing.Size(95, 20);
             lblVersionInfo.TabIndex = 6;
@@ -2122,6 +2135,7 @@ namespace DBADashServiceConfig
             txtDestination.Name = "txtDestination";
             txtDestination.Size = new System.Drawing.Size(903, 27);
             txtDestination.TabIndex = 1;
+            txtDestination.TextChanged += TxtDestination_TextChanged;
             txtDestination.Validated += TxtDestination_Validated;
             // 
             // tab1
@@ -2151,17 +2165,6 @@ namespace DBADashServiceConfig
             tabMessaging.TabIndex = 7;
             tabMessaging.Text = "Messaging";
             tabMessaging.UseVisualStyleBackColor = true;
-            // 
-            // lnkSummaryRefreshCron
-            // 
-            lnkSummaryRefreshCron.AutoSize = true;
-            lnkSummaryRefreshCron.Location = new System.Drawing.Point(286, 102);
-            lnkSummaryRefreshCron.Name = "lnkSummaryRefreshCron";
-            lnkSummaryRefreshCron.Size = new System.Drawing.Size(230, 20);
-            lnkSummaryRefreshCron.TabIndex = 58;
-            lnkSummaryRefreshCron.TabStop = true;
-            lnkSummaryRefreshCron.Text = "Configure summary auto refresh...";
-            lnkSummaryRefreshCron.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(LnkSummaryRefreshCron_LinkClicked);
             // 
             // ServiceConfig
             // 
@@ -2257,10 +2260,8 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.LinkLabel lnkStop;
         private System.Windows.Forms.Button bttnS3;
         private System.Windows.Forms.Button bttnDestFolder;
-        private System.Windows.Forms.CheckBox chkAutoUpgradeRepoDB;
         private System.Windows.Forms.Button bttnConnect;
         private System.Windows.Forms.Label lblVersionInfo;
-        private System.Windows.Forms.Button bttnDeployDatabase;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.TextBox txtDestination;
         private System.Windows.Forms.TabPage tabSource;
@@ -2399,6 +2400,8 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.Label lblRunningAs;
         private System.Windows.Forms.LinkLabel lnkAutomaticUpdates;
         private System.Windows.Forms.LinkLabel lnkSummaryRefreshCron;
+        private System.Windows.Forms.LinkLabel lnkAutoUpgradeDB;
+        private System.Windows.Forms.LinkLabel lnkDeployDatabase;
     }
 }
 

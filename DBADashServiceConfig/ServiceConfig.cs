@@ -379,8 +379,17 @@ namespace DBADashServiceConfig
             if (control.InvokeRequired)
             {
                 control.Invoke(() => InvokeEnable(control, isEnabled));
+                return;
             }
             control.Enabled = isEnabled;
+        }
+
+        private void UpdateDeployDatabaseLinkState()
+        {
+            var canDeploy = RepoDbVersionStatus?.VersionStatus is DBValidations.DBVersionStatusEnum.CreateDB
+                or DBValidations.DBVersionStatusEnum.OK
+                or DBValidations.DBVersionStatusEnum.UpgradeRequired;
+            InvokeEnable(lnkDeployDatabase, canDeploy);
         }
 
         private async Task UpdateDBVersionStatusAsync()
@@ -391,18 +400,21 @@ namespace DBADashServiceConfig
             {
                 RepoDbVersionStatus = null;
                 InvokeSetStatus(lblVersionInfo, "Please start by setting the destination connection for your DBA Dash repository database.", DashColors.Information, FontStyle.Bold);
+                UpdateDeployDatabaseLinkState();
                 return;
             }
             if (dest.Type == ConnectionType.Invalid)
             {
                 RepoDbVersionStatus = null;
                 InvokeSetStatus(lblVersionInfo, "Invalid connection string, directory or S3 path", DashColors.Fail, FontStyle.Regular);
+                UpdateDeployDatabaseLinkState();
                 return;
             }
             if (dest.Type != ConnectionType.SQL)
             {
                 RepoDbVersionStatus = null;
                 InvokeSetStatus(lblVersionInfo, string.Empty, DashColors.TrimbleBlue, FontStyle.Regular);
+                UpdateDeployDatabaseLinkState();
                 return;
             }
 
@@ -427,34 +439,35 @@ namespace DBADashServiceConfig
                 {
                     case null:
                         InvokeSetStatus(lblVersionInfo, "???", DashColors.Fail, FontStyle.Bold);
+                        UpdateDeployDatabaseLinkState();
                         break;
 
                     case DBValidations.DBVersionStatusEnum.CreateDB:
                         InvokeSetStatus(lblVersionInfo,
                             "Start service to create repository database or click Deploy to create manually.",
                             DashColors.Warning, FontStyle.Bold);
-                        InvokeEnable(bttnDeployDatabase, true);
+                        UpdateDeployDatabaseLinkState();
                         return;
 
                     case DBValidations.DBVersionStatusEnum.OK:
                         InvokeSetStatus(lblVersionInfo,
                             "Repository database version check successful. DacVersion/DB Version: " +
                             RepoDbVersionStatus.DACVersion, DashColors.Success, FontStyle.Regular);
-                        InvokeEnable(bttnDeployDatabase, true);
+                        UpdateDeployDatabaseLinkState();
                         break;
 
                     case DBValidations.DBVersionStatusEnum.AppUpgradeRequired:
                         InvokeSetStatus(lblVersionInfo,
                             $"Repository database version {RepoDbVersionStatus.DBVersion} is newer than dac version {RepoDbVersionStatus.DACVersion}.  Please update this app.",
                             DashColors.Warning, FontStyle.Bold);
-                        InvokeEnable(bttnDeployDatabase, false);
+                        UpdateDeployDatabaseLinkState();
                         break;
 
                     case DBValidations.DBVersionStatusEnum.UpgradeRequired:
                         InvokeSetStatus(lblVersionInfo,
                             $"Repository database version {RepoDbVersionStatus.DBVersion}  requires upgrade to {RepoDbVersionStatus.DACVersion}.  Database will be upgraded on service start.",
                             DashColors.Warning, FontStyle.Bold);
-                        InvokeEnable(bttnDeployDatabase, true);
+                        UpdateDeployDatabaseLinkState();
                         break;
 
                     default:
@@ -464,6 +477,7 @@ namespace DBADashServiceConfig
             catch (Exception ex)
             {
                 InvokeSetStatus(lblVersionInfo, ex.Message, DashColors.Fail, FontStyle.Regular);
+                UpdateDeployDatabaseLinkState();
             }
         }
 
@@ -963,7 +977,7 @@ namespace DBADashServiceConfig
                 chkScanAzureDB.Checked = collectionConfig.ScanForAzureDBs;
                 chkScanEvery.Checked = collectionConfig.ScanForAzureDBsInterval > 0;
                 numAzureScanInterval.Value = collectionConfig.ScanForAzureDBsInterval;
-                chkAutoUpgradeRepoDB.Checked = collectionConfig.AutoUpdateDatabase;
+                lnkAutoUpgradeDB.Visible = !collectionConfig.AutoUpdateDatabase;
                 chkLogInternalPerfCounters.Checked = collectionConfig.LogInternalPerformanceCounters;
                 chkDefaultIdentityCollection.Checked = !collectionConfig.IdentityCollectionThreshold.HasValue;
                 numIdentityCollectionThreshold.Value = collectionConfig.IdentityCollectionThreshold ??
@@ -1378,8 +1392,17 @@ namespace DBADashServiceConfig
             await DestinationChangedAsync();
         }
 
-        private async Task DestinationChangedAsync()
+        private void TxtDestination_TextChanged(object sender, EventArgs e)
         {
+            if (txtDestination.Text != collectionConfig.Destination)
+            {
+                RepoDbVersionStatus = null;
+                InvokeEnable(lnkDeployDatabase, false);
+            }
+        }
+
+        private async Task DestinationChangedAsync()
+            {
             if (collectionConfig.Destination != txtDestination.Text)
             {
                 try
@@ -1456,7 +1479,7 @@ namespace DBADashServiceConfig
             SetAvailableOptionsForSource();
         }
 
-        private async void BttnDeployDatabase_Click(object sender, EventArgs e)
+        private async Task DeployDatabase()
         {
             var frm = new DBDeploy();
             var cn = new DBADashConnection(txtDestination.Text);
@@ -1584,12 +1607,6 @@ namespace DBADashServiceConfig
         private void ChkScanAzureDB_CheckedChanged(object sender, EventArgs e)
         {
             collectionConfig.ScanForAzureDBs = chkScanAzureDB.Checked;
-            SetJson();
-        }
-
-        private void ChkAutoUpgradeRepoDB_CheckedChanged(object sender, EventArgs e)
-        {
-            collectionConfig.AutoUpdateDatabase = chkAutoUpgradeRepoDB.Checked;
             SetJson();
         }
 
@@ -2239,8 +2256,8 @@ namespace DBADashServiceConfig
                     ? DashColors.Fail
                     : DashColors.Warning;
             tabJson.Text = collectionConfig.EncryptionOption == BasicConfig.EncryptionOptions.Encrypt
-                ? "Json (Decrypted)"
-                : "Json";
+                ? "JSON (Decrypted)"
+                : "JSON";
         }
 
         private void NumBackupRetention_ValueChanged(object sender, EventArgs e)
@@ -3185,6 +3202,24 @@ namespace DBADashServiceConfig
             {
                 // Unable to parse - validation will be handled elsewhere
             }
+        }
+
+        private void AutoUpgradeDB_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (MessageBox.Show("Automatically upgrade the repository database on service startup when a new version is detected? (Recommended)\r\n\r\nThis option can be disabled again by editing \"AutoUpdateDatabase\" in the JSON tab.", "Automatic Database Upgrades", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
+            collectionConfig.AutoUpdateDatabase = true;
+            lnkAutoUpgradeDB.Visible = false;
+            SetJson();
+        }
+
+        private async void DeployDatabase_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (!lnkDeployDatabase.Enabled)
+            {
+                return;
+            }
+
+            await DeployDatabase();
         }
     }
 }
