@@ -51,7 +51,7 @@ namespace DBADashServiceConfig
             dgv.Columns.Clear();
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "CollectionType", HeaderText = "Collection Type", ReadOnly = true, AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill });
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "Schedule", HeaderText = "Schedule", ToolTipText = "Cron expression or time in seconds" });
-            dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "ScheduleDescription", HeaderText = "Schedule Description", ReadOnly = true });
+            dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "ScheduleDescription", HeaderText = "Schedule Description", ReadOnly = false, TrackVisitedState = false, LinkBehavior = LinkBehavior.SystemDefault });
             dgv.Columns.Add(new DataGridViewCheckBoxColumn() { Name = "RunOnStart", HeaderText = "Run on service start" });
             dgv.Columns.Add(new DataGridViewCheckBoxColumn() { Name = "Default", HeaderText = "Default", ToolTipText = "Uncheck to supply a custom cron schedule or check to use the default schedule." });
 
@@ -72,7 +72,7 @@ namespace DBADashServiceConfig
                 }
             }
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.AllCells);
-            dgv.ApplyTheme();
+            this.ApplyTheme();
         }
 
         public static string GetScheduleDescription(string schedule)
@@ -113,10 +113,6 @@ namespace DBADashServiceConfig
             }
         }
 
-        private void Dgv_CellValidated(object sender, DataGridViewCellEventArgs e)
-        {
-        }
-
         private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
             for (int i = 0; i < e.RowCount - 1; i++)
@@ -136,14 +132,21 @@ namespace DBADashServiceConfig
 
         private void FormatRow(int idx)
         {
+            static void FormatCell(DataGridViewCell cell)
+            {
+                cell.Style.BackColor = cell.ReadOnly ? DashColors.GrayLight : Color.White;
+                cell.Style.SelectionBackColor = cell.ReadOnly ? DashColors.TrimbleGray : DashColors.BluePale;
+                cell.Style.SelectionForeColor = DashColors.White;
+            }
             var row = dgv.Rows[idx];
             bool isDefault = (bool)row.Cells["Default"].Value;
             row.Cells["Schedule"].ReadOnly = isDefault;
             row.Cells["RunOnStart"].ReadOnly = isDefault;
-            row.Cells["Schedule"].Style.BackColor = isDefault ? Color.LightGray : Color.White;
-            row.Cells["RunOnStart"].Style.BackColor = isDefault ? Color.LightGray : Color.White;
-            row.Cells["ScheduleDescription"].Style.BackColor = isDefault ? Color.LightGray : Color.AliceBlue;
-            row.Cells["CollectionType"].Style.BackColor = isDefault ? Color.LightGray : Color.AliceBlue;
+            FormatCell(row.Cells["Schedule"]);
+            FormatCell(row.Cells["RunOnStart"]);
+            FormatCell(row.Cells["ScheduleDescription"]);
+            FormatCell(row.Cells["CollectionType"]);
+            FormatCell(row.Cells["Default"]);
             if (isDefault)
             {
                 CollectionType collectType = (CollectionType)Enum.Parse(typeof(CollectionType), (string)row.Cells["CollectionType"].Value);
@@ -153,12 +156,34 @@ namespace DBADashServiceConfig
             row.Cells["ScheduleDescription"].Value = GetScheduleDescription(Convert.ToString(row.Cells["Schedule"].Value));
         }
 
+ 
+
         private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.ColumnIndex == dgv.Columns["Default"].Index)
             {
                 dgv.EndEdit();
                 FormatRow(e.RowIndex);
+            }
+
+            // If the schedule description link was clicked, open the cron expression builder
+            if (e.RowIndex >= 0 && e.ColumnIndex == dgv.Columns["ScheduleDescription"].Index)
+            {
+                var row = dgv.Rows[e.RowIndex];
+                var currentSchedule = Convert.ToString(row.Cells["Schedule"].Value);
+                var isDefault = (bool)row.Cells["Default"].Value;
+                using (var dlg = new CronExpressionBuilder(currentSchedule) { SupportsIntegerSeconds = true, SupportsDefault = true, UseDefaultValue = isDefault })
+                {
+                    if (dlg.ShowDialog(this) == DialogResult.OK)
+                    {
+                        row.Cells["Default"].Value = dlg.UseDefaultValue;
+                        if (!dlg.UseDefaultValue)
+                        {
+                            row.Cells["Schedule"].Value = dlg.CronExpression ?? string.Empty;
+                        }
+                        FormatRow(e.RowIndex);
+                    }
+                }
             }
         }
 

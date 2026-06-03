@@ -105,9 +105,6 @@ namespace DBADashServiceConfig
             numThreads = new System.Windows.Forms.NumericUpDown();
             lnkTimeouts = new System.Windows.Forms.LinkLabel();
             bttnCustomCollections = new System.Windows.Forms.Button();
-            lblSummaryRefreshCron = new System.Windows.Forms.Label();
-            chkSummaryRefresh = new System.Windows.Forms.CheckBox();
-            txtSummaryRefreshCron = new System.Windows.Forms.TextBox();
             lnkDeleteConfigBackups = new System.Windows.Forms.LinkLabel();
             numBackupRetention = new System.Windows.Forms.NumericUpDown();
             lblEncryptionStatus = new System.Windows.Forms.Label();
@@ -199,6 +196,7 @@ namespace DBADashServiceConfig
             txtDestination = new System.Windows.Forms.TextBox();
             tab1 = new ThemedTabControl();
             tabMessaging = new System.Windows.Forms.TabPage();
+            lnkSummaryRefreshCron = new System.Windows.Forms.LinkLabel();
             ((System.ComponentModel.ISupportInitialize)errorProvider1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox3).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
@@ -913,6 +911,7 @@ namespace DBADashServiceConfig
             // groupBox3
             // 
             groupBox3.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            groupBox3.Controls.Add(lnkSummaryRefreshCron);
             groupBox3.Controls.Add(chkLowPriorityMaxThreadPct);
             groupBox3.Controls.Add(label24);
             groupBox3.Controls.Add(numLowMaxThreadPct);
@@ -926,10 +925,7 @@ namespace DBADashServiceConfig
             groupBox3.Controls.Add(label23);
             groupBox3.Controls.Add(lnkTimeouts);
             groupBox3.Controls.Add(bttnCustomCollections);
-            groupBox3.Controls.Add(lblSummaryRefreshCron);
-            groupBox3.Controls.Add(chkSummaryRefresh);
             groupBox3.Controls.Add(label3);
-            groupBox3.Controls.Add(txtSummaryRefreshCron);
             groupBox3.Controls.Add(lnkDeleteConfigBackups);
             groupBox3.Controls.Add(lblConfigFileRetention);
             groupBox3.Controls.Add(numBackupRetention);
@@ -1076,35 +1072,6 @@ namespace DBADashServiceConfig
             bttnCustomCollections.Text = "Custom Collections";
             bttnCustomCollections.UseVisualStyleBackColor = true;
             bttnCustomCollections.Click += BttnCustomCollections_Click;
-            // 
-            // lblSummaryRefreshCron
-            // 
-            lblSummaryRefreshCron.AutoSize = true;
-            lblSummaryRefreshCron.Location = new System.Drawing.Point(431, 106);
-            lblSummaryRefreshCron.Name = "lblSummaryRefreshCron";
-            lblSummaryRefreshCron.Size = new System.Drawing.Size(0, 20);
-            lblSummaryRefreshCron.TabIndex = 45;
-            // 
-            // chkSummaryRefresh
-            // 
-            chkSummaryRefresh.AutoSize = true;
-            chkSummaryRefresh.Location = new System.Drawing.Point(407, 109);
-            chkSummaryRefresh.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            chkSummaryRefresh.Name = "chkSummaryRefresh";
-            chkSummaryRefresh.Size = new System.Drawing.Size(18, 17);
-            chkSummaryRefresh.TabIndex = 44;
-            chkSummaryRefresh.UseVisualStyleBackColor = true;
-            chkSummaryRefresh.CheckedChanged += ChkSummaryRefresh_CheckedChanged;
-            // 
-            // txtSummaryRefreshCron
-            // 
-            txtSummaryRefreshCron.Enabled = false;
-            txtSummaryRefreshCron.Location = new System.Drawing.Point(286, 103);
-            txtSummaryRefreshCron.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            txtSummaryRefreshCron.Name = "txtSummaryRefreshCron";
-            txtSummaryRefreshCron.Size = new System.Drawing.Size(114, 27);
-            txtSummaryRefreshCron.TabIndex = 42;
-            txtSummaryRefreshCron.Validated += TxtSummaryRefreshCron_Validated;
             // 
             // lnkDeleteConfigBackups
             // 
@@ -2185,6 +2152,17 @@ namespace DBADashServiceConfig
             tabMessaging.Text = "Messaging";
             tabMessaging.UseVisualStyleBackColor = true;
             // 
+            // lnkSummaryRefreshCron
+            // 
+            lnkSummaryRefreshCron.AutoSize = true;
+            lnkSummaryRefreshCron.Location = new System.Drawing.Point(286, 102);
+            lnkSummaryRefreshCron.Name = "lnkSummaryRefreshCron";
+            lnkSummaryRefreshCron.Size = new System.Drawing.Size(230, 20);
+            lnkSummaryRefreshCron.TabIndex = 58;
+            lnkSummaryRefreshCron.TabStop = true;
+            lnkSummaryRefreshCron.Text = "Configure summary auto refresh...";
+            lnkSummaryRefreshCron.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(LnkSummaryRefreshCron_LinkClicked);
+            // 
             // ServiceConfig
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -2354,10 +2332,7 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.NumericUpDown numBackupRetention;
         private System.Windows.Forms.LinkLabel lnkDeleteConfigBackups;
         private System.Windows.Forms.CheckBox chkWriteToSecondaryDestinations;
-        private System.Windows.Forms.Label lblSummaryRefreshCron;
-        private System.Windows.Forms.CheckBox chkSummaryRefresh;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.TextBox txtSummaryRefreshCron;
         private System.Windows.Forms.Label lblConfigFileRetention;
         private System.Windows.Forms.Button bttnCustomCollections;
         private System.Windows.Forms.Button bttnCustomCollectionsNew;
@@ -2423,6 +2398,7 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.NumericUpDown numLowMaxThreadPct;
         private System.Windows.Forms.Label lblRunningAs;
         private System.Windows.Forms.LinkLabel lnkAutomaticUpdates;
+        private System.Windows.Forms.LinkLabel lnkSummaryRefreshCron;
     }
 }
 

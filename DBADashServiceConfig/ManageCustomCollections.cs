@@ -30,7 +30,7 @@ namespace DBADashServiceConfig
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string ConnectionString { get; set; }
 
-        private bool IsScheduleValid = true;
+        private const string DefaultScheduleText = "Configure Schedule...";
 
         private readonly List<DataGridViewColumn> CustomCols = new()
         {
@@ -48,6 +48,11 @@ namespace DBADashServiceConfig
             {
                 Name = "Schedule", HeaderText = "Schedule", DataPropertyName = "Schedule",
                 SortMode = DataGridViewColumnSortMode.Automatic, Width = 80
+            },
+            new DataGridViewLinkColumn()
+            {
+                Name = "ScheduleDescription", HeaderText = "Schedule Description", UseColumnTextForLinkValue = false,
+                SortMode = DataGridViewColumnSortMode.Automatic, Width = 180
             },
             new DataGridViewTextBoxColumn()
             {
@@ -79,7 +84,36 @@ namespace DBADashServiceConfig
         public ManageCustomCollections()
         {
             InitializeComponent();
+            lnkConfigureSchedule.LinkClicked += LnkConfigureSchedule_LinkClicked;
             this.ApplyTheme();
+        }
+
+        private string Schedule
+        {
+            get => lnkConfigureSchedule.Tag as string ?? string.Empty;
+            set
+            {
+                lnkConfigureSchedule.Tag = value;
+                UpdateScheduleDisplay(value);
+            }
+        }
+
+        private void UpdateScheduleDisplay(string schedule)
+        {
+            if (string.IsNullOrWhiteSpace(schedule))
+            {
+                lnkConfigureSchedule.Text = DefaultScheduleText;
+                return;
+            }
+
+            try
+            {
+                lnkConfigureSchedule.Text = ScheduleConfig.GetScheduleDescription(schedule);
+            }
+            catch
+            {
+                lnkConfigureSchedule.Text = $"Schedule: {schedule}";
+            }
         }
 
         private void CustomCollections_Load(object sender, EventArgs e)
@@ -127,8 +161,8 @@ ORDER BY ProcName", cn);
             dgvCustom.Rows.Clear();
             foreach (var kvp in CustomCollections)
             {
-                dgvCustom.Rows.Add(kvp.Key, kvp.Value.ProcedureName, kvp.Value.Schedule, kvp.Value.CommandTimeout,
-                    kvp.Value.RunOnServiceStart);
+                dgvCustom.Rows.Add(kvp.Key, kvp.Value.ProcedureName, kvp.Value.Schedule, GetScheduleDescription(kvp.Value.Schedule),
+                    kvp.Value.CommandTimeout, kvp.Value.RunOnServiceStart);
             }
             dgvCustom.ApplyTheme();
         }
@@ -139,7 +173,11 @@ ORDER BY ProcName", cn);
                 return;
 
             var name = dgvCustom.Rows[e.RowIndex].Cells["Name"].Value.ToString();
-            if (e.ColumnIndex == dgvCustom.Columns["Copy"]!.Index)
+            if (e.ColumnIndex == dgvCustom.Columns["ScheduleDescription"]!.Index)
+            {
+                OpenScheduleBuilder(e.RowIndex);
+            }
+            else if (e.ColumnIndex == dgvCustom.Columns["Copy"]!.Index)
             {
                 // Handle Edit operation
                 CopyRecord(name);
@@ -534,7 +572,7 @@ ORDER BY ProcName", cn);
         private void CopyRecord(string name)
         {
             cboProcedureName.Text = CustomCollections[name].ProcedureName;
-            txtCron.Text = CustomCollections[name].Schedule;
+            Schedule = CustomCollections[name].Schedule;
             chkDefaultTimeout.Checked = CustomCollections[name].CommandTimeout == null;
             numTimeout.Value = CustomCollections[name].CommandTimeout == null ? numTimeout.Value : Convert.ToDecimal(CustomCollections[name].CommandTimeout);
             chkRunOnStart.Checked = CustomCollections[name].RunOnServiceStart;
@@ -549,11 +587,54 @@ ORDER BY ProcName", cn);
         {
             if (collection.Value == null) return;
             cboProcedureName.Text = collection.Value.ProcedureName;
-            txtCron.Text = collection.Value.Schedule;
+            Schedule = collection.Value.Schedule;
             chkDefaultTimeout.Checked = collection.Value.CommandTimeout == null;
             numTimeout.Value = collection.Value.CommandTimeout == null ? numTimeout.Value : Convert.ToDecimal(collection.Value.CommandTimeout);
             chkRunOnStart.Checked = collection.Value.RunOnServiceStart;
             txtName.Text = collection.Key;
+        }
+
+        private static string GetScheduleDescription(string schedule)
+        {
+            try
+            {
+                return ScheduleConfig.GetScheduleDescription(schedule);
+            }
+            catch
+            {
+                return string.IsNullOrWhiteSpace(schedule) ? "Disabled" : "Invalid Schedule";
+            }
+        }
+
+        private void RefreshScheduleDescription(int rowIndex)
+        {
+            if (rowIndex < 0 || rowIndex >= dgvCustom.Rows.Count) return;
+            var row = dgvCustom.Rows[rowIndex];
+            row.Cells["ScheduleDescription"].Value = GetScheduleDescription(Convert.ToString(row.Cells["Schedule"].Value));
+        }
+
+        private void OpenScheduleBuilder(int rowIndex)
+        {
+            if (rowIndex < 0 || rowIndex >= dgvCustom.Rows.Count) return;
+
+            var row = dgvCustom.Rows[rowIndex];
+            var currentSchedule = Convert.ToString(row.Cells["Schedule"].Value);
+            using var dlg = new CronExpressionBuilder(currentSchedule)
+            {
+                SupportsIntegerSeconds = true,
+                SupportsDefault = false
+            };
+
+            if (dlg.ShowDialog(this) == DialogResult.OK)
+            {
+                row.Cells["Schedule"].Value = dlg.CronExpression ?? string.Empty;
+                row.Cells["ScheduleDescription"].Value = GetScheduleDescription(Convert.ToString(row.Cells["Schedule"].Value));
+                var name = Convert.ToString(row.Cells["Name"].Value);
+                if (!string.IsNullOrWhiteSpace(name) && CustomCollections.ContainsKey(name))
+                {
+                    CustomCollections[name].Schedule = Convert.ToString(row.Cells["Schedule"].Value);
+                }
+            }
         }
 
         private void DeleteRecord(string name)
@@ -567,6 +648,7 @@ ORDER BY ProcName", cn);
         private bool ValidateInput()
         {
             var validated = true;
+            errorProvider1.SetError(lnkConfigureSchedule, string.Empty);
             if (string.IsNullOrEmpty(txtName.Text))
             {
                 errorProvider1.SetError(txtName, "Name is required");
@@ -583,12 +665,21 @@ ORDER BY ProcName", cn);
                 validated = false;
             }
 
-            if (IsScheduleValid == false)
+            var schedule = Schedule;
+            if (!string.IsNullOrWhiteSpace(schedule))
             {
-                errorProvider1.SetError(txtCron, "Schedule is invalid");
-                validated = false;
+                try
+                {
+                    ScheduleConfig.GetScheduleDescription(schedule);
+                }
+                catch
+                {
+                    errorProvider1.SetError(lnkConfigureSchedule, "Schedule is invalid");
+                    validated = false;
+                }
             }
-            if (validated && string.IsNullOrEmpty(txtCron.Text))
+
+            if (validated && string.IsNullOrEmpty(schedule))
             {
                 if (MessageBox.Show("No schedule has been specified.  Would you like to add without a schedule?",
                         "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
@@ -621,7 +712,7 @@ ORDER BY ProcName", cn);
                 CommandTimeout = chkDefaultTimeout.Checked ? null : Convert.ToInt32(numTimeout.Value),
                 ProcedureName = cboProcedureName.Text,
                 RunOnServiceStart = chkRunOnStart.Checked,
-                Schedule = txtCron.Text
+                Schedule = Schedule
             };
         }
 
@@ -650,6 +741,7 @@ ORDER BY ProcName", cn);
             CustomCollections[name].Schedule = row.Cells["Schedule"].Value.ToString();
             CustomCollections[name].CommandTimeout = Convert.ToInt32(row.Cells["CommandTimeout"].Value);
             CustomCollections[name].RunOnServiceStart = Convert.ToBoolean(row.Cells["RunOnServiceStart"].Value);
+            RefreshScheduleDescription(e.RowIndex);
         }
 
         private void CboProcedureName_SelectedIndexChanged(object sender, EventArgs e)
@@ -775,38 +867,21 @@ ORDER BY ProcName", cn);
             }
         }
 
-        private void SetCron(object sender, LinkLabelLinkClickedEventArgs e)
+        private void LnkConfigureSchedule_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            var link = (LinkLabel)sender;
-            txtCron.Text = link.Tag.ToString();
-            if (string.IsNullOrEmpty(txtCron.Text))
+            using var dlg = new CronExpressionBuilder(Schedule)
             {
-                chkRunOnStart.Checked = false;
-            }
-        }
+                SupportsIntegerSeconds = true,
+                SupportsDefault = false
+            };
 
-        private void TxtCron_TextChanged(object sender, EventArgs e)
-        {
-            try
+            if (dlg.ShowDialog(this) == DialogResult.OK)
             {
-                if (string.IsNullOrWhiteSpace(txtCron.Text))
+                Schedule = dlg.CronExpression ?? string.Empty;
+                if (string.IsNullOrEmpty(Schedule))
                 {
-                    lblCron.Text = "No Schedule";
+                    chkRunOnStart.Checked = false;
                 }
-                else if (int.TryParse(txtCron.Text, out var intCron))
-                {
-                    lblCron.Text = $"Every {intCron} seconds";
-                }
-                else
-                {
-                    lblCron.Text = CronExpressionDescriptor.ExpressionDescriptor.GetDescription(txtCron.Text);
-                }
-                IsScheduleValid = true;
-            }
-            catch
-            {
-                lblCron.Text = "Invalid Schedule";
-                IsScheduleValid = true;
             }
         }
     }
