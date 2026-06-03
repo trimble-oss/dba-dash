@@ -969,8 +969,7 @@ namespace DBADashServiceConfig
                 numIdentityCollectionThreshold.Value = collectionConfig.IdentityCollectionThreshold ??
                                                        DBCollector.DefaultIdentityCollectionThreshold;
                 numBackupRetention.Value = collectionConfig.ConfigBackupRetentionDays;
-                txtSummaryRefreshCron.Text = collectionConfig.SummaryRefreshCron;
-                chkSummaryRefresh.Checked = !string.IsNullOrEmpty(collectionConfig.SummaryRefreshCron);
+                UpdateSummaryRefreshCronLabel();
                 chkEnableMessaging.Checked = collectionConfig.EnableMessaging;
                 txtSQS.Text = collectionConfig.ServiceSQSQueueUrl;
                 chkAllowPlanForcing.Checked = collectionConfig.AllowPlanForcing;
@@ -1014,7 +1013,7 @@ namespace DBADashServiceConfig
                 }
                 lnkAutomaticUpdates.Text = string.IsNullOrEmpty(upgradeCheckSchedule) ? "Configure Automatic Updates..." : $"Automatic Update Checks: {upgradeCheckSchedule}";
                 UpdateThreadCount();
-                UpdateSummaryCron();
+                UpdateSummaryRefreshCronLabel();
                 UpdateScanInterval();
                 setDgv();
                 RefreshEncryption();
@@ -2260,36 +2259,34 @@ namespace DBADashServiceConfig
             }
         }
 
-        private void ChkSummaryRefresh_CheckedChanged(object sender, EventArgs e)
+        private void LnkSummaryRefreshCron_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            txtSummaryRefreshCron.Enabled = chkSummaryRefresh.Checked;
-            if (!IsSetFromJson)
+            var defaultCron = string.IsNullOrEmpty(collectionConfig.SummaryRefreshCron) ? "120" : collectionConfig.SummaryRefreshCron;
+            using var frm = new CronExpressionBuilder(defaultCron) { SupportsIntegerSeconds = true };
+            if (frm.ShowDialog() == DialogResult.OK)
             {
-                txtSummaryRefreshCron.Text = chkSummaryRefresh.Checked ? "120" : string.Empty;
-                UpdateSummaryCron();
+                collectionConfig.SummaryRefreshCron = string.IsNullOrEmpty(frm.CronExpression) ? null : frm.CronExpression;
+                UpdateSummaryRefreshCronLabel();
                 SetJson();
             }
         }
 
-        private void TxtSummaryRefreshCron_Validated(object sender, EventArgs e)
+        private void UpdateSummaryRefreshCronLabel()
         {
-            UpdateSummaryCron();
-        }
-
-        private void UpdateSummaryCron()
-        {
+            string description;
             try
             {
-                lblSummaryRefreshCron.Text = ScheduleConfig.GetScheduleDescription(txtSummaryRefreshCron.Text);
-                lblSummaryRefreshCron.ForeColor = DashColors.TrimbleBlue;
-                collectionConfig.SummaryRefreshCron = txtSummaryRefreshCron.Text;
-                SetJson();
+                description = string.IsNullOrEmpty(collectionConfig.SummaryRefreshCron)
+                    ? string.Empty
+                    : ScheduleConfig.GetScheduleDescription(collectionConfig.SummaryRefreshCron);
             }
             catch
             {
-                lblSummaryRefreshCron.Text = "Error with cron expression";
-                lblSummaryRefreshCron.ForeColor = DashColors.Fail;
+                description = "Invalid Cron Expression";
             }
+            lnkSummaryRefreshCron.Text = string.IsNullOrEmpty(description)
+                ? "Configure Summary Refresh Schedule..."
+                : description;
         }
 
         private void BttnCustomCollections_Click(object sender, EventArgs e)

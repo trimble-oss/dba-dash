@@ -22,7 +22,9 @@ namespace DBADash
             EveryNHours = 3,
             Daily = 4,
             Weekly = 5,
-            Custom = 6
+            Custom = 6,
+            IntegerSeconds = 7,
+            Default = 8
         }
 
         /// <summary>

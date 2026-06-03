@@ -34,7 +34,6 @@
             lblName = new System.Windows.Forms.Label();
             cboProcedureName = new System.Windows.Forms.ComboBox();
             label1 = new System.Windows.Forms.Label();
-            txtCron = new System.Windows.Forms.TextBox();
             label2 = new System.Windows.Forms.Label();
             numTimeout = new System.Windows.Forms.NumericUpDown();
             chkDefaultTimeout = new System.Windows.Forms.CheckBox();
@@ -48,14 +47,8 @@
             errorProvider1 = new System.Windows.Forms.ErrorProvider(components);
             lblGetScript = new System.Windows.Forms.Label();
             timer1 = new System.Windows.Forms.Timer(components);
-            lnk1min = new System.Windows.Forms.LinkLabel();
-            linkLabel1 = new System.Windows.Forms.LinkLabel();
-            linkLabel2 = new System.Windows.Forms.LinkLabel();
-            lblCron = new System.Windows.Forms.Label();
-            linkLabel3 = new System.Windows.Forms.LinkLabel();
-            linkLabel4 = new System.Windows.Forms.LinkLabel();
             toolTip1 = new System.Windows.Forms.ToolTip(components);
-            linkLabel5 = new System.Windows.Forms.LinkLabel();
+            lnkConfigureSchedule = new System.Windows.Forms.LinkLabel();
             ((System.ComponentModel.ISupportInitialize)numTimeout).BeginInit();
             ((System.ComponentModel.ISupportInitialize)dgvCustom).BeginInit();
             ((System.ComponentModel.ISupportInitialize)errorProvider1).BeginInit();
@@ -99,18 +92,10 @@
             label1.Text = "Stored Procedure:";
             toolTip1.SetToolTip(label1, resources.GetString("label1.ToolTip"));
             // 
-            // txtCron
-            // 
-            txtCron.Location = new System.Drawing.Point(153, 130);
-            txtCron.Name = "txtCron";
-            txtCron.Size = new System.Drawing.Size(237, 27);
-            txtCron.TabIndex = 8;
-            txtCron.TextChanged += TxtCron_TextChanged;
-            // 
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new System.Drawing.Point(12, 133);
+            label2.Location = new System.Drawing.Point(12, 120);
             label2.Name = "label2";
             label2.Size = new System.Drawing.Size(114, 20);
             label2.TabIndex = 5;
@@ -120,7 +105,7 @@
             // numTimeout
             // 
             numTimeout.Enabled = false;
-            numTimeout.Location = new System.Drawing.Point(153, 195);
+            numTimeout.Location = new System.Drawing.Point(153, 185);
             numTimeout.Maximum = new decimal(new int[] { int.MaxValue, 0, 0, 0 });
             numTimeout.Name = "numTimeout";
             numTimeout.Size = new System.Drawing.Size(108, 27);
@@ -132,7 +117,7 @@
             chkDefaultTimeout.AutoSize = true;
             chkDefaultTimeout.Checked = true;
             chkDefaultTimeout.CheckState = System.Windows.Forms.CheckState.Checked;
-            chkDefaultTimeout.Location = new System.Drawing.Point(267, 198);
+            chkDefaultTimeout.Location = new System.Drawing.Point(267, 188);
             chkDefaultTimeout.Name = "chkDefaultTimeout";
             chkDefaultTimeout.Size = new System.Drawing.Size(80, 24);
             chkDefaultTimeout.TabIndex = 11;
@@ -143,7 +128,7 @@
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new System.Drawing.Point(12, 199);
+            label3.Location = new System.Drawing.Point(12, 189);
             label3.Name = "label3";
             label3.Size = new System.Drawing.Size(67, 20);
             label3.TabIndex = 8;
@@ -160,7 +145,6 @@
             dgvCustom.Name = "dgvCustom";
             dgvCustom.RowHeadersVisible = false;
             dgvCustom.RowHeadersWidth = 51;
-            dgvCustom.RowTemplate.Height = 29;
             dgvCustom.Size = new System.Drawing.Size(807, 256);
             dgvCustom.TabIndex = 13;
             dgvCustom.CellContentClick += DgvCustom_CellContentClick;
@@ -179,7 +163,7 @@
             // chkRunOnStart
             // 
             chkRunOnStart.AutoSize = true;
-            chkRunOnStart.Location = new System.Drawing.Point(153, 163);
+            chkRunOnStart.Location = new System.Drawing.Point(153, 155);
             chkRunOnStart.Name = "chkRunOnStart";
             chkRunOnStart.Size = new System.Drawing.Size(159, 24);
             chkRunOnStart.TabIndex = 9;
@@ -240,99 +224,23 @@
             timer1.Interval = 500;
             timer1.Tick += Timer1_Tick;
             // 
-            // lnk1min
+            // lnkConfigureSchedule
             // 
-            lnk1min.AutoSize = true;
-            lnk1min.Location = new System.Drawing.Point(153, 107);
-            lnk1min.Name = "lnk1min";
-            lnk1min.Size = new System.Drawing.Size(42, 20);
-            lnk1min.TabIndex = 3;
-            lnk1min.TabStop = true;
-            lnk1min.Tag = "0 * * ? * *";
-            lnk1min.Text = "1min";
-            lnk1min.LinkClicked += SetCron;
-            // 
-            // linkLabel1
-            // 
-            linkLabel1.AutoSize = true;
-            linkLabel1.Location = new System.Drawing.Point(259, 107);
-            linkLabel1.Name = "linkLabel1";
-            linkLabel1.Size = new System.Drawing.Size(30, 20);
-            linkLabel1.TabIndex = 5;
-            linkLabel1.TabStop = true;
-            linkLabel1.Tag = "0 0 * ? * *";
-            linkLabel1.Text = "1hr";
-            linkLabel1.LinkClicked += SetCron;
-            // 
-            // linkLabel2
-            // 
-            linkLabel2.AutoSize = true;
-            linkLabel2.Location = new System.Drawing.Point(341, 107);
-            linkLabel2.Name = "linkLabel2";
-            linkLabel2.Size = new System.Drawing.Size(46, 20);
-            linkLabel2.TabIndex = 7;
-            linkLabel2.TabStop = true;
-            linkLabel2.Tag = "0 0 0 1/1 * ? *";
-            linkLabel2.Text = "12am";
-            linkLabel2.LinkClicked += SetCron;
-            // 
-            // lblCron
-            // 
-            lblCron.AutoSize = true;
-            lblCron.Location = new System.Drawing.Point(396, 133);
-            lblCron.Name = "lblCron";
-            lblCron.Size = new System.Drawing.Size(93, 20);
-            lblCron.TabIndex = 15;
-            lblCron.Text = "No Schedule";
-            // 
-            // linkLabel3
-            // 
-            linkLabel3.AutoSize = true;
-            linkLabel3.Location = new System.Drawing.Point(206, 107);
-            linkLabel3.Name = "linkLabel3";
-            linkLabel3.Size = new System.Drawing.Size(42, 20);
-            linkLabel3.TabIndex = 4;
-            linkLabel3.TabStop = true;
-            linkLabel3.Tag = "0 */5 * ? * *";
-            linkLabel3.Text = "5min";
-            linkLabel3.LinkClicked += SetCron;
-            // 
-            // linkLabel4
-            // 
-            linkLabel4.AutoSize = true;
-            linkLabel4.Location = new System.Drawing.Point(300, 107);
-            linkLabel4.Name = "linkLabel4";
-            linkLabel4.Size = new System.Drawing.Size(30, 20);
-            linkLabel4.TabIndex = 6;
-            linkLabel4.TabStop = true;
-            linkLabel4.Tag = "0 0 */2 ? * *";
-            linkLabel4.Text = "2hr";
-            linkLabel4.LinkClicked += SetCron;
-            // 
-            // linkLabel5
-            // 
-            linkLabel5.AutoSize = true;
-            linkLabel5.Location = new System.Drawing.Point(407, 107);
-            linkLabel5.Name = "linkLabel5";
-            linkLabel5.Size = new System.Drawing.Size(59, 20);
-            linkLabel5.TabIndex = 16;
-            linkLabel5.TabStop = true;
-            linkLabel5.Tag = "";
-            linkLabel5.Text = "Disable";
-            linkLabel5.LinkClicked += SetCron;
+            lnkConfigureSchedule.AutoSize = true;
+            lnkConfigureSchedule.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            lnkConfigureSchedule.Location = new System.Drawing.Point(153, 120);
+            lnkConfigureSchedule.Name = "lnkConfigureSchedule";
+            lnkConfigureSchedule.Size = new System.Drawing.Size(156, 20);
+            lnkConfigureSchedule.TabIndex = 17;
+            lnkConfigureSchedule.TabStop = true;
+            lnkConfigureSchedule.Text = "Configure Schedule...";
             // 
             // ManageCustomCollections
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             ClientSize = new System.Drawing.Size(831, 602);
-            Controls.Add(linkLabel5);
-            Controls.Add(linkLabel4);
-            Controls.Add(linkLabel3);
-            Controls.Add(lblCron);
-            Controls.Add(linkLabel2);
-            Controls.Add(linkLabel1);
-            Controls.Add(lnk1min);
+            Controls.Add(lnkConfigureSchedule);
             Controls.Add(lblGetScript);
             Controls.Add(lnkPreview);
             Controls.Add(bttnCancel);
@@ -344,7 +252,6 @@
             Controls.Add(chkDefaultTimeout);
             Controls.Add(numTimeout);
             Controls.Add(label2);
-            Controls.Add(txtCron);
             Controls.Add(label1);
             Controls.Add(cboProcedureName);
             Controls.Add(lblName);
@@ -366,7 +273,6 @@
         private System.Windows.Forms.Label lblName;
         private System.Windows.Forms.ComboBox cboProcedureName;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox txtCron;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.NumericUpDown numTimeout;
         private System.Windows.Forms.CheckBox chkDefaultTimeout;
@@ -380,13 +286,7 @@
         private System.Windows.Forms.ErrorProvider errorProvider1;
         private System.Windows.Forms.Label lblGetScript;
         private System.Windows.Forms.Timer timer1;
-        private System.Windows.Forms.LinkLabel lnk1min;
-        private System.Windows.Forms.LinkLabel linkLabel2;
-        private System.Windows.Forms.LinkLabel linkLabel1;
-        private System.Windows.Forms.Label lblCron;
-        private System.Windows.Forms.LinkLabel linkLabel4;
-        private System.Windows.Forms.LinkLabel linkLabel3;
         private System.Windows.Forms.ToolTip toolTip1;
-        private System.Windows.Forms.LinkLabel linkLabel5;
+        private System.Windows.Forms.LinkLabel lnkConfigureSchedule;
     }
 }

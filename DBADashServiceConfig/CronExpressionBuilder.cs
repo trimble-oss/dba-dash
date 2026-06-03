@@ -1,5 +1,7 @@
 using DBADash;
+using Humanizer;
 using System;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows.Forms;
 using System.Diagnostics;
@@ -13,7 +15,11 @@ namespace DBADashServiceConfig
     /// </summary>
     public partial class CronExpressionBuilder : Form
     {
-        private CronParser.FrequencyMode SelectedFrequencyMode => (CronParser.FrequencyMode)cboFrequency.SelectedIndex;
+        private CronParser.FrequencyMode SelectedFrequencyMode => _frequencyModes != null && cboFrequency.SelectedIndex >= 0 && cboFrequency.SelectedIndex < _frequencyModes.Length
+            ? _frequencyModes[cboFrequency.SelectedIndex]
+            : (CronParser.FrequencyMode)cboFrequency.SelectedIndex;
+
+        private CronParser.FrequencyMode[] _frequencyModes;
 
         private bool _suspendUiUpdates = false;
 
@@ -21,6 +27,24 @@ namespace DBADashServiceConfig
         /// The current cron expression produced by the builder.
         /// </summary>
         public string CronExpression { get; private set; }
+
+        /// <summary>
+        /// When true, a "Seconds" option is available allowing users to enter a plain integer seconds value.
+        /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool SupportsIntegerSeconds { get; set; }
+
+        /// <summary>
+        /// When true, a "Default" option is available allowing the user to select the default schedule.
+        /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool SupportsDefault { get; set; }
+
+        /// <summary>
+        /// Set to true to pre-select the Default option on load. After OK, indicates the user chose Default.
+        /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool UseDefaultValue { get; set; }
 
         /// <summary>
         /// Create a new builder. Optionally provide an existing cron expression to initialize the form.
@@ -59,6 +83,16 @@ namespace DBADashServiceConfig
         /// </summary>
         private void CronExpressionBuilder_Load(object sender, EventArgs e)
         {
+            var modes = new System.Collections.Generic.List<CronParser.FrequencyMode>
+            {
+                CronParser.FrequencyMode.None,
+                CronParser.FrequencyMode.EveryNSeconds,
+                CronParser.FrequencyMode.EveryNMinutes,
+                CronParser.FrequencyMode.EveryNHours,
+                CronParser.FrequencyMode.Daily,
+                CronParser.FrequencyMode.Weekly,
+                CronParser.FrequencyMode.Custom
+            };
             cboFrequency.Items.AddRange(new object[]
             {
                 "None (Disabled)",
@@ -69,7 +103,18 @@ namespace DBADashServiceConfig
                 "Weekly on Day(s)",
                 "Custom"
             });
-            cboFrequency.SelectedIndex = (int)CronParser.FrequencyMode.Custom; // Default to custom
+            if (SupportsIntegerSeconds)
+            {
+                cboFrequency.Items.Add("Seconds");
+                modes.Add(CronParser.FrequencyMode.IntegerSeconds);
+            }
+            if (SupportsDefault)
+            {
+                cboFrequency.Items.Add("Default");
+                modes.Add(CronParser.FrequencyMode.Default);
+            }
+            _frequencyModes = modes.ToArray();
+            cboFrequency.SelectedIndex = IndexOfMode(CronParser.FrequencyMode.Custom);
 
             chkDaysOfWeek.Items.AddRange(new object[] { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" });
             chkDaysOfWeek.ItemCheck += (_, _) => BeginInvoke(new Action(SafeUpdatePreview));
@@ -86,18 +131,27 @@ namespace DBADashServiceConfig
             dtpTime.ShowUpDown = true;
             dtpTime.Value = DateTime.Today.AddHours(3); // Default 3:00 AM
 
-            if (!string.IsNullOrEmpty(CronExpression))
+            if (SupportsDefault && UseDefaultValue)
             {
-                if (!TryParseIntoBuilder(CronExpression))
+                cboFrequency.SelectedIndex = IndexOfMode(CronParser.FrequencyMode.Default);
+            }
+            else if (!string.IsNullOrEmpty(CronExpression))
+            {
+                if (SupportsIntegerSeconds && int.TryParse(CronExpression, out int intSeconds) && intSeconds > 0)
+                {
+                    cboFrequency.SelectedIndex = IndexOfMode(CronParser.FrequencyMode.IntegerSeconds);
+                    numIntegerSeconds.Value = Math.Clamp(intSeconds, (int)numIntegerSeconds.Minimum, (int)numIntegerSeconds.Maximum);
+                }
+                else if (!TryParseIntoBuilder(CronExpression))
                 {
                     // Show unsupported expressions as Custom
-                    cboFrequency.SelectedIndex = (int)CronParser.FrequencyMode.Custom;
+                    cboFrequency.SelectedIndex = IndexOfMode(CronParser.FrequencyMode.Custom);
                     txtCustom.Text = CronExpression;
                 }
             }
             else
             {
-                cboFrequency.SelectedIndex = (int)CronParser.FrequencyMode.None; // None
+                cboFrequency.SelectedIndex = IndexOfMode(CronParser.FrequencyMode.None);
                 // ensure no days are selected by default
                 ClearAllDays();
             }
@@ -168,7 +222,8 @@ namespace DBADashServiceConfig
             lblDay.Visible = SelectedFrequencyMode is CronParser.FrequencyMode.EveryNSeconds or CronParser.FrequencyMode.EveryNMinutes or CronParser.FrequencyMode.EveryNHours or CronParser.FrequencyMode.Weekly;
             txtCustom.Visible = SelectedFrequencyMode == CronParser.FrequencyMode.Custom;
             lblCustom.Visible = SelectedFrequencyMode == CronParser.FrequencyMode.Custom;
-
+            numIntegerSeconds.Visible = SelectedFrequencyMode == CronParser.FrequencyMode.IntegerSeconds;
+            lblSeconds.Visible = SelectedFrequencyMode == CronParser.FrequencyMode.IntegerSeconds;
         }
 
         /// <summary>
@@ -180,7 +235,12 @@ namespace DBADashServiceConfig
             txtCron.Text = expression ?? string.Empty;
             if (string.IsNullOrEmpty(expression))
             {
-                lblPreview.Text = "No expression";
+                lblPreview.Text = SelectedFrequencyMode == CronParser.FrequencyMode.Default ? "Use default schedule" : "No expression";
+                return;
+            }
+            if (int.TryParse(expression, out int secs))
+            {
+                lblPreview.Text = $"Every {TimeSpan.FromSeconds(secs).Humanize(5)}";
                 return;
             }
             if (Quartz.CronExpression.IsValidExpression(expression))
@@ -238,6 +298,8 @@ namespace DBADashServiceConfig
                 CronParser.FrequencyMode.Daily => $"{dtpTime.Value.Second} {dtpTime.Value.Minute} {dtpTime.Value.Hour} * * ?",
                 CronParser.FrequencyMode.Weekly => BuildWeeklyExpression(),
                 CronParser.FrequencyMode.Custom => txtCustom.Text.Trim(),
+                CronParser.FrequencyMode.IntegerSeconds => ((int)numIntegerSeconds.Value).ToString(),
+                CronParser.FrequencyMode.Default => string.Empty,
                 _ => string.Empty
             };
         }
@@ -383,12 +445,13 @@ namespace DBADashServiceConfig
         private void BttnOK_Click(object sender, EventArgs e)
         {
             var expression = BuildExpression();
-            if (!string.IsNullOrEmpty(expression) && !Quartz.CronExpression.IsValidExpression(expression))
+            if (!string.IsNullOrEmpty(expression) && (!int.TryParse(expression, out var intSeconds) || intSeconds <= 0) && !Quartz.CronExpression.IsValidExpression(expression))
             {
                 MessageBox.Show("The cron expression is not valid.", "Invalid Expression", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
             CronExpression = expression;
+            UseDefaultValue = SelectedFrequencyMode == CronParser.FrequencyMode.Default;
             DialogResult = DialogResult.OK;
         }
 
@@ -416,6 +479,15 @@ namespace DBADashServiceConfig
         }
 
         /// <summary>
+        /// Get the combo box index for a given frequency mode.
+        /// </summary>
+        private int IndexOfMode(CronParser.FrequencyMode mode)
+        {
+            if (_frequencyModes == null) return (int)mode;
+            return Array.IndexOf(_frequencyModes, mode);
+        }
+
+        /// <summary>
         /// Apply a parsed cron state to the UI controls. Values are clamped to control ranges and UI
         /// update events are suppressed while the values are applied.
         /// </summary>
@@ -428,7 +500,7 @@ namespace DBADashServiceConfig
                 _suspendUiUpdates = true;
                 this.SuspendLayout();
 
-                cboFrequency.SelectedIndex = (int)state.Mode;
+                cboFrequency.SelectedIndex = IndexOfMode(state.Mode);
 
                 // Ensure numeric values are within range
                 if (state.Interval < numInterval.Minimum) state.Interval = (int)numInterval.Minimum;

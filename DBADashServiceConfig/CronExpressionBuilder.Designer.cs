@@ -34,10 +34,13 @@ namespace DBADashServiceConfig
             txtCron = new System.Windows.Forms.TextBox();
             lblCron = new System.Windows.Forms.Label();
             lblOffset = new System.Windows.Forms.Label();
+            numIntegerSeconds = new System.Windows.Forms.NumericUpDown();
+            lblSeconds = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)numInterval).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numSecondBase).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numMinuteBase).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numHourBase).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)numIntegerSeconds).BeginInit();
             SuspendLayout();
             // 
             // cboFrequency
@@ -107,7 +110,7 @@ namespace DBADashServiceConfig
             lblPreview.Location = new System.Drawing.Point(174, 277);
             lblPreview.MaximumSize = new System.Drawing.Size(360, 0);
             lblPreview.Name = "lblPreview";
-            lblPreview.Size = new System.Drawing.Size(280, 159);
+            lblPreview.Size = new System.Drawing.Size(280, 144);
             lblPreview.TabIndex = 10;
             lblPreview.Text = "No expression";
             // 
@@ -211,6 +214,28 @@ namespace DBADashServiceConfig
             lblOffset.Text = "Offset (HH:MM:SS):";
             lblOffset.Visible = false;
             // 
+            // numIntegerSeconds
+            // 
+            numIntegerSeconds.Location = new System.Drawing.Point(174, 50);
+            numIntegerSeconds.Maximum = new decimal(new int[] { 86400, 0, 0, 0 });
+            numIntegerSeconds.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            numIntegerSeconds.Name = "numIntegerSeconds";
+            numIntegerSeconds.Size = new System.Drawing.Size(140, 27);
+            numIntegerSeconds.TabIndex = 18;
+            numIntegerSeconds.Value = new decimal(new int[] { 60, 0, 0, 0 });
+            numIntegerSeconds.Visible = false;
+            numIntegerSeconds.ValueChanged += NumInterval_ValueChanged;
+            // 
+            // lblSeconds
+            // 
+            lblSeconds.AutoSize = true;
+            lblSeconds.Location = new System.Drawing.Point(12, 57);
+            lblSeconds.Name = "lblSeconds";
+            lblSeconds.Size = new System.Drawing.Size(67, 20);
+            lblSeconds.TabIndex = 19;
+            lblSeconds.Text = "Seconds:";
+            lblSeconds.Visible = false;
+            // 
             // CronExpressionBuilder
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -235,6 +260,8 @@ namespace DBADashServiceConfig
             Controls.Add(dtpTime);
             Controls.Add(numMinuteBase);
             Controls.Add(numSecondBase);
+            Controls.Add(numIntegerSeconds);
+            Controls.Add(lblSeconds);
             FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             MaximizeBox = false;
             MinimizeBox = false;
@@ -246,6 +273,7 @@ namespace DBADashServiceConfig
             ((System.ComponentModel.ISupportInitialize)numSecondBase).EndInit();
             ((System.ComponentModel.ISupportInitialize)numMinuteBase).EndInit();
             ((System.ComponentModel.ISupportInitialize)numHourBase).EndInit();
+            ((System.ComponentModel.ISupportInitialize)numIntegerSeconds).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -269,5 +297,7 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.CheckedListBox chkDaysOfWeek;
         private System.Windows.Forms.TextBox txtCron;
         private System.Windows.Forms.Label lblCron;
+        private System.Windows.Forms.NumericUpDown numIntegerSeconds;
+        private System.Windows.Forms.Label lblSeconds;
     }
 }
