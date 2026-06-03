@@ -126,6 +126,12 @@
   <metadata name="toolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>172, 17</value>
   </metadata>
+  <data name="lnkAutoUpgradeDB.ToolTip" xml:space="preserve">
+    <value>The database is currently configured not to upgrade automatically on service start. This will require you to deploy database changes manually each time you upgrade DBA Dash.
+
+ Click this link to enable automatic deployment of database changes
+</value>
+  </data>
   <data name="lnkAutomaticUpdates.ToolTip" xml:space="preserve">
     <value>Configure the service to automatically check and install updates on a schedule.
 
