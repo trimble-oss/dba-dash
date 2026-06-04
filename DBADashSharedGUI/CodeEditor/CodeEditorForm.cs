@@ -82,7 +82,6 @@ namespace DBADashGUI.SchemaCompare
             set
             {
                 codeEditor1.txtCode.Text = value;
-                ShowMarkdownPreview().Wait();
             }
         }
 
