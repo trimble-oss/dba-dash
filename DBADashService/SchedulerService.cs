@@ -570,7 +570,7 @@ namespace DBADashService
                     {
                         var groupedSchedule = srcSchedule.GroupedBySchedule;
                         foreach (var schedule in customCollections
-                                                    .GroupBy(c => c.Value.Schedule)
+                                                    .GroupBy(c => c.Value.NormalizedSchedule)
                                                     .Where(c => !groupedSchedule.ContainsKey(c.Key))
                                                     .Select(c => c.Key))
                         {
@@ -583,7 +583,7 @@ namespace DBADashService
                             var collections = RemoveNotApplicableCollections(s.Value);
 
                             var custom = customCollections
-                                .Where(c => c.Value.Schedule == s.Key)
+                                .Where(c => c.Value.NormalizedSchedule == s.Key)
                                 .ToDictionary(c => c.Key, c => c.Value);
                             var job = GetJob(collections.ToArray(), src, cfgString, custom, s.Key);
                             Log.Information("Add schedule for {source} to collect {collection},{custom} on schedule {schedule}", src.SourceConnection.ConnectionForPrint, collections, custom.Keys, s.Key);
@@ -593,17 +593,17 @@ namespace DBADashService
                         if (src.SchemaSnapshotDBs is { Length: > 0 })
                         {
                             var snapshotSchedule = srcSchedule[CollectionType.SchemaSnapshot];
-                            if (!string.IsNullOrEmpty(snapshotSchedule.Schedule))
+                            if (!string.IsNullOrEmpty(snapshotSchedule.NormalizedSchedule))
                             {
-                                Log.Information("Add schedule for {source} to collect Schema Snapshots on schedule {schedule}", src.SourceConnection.ConnectionForPrint, snapshotSchedule.Schedule);
+                                Log.Information("Add schedule for {source} to collect Schema Snapshots on schedule {schedule}", src.SourceConnection.ConnectionForPrint, snapshotSchedule.NormalizedSchedule);
                                 var job = JobBuilder.Create<SchemaSnapshotJob>()
                                     .UsingJobData("Source", src.SourceConnection.ConnectionString)
                                     .UsingJobData("CFG", cfgString)
                                     .UsingJobData("SchemaSnapshotDBs", src.SchemaSnapshotDBs)
-                                    .UsingJobData("Schedule", snapshotSchedule.Schedule)
+                                    .UsingJobData("Schedule", snapshotSchedule.NormalizedSchedule)
                                     .Build();
 
-                                ScheduleJob(snapshotSchedule.Schedule, job);
+                                ScheduleJob(snapshotSchedule.NormalizedSchedule, job);
 
                                 if (snapshotSchedule.RunOnServiceStart)
                                 {
@@ -616,9 +616,9 @@ namespace DBADashService
                     }
                 case ConnectionType.Directory or ConnectionType.AWSS3:
                     {
-                        var job = GetJob(null, src, cfgString, null, CollectionSchedule.DefaultImportSchedule.Schedule);
-                        Log.Information("Add schedule for {source} to import on schedule {schedule}", src.SourceConnection.ConnectionForPrint, CollectionSchedule.DefaultImportSchedule);
-                        ScheduleJob(CollectionSchedule.DefaultImportSchedule.Schedule, job);
+                        var job = GetJob(null, src, cfgString, null, CollectionSchedule.DefaultImportSchedule.NormalizedSchedule);
+                        Log.Information("Add schedule for {source} to import on schedule {schedule}", src.SourceConnection.ConnectionForPrint, CollectionSchedule.DefaultImportSchedule.NormalizedSchedule);
+                        ScheduleJob(CollectionSchedule.DefaultImportSchedule.NormalizedSchedule, job);
                         break;
                     }
             }
@@ -716,7 +716,7 @@ namespace DBADashService
             var grouped = srcSchedule.GroupedBySchedule;
 
             foreach (var schedule in customCollections
-                .GroupBy(c => c.Value.Schedule)
+                .GroupBy(c => c.Value.NormalizedSchedule)
                 .Where(g => !grouped.ContainsKey(g.Key))
                 .Select(g => g.Key))
             {
@@ -753,7 +753,7 @@ namespace DBADashService
 
                     // Pre-filter custom collections for this schedule, compute once
                     var customForSchedule = customCollections
-                        .Where(c => c.Value.Schedule == scheduleKey)
+                        .Where(c => c.Value.NormalizedSchedule == scheduleKey)
                         .ToDictionary(c => c.Key, c => c.Value);
 
                     var finalKey = BuildScheduleGroupKey(scheduleKey, collections, customForSchedule.Keys);
@@ -773,7 +773,7 @@ namespace DBADashService
             foreach (var src in connections.Where(src => src.SourceConnection.Type != ConnectionType.SQL))
             {
                 // Non-SQL sources (Directory, AWSS3) - single import schedule
-                var scheduleKey = CollectionSchedule.DefaultImportSchedule.Schedule;
+                var scheduleKey = CollectionSchedule.DefaultImportSchedule.NormalizedSchedule;
                 var finalKey = BuildScheduleGroupKey(scheduleKey, Array.Empty<CollectionType>(), null);
                 if (!scheduleGroups.TryGetValue(finalKey, out var bucket))
                 {
@@ -841,14 +841,14 @@ namespace DBADashService
             var typeGroups = onStartTypes
                 .GroupBy(t =>
                 {
-                    var sched = srcSchedule.ContainsKey(t) ? srcSchedule[t].Schedule : null;
+                    var sched = srcSchedule.ContainsKey(t) ? srcSchedule[t].NormalizedSchedule : null;
                     return ScheduledCollectionJob.ComputePriorityFromSchedule(sched);
                 })
                 .ToDictionary(g => g.Key, g => g.ToArray());
 
             var customOnStartGroups = customCollections
                 .Where(c => c.Value.RunOnServiceStart)
-                .GroupBy(kvp => ScheduledCollectionJob.ComputePriorityFromSchedule(kvp.Value?.Schedule))
+                .GroupBy(kvp => ScheduledCollectionJob.ComputePriorityFromSchedule(kvp.Value?.NormalizedSchedule))
                 .ToDictionary(g => g.Key, g => g.ToDictionary(x => x.Key, x => x.Value));
 
             // Enqueue one work item per priority group (merge custom with same priority)

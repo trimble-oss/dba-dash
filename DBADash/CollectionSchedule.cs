@@ -6,11 +6,11 @@ namespace DBADashService
 {
     public class CollectionSchedules : Dictionary<CollectionType, CollectionSchedule>
     {
-        private const string every1min = "0 * * ? * *";
-        private const string hourly = "0 0 * ? * *";
-        private const string midnight = "0 0 0 1/1 * ? *";
-        private const string elevenPm = "0 0 23 1/1 * ? *";
-        private const string tenPm = "0 0 22 1/1 * ? *";
+        private const string every1min = "0 0/1 * * * ?";
+        private const string hourly = "0 0 0/1 * * ?";
+        private const string midnight = "0 0 0 * * ?";
+        private const string elevenPm = "0 0 23 * * ?";
+        private const string tenPm = "0 0 22 * * ?";
         private const string disabled = "";
 
         private static readonly CollectionSchedules collectionSchedules = new() {
@@ -107,13 +107,10 @@ namespace DBADashService
         {
             get
             {
-                var groupedSchedule = new Dictionary<string, CollectionType[]>();
-                var schedules = this.Where(s => s.Key != CollectionType.SchemaSnapshot && !string.IsNullOrEmpty(s.Value.Schedule)).Select(s => s.Value.Schedule).Distinct().ToArray();
-                foreach (var schedule in schedules)
-                {
-                    groupedSchedule.Add(schedule, this.Where(s => s.Value.Schedule == schedule).Select(s => s.Key).ToArray());
-                }
-                return groupedSchedule;
+                return this
+                    .Where(s => s.Key != CollectionType.SchemaSnapshot && !string.IsNullOrEmpty(s.Value.NormalizedSchedule))
+                    .GroupBy(s => s.Value.NormalizedSchedule)
+                    .ToDictionary(g => g.Key, g => g.Select(s => s.Key).ToArray());
             }
         }
 
@@ -128,7 +125,22 @@ namespace DBADashService
         public string Schedule;
         public bool RunOnServiceStart = true;
 
-        private const string every1min = "0 * * ? * *";
+        private string _cachedSchedule;
+        private string _cachedNormalizedSchedule;
+
+        public string NormalizedSchedule
+        {
+            get
+            {
+                if (_cachedNormalizedSchedule == null || _cachedSchedule != Schedule)
+                {
+                    _cachedSchedule = Schedule;
+                    _cachedNormalizedSchedule = CronParser.NormalizeCronExpression(Schedule);
+                }
+                return _cachedNormalizedSchedule;
+            }
+        }
+
         private static readonly CollectionSchedule importSchedule = new() { Schedule = "10" };
         public static readonly CollectionSchedule DefaultImportSchedule = importSchedule;
     }

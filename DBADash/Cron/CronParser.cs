@@ -51,6 +51,14 @@ namespace DBADash
         // Helper: canonical day names used in cron expressions
         public static string[] DayNames() => new[] { "SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT" };
 
+        private static string[] CanonicalizeSelectedDays(string[] selectedDays)
+        {
+            var normalized = NormalizeDayTokens(selectedDays);
+            if (normalized == null || normalized.Length == 0) return Array.Empty<string>();
+
+            return CompressDayTokens(normalized);
+        }
+
         /// <summary>
         /// Map token (name prefix or number) to index 0..6 (SUN=0). Returns -1 if unrecognized.
         /// </summary>
@@ -202,7 +210,7 @@ namespace DBADash
         /// Unsupported or malformed expressions return <c>false</c> so the UI can fallback to Custom.
         /// Intervals of zero or less are rejected.
         /// </remarks>
-        /// <param name="cron">Cron expression to parse (6 fields).</param>
+        /// <param name="cron">Cron expression to parse (6 or 7 fields).</param>
         /// <param name="state">Output parsed state when parsing succeeds.</param>
         /// <returns>True if parsing succeeded and state is populated; otherwise false.</returns>
         public static bool TryParseCronState(string cron, out ParsedCronState state)
@@ -210,7 +218,8 @@ namespace DBADash
             state = null;
             if (string.IsNullOrWhiteSpace(cron)) return false;
             var parts = cron.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            if (parts.Length != 6) return false;
+            if (parts.Length != 6 && parts.Length != 7) return false;
+            if (parts.Length == 7 && parts[6] != "*") return false;
 
             // small helper to parse and validate numeric cron fields
             static bool TryParseField(string token, int min, int max, out int value)
@@ -323,6 +332,21 @@ namespace DBADash
                 return false;
             }
 
+            // Legacy default every-minute form: S * * ? * *
+            if (parts[1] == "*" && parts[2] == "*" && parts[3] == "?" && parts[4] == "*" && parts[5] == "*")
+            {
+                if (!TryParseField(parts[0], 0, 59, out int secForLegacyMinutes)) return false;
+
+                state = new ParsedCronState
+                {
+                    Mode = FrequencyMode.EveryNMinutes,
+                    Interval = 1,
+                    BaseMinute = 0,
+                    BaseSecond = secForLegacyMinutes
+                };
+                return true;
+            }
+
             // Every N hours: accept forms like H/N in the hour field (e.g. 5/5)
             var hourMatch = Regex.Match(parts[2], @"^(\d+)/(\d+)$");
             if (hourMatch.Success)
@@ -374,6 +398,22 @@ namespace DBADash
                 return false;
             }
 
+            // Legacy default hourly form: S M * ? * *
+            if (parts[2] == "*" && parts[3] == "?" && parts[4] == "*" && parts[5] == "*")
+            {
+                if (!TryParseField(parts[1], 0, 59, out int minute) || !TryParseField(parts[0], 0, 59, out int secForLegacyHours)) return false;
+
+                state = new ParsedCronState
+                {
+                    Mode = FrequencyMode.EveryNHours,
+                    Interval = 1,
+                    BaseHour = 0,
+                    BaseMinute = minute,
+                    BaseSecond = secForLegacyHours
+                };
+                return true;
+            }
+
             // Daily: S M H * * ?  (seconds, minutes, hours)
             // require numeric seconds/minutes/hours and validate Quartz ranges (sec/min 0-59, hour 0-23)
             if (parts[3] == "*" && parts[4] == "*" && parts[5] == "?"
@@ -387,6 +427,22 @@ namespace DBADash
                     BaseHour = hr,
                     BaseMinute = min,
                     BaseSecond = s
+                };
+                return true;
+            }
+
+            // Legacy daily form: S M H 1/1 * ? *
+            if (parts[3] == "1/1" && parts[4] == "*" && parts[5] == "?"
+                && TryParseField(parts[0], 0, 59, out int legacyS)
+                && TryParseField(parts[1], 0, 59, out int legacyMin)
+                && TryParseField(parts[2], 0, 23, out int legacyHr))
+            {
+                state = new ParsedCronState
+                {
+                    Mode = FrequencyMode.Daily,
+                    BaseHour = legacyHr,
+                    BaseMinute = legacyMin,
+                    BaseSecond = legacyS
                 };
                 return true;
             }
@@ -413,6 +469,41 @@ namespace DBADash
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Normalize a Quartz cron expression to a canonical form for grouping.
+        /// Unsupported expressions are returned trimmed and unchanged.
+        /// </summary>
+        public static string NormalizeCronExpression(string cron)
+        {
+            if (string.IsNullOrWhiteSpace(cron)) return string.Empty;
+
+            var trimmed = cron.Trim();
+            if (!TryParseCronState(trimmed, out var state)) return trimmed;
+
+            var canonicalSelectedDays = state.SelectedDays is { Length: > 0 }
+                ? CanonicalizeSelectedDays(state.SelectedDays)
+                : Array.Empty<string>();
+            var hasSelectedDays = canonicalSelectedDays.Length > 0 && !(canonicalSelectedDays.Length == 1 && canonicalSelectedDays[0] == "*");
+
+            return state.Mode switch
+            {
+                FrequencyMode.EveryNSeconds => hasSelectedDays
+                    ? $"{state.BaseSecond}/{state.Interval} * * ? * {string.Join(',', canonicalSelectedDays)}"
+                    : $"{state.BaseSecond}/{state.Interval} * * * * ?",
+                FrequencyMode.EveryNMinutes => hasSelectedDays
+                    ? $"{state.BaseSecond} {state.BaseMinute}/{state.Interval} * ? * {string.Join(',', canonicalSelectedDays)}"
+                    : $"{state.BaseSecond} {state.BaseMinute}/{state.Interval} * * * ?",
+                FrequencyMode.EveryNHours => hasSelectedDays
+                    ? $"{state.BaseSecond} {state.BaseMinute} {state.BaseHour}/{state.Interval} ? * {string.Join(',', canonicalSelectedDays)}"
+                    : $"{state.BaseSecond} {state.BaseMinute} {state.BaseHour}/{state.Interval} * * ?",
+                FrequencyMode.Daily => $"{state.BaseSecond} {state.BaseMinute} {state.BaseHour} * * ?",
+                FrequencyMode.Weekly => hasSelectedDays
+                    ? $"{state.BaseSecond} {state.BaseMinute} {state.BaseHour} ? * {string.Join(',', canonicalSelectedDays)}"
+                    : $"{state.BaseSecond} {state.BaseMinute} {state.BaseHour} * * ?",
+                _ => trimmed
+            };
         }
     }
 }
