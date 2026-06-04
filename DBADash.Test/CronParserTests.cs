@@ -6,11 +6,31 @@ namespace DBADash.Test
     public class CronParserTests
     {
         [TestMethod]
+        public void GroupedBySchedule_NormalizesEquivalentSchedules()
+        {
+            var schedules = new DBADashService.CollectionSchedules
+            {
+                [DBADash.CollectionType.CPU] = new DBADashService.CollectionSchedule { Schedule = "0 0/1 * * * ?" },
+                [DBADash.CollectionType.IOStats] = new DBADashService.CollectionSchedule { Schedule = "0 * * ? * *" },
+                [DBADash.CollectionType.Waits] = new DBADashService.CollectionSchedule { Schedule = "0 0/1 * * * ?" }
+            };
+
+            var grouped = schedules.GroupedBySchedule;
+
+            Assert.AreEqual(1, grouped.Count);
+            Assert.IsTrue(grouped.ContainsKey(CronParser.NormalizeCronExpression("0 0/1 * * * ?")));
+            CollectionAssert.AreEquivalent(
+                new[] { DBADash.CollectionType.CPU, DBADash.CollectionType.IOStats, DBADash.CollectionType.Waits },
+                grouped[CronParser.NormalizeCronExpression("0 0/1 * * * ?")]);
+        }
+
+        [TestMethod]
         public void TryParseCronState_EveryNMinutes_Various()
         {
             var cases = new[] {
                 (cron: "0 0/5 * * * ?", expectedInterval: 5, expectedBaseMinute: 0),
-                (cron: "0 2/10 * * * ?", expectedInterval: 10, expectedBaseMinute: 2)
+                (cron: "0 2/10 * * * ?", expectedInterval: 10, expectedBaseMinute: 2),
+                (cron: "0 * * ? * *", expectedInterval: 1, expectedBaseMinute: 0)
             };
             foreach (var c in cases)
             {
@@ -20,6 +40,78 @@ namespace DBADash.Test
                 Assert.AreEqual(0, state.BaseSecond);
                 Assert.AreEqual(c.expectedBaseMinute, state.BaseMinute);
             }
+        }
+
+        [TestMethod]
+        public void TryParseCronState_EveryNHours_Various()
+        {
+            var cases = new[] {
+                (cron: "0 0 0/1 * * ?", expectedInterval: 1, expectedBaseHour: 0, expectedBaseMinute: 0),
+                (cron: "0 0 * ? * *", expectedInterval: 1, expectedBaseHour: 0, expectedBaseMinute: 0)
+            };
+
+            foreach (var c in cases)
+            {
+                Assert.IsTrue(CronParser.TryParseCronState(c.cron, out var state), $"Parsing failed for: {c.cron}");
+                Assert.AreEqual(CronParser.FrequencyMode.EveryNHours, state.Mode);
+                Assert.AreEqual(c.expectedInterval, state.Interval);
+                Assert.AreEqual(c.expectedBaseHour, state.BaseHour);
+                Assert.AreEqual(c.expectedBaseMinute, state.BaseMinute);
+                Assert.AreEqual(0, state.BaseSecond);
+            }
+        }
+
+        [TestMethod]
+        public void TryParseCronState_Daily_Various()
+        {
+            var cases = new[] {
+                (cron: "0 0 0 * * ?", expectedHour: 0, expectedMinute: 0, expectedSecond: 0),
+                (cron: "0 0 23 * * ?", expectedHour: 23, expectedMinute: 0, expectedSecond: 0),
+                (cron: "0 0 22 * * ?", expectedHour: 22, expectedMinute: 0, expectedSecond: 0),
+                (cron: "0 0 0 1/1 * ? *", expectedHour: 0, expectedMinute: 0, expectedSecond: 0),
+                (cron: "0 0 23 1/1 * ? *", expectedHour: 23, expectedMinute: 0, expectedSecond: 0),
+                (cron: "0 0 22 1/1 * ? *", expectedHour: 22, expectedMinute: 0, expectedSecond: 0)
+            };
+
+            foreach (var c in cases)
+            {
+                Assert.IsTrue(CronParser.TryParseCronState(c.cron, out var state), $"Parsing failed for: {c.cron}");
+                Assert.AreEqual(CronParser.FrequencyMode.Daily, state.Mode);
+                Assert.AreEqual(c.expectedHour, state.BaseHour);
+                Assert.AreEqual(c.expectedMinute, state.BaseMinute);
+                Assert.AreEqual(c.expectedSecond, state.BaseSecond);
+            }
+        }
+
+        [TestMethod]
+        public void NormalizeCronExpression_EquivalentForms_MapToSameValue()
+        {
+            Assert.AreEqual(CronParser.NormalizeCronExpression("0 0 * ? * *"), CronParser.NormalizeCronExpression("0 0 0/1 * * ?"));
+            Assert.AreEqual(CronParser.NormalizeCronExpression("0 0 0 1/1 * ? *"), CronParser.NormalizeCronExpression("0 0 0 * * ?"));
+            Assert.AreEqual(CronParser.NormalizeCronExpression("0 0 23 1/1 * ? *"), CronParser.NormalizeCronExpression("0 0 23 * * ?"));
+            Assert.AreEqual(CronParser.NormalizeCronExpression("0 0 22 1/1 * ? *"), CronParser.NormalizeCronExpression("0 0 22 * * ?"));
+        }
+
+        [TestMethod]
+        public void NormalizeCronExpression_AllDaysSelection_UsesDailyCanonicalForm()
+        {
+            var normalized = CronParser.NormalizeCronExpression("0 0 3 ? * SUN,MON,TUE,WED,THU,FRI,SAT");
+
+            Assert.AreEqual("0 0 3 * * ?", normalized);
+            Assert.IsTrue(CronParser.TryParseCronState(normalized, out var state));
+            Assert.AreEqual(CronParser.FrequencyMode.Daily, state.Mode);
+        }
+
+        [TestMethod]
+        public void EquivalentEveryMinuteForms_ParseTheSame()
+        {
+            Assert.IsTrue(CronParser.TryParseCronState("0 0/1 * * * ?", out var stepState));
+            Assert.IsTrue(CronParser.TryParseCronState("0 * * ? * *", out var legacyState));
+
+            Assert.AreEqual(stepState.Mode, legacyState.Mode);
+            Assert.AreEqual(stepState.Interval, legacyState.Interval);
+            Assert.AreEqual(stepState.BaseMinute, legacyState.BaseMinute);
+            Assert.AreEqual(stepState.BaseSecond, legacyState.BaseSecond);
         }
 
         [TestMethod]
@@ -37,6 +129,17 @@ namespace DBADash.Test
                 var compressed = CronParser.CompressDayTokens(state.SelectedDays);
                 CollectionAssert.AreEqual(new[] { c.expectedCompressed }, compressed);
             }
+        }
+
+        [TestMethod]
+        [DataRow("0 0 3 ? * MON,FRI,MON", "0 0 3 ? * MON,FRI")]
+        [DataRow("0 0 3 ? * FRI,MON", "0 0 3 ? * MON,FRI")]
+        [DataRow("0 0 3 ? * MON-FRI", "0 0 3 ? * MON-FRI")]
+        [DataRow("0 0 3 ? * FRI-MON", "0 0 3 ? * FRI-MON")]
+        [DataRow("0 0 3 ? * MON,TUE,MON,TUE", "0 0 3 ? * MON-TUE")]
+        public void NormalizeCronExpression_SortsAndDeduplicatesSelectedDays(string cron, string expected)
+        {
+            Assert.AreEqual(expected, CronParser.NormalizeCronExpression(cron));
         }
 
         [TestMethod]
