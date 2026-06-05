@@ -21,14 +21,14 @@ SELECT TOP (@MaxRows)
         WHEN 2 THEN 'Quit with failure'
         WHEN 3 THEN 'Go to next step'
         WHEN 4 THEN 'Go to step'
-        ELSE FORMAT(js.on_success_action,'N0') END AS OnSuccessActionDescription,
+        ELSE CAST(js.on_success_action AS VARCHAR(10)) END AS OnSuccessActionDescription,
     js.on_fail_action,
     CASE js.on_fail_action
         WHEN 1 THEN 'Quit with success'
         WHEN 2 THEN 'Quit with failure'
         WHEN 3 THEN 'Go to next step'
         WHEN 4 THEN 'Go to step'
-        ELSE FORMAT(js.on_fail_action,'N0') END AS OnFailActionDescription,
+        ELSE CAST(js.on_fail_action AS VARCHAR(10)) END AS OnFailActionDescription,
     js.retry_attempts,
     js.retry_interval,
     js.output_file_name AS OutputFileName,
@@ -44,4 +44,5 @@ WHERE j.IsActive = 1
   AND ajs.enabled = 1
   AND (ajs.JobStatus IN (1, 2, 5) OR ajs.JobStepFails7Days > 0)
   AND (@InstanceFilter IS NULL OR i.InstanceDisplayName LIKE @InstanceFilter + '%')
+  AND (j.LastFailed >= DATEADD(HOUR, -@HoursBack, GETUTCDATE()) OR j.StepLastFailed >= DATEADD(HOUR, -@HoursBack, GETUTCDATE()))
 ORDER BY ajs.JobStatus ASC, i.InstanceDisplayName, j.name, js.step_id
