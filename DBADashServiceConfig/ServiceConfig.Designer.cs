@@ -580,7 +580,7 @@ namespace DBADashServiceConfig
             bttnCheckConnections.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
             bttnCheckConnections.Location = new System.Drawing.Point(16, 341);
             bttnCheckConnections.Name = "bttnCheckConnections";
-            bttnCheckConnections.Size = new System.Drawing.Size(163, 29);
+            bttnCheckConnections.Size = new System.Drawing.Size(163, 35);
             bttnCheckConnections.TabIndex = 26;
             bttnCheckConnections.Text = "Check Connections";
             toolTip1.SetToolTip(bttnCheckConnections, "Perform a basic connectivity test for each source connection and get age of the last collection from the repository database.  ");
@@ -828,7 +828,7 @@ namespace DBADashServiceConfig
             // 
             bttnPerformanceCounters.Location = new System.Drawing.Point(14, 38);
             bttnPerformanceCounters.Name = "bttnPerformanceCounters";
-            bttnPerformanceCounters.Size = new System.Drawing.Size(227, 29);
+            bttnPerformanceCounters.Size = new System.Drawing.Size(227, 35);
             bttnPerformanceCounters.TabIndex = 41;
             bttnPerformanceCounters.Text = "Performance Counters";
             bttnPerformanceCounters.UseVisualStyleBackColor = true;
@@ -1844,9 +1844,9 @@ namespace DBADashServiceConfig
             // bttnAdd
             // 
             bttnAdd.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            bttnAdd.Location = new System.Drawing.Point(981, 253);
+            bttnAdd.Location = new System.Drawing.Point(967, 253);
             bttnAdd.Name = "bttnAdd";
-            bttnAdd.Size = new System.Drawing.Size(103, 37);
+            bttnAdd.Size = new System.Drawing.Size(117, 37);
             bttnAdd.TabIndex = 8;
             bttnAdd.Text = "Add/Update";
             bttnAdd.UseVisualStyleBackColor = true;
@@ -1876,7 +1876,7 @@ namespace DBADashServiceConfig
             bttnPermissionsHelper.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
             bttnPermissionsHelper.Location = new System.Drawing.Point(533, 341);
             bttnPermissionsHelper.Name = "bttnPermissionsHelper";
-            bttnPermissionsHelper.Size = new System.Drawing.Size(214, 29);
+            bttnPermissionsHelper.Size = new System.Drawing.Size(214, 35);
             bttnPermissionsHelper.TabIndex = 26;
             bttnPermissionsHelper.Text = "Permissions Helper";
             bttnPermissionsHelper.UseVisualStyleBackColor = true;
@@ -2003,7 +2003,7 @@ namespace DBADashServiceConfig
             bttnViewServiceLog.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
             bttnViewServiceLog.Location = new System.Drawing.Point(10, 673);
             bttnViewServiceLog.Name = "bttnViewServiceLog";
-            bttnViewServiceLog.Size = new System.Drawing.Size(187, 29);
+            bttnViewServiceLog.Size = new System.Drawing.Size(187, 35);
             bttnViewServiceLog.TabIndex = 20;
             bttnViewServiceLog.Text = "View Service Log";
             bttnViewServiceLog.UseVisualStyleBackColor = true;
@@ -2028,7 +2028,7 @@ namespace DBADashServiceConfig
             bttnGrantAccessToServiceAccount.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
             bttnGrantAccessToServiceAccount.Location = new System.Drawing.Point(835, 59);
             bttnGrantAccessToServiceAccount.Name = "bttnGrantAccessToServiceAccount";
-            bttnGrantAccessToServiceAccount.Size = new System.Drawing.Size(171, 29);
+            bttnGrantAccessToServiceAccount.Size = new System.Drawing.Size(171, 35);
             bttnGrantAccessToServiceAccount.TabIndex = 26;
             bttnGrantAccessToServiceAccount.Text = "Permissions Helper";
             bttnGrantAccessToServiceAccount.UseVisualStyleBackColor = true;
@@ -2062,7 +2062,7 @@ namespace DBADashServiceConfig
             // 
             bttnAbout.Location = new System.Drawing.Point(103, 168);
             bttnAbout.Name = "bttnAbout";
-            bttnAbout.Size = new System.Drawing.Size(214, 29);
+            bttnAbout.Size = new System.Drawing.Size(214, 35);
             bttnAbout.TabIndex = 20;
             bttnAbout.Text = "Check for Updates";
             bttnAbout.UseVisualStyleBackColor = true;
