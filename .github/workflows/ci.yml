@@ -138,6 +138,9 @@ jobs:
       - name: Run Pester Tests
         shell: powershell
         run: |     
+          if (-not (Get-PSRepository -Name PSGallery -ErrorAction SilentlyContinue)) {
+            Register-PSRepository -Default
+          }
           Install-Module Pester -Force -SkipPublisherCheck
           Import-Module Pester -PassThru
           Invoke-Pester -Output Detailed Scripts\CI_Workflow.Tests.ps1
@@ -146,4 +149,3 @@ jobs:
         shell: powershell
         run: | 
             ./Scripts/Get-TableCounts -ServerInstance "LOCALHOST" -Database "DBADashDB_GitHubAction" 
-
