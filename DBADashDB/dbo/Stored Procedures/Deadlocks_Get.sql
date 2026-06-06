@@ -18,6 +18,8 @@ SELECT @Use60Min = CASE WHEN @Use60Min IS NOT NULL THEN @Use60Min WHEN @DateGrou
 SET @SQL = N'
 WITH Deadlocks AS (
 	SELECT  PC.SnapshotDate,
+			/* The snapshot date is the date the metric was collected.  The deadlock events occurred between PreviousSnapshotDate and SnapshotDate.  We can use this for filtering in sp_BlitzLock */
+			LAG(PC.SnapshotDate) OVER (ORDER BY PC.SnapshotDate) AS PreviousSnapshotDate,
 			/* Convert deadlocks/sec to deadlock count */
 			CAST(ROUND((' + CASE WHEN @Use60Min=1 THEN '(PC.Value_Total/PC.SampleCount)' ELSE 'PC.value' END + ' * (DATEDIFF(ms,LAG(PC.SnapshotDate) OVER (ORDER BY PC.SnapshotDate),PC.SnapshotDate)/1000.0)),0) AS BIGINT) AS DeadlockCount
 	FROM dbo.PerformanceCounters' + CASE WHEN @Use60Min=1 THEN '_60MIN' ELSE '' END + ' PC
@@ -30,6 +32,7 @@ WITH Deadlocks AS (
 	AND C.instance_name = ''_Total''
 )
 SELECT ' + @DateGroupingSQL + ' AS SnapshotDate,
+		MIN(PreviousSnapshotDate) AS PreviousSnapshotDate,
 		SUM(DeadlockCount) AS DeadlockCount
 FROM Deadlocks
 ' + CASE WHEN @DateGroupingMin = 0 OR @DateGroupingMin IS NULL THEN '' ELSE 'CROSS APPLY dbo.DateGroupingMins(Deadlocks.SnapshotDate,@DateGroupingMin) DG' END + '
