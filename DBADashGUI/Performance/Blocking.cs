@@ -553,8 +553,15 @@ namespace DBADashGUI.Performance
                 if (idx < 0 || idx >= _deadlockRows.Count) return;
                 var deadlockRow = _deadlockRows[idx];
                 var snapshotDateUtc = (DateTime)deadlockRow["SnapshotDate"];
-                var fromUtc = snapshotDateUtc.AddMinutes(-Math.Max(_deadlockDateGroupingMin, 1));
-                _ = ShowDeadlockReportAsync(fromUtc, snapshotDateUtc);
+                // Determine the report date range represented by this deadlock snapshot.
+                // Start = PreviousSnapshotDate (if available) or snapshot minus 1 minute as a safe default.
+                // End = snapshot + _deadlockDateGroupingMin minutes to include the full grouping bucket.
+                // Example: a deadlock at 01:59:36 may be included in the 02:00 snapshot; using the previous snapshot
+                // as the start and adding the grouping minutes to the end ensures the report covers the entire interval
+                // represented by that snapshot bucket.
+                var fromUtc = deadlockRow["PreviousSnapshotDate"] == DBNull.Value ? snapshotDateUtc.AddMinutes(-1) : (DateTime)deadlockRow["PreviousSnapshotDate"];
+                var toUtc = snapshotDateUtc.AddMinutes(_deadlockDateGroupingMin);
+                _ = ShowDeadlockReportAsync(fromUtc, toUtc);
                 return;
             }
             // Try to map the clicked ChartPoint back to the original row.
