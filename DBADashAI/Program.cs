@@ -7,10 +7,8 @@ using System.Text.Json;
 using DBADashAI.Services;
 using DBADashAI.Services.Authentication;
 using DBADashAI.Services.Tools;
-using Microsoft.AspNetCore.RateLimiting;
 using Serilog;
 using System.Diagnostics;
-using System.Threading.RateLimiting;
 
 // Bootstrap Serilog from serilog.json before the host is built so that any
 // startup errors (config load failures, port conflicts, etc.) are captured.
@@ -378,10 +376,10 @@ ApplyAuth(app.MapPost("/api/ai/feedback", (
 
     var logger = loggerFactory.CreateLogger("AiFeedback");
     logger.LogInformation("AI feedback received. RequestId={RequestId}, Helpful={Helpful}, Tool={ToolName}, Category={Category}",
-        request.RequestId,
+        LogSanitizer.SanitizeForLog(request.RequestId),
         request.IsHelpful,
-        request.ToolName ?? "(unknown)",
-        request.Category ?? string.Empty);
+        LogSanitizer.SanitizeForLog(request.ToolName ?? "(unknown)"),
+        LogSanitizer.SanitizeForLog(request.Category ?? string.Empty));
 
     return Results.Ok(new { status = "saved" });
 }));

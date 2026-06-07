@@ -79,15 +79,23 @@ namespace DBADashAI.Services
 
             // Emit a structured warning for every thumbs-down so operators can diagnose
             // routing problems without having to parse the persisted feedback file.
+            // Sanitize user-provided fields before they are written to the logs to
+            // prevent log forging (remove line breaks/control characters).
             if (!record.IsHelpful)
             {
+                var requestId = LogSanitizer.SanitizeForLog(record.RequestId);
+                var toolName = LogSanitizer.SanitizeForLog(record.ToolName ?? "(unknown)");
+                var category = LogSanitizer.SanitizeForLog(record.Category ?? "(none)");
+                var questionExcerpt = LogSanitizer.SanitizeForLog(record.QuestionExcerpt ?? "(none)");
+                var comment = LogSanitizer.SanitizeForLog(record.Comment ?? "(none)");
+
                 _logger.LogWarning(
                     "AI feedback negative. RequestId={RequestId}, Tool={ToolName}, Category={Category}, QuestionExcerpt={QuestionExcerpt}, Comment={Comment}",
-                    record.RequestId,
-                    record.ToolName ?? "(unknown)",
-                    record.Category ?? "(none)",
-                    record.QuestionExcerpt ?? "(none)",
-                    record.Comment ?? "(none)");
+                    requestId,
+                    toolName,
+                    category,
+                    questionExcerpt,
+                    comment);
             }
 
             _records.Enqueue(record);
