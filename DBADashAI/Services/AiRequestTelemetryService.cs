@@ -16,8 +16,8 @@ namespace DBADashAI.Services
         {
             _logger.LogInformation(
                 "AI request {RequestId} started. Tool={ToolName}, QuestionLength={QuestionLength}",
-                requestId,
-                toolName ?? "auto",
+                LogSanitizer.SanitizeForLog(requestId),
+                LogSanitizer.SanitizeForLog(toolName ?? "auto"),
                 question?.Length ?? 0);
 
             // Question content logged at Debug only — it may contain server names, database
@@ -27,8 +27,8 @@ namespace DBADashAI.Services
             {
                 _logger.LogDebug(
                     "AI request {RequestId} question excerpt: {QuestionExcerpt}",
-                    requestId,
-                    GetExcerpt(question));
+                    LogSanitizer.SanitizeForLog(requestId),
+                    LogSanitizer.SanitizeForLog(GetExcerpt(question)));
             }
 
             return Stopwatch.StartNew();
@@ -38,18 +38,18 @@ namespace DBADashAI.Services
         {
             _logger.LogInformation(
                 "AI request {RequestId} completed. Tool={ToolName}, RowCount={RowCount}, ToolMs={ToolMs}, TotalMs={TotalMs}, ConfidenceScore={ConfidenceScore}, ConfidenceLabel={ConfidenceLabel}",
-                requestId,
-                toolName,
+                LogSanitizer.SanitizeForLog(requestId),
+                LogSanitizer.SanitizeForLog(toolName),
                 rowCount,
                 toolMs,
                 totalMs,
                 confidenceScore,
-                confidenceLabel);
+                LogSanitizer.SanitizeForLog(confidenceLabel));
         }
 
         public void Fail(string requestId, Exception ex)
         {
-            _logger.LogError(ex, "AI request {RequestId} failed.", requestId);
+            _logger.LogError(ex, "AI request {RequestId} failed.", LogSanitizer.SanitizeForLog(requestId));
         }
 
         /// <summary>
