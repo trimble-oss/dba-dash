@@ -25,6 +25,29 @@ for ($attempt = 1; $attempt -le $MaxRetries; $attempt++) {
     }
 }
 
+function Invoke-WebRequestWithRetry {
+    param(
+        [string]$Uri,
+        [string]$OutFile,
+        [hashtable]$Headers,
+        [int]$MaxRetries = 3
+    )
+
+    for ($attempt = 1; $attempt -le $MaxRetries; $attempt++) {
+        try {
+            Invoke-WebRequest -Uri $Uri -OutFile $OutFile -Headers $Headers
+            return
+        } catch {
+            if (Test-Path $OutFile) {
+                Remove-Item -Path $OutFile -Force
+            }
+            if ($attempt -eq $MaxRetries) { throw }
+            Write-Warning "Download failed (attempt $attempt/$MaxRetries): $_. Retrying..."
+            Start-Sleep -Seconds (5 * $attempt)
+        }
+    }
+}
+
 # 2. Narrow the asset match to the specific zip name and ensure only one result
 # Using -like "SerializedDataSetViewer_*.zip" to ignore other potential zip assets
 $URL = $ReleaseData.assets | 
@@ -43,7 +66,7 @@ $ConfigFile = [System.IO.Path]::Combine($Folder, "appsettings.json")
 
 # 4. Download and Extract
 Write-Host "Downloading latest version: $FileName"
-Invoke-WebRequest -Uri $URL -OutFile $DownloadPath
+Invoke-WebRequestWithRetry -Uri $URL -OutFile $DownloadPath -Headers $ApiHeaders -MaxRetries $MaxRetries
 Expand-Archive -Path $DownloadPath -DestinationPath $Folder -Force
 
 # 5. Cleanup and Config
