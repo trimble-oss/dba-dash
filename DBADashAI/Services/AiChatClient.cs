@@ -136,7 +136,7 @@ namespace DBADashAI.Services
             {
                 var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
                 var errorId = Guid.NewGuid().ToString("N")[..8];
-                _logger.LogError("Azure OpenAI call failed. ErrorId={ErrorId}, Status={StatusCode}, URL={Url}, Body={Body}", errorId, (int)response.StatusCode, requestUrl, errorBody);
+                _logger.LogError("Azure OpenAI call failed. ErrorId={ErrorId}, Status={StatusCode}, URL={Url}, Body={Body}", LogSanitizer.SanitizeForLog(errorId), (int)response.StatusCode, requestUrl, LogSanitizer.TruncateAndSanitizeForLog(errorBody));
                 return $"Azure OpenAI summary call failed: {(int)response.StatusCode} {StatusHint((int)response.StatusCode)} (ErrorId={errorId}). Check the service logs for details.";
             }
 
@@ -196,7 +196,7 @@ namespace DBADashAI.Services
             {
                 var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
                 var errorId = Guid.NewGuid().ToString("N")[..8];
-                _logger.LogError("Anthropic call failed. ErrorId={ErrorId}, Status={StatusCode}, Body={Body}", errorId, (int)response.StatusCode, errorBody);
+                _logger.LogError("Anthropic call failed. ErrorId={ErrorId}, Status={StatusCode}, Body={Body}", LogSanitizer.SanitizeForLog(errorId), (int)response.StatusCode, LogSanitizer.TruncateAndSanitizeForLog(errorBody));
                 return $"Anthropic summary call failed: {(int)response.StatusCode} {StatusHint((int)response.StatusCode)} (ErrorId={errorId}). Check the service logs for details.";
             }
 
