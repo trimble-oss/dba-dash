@@ -182,6 +182,7 @@ namespace DBADashGUI.CustomReports
                 GetCopyAsMarkdownMenuItem(),
                 GetCopyAsJsonMenuItem()
             });
+            var colGroupByMenuItem = GetGroupByMenuItem();
             ColumnContextMenu.Items.AddRange(
                 new ToolStripItem[]
                 {
@@ -193,6 +194,8 @@ namespace DBADashGUI.CustomReports
                     GetAutoResizeColumns(),
                     hideColumn,
                     freezeColumn,
+                    new ToolStripSeparator(),
+                    colGroupByMenuItem,
                     new ToolStripSeparator(),
                     editFilter,
                     clearFilter,
@@ -216,6 +219,7 @@ namespace DBADashGUI.CustomReports
                 freezeColumn.Text = ClickedColumnIndex >= 0 && Columns[ClickedColumnIndex].Frozen ? "Unfreeze Column" : "Freeze Column";
                 freezeColumn.Visible = ClickedColumnIndex >= 0;
                 freezeColumn.Checked = ClickedColumnIndex >= 0 && Columns[ClickedColumnIndex].Frozen;
+                colGroupByMenuItem.Enabled = HasGroupByColumns;
             };
         }
 
@@ -285,6 +289,7 @@ namespace DBADashGUI.CustomReports
                 GetCopyAsJsonMenuItem()
             });
 
+            var cellGroupByMenuItem = GetGroupByMenuItem();
             CellContextMenu.Items.AddRange(
                 new ToolStripItem[]
                 {
@@ -297,6 +302,7 @@ namespace DBADashGUI.CustomReports
                     select,
                     GetColumnsMenuItem(),
                     GetAutoResizeColumns(),
+                    cellGroupByMenuItem,
                     new ToolStripSeparator(),
                     inFilter,
                     notInFilter,
@@ -342,6 +348,7 @@ namespace DBADashGUI.CustomReports
                 var selectedStats = GetSelectedCellsStats();
                 SelectedCellsStatsToolStripMenuItem.Text = selectedStats;
                 SelectedCellsStatsToolStripMenuItem.Visible = !string.IsNullOrEmpty(selectedStats);
+                cellGroupByMenuItem.Enabled = HasGroupByColumns;
             };
         }
 
@@ -401,7 +408,7 @@ namespace DBADashGUI.CustomReports
         /// <param name="grid"></param>
         /// <param name="rows"></param>
         /// <returns></returns>
-        public static DataGridView TransposeRows(DataGridView grid, IReadOnlyCollection<DataGridViewRow> rows)
+        public static DBADashDataGridView TransposeRows(DataGridView grid, IReadOnlyCollection<DataGridViewRow> rows)
         {
             const int maxRows = 65535;
             if (rows.Count > maxRows)
@@ -454,6 +461,320 @@ namespace DBADashGUI.CustomReports
                 CommonShared.ShowExceptionDialog(ex);
             }
         }
+
+        // =====================================================================
+        //  Group By
+        // =====================================================================
+
+        /// <summary>
+        /// Returns true when the grid has at least one visible column that can be grouped.
+        /// All visible columns are usable regardless of whether they have a DataPropertyName set.
+        /// </summary>
+        private bool HasGroupByColumns =>
+            Columns.Cast<DataGridViewColumn>().Any(c => c.Visible);
+
+        private ToolStripMenuItem GetGroupByMenuItem() =>
+            new("Group By", Properties.Resources.GroupBy_16x, (_, _) => ShowGroupBy());
+
+        private void ShowGroupBy()
+        {
+            try
+            {
+                if (!HasGroupByColumns)
+                {
+                    MessageBox.Show("Group By is not available for this grid — no visible columns.",
+                        "Group By", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+                // Build the column config list; pre-select the right-clicked column as the initial group key.
+                // All visible columns are included regardless of DataPropertyName — cells are accessed by index.
+                var configs = Columns.Cast<DataGridViewColumn>()
+                    .Where(c => c.Visible)
+                    .Select(c => new GroupByColumnConfig
+                    {
+                        ColumnIndex = c.Index,
+                        HeaderText = c.HeaderText.Replace("\n", " "),
+                        IsGroupKey = c.Index == ClickedColumnIndex,
+                        IsNumeric = c.ValueType != null && c.ValueType.IsNumericType(),
+                        IsComparable = c.ValueType != null && typeof(IComparable).IsAssignableFrom(c.ValueType),
+                        ValueType = c.ValueType
+                    })
+                    .ToList();
+
+                using var dlg = new GroupByDialog(configs);
+                var title = string.IsNullOrEmpty(ResultSetName) ? "Group By" : $"Group By — {ResultSetName}";
+                dlg.Text = title;
+                if (dlg.ShowDialog(this) != DialogResult.OK) return;
+
+                var resultGrid = BuildGroupByResult(dlg.Columns, dlg.IncludeCount, dlg.IncludePercentOfTotal);
+                ShowGridInNewForm(resultGrid, title) ;
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex);
+            }
+        }
+
+        private DBADashDataGridView BuildGroupByResult(IReadOnlyList<GroupByColumnConfig> configs, bool includeCount, bool includePercentOfTotal)
+        {
+            var groupKeys = configs.Where(c => c.IsGroupKey).ToList();
+            var aggregations = configs.Where(c => !c.IsGroupKey &&
+                                                   (c.IncludeCountDistinct || c.IncludeSum || c.IncludeSumPercent || c.IncludeAvg ||
+                                                    (c.IncludeMin && c.IsComparable) || (c.IncludeMax && c.IsComparable))).ToList();
+
+            if (groupKeys.Count == 0)
+                throw new InvalidOperationException("At least one Group By column must be selected.");
+
+            // Collect visible, non-new rows from the current grid view
+            var rows = Rows.Cast<DataGridViewRow>()
+                .Where(r => !r.IsNewRow && r.Visible)
+                .ToList();
+
+            // Group by the key columns, using the formatted (display) cell values as group keys
+            var keyComparer = StringComparer.Ordinal;
+            var groups = rows
+                .GroupBy(r => new DataGroupKey(
+                    groupKeys.Select(k =>
+                    {
+                        var cell = r.Cells[k.ColumnIndex];
+                        var value = cell.OwningColumn?.ValueType == typeof(string) ? cell.Value : cell.FormattedValue;
+                        return value?.ToString() ?? string.Empty;
+                    }).ToArray(),
+                    keyComparer))
+                .OrderBy(g => g.Key, DataGroupKey.Comparer)
+                .ToList();
+
+            long totalCount = groups.Sum(g => g.Count());
+
+            // Build result DataTable
+            var dt = new DataTable();
+            foreach (var key in groupKeys)
+                dt.Columns.Add(key.HeaderText, typeof(string));
+            if (includeCount)
+                dt.Columns.Add("Count", typeof(long));
+            
+            if (includePercentOfTotal)
+                dt.Columns.Add("Count %", typeof(decimal));
+
+            foreach (var agg in aggregations)
+            {
+                if (agg.IncludeCountDistinct) dt.Columns.Add($"{agg.HeaderText} | Count Distinct", typeof(long));
+                if (agg.IncludeSum) dt.Columns.Add($"{agg.HeaderText} | Sum", typeof(decimal));
+                if (agg.IncludeSumPercent) dt.Columns.Add($"{agg.HeaderText} | Sum %", typeof(decimal));
+                if (agg.IncludeAvg) dt.Columns.Add($"{agg.HeaderText} | Avg", typeof(decimal));
+                // Min/Max use the source column type so dates etc. sort/display correctly
+                var minMaxType = agg.IsNumeric ? typeof(decimal) : (agg.ValueType ?? typeof(string));
+                if (agg.IncludeMin) dt.Columns.Add($"{agg.HeaderText} | Min", minMaxType);
+                if (agg.IncludeMax) dt.Columns.Add($"{agg.HeaderText} | Max", minMaxType);
+            }
+
+            // Pre-compute grand-total sums for columns that need a Sum % column
+            var grandTotalSums = aggregations.Where(a => a.IncludeSumPercent)
+                .ToDictionary(
+                    agg => agg.ColumnIndex,
+                    agg => rows
+                        .Select(r => r.Cells[agg.ColumnIndex].Value)
+                        .Where(v => v is not null and not DBNull)
+                        .Select(v => TryConvertToDecimal(v, out var d) ? d : (decimal?)null)
+                        .Where(v => v.HasValue)
+                        .Select(v => v!.Value)
+                        .DefaultIfEmpty(0m)
+                        .Sum());
+
+            foreach (var group in groups)
+            {
+                var row = dt.NewRow();
+                var colOffset = 0;
+
+                // Group key values
+                for (int i = 0; i < groupKeys.Count; i++)
+                    row[colOffset + i] = group.Key.Values[i];
+                colOffset += groupKeys.Count;
+
+                long groupCount = group.Count();
+
+                // Count
+                if (includeCount)
+                {
+                    row[colOffset++] = groupCount;
+                }
+                if (includePercentOfTotal)
+                {
+                    row[colOffset++] = totalCount > 0
+                        ? Math.Round((decimal)groupCount / totalCount * 100m, 2)
+                        : (object)DBNull.Value;
+                }
+
+                // Aggregations
+                foreach (var agg in aggregations)
+                {
+                    var cellIndex = agg.ColumnIndex;
+
+                    if (agg.IncludeCountDistinct)
+                    {
+                        var distinctCount = group
+                            .Select(r =>
+                            {
+                                var cell = r.Cells[cellIndex];
+                                var value = cell.OwningColumn?.ValueType == typeof(string) ? cell.Value : cell.FormattedValue;
+                                return value?.ToString() ?? string.Empty;
+                            })
+                            .Distinct(StringComparer.Ordinal)
+                            .LongCount();
+                        row[colOffset++] = distinctCount;
+                    }
+
+                    if (agg.IncludeSum || agg.IncludeSumPercent || agg.IncludeAvg)
+                    {
+                        var numericValues = group
+                            .Select(r => r.Cells[cellIndex].Value)
+                            .Where(v => v is not null and not DBNull)
+                            .Select(v => TryConvertToDecimal(v, out var d) ? d : (decimal?)null)
+                            .Where(v => v.HasValue)
+                            .Select(v => v!.Value)
+                            .ToList();
+
+                        decimal? sum = numericValues.Count > 0 ? numericValues.Sum() : null;
+                        decimal? avg = numericValues.Count > 0 ? numericValues.Average() : null;
+
+                        if (agg.IncludeSum) row[colOffset++] = (object)sum ?? DBNull.Value;
+                        if (agg.IncludeSumPercent)
+                        {
+                            var grandTotal = grandTotalSums[agg.ColumnIndex];
+                            row[colOffset++] = sum.HasValue && grandTotal != 0
+                                ? (object)Math.Round(sum.Value / grandTotal * 100m, 2)
+                                : DBNull.Value;
+                        }
+                        if (agg.IncludeAvg) row[colOffset++] = (object)avg ?? DBNull.Value;
+                    }
+
+                    if (agg.IncludeMin || agg.IncludeMax)
+                    {
+                        if (agg.IsNumeric)
+                        {
+                            // Numeric path — use decimal for precision
+                            var numericValues = group
+                                .Select(r => r.Cells[cellIndex].Value)
+                                .Where(v => v is not null and not DBNull)
+                                .Select(v => TryConvertToDecimal(v, out var d) ? d : (decimal?)null)
+                                .Where(v => v.HasValue)
+                                .Select(v => v!.Value)
+                                .ToList();
+
+                            if (agg.IncludeMin) row[colOffset++] = numericValues.Count > 0 ? (object)numericValues.Min() : DBNull.Value;
+                            if (agg.IncludeMax) row[colOffset++] = numericValues.Count > 0 ? (object)numericValues.Max() : DBNull.Value;
+                        }
+                        else
+                        {
+                            // Comparable path — use IComparable so dates, strings etc. work natively
+                            var comparableValues = group
+                                .Select(r => r.Cells[cellIndex].Value)
+                                .Where(v => v is not null and not DBNull && v is IComparable)
+                                .Cast<IComparable>()
+                                .ToList();
+
+                            if (agg.IncludeMin) row[colOffset++] = comparableValues.Count > 0 ? (object)comparableValues.Min() : DBNull.Value;
+                            if (agg.IncludeMax) row[colOffset++] = comparableValues.Count > 0 ? (object)comparableValues.Max() : DBNull.Value;
+                        }
+                    }
+                }
+
+                dt.Rows.Add(row);
+            }
+
+            var resultGrid = new DBADashDataGridView
+            {
+                Dock = DockStyle.Fill,
+                AllowUserToAddRows = false,
+                AllowUserToDeleteRows = false,
+                ReadOnly = true,
+                RowHeadersVisible = false,
+                DataSource = dt.DefaultView
+            };
+            resultGrid.DataBindingComplete += (_, _) =>
+             {
+                 // --- Format Aggregate Columns dynamically after binding the DataSource ---
+                 foreach (DataGridViewColumn col in resultGrid.Columns)
+                 {
+                     // Whole numbers / counts (e.g., 1,234,567)
+                     if (col.Name == "Count" || col.Name.EndsWith("| Count Distinct"))
+                     {
+                         col.DefaultCellStyle.Format = "N0";
+                         col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+                     }
+                     // Percentage columns (e.g., 98.45)
+                     else if (col.Name == "Count %" || col.Name.EndsWith("| Sum %"))
+                     {
+                         col.DefaultCellStyle.Format = "N2";
+                         col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+                     }
+                     // Decimals/Financial aggregates (e.g., 1,234.50) — only for decimal-typed columns
+                     else if ((col.Name.EndsWith("| Sum") || col.Name.EndsWith("| Avg") ||
+                               col.Name.EndsWith("| Min") || col.Name.EndsWith("| Max"))
+                              && col.ValueType == typeof(decimal))
+                     {
+                         col.DefaultCellStyle.Format = "#,##0.######";
+                         col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+                     }
+                 }
+                 resultGrid.AutoResizeColumnsWithMaxColumnWidth();
+                 resultGrid.AutoResizeColumnHeadersHeight();
+             };
+
+            return resultGrid;
+        }
+
+        /// <summary>
+        /// Composite group key that supports value-by-value string comparison for ordered grouping.
+        /// </summary>
+        private sealed class DataGroupKey : IEquatable<DataGroupKey>
+        {
+            public readonly string[] Values;
+            private readonly int _hash;
+            private static readonly DataGroupKeyComparer _comparer = new();
+
+            public static IComparer<DataGroupKey> Comparer => _comparer;
+
+            public DataGroupKey(string[] values, StringComparer elementComparer)
+            {
+                Values = values;
+                var hc = new HashCode();
+                foreach (var v in values)
+                    hc.Add(v, elementComparer);
+                _hash = hc.ToHashCode();
+            }
+
+            public bool Equals(DataGroupKey other)
+            {
+                if (other is null || Values.Length != other.Values.Length) return false;
+                for (int i = 0; i < Values.Length; i++)
+                    if (!string.Equals(Values[i], other.Values[i], StringComparison.Ordinal)) return false;
+                return true;
+            }
+
+            public override bool Equals(object obj) => Equals(obj as DataGroupKey);
+            public override int GetHashCode() => _hash;
+
+            private sealed class DataGroupKeyComparer : IComparer<DataGroupKey>
+            {
+                public int Compare(DataGroupKey x, DataGroupKey y)
+                {
+                    if (x is null) return y is null ? 0 : -1;
+                    if (y is null) return 1;
+                    var len = Math.Min(x.Values.Length, y.Values.Length);
+                    for (int i = 0; i < len; i++)
+                    {
+                        var cmp = string.Compare(x.Values[i], y.Values[i], StringComparison.Ordinal);
+                        if (cmp != 0) return cmp;
+                    }
+                    return x.Values.Length.CompareTo(y.Values.Length);
+                }
+            }
+        }
+
+        // =====================================================================
+        //  End Group By
+        // =====================================================================
 
         public static void ShowGridInNewForm(Control grid, string title)
         {
