@@ -95,6 +95,25 @@
                        WHEN state = (7) THEN 'COPYING'
                        WHEN state = (10) THEN 'OFFLINE_SECONDARY' ELSE CONVERT(NVARCHAR(60), state)END
                   ),
+    recovery_model_desc AS (CASE WHEN recovery_model = (1) THEN 'FULL'
+                                WHEN recovery_model = (2) THEN 'BULK_LOGGED'
+                                WHEN recovery_model = (3) THEN 'SIMPLE' ELSE CONVERT(NVARCHAR(60), recovery_model) END),
+    page_verify_option_desc AS (CASE WHEN page_verify_option=0 THEN 'NONE' 
+                                WHEN page_verify_option=1 THEN 'TORN_PAGE_DETECTION' 
+                                WHEN page_verify_option=2 THEN 'CHECKSUM' ELSE CONVERT(NVARCHAR(60),page_verify_option) END),
+    log_reuse_wait_desc AS (CASE WHEN log_reuse_wait=0 THEN 'NOTHING'
+                                WHEN log_reuse_wait=1 THEN 'CHECKPOINT'
+                                WHEN log_reuse_wait=2 THEN 'LOG_BACKUP'
+                                WHEN log_reuse_wait=3 THEN 'ACTIVE_BACKUP_OR_RESTORE'
+                                WHEN log_reuse_wait=4 THEN 'ACTIVE_TRANSACTION'
+                                WHEN log_reuse_wait=5 THEN 'DATABASE_MIRRORING' 
+                                WHEN log_reuse_wait=6 THEN 'REPLICATION'
+                                WHEN log_reuse_wait=7 THEN 'DATABASE_SNAPSHOT_CREATION'
+                                WHEN log_reuse_wait=8 THEN 'LOG_SCAN'
+                                WHEN log_reuse_wait=9 THEN 'AVAILABILITY_REPLICA'
+                                WHEN log_reuse_wait=13 THEN 'OLDEST_PAGE'
+                                WHEN log_reuse_wait=16 THEN 'XTP_CHECKPOINT'
+                                ELSE CONVERT(NVARCHAR(60),log_reuse_wait) END),
     CONSTRAINT PK_Databases PRIMARY KEY CLUSTERED (DatabaseID ASC),
     CONSTRAINT FK_Databases_Instances FOREIGN KEY (InstanceID) REFERENCES dbo.Instances (InstanceID)
 );

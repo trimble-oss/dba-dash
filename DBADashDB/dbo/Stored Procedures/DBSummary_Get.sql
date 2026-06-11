@@ -28,7 +28,10 @@ SELECT I.InstanceGroupName AS Instance,
 	MAX(I.MaxSupportedCompatibilityLevel) AS [Max Supported Compatibility Level],
 	SUM(CASE WHEN D.database_id >4  AND D.is_read_committed_snapshot_on = 1 THEN 1 ELSE 0 END) AS [RCSI Count],
 	SUM(CASE WHEN D.is_accelerated_database_recovery_on=1 THEN 1 ELSE 0 END) AS ADR,
-	SUM(CASE WHEN D.is_optimized_locking_on=1 THEN 1 ELSE 0 END) AS [Optimized Locking]
+	SUM(CASE WHEN D.is_optimized_locking_on=1 THEN 1 ELSE 0 END) AS [Optimized Locking],
+	SUM(CASE WHEN D.is_encrypted = CAST(1 AS BIT) AND D.database_id>4 THEN 1 ELSE 0 END) AS [TDE],
+	SUM(CASE WHEN D.is_read_only = CAST(1 AS BIT) THEN 1 ELSE 0 END) AS [Read Only],
+	SUM(CASE WHEN D.is_cdc_enabled= CAST(1 AS BIT) THEN 1 ELSE 0 END) AS [CDC]
 FROM dbo.InstanceInfo I 
 JOIN dbo.Databases D ON I.InstanceID = D.InstanceID
 WHERE I.IsActive=1
