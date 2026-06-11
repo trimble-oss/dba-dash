@@ -63,6 +63,9 @@ namespace DBADashGUI.Changes
                     new DataGridViewLinkColumn(){ Name="User Database Count", HeaderText="User Database Count", DataPropertyName="User Database Count", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Count of databases excluding system databases."},
                     new DataGridViewLinkColumn(){ Name="ADR", HeaderText="ADR", DataPropertyName="ADR", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Count of databases with ADR (Accelerated Database Recovery) enabled"},
                     new DataGridViewLinkColumn(){ Name="Optimized Locking", HeaderText="Optimized Locking", DataPropertyName="Optimized Locking", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Count of databases with optimized locking enabled (SQL 2025)"},
+                    new DataGridViewLinkColumn(){ Name="TDE", HeaderText="TDE", DataPropertyName="TDE", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Count of user databases with Transparent data encryption (TDE) enabled.\nis_encrypted=1 from sys.databases DMV, excludes system databases."},
+                    new DataGridViewLinkColumn(){ Name="Read Only", HeaderText="Read Only", DataPropertyName="Read Only", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Count of databases marked read only\nis_read_only=1 from sys.databases.  Includes standby databases"},
+                    new DataGridViewLinkColumn(){ Name="CDC", HeaderText="CDC", DataPropertyName="CDC", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Count of databases where change data capture (CDC) is enabled.\nis_cdc_enabled=1 from sys.databases."},
         };
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -568,6 +571,18 @@ namespace DBADashGUI.Changes
             else if (e.ColumnIndex == dgv.Columns["Optimized Locking"]?.Index)
             {
                 PersistFilter = "is_optimized_locking_on=1";
+            }
+            else if (e.ColumnIndex == dgv.Columns["TDE"]?.Index)
+            {
+                PersistFilter = "is_encrypted = 1 AND database_id > 4";
+            }
+            else if (e.ColumnIndex == dgv.Columns["Read Only"]?.Index)
+            {
+                PersistFilter = "is_read_only = 1";
+            }
+            else if (e.ColumnIndex == dgv.Columns["CDC"]?.Index)
+            {
+                PersistFilter = "is_cdc_enabled = 1";
             }
             else
             {
