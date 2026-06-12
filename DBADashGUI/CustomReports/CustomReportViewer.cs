@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace DBADashGUI.CustomReports
@@ -26,12 +27,23 @@ namespace DBADashGUI.CustomReports
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public List<CustomSqlParameter> CustomParams { get; set; }
 
+        /// <summary>
+        /// Optional grid filters to apply after report data loads.
+        /// Key = result set index, Value = DataView RowFilter expression.
+        /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public Dictionary<int, string> GridFilters { get; set; }
+
         public DataSet DataSet;
 
         private async void CustomReportViewer_Load(object sender, EventArgs e)
         {
             ReplaceViewType();
             Text = Context.Report.ReportName;
+            if (GridFilters is { Count: > 0 })
+            {
+                customReportView1.PostGridRefresh += ApplyGridFilters;
+            }
             await customReportView1.SetContext(Context, CustomParams);
             if (DataSet != null)
             {
@@ -40,6 +52,20 @@ namespace DBADashGUI.CustomReports
             else if (LoadDirectExecutionReport && Context.Report is DirectExecutionReport)
             {
                 customReportView1.RefreshData();
+            }
+        }
+
+        private void ApplyGridFilters(object sender, EventArgs e)
+        {
+            customReportView1.PostGridRefresh -= ApplyGridFilters;
+            if (GridFilters == null) return;
+            foreach (var kvp in GridFilters)
+            {
+                var grid = customReportView1.Grids.FirstOrDefault(g => g.ResultSetID == kvp.Key);
+                if (grid != null && !string.IsNullOrEmpty(kvp.Value))
+                {
+                    grid.SetFilter(kvp.Value);
+                }
             }
         }
 

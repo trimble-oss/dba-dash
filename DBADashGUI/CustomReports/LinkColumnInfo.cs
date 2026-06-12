@@ -8,6 +8,18 @@ using static DBADashGUI.SchemaCompare.CodeEditor;
 
 namespace DBADashGUI.CustomReports
 {
+    /// <summary>
+    /// Controls where a drill-down report is displayed.
+    /// </summary>
+    public enum DrillDownMode
+    {
+        /// <summary>Open the drill-down report in a new window (default).</summary>
+        NewWindow,
+
+        /// <summary>Load the drill-down report in the existing window/control.</summary>
+        ExistingWindow,
+    }
+
     public abstract class LinkColumnInfo
     {
         public abstract void Navigate(DBADashContext context, DataGridViewRow row, int selectedTableIndex, ContainerControl sender);
@@ -119,6 +131,26 @@ namespace DBADashGUI.CustomReports
     {
         public Dictionary<string, string> ColumnToParameterMap { get; set; } = new();
 
+        /// <summary>
+        /// Controls whether the drill-down opens in a new window or loads in the existing window.
+        /// Default is <see cref="DrillDownMode.NewWindow"/>.
+        /// </summary>
+        [JsonConverter(typeof(StringEnumConverter))]
+        public DrillDownMode DrillDownMode { get; set; } = DrillDownMode.NewWindow;
+
+        /// <summary>
+        /// Optional fixed grid filters to apply after the drill-down report loads.
+        /// Key = result set index, Value = DataView RowFilter expression.
+        /// </summary>
+        public Dictionary<int, string> GridFilters { get; set; }
+
+        /// <summary>
+        /// Optional factory to build grid filters dynamically from the clicked row.
+        /// Takes precedence over <see cref="GridFilters"/> when set.
+        /// </summary>
+        [JsonIgnore]
+        public Func<DataGridViewRow, Dictionary<int, string>> GridFilterFactory { get; set; }
+
         protected abstract CustomReport GetReport(DBADashContext context);
 
         public override void Navigate(DBADashContext context, DataGridViewRow row, int selectedTableIndex, ContainerControl sender)
@@ -133,8 +165,12 @@ namespace DBADashGUI.CustomReports
             {
                 var param = customParams.FirstOrDefault(p => p.Param.ParameterName == mapping.Key);
                 if (param == null) continue;
-                param.UseDefaultValue = false;
                 var value = row.Cells[mapping.Value].Value;
+                if (value == null || value == DBNull.Value)
+                {
+                    continue; // Skip null values - leave parameter at default
+                }
+                param.UseDefaultValue = false;
                 if (row.Cells[mapping.Value].ValueType == typeof(DateTime) && !context.Report.CustomReportResults[selectedTableIndex].DoNotConvertToLocalTimeZone.Contains(mapping.Value))
                 {
                     value = ((DateTime)value).AppTimeZoneToUtc();
@@ -145,8 +181,24 @@ namespace DBADashGUI.CustomReports
                 }
                 param.Param.Value = value;
             }
-            CustomReportViewer customReportViewer = new() { Context = newContext, CustomParams = customParams };
-            customReportViewer.ShowSingleInstance();
+            var filters = GridFilterFactory?.Invoke(row) ?? GridFilters;
+
+            var useExistingWindow = DrillDownMode == DrillDownMode.ExistingWindow
+                                    && sender is CustomReportView
+                                    && !Control.ModifierKeys.HasFlag(Keys.Control); // Ctrl+Click forces new window
+
+            if (useExistingWindow && sender is CustomReportView existingView)
+            {
+                existingView.PushNavigationState();
+                existingView.Report = report;
+                existingView.DrillDownGridFilters = filters;
+                _ = existingView.SetContext(newContext, customParams);
+            }
+            else
+            {
+                CustomReportViewer customReportViewer = new() { Context = newContext, CustomParams = customParams, GridFilters = filters };
+                customReportViewer.ShowSingleInstance();
+            }
         }
     }
 

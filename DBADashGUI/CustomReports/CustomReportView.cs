@@ -26,7 +26,7 @@ using DataTable = System.Data.DataTable;
 
 namespace DBADashGUI.CustomReports
 {
-    public partial class CustomReportView : UserControl, ISetContext, IRefreshData, ISetStatus
+    public partial class CustomReportView : UserControl, ISetContext, IRefreshData, ISetStatus, INavigation
     {
         public event EventHandler ReportNameChanged;
 
@@ -66,6 +66,83 @@ namespace DBADashGUI.CustomReports
 
         private bool wasTableCollapsedBeforeMaximize = false;
 
+        #region Navigation stack for in-place drill-down
+
+        /// <summary>
+        /// Represents a saved navigation state for back-navigation.
+        /// </summary>
+        private sealed record NavigationState(CustomReport Report, DBADashContext Context, List<CustomSqlParameter> Params, Dictionary<int, string> GridFilters);
+
+        private readonly Stack<NavigationState> navigationStack = new();
+        private ToolStripButton tsBack;
+
+        /// <summary>
+        /// Programmatic grid filters applied by drill-down navigation.
+        /// These are re-applied on every grid refresh so they persist across tab changes.
+        /// Key = result set index, Value = DataView RowFilter expression.
+        /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public Dictionary<int, string> DrillDownGridFilters { get; set; }
+
+        public bool CanNavigateBack => navigationStack.Count > 0;
+
+        public bool NavigateBack()
+        {
+            if (!CanNavigateBack) return false;
+            var state = navigationStack.Pop();
+            Report = state.Report;
+            DrillDownGridFilters = state.GridFilters;
+            if (state.Context == context)
+            {
+                // Context reference unchanged (e.g., switching between summary/detail on same tree node).
+                // Restore params and refresh directly since SetContext would short-circuit.
+                customParams = state.Params;
+                RefreshData();
+            }
+            else
+            {
+                _ = SetContext(state.Context, state.Params);
+            }
+            UpdateBackButtonVisibility();
+            return true;
+        }
+
+        /// <summary>
+        /// Saves the current report, context, and parameters onto the navigation stack.
+        /// Call before modifying the view in-place (e.g., drill-down or report switch).
+        /// </summary>
+        public void PushNavigationState()
+        {
+            navigationStack.Push(new NavigationState(Report, context, new List<CustomSqlParameter>(customParams), DrillDownGridFilters));
+            UpdateBackButtonVisibility();
+        }
+
+        /// <summary>
+        /// Clears the entire navigation stack (e.g., when returning to a known home state).
+        /// </summary>
+        public void ClearNavigationStack()
+        {
+            navigationStack.Clear();
+            UpdateBackButtonVisibility();
+        }
+
+        private void UpdateBackButtonVisibility()
+        {
+            if (tsBack != null)
+            {
+                tsBack.Visible = navigationStack.Count > 0;
+            }
+        }
+
+        private void AddBackButton()
+        {
+            tsBack = new ToolStripButton() { ToolTipText = "Navigate back to previous view", Visible = false, Image = Properties.Resources.arrow_back_16xLG, DisplayStyle = ToolStripItemDisplayStyle.Image };
+            tsBack.Click += (_, _) => NavigateBack();
+            toolStrip1.Items.Insert(0, tsBack);
+        }
+
+        #endregion
+
         // Map chart location to the appropriate split panel.
         // For Top or Left charts we host them in Panel1; for Bottom or Right use Panel2.
         private Panel ChartPanel => Report != null && Report.ChartLocation is CustomReport.ChartLocations.Top or CustomReport.ChartLocations.Left ? splitTablesCharts.Panel1 : splitTablesCharts.Panel2;
@@ -99,6 +176,7 @@ namespace DBADashGUI.CustomReports
         {
             Grids = new();
             InitializeComponent();
+            AddBackButton();
             ShowParamPrompt(false);
             this.ApplyTheme();
             scriptDataTablesToolStripMenuItem.Click += (_, _) => ScriptDataTables(false);
@@ -1587,8 +1665,26 @@ namespace DBADashGUI.CustomReports
 
         protected virtual void OnPostGridRefresh()
         {
+            ApplyDrillDownGridFilters();
             UpdateClearFilter();
+            UpdateBackButtonVisibility();
             PostGridRefresh?.Invoke(this, EventArgs.Empty);
+        }
+
+        /// <summary>
+        /// Re-applies programmatic drill-down grid filters after every grid refresh.
+        /// </summary>
+        private void ApplyDrillDownGridFilters()
+        {
+            if (DrillDownGridFilters is not { Count: > 0 }) return;
+            foreach (var kvp in DrillDownGridFilters)
+            {
+                var grid = Grids.FirstOrDefault(g => g.ResultSetID == kvp.Key);
+                if (grid != null && !string.IsNullOrEmpty(kvp.Value))
+                {
+                    grid.SetFilter(kvp.Value);
+                }
+            }
         }
 
         private void RenameResultSet_Click(object sender, EventArgs e)
