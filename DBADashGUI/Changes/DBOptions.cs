@@ -1,609 +1,145 @@
-﻿using DBADashGUI.HA;
+using DBADash;
+using DBADashGUI.HA;
 using DBADashGUI.Theme;
-using Humanizer;
-using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Linq;
 using System.Windows.Forms;
 
-namespace DBADashGUI.Changes
+namespace DBADashGUI.CustomReports
 {
-    public partial class DBOptions : UserControl, ISetContext, INavigation
+    internal class DBOptionsReport : CustomReportView
     {
-        private List<int> InstanceIDs;
-        private int DatabaseID;
-        private string InstanceGroupName;
-        private string PersistFilter;
-        private int? _drillDownInstanceID;
-
-        private int? DrillDownInstanceID
-        {
-            get => _drillDownInstanceID;
-            set
-            {
-                _drillDownInstanceID = value;
-                tsConfigureInstance.Enabled = InstanceIDs.Count == 1 || _drillDownInstanceID.HasValue;
-            }
-        }
-
         private const int MAX_VLF_WARNING_THRESHOLD = 1000;
         private const int MAX_VLF_CRITICAL_THRESHOLD = 10000;
 
-        public DBOptions()
+        private ToolStripDropDownButton tsConfigureMetrics;
+        private ToolStripMenuItem tsConfigureRoot;
+        private ToolStripMenuItem tsConfigureInstance;
+        private ToolStripButton tsDetail;
+        private ToolStripButton tsSummary;
+
+        private bool IsSummaryMode => Report is SystemReport sr && sr.ProcedureName == "DBOptionsSummary_Get";
+
+        public DBOptionsReport()
         {
-            InitializeComponent();
-            dgvHistory.RegisterClearFilter(tsClearFilterHistory);
-            dgv.RegisterClearFilter(tsClearFilter);
+            PostGridRefresh += DBOptionsReport_PostGridRefresh;
+            Report = SummaryInstance;
+            PreventReportOverwrite = true;
+            AddToolbarButtons();
         }
 
-        private static readonly DataGridViewColumn[] SummaryCols =
-        {           new DataGridViewLinkColumn(){ Name="Instance", HeaderText="Instance", DataPropertyName="Instance", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor},
-                    new DataGridViewLinkColumn(){ Name="Page Verify Not Optimal", HeaderText="Page Verify Not Optimal", DataPropertyName="Page Verify Not Optimal", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Page verify should be set to CHECKSUM which can help detect corruption"},
-                    new DataGridViewLinkColumn(){ Name="Auto Close", HeaderText="Auto Close", DataPropertyName="Auto Close", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Auto close should be set to OFF.  Opening and closing the database after each connection can result in performance issues"},
-                    new DataGridViewLinkColumn(){ Name="Auto Shrink", HeaderText="Auto Shrink", DataPropertyName="Auto Shrink", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText ="Auto shrink should be set to OFF.  Constant growing and shrinking of database files will result in performance issues."},
-                    new DataGridViewLinkColumn(){ Name="Auto Create Stats Disabled", HeaderText="Auto Create Stats Disabled", DataPropertyName="Auto Create Stats Disabled", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Auto create statistics should be enabled. Statistics enable the query optimizer to make better decisions about how to process your query."},
-                    new DataGridViewLinkColumn(){ Name="Auto Update Stats Disabled", HeaderText="Auto Update Stats Disabled", DataPropertyName="Auto Update Stats Disabled", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText ="Auto update statistics should be enabled. Up-to-date statistics enable the query optimizer to make better decisions about how to process your query." },
-                    new DataGridViewLinkColumn(){ Name="Old Compat Level", HeaderText="Old Compat Level", DataPropertyName="Old Compat Level", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Use the latest compatibility level to benefit from new performance improvements and features. \nWARNING: Changing the database compatibility level has some risk associated with it and it can also result in performance degradation."},
-                    new DataGridViewLinkColumn(){ Name="Trustworthy", HeaderText="Trustworthy", DataPropertyName="Trustworthy", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Trustworthy should be set to OFF.  This setting has security risks associated with it."},
-                    new DataGridViewLinkColumn(){ Name="Online", HeaderText="Online", DataPropertyName="Online", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Database is online ready for queries."},
-                    new DataGridViewLinkColumn(){ Name="Offline", HeaderText="Offline", DataPropertyName="Offline", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Database has been taken offline and is unavailable"},
-                    new DataGridViewLinkColumn(){ Name="Restoring", HeaderText="Restoring", DataPropertyName="Restoring", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Database is restoring."},
-                    new DataGridViewLinkColumn(){ Name="Recovering", HeaderText="Recovering", DataPropertyName="Recovering", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Database is waiting for recovery process to complete before it becomes online"},
-                    new DataGridViewLinkColumn(){ Name="Recovery Pending", HeaderText="Recovery Pending", DataPropertyName="Recovery Pending", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "SQL Server encountered a resource related error during recovery.  Files could be missing or system resource limitations might be preventing the database from starting."},
-                    new DataGridViewLinkColumn(){ Name="Suspect", HeaderText="Suspect", DataPropertyName="Suspect", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Database couldn't be recovered and might be damaged."},
-                    new DataGridViewLinkColumn(){ Name="Emergency", HeaderText="Emergency", DataPropertyName="Emergency", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "User has changed the database state to EMERGENCY.  The database is in single-user mode to allow repair."},
-                    new DataGridViewLinkColumn(){ Name="Standby", HeaderText="Standby", DataPropertyName="Standby", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Database is restoring and has been brought online with STANDBY for read-only access."},
-                    new DataGridViewLinkColumn(){ Name="Max VLF Count", HeaderText="Max VLF Count", DataPropertyName="Max VLF Count", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Too many virtual log files (VLF) can slow down log backups and database recovery."},
-                    new DataGridViewLinkColumn(){ Name="Not Using Indirect Checkpoints", HeaderText="Not Using Indirect Checkpoints", DataPropertyName="Not Using Indirect Checkpoints", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Indirect checkpoints can improve database recovery time and reduce checkpoint related I/O spiking.\nIntroduced in SQL 2012 and became the default in SQL 2016.\nNote: In some cases indirect checkpoints might cause performance degradation."},
-                    new DataGridViewLinkColumn(){ Name="None-Default Target Recovery Time", HeaderText="None-Default Target Recovery Time", DataPropertyName="None-Default Target Recovery Time", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Defaults are:\n0 - Automatic checkpoints.  Old default.\n60 - Indirect checkpoints. Default from SQL 2016.  Can improve recovery time and reduce checkpoint related I/O spiking."},
-                    new DataGridViewLinkColumn(){ Name="RCSI Count", HeaderText="RCSI Count", DataPropertyName="RCSI Count", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Count of user databases using read committed snapshot isolation level.\nRead Committed Isolation Level (RCSI) allows read and write queries to run concurrently without blocking each other."},
-                    new DataGridViewLinkColumn(){ Name="User Database Count", HeaderText="User Database Count", DataPropertyName="User Database Count", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Count of databases excluding system databases."},
-                    new DataGridViewLinkColumn(){ Name="ADR", HeaderText="ADR", DataPropertyName="ADR", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Count of databases with ADR (Accelerated Database Recovery) enabled"},
-                    new DataGridViewLinkColumn(){ Name="Optimized Locking", HeaderText="Optimized Locking", DataPropertyName="Optimized Locking", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Count of databases with optimized locking enabled (SQL 2025)"},
-                    new DataGridViewLinkColumn(){ Name="TDE", HeaderText="TDE", DataPropertyName="TDE", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Count of user databases with Transparent data encryption (TDE) enabled.\nis_encrypted=1 from sys.databases DMV, excludes system databases."},
-                    new DataGridViewLinkColumn(){ Name="Read Only", HeaderText="Read Only", DataPropertyName="Read Only", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Count of databases marked read only\nis_read_only=1 from sys.databases.  Includes standby databases"},
-                    new DataGridViewLinkColumn(){ Name="CDC", HeaderText="CDC", DataPropertyName="CDC", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Count of databases where change data capture (CDC) is enabled.\nis_cdc_enabled=1 from sys.databases."},
-        };
-
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public bool SummaryMode
+        private void AddToolbarButtons()
         {
-            get => DatabaseID <= 0 && tsDetail.Visible;
-            set
+            tsDetail = new ToolStripButton("Detail") { ToolTipText = "Switch to detail view showing all databases", Image = Properties.Resources.Table_16x };
+            tsDetail.Click += (_, _) => SwitchToDetail();
+
+            tsSummary = new ToolStripButton("Summary") { ToolTipText = "Switch back to summary view", Visible = false, Image = Properties.Resources.Table_16x };
+            tsSummary.Click += (_, _) => SwitchToSummary();
+
+            tsConfigureRoot = new ToolStripMenuItem("Root") { ToolTipText = "Configure database collection metrics at root level" };
+            tsConfigureRoot.Click += (_, _) => ConfigureMetrics(-1);
+
+            tsConfigureInstance = new ToolStripMenuItem("Instance") { ToolTipText = "Configure database collection metrics for this instance" };
+            tsConfigureInstance.Click += (_, _) =>
             {
-                tsDetail.Visible = value;
-                tsSummary.Visible = !value;
-                if (value)
+                if (context?.InstanceIDs?.Count == 1)
                 {
-                    InstanceGroupName = string.Empty;
+                    ConfigureMetrics(context.InstanceIDs.First());
                 }
-            }
+            };
+
+            tsConfigureMetrics = new ToolStripDropDownButton("Configure Metrics")
+            {
+                ToolTipText = "Configure database collection metrics",
+                DropDownItems = { tsConfigureRoot, tsConfigureInstance },
+                Image = Properties.Resources.SettingsOutline_16x
+            };
+
+            var insertAt = ToolStrip.Items.IndexOfKey("tsCols");
+            insertAt = insertAt >= 0 ? insertAt + 1 : ToolStrip.Items.Count;
+            ToolStrip.Items.Insert(insertAt++, tsDetail);
+            ToolStrip.Items.Insert(insertAt++, tsSummary);
+            ToolStrip.Items.Insert(insertAt, tsConfigureMetrics);
         }
 
-        public void SetContext(DBADashContext _context)
+        private void SwitchToDetail()
         {
-            InstanceIDs = _context.InstanceIDs.ToList();
-            DatabaseID = _context.DatabaseID;
-            PersistFilter = null;
-            InstanceGroupName = string.Empty;
-            SummaryMode = true;
-            DrillDownInstanceID = null;
+            PushNavigationState();
+            Report = DetailInstance;
+            DrillDownGridFilters = null;
+            customParams = Report.GetCustomSqlParameters();
             RefreshData();
         }
 
-        private void RefreshData()
+        private void SwitchToSummary()
         {
-            if (InstanceIDs == null) return;
-            RefreshHistory();
-            if (SummaryMode)
-            {
-                RefreshDBSummary();
-            }
-            else
-            {
-                RefreshDBInfo();
-            }
+            ClearNavigationStack();
+            Report = SummaryInstance;
+            DrillDownGridFilters = null;
+            customParams = Report.GetCustomSqlParameters();
+            RefreshData();
         }
 
-        private void Pivot(ref DataTable dt)
+        private void DBOptionsReport_PostGridRefresh(object sender, EventArgs e)
         {
-            var pivotDT = new DataTable();
-            pivotDT.Columns.Add("Setting");
-            pivotDT.Columns.Add("Value");
-            foreach (DataColumn col in dt.Columns)
+            tsConfigureInstance.Enabled = context?.InstanceIDs?.Count == 1;
+
+            // Sync toolbar state with current mode
+            tsDetail.Visible = IsSummaryMode;
+            tsSummary.Visible = !IsSummaryMode;
+
+            // Apply manual highlighting for detail mode (cross-column comparisons)
+            if (!IsSummaryMode && Grids.Count > 0)
             {
-                if (col.ColumnName is not "InstanceID" and not "DatabaseID")
+                var detailGrid = Grids[0];
+                detailGrid.RowsAdded -= Detail_RowsAdded;
+                detailGrid.RowsAdded += Detail_RowsAdded;
+
+                if (detailGrid.Rows.Count > 0)
                 {
-                    var r = pivotDT.NewRow();
-                    r[0] = col.ColumnName;
-                    r[1] = dt.Rows[0][col];
-                    pivotDT.Rows.Add(r);
+                    Detail_RowsAdded(detailGrid, new DataGridViewRowsAddedEventArgs(0, detailGrid.Rows.Count));
                 }
             }
-
-            dgv.AutoGenerateColumns = true;
-            dgv.DataSource = pivotDT;
-            dgv.ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing();
-            dgv.AutoResizeColumnsWithMaxColumnWidth();
         }
 
-        private void RefreshDBSummary()
-        {
-            using var cn = new SqlConnection(Common.ConnectionString);
-            using var cmd = new SqlCommand("dbo.DBSummary_Get", cn) { CommandType = CommandType.StoredProcedure };
-            using var da = new SqlDataAdapter(cmd);
-
-            cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-            cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
-            DataTable dt = new();
-            da.Fill(dt);
-            dgv.DataSource = null;
-            dgv.AutoGenerateColumns = false;
-            dgv.Columns.Clear();
-            dgv.Columns.AddRange(SummaryCols);
-            dgv.ApplyTheme();
-            dgv.DataSource = new DataView(dt);
-            PersistFilter = null;
-            dgv.ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing();
-            dgv.AutoResizeColumnsWithMaxColumnWidth();
-
-            dgv.Columns[0].Frozen = Common.FreezeKeyColumn;
-        }
-
-        public DataTable GetDBInfo()
-        {
-            using var cn = new SqlConnection(Common.ConnectionString);
-            using var cmd = new SqlCommand("dbo.DatabasesAllInfo_Get", cn) { CommandType = CommandType.StoredProcedure };
-            using var da = new SqlDataAdapter(cmd);
-            cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-            cmd.Parameters.AddIfGreaterThanZero("DatabaseID", DatabaseID);
-            cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
-            cmd.Parameters.AddStringIfNotNullOrEmpty("InstanceGroupName", InstanceGroupName);
-            DataTable dt = new();
-            da.Fill(dt);
-            return dt;
-        }
-
-        private void RefreshDBInfo()
-        {
-            var dt = GetDBInfo();
-            if (dt.Rows.Count == 1 && DatabaseID > 0)
-            {
-                tsSummary.Visible = false;
-                tsDetail.Visible = false;
-                Pivot(ref dt);
-            }
-            else
-            {
-                tsSummary.Visible = true;
-                dgv.Columns.Clear();
-                dgv.AutoGenerateColumns = true;
-                var dv = new DataView(dt, PersistFilter, string.Empty, DataViewRowState.CurrentRows);
-                dgv.DataSource = dv;
-                dgv.Columns["InstanceID"].Visible = false;
-                dgv.Columns["DatabaseID"].Visible = false;
-                dgv.Columns["LastGoodCheckDBStatus"].Visible = false;
-                foreach (DataGridViewColumn col in dgv.Columns)
-                {
-                    col.HeaderText = col.HeaderText.Titleize();
-                    col.SortMode = DataGridViewColumnSortMode.Automatic;
-                }
-                dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-                dgv.Columns[0].Frozen = Common.FreezeKeyColumn;
-                dgv.Columns[1].Frozen = Common.FreezeKeyColumn; //hidden
-                dgv.Columns[2].Frozen = Common.FreezeKeyColumn; //hidden
-                dgv.Columns[3].Frozen = Common.FreezeKeyColumn;
-                PersistFilter = null;
-            }
-        }
-
-        private void RefreshHistory()
-        {
-            using var cn = new SqlConnection(Common.ConnectionString);
-            using var cmd = new SqlCommand("dbo.DBOptionsHistory_Get", cn) { CommandType = CommandType.StoredProcedure };
-            using var da = new SqlDataAdapter(cmd);
-            cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-            cmd.Parameters.AddIfGreaterThanZero("DatabaseID", DatabaseID);
-            cmd.Parameters.AddWithValue("ExcludeStateChanges", excludeStateChangesToolStripMenuItem.Checked);
-            cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
-            cmd.Parameters.AddStringIfNotNullOrEmpty("InstanceGroupName", InstanceGroupName);
-            DataTable dt = new();
-            da.Fill(dt);
-            DateHelper.ConvertUTCToAppTimeZone(ref dt);
-            foreach (DataRow r in dt.Rows)
-            {
-                if (r["OldValue"].GetType() == typeof(byte[]))
-                {
-                    r["OldValue"] = Common.ByteArrayToString((byte[])r["OldValue"]);
-                }
-                if (r["NewValue"].GetType() == typeof(byte[]))
-                {
-                    r["NewValue"] = Common.ByteArrayToString((byte[])r["NewValue"]);
-                }
-            }
-            dgvHistory.AutoGenerateColumns = false;
-            dgvHistory.DataSource = new DataView(dt);
-            dgvHistory.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-            dgvHistory.ApplyTheme();
-        }
-
-        private void TsCopyHistory_Click(object sender, EventArgs e)
-        {
-            dgvHistory.CopyGrid();
-        }
-
-        private void TsRefreshHistory_Click(object sender, EventArgs e)
-        {
-            RefreshHistory();
-        }
-
-        private void TsRefreshInfo_Click(object sender, EventArgs e)
-        {
-            if (SummaryMode)
-            {
-                RefreshDBSummary();
-            }
-            else
-            {
-                RefreshDBInfo();
-            }
-        }
-
-        private void TsCopyInfo_Click(object sender, EventArgs e)
-        {
-            dgv.CopyGrid();
-        }
-
-        private void ExcludeStateChangesToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            RefreshHistory();
-        }
-
-        private void TsSummary_Click(object sender, EventArgs e)
-        {
-            ShowSummary();
-        }
-
-        private void ShowSummary()
-        {
-            var historyRefresh = !string.IsNullOrEmpty(InstanceGroupName);
-            dgv.DataSource = null;
-            SummaryMode = true;
-            DrillDownInstanceID = null;
-            RefreshDBSummary();
-            if (historyRefresh)
-            {
-                RefreshHistory();
-            }
-        }
-
-        private void TsDetail_Click(object sender, EventArgs e)
-        {
-            var historyRefresh = string.IsNullOrEmpty(InstanceGroupName);
-            SummaryMode = false;
-            RefreshDBInfo();
-            if (historyRefresh)
-            {
-                RefreshHistory();
-            }
-        }
-
-        private void DBOptions_Load(object sender, EventArgs e)
-        {
-            if (DatabaseID > 0)
-            {
-                SummaryMode = false;
-            }
-        }
-
+        /// <summary>
+        /// Manual highlighting for cross-column comparisons that can't be expressed with rules
+        /// </summary>
         private void Detail_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            if (!dgv.Columns.Contains("database_id")) return;
+            if (sender is not DataGridView dgv) return;
 
             for (var idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
+                if (idx >= dgv.Rows.Count) break;
                 var r = dgv.Rows[idx];
-                var maxCompatLevel = r.Cells["MaxSupportedCompatibilityLevel"].Value == DBNull.Value ? 0 : Convert.ToInt16(r.Cells["MaxSupportedCompatibilityLevel"].Value);
-                r.Cells["compatibility_level"].SetStatusColor(Convert.ToInt16(r.Cells["compatibility_level"].Value) < maxCompatLevel
-                    ? DBADashStatus.DBADashStatusEnum.Warning
-                    : DBADashStatus.DBADashStatusEnum.OK);
 
-                r.Cells["page_verify_option_desc"].SetStatusColor(r.Cells["page_verify_option_desc"].Value as string == "CHECKSUM"
-                    ? DBADashStatus.DBADashStatusEnum.OK
-                    : DBADashStatus.DBADashStatusEnum.Critical);
-                r.Cells["page_verify_option"].SetStatusColor(r.Cells["page_verify_option_desc"].Value as string == "CHECKSUM"
-                    ? DBADashStatus.DBADashStatusEnum.OK
-                    : DBADashStatus.DBADashStatusEnum.Critical);
-                r.Cells["is_auto_create_stats_on"].SetStatusColor(r.Cells["is_auto_create_stats_on"].Value as bool? == true
-                    ? DBADashStatus.DBADashStatusEnum.OK
-                    : DBADashStatus.DBADashStatusEnum.Warning);
-                r.Cells["is_auto_update_stats_on"].SetStatusColor(r.Cells["is_auto_update_stats_on"].Value as bool? == true
-                    ? DBADashStatus.DBADashStatusEnum.OK
-                    : DBADashStatus.DBADashStatusEnum.Warning);
-                r.Cells["is_auto_close_on"].SetStatusColor(r.Cells["is_auto_close_on"].Value as bool? == false
-                    ? DBADashStatus.DBADashStatusEnum.OK
-                    : DBADashStatus.DBADashStatusEnum.Critical);
-                r.Cells["is_auto_shrink_on"].SetStatusColor(r.Cells["is_auto_shrink_on"].Value as bool? == false
-                    ? DBADashStatus.DBADashStatusEnum.OK
-                    : DBADashStatus.DBADashStatusEnum.Critical);
-                r.Cells["LastGoodCheckDBStatus"].SetStatusColor((DBADashStatus.DBADashStatusEnum)Convert.ToInt32(r.Cells["LastGoodCheckDBStatus"].Value));
-                r.Cells["LastGoodCheckDbTime"].SetStatusColor((DBADashStatus.DBADashStatusEnum)Convert.ToInt32(r.Cells["LastGoodCheckDBStatus"].Value));
-
-                if (Convert.ToInt32(r.Cells["database_id"].Value) == 4) // msdb
+                // compatibility_level vs MaxSupportedCompatibilityLevel (cross-column comparison)
+                if (dgv.Columns.Contains("compatibility_level") && dgv.Columns.Contains("MaxSupportedCompatibilityLevel"))
                 {
-                    r.Cells["is_trustworthy_on"].SetStatusColor(DBADashStatus.DBADashStatusEnum.NA);
-                }
-                else
-                {
-                    r.Cells["is_trustworthy_on"].SetStatusColor(r.Cells["is_trustworthy_on"].Value as bool? == false
-                        ? DBADashStatus.DBADashStatusEnum.OK
-                        : DBADashStatus.DBADashStatusEnum.Critical);
+                    var maxCompatLevel = r.Cells["MaxSupportedCompatibilityLevel"].Value == DBNull.Value ? 0 : Convert.ToInt16(r.Cells["MaxSupportedCompatibilityLevel"].Value);
+                    r.Cells["compatibility_level"].SetStatusColor(Convert.ToInt16(r.Cells["compatibility_level"].Value) < maxCompatLevel
+                        ? DBADashStatus.DBADashStatusEnum.Warning
+                        : DBADashStatus.DBADashStatusEnum.OK);
                 }
 
-                if (r.Cells["target_recovery_time_in_seconds"].Value == DBNull.Value)
+                // is_trustworthy_on: NA for msdb (database_id=4), otherwise rule-based
+                if (dgv.Columns.Contains("is_trustworthy_on") && dgv.Columns.Contains("database_id"))
                 {
-                    r.Cells["target_recovery_time_in_seconds"].SetStatusColor(DBADashStatus.DBADashStatusEnum.NA);
-                }
-                else
-                {
-                    r.Cells["target_recovery_time_in_seconds"].SetStatusColor(
-                        r.Cells["target_recovery_time_in_seconds"].Value as int? == 60
+                    if (Convert.ToInt32(r.Cells["database_id"].Value) == 4) // msdb
+                    {
+                        r.Cells["is_trustworthy_on"].SetStatusColor(DBADashStatus.DBADashStatusEnum.NA);
+                    }
+                    else
+                    {
+                        r.Cells["is_trustworthy_on"].SetStatusColor(r.Cells["is_trustworthy_on"].Value as bool? == false
                             ? DBADashStatus.DBADashStatusEnum.OK
-                            : DBADashStatus.DBADashStatusEnum.Warning);
-                }
-
-                switch (Convert.ToInt32(r.Cells["state"].Value))
-                {
-                    case 0: // Online
-                        r.Cells["state"].SetStatusColor(DBADashStatus.DBADashStatusEnum.OK);
-                        r.Cells["state_desc"].SetStatusColor(DBADashStatus.DBADashStatusEnum.OK); break;
-
-                    case 1: // Restoring
-                    case 6: // Offline
-                    case 7: // Copying
-                    case 10: // Offline Secondary
-                        r.Cells["state"].SetStatusColor(DBADashStatus.DBADashStatusEnum.NA);
-                        r.Cells["state_desc"].SetStatusColor(DBADashStatus.DBADashStatusEnum.NA);
-                        break;
-
-                    case 2: // Recovering
-                        r.Cells["state"].SetStatusColor(DBADashStatus.DBADashStatusEnum.Warning);
-                        r.Cells["state_desc"].SetStatusColor(DBADashStatus.DBADashStatusEnum.Warning);
-                        break;
-
-                    case 3: // Recovery Pending
-                    case 4: // Suspect
-                    case 5: // Emergency
-                        r.Cells["state"].SetStatusColor(DBADashStatus.DBADashStatusEnum.Critical);
-                        r.Cells["state_desc"].SetStatusColor(DBADashStatus.DBADashStatusEnum.Critical);
-                        break;
-                }
-
-                if (r.Cells["VLFCount"].Value == DBNull.Value)
-                {
-                    r.Cells["VLFCount"].SetStatusColor(DBADashStatus.DBADashStatusEnum.NA);
-                }
-                else
-                {
-                    switch (Convert.ToInt32(r.Cells["VLFCount"].Value))
-                    {
-                        case > MAX_VLF_CRITICAL_THRESHOLD:
-                            r.Cells["VLFCount"].SetStatusColor(DBADashStatus.DBADashStatusEnum.Critical);
-                            break;
-
-                        case > MAX_VLF_WARNING_THRESHOLD:
-                            r.Cells["VLFCount"].SetStatusColor(DBADashStatus.DBADashStatusEnum.Warning);
-                            break;
-
-                        default:
-                            r.Cells["VLFCount"].SetStatusColor(DBADashStatus.DBADashStatusEnum.OK);
-                            break;
+                            : DBADashStatus.DBADashStatusEnum.Critical);
                     }
                 }
             }
-        }
-
-        private void Summary_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
-        {
-            var warningCols = new[] { "Auto Create Stats Disabled", "Auto Update Stats Disabled", "Old Compat Level", "Recovering", "Offline", "Trustworthy", "Not Using Indirect Checkpoints", "None-Default Target Recovery Time" };
-            var criticalCols = new[] { "Page Verify Not Optimal", "Auto Close", "Auto Shrink", "Suspect", "Emergency", "Recovery Pending" };
-            for (var idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
-            {
-                var r = dgv.Rows[idx];
-
-                foreach (var col in warningCols)
-                {
-                    if (r.Cells[col].Value == DBNull.Value)
-                    {
-                        r.Cells[col].SetStatusColor(DBADashStatus.DBADashStatusEnum.NA);
-                    }
-                    else
-                    {
-                        r.Cells[col].SetStatusColor((int)r.Cells[col].Value > 0 ? DBADashStatus.DBADashStatusEnum.Warning : DBADashStatus.DBADashStatusEnum.OK);
-                    }
-                }
-                foreach (var col in criticalCols)
-                {
-                    if (r.Cells[col].Value == DBNull.Value)
-                    {
-                        r.Cells[col].SetStatusColor(DBADashStatus.DBADashStatusEnum.NA);
-                    }
-                    else
-                    {
-                        r.Cells[col].SetStatusColor((int)r.Cells[col].Value > 0 ? DBADashStatus.DBADashStatusEnum.Critical : DBADashStatus.DBADashStatusEnum.OK);
-                    }
-                }
-                var vlfStatus = DBADashStatus.DBADashStatusEnum.NA;
-                if (r.Cells["Max VLF Count"].Value != DBNull.Value)
-                {
-                    vlfStatus = (int)r.Cells["Max VLF Count"].Value > MAX_VLF_CRITICAL_THRESHOLD ? DBADashStatus.DBADashStatusEnum.Critical : ((int)r.Cells["Max VLF Count"].Value > MAX_VLF_WARNING_THRESHOLD ? DBADashStatus.DBADashStatusEnum.Warning : DBADashStatus.DBADashStatusEnum.OK);
-                }
-
-                r.Cells["Max VLF Count"].SetStatusColor(vlfStatus);
-            }
-        }
-
-        private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
-        {
-            if (SummaryMode)
-            {
-                Summary_RowsAdded(sender, e);
-            }
-            else
-            {
-                Detail_RowsAdded(sender, e);
-            }
-        }
-
-        private void TsExcel_Click(object sender, EventArgs e)
-        {
-            dgv.ExportToExcel();
-        }
-
-        private void TsExcelHistory_Click(object sender, EventArgs e)
-        {
-            dgvHistory.ExportToExcel();
-        }
-
-        private void TsCols_Click(object sender, EventArgs e)
-        {
-            dgv.PromptColumnSelection();
-        }
-
-        private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-            if (!SummaryMode || e.RowIndex < 0) return;
-            var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
-            InstanceGroupName = (string)row["Instance"];
-            DrillDownInstanceID = (int?)(row["InstanceID"].DBNullToNull());
-            SummaryMode = false;
-            if (e.ColumnIndex == dgv.Columns["Instance"]?.Index)
-            {
-                PersistFilter = string.Empty;
-            }
-            else if (e.ColumnIndex == dgv.Columns["Page Verify Not Optimal"]?.Index)
-            {
-                PersistFilter = "page_verify_option <> 2";
-            }
-            else if (e.ColumnIndex == dgv.Columns["Auto Close"]?.Index)
-            {
-                PersistFilter = "is_auto_close_on = 1";
-            }
-            else if (e.ColumnIndex == dgv.Columns["Auto Shrink"]?.Index)
-            {
-                PersistFilter = "is_auto_shrink_on = 1";
-            }
-            else if (e.ColumnIndex == dgv.Columns["Auto Create Stats Disabled"]?.Index)
-            {
-                PersistFilter = "is_auto_create_stats_on = 0";
-            }
-            else if (e.ColumnIndex == dgv.Columns["Auto Update Stats Disabled"]?.Index)
-            {
-                PersistFilter = "is_auto_update_stats_on = 0";
-            }
-            else if (e.ColumnIndex == dgv.Columns["Trustworthy"]?.Index)
-            {
-                PersistFilter = "is_trustworthy_on = 1 AND DatabaseName<> 'msdb'";
-            }
-            else if (e.ColumnIndex == dgv.Columns["Online"]?.Index)
-            {
-                PersistFilter = "state = 0";
-            }
-            else if (e.ColumnIndex == dgv.Columns["Restoring"]?.Index)
-            {
-                PersistFilter = "state = 1";
-            }
-            else if (e.ColumnIndex == dgv.Columns["Recovering"]?.Index)
-            {
-                PersistFilter = "state = 2";
-            }
-            else if (e.ColumnIndex == dgv.Columns["Recovery Pending"]?.Index)
-            {
-                PersistFilter = "state = 3";
-            }
-            else if (e.ColumnIndex == dgv.Columns["Suspect"]?.Index)
-            {
-                PersistFilter = "state = 4";
-            }
-            else if (e.ColumnIndex == dgv.Columns["Emergency"]?.Index)
-            {
-                PersistFilter = "state = 5";
-            }
-            else if (e.ColumnIndex == dgv.Columns["Offline"]?.Index)
-            {
-                PersistFilter = "state IN(6, 10)";
-            }
-            else if (e.ColumnIndex == dgv.Columns["Not Using Indirect Checkpoints"]?.Index)
-            {
-                PersistFilter = "target_recovery_time_in_seconds=0 and database_id>4";
-            }
-            else if (e.ColumnIndex == dgv.Columns["None-Default Target Recovery Time"]?.Index)
-            {
-                PersistFilter = "target_recovery_time_in_seconds NOT IN(0,60)";
-            }
-            else if (e.ColumnIndex == dgv.Columns["Old Compat Level"]?.Index)
-            {
-                PersistFilter = "compatibility_level < " + Convert.ToInt32(row["Max Supported Compatibility Level"]);
-            }
-            else if (e.ColumnIndex == dgv.Columns["Max VLF Count"]?.Index)
-            {
-                PersistFilter = "VLFCount >= " + Math.Min(MAX_VLF_WARNING_THRESHOLD + 1, Convert.ToInt32(row["Max VLF Count"]));
-            }
-            else if (e.ColumnIndex == dgv.Columns["User Database Count"]?.Index)
-            {
-                PersistFilter = "database_id > 4";
-            }
-            else if (e.ColumnIndex == dgv.Columns["Standby"]?.Index)
-            {
-                PersistFilter = "is_in_standby = 1";
-            }
-            else if (e.ColumnIndex == dgv.Columns["RCSI Count"]?.Index)
-            {
-                PersistFilter = "is_read_committed_snapshot_on=1";
-            }
-            else if (e.ColumnIndex == dgv.Columns["ADR"]?.Index)
-            {
-                PersistFilter = "is_accelerated_database_recovery_on=1";
-            }
-            else if (e.ColumnIndex == dgv.Columns["Optimized Locking"]?.Index)
-            {
-                PersistFilter = "is_optimized_locking_on=1";
-            }
-            else if (e.ColumnIndex == dgv.Columns["TDE"]?.Index)
-            {
-                PersistFilter = "is_encrypted = 1 AND database_id > 4";
-            }
-            else if (e.ColumnIndex == dgv.Columns["Read Only"]?.Index)
-            {
-                PersistFilter = "is_read_only = 1";
-            }
-            else if (e.ColumnIndex == dgv.Columns["CDC"]?.Index)
-            {
-                PersistFilter = "is_cdc_enabled = 1";
-            }
-            else
-            {
-                PersistFilter = "";
-            }
-            RefreshData();
-        }
-
-        public bool CanNavigateBack => InstanceGroupName != string.Empty;
-
-        public bool NavigateBack()
-        {
-            if (!CanNavigateBack) return false;
-
-            ShowSummary();
-            return true;
-        }
-
-        private void HistoryCols_Click(object sender, EventArgs e)
-        {
-            dgvHistory.PromptColumnSelection();
         }
 
         private static void ConfigureMetrics(int instanceId)
@@ -612,16 +148,463 @@ namespace DBADashGUI.Changes
             metricsConfig.ShowDialog();
         }
 
-        private void ConfigureRoot_Click(object sender, EventArgs e)
-        {
-            ConfigureMetrics(-1);
-        }
+        #region Report metadata helpers
 
-        private void ConfigureInstance_Click(object sender, EventArgs e)
+        /// <summary>
+        /// Creates a highlighting rule set that colors cells based on count: > 0 shows the specified status, 0 shows OK, null shows NA
+        /// </summary>
+        private static CellHighlightingRuleSet CountStatusRuleSet(string columnName, DBADashStatus.DBADashStatusEnum nonZeroStatus) => new(columnName)
         {
-            if (InstanceIDs.Count != 1 && !DrillDownInstanceID.HasValue) return;
-            var instanceId = DrillDownInstanceID ?? InstanceIDs.First();
-            ConfigureMetrics(instanceId);
-        }
+            Rules = new List<CellHighlightingRule>
+            {
+                new() { ConditionType = CellHighlightingRule.ConditionTypes.IsNull, Status = DBADashStatus.DBADashStatusEnum.NA },
+                new() { ConditionType = CellHighlightingRule.ConditionTypes.GreaterThan, Value1 = "0", Status = nonZeroStatus },
+                new() { ConditionType = CellHighlightingRule.ConditionTypes.All, Status = DBADashStatus.DBADashStatusEnum.OK },
+            }
+        };
+
+        /// <summary>
+        /// Creates a drill-down link to detail mode with an optional filter on the detail grid (result set 0).
+        /// Maps both @InstanceIDs and @InstanceGroupName so Azure DB instances (NULL InstanceID) work.
+        /// </summary>
+        private static SystemDrillDownLinkColumnInfo DrillDownLink(string detailFilter = null) => new()
+        {
+            ReportFactory = () => DetailInstance,
+            DrillDownMode = DrillDownMode.ExistingWindow,
+            ColumnToParameterMap = new Dictionary<string, string>
+            {
+                { "@InstanceIDs", "InstanceID" },
+                { "@InstanceGroupName", "Instance" },
+            },
+            GridFilters = string.IsNullOrEmpty(detailFilter) ? null : new Dictionary<int, string> { { 0, detailFilter } },
+        };
+
+        /// <summary>
+        /// Creates a drill-down link that builds the filter dynamically from row values.
+        /// </summary>
+        private static SystemDrillDownLinkColumnInfo DrillDownLinkDynamic(Func<DataGridViewRow, string> filterBuilder) => new()
+        {
+            ReportFactory = () => DetailInstance,
+            DrillDownMode = DrillDownMode.ExistingWindow,
+            ColumnToParameterMap = new Dictionary<string, string>
+            {
+                { "@InstanceIDs", "InstanceID" },
+                { "@InstanceGroupName", "Instance" },
+            },
+            GridFilterFactory = row =>
+            {
+                var filter = filterBuilder(row);
+                return string.IsNullOrEmpty(filter) ? null : new Dictionary<int, string> { { 0, filter } };
+            },
+        };
+
+        private static ColumnMetadata SummaryColumnWithHighlighting(string alias, string description, DBADashStatus.DBADashStatusEnum nonZeroStatus, string columnName, string detailFilter) => new()
+        {
+            Alias = alias,
+            Description = description,
+            Link = DrillDownLink(detailFilter),
+            Highlighting = CountStatusRuleSet(columnName, nonZeroStatus),
+        };
+
+        /// <summary>
+        /// Boolean rule: true = OK, false = notOkStatus
+        /// </summary>
+        private static CellHighlightingRuleSet BoolTrueIsOk(string columnName, DBADashStatus.DBADashStatusEnum notOkStatus) => new(columnName)
+        {
+            Rules = new List<CellHighlightingRule>
+            {
+                new() { ConditionType = CellHighlightingRule.ConditionTypes.Equals, Value1 = "True", Status = DBADashStatus.DBADashStatusEnum.OK },
+                new() { ConditionType = CellHighlightingRule.ConditionTypes.All, Status = notOkStatus },
+            }
+        };
+
+        /// <summary>
+        /// Boolean rule: false = OK, true = notOkStatus
+        /// </summary>
+        private static CellHighlightingRuleSet BoolFalseIsOk(string columnName, DBADashStatus.DBADashStatusEnum notOkStatus) => new(columnName)
+        {
+            Rules = new List<CellHighlightingRule>
+            {
+                new() { ConditionType = CellHighlightingRule.ConditionTypes.Equals, Value1 = "False", Status = DBADashStatus.DBADashStatusEnum.OK },
+                new() { ConditionType = CellHighlightingRule.ConditionTypes.All, Status = notOkStatus },
+            }
+        };
+
+        #endregion
+
+        #region Report definitions
+
+        public static SystemReport SummaryInstance => new()
+        {
+            ViewType = typeof(DBOptionsReport),
+            ReportName = "DB Options",
+            SchemaName = "dbo",
+            ProcedureName = "DBOptionsSummary_Get",
+            QualifiedProcedureName = "dbo.DBOptionsSummary_Get",
+            CanEditReport = false,
+            TriggerCollectionTypes = new List<string> { CollectionType.Databases.ToString() },
+            CustomReportResults = new Dictionary<int, CustomReportResult>
+            {
+                {
+                    0, new CustomReportResult
+                    {
+                        ResultName = "Summary",
+                        Columns = new Dictionary<string, ColumnMetadata>
+                        {
+                            { "Instance", new ColumnMetadata { Alias = "Instance", Description = "Instance group name", Link = DrillDownLink() }},
+                            { "InstanceID", new ColumnMetadata { Visible = false } },
+                            { "Page Verify Not Optimal", SummaryColumnWithHighlighting("Page Verify\nNot Optimal", "Page verify should be set to CHECKSUM which can help detect corruption", DBADashStatus.DBADashStatusEnum.Critical, "Page Verify Not Optimal", "page_verify_option <> 2") },
+                            { "Auto Close", SummaryColumnWithHighlighting("Auto\nClose", "Auto close should be set to OFF. Opening and closing the database after each connection can result in performance issues", DBADashStatus.DBADashStatusEnum.Critical, "Auto Close", "is_auto_close_on = 1") },
+                            { "Auto Shrink", SummaryColumnWithHighlighting("Auto\nShrink", "Auto shrink should be set to OFF. Constant growing and shrinking of database files will result in performance issues", DBADashStatus.DBADashStatusEnum.Critical, "Auto Shrink", "is_auto_shrink_on = 1") },
+                            { "Auto Create Stats Disabled", SummaryColumnWithHighlighting("Auto Create\nStats Disabled", "Auto create statistics should be enabled", DBADashStatus.DBADashStatusEnum.Warning, "Auto Create Stats Disabled", "is_auto_create_stats_on = 0") },
+                            { "Auto Update Stats Disabled", SummaryColumnWithHighlighting("Auto Update\nStats Disabled", "Auto update statistics should be enabled", DBADashStatus.DBADashStatusEnum.Warning, "Auto Update Stats Disabled", "is_auto_update_stats_on = 0") },
+                            { "Old Compat Level", new ColumnMetadata
+                                {
+                                    Alias = "Old Compat\nLevel",
+                                    Description = "Use the latest compatibility level to benefit from new performance improvements",
+                                    Link = DrillDownLinkDynamic(row => $"compatibility_level < {Convert.ToInt32(row.Cells["Max Supported Compatibility Level"].Value)}"),
+                                    Highlighting = CountStatusRuleSet("Old Compat Level", DBADashStatus.DBADashStatusEnum.Warning),
+                                }
+                            },
+                            { "Trustworthy", SummaryColumnWithHighlighting("Trust\nworthy", "Trustworthy should be set to OFF. This setting has security risks", DBADashStatus.DBADashStatusEnum.Warning, "Trustworthy", "is_trustworthy_on = 1 AND DatabaseName <> 'msdb'") },
+                            { "Online", new ColumnMetadata { Description = "Database is online ready for queries", Link = DrillDownLink("state = 0") } },
+                            { "Offline", SummaryColumnWithHighlighting("Offline", "Database has been taken offline and is unavailable", DBADashStatus.DBADashStatusEnum.Warning, "Offline", "state IN(6, 10)") },
+                            { "Restoring", new ColumnMetadata { Description = "Database is restoring", Link = DrillDownLink("state = 1") } },
+                            { "Recovering", SummaryColumnWithHighlighting("Recovering", "Database is waiting for recovery process to complete", DBADashStatus.DBADashStatusEnum.Warning, "Recovering", "state = 2") },
+                            { "Recovery Pending", SummaryColumnWithHighlighting("Recovery\nPending", "SQL Server encountered a resource related error during recovery", DBADashStatus.DBADashStatusEnum.Critical, "Recovery Pending", "state = 3") },
+                            { "Suspect", SummaryColumnWithHighlighting("Suspect", "Database couldn't be recovered and might be damaged", DBADashStatus.DBADashStatusEnum.Critical, "Suspect", "state = 4") },
+                            { "Emergency", SummaryColumnWithHighlighting("Emergency", "User has changed the database state to EMERGENCY", DBADashStatus.DBADashStatusEnum.Critical, "Emergency", "state = 5") },
+                            { "Standby", new ColumnMetadata { Description = "Database is restoring and has been brought online with STANDBY", Link = DrillDownLink("is_in_standby = 1") } },
+                            { "Max VLF Count", new ColumnMetadata
+                                {
+                                    Alias = "Max VLF\nCount",
+                                    Description = "Too many virtual log files (VLF) can slow down log backups and database recovery",
+                                    Link = DrillDownLinkDynamic(row => row.Cells["Max VLF Count"].Value == DBNull.Value ? null : $"VLFCount >= {Math.Min(MAX_VLF_WARNING_THRESHOLD + 1, Convert.ToInt32(row.Cells["Max VLF Count"].Value))}"),
+                                    Highlighting = new CellHighlightingRuleSet("Max VLF Count")
+                                    {
+                                        Rules = new List<CellHighlightingRule>
+                                        {
+                                            new() { ConditionType = CellHighlightingRule.ConditionTypes.IsNull, Status = DBADashStatus.DBADashStatusEnum.NA },
+                                            new() { ConditionType = CellHighlightingRule.ConditionTypes.GreaterThan, Value1 = "10000", Status = DBADashStatus.DBADashStatusEnum.Critical },
+                                            new() { ConditionType = CellHighlightingRule.ConditionTypes.GreaterThan, Value1 = "1000", Status = DBADashStatus.DBADashStatusEnum.Warning },
+                                            new() { ConditionType = CellHighlightingRule.ConditionTypes.All, Status = DBADashStatus.DBADashStatusEnum.OK },
+                                        }
+                                    }
+                                }
+                            },
+                            { "Not Using Indirect Checkpoints", SummaryColumnWithHighlighting("Not Using\nIndirect\nCheckpoints", "Indirect checkpoints can improve database recovery time and reduce checkpoint related I/O spiking", DBADashStatus.DBADashStatusEnum.Warning, "Not Using Indirect Checkpoints", "target_recovery_time_in_seconds=0 and database_id>4") },
+                            { "None-Default Target Recovery Time", SummaryColumnWithHighlighting("Non-Default\nTarget\nRecovery Time", "Defaults: 0=Automatic checkpoints, 60=Indirect checkpoints (default from SQL 2016)", DBADashStatus.DBADashStatusEnum.Warning, "None-Default Target Recovery Time", "target_recovery_time_in_seconds NOT IN(0,60)") },
+                            { "Max Supported Compatibility Level", new ColumnMetadata { Visible = false } },
+                            { "RCSI Count", new ColumnMetadata { Alias = "RCSI\nCount", Description = "Count of user databases using read committed snapshot isolation level", Link = DrillDownLink("is_read_committed_snapshot_on=1 AND database_id > 4") } },
+                            { "User Database Count", new ColumnMetadata { Alias = "User DB\nCount", Description = "Count of databases excluding system databases", Link = DrillDownLink("database_id > 4") } },
+                            { "ADR", new ColumnMetadata { Description = "Count of databases with ADR (Accelerated Database Recovery) enabled", Link = DrillDownLink("is_accelerated_database_recovery_on=1") } },
+                            { "Optimized Locking", new ColumnMetadata { Alias = "Optimized\nLocking", Description = "Count of databases with optimized locking enabled (SQL 2025)", Link = DrillDownLink("is_optimized_locking_on=1") } },
+                            { "TDE", new ColumnMetadata { Description = "Count of user databases with Transparent data encryption (TDE) enabled", Link = DrillDownLink("is_encrypted = 1 AND database_id > 4") } },
+                            { "Read Only", new ColumnMetadata { Alias = "Read\nOnly", Description = "Count of databases marked read only", Link = DrillDownLink("is_read_only = 1") } },
+                            { "CDC", new ColumnMetadata { Description = "Count of databases where change data capture (CDC) is enabled", Link = DrillDownLink("is_cdc_enabled = 1") } },
+                        }
+                    }
+                },
+                {
+                    1, new CustomReportResult
+                    {
+                        ResultName = "Options History",
+                        Columns = new Dictionary<string, ColumnMetadata>
+                        {
+                            { "Instance", new ColumnMetadata { Alias = "Instance", Description = "Instance name" } },
+                            { "InstanceGroupName", new ColumnMetadata { Alias = "Instance\nGroup", Description = "Instance group name" } },
+                            { "DB", new ColumnMetadata { Alias = "Database", Description = "Database name" } },
+                            { "Setting", new ColumnMetadata { Alias = "Setting", Description = "Setting that was changed" } },
+                            { "OldValue", new ColumnMetadata { Alias = "Old Value", Description = "Previous value of the setting" } },
+                            { "NewValue", new ColumnMetadata { Alias = "New Value", Description = "New value of the setting" } },
+                            { "ChangeDate", new ColumnMetadata { Alias = "Change Date", Description = "Date and time the change occurred" } },
+                        }
+                    }
+                }
+            },
+            Pickers = new List<Picker>
+            {
+                new()
+                {
+                    ParameterName = "@ExcludeStateChanges",
+                    Name = "Exclude State Changes",
+                    PickerItems = new Dictionary<object, string>
+                    {
+                        { true, "Yes" },
+                        { false, "No" },
+                    },
+                    DefaultValue = true,
+                    MenuBar = false,
+                    DataType = typeof(bool)
+                },
+            },
+            Params = new Params
+            {
+                ParamList = new List<Param>
+                {
+                    new()
+                    {
+                        ParamName = "@InstanceIDs",
+                        ParamType = "IDS",
+                    },
+                    new()
+                    {
+                        ParamName = "@DatabaseID",
+                        ParamType = "INT",
+                    },
+                    new()
+                    {
+                        ParamName = "@ExcludeStateChanges",
+                        ParamType = "BIT",
+                    },
+                }
+            },
+        };
+
+        public static SystemReport DetailInstance => new()
+        {
+            ViewType = typeof(DBOptionsReport),
+            ReportName = "DB Options Detail",
+            SchemaName = "dbo",
+            ProcedureName = "DBOptionsDetail_Get",
+            QualifiedProcedureName = "dbo.DBOptionsDetail_Get",
+            CanEditReport = false,
+            TriggerCollectionTypes = new List<string> { CollectionType.Databases.ToString() },
+            CustomReportResults = new Dictionary<int, CustomReportResult>
+            {
+                {
+                    0, new CustomReportResult
+                    {
+                        ResultName = "Detail",
+                        Columns = new Dictionary<string, ColumnMetadata>
+                        {
+                            { "Instance", new ColumnMetadata { Alias = "Instance", Description = "Instance group name" } },
+                            { "DatabaseID", new ColumnMetadata { Visible = false } },
+                            { "InstanceID", new ColumnMetadata { Visible = false } },
+                            { "DatabaseName", new ColumnMetadata { Alias = "Database\nName", Description = "Database name" } },
+                            { "database_id", new ColumnMetadata { Alias = "DB\nID", Description = "Database ID" } },
+                            { "compatibility_level", new ColumnMetadata { Alias = "Compat\nLevel", Description = "Database compatibility level" } },
+                            { "MaxSupportedCompatibilityLevel", new ColumnMetadata { Visible = false } },
+                            { "state", new ColumnMetadata
+                                {
+                                    Alias = "State",
+                                    Description = "Database state code",
+                                    Highlighting = new CellHighlightingRuleSet("state")
+                                    {
+                                        Rules = new List<CellHighlightingRule>
+                                        {
+                                            new() { ConditionType = CellHighlightingRule.ConditionTypes.Equals, Value1 = "0", Status = DBADashStatus.DBADashStatusEnum.OK },
+                                            new() { ConditionType = CellHighlightingRule.ConditionTypes.Equals, Value1 = "2", Status = DBADashStatus.DBADashStatusEnum.Warning },
+                                            new() { ConditionType = CellHighlightingRule.ConditionTypes.Equals, Value1 = "3", Status = DBADashStatus.DBADashStatusEnum.Critical },
+                                            new() { ConditionType = CellHighlightingRule.ConditionTypes.Equals, Value1 = "4", Status = DBADashStatus.DBADashStatusEnum.Critical },
+                                            new() { ConditionType = CellHighlightingRule.ConditionTypes.Equals, Value1 = "5", Status = DBADashStatus.DBADashStatusEnum.Critical },
+                                            new() { ConditionType = CellHighlightingRule.ConditionTypes.All, Status = DBADashStatus.DBADashStatusEnum.NA },
+                                        }
+                                    }
+                                }
+                            },
+                            { "state_desc", new ColumnMetadata
+                                {
+                                    Alias = "State\nDesc",
+                                    Description = "Database state description",
+                                    Highlighting = new CellHighlightingRuleSet("state", evaluateConditionAgainstDataSource: true)
+                                    {
+                                        Rules = new List<CellHighlightingRule>
+                                        {
+                                            new() { ConditionType = CellHighlightingRule.ConditionTypes.Equals, Value1 = "0", Status = DBADashStatus.DBADashStatusEnum.OK },
+                                            new() { ConditionType = CellHighlightingRule.ConditionTypes.Equals, Value1 = "2", Status = DBADashStatus.DBADashStatusEnum.Warning },
+                                            new() { ConditionType = CellHighlightingRule.ConditionTypes.Equals, Value1 = "3", Status = DBADashStatus.DBADashStatusEnum.Critical },
+                                            new() { ConditionType = CellHighlightingRule.ConditionTypes.Equals, Value1 = "4", Status = DBADashStatus.DBADashStatusEnum.Critical },
+                                            new() { ConditionType = CellHighlightingRule.ConditionTypes.Equals, Value1 = "5", Status = DBADashStatus.DBADashStatusEnum.Critical },
+                                            new() { ConditionType = CellHighlightingRule.ConditionTypes.All, Status = DBADashStatus.DBADashStatusEnum.NA },
+                                        }
+                                    }
+                                }
+                            },
+                            { "recovery_model_desc", new ColumnMetadata { Alias = "Recovery\nModel", Description = "Database recovery model" } },
+                            { "page_verify_option", new ColumnMetadata
+                                {
+                                    Alias = "Page\nVerify\nOption",
+                                    Description = "Page verify option code",
+                                    Highlighting = new CellHighlightingRuleSet("page_verify_option_desc", evaluateConditionAgainstDataSource: true)
+                                    {
+                                        Rules = new List<CellHighlightingRule>
+                                        {
+                                            new() { ConditionType = CellHighlightingRule.ConditionTypes.Equals, Value1 = "CHECKSUM", Status = DBADashStatus.DBADashStatusEnum.OK },
+                                            new() { ConditionType = CellHighlightingRule.ConditionTypes.All, Status = DBADashStatus.DBADashStatusEnum.Critical },
+                                        }
+                                    }
+                                }
+                            },
+                            { "page_verify_option_desc", new ColumnMetadata
+                                {
+                                    Alias = "Page\nVerify",
+                                    Description = "Page verify should be set to CHECKSUM which can help detect corruption",
+                                    Highlighting = new CellHighlightingRuleSet("page_verify_option_desc")
+                                    {
+                                        Rules = new List<CellHighlightingRule>
+                                        {
+                                            new() { ConditionType = CellHighlightingRule.ConditionTypes.Equals, Value1 = "CHECKSUM", Status = DBADashStatus.DBADashStatusEnum.OK },
+                                            new() { ConditionType = CellHighlightingRule.ConditionTypes.All, Status = DBADashStatus.DBADashStatusEnum.Critical },
+                                        }
+                                    }
+                                }
+                            },
+                            { "is_auto_close_on", new ColumnMetadata
+                                {
+                                    Alias = "Auto\nClose",
+                                    Description = "Auto close should be set to OFF",
+                                    Highlighting = BoolFalseIsOk("is_auto_close_on", DBADashStatus.DBADashStatusEnum.Critical),
+                                }
+                            },
+                            { "is_auto_shrink_on", new ColumnMetadata
+                                {
+                                    Alias = "Auto\nShrink",
+                                    Description = "Auto shrink should be set to OFF",
+                                    Highlighting = BoolFalseIsOk("is_auto_shrink_on", DBADashStatus.DBADashStatusEnum.Critical),
+                                }
+                            },
+                            { "is_auto_create_stats_on", new ColumnMetadata
+                                {
+                                    Alias = "Auto\nCreate\nStats",
+                                    Description = "Auto create statistics should be enabled",
+                                    Highlighting = BoolTrueIsOk("is_auto_create_stats_on", DBADashStatus.DBADashStatusEnum.Warning),
+                                }
+                            },
+                            { "is_auto_update_stats_on", new ColumnMetadata
+                                {
+                                    Alias = "Auto\nUpdate\nStats",
+                                    Description = "Auto update statistics should be enabled",
+                                    Highlighting = BoolTrueIsOk("is_auto_update_stats_on", DBADashStatus.DBADashStatusEnum.Warning),
+                                }
+                            },
+                            { "is_trustworthy_on", new ColumnMetadata { Alias = "Trust\nworthy", Description = "Trustworthy should be set to OFF" } },
+                            { "target_recovery_time_in_seconds", new ColumnMetadata
+                                {
+                                    Alias = "Target\nRecovery\nTime (s)",
+                                    Description = "Defaults: 0=Automatic checkpoints, 60=Indirect checkpoints",
+                                    Highlighting = new CellHighlightingRuleSet("target_recovery_time_in_seconds")
+                                    {
+                                        Rules = new List<CellHighlightingRule>
+                                        {
+                                            new() { ConditionType = CellHighlightingRule.ConditionTypes.IsNull, Status = DBADashStatus.DBADashStatusEnum.NA },
+                                            new() { ConditionType = CellHighlightingRule.ConditionTypes.Equals, Value1 = "60", Status = DBADashStatus.DBADashStatusEnum.OK },
+                                            new() { ConditionType = CellHighlightingRule.ConditionTypes.All, Status = DBADashStatus.DBADashStatusEnum.Warning },
+                                        }
+                                    }
+                                }
+                            },
+                            { "VLFCount", new ColumnMetadata
+                                {
+                                    Alias = "VLF\nCount",
+                                    Description = "Too many virtual log files can slow down log backups and database recovery",
+                                    FormatString = "N0",
+                                    Highlighting = new CellHighlightingRuleSet("VLFCount")
+                                    {
+                                        Rules = new List<CellHighlightingRule>
+                                        {
+                                            new() { ConditionType = CellHighlightingRule.ConditionTypes.IsNull, Status = DBADashStatus.DBADashStatusEnum.NA },
+                                            new() { ConditionType = CellHighlightingRule.ConditionTypes.GreaterThan, Value1 = MAX_VLF_CRITICAL_THRESHOLD.ToString(), Status = DBADashStatus.DBADashStatusEnum.Critical },
+                                            new() { ConditionType = CellHighlightingRule.ConditionTypes.GreaterThan, Value1 = MAX_VLF_WARNING_THRESHOLD.ToString(), Status = DBADashStatus.DBADashStatusEnum.Warning },
+                                            new() { ConditionType = CellHighlightingRule.ConditionTypes.All, Status = DBADashStatus.DBADashStatusEnum.OK },
+                                        }
+                                    }
+                                }
+                            },
+                            { "is_read_committed_snapshot_on", new ColumnMetadata { Alias = "RCSI", Description = "Read Committed Snapshot Isolation" } },
+                            { "is_accelerated_database_recovery_on", new ColumnMetadata { Alias = "ADR", Description = "Accelerated Database Recovery enabled" } },
+                            { "is_optimized_locking_on", new ColumnMetadata { Alias = "Optimized\nLocking", Description = "Optimized locking enabled (SQL 2025)" } },
+                            { "is_encrypted", new ColumnMetadata { Alias = "TDE", Description = "Transparent data encryption enabled" } },
+                            { "is_read_only", new ColumnMetadata { Alias = "Read\nOnly", Description = "Database is read only" } },
+                            { "is_cdc_enabled", new ColumnMetadata { Alias = "CDC", Description = "Change data capture enabled" } },
+                            { "is_in_standby", new ColumnMetadata { Alias = "Standby", Description = "Database is in standby mode" } },
+                            { "LastGoodCheckDbTime", new ColumnMetadata
+                                {
+                                    Alias = "Last Good\nCheckDB",
+                                    Description = "Last good CHECKDB time",
+                                    Highlighting = new CellHighlightingRuleSet("LastGoodCheckDBStatus", evaluateConditionAgainstDataSource: true)
+                                    {
+                                        IsStatusColumn = true,
+                                    }
+                                }
+                            },
+                            { "LastGoodCheckDBStatus", new ColumnMetadata
+                                {
+                                    Visible = false,
+                                    Highlighting = new CellHighlightingRuleSet("LastGoodCheckDBStatus")
+                                    {
+                                        IsStatusColumn = true,
+                                    }
+                                }
+                            },
+                            { "collation_name", new ColumnMetadata { Alias = "Collation", Description = "Database collation" } },
+                            { "is_query_store_on", new ColumnMetadata { Alias = "Query\nStore", Description = "Query store enabled" } },
+                            { "is_broker_enabled", new ColumnMetadata { Alias = "Broker\nEnabled", Description = "Service broker enabled" } },
+                            { "log_reuse_wait_desc", new ColumnMetadata { Alias = "Log Reuse\nWait", Description = "Log reuse wait description" } },
+                        }
+                    }
+                },
+                {
+                    1, new CustomReportResult
+                    {
+                        ResultName = "Options History",
+                        Columns = new Dictionary<string, ColumnMetadata>
+                        {
+                            { "Instance", new ColumnMetadata { Alias = "Instance", Description = "Instance name" } },
+                            { "InstanceGroupName", new ColumnMetadata { Alias = "Instance\nGroup", Description = "Instance group name" } },
+                            { "DB", new ColumnMetadata { Alias = "Database", Description = "Database name" } },
+                            { "Setting", new ColumnMetadata { Alias = "Setting", Description = "Setting that was changed" } },
+                            { "OldValue", new ColumnMetadata { Alias = "Old Value", Description = "Previous value of the setting" } },
+                            { "NewValue", new ColumnMetadata { Alias = "New Value", Description = "New value of the setting" } },
+                            { "ChangeDate", new ColumnMetadata { Alias = "Change Date", Description = "Date and time the change occurred" } },
+                        }
+                    }
+                }
+            },
+            Pickers = new List<Picker>
+            {
+                new()
+                {
+                    ParameterName = "@ExcludeStateChanges",
+                    Name = "Exclude State Changes",
+                    PickerItems = new Dictionary<object, string>
+                    {
+                        { true, "Yes" },
+                        { false, "No" },
+                    },
+                    DefaultValue = true,
+                    MenuBar = true,
+                    DataType = typeof(bool)
+                },
+            },
+            Params = new Params
+            {
+                ParamList = new List<Param>
+                {
+                    new()
+                    {
+                        ParamName = "@InstanceIDs",
+                        ParamType = "IDS",
+                    },
+                    new()
+                    {
+                        ParamName = "@DatabaseID",
+                        ParamType = "INT",
+                    },
+                    new()
+                    {
+                        ParamName = "@InstanceGroupName",
+                        ParamType = "NVARCHAR",
+                    },
+                    new()
+                    {
+                        ParamName = "@ExcludeStateChanges",
+                        ParamType = "BIT",
+                    },
+                }
+            },
+        };
+
+        #endregion
     }
 }

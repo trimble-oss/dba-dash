@@ -447,7 +447,7 @@ namespace DBADashGUI
             tabs.TabPages.Clear();
             tabs.TabPages.Add(tabDBADash);
 
-            dbOptions1.SummaryMode = true;
+            tabDBOptions.Controls.Add(new CustomReports.DBOptionsReport() { Dock = DockStyle.Fill });
             splitSchemaSnapshot.Panel1.Controls.Add(diffSchemaSnapshot);
             diffSchemaSnapshot.Dock = DockStyle.Fill;
 

@@ -79,9 +79,6 @@
     <Compile Update="Changes\DBConfiguration.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Update="Changes\DBOptions.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
     <Compile Update="Changes\Drivers.cs">
       <SubType>UserControl</SubType>
     </Compile>

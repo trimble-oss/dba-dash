@@ -159,7 +159,6 @@ namespace DBADashGUI
             tabDBConfiguration = new System.Windows.Forms.TabPage();
             dbConfiguration1 = new DBADashGUI.Changes.DBConfiguration();
             tabDBOptions = new System.Windows.Forms.TabPage();
-            dbOptions1 = new DBADashGUI.Changes.DBOptions();
             tabTempDB = new System.Windows.Forms.TabPage();
             tempDBConfig1 = new DBADashGUI.DBFiles.TempDBConfig();
             tabCustomChecks = new System.Windows.Forms.TabPage();
@@ -292,7 +291,7 @@ namespace DBADashGUI
             tabAzureDB.SuspendLayout();
             tabAzureServiceObjectives.SuspendLayout();
             tabDBConfiguration.SuspendLayout();
-            tabDBOptions.SuspendLayout();
+
             tabTempDB.SuspendLayout();
             tabCustomChecks.SuspendLayout();
             tabMetrics.SuspendLayout();
@@ -1681,7 +1680,6 @@ namespace DBADashGUI
             // 
             // tabDBOptions
             // 
-            tabDBOptions.Controls.Add(dbOptions1);
             tabDBOptions.Location = new System.Drawing.Point(4, 39);
             tabDBOptions.Margin = new System.Windows.Forms.Padding(1, 2, 1, 2);
             tabDBOptions.Name = "tabDBOptions";
@@ -1690,15 +1688,6 @@ namespace DBADashGUI
             tabDBOptions.TabIndex = 27;
             tabDBOptions.Text = "DB Options";
             tabDBOptions.UseVisualStyleBackColor = true;
-            // 
-            // dbOptions1
-            // 
-            dbOptions1.Dock = System.Windows.Forms.DockStyle.Fill;
-            dbOptions1.Location = new System.Drawing.Point(1, 2);
-            dbOptions1.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
-            dbOptions1.Name = "dbOptions1";
-            dbOptions1.Size = new System.Drawing.Size(190, 53);
-            dbOptions1.TabIndex = 0;
             // 
             // tabTempDB
             // 
@@ -2727,7 +2716,7 @@ namespace DBADashGUI
             tabAzureDB.ResumeLayout(false);
             tabAzureServiceObjectives.ResumeLayout(false);
             tabDBConfiguration.ResumeLayout(false);
-            tabDBOptions.ResumeLayout(false);
+
             tabTempDB.ResumeLayout(false);
             tabCustomChecks.ResumeLayout(false);
             tabMetrics.ResumeLayout(false);
@@ -2855,7 +2844,6 @@ namespace DBADashGUI
         private System.Windows.Forms.TabPage tabDBConfiguration;
         private Changes.DBConfiguration dbConfiguration1;
         private System.Windows.Forms.TabPage tabDBOptions;
-        private Changes.DBOptions dbOptions1;
         private System.Windows.Forms.TabPage tabTempDB;
         private DBFiles.TempDBConfig tempDBConfig1;
         private System.Windows.Forms.TabPage tabCustomChecks;
