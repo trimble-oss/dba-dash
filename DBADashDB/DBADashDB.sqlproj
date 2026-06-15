@@ -938,6 +938,7 @@
     <Build Include="Security\Migration.sql" />
     <Build Include="dbo\Stored Procedures\DBOptionsSummary_Get.sql" />
     <Build Include="dbo\Stored Procedures\DBOptionsDetail_Get.sql" />
+    <Build Include="Alert\Procedures\AgentNotRunningAlert_Upd.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
