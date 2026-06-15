@@ -41,6 +41,7 @@ EXEC Alert.OfflineAlert_Upd
 EXEC Alert.RestartAlert_Upd
 EXEC Alert.DatabaseStatusAlert_Upd
 EXEC Alert.BackupAlert_Upd
+EXEC Alert.AgentNotRunningAlert_Upd
 
 /* Close Alerts that have been resolved for a period of time */
 
