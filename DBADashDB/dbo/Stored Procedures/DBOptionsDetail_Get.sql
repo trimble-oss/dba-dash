@@ -7,7 +7,13 @@ CREATE PROC dbo.DBOptionsDetail_Get(
 )
 AS
 DECLARE @InstanceIDsString VARCHAR(MAX)
-SELECT @InstanceIDsString = STRING_AGG(CAST(ID AS VARCHAR(20)), ',') FROM @InstanceIDs
+SET @InstanceIDsString = STUFF(
+			(
+			SELECT CONCAT(',',ID) 
+			FROM @InstanceIDs
+			FOR XML PATH(''),TYPE
+			).value('.','VARCHAR(MAX)')
+		,1,1,'')
 
 -- Result Set 1: Detail data (per-database options)
 EXEC dbo.DatabasesAllInfo_Get

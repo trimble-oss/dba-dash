@@ -1,9 +1,7 @@
 using DBADash;
 using DBADashGUI.HA;
-using DBADashGUI.Theme;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -80,6 +78,21 @@ namespace DBADashGUI.CustomReports
             DrillDownGridFilters = null;
             customParams = Report.GetCustomSqlParameters();
             RefreshData();
+        }
+
+        /// <summary>
+        /// Reset to summary mode when the context changes via tree navigation.
+        /// This runs before parameters are built and data is refreshed, avoiding a wasted detail query.
+        /// Drill-down navigation is excluded so clicking a summary row correctly shows detail.
+        /// </summary>
+        protected override void OnContextChanged(bool isDrillDown)
+        {
+            if (!isDrillDown && !IsSummaryMode)
+            {
+                ClearNavigationStack();
+                Report = SummaryInstance;
+                DrillDownGridFilters = null;
+            }
         }
 
         private void DBOptionsReport_PostGridRefresh(object sender, EventArgs e)

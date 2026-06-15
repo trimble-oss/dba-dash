@@ -1966,6 +1966,7 @@ namespace DBADashGUI.CustomReports
                 {
                     Report = _context.Report ?? Report;
                 }
+                OnContextChanged(isDrillDown: sqlParams != null);
                 customParams = sqlParams ?? Report.GetCustomSqlParameters();
                 SetContextParametersForDirectExecutionReport();
                 tsParams.Visible = Report.UserParams.Any();
@@ -2001,6 +2002,17 @@ namespace DBADashGUI.CustomReports
             {
                 CommonShared.ShowExceptionDialog(ex, "Error setting context");
             }
+        }
+
+        /// <summary>
+        /// Called during SetContext after the new context is assigned but before parameters
+        /// are built and data is refreshed. Override to reset report state (e.g., switch
+        /// back to a default view) without incurring a wasted query.
+        /// </summary>
+        /// <param name="isDrillDown">True when the caller provided explicit parameters (e.g., drill-down navigation);
+        /// false for tree navigation where the report should typically reset to its default view.</param>
+        protected virtual void OnContextChanged(bool isDrillDown)
+        {
         }
 
         private void SetContextParametersForDirectExecutionReport() // Set DatabaseName
