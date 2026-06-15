@@ -6,7 +6,13 @@ CREATE PROC dbo.DBOptionsSummary_Get(
 )
 AS
 DECLARE @InstanceIDsString VARCHAR(MAX)
-SELECT @InstanceIDsString = STRING_AGG(CAST(ID AS VARCHAR(20)), ',') FROM @InstanceIDs
+SET @InstanceIDsString = STUFF(
+			(
+			SELECT CONCAT(',',ID) 
+			FROM @InstanceIDs
+			FOR XML PATH(''),TYPE
+			).value('.','VARCHAR(MAX)')
+		,1,1,'')
 
 -- Result Set 1: Summary data (instance-level aggregates)
 EXEC dbo.DBSummary_Get
