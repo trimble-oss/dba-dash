@@ -87,6 +87,7 @@ namespace DBADashGUI.CustomReports
                 case DrillDownLinkColumnInfo drillDown:
                     optDrillDown.Checked = true;
                     cboReport.Text = drillDown.ReportProcedureName;
+                    chkNewWindow.Checked = drillDown.DrillDownMode == DrillDownMode.NewWindow;
                     SetTab();
                     break;
 
@@ -130,7 +131,8 @@ namespace DBADashGUI.CustomReports
                 LinkColumnInfo = new DrillDownLinkColumnInfo()
                 {
                     ReportProcedureName = cboReport.Text,
-                    ColumnToParameterMap = mapping
+                    ColumnToParameterMap = mapping,
+                    DrillDownMode = chkNewWindow.Checked ? DrillDownMode.NewWindow : DrillDownMode.ExistingWindow
                 };
             }
             else if (optQueryPlan.Checked)

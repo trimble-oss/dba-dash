@@ -183,9 +183,11 @@ namespace DBADashGUI.CustomReports
             }
             var filters = GridFilterFactory?.Invoke(row) ?? GridFilters;
 
+            var targetViewType = report.ViewType ?? typeof(CustomReportView);
             var useExistingWindow = DrillDownMode == DrillDownMode.ExistingWindow
                                     && sender is CustomReportView
-                                    && !Control.ModifierKeys.HasFlag(Keys.Control); // Ctrl+Click forces new window
+                                    && !Control.ModifierKeys.HasFlag(Keys.Control) // Ctrl+Click forces new window
+                                    && targetViewType.IsAssignableFrom(sender.GetType()); // Fall back to new window if ViewType is incompatible
 
             if (useExistingWindow && sender is CustomReportView existingView)
             {

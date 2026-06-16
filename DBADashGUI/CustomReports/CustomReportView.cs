@@ -761,6 +761,9 @@ namespace DBADashGUI.CustomReports
                 reportDS = await GetReportDataAsync(token);
                 this.Invoke(() =>
                 {
+                    // Guard: if this CTS has been superseded by a newer RefreshData call,
+                    // discard results to avoid rendering stale data with the wrong Report.
+                    if (!ReferenceEquals(cts, cancellationTokenSource)) return;
                     ShowParamPrompt(false); // Show grid
                     LoadResultsCombo();
                     if (reportDS.Tables.Count > 0)
@@ -778,7 +781,8 @@ namespace DBADashGUI.CustomReports
                             MessageBoxIcon.Warning);
                     }
                 });
-                SetStatus("Completed", "Success", DashColors.Success);
+                if (ReferenceEquals(cts, cancellationTokenSource))
+                    SetStatus("Completed", "Success", DashColors.Success);
             }
             catch (SqlException ex) when (ex.Number == 201) // Parameter required
             {
@@ -791,8 +795,11 @@ namespace DBADashGUI.CustomReports
             }
             finally
             {
-                IsMessageInProgress = false;
-                StopTimer();
+                if (ReferenceEquals(cts, cancellationTokenSource))
+                {
+                    IsMessageInProgress = false;
+                    StopTimer();
+                }
                 try
                 {
                     // Clear the static field if it still references this run's CTS
@@ -1057,6 +1064,23 @@ namespace DBADashGUI.CustomReports
 
         private void GetChartPanels()
         {
+            // Always move chartLayout to ChartPanel before any early return.
+            // If this is skipped (e.g. different report with no charts), chartLayout can end up in
+            // TablePanel from a previous report, covering the grids and making them invisible.
+            try
+            {
+                if (chartLayout.Parent != ChartPanel)
+                {
+                    chartLayout.Parent?.Controls.Remove(chartLayout);
+                    ChartPanel.Controls.Add(chartLayout);
+                    chartLayout.Dock = DockStyle.Fill;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"GetChartPanels: error repositioning chartLayout: {ex}");
+            }
+
             if (Report.Charts == null || Report.Charts.Count == 0) return;
             // Allow metric-chart-only reports to render even if there are no result tables
             if (reportDS == null || reportDS.Tables.Count == 0)
@@ -1965,6 +1989,13 @@ namespace DBADashGUI.CustomReports
                 if (!PreventReportOverwrite)
                 {
                     Report = _context.Report ?? Report;
+                }
+                // Clear drill-down navigation state on tree navigation (not drill-down).
+                // This prevents a stale back button when the user selects a different report
+                // in the tree or navigates to a different level.
+                if (sqlParams == null)
+                {
+                    ClearNavigationStack();
                 }
                 OnContextChanged(isDrillDown: sqlParams != null);
                 customParams = sqlParams ?? Report.GetCustomSqlParameters();
