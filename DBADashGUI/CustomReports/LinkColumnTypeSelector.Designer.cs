@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LinkColumnTypeSelector));
             optNone = new System.Windows.Forms.RadioButton();
             optURL = new System.Windows.Forms.RadioButton();
@@ -44,6 +45,7 @@
             cboLanguage = new System.Windows.Forms.ComboBox();
             label3 = new System.Windows.Forms.Label();
             tabDrillDown = new System.Windows.Forms.TabPage();
+            chkNewWindow = new System.Windows.Forms.CheckBox();
             dgvMapping = new System.Windows.Forms.DataGridView();
             label8 = new System.Windows.Forms.Label();
             cboReport = new System.Windows.Forms.ComboBox();
@@ -65,6 +67,7 @@
             txtLinkColumn = new System.Windows.Forms.TextBox();
             optQueryPlan = new System.Windows.Forms.RadioButton();
             optNavigateTree = new System.Windows.Forms.RadioButton();
+            toolTip1 = new System.Windows.Forms.ToolTip(components);
             tab1.SuspendLayout();
             tabNone.SuspendLayout();
             tabURL.SuspendLayout();
@@ -227,6 +230,7 @@
             // 
             // tabDrillDown
             // 
+            tabDrillDown.Controls.Add(chkNewWindow);
             tabDrillDown.Controls.Add(dgvMapping);
             tabDrillDown.Controls.Add(label8);
             tabDrillDown.Controls.Add(cboReport);
@@ -238,6 +242,17 @@
             tabDrillDown.TabIndex = 3;
             tabDrillDown.Text = "Drill Down";
             tabDrillDown.UseVisualStyleBackColor = true;
+            // 
+            // chkNewWindow
+            // 
+            chkNewWindow.AutoSize = true;
+            chkNewWindow.Location = new System.Drawing.Point(291, 9);
+            chkNewWindow.Name = "chkNewWindow";
+            chkNewWindow.Size = new System.Drawing.Size(173, 24);
+            chkNewWindow.TabIndex = 15;
+            chkNewWindow.Text = "Open in new window";
+            toolTip1.SetToolTip(chkNewWindow, "Option to open drill-down report in a new window. If unchecked, the user can still open the report in a new window using Ctrl+Click.");
+            chkNewWindow.UseVisualStyleBackColor = true;
             // 
             // dgvMapping
             // 
@@ -522,5 +537,7 @@
         private System.Windows.Forms.ComboBox cboDatabaseNameCol;
         private System.Windows.Forms.ComboBox cboInstanceIDCol;
         private System.Windows.Forms.RadioButton optNavigateTree;
+        private System.Windows.Forms.CheckBox chkNewWindow;
+        private System.Windows.Forms.ToolTip toolTip1;
     }
 }
