@@ -110,11 +110,11 @@ namespace DBADashGUI
 
                 DataLabelsPaint = new SolidColorPaint(DashColors.White.ToSKColor()) { StrokeThickness = 2 },
                 DataLabelsFormatter = point =>
-                    $"{point.Context.Series.Name} ({point.StackedValue?.Share:P2})",
+                    $"{point.Context.Series.Name} ({point.StackedValue?.Share:P2}, {point.Model:N2} GB)",
                 DataLabelsPosition = LiveChartsCore.Measure.PolarLabelsPosition.Middle,
 
                 ToolTipLabelFormatter = point =>
-                    $"{point.StackedValue!.Share:P2}"
+                    $"{point.StackedValue!.Share:P2} ({point.Model:N2} GB)"
             };
         }
 
