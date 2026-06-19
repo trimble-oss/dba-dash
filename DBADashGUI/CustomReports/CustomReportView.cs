@@ -1875,6 +1875,12 @@ namespace DBADashGUI.CustomReports
             {
                 pDatabaseID.Param.Value = context.DatabaseID > 0 ? context.DatabaseID : DBNull.Value;
             }
+            // Hidden instances are shown when a single instance is in context or the global ShowHidden preference is enabled.
+            var pShowHidden = customParams.FirstOrDefault(p => p.Param.ParameterName.Equals("@ShowHidden", StringComparison.InvariantCultureIgnoreCase) && p.UseDefaultValue);
+            if (pShowHidden != null)
+            {
+                pShowHidden.Param.Value = context.InstanceIDs.Count == 1 || Common.ShowHidden;
+            }
             var pFromDate = customParams.FirstOrDefault(p => p.Param.ParameterName.Equals("@FromDate", StringComparison.InvariantCultureIgnoreCase) && p.UseDefaultValue);
             if (pFromDate != null)
             {

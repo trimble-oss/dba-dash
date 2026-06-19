@@ -80,7 +80,7 @@ namespace DBADashGUI.CustomReports
         [JsonIgnore]
         public Exception DeserializationException = null;
 
-        public static readonly string[] SystemParamNames = new[] { "@INSTANCEIDS", "@INSTANCEID", "@DATABASEID", "@FROMDATE", "@TODATE", "@OBJECTID" };
+        public static readonly string[] SystemParamNames = new[] { "@INSTANCEIDS", "@INSTANCEID", "@DATABASEID", "@FROMDATE", "@TODATE", "@OBJECTID", "@SHOWHIDDEN" };
 
         private static readonly string[] InstanceLevelSystemParams = new[] { "@INSTANCEIDS", "@INSTANCEID" };
 

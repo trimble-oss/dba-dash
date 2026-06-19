@@ -212,9 +212,6 @@
     <Compile Update="Changes\SQLPatching.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Update="DBFiles\SpaceTracking.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
     <Compile Update="Checks\Summary.cs">
       <SubType>UserControl</SubType>
     </Compile>

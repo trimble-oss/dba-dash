@@ -3,6 +3,13 @@ using System.Collections.Generic;
 
 namespace DBADashGUI.Charts
 {
+    public enum PieLabelMode
+    {
+        None,
+        ValueOnly,
+        PercentOnly,
+        ValueAndPercent
+    }
     /// <summary>
     /// Configuration specific to pie charts. Inherits common chart options but provides
     /// pie-specific fields such as category/value columns and donut sizing.
@@ -64,6 +71,21 @@ namespace DBADashGUI.Charts
         /// Label to use for the grouped bucket when small slices are combined. Defaults to "Other".
         /// </summary>
         public string OtherLabel { get; init; } = "Other";
+
+        /// <summary>
+        /// Controls what is shown in data labels on each pie slice. Defaults to None.
+        /// </summary>
+        public PieLabelMode DataLabelMode { get; init; } = PieLabelMode.None;
+
+        /// <summary>
+        /// Format string for the numeric value shown in data labels and tooltips. Defaults to "N1".
+        /// </summary>
+        public string DataLabelsValueFormat { get; init; } = "N1";
+
+        /// <summary>
+        /// Optional suffix appended to the value in data labels and tooltips (e.g. " GB").
+        /// </summary>
+        public string DataLabelsValueSuffix { get; init; } = "";
 
         public override void Validate()
         {

@@ -57,6 +57,8 @@ namespace DBADashGUI.CustomReports
             cboLegend.DataSource = Enum.GetValues(typeof(LegendPosition)).Cast<LegendPosition>().ToList();
             // ValueMember is not set for this simple list binding, so set SelectedItem instead of SelectedValue
             cboLegend.SelectedItem = LegendPosition.Bottom;
+            cboPieLabelMode.DataSource = Enum.GetValues(typeof(PieLabelMode)).Cast<PieLabelMode>().ToList();
+            cboPieLabelMode.SelectedItem = PieLabelMode.None;
             cboChartType.DataSource = Enum.GetValues(typeof(ChartTypes)).Cast<ChartTypes>().ToList();
             // ensure we can react to changes in chart type / series selection to enforce single metric selection when needed
             cboChartType.SelectedIndexChanged += ChartType_Changed;
@@ -261,6 +263,9 @@ namespace DBADashGUI.CustomReports
                         cboPieValueColumn.Text = pie.ValueColumn;
                 }
                 chkCountRows.Checked = pie.CountRows;
+                cboPieLabelMode.SelectedItem = pie.DataLabelMode;
+                txtPieDataLabelFormat.Enabled = pie.DataLabelMode != PieLabelMode.None;
+                txtPieDataLabelFormat.Text = pie.DataLabelsValueFormat ?? "N1";
             }
             else if (config is ChartConfiguration cfg)
             {
@@ -503,6 +508,8 @@ namespace DBADashGUI.CustomReports
                     ChartTitle = txtTitle.Text,
                     LegendPosition = legend,
                     InnerRadius = chkDoughnut.Checked ? Convert.ToDouble(numRadius.Value / 100) : (double?)null,
+                    DataLabelMode = cboPieLabelMode.SelectedItem is PieLabelMode m ? m : PieLabelMode.None,
+                    DataLabelsValueFormat = txtPieDataLabelFormat.Text,
                 };
             }
             else
@@ -587,6 +594,11 @@ namespace DBADashGUI.CustomReports
         private void CountRows_CheckedChanged(object sender, EventArgs e)
         {
             cboPieValueColumn.Enabled = !chkCountRows.Checked;
+        }
+
+        private void CboPieLabelMode_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            txtPieDataLabelFormat.Enabled = cboPieLabelMode.SelectedItem is PieLabelMode m && m != PieLabelMode.None;
         }
     }
 }
