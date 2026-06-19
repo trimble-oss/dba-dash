@@ -43,6 +43,9 @@
             tabConfig = new System.Windows.Forms.TabControl();
             tabData = new System.Windows.Forms.TabPage();
             tabPieData = new System.Windows.Forms.TabPage();
+            label15 = new System.Windows.Forms.Label();
+            txtPieDataLabelFormat = new System.Windows.Forms.TextBox();
+            cboPieLabelMode = new System.Windows.Forms.ComboBox();
             chkCountRows = new System.Windows.Forms.CheckBox();
             numRadius = new System.Windows.Forms.NumericUpDown();
             label16 = new System.Windows.Forms.Label();
@@ -72,6 +75,7 @@
             txtXLabel = new System.Windows.Forms.TextBox();
             bttnAdd = new System.Windows.Forms.Button();
             bttnCancel = new System.Windows.Forms.Button();
+            label17 = new System.Windows.Forms.Label();
             tabConfig.SuspendLayout();
             tabData.SuspendLayout();
             tabPieData.SuspendLayout();
@@ -209,6 +213,10 @@
             // 
             // tabPieData
             // 
+            tabPieData.Controls.Add(label17);
+            tabPieData.Controls.Add(label15);
+            tabPieData.Controls.Add(txtPieDataLabelFormat);
+            tabPieData.Controls.Add(cboPieLabelMode);
             tabPieData.Controls.Add(chkCountRows);
             tabPieData.Controls.Add(numRadius);
             tabPieData.Controls.Add(label16);
@@ -224,6 +232,33 @@
             tabPieData.TabIndex = 1;
             tabPieData.Text = "Pie";
             tabPieData.UseVisualStyleBackColor = true;
+            // 
+            // label15
+            // 
+            label15.AutoSize = true;
+            label15.Location = new System.Drawing.Point(3, 170);
+            label15.Name = "label15";
+            label15.Size = new System.Drawing.Size(175, 20);
+            label15.TabIndex = 12;
+            label15.Text = "Data Label Value Format:";
+            // 
+            // txtPieDataLabelFormat
+            // 
+            txtPieDataLabelFormat.Enabled = false;
+            txtPieDataLabelFormat.Location = new System.Drawing.Point(204, 167);
+            txtPieDataLabelFormat.Name = "txtPieDataLabelFormat";
+            txtPieDataLabelFormat.Size = new System.Drawing.Size(150, 27);
+            txtPieDataLabelFormat.TabIndex = 11;
+            txtPieDataLabelFormat.Text = "N1";
+            // 
+            // cboPieLabelMode
+            // 
+            cboPieLabelMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            cboPieLabelMode.Location = new System.Drawing.Point(205, 137);
+            cboPieLabelMode.Name = "cboPieLabelMode";
+            cboPieLabelMode.Size = new System.Drawing.Size(150, 28);
+            cboPieLabelMode.TabIndex = 10;
+            cboPieLabelMode.SelectedIndexChanged += CboPieLabelMode_SelectedIndexChanged;
             // 
             // chkCountRows
             // 
@@ -498,6 +533,15 @@
             bttnCancel.UseVisualStyleBackColor = true;
             bttnCancel.Click += Cancel_Click;
             // 
+            // label17
+            // 
+            label17.AutoSize = true;
+            label17.Location = new System.Drawing.Point(3, 140);
+            label17.Name = "label17";
+            label17.Size = new System.Drawing.Size(87, 20);
+            label17.TabIndex = 13;
+            label17.Text = "Data Labels";
+            // 
             // ConfigureChart
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -574,5 +618,9 @@
         private System.Windows.Forms.Button bttnAdd;
         private System.Windows.Forms.Button bttnCancel;
         private System.Windows.Forms.CheckBox chkCountRows;
+        private System.Windows.Forms.ComboBox cboPieLabelMode;
+        private System.Windows.Forms.Label label15;
+        private System.Windows.Forms.TextBox txtPieDataLabelFormat;
+        private System.Windows.Forms.Label label17;
     }
 }

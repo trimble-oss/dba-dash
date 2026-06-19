@@ -326,13 +326,41 @@ namespace DBADashGUI.Charts
             // Sort slices descending by value for consistent display
             slices = slices.OrderByDescending(s => s.value).ToList();
 
+            // Validate the user-supplied numeric format once so an invalid format string
+            // doesn't throw inside the label/tooltip formatter delegates at render time.
+            var valueFormat = SafeNumericFormat(config.DataLabelsValueFormat);
+
             // Convert to ISeries list. Don't attempt to compute pixel sizes yet - chart size is needed.
             var series = slices.Select(s => (ISeries)new PieSeries<ObservableValue>
             {
                 Name = s.name,
                 Values = new ObservableValue[] { new ObservableValue(s.value) },
                 // initialize to unlimited; will be computed once the chart control has a size
-                MaxRadialColumnWidth = double.MaxValue
+                MaxRadialColumnWidth = double.MaxValue,
+                DataLabelsPaint = config.DataLabelMode != PieLabelMode.None ? new SolidColorPaint(DashColors.White.ToSKColor()) : null,
+                DataLabelsPosition = LiveChartsCore.Measure.PolarLabelsPosition.Middle,
+                DataLabelsFormatter = config.DataLabelMode == PieLabelMode.None ? null : point =>
+                {
+                    var val = $"{(point.Model?.Value ?? 0).ToString(valueFormat)}{config.DataLabelsValueSuffix}";
+                    var pct = $"{point.StackedValue?.Share:P1}";
+                    return config.DataLabelMode switch
+                    {
+                        PieLabelMode.ValueOnly       => $"{point.Context.Series.Name} {val}",
+                        PieLabelMode.PercentOnly     => $"{point.Context.Series.Name} {pct}",
+                        _                            => $"{point.Context.Series.Name} {val} ({pct})",
+                    };
+                },
+                ToolTipLabelFormatter = point =>
+                {
+                    var val = $"{(point.Model?.Value ?? 0).ToString(valueFormat)}{config.DataLabelsValueSuffix}";
+                    var pct = $"{point.StackedValue?.Share:P1}";
+                    return config.DataLabelMode switch
+                    {
+                        PieLabelMode.PercentOnly => pct,
+                        PieLabelMode.None        => $"{val} ({pct})",
+                        _                        => $"{val} ({pct})",
+                    };
+                },
             }).ToList();
 
             var chart = new PieChart
@@ -352,7 +380,6 @@ namespace DBADashGUI.Charts
 
             chart.LegendPosition = config.LegendPosition;
             chart.LegendTextPaint = labelPaint;
-            chart.LegendTextSize = DBADashUser.ChartAxisLabelFontSize;
 
             // Context menu for chart actions (copy/save)
             AddChartContextMenu(chart, dt);
@@ -360,6 +387,24 @@ namespace DBADashGUI.Charts
             // PieChart currently doesn't use the Cartesian custom tooltip helper
 
             return chart;
+        }
+
+        /// <summary>
+        /// Returns the supplied numeric format string if it is valid, otherwise a safe default ("N1").
+        /// Guards against user-entered format strings throwing inside chart formatter delegates at render time.
+        /// </summary>
+        private static string SafeNumericFormat(string format)
+        {
+            if (string.IsNullOrWhiteSpace(format)) return "N1";
+            try
+            {
+                _ = 0d.ToString(format);
+                return format;
+            }
+            catch (FormatException)
+            {
+                return "N1";
+            }
         }
 
         /// <summary>

@@ -149,7 +149,7 @@ namespace DBADashGUI
             tabDrivers = new System.Windows.Forms.TabPage();
             drivers1 = new DBADashGUI.Changes.Drivers();
             tabDBSpace = new System.Windows.Forms.TabPage();
-            spaceTracking1 = new SpaceTracking();
+            spaceTracking1 = new DBADashGUI.DBFiles.SpaceTracking();
             tabAzureSummary = new System.Windows.Forms.TabPage();
             azureSummary1 = new DBADashGUI.Performance.AzureSummary();
             tabAzureDB = new System.Windows.Forms.TabPage();
@@ -1583,9 +1583,9 @@ namespace DBADashGUI
             tabDBSpace.TabIndex = 22;
             tabDBSpace.Text = "DB Space";
             tabDBSpace.UseVisualStyleBackColor = true;
-            // 
+            //
             // spaceTracking1
-            // 
+            //
             spaceTracking1.Dock = System.Windows.Forms.DockStyle.Fill;
             spaceTracking1.Location = new System.Drawing.Point(1, 2);
             spaceTracking1.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
@@ -2809,7 +2809,7 @@ namespace DBADashGUI
         private System.Windows.Forms.TabPage tabDrivers;
         private Changes.Drivers drivers1;
         private System.Windows.Forms.TabPage tabDBSpace;
-        private SpaceTracking spaceTracking1;
+        private DBADashGUI.DBFiles.SpaceTracking spaceTracking1;
         private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem dataRetentionToolStripMenuItem;
         private System.Windows.Forms.TabPage tabAzureSummary;
