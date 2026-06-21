@@ -13,6 +13,20 @@ namespace DBADash.Messaging
     {
         [JsonIgnore] public int SemaphoreTimeout { get; set; } = 2000;
 
+        /// <summary>
+        /// Set by the message processor (service broker or SQS relay) before <see cref="Process"/> is
+        /// called.  Allows a long-running message to send intermediate reply messages back to the GUI
+        /// (e.g. per-instance progress for a batched collection).  Null when not supported.
+        /// </summary>
+        [JsonIgnore] public Func<ResponseMessage, Task> ProgressReporter { get; set; }
+
+        /// <summary>
+        /// Sends an intermediate reply back to the originating GUI if a <see cref="ProgressReporter"/>
+        /// has been configured.  Safe to call when no reporter is set (no-op).
+        /// </summary>
+        protected Task ReportProgressAsync(ResponseMessage progress) =>
+            ProgressReporter?.Invoke(progress) ?? Task.CompletedTask;
+
         public abstract Task<DataSet> Process(CollectionConfig cfg, Guid handle, CancellationToken cancellationToken);
 
         /// <summary>

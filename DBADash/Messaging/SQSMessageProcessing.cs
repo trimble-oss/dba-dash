@@ -249,6 +249,13 @@ namespace DBADash.Messaging
                     replySQS,
                     replyAgent);
             }
+            catch (CollectionScheduleDisabledException ex)
+            {
+                // Requested collections are disabled for the instance - report as a warning, not an error.
+                Log.Warning("Message with handle {handle} skipped: {Message}", handle, ex.Message);
+                await SendReplyMessage(DBADashAgentIdentifier, handle, destinationConnectionHash, replySQS, replyAgent,
+                    ResponseMessage.ResponseTypes.Warning, ex.Message, disabledCollections: ex.DisabledCollections).ConfigureAwait(false);
+            }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error processing message with handle {handle}", handle);
@@ -274,6 +281,22 @@ namespace DBADash.Messaging
             await SendReplyMessage(DBADashAgentIdentifier, handle, destinationConnectionHash, replySQS, replyAgent,
                 ResponseMessage.ResponseTypes.Progress, "Message Received");
 
+            // Allow the message to stream intermediate replies back to the origin/GUI (e.g. per-instance
+            // progress for a batched collection).  Any data carried on a progress reply is ferried via S3
+            // just like the final result so the origin can write it to the repository database.
+            msg.ProgressReporter = async progress =>
+            {
+                if (progress.Data != null)
+                {
+                    var progressFileName = $"{handle}.{Guid.NewGuid()}.message";
+                    progress.MessageDataPath = msg.CollectAgent.S3Path.AppendToUrl(progressFileName);
+                    await DestinationHandling.WriteS3Async(progress.Data, msg.CollectAgent.S3Path, progressFileName, Config);
+                    progress.Data = null;
+                }
+                await AWSTools.SendSQSMessageAsync(Config, Convert.ToBase64String(progress.Serialize()),
+                    DBADashAgentIdentifier, replyAgent, handle, replySQS, "REPLY", destinationConnectionHash);
+            };
+
             var ds = await msg.ProcessWithCancellation(Config, handle);
             string messageDataPath = null;
             if (ds != null)
@@ -292,9 +315,10 @@ namespace DBADash.Messaging
 
         private async Task SendReplyMessage(string DBADashAgentIdentifier, Guid handle,
             string destinationConnectionHash, string replySQS, string replyAgent,
-            ResponseMessage.ResponseTypes responseType, string message, string messageDataPath = null)
+            ResponseMessage.ResponseTypes responseType, string message, string messageDataPath = null,
+            List<string> disabledCollections = null)
         {
-            var payload = CreateResponsePayload(responseType, message, messageDataPath);
+            var payload = CreateResponsePayload(responseType, message, messageDataPath, disabledCollections);
             await AWSTools.SendSQSMessageAsync(Config, Convert.ToBase64String(payload),
                 DBADashAgentIdentifier, replyAgent, handle, replySQS, "REPLY", destinationConnectionHash);
         }
@@ -341,13 +365,15 @@ namespace DBADash.Messaging
             }
         }
 
-        private static byte[] CreateResponsePayload(ResponseMessage.ResponseTypes responseType, string message, string messageDataPath = null)
+        private static byte[] CreateResponsePayload(ResponseMessage.ResponseTypes responseType, string message,
+            string messageDataPath = null, List<string> disabledCollections = null)
         {
             var responseMessage = new ResponseMessage
             {
                 Type = responseType,
                 Message = message,
-                MessageDataPath = messageDataPath
+                MessageDataPath = messageDataPath,
+                DisabledCollections = disabledCollections
             };
             return responseMessage.Serialize();
         }
@@ -377,7 +403,7 @@ namespace DBADash.Messaging
                 await DestinationHandling.WriteDBAsync(responseMessage.Data, destination.ConnectionString,
                         Config);
 
-                if (responseMessage.Exception == null && responseMessage.Data.Tables.Contains("Errors") && responseMessage.Data.Tables["Errors"]!.Rows.Count > 0)
+                if (responseMessage.Type == ResponseMessage.ResponseTypes.Success && responseMessage.Exception == null && responseMessage.Data.Tables.Contains("Errors") && responseMessage.Data.Tables["Errors"]!.Rows.Count > 0)
                 {
                     var dtErrors = responseMessage.Data.Tables["Errors"];
                     var sbErrors = new StringBuilder();
@@ -428,6 +454,13 @@ namespace DBADash.Messaging
 
                 case ResponseMessage.ResponseTypes.Progress:
                     Log.Information("Message with handle {handle} is in progress on remote service. {message}", handle, responseMessage.Message);
+                    break;
+
+                case ResponseMessage.ResponseTypes.Warning:
+                    // Terminal like Failure (e.g. all requested collections are disabled) - end the conversation
+                    // so the handle isn't leaked.  The forwarded warning has already been sent to the GUI above.
+                    Log.Warning("Message with handle {handle} returned a warning from remote service: {message}", handle, responseMessage.Message);
+                    await MessageProcessing.EndConversation(handle, Config.DestinationConnection.ConnectionString);
                     break;
 
                 case ResponseMessage.ResponseTypes.Failure:

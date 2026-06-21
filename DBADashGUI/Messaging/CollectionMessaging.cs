@@ -73,18 +73,10 @@ namespace DBADashGUI.Messaging
 
             var collectAgent = DBADashAgent.GetDBADashAgent(Common.ConnectionString, collectAgentID);
             var importAgent = DBADashAgent.GetDBADashAgent(Common.ConnectionString, importAgentID);
-            var x = new CollectionMessage(types, connectionID) { CollectAgent = collectAgent, ImportAgent = importAgent, DatabaseName = db, Lifetime = CollectionDialogLifetime };
+            var message = new CollectionMessage(types, connectionID) { CollectAgent = collectAgent, ImportAgent = importAgent, DatabaseName = db, Lifetime = CollectionDialogLifetime };
 
-            var payload = x.Serialize();
-            var messageGroup = Guid.NewGuid();
-            await MessageProcessing.SendMessageToService(payload, importAgentID, messageGroup, Common.ConnectionString, CollectionDialogLifetime);
-            control.SetStatus(messageBase + "SENT", "", DashColors.Information);
-            foreach (var type in types)
-            {
-                UpdateLastTriggeredTime(key, type);
-            }
             IncrementPendingRequests();
-            await Task.Run(() => ReceiveReply(messageGroup, messageBase, control));
+            await Task.Run(() => SendAndReceiveReply(message, importAgentID, key, messageBase, control));
         }
 
         public static async Task TriggerCollection(int InstanceID, List<CollectionType> types, ISetStatus control, string db = null)
@@ -114,22 +106,59 @@ namespace DBADashGUI.Messaging
             return row != null && (bool)row["MessagingEnabled"];
         }
 
-        public static async Task ReceiveReply(Guid group, string messageBase, ISetStatus control)
+        private static async Task SendAndReceiveReply(CollectionMessage message, int importAgentID, string key, string messageBase, ISetStatus control)
         {
+            ArgumentNullException.ThrowIfNull(message);
             ArgumentNullException.ThrowIfNull(messageBase);
             ArgumentNullException.ThrowIfNull(control);
 
             try
             {
+                var group = Guid.NewGuid();
+                message.Id = group; // Track the message by its conversation group so it can be cancelled and logged correctly.
+                await MessageProcessing.SendMessageToService(message.Serialize(), importAgentID, group, Common.ConnectionString, message.Lifetime);
+
+                // Only record the trigger once the message has actually been sent - a failed send shouldn't
+                // block retries for RecentTriggerThresholdSeconds when nothing was collected.
+                foreach (var type in message.CollectionTypes)
+                {
+                    UpdateLastTriggeredTime(key, type);
+                }
+                control.SetStatus(messageBase + "SENT", "", DashColors.Information);
+
                 var completed = false;
                 while (!completed)
                 {
-                    var reply = await ReceiveReply(group, CollectionDialogLifetime * 1000);
+                    var reply = await ReceiveReply(group, message.Lifetime * 1000);
                     switch (reply.Type)
                     {
                         case ResponseMessage.ResponseTypes.Failure:
                             control.SetStatus(messageBase + reply.Message, reply.Exception?.ToString(), DashColors.Fail);
                             completed = true;
+                            break;
+
+                        case ResponseMessage.ResponseTypes.Warning:
+                            // The collection(s) aren't scheduled for this instance so nothing was run.  Offer to
+                            // run them anyway; if confirmed, re-send the same message forced and keep listening on
+                            // the new conversation rather than treating the warning as the end of the operation.
+                            if (reply.DisabledCollections is { Count: > 0 } && !message.IgnoreDisabledSchedule &&
+                                PromptRunUnscheduled(control, reply.DisabledCollections))
+                            {
+                                // The service ends the conversation after the warning.  Drain its end-of-dialog
+                                // message so it isn't orphaned in the broker queue, but fire-and-forget so we
+                                // don't delay the re-send - it runs on the old group and handles its own errors,
+                                // so it won't interfere with replies received on the new conversation below.
+                                _ = DrainConversationAsync(group, message.Lifetime);
+                                message.IgnoreDisabledSchedule = true;
+                                group = Guid.NewGuid();
+                                message.Id = group; // New conversation - retrack under the new group for cancellation/logging.
+                                await MessageProcessing.SendMessageToService(message.Serialize(), importAgentID, group, Common.ConnectionString, message.Lifetime);
+                                control.SetStatus(messageBase + "running unscheduled collection(s)...", null, DashColors.Information);
+                                break; // completed stays false - continue receiving on the re-sent conversation
+                            }
+                            // Show the warning but keep listening (completed stays false) so the service's
+                            // end-of-dialog is received and the conversation closed rather than orphaning it.
+                            control.SetStatus(messageBase + reply.Message, null, DashColors.Warning);
                             break;
 
                         case ResponseMessage.ResponseTypes.EndConversation:
@@ -155,6 +184,53 @@ namespace DBADashGUI.Messaging
             finally
             {
                 DecrementPendingRequests();
+            }
+        }
+
+        /// <summary>
+        /// Prompts the user (on the UI thread) to confirm running collection(s) that aren't scheduled for the
+        /// target instance.  Returns true if the user chose to run them anyway.
+        /// </summary>
+        private static bool PromptRunUnscheduled(ISetStatus control, List<string> disabledCollections)
+        {
+            bool Confirm()
+            {
+                var list = string.Join(", ", disabledCollections);
+                var text = disabledCollections.Count == 1
+                    ? $"The {list} collection is not scheduled for this instance, so it was not run.\n\nRun it anyway?"
+                    : $"The following collections are not scheduled for this instance, so they were not run:\n\n{list}\n\nRun them anyway?";
+                return MessageBox.Show(text, "Collection Not Scheduled", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes;
+            }
+
+            if (control is Control c && c.InvokeRequired)
+            {
+                return (bool)c.Invoke((Func<bool>)Confirm);
+            }
+            return Confirm();
+        }
+
+        /// <summary>
+        /// Receives any remaining messages on a conversation the service has finished with (e.g. after a
+        /// terminal Warning reply) up to the end-of-dialog, which <see cref="ReceiveReply"/> acknowledges by
+        /// ending the conversation.  Stops the end-of-dialog broker message being left orphaned in the queue.
+        /// </summary>
+        private static async Task DrainConversationAsync(Guid group, int lifetimeSeconds)
+        {
+            try
+            {
+                while (true)
+                {
+                    var reply = await ReceiveReply(group, lifetimeSeconds * 1000);
+                    if (reply.Type is ResponseMessage.ResponseTypes.EndConversation
+                        or ResponseMessage.ResponseTypes.Failure)
+                    {
+                        break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Debug(ex, "Error draining conversation {group} after warning", group);
             }
         }
 
