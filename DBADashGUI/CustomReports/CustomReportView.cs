@@ -2108,7 +2108,52 @@ namespace DBADashGUI.CustomReports
             }
         }
 
-        public void SetTriggerCollectionVisibility() => tsTrigger.Visible = Report.TriggerCollectionTypes.Count > 0 && context.CanMessage;
+        public void SetTriggerCollectionVisibility() => tsTrigger.Visible = Report.TriggerCollectionTypes.Count > 0 &&
+            (context.CanMessage || (context.InstanceID <= 0 && ContextHasMessagingEnabledInstances()));
+
+        /// <summary>
+        /// True if the current (group/folder/root) context contains at least one messaging-enabled
+        /// instance, allowing a collection to be triggered across all of them at once.
+        /// </summary>
+        private bool ContextHasMessagingEnabledInstances()
+        {
+            if (!DBADashUser.AllowMessaging) return false;
+            var ids = GetEffectiveInstanceIDs();
+            if (ids.Count == 0) return false;
+            return CommonData.Instances.AsEnumerable()
+                .Any(r => ids.Contains(r.Field<int>("InstanceID")) && r.Field<bool>("MessagingEnabled"));
+        }
+
+        /// <summary>
+        /// The set of instances the report is currently scoped to.  Normally this is every instance in the
+        /// tree context, but a drill-down narrows the scope by overriding the @InstanceID / @InstanceIDs
+        /// parameter (without changing the context object) - in which case a triggered collection should
+        /// target only the drilled-into instance(s) rather than the whole original context.
+        /// </summary>
+        private HashSet<int> GetEffectiveInstanceIDs()
+        {
+            // Drill-down to a single instance via @InstanceID.  Guard against the parameter carrying an
+            // instance outside the current context - fall through to the wider scope rather than target it.
+            var pInstanceID = customParams.FirstOrDefault(p => !p.UseDefaultValue &&
+                p.Param.ParameterName.Equals("@InstanceID", StringComparison.OrdinalIgnoreCase));
+            if (pInstanceID?.Param.Value is int id && id > 0 && context.InstanceIDs.Contains(id))
+            {
+                return new HashSet<int> { id };
+            }
+
+            // Drill-down to a narrowed set via @InstanceIDs (stored as a single-column DataTable).
+            if (customParams.FirstOrDefault(p => !p.UseDefaultValue &&
+                    p.Param.ParameterName.Equals("@InstanceIDs", StringComparison.OrdinalIgnoreCase))
+                    ?.Param.Value is DataTable { Rows.Count: > 0 } dt)
+            {
+                var ids = dt.AsEnumerable().Select(r => r[0]).OfType<int>().ToHashSet();
+                // Guard against the parameter carrying an instance outside the current context.
+                ids.IntersectWith(context.InstanceIDs);
+                if (ids.Count > 0) return ids;
+            }
+
+            return context.InstanceIDs;
+        }
 
         private void AddPickers()
         {
@@ -2467,8 +2512,17 @@ namespace DBADashGUI.CustomReports
 
         private async void TsTrigger_Click(object sender, EventArgs e)
         {
-            if (context.CollectAgentID == null || context.ImportAgentID == null) return;
-            await CollectionMessaging.TriggerCollection(context.ConnectionID, Report.TriggerCollectionTypes, context.CollectAgentID.Value, context.ImportAgentID.Value, this);
+            if (context.InstanceID > 0)
+            {
+                if (context.CollectAgentID == null || context.ImportAgentID == null) return;
+                await CollectionMessaging.TriggerCollection(context.ConnectionID, Report.TriggerCollectionTypes, context.CollectAgentID.Value, context.ImportAgentID.Value, this);
+            }
+            else
+            {
+                // Higher up the tree (or drilled-down into a subset) - trigger across the instances the
+                // report is currently scoped to rather than the whole original context.
+                BulkTriggerCollectionForm.Trigger(this, Report.TriggerCollectionTypes, GetEffectiveInstanceIDs(), this);
+            }
         }
 
         private void AssociateCollectionToolStripMenuItem_Click(object sender, EventArgs e)

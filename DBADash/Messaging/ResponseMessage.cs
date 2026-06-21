@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Serilog;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Text;
@@ -16,7 +17,8 @@ namespace DBADash.Messaging
             Failure,
             Success,
             EndConversation,
-            Cancellation
+            Cancellation,
+            Warning
         }
 
         public ResponseTypes Type { get; set; }
@@ -44,6 +46,20 @@ namespace DBADash.Messaging
         public string Message { get; set; }
 
         public string MessageDataPath { get; set; }
+
+        /// <summary>
+        /// Populated on a <see cref="ResponseTypes.Warning"/> reply when the message was skipped because the
+        /// requested collection(s) are disabled (no schedule) for the instance.  Carries the disabled
+        /// collection names so the GUI can offer to re-run them with <see cref="CollectionMessage.IgnoreDisabledSchedule"/>.
+        /// </summary>
+        public List<string> DisabledCollections { get; set; }
+
+        /// <summary>
+        /// Optional per-instance progress payload.  Populated when a batched message (e.g.
+        /// <see cref="MultiCollectionMessage"/>) reports the completion of a single instance so the
+        /// GUI can tick instances off as they complete rather than waiting for the whole batch.
+        /// </summary>
+        public CollectionProgress CollectionProgress { get; set; }
 
         [JsonIgnore] public DataSet Data { get; set; }
 
@@ -102,5 +118,26 @@ namespace DBADash.Messaging
             var json = Encoding.UTF8.GetString(compressedData.Decompress());
             return JsonConvert.DeserializeObject<ResponseMessage>(json);
         }
+    }
+
+    /// <summary>
+    /// Lightweight per-instance status carried on a <see cref="ResponseMessage"/> so the GUI can
+    /// update a single instance row while a batched collection is still running.
+    /// </summary>
+    public class CollectionProgress
+    {
+        public int InstanceID { get; set; }
+
+        /// <summary>"Success", "Failed" or "Warning" (e.g. the collection was skipped as it is disabled).</summary>
+        public string Status { get; set; }
+
+        /// <summary>Optional detail (e.g. an error message when the instance failed).</summary>
+        public string Detail { get; set; }
+
+        /// <summary>
+        /// When <see cref="Status"/> is "Warning" because the collection(s) are disabled (no schedule) for
+        /// this instance, the disabled collection names so the GUI can offer to re-run them forced.
+        /// </summary>
+        public List<string> DisabledCollections { get; set; }
     }
 }

@@ -26,16 +26,28 @@ namespace DBADashGUI.Messaging
         public static async Task SendMessageAndProcessReply(MessageBase message, DBADashContext context,
             SetStatusDelegate setStatus, MessageCompletedDelegate processCompleted, Guid messageGroup)
         {
-            message.Id = messageGroup;
             if (context.ImportAgentID == null)
             {
                 setStatus("No Import Agent", string.Empty, DashColors.Fail);
                 return;
             }
+            await SendMessageAndProcessReply(message, (int)context.ImportAgentID, setStatus, processCompleted, messageGroup);
+        }
+
+        /// <summary>
+        /// Sends a message to the service identified by <paramref name="importAgentID"/> and processes the
+        /// replies.  <paramref name="onProgress"/> is invoked for each Progress reply, allowing callers
+        /// (e.g. the bulk collection dialog) to act on intermediate per-instance updates.
+        /// </summary>
+        public static async Task SendMessageAndProcessReply(MessageBase message, int importAgentID,
+            SetStatusDelegate setStatus, MessageCompletedDelegate processCompleted, Guid messageGroup,
+            MessageResponseDelegate onProgress = null)
+        {
+            message.Id = messageGroup;
 
             try
             {
-                await MessageProcessing.SendMessageToService(message.Serialize(), (int)context.ImportAgentID,
+                await MessageProcessing.SendMessageToService(message.Serialize(), importAgentID,
                     messageGroup,
                     Common.ConnectionString, message.Lifetime);
             }
@@ -65,11 +77,21 @@ namespace DBADashGUI.Messaging
                     case ResponseMessage.ResponseTypes.Progress:
                         completed = false;
                         setStatus(reply.Message, string.Empty, DashColors.Information);
+                        if (onProgress != null)
+                        {
+                            await onProgress(reply, messageGroup);
+                        }
                         break;
 
                     case ResponseMessage.ResponseTypes.Failure:
                         completed = true;
                         setStatus(reply.Message, reply.Exception?.ToString(), DashColors.Fail);
+                        await processCompleted(reply, messageGroup, setStatus);
+                        break;
+
+                    case ResponseMessage.ResponseTypes.Warning:
+                        completed = false; // Terminal, but wait for the end dialog so the conversation closes cleanly.
+                        setStatus(reply.Message, null, DashColors.Warning);
                         await processCompleted(reply, messageGroup, setStatus);
                         break;
 

@@ -997,7 +997,7 @@ namespace DBADashGUI
             }
             else
             {
-                foreach (var ctrl in tabs.SelectedTab.Controls.OfType<ISetContext>())
+                foreach (var ctrl in tabs.SelectedTab?.Controls.OfType<ISetContext>() ?? Enumerable.Empty<ISetContext>())
                 {
                     ctrl.SetContext(n.Context);
                 }

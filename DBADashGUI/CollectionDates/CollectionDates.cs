@@ -13,7 +13,7 @@ using System.Windows.Forms;
 
 namespace DBADashGUI.CollectionDates
 {
-    public partial class CollectionDates : UserControl, ISetContext, ISetStatus
+    public partial class CollectionDates : UserControl, ISetContext, ISetStatus, IRefreshData
     {
         public CollectionDates()
         {
@@ -212,11 +212,11 @@ namespace DBADashGUI.CollectionDates
             dgvCollectionDates.ExportToExcel();
         }
 
-        private async void tsTriggerWarningAndCritical_Click(object sender, EventArgs e)
+        private void tsTriggerWarningAndCritical_Click(object sender, EventArgs e)
         {
             RefreshData();
             var rows = dgvCollectionDates.Rows.Cast<DataGridViewRow>().Select(r => ((DataRowView)r.DataBoundItem).Row).Where(row => row.Field<int>("Status") is 1 or 2 && CanRowBeTriggered(row)).ToList();
-            await TriggerCollections(rows);
+            TriggerCollections(rows);
         }
 
         private static bool CanRowBeTriggered(DataRow row)
@@ -225,60 +225,47 @@ namespace DBADashGUI.CollectionDates
                 string.Equals(r, row.Field<string>("Reference"), StringComparison.OrdinalIgnoreCase));
         }
 
-        private async Task TriggerCollections(List<DataRow> rows)
+        private void TriggerCollections(List<DataRow> rows)
         {
-            var filteredAndGrouped = rows.Where(CanRowBeTriggered)
-                .GroupBy(row => row.Field<string>("ConnectionID"))
-                .ToDictionary(
-                    group => group.Key,
-                    group => new
-                    {
-                        References = group.Select(row => row.Field<string>("Reference")).ToList(),
-                        ImportAgentID = group.First().Field<int>("ImportAgentID"),
-                        CollectionAgentID = group.First().Field<int>("CollectAgentID")
-                    }
-                );
-            if (rows.Count == 0)
+            var triggerable = rows.Where(CanRowBeTriggered).ToList();
+            if (triggerable.Count == 0)
             {
                 MessageBox.Show("Nothing to trigger.", "Trigger Collections", MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
                 return;
             }
-            if (rows.Count > Config.CollectionTriggerLimit)
+            if (triggerable.Count > Config.CollectionTriggerLimit)
             {
                 MessageBox.Show(
-                    $"Unable to trigger {rows.Count} collections.  Collection Trigger limit is set to {Config.CollectionTriggerLimit}",
+                    $"Unable to trigger {triggerable.Count} collections.  Collection Trigger limit is set to {Config.CollectionTriggerLimit}",
                     "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-            if (MessageBox.Show($"Trigger {rows.Count} collection(s) across {filteredAndGrouped.Count} instance(s)?", "Trigger Collections", MessageBoxButtons.YesNo,
-                 rows.Count > Config.CollectionTriggerWarningLimit ? MessageBoxIcon.Warning : MessageBoxIcon.Question) != DialogResult.Yes) return;
+
+            // Each row is an instance/collection pair; group them into the per-instance collection types the
+            // shared trigger dialog expects.  The dialog batches instances by service, shows per-instance
+            // progress and refreshes this view on close.
+            var instanceCollectionTypes = triggerable
+                .GroupBy(row => row.Field<int>("InstanceID"))
+                .ToDictionary(
+                    group => group.Key,
+                    group => group.Select(row => row.Field<string>("Reference")).Distinct().ToList());
+
             PersistFilter = dgvCollectionDates.RowFilter;
             PersistSort = dgvCollectionDates.SortString;
-            foreach (var group in filteredAndGrouped)
-            {
-                try
-                {
-                    await CollectionMessaging.TriggerCollection(group.Key, group.Value.References,
-                        group.Value.CollectionAgentID, group.Value.ImportAgentID, this);
-                }
-                catch (Exception ex)
-                {
-                    SetStatus(ex.Message, ex.ToString(), DashColors.Fail);
-                }
-            }
+            BulkTriggerCollectionForm.Trigger(this, instanceCollectionTypes, this);
         }
 
-        private async void tsTriggerSelected_Click(object sender, EventArgs e)
+        private void tsTriggerSelected_Click(object sender, EventArgs e)
         {
             var rows = dgvCollectionDates.SelectedCells.Cast<DataGridViewCell>().Select(cell => ((DataRowView)cell.OwningRow.DataBoundItem).Row).Where(CanRowBeTriggered).Distinct();
-            await TriggerCollections(rows.ToList());
+            TriggerCollections(rows.ToList());
         }
 
-        private async void tsTriggerAll_Click(object sender, EventArgs e)
+        private void tsTriggerAll_Click(object sender, EventArgs e)
         {
             var rows = dgvCollectionDates.Rows.Cast<DataGridViewRow>().Select(r => ((DataRowView)r.DataBoundItem).Row).Where(CanRowBeTriggered).ToList();
-            await TriggerCollections(rows);
+            TriggerCollections(rows);
         }
     }
 }
