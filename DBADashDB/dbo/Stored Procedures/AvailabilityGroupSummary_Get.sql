@@ -39,7 +39,7 @@ LEFT JOIN dbo.AvailabilityReplicas AR ON D.InstanceID = AR.InstanceID
                                          AND AR.replica_id = HADR.replica_id
 LEFT JOIN dbo.AvailabilityGroups AG ON HADR.group_id = AG.group_id
                                        AND D.InstanceID = AG.InstanceID
-LEFT JOIN dbo.CollectionDatesStatus CD ON D.InstanceID = CD.InstanceID AND CD.Reference='DatabaseHADR'
+LEFT JOIN dbo.CollectionDatesStatus CD ON D.InstanceID = CD.InstanceID AND CD.Reference='DatabasesHADR'
 LEFT JOIN dbo.DatabasesHADR PrimaryHADR ON PrimaryHADR.InstanceID = HADR.InstanceID 
                                          AND PrimaryHADR.group_database_id = HADR.group_database_id 
                                          AND PrimaryHADR.is_primary_replica = 1
