@@ -1413,7 +1413,7 @@ FROM
 (-1,'TraceFlags',125,180),
 (-1,'ServerProperties',125,180),
 (-1,'LogRestores',125,180),
-(-1,'DatabaseHADR',5,10),
+(-1,'DatabasesHADR',5,10),
 (-1,'LastGoodCheckDB',125,180),
 (-1,'Alerts',125,180),
 (-1,'DBTuningOptions',125,180),
@@ -1462,7 +1462,7 @@ FROM
 WHERE NOT EXISTS(SELECT 1 FROM dbo.CollectionDatesThresholds CDT WHERE CDT.InstanceID = T.InstanceID AND CDT.Reference = T.Reference)
 
 -- Delete thresholds for legacy collections
-DELETE dbo.CollectionDatesThresholds WHERE Reference IN('AgentJobs','BlockingSnapshot','Database')
+DELETE dbo.CollectionDatesThresholds WHERE Reference IN('AgentJobs','BlockingSnapshot','Database','DatabaseHADR')
 
 -- Delete collection history for legacy collections
 DELETE dbo.CollectionDates

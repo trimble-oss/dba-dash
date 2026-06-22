@@ -20,6 +20,7 @@ namespace DBADashGUI.HA
             ProcedureName = "AvailabilityGroupSummary_Get",
             QualifiedProcedureName = "dbo.AvailabilityGroupSummary_Get",
             ReportName = "Availability Group Summary",
+            TriggerCollectionTypes = new List<string>() { CollectionType.AvailabilityGroups.ToString(), CollectionType.AvailabilityReplicas.ToString(), CollectionType.DatabasesHADR.ToString() },
             Params = new Params
             {
                 ParamList = new List<Param>
