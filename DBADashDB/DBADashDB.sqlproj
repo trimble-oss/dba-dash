@@ -343,7 +343,7 @@
     <Build Include="dbo\Functions\SQLVersionName.sql" />
     <Build Include="dbo\Stored Procedures\SystemTags_Upd.sql" />
     <Build Include="dbo\Stored Procedures\Backups_Get.sql" />
-    <Build Include="dbo\Stored Procedures\LogShipping_Get.sql" />
+    <Build Include="dbo\Stored Procedures\LogShippingReport_Get.sql" />
     <Build Include="dbo\Stored Procedures\AgentJobThresholds_Upd.sql" />
     <Build Include="dbo\Stored Procedures\AgentJobThresholds_Get.sql" />
     <Build Include="dbo\Stored Procedures\AgentJobs_Get.sql" />
@@ -600,7 +600,6 @@
     <Build Include="dbo\Stored Procedures\InstanceUptimeAck.sql" />
     <Build Include="dbo\Stored Procedures\TagReport_Get.sql" />
     <Build Include="dbo\Tables\DBADashAgent.sql" />
-    <Build Include="dbo\Stored Procedures\LogShippingSummary_Get.sql" />
     <Build Include="dbo\Stored Procedures\DBADashAgent_Upd.sql" />
     <Build Include="dbo\Views\BackupStats.sql" />
     <Build Include="dbo\Views\LastBackup.sql" />
