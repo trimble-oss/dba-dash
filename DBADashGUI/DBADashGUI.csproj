@@ -158,9 +158,6 @@
     <Compile Update="LastGoodCheckDB\LastGoodCheckDBControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Update="HA\LogShippingControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
     <Compile Update="Performance\AzureDBResourceStats.cs">
       <SubType>UserControl</SubType>
     </Compile>
