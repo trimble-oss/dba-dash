@@ -73,6 +73,15 @@ namespace DBADashGUI.CustomReports
         /// </summary>
         public bool SinglePageLayout { get; set; }
 
+        /// <summary>
+        /// When true the report view shows a status filter (Critical / Warning / N/A / OK) in the toolbar and pushes
+        /// the selected values into the @IncludeCritical / @IncludeWarning / @IncludeNA / @IncludeOK (and optional
+        /// @IncludeACK) parameters before each refresh.  The filter resets on tree navigation: a single instance in
+        /// context shows all statuses, multiple instances default to Critical + Warning only.  The generic Parameters
+        /// button is hidden because the filter drives those parameters.
+        /// </summary>
+        public bool ShowStatusFilter { get; set; }
+
         private bool _tableVisible = true;
 
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Include)]

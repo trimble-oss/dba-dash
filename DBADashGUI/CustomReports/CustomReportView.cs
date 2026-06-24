@@ -730,8 +730,10 @@ namespace DBADashGUI.CustomReports
                 return;
             }
 
-            // Allow derived views to apply view-specific parameters (e.g. a status filter) into customParams
-            // before the query runs. Called for every refresh path, including the initial auto-load from SetContext.
+            // Push the shared status filter selection (when enabled) into the @Include* parameters, then allow
+            // derived views to apply any further view-specific parameters into customParams before the query runs.
+            // Called for every refresh path, including the initial auto-load from SetContext.
+            ApplyStatusFilterParams();
             OnBeforeRefresh();
 
             if (Report is DirectExecutionReport)
@@ -2166,7 +2168,11 @@ namespace DBADashGUI.CustomReports
                 OnContextChanged(isDrillDown: sqlParams != null);
                 customParams = sqlParams ?? Report.GetCustomSqlParameters();
                 SetContextParametersForDirectExecutionReport();
-                tsParams.Visible = Report.UserParams.Any();
+                EnsureStatusFilter();
+                // Reset the filter on tree navigation only; drill-downs supply their own parameter state.
+                if (sqlParams == null) ResetStatusFilter();
+                // When a status filter is shown it drives the @Include* parameters, so the generic params button is redundant.
+                tsParams.Visible = Report.UserParams.Any() && Report.ShowStatusFilter != true;
                 tsConfigure.Visible = Report.CanEditReport;
                 SetStatus(Report.Description, Report.Description, DBADashUser.SelectedTheme.ForegroundColor);
                 lblDescription.Visible = !string.IsNullOrEmpty(Report.Description);
@@ -2220,6 +2226,87 @@ namespace DBADashGUI.CustomReports
         protected virtual void OnBeforeRefresh()
         {
         }
+
+        #region Status filter
+
+        private StatusFilterToolStrip statusFilter;
+
+        /// <summary>
+        /// The shared status filter created when <see cref="CustomReport.ShowStatusFilter"/> is set.  Exposed so a
+        /// derived view (or a drill-down link) can adjust the selection - for example showing all statuses when
+        /// drilling into a single instance.  Null when the current report does not use a status filter.
+        /// </summary>
+        protected StatusFilterToolStrip StatusFilter => statusFilter;
+
+        /// <summary>
+        /// Creates the status filter on first use and toggles its visibility (and that of the redundant generic
+        /// Parameters button) to match the current report.  Called from SetContext so it tracks report changes,
+        /// including drill-downs that swap to a report without a status filter.
+        /// </summary>
+        private void EnsureStatusFilter()
+        {
+            var show = Report?.ShowStatusFilter == true;
+            if (show && statusFilter == null)
+            {
+                statusFilter = new StatusFilterToolStrip
+                {
+                    Name = "tsStatusFilter",
+                    AcknowledgedVisible = ReportHasParam("@IncludeACK")
+                };
+                // StatusFilterToolStrip forces its own icon (FilterCircle), but only when the Image setter runs.
+                statusFilter.Image = Properties.Resources.FilterCircle_16x_Colors;
+                statusFilter.UserChangedStatusFilter += (_, _) =>
+                {
+                    if (context != null) RefreshData();
+                };
+                // Insert just after the Parameters button so the filter sits at the start of the toolbar.
+                var insertAt = toolStrip1.Items.IndexOfKey("tsParams");
+                insertAt = insertAt >= 0 ? insertAt + 1 : toolStrip1.Items.Count;
+                toolStrip1.Items.Insert(insertAt, statusFilter);
+            }
+            if (statusFilter != null) statusFilter.Visible = show;
+        }
+
+        /// <summary>
+        /// Resets the status filter on tree navigation: a single instance in context shows all statuses, multiple
+        /// instances default to Critical + Warning only.
+        /// </summary>
+        private void ResetStatusFilter()
+        {
+            if (statusFilter == null || Report?.ShowStatusFilter != true) return;
+            var single = context?.InstanceIDs.Count == 1;
+            statusFilter.Critical = true;
+            statusFilter.Warning = true;
+            statusFilter.NA = single;
+            statusFilter.OK = single;
+        }
+
+        /// <summary>
+        /// Pushes the current status filter selection into the report's @Include* parameters before a refresh.
+        /// </summary>
+        private void ApplyStatusFilterParams()
+        {
+            if (statusFilter == null || Report?.ShowStatusFilter != true) return;
+            SetBitParam("@IncludeCritical", statusFilter.Critical);
+            SetBitParam("@IncludeWarning", statusFilter.Warning);
+            SetBitParam("@IncludeNA", statusFilter.NA);
+            SetBitParam("@IncludeOK", statusFilter.OK);
+            if (ReportHasParam("@IncludeACK")) SetBitParam("@IncludeACK", statusFilter.Acknowledged);
+        }
+
+        private bool ReportHasParam(string name) =>
+            Report?.Params?.ParamList?.Any(p => p.ParamName.Equals(name, StringComparison.OrdinalIgnoreCase)) == true;
+
+        private void SetBitParam(string name, bool value)
+        {
+            var p = customParams.FirstOrDefault(p =>
+                p.Param.ParameterName.Equals(name, StringComparison.OrdinalIgnoreCase));
+            if (p == null) return;
+            p.Param.Value = value;
+            p.UseDefaultValue = false;
+        }
+
+        #endregion Status filter
 
         private void SetContextParametersForDirectExecutionReport() // Set DatabaseName
         {

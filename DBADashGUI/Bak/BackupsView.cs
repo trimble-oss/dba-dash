@@ -26,7 +26,6 @@ namespace DBADashGUI.Backups
         private const string ConfigureColumnName = "Configure";
         private const string BackupReportProcedureName = "BackupReport_Get";
 
-        private StatusFilterToolStrip statusFilter;
         private ToolStripDropDownButton tsConfigureBackups;
         private ToolStripMenuItem mnuThresholdInstance;
 
@@ -41,14 +40,6 @@ namespace DBADashGUI.Backups
 
         private void AddToolbarButtons()
         {
-            statusFilter = new StatusFilterToolStrip { Name = "tsStatusFilter", AcknowledgedVisible = false };
-            // StatusFilterToolStrip forces its own icon (FilterCircle), but only when the Image setter runs.
-            statusFilter.Image = Properties.Resources.FilterCircle_16x_Colors;
-            statusFilter.UserChangedStatusFilter += (_, _) =>
-            {
-                if (context != null) RefreshData();
-            };
-
             tsConfigureBackups = new ToolStripDropDownButton("Configure")
             {
                 Name = "tsConfigureBackups",
@@ -66,60 +57,25 @@ namespace DBADashGUI.Backups
             };
             tsConfigureBackups.DropDownItems.AddRange(new ToolStripItem[] { mnuThresholdRoot, mnuThresholdInstance });
 
-            // Insert just after the Parameters button so the controls sit at the start of the toolbar.
+            // Insert just after the Parameters button.  The status filter is added by the base class (the report
+            // sets ShowStatusFilter) and sits immediately before this Configure button.
             var insertAt = ToolStrip.Items.IndexOfKey("tsParams");
             insertAt = insertAt >= 0 ? insertAt + 1 : ToolStrip.Items.Count;
-            ToolStrip.Items.Insert(insertAt++, statusFilter);
             ToolStrip.Items.Insert(insertAt, tsConfigureBackups);
         }
 
         private void UpdateToolbarState()
         {
-            // The status filter / configure controls only apply to the backup summary + detail report.  When we
-            // drill into the per-database backup history (a different proc) they are hidden.
-            var isBackupReport = Report?.ProcedureName == BackupReportProcedureName;
-            statusFilter.Visible = isBackupReport;
-            tsConfigureBackups.Visible = isBackupReport;
-
-            // The generic Parameters button is redundant - the status filter drives the Include* parameters.
-            if (ToolStrip.Items["tsParams"] is { } tsParams) tsParams.Visible = false;
-
+            // The configure control only applies to the backup summary + detail report.  When we drill into the
+            // per-database backup history (a different proc) it is hidden.  The status filter is shown/hidden by the
+            // base class based on the report's ShowStatusFilter flag.
+            tsConfigureBackups.Visible = Report?.ProcedureName == BackupReportProcedureName;
             mnuThresholdInstance.Enabled = TryGetSingleInstanceId(out _);
         }
 
         #endregion Toolbar
 
-        #region Status filter / parameters
-
-        protected override void OnContextChanged(bool isDrillDown)
-        {
-            // Reset the status filter on tree navigation only.  A single instance in context shows all databases
-            // (including OK / N/A); multiple instances default to Warning and Critical only.
-            if (isDrillDown) return;
-            var single = context?.InstanceIDs.Count == 1;
-            statusFilter.Critical = true;
-            statusFilter.Warning = true;
-            statusFilter.NA = single;
-            statusFilter.OK = single;
-        }
-
-        protected override void OnBeforeRefresh()
-        {
-            // Push the current status filter state into the parameters used for the detail result set.
-            SetBitParam("@IncludeCritical", statusFilter.Critical);
-            SetBitParam("@IncludeWarning", statusFilter.Warning);
-            SetBitParam("@IncludeNA", statusFilter.NA);
-            SetBitParam("@IncludeOK", statusFilter.OK);
-        }
-
-        private void SetBitParam(string name, bool value)
-        {
-            var p = customParams.FirstOrDefault(p =>
-                p.Param.ParameterName.Equals(name, StringComparison.OrdinalIgnoreCase));
-            if (p == null) return;
-            p.Param.Value = value;
-            p.UseDefaultValue = false;
-        }
+        #region Parameters
 
         /// <summary>
         /// Sets the @InstanceID drill-down parameter.  Replaces the parameter object (rather than mutating it) so
@@ -170,7 +126,7 @@ namespace DBADashGUI.Backups
             return false;
         }
 
-        #endregion Status filter / parameters
+        #endregion Parameters
 
         #region Configuration dialogs
 
@@ -243,10 +199,13 @@ namespace DBADashGUI.Backups
                 view.DrillDownGridFilters = null;
                 view.SetInstanceIDParam(instanceId);
                 // Focusing a single instance shows all of its databases.
-                view.statusFilter.Critical = true;
-                view.statusFilter.Warning = true;
-                view.statusFilter.NA = true;
-                view.statusFilter.OK = true;
+                if (view.StatusFilter is { } filter)
+                {
+                    filter.Critical = true;
+                    filter.Warning = true;
+                    filter.NA = true;
+                    filter.OK = true;
+                }
                 view.RefreshData();
             }
         }
@@ -303,6 +262,7 @@ namespace DBADashGUI.Backups
             ProcedureName = BackupReportProcedureName,
             QualifiedProcedureName = "dbo.BackupReport_Get",
             CanEditReport = false,
+            ShowStatusFilter = true,
             TriggerCollectionTypes = new List<string>
             {
                 CollectionType.Backups.ToString(),

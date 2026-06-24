@@ -342,7 +342,6 @@
     <Build Include="dbo\Stored Procedures\DriveThreshold_Get.sql" />
     <Build Include="dbo\Functions\SQLVersionName.sql" />
     <Build Include="dbo\Stored Procedures\SystemTags_Upd.sql" />
-    <Build Include="dbo\Stored Procedures\Backups_Get.sql" />
     <Build Include="dbo\Stored Procedures\BackupReport_Get.sql" />
     <Build Include="dbo\Stored Procedures\LogShippingReport_Get.sql" />
     <Build Include="dbo\Stored Procedures\AgentJobThresholds_Upd.sql" />
@@ -605,7 +604,6 @@
     <Build Include="dbo\Views\BackupStats.sql" />
     <Build Include="dbo\Views\LastBackup.sql" />
     <Build Include="dbo\Views\BackupSummary.sql" />
-    <Build Include="dbo\Stored Procedures\BackupSummary_Get.sql" />
     <Build Include="dbo\Stored Procedures\LastBackup_Get.sql" />
     <Build Include="dbo\Views\RunningQueriesInfo.sql" />
     <Build Include="dbo\Stored Procedures\RunningQueriesForSession_Get.sql" />
