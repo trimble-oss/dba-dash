@@ -253,6 +253,7 @@ namespace DBADashGUI.CustomReports
             ReportName = "DB Options",
             SchemaName = "dbo",
             ProcedureName = "DBOptionsSummary_Get",
+            SinglePageLayout = true,
             QualifiedProcedureName = "dbo.DBOptionsSummary_Get",
             CanEditReport = false,
             TriggerCollectionTypes = new List<string> { CollectionType.Databases.ToString() },
