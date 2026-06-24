@@ -141,6 +141,29 @@ namespace DBADashGUI.CustomReports
             toolStrip1.Items.Insert(0, tsBack);
         }
 
+
+        private void TsSinglePage_CheckedChanged(object sender, EventArgs e)
+        {
+            if (Report == null || Report.SinglePageLayout == tsToggleSinglePage.Checked) return;
+            Report.SinglePageLayout = tsToggleSinglePage.Checked;
+            if (Report.CanEditReport)
+            {
+                try { Report.Update(); } catch (Exception ex) { Debug.WriteLine($"Error saving SinglePageLayout: {ex}"); }
+            }
+            ApplyLayoutMode();
+        }
+
+        /// <summary>
+        /// Applies the current layout mode to the table container: a scrollable report lets the stacked result
+        /// sets expand and the page scroll, a single-page report fits them into the available height.
+        /// </summary>
+        private void ApplyLayoutMode()
+        {
+            var multi = TablePanel.Controls.OfType<Panel>().Count(p => p.Tag is int) > 1;
+            TablePanel.AutoScroll = multi && !(Report?.SinglePageLayout ?? false);
+            ResizeResultPanels();
+        }
+
         #endregion
 
         // Map chart location to the appropriate split panel.
@@ -177,6 +200,9 @@ namespace DBADashGUI.CustomReports
             Grids = new();
             InitializeComponent();
             AddBackButton();
+            // Re-flow stacked result sets when the available area changes (window resize / splitter move).
+            splitTablesCharts.Panel1.SizeChanged += (_, _) => { if (Grids.Count > 0) ResizeResultPanels(); };
+            splitTablesCharts.Panel2.SizeChanged += (_, _) => { if (Grids.Count > 0) ResizeResultPanels(); };
             ShowParamPrompt(false);
             this.ApplyTheme();
             scriptDataTablesToolStripMenuItem.Click += (_, _) => ScriptDataTables(false);
@@ -703,6 +729,10 @@ namespace DBADashGUI.CustomReports
                     MessageBoxIcon.Warning);
                 return;
             }
+
+            // Allow derived views to apply view-specific parameters (e.g. a status filter) into customParams
+            // before the query runs. Called for every refresh path, including the initial auto-load from SetContext.
+            OnBeforeRefresh();
 
             if (Report is DirectExecutionReport)
             {
@@ -1452,6 +1482,13 @@ namespace DBADashGUI.CustomReports
             {
                 tables = Array.Empty<DataTable>();
             }
+            // With multiple result sets the panels are stacked (Dock=Top). In a scrollable report the container
+            // scrolls so result sets keep a usable height and overflow scrolls off-screen rather than being
+            // squashed to fit; in a single-page report the result sets are fitted into the available height.
+            // A single result set always fills the panel.
+            parentPanel.AutoScroll = tables.Length > 1 && !Report.SinglePageLayout;
+            tsToggleSinglePage.Visible = tables.Length > 1;
+            tsToggleSinglePage.Checked = Report.SinglePageLayout;
             foreach (var table in tables)
             {
                 var pnl = new Panel()
@@ -1841,6 +1878,129 @@ namespace DBADashGUI.CustomReports
             if (sender is not DBADashDataGridView dgv) return;
             SetColumnLayout(dgv);
             dgv.DataBindingComplete -= Dgv_DataBindingComplete;
+            // For stacked (multi result set) layouts, size each panel to its natural content height now that the
+            // column headers and rows have been measured. A single result set is docked Fill and left untouched.
+            if (dgv.Parent is Panel { Dock: DockStyle.Top })
+            {
+                ResizeResultPanels();
+            }
+        }
+
+        private const int MinResultPanelHeight = 100;
+
+        /// <summary>
+        /// Sizes the stacked result-set panels.
+        /// Scrollable report: each panel takes its full natural content height (header + all rows) so every row is
+        /// shown without an internal grid scrollbar; the final panel grows to fill any gap and the container
+        /// (AutoScroll) scrolls when the combined height exceeds the visible area.
+        /// Single-page report: the panels are fitted into the available height, sharing it fairly so a small
+        /// result set keeps its natural height while larger ones absorb the shortfall and scroll internally.
+        /// </summary>
+        private void ResizeResultPanels()
+        {
+            var parent = TablePanel;
+            var panels = parent.Controls.OfType<Panel>()
+                .Where(p => p.Tag is int && p.Dock == DockStyle.Top && p.Visible)
+                .OrderBy(p => (int)p.Tag!)
+                .ToList();
+            if (panels.Count == 0) return;
+
+            var viewport = parent.ClientSize.Height;
+            var naturals = panels.Select(NaturalPanelHeight).ToList();
+
+            if (Report?.SinglePageLayout == true)
+            {
+                var heights = AllocateFairHeights(naturals, viewport);
+                for (var i = 0; i < panels.Count; i++) panels[i].Height = heights[i];
+                return;
+            }
+
+            var total = 0;
+            for (var i = 0; i < panels.Count; i++)
+            {
+                panels[i].Height = naturals[i];
+                total += naturals[i];
+            }
+            // Consume any remaining space so the final result set doesn't leave an empty gap below it.
+            if (total < viewport)
+            {
+                panels[^1].Height += viewport - total;
+            }
+        }
+
+        /// <summary>
+        /// Distributes <paramref name="viewport"/> pixels across result-set panels using max-min fair sharing:
+        /// a panel whose natural height is no larger than its fair share keeps its natural height, and the space
+        /// it leaves is shared among the larger panels (which then scroll internally). The result always sums to
+        /// the viewport so the panels exactly fill a single page with no squashed gap at the bottom.
+        /// </summary>
+        private static int[] AllocateFairHeights(IReadOnlyList<int> naturals, int viewport)
+        {
+            var n = naturals.Count;
+            var heights = new int[n];
+            if (n == 0) return heights;
+            if (viewport <= 0) // Not laid out yet - fall back to natural heights.
+            {
+                for (var i = 0; i < n; i++) heights[i] = naturals[i];
+                return heights;
+            }
+
+            var settled = new bool[n];
+            var remaining = viewport;
+            var unsettled = n;
+            bool progress;
+            do
+            {
+                progress = false;
+                var share = remaining / Math.Max(unsettled, 1);
+                for (var i = 0; i < n; i++)
+                {
+                    if (settled[i] || naturals[i] > share) continue;
+                    heights[i] = naturals[i];
+                    remaining -= naturals[i];
+                    settled[i] = true;
+                    unsettled--;
+                    progress = true;
+                }
+            } while (progress && unsettled > 0);
+
+            if (unsettled == 0)
+            {
+                // Everything fits within its share - give any leftover to the last panel so the page is filled.
+                if (remaining > 0) heights[n - 1] += remaining;
+            }
+            else
+            {
+                // The remaining (larger) panels split what's left equally and scroll internally.
+                var share = remaining / unsettled;
+                var rem = remaining - (share * unsettled);
+                for (var i = 0; i < n; i++)
+                {
+                    if (settled[i]) continue;
+                    heights[i] = share + (rem-- > 0 ? 1 : 0);
+                }
+            }
+            return heights;
+        }
+
+        private static int NaturalPanelHeight(Panel pnl)
+        {
+            var grid = pnl.Controls.OfType<DBADashDataGridView>().FirstOrDefault();
+            if (grid == null) return MinResultPanelHeight;
+            var toolStripHeight = pnl.Controls.OfType<ToolStrip>().FirstOrDefault()?.Height ?? 0;
+            // GridBorderAllowance covers the grid's own border (and a little rounding headroom) on top of the
+            // horizontal scrollbar allowance. Without it a wide grid that shows a horizontal scrollbar consumes
+            // the full scrollbar allowance, leaving the border uncovered and forcing a (spurious) vertical
+            // scrollbar too - a nested "double scroll" inside the already-scrollable container.
+            const int GridBorderAllowance = 6;
+            var content = grid.ColumnHeadersHeight
+                          + grid.Rows.GetRowsHeight(DataGridViewElementStates.Visible)
+                          + grid.Padding.Top + grid.Padding.Bottom
+                          + pnl.Padding.Top + pnl.Padding.Bottom
+                          + toolStripHeight
+                          + SystemInformation.HorizontalScrollBarHeight // room for a horizontal scrollbar on wide grids
+                          + GridBorderAllowance;
+            return Math.Max(MinResultPanelHeight, content);
         }
 
         /// <summary>
@@ -2049,6 +2209,15 @@ namespace DBADashGUI.CustomReports
         /// <param name="isDrillDown">True when the caller provided explicit parameters (e.g., drill-down navigation);
         /// false for tree navigation where the report should typically reset to its default view.</param>
         protected virtual void OnContextChanged(bool isDrillDown)
+        {
+        }
+
+        /// <summary>
+        /// Called at the start of every <see cref="RefreshData"/> before parameters are read and the
+        /// query is executed. Override to write view-specific parameter values into <see cref="customParams"/>
+        /// (for example, a custom status filter). Default implementation does nothing.
+        /// </summary>
+        protected virtual void OnBeforeRefresh()
         {
         }
 

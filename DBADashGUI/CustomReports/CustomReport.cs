@@ -65,6 +65,14 @@ namespace DBADashGUI.CustomReports
 
         public bool ChartVisible { get; set; } = true;
 
+        /// <summary>
+        /// Controls how multiple result sets are laid out.
+        /// False (default): result sets expand to their full height and the report scrolls as a page.
+        /// True: the result sets are fitted into the available height (a single page), sharing the space fairly,
+        /// and only scroll internally when a result set needs more room than its share.
+        /// </summary>
+        public bool SinglePageLayout { get; set; }
+
         private bool _tableVisible = true;
 
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Include)]
