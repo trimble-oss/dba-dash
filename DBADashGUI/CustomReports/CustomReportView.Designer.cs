@@ -78,6 +78,7 @@
             tsToggleCharts = new System.Windows.Forms.ToolStripButton();
             tsToggleGrids = new System.Windows.Forms.ToolStripButton();
             splitToggle2 = new System.Windows.Forms.ToolStripSeparator();
+            tsToggleSinglePage = new System.Windows.Forms.ToolStripButton();
             lnkParams = new System.Windows.Forms.LinkLabel();
             pnlParams = new System.Windows.Forms.Panel();
             splitParams = new System.Windows.Forms.SplitContainer();
@@ -110,7 +111,7 @@
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsExecute, tsRefresh, tsCancel, tsCopy, tsParams, tsExcel, tsCols, tsConfigure, cboResults, lblSelectResults, tsScriptResults, tsClearFilter, tsTrigger, tsReset, tsNewWindow, splitToggle1, tsToggleCharts, tsToggleGrids, splitToggle2 });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsExecute, tsRefresh, tsCancel, tsCopy, tsParams, tsExcel, tsCols, tsConfigure, cboResults, lblSelectResults, tsScriptResults, tsClearFilter, tsTrigger, tsReset, tsNewWindow, splitToggle1, tsToggleCharts, tsToggleGrids, splitToggle2, tsToggleSinglePage });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
@@ -536,6 +537,17 @@
             splitToggle2.Name = "splitToggle2";
             splitToggle2.Size = new System.Drawing.Size(6, 31);
             // 
+            // tsToggleSinglePage
+            // 
+            tsToggleSinglePage.CheckOnClick = true;
+            tsToggleSinglePage.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsToggleSinglePage.Image = Properties.Resources.ScrollViewer;
+            tsToggleSinglePage.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsToggleSinglePage.Name = "tsToggleSinglePage";
+            tsToggleSinglePage.Size = new System.Drawing.Size(29, 28);
+            tsToggleSinglePage.Text = resources.GetString("tsToggleSinglePage.Text");
+            tsToggleSinglePage.CheckedChanged += TsSinglePage_CheckedChanged;
+            // 
             // lnkParams
             // 
             lnkParams.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -635,7 +647,7 @@
             chartLayout.Name = "chartLayout";
             chartLayout.RowCount = 1;
             chartLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            chartLayout.Size = new System.Drawing.Size(414, 305);
+            chartLayout.Size = new System.Drawing.Size(150, 305);
             chartLayout.TabIndex = 0;
             // 
             // statusStrip1
@@ -775,5 +787,6 @@
         private System.Windows.Forms.ToolStripMenuItem performanceCounterToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem deleteAllChartsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem chartLayoutToolStripMenuItem;
+        private System.Windows.Forms.ToolStripButton tsToggleSinglePage;
     }
 }
