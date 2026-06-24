@@ -192,7 +192,7 @@ namespace DBADashGUI.LogShipping
                 if (grid.ResultSetID == 0)
                 {
                     bold = table.Columns.Contains("InstanceLevelThreshold")
-                           && drv["InstanceLevelThreshold"] is bool b && b;
+                           && drv["InstanceLevelThreshold"].DBNullToNull() is bool b && b;
                 }
                 else
                 {

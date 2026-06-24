@@ -69,9 +69,17 @@ namespace DBADashGUI.CustomReports
         #region Navigation stack for in-place drill-down
 
         /// <summary>
-        /// Represents a saved navigation state for back-navigation.
+        /// Represents a saved navigation state for back-navigation.  <see cref="StatusFilter"/> captures the
+        /// status filter selection (null when the report has no status filter) so back-navigation restores it -
+        /// the checkbox state is a separate source of truth from <see cref="Params"/> and would otherwise be
+        /// re-applied stale over the restored parameters by <see cref="ApplyStatusFilterParams"/>.
         /// </summary>
-        private sealed record NavigationState(CustomReport Report, DBADashContext Context, List<CustomSqlParameter> Params, Dictionary<int, string> GridFilters);
+        private sealed record NavigationState(CustomReport Report, DBADashContext Context, List<CustomSqlParameter> Params, Dictionary<int, string> GridFilters, StatusFilterSelection StatusFilter);
+
+        /// <summary>
+        /// Snapshot of the status filter selection for back-navigation.
+        /// </summary>
+        private sealed record StatusFilterSelection(bool Critical, bool Warning, bool NA, bool OK, bool Acknowledged);
 
         private readonly Stack<NavigationState> navigationStack = new();
         private ToolStripButton tsBack;
@@ -92,6 +100,9 @@ namespace DBADashGUI.CustomReports
             var state = navigationStack.Pop();
             Report = state.Report;
             DrillDownGridFilters = state.GridFilters;
+            // Restore the status filter selection before refreshing: the refresh re-applies the checkbox state into
+            // the @Include* parameters, so it must reflect the saved state rather than whatever the drill-down left.
+            RestoreStatusFilter(state.StatusFilter);
             if (state.Context == context)
             {
                 // Context reference unchanged (e.g., switching between summary/detail on same tree node).
@@ -113,7 +124,7 @@ namespace DBADashGUI.CustomReports
         /// </summary>
         public void PushNavigationState()
         {
-            navigationStack.Push(new NavigationState(Report, context, new List<CustomSqlParameter>(customParams), DrillDownGridFilters));
+            navigationStack.Push(new NavigationState(Report, context, new List<CustomSqlParameter>(customParams), DrillDownGridFilters, CaptureStatusFilter()));
             UpdateBackButtonVisibility();
         }
 
@@ -2279,6 +2290,31 @@ namespace DBADashGUI.CustomReports
             statusFilter.Warning = true;
             statusFilter.NA = single;
             statusFilter.OK = single;
+        }
+
+        /// <summary>
+        /// Snapshots the current status filter selection for back-navigation, or null when no status filter is
+        /// shown.  The captured values are the effective getters (an all-unchecked filter reads as all-true, which
+        /// is the same ALL semantics) so restoring them reproduces identical @Include* parameters.
+        /// </summary>
+        private StatusFilterSelection CaptureStatusFilter() =>
+            statusFilter == null
+                ? null
+                : new StatusFilterSelection(statusFilter.Critical, statusFilter.Warning, statusFilter.NA, statusFilter.OK, statusFilter.Acknowledged);
+
+        /// <summary>
+        /// Restores a status filter selection captured by <see cref="CaptureStatusFilter"/>.  Setting the checkbox
+        /// properties only updates the control text (it does not raise UserChangedStatusFilter), so this is safe to
+        /// call before a refresh without triggering a second one.
+        /// </summary>
+        private void RestoreStatusFilter(StatusFilterSelection selection)
+        {
+            if (selection == null || statusFilter == null) return;
+            statusFilter.Critical = selection.Critical;
+            statusFilter.Warning = selection.Warning;
+            statusFilter.NA = selection.NA;
+            statusFilter.OK = selection.OK;
+            statusFilter.Acknowledged = selection.Acknowledged;
         }
 
         /// <summary>
