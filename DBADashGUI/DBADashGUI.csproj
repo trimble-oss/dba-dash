@@ -64,9 +64,6 @@
     <Compile Update="DBFiles\FileThresholdConfigControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Update="Bak\BackupsControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
     <Compile Update="Changes\SQLAgentAlerts.cs">
       <SubType>UserControl</SubType>
     </Compile>
