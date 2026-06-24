@@ -343,6 +343,7 @@
     <Build Include="dbo\Functions\SQLVersionName.sql" />
     <Build Include="dbo\Stored Procedures\SystemTags_Upd.sql" />
     <Build Include="dbo\Stored Procedures\Backups_Get.sql" />
+    <Build Include="dbo\Stored Procedures\BackupReport_Get.sql" />
     <Build Include="dbo\Stored Procedures\LogShippingReport_Get.sql" />
     <Build Include="dbo\Stored Procedures\AgentJobThresholds_Upd.sql" />
     <Build Include="dbo\Stored Procedures\AgentJobThresholds_Get.sql" />
