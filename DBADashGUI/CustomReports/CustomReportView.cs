@@ -70,6 +70,8 @@ namespace DBADashGUI.CustomReports
         private readonly Dictionary<DBADashDataGridView, (int RowCount, int RowsHeight)> rowsHeightCache = new();
 
         private bool wasTableCollapsedBeforeMaximize = false;
+        private readonly Dictionary<Panel, (DockStyle Dock, int Height)> savedPanelState = new();
+        private bool savedAutoScroll;
 
         #region Navigation stack for in-place drill-down
 
@@ -1694,11 +1696,16 @@ namespace DBADashGUI.CustomReports
 
         private void Maximize_Click(object sender, EventArgs e)
         {
+            savedAutoScroll = TablePanel.AutoScroll;
+            TablePanel.SuspendLayout();
+            TablePanel.AutoScroll = false;
+            TablePanel.AutoScrollPosition = Point.Empty;
             foreach (var panel in chartLayout.Controls.OfType<Panel>().Union(TablePanel.Controls.OfType<Panel>()))
             {
                 var ts = panel.Controls.OfType<ToolStrip>().FirstOrDefault();
                 if (ts != null && ts.Items.Cast<object>().Any(itm => itm == sender))
                 {
+                    savedPanelState[panel] = (panel.Dock, panel.Height);
                     panel.Dock = DockStyle.Fill;
                     ts.Items[0].Text = "-";
                     ts.Items[0].Click -= Maximize_Click;
@@ -1720,6 +1727,7 @@ namespace DBADashGUI.CustomReports
                     panel.Visible = false;
                 }
             }
+            TablePanel.ResumeLayout(true);
         }
 
         private void Minimize_Click(object sender, EventArgs e)
@@ -1729,7 +1737,16 @@ namespace DBADashGUI.CustomReports
                 var ts = panel.Controls.OfType<ToolStrip>().FirstOrDefault();
                 if (ts != null && ts.Items.Cast<object>().Any(itm => itm == sender))
                 {
-                    panel.Dock = DockStyle.Top;
+                    if (savedPanelState.TryGetValue(panel, out var saved))
+                    {
+                        panel.Dock = saved.Dock;
+                        panel.Height = saved.Height;
+                        savedPanelState.Remove(panel);
+                    }
+                    else
+                    {
+                        panel.Dock = DockStyle.Top;
+                    }
                     ts.Items[0].Text = "+";
                     ts.Items[0].Click -= Minimize_Click;
                     ts.Items[0].Click += Maximize_Click;
@@ -1741,6 +1758,8 @@ namespace DBADashGUI.CustomReports
             }
             SetChartPanelCollapsed(Charts.Count == 0);
             SetTablePanelCollapsed(false);
+            TablePanel.AutoScroll = savedAutoScroll;
+            ResizeResultPanels();
         }
 
         protected virtual void OnPostGridRefresh()
