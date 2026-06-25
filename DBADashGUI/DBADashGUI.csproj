@@ -194,9 +194,6 @@
     <Compile Update="Performance\WaitsSummary.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Update="Drives\DrivesControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
     <Compile Update="Info.cs">
       <SubType>UserControl</SubType>
     </Compile>

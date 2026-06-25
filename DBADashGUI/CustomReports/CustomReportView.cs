@@ -2804,7 +2804,8 @@ namespace DBADashGUI.CustomReports
         {
             var dgv = (DBADashDataGridView)sender;
             if (e.RowIndex < 0) return;
-            var colName = dgv.Columns[e.ColumnIndex].DataPropertyName;
+            var col = dgv.Columns[e.ColumnIndex];
+            var colName = string.IsNullOrEmpty(col.DataPropertyName) ? col.Name : col.DataPropertyName;
             LinkColumnInfo linkColumnInfo = null;
             Report.CustomReportResults[dgv.ResultSetID].LinkColumns?.TryGetValue(colName, out linkColumnInfo);
             try

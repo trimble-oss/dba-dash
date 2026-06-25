@@ -1,0 +1,103 @@
+﻿CREATE PROC dbo.DrivesReport_Get(
+	@InstanceIDs IDs READONLY,
+	@IncludeCritical BIT=1,
+	@IncludeWarning BIT=1,
+	@IncludeNA BIT=0,
+	@IncludeOK BIT=0,
+	@IncludeMetrics BIT=0,
+	@ShowHidden BIT=1,
+	@DriveName NVARCHAR(256)=NULL,
+	@HasMetrics BIT=0
+)
+AS
+DECLARE @StatusSQL NVARCHAR(MAX)
+
+SELECT @StatusSQL = CASE WHEN @IncludeCritical=1 THEN ',1' ELSE '' END
+	+ CASE WHEN @IncludeWarning=1 THEN ',2' ELSE '' END
+	+ CASE WHEN @IncludeNA=1 THEN ',3' ELSE '' END
+	+ CASE WHEN @IncludeOK=1 THEN ',4' ELSE '' END
+
+SELECT @StatusSQL = CASE WHEN @StatusSQL='' THEN 'AND 1=2'
+		ELSE 'AND D.Status IN(' + STUFF(@StatusSQL,1,1,'') + ')' END
+
+DECLARE @SQL NVARCHAR(MAX)
+SET @SQL = N'
+SELECT D.DriveID,
+		D.Name,
+		D.InstanceID,
+		D.Label,
+		D.TotalGB,
+		D.FreeGB,
+		D.DriveCheckType,
+		D.Status,
+		D.DriveWarningThreshold,
+		D.DriveCriticalThreshold,
+		D.IsInheritedThreshold,
+		D.Instance,
+		D.InstanceDisplayName,
+		D.PctFreeSpace,
+		D.DriveCheckConfiguredLevel,
+		D.SnapshotDate,
+		D.SnapshotAgeMins,
+		D.SnapshotStatus' + CASE WHEN  @IncludeMetrics=1 THEN ',
+		(D.UsedGB-PreviousDay.UsedGB) AS ChangeUsedGB24Hrs,
+		(D.TotalGB-PreviousDay.TotalGB) AS ChangeDriveSize24Hrs,
+		(D.UsedGB-SevenDay.UsedGB) AS ChangeUsedGB7Days,
+		(D.TotalGB-SevenDay.TotalGB) AS ChangeDriveSize7Days,
+		(D.UsedGB-ThirtyDay.UsedGB) ChangeUsedGB30Days,
+		(D.TotalGB-ThirtyDay.TotalGB) AS ChangeDriveSize30Days,
+		(D.UsedGB-NinetyDay.UsedGB) AS ChangeUsedGB90Days,
+		(D.TotalGB-NinetyDay.TotalGB) AS ChangeDriveSize90Days' ELSE '' END + '
+FROM dbo.DriveStatus D ' + CASE WHEN @IncludeMetrics=1 THEN '
+OUTER APPLY (SELECT TOP(1) DSS.Capacity / POWER(1024.0,3) as TotalGB,
+                    DSS.UsedSpace / POWER(1024.0,3)as UsedGB
+		FROM dbo.DriveSnapshot DSS 
+		WHERE DSS.SnapshotDate < DATEADD(HH,-24,GETUTCDATE())
+		AND DSS.DriveID=D.DriveID
+		ORDER BY DSS.SnapshotDate DESC
+		) PreviousDay
+OUTER APPLY (SELECT TOP(1) DSS.Capacity / POWER(1024.0,3) as TotalGB,
+                    DSS.UsedSpace / POWER(1024.0,3) as UsedGB
+		FROM dbo.DriveSnapshot DSS 
+		WHERE DSS.SnapshotDate >= DATEADD(d,-7,GETUTCDATE())
+		AND DSS.DriveID=D.DriveID
+		ORDER BY DSS.SnapshotDate
+		) SevenDay
+OUTER APPLY (SELECT TOP(1) DSS.Capacity / POWER(1024.0,3) as TotalGB,
+                    DSS.UsedSpace / POWER(1024.0,3)as UsedGB
+		FROM dbo.DriveSnapshot DSS 
+		WHERE DSS.SnapshotDate >= DATEADD(d,-30,GETUTCDATE())
+		AND DSS.DriveID=D.DriveID
+		ORDER BY DSS.SnapshotDate
+		) ThirtyDay
+OUTER APPLY (SELECT TOP(1) DSS.Capacity / POWER(1024.0,3) as TotalGB,
+                    DSS.UsedSpace / POWER(1024.0,3)as UsedGB
+		FROM dbo.DriveSnapshot DSS 
+		WHERE DSS.SnapshotDate >= DATEADD(d,-90,GETUTCDATE())
+		AND DSS.DriveID=D.DriveID
+		ORDER BY DSS.SnapshotDate
+		) NinetyDay' ELSE '' END + '
+WHERE ' + CASE WHEN EXISTS(SELECT 1 FROM @InstanceIDs)
+			THEN 'EXISTS(SELECT 1
+						FROM @InstanceIDs ids
+						WHERE ids.ID = D.InstanceID)'
+			ELSE '1=1' END + '
+' + @StatusSQL + '
+' + CASE WHEN @ShowHidden=1 THEN '' ELSE 'AND D.ShowInSummary=1' END + '
+' + CASE WHEN @DriveName IS NULL THEN '' ELSE 'AND D.Name = @DriveName' END + '
+' + CASE WHEN @HasMetrics = 1 THEN 'AND EXISTS(
+										SELECT 1 
+										FROM dbo.DBIOStats IOS 
+										WHERE IOS.InstanceID = D.InstanceID 
+										AND IOS.DatabaseID=-1 
+										AND IOS.FileID = -1
+										AND IOS.Drive = CAST(LEFT(D.Name,1) AS CHAR(1))
+										) ' ELSE '' END + '
+ORDER BY Status DESC, PctFreeSpace DESC;'
+
+EXEC sp_executesql @SQL,N'@InstanceIDs IDs READONLY,@DriveName NVARCHAR(256)',@InstanceIDs,@DriveName
+GO
+GRANT EXECUTE
+    ON OBJECT::[dbo].[DrivesReport_Get] TO [Reports]
+    AS [dbo];
+
