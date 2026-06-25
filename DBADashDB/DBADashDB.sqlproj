@@ -344,6 +344,7 @@
     <Build Include="dbo\Stored Procedures\SystemTags_Upd.sql" />
     <Build Include="dbo\Stored Procedures\BackupReport_Get.sql" />
     <Build Include="dbo\Stored Procedures\LogShippingReport_Get.sql" />
+    <Build Include="dbo\Stored Procedures\SQLPatchingReport_Get.sql" />
     <Build Include="dbo\Stored Procedures\AgentJobThresholds_Upd.sql" />
     <Build Include="dbo\Stored Procedures\AgentJobThresholds_Get.sql" />
     <Build Include="dbo\Stored Procedures\AgentJobs_Get.sql" />
@@ -411,7 +412,6 @@
     <Build Include="dbo\Stored Procedures\AlertsConfig_Get.sql" />
     <Build Include="dbo\Stored Procedures\Alerts_Get.sql" />
     <Build Include="dbo\Stored Procedures\Drivers_Get.sql" />
-    <Build Include="dbo\Stored Procedures\InstanceVersionInfo_Get.sql" />
     <Build Include="dbo\Stored Procedures\Hardware_Get.sql" />
     <Build Include="dbo\Tables\DBIOStats_60MIN.sql" />
     <Build Include="dbo\Tables\DBIOStats.sql" />

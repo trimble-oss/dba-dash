@@ -137,7 +137,7 @@ namespace DBADashGUI
             tabHardware = new System.Windows.Forms.TabPage();
             hardwareChanges1 = new HardwareChanges();
             tabSQLPatching = new System.Windows.Forms.TabPage();
-            sqlPatching1 = new SQLPatching();
+            sqlPatching1 = new DBADashGUI.Changes.SQLPatchingView();
             tabConfiguration = new System.Windows.Forms.TabPage();
             configurationHistory1 = new ConfigurationHistory();
             tabSlowQueries = new System.Windows.Forms.TabPage();
@@ -2797,7 +2797,7 @@ namespace DBADashGUI
         private System.Windows.Forms.TabPage tabHardware;
         private HardwareChanges hardwareChanges1;
         private System.Windows.Forms.TabPage tabSQLPatching;
-        private SQLPatching sqlPatching1;
+        private DBADashGUI.Changes.SQLPatchingView sqlPatching1;
         private System.Windows.Forms.TabPage tabConfiguration;
         private ConfigurationHistory configurationHistory1;
         private System.Windows.Forms.TabPage tabSlowQueries;
