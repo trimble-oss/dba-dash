@@ -203,10 +203,7 @@
     <Compile Update="Performance\SlowQueries.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Update="Changes\SQLPatching.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Update="Checks\Summary.cs">
+<Compile Update="Checks\Summary.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Update="Tagging\Tags.cs">
