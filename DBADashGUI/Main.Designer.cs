@@ -113,7 +113,7 @@ namespace DBADashGUI
             tabTags = new System.Windows.Forms.TabPage();
             tags1 = new DBADashGUI.Tagging.Tags();
             tabDrives = new System.Windows.Forms.TabPage();
-            drivesControl1 = new DrivesControl();
+            drivesControl1 = new DBADashGUI.Drives.DrivesView();
             tabBackups = new System.Windows.Forms.TabPage();
             backupsControl1 = new DBADashGUI.Backups.BackupsView();
             tabLogShipping = new System.Windows.Forms.TabPage();
@@ -2774,7 +2774,7 @@ namespace DBADashGUI
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.TabPage tabTags;
         private System.Windows.Forms.TabPage tabDrives;
-        private DrivesControl drivesControl1;
+        private DBADashGUI.Drives.DrivesView drivesControl1;
         private System.Windows.Forms.TabPage tabBackups;
         private Backups.BackupsView backupsControl1;
         private System.Windows.Forms.TabPage tabLogShipping;

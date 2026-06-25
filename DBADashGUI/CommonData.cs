@@ -339,10 +339,10 @@ namespace DBADashGUI
         public static DataTable GetDrives(HashSet<int> instanceIDs, bool includeMetrics, bool includeCritical, bool includeWarning, bool includeNA, bool includeOK, bool showHidden, string driveName, bool hasMetrics = false)
         {
             using var cn = new SqlConnection(Common.ConnectionString);
-            using var cmd = new SqlCommand("dbo.Drives_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var cmd = new SqlCommand("dbo.DrivesReport_Get", cn) { CommandType = CommandType.StoredProcedure };
             using var da = new SqlDataAdapter(cmd);
             cn.Open();
-            cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", instanceIDs));
+            cmd.Parameters.AddWithValue("InstanceIDs", instanceIDs.AsDataTable());
             cmd.Parameters.Add(new SqlParameter() { ParameterName = "IncludeCritical", DbType = DbType.Boolean, Value = includeCritical });
             cmd.Parameters.Add(new SqlParameter() { ParameterName = "IncludeWarning", DbType = DbType.Boolean, Value = includeWarning });
             cmd.Parameters.Add(new SqlParameter() { ParameterName = "IncludeNA", DbType = DbType.Boolean, Value = includeNA });
@@ -361,8 +361,8 @@ namespace DBADashGUI
         public static async Task<DataTable> GetDrivesAsync(HashSet<int> instanceIDs, bool includeMetrics, bool includeCritical, bool includeWarning, bool includeNA, bool includeOK, bool showHidden, string driveName, bool hasMetrics = false, CancellationToken token = default)
         {
             await using var cn = new SqlConnection(Common.ConnectionString);
-            await using var cmd = new SqlCommand("dbo.Drives_Get", cn) { CommandType = CommandType.StoredProcedure };
-            cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", instanceIDs));
+            await using var cmd = new SqlCommand("dbo.DrivesReport_Get", cn) { CommandType = CommandType.StoredProcedure };
+            cmd.Parameters.AddWithValue("InstanceIDs", instanceIDs.AsDataTable());
             cmd.Parameters.Add(new SqlParameter() { ParameterName = "IncludeCritical", DbType = DbType.Boolean, Value = includeCritical });
             cmd.Parameters.Add(new SqlParameter() { ParameterName = "IncludeWarning", DbType = DbType.Boolean, Value = includeWarning });
             cmd.Parameters.Add(new SqlParameter() { ParameterName = "IncludeNA", DbType = DbType.Boolean, Value = includeNA });

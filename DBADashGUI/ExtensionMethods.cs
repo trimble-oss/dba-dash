@@ -655,8 +655,10 @@ namespace DBADashGUI
         /// <param name="customReportResult">Types for each column</param>
         public static void AddColumns(this DataGridView dgv, DataTable dt, CustomReportResult customReportResult)
         {
+            var dataColumnNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             foreach (DataColumn dataColumn in dt.Columns)
             {
+                dataColumnNames.Add(dataColumn.ColumnName);
                 DataGridViewColumn column;
                 customReportResult.Columns.TryGetValue(dataColumn.ColumnName, out var colInfo);
 
@@ -681,6 +683,21 @@ namespace DBADashGUI
                 column.ValueType = dataColumn.DataType;
                 column.ToolTipText = colInfo?.Description;
                 column.SortMode = DataGridViewColumnSortMode.Automatic;
+                dgv.Columns.Add(column);
+            }
+
+            foreach (var (colName, colInfo) in customReportResult.Columns)
+            {
+                if (colInfo?.Link == null || dataColumnNames.Contains(colName)) continue;
+                var column = new DataGridViewLinkColumn
+                {
+                    Name = colName,
+                    HeaderText = string.IsNullOrEmpty(colInfo.Alias) ? colName : colInfo.Alias,
+                    ToolTipText = colInfo.Description,
+                    UseColumnTextForLinkValue = true,
+                    Text = string.IsNullOrEmpty(colInfo.Alias) ? colName : colInfo.Alias,
+                    SortMode = DataGridViewColumnSortMode.NotSortable,
+                };
                 dgv.Columns.Add(column);
             }
         }

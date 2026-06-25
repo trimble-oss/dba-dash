@@ -177,6 +177,7 @@
     <Build Include="dbo\Stored Procedures\DriveThresholds_Upd.sql" />
     <Build Include="dbo\Stored Procedures\DriveThresholds_Get.sql" />
     <Build Include="dbo\Stored Procedures\Drives_Get.sql" />
+    <Build Include="dbo\Stored Procedures\DrivesReport_Get.sql" />
     <Build Include="dbo\Stored Procedures\Databases_Get.sql" />
     <Build Include="dbo\Stored Procedures\BackupThresholds_Upd.sql" />
     <Build Include="dbo\Stored Procedures\BackupThresholds_Get.sql" />

@@ -763,7 +763,7 @@
         private System.Windows.Forms.ToolStripMenuItem scriptGridsToolStripMenuItem;
         private System.Windows.Forms.ToolStripButton tsReset;
         private System.Windows.Forms.ToolStripStatusLabel lblDescription;
-        private System.Windows.Forms.SplitContainer splitTablesCharts;
+        protected System.Windows.Forms.SplitContainer splitTablesCharts;
         private System.Windows.Forms.TableLayoutPanel chartLayout;
         private System.Windows.Forms.ToolStripButton tsToggleCharts;
         private System.Windows.Forms.ToolStripButton tsToggleGrids;
