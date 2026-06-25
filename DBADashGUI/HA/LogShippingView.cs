@@ -184,6 +184,9 @@ namespace DBADashGUI.LogShipping
         private static void ApplyThresholdStyling(DBADashDataGridView grid)
         {
             if (grid.Columns[ConfigureColumnName] == null) return;
+            // Reuse a single bold font across all rows (created lazily) and the grid's own font for the regular case
+            // rather than allocating a Font per row on every refresh.
+            Font boldFont = null;
             foreach (DataGridViewRow row in grid.Rows)
             {
                 if (row.DataBoundItem is not DataRowView drv) continue;
@@ -200,7 +203,7 @@ namespace DBADashGUI.LogShipping
                            && (drv["ThresholdConfiguredLevel"] as string) == "Database";
                 }
                 row.Cells[ConfigureColumnName].Style.Font =
-                    new Font(grid.Font, bold ? FontStyle.Bold : FontStyle.Regular);
+                    bold ? boldFont ??= new Font(grid.Font, FontStyle.Bold) : grid.Font;
             }
         }
 

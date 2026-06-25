@@ -64,6 +64,11 @@ namespace DBADashGUI.CustomReports
         // Keep track of GridFilterChanged handlers so we can unsubscribe them when disposing/clearing
         private readonly Dictionary<DBADashDataGridView, EventHandler> gridFilterHandlers = new();
 
+        // Caches each grid's summed row height (the only O(rowCount) part of NaturalPanelHeight) so resize events,
+        // which fire frequently during a window/splitter drag, don't re-walk every row. Keyed by grid and validated
+        // against the row count; cleared with the grids in CleanupGrids.
+        private readonly Dictionary<DBADashDataGridView, (int RowCount, int RowsHeight)> rowsHeightCache = new();
+
         private bool wasTableCollapsedBeforeMaximize = false;
 
         #region Navigation stack for in-place drill-down
@@ -391,6 +396,7 @@ namespace DBADashGUI.CustomReports
 
                 Grids.Clear();
                 gridFilterHandlers.Clear();
+                rowsHeightCache.Clear();
             }
             catch (Exception ex)
             {
@@ -1996,7 +2002,7 @@ namespace DBADashGUI.CustomReports
             return heights;
         }
 
-        private static int NaturalPanelHeight(Panel pnl)
+        private int NaturalPanelHeight(Panel pnl)
         {
             var grid = pnl.Controls.OfType<DBADashDataGridView>().FirstOrDefault();
             if (grid == null) return MinResultPanelHeight;
@@ -2007,13 +2013,29 @@ namespace DBADashGUI.CustomReports
             // scrollbar too - a nested "double scroll" inside the already-scrollable container.
             const int GridBorderAllowance = 6;
             var content = grid.ColumnHeadersHeight
-                          + grid.Rows.GetRowsHeight(DataGridViewElementStates.Visible)
+                          + GridRowsHeight(grid)
                           + grid.Padding.Top + grid.Padding.Bottom
                           + pnl.Padding.Top + pnl.Padding.Bottom
                           + toolStripHeight
                           + SystemInformation.HorizontalScrollBarHeight // room for a horizontal scrollbar on wide grids
                           + GridBorderAllowance;
             return Math.Max(MinResultPanelHeight, content);
+        }
+
+        /// <summary>
+        /// Returns the summed height of the grid's rows, cached against the row count so frequent resize events
+        /// don't re-walk every row (<see cref="DataGridViewRowCollection.GetRowsHeight"/> is O(rowCount)).
+        /// </summary>
+        private int GridRowsHeight(DBADashDataGridView grid)
+        {
+            var rowCount = grid.Rows.Count;
+            if (rowsHeightCache.TryGetValue(grid, out var cached) && cached.RowCount == rowCount)
+            {
+                return cached.RowsHeight;
+            }
+            var rowsHeight = grid.Rows.GetRowsHeight(DataGridViewElementStates.Visible);
+            rowsHeightCache[grid] = (rowCount, rowsHeight);
+            return rowsHeight;
         }
 
         /// <summary>
