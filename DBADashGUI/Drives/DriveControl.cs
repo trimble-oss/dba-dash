@@ -138,21 +138,16 @@ namespace DBADashGUI
                 Height = ctrl.Parent?.Height ?? 500,
             };
             var context = CommonData.GetDBADashContext(instanceID);
-            var files = new DBFilesControl()
+            context.DriveName = driveLetter;
+            var files = new DBFilesView()
             {
                 Dock = DockStyle.Fill,
-                FileLevel = true,
-                IncludeCritical = true,
-                IncludeWarning = true,
-                IncludeOK = true,
-                IncludeNA = true,
             };
             frm.Controls.Add(files);
             frm.ApplyTheme();
             frm.Load += (s, args) =>
             {
-                files.SetContext(context, false, true);
-                files.GridFilter = $"[physical_name] LIKE '{driveLetter}%'";
+                files.SetContext(context);
             };
             frm.Text = $@"DB Files on drive {driveLetter} ({driveLabel}) on {instanceName}";
             frm.ShowSingleInstance();

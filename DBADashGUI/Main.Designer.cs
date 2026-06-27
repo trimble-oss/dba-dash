@@ -123,7 +123,7 @@ namespace DBADashGUI
             tabSummary = new System.Windows.Forms.TabPage();
             summary1 = new Summary();
             tabFiles = new System.Windows.Forms.TabPage();
-            dbFilesControl1 = new DBADashGUI.DBFiles.DBFilesControl();
+            dbFilesControl1 = new DBADashGUI.DBFiles.DBFilesView();
             tabLastGood = new System.Windows.Forms.TabPage();
             lastGoodCheckDBControl1 = new DBADashGUI.LastGoodCheckDB.LastGoodCheckDBControl();
             tabDBADashErrorLog = new System.Windows.Forms.TabPage();
@@ -1313,7 +1313,7 @@ namespace DBADashGUI
             // 
             dbFilesControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             dbFilesControl1.Location = new System.Drawing.Point(1, 2);
-            dbFilesControl1.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
+            dbFilesControl1.Margin = new System.Windows.Forms.Padding(1, 2, 1, 2);
             dbFilesControl1.Name = "dbFilesControl1";
             dbFilesControl1.Size = new System.Drawing.Size(190, 53);
             dbFilesControl1.TabIndex = 0;
@@ -2784,7 +2784,7 @@ namespace DBADashGUI
         private System.Windows.Forms.TabPage tabSummary;
         private Summary summary1;
         private System.Windows.Forms.TabPage tabFiles;
-        private DBFiles.DBFilesControl dbFilesControl1;
+        private DBFiles.DBFilesView dbFilesControl1;
         private System.Windows.Forms.TabPage tabLastGood;
         private LastGoodCheckDB.LastGoodCheckDBControl lastGoodCheckDBControl1;
         private System.Windows.Forms.TabPage tabDBADashErrorLog;

@@ -354,6 +354,7 @@
     <Build Include="dbo\Stored Procedures\DBFileThresholds_Upd.sql" />
     <Build Include="dbo\Stored Procedures\DBFileThresholds_Get.sql" />
     <Build Include="dbo\Stored Procedures\DBFiles_Get.sql" />
+    <Build Include="dbo\Stored Procedures\DBFilesReport_Get.sql" />
     <Build Include="dbo\Stored Procedures\LastGoodCheckDBThresholds_Upd.sql" />
     <Build Include="dbo\Stored Procedures\LastGoodCheckDBThresholds_Get.sql" />
     <Build Include="dbo\Stored Procedures\LastGoodCheckDB_Get.sql" />

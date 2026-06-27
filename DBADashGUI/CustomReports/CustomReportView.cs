@@ -51,11 +51,15 @@ namespace DBADashGUI.CustomReports
         private Guid CurrentMessageGroup;
         public EventHandler PostGridRefresh;
         public ToolStrip ToolStrip => toolStrip1;
+        public StatusStrip StatusStrip => statusStrip1;
         public DateTime RefreshDate { private set; get; }
 
         public TimeSpan TimeSinceRefresh => DateTime.Now.Subtract(RefreshDate);
 
-        private bool AutoLoad => Report is not DirectExecutionReport;
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool SuppressRefresh { get; set; }
+
+        private bool AutoLoad => !SuppressRefresh && Report is not DirectExecutionReport;
 
         private const string ResultSetLabelControlName = "ResultLabel";
 
@@ -2372,7 +2376,11 @@ namespace DBADashGUI.CustomReports
                 SetContextParametersForDirectExecutionReport();
                 EnsureStatusFilter();
                 // Reset the filter on tree navigation only; drill-downs supply their own parameter state.
-                if (sqlParams == null) ResetStatusFilter();
+                // When refresh is suppressed (data already provided), restore filter state from params instead.
+                if (SuppressRefresh)
+                    RestoreStatusFilterFromParams();
+                else if (sqlParams == null)
+                    ResetStatusFilter();
                 // When a status filter is shown it drives the @Include* parameters, so the generic params button is redundant.
                 tsParams.Visible = Report.UserParams.Any() && Report.ShowStatusFilter != true;
                 tsConfigure.Visible = Report.CanEditReport;
@@ -2485,6 +2493,25 @@ namespace DBADashGUI.CustomReports
             {
                 statusFilter.Acknowledged = true;
             }
+        }
+
+        private void RestoreStatusFilterFromParams()
+        {
+            if (statusFilter == null || Report?.ShowStatusFilter != true) return;
+            statusFilter.Critical = GetBitParam("@IncludeCritical");
+            statusFilter.Warning = GetBitParam("@IncludeWarning");
+            statusFilter.NA = GetBitParam("@IncludeNA");
+            statusFilter.OK = GetBitParam("@IncludeOK");
+            if (statusFilter.AcknowledgedVisible)
+                statusFilter.Acknowledged = GetBitParam("@IncludeACK");
+        }
+
+        private bool GetBitParam(string name)
+        {
+            var p = customParams.FirstOrDefault(p =>
+                p.Param.ParameterName.Equals(name, StringComparison.OrdinalIgnoreCase));
+            if (p == null) return true;
+            return p.Param.Value is true or 1;
         }
 
         /// <summary>
@@ -2713,17 +2740,58 @@ namespace DBADashGUI.CustomReports
                         tsParams.DropDownItems.Add(pickerMenu);
                     }
                 }
-                else
+                else if (picker.MultiSelect)
                 {
-                    var pickerMenu = new ToolStripMenuItem(picker.Name) { Tag = pickerTag };
+                    var pickerMenu = new ToolStripDropDownButton(picker.Name) { Tag = pickerTag, DisplayStyle = ToolStripItemDisplayStyle.Text };
+                    var selectedValues = param.UseDefaultValue
+                        ? null
+                        : param.Param.Value?.ToString()?.Split(',').Select(s => s.Trim()).ToHashSet(StringComparer.OrdinalIgnoreCase);
                     foreach (var itm in picker.PickerItems ?? new Dictionary<object, string>())
                     {
+                        var isChecked = selectedValues == null || selectedValues.Contains(itm.Key.ToString());
                         var item = new ToolStripMenuItem(itm.Value)
                         {
                             Tag = itm.Key,
-                            Checked = (param.UseDefaultValue && string.IsNullOrEmpty(itm.Key.ToString())) || (!param.UseDefaultValue && param.Param.Value != null && param.Param.Value.ToString() == itm.Key.ToString())
+                            CheckOnClick = true,
+                            Checked = isChecked,
+                            Font = isChecked ? new Font(pickerMenu.Font, FontStyle.Bold) : new Font(pickerMenu.Font, FontStyle.Regular)
                         };
-                        item.Click += (sender, e) => PickerItem_Click(sender, itm, picker.ParameterName);
+                        item.CheckedChanged += (_, _) => MultiSelectPickerChanged(pickerMenu, picker.ParameterName);
+                        pickerMenu.DropDownItems.Add(item);
+                    }
+                    if (selectedValues != null)
+                    {
+                        pickerMenu.Font = new Font(pickerMenu.Font, FontStyle.Bold);
+                    }
+                    if (picker.MenuBar)
+                    {
+                        toolStrip1.Items.Insert(baseIdx + 1, pickerMenu);
+                    }
+                    else
+                    {
+                        tsParams.DropDownItems.Add(pickerMenu);
+                    }
+                }
+                else
+                {
+                    var pickerMenu = new ToolStripMenuItem(picker.Name) { Tag = pickerTag };
+                    var isNonDefault = !param.UseDefaultValue && picker.DefaultValue != null
+                        && param.Param.Value?.ToString() != picker.DefaultValue.ToString();
+                    if (isNonDefault)
+                    {
+                        pickerMenu.Font = new Font(pickerMenu.Font, FontStyle.Bold);
+                    }
+                    foreach (var itm in picker.PickerItems ?? new Dictionary<object, string>())
+                    {
+                        var isChecked = (param.UseDefaultValue && string.IsNullOrEmpty(itm.Key.ToString())) || (!param.UseDefaultValue && param.Param.Value != null && param.Param.Value.ToString() == itm.Key.ToString());
+                        var item = new ToolStripMenuItem(itm.Value)
+                        {
+                            Tag = itm.Key,
+                            Checked = isChecked,
+                            Font = isChecked ? new Font(pickerMenu.Font, FontStyle.Bold) : new Font(pickerMenu.Font, FontStyle.Regular)
+                        };
+                        var capturedPicker = picker;
+                        item.Click += (sender, e) => PickerItem_Click(sender, itm, capturedPicker);
                         pickerMenu.DropDownItems.Add(item);
                     }
                     if (picker.MenuBar)
@@ -2744,10 +2812,10 @@ namespace DBADashGUI.CustomReports
             tsParams.DropDownItems.Add(tsParameters);
         }
 
-        private void PickerItem_Click(object sender, KeyValuePair<object, string> itm, string paramName)
+        private void PickerItem_Click(object sender, KeyValuePair<object, string> itm, Picker picker)
         {
             var menu = (ToolStripMenuItem)sender;
-            var param = customParams.First(p => p.Param.ParameterName.TrimStart('@').Equals(paramName.TrimStart('@'), StringComparison.InvariantCultureIgnoreCase));
+            var param = customParams.First(p => p.Param.ParameterName.TrimStart('@').Equals(picker.ParameterName.TrimStart('@'), StringComparison.InvariantCultureIgnoreCase));
             if (itm.Key != DBNull.Value && (itm.Key == null || string.IsNullOrEmpty(itm.Key.ToString())))
             {
                 param.UseDefaultValue = true;
@@ -2758,13 +2826,56 @@ namespace DBADashGUI.CustomReports
                 param.UseDefaultValue = false;
             }
 
-            if (menu.Owner != null)
+            var isDefault = param.UseDefaultValue || (picker.DefaultValue != null && picker.DefaultValue.ToString() == itm.Key?.ToString());
+            if (menu.Owner is ToolStripDropDownMenu ownerMenu)
             {
-                foreach (var item in menu.Owner.Items.Cast<ToolStripMenuItem>())
+                foreach (var item in ownerMenu.Items.Cast<ToolStripMenuItem>())
                 {
                     item.Checked = item == menu;
+                    item.Font = item.Checked
+                        ? new Font(item.Font, FontStyle.Bold)
+                        : new Font(item.Font, FontStyle.Regular);
+                }
+                if (ownerMenu.OwnerItem != null)
+                {
+                    ownerMenu.OwnerItem.Font = isDefault
+                        ? new Font(ownerMenu.OwnerItem.Font, FontStyle.Regular)
+                        : new Font(ownerMenu.OwnerItem.Font, FontStyle.Bold);
                 }
             }
+            if (AutoLoad)
+            {
+                RefreshData();
+            }
+        }
+
+        private void MultiSelectPickerChanged(ToolStripDropDownButton pickerMenu, string paramName)
+        {
+            var param = customParams.First(p => p.Param.ParameterName.TrimStart('@').Equals(paramName.TrimStart('@'), StringComparison.InvariantCultureIgnoreCase));
+            var checkedItems = pickerMenu.DropDownItems.OfType<ToolStripMenuItem>()
+                .Where(i => i.Checked)
+                .Select(i => i.Tag?.ToString())
+                .ToList();
+
+            var allCount = pickerMenu.DropDownItems.OfType<ToolStripMenuItem>().Count();
+            if (checkedItems.Count == allCount || checkedItems.Count == 0)
+            {
+                param.UseDefaultValue = true;
+            }
+            else
+            {
+                param.Param.Value = string.Join(",", checkedItems);
+                param.UseDefaultValue = false;
+            }
+
+            pickerMenu.Font = checkedItems.Count > 0 && checkedItems.Count < allCount
+                ? new Font(pickerMenu.Font, FontStyle.Bold)
+                : new Font(pickerMenu.Font, FontStyle.Regular);
+            foreach (var item in pickerMenu.DropDownItems.OfType<ToolStripMenuItem>())
+            {
+                item.Font = item.Checked ? new Font(item.Font, FontStyle.Bold) : new Font(item.Font, FontStyle.Regular);
+            }
+
             if (AutoLoad)
             {
                 RefreshData();
