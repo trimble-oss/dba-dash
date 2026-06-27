@@ -44,9 +44,14 @@ namespace DBADashGUI.CustomReports
             {
                 customReportView1.PostGridRefresh += ApplyGridFilters;
             }
+            if (DataSet != null)
+            {
+                customReportView1.SuppressRefresh = true;
+            }
             await customReportView1.SetContext(Context, CustomParams);
             if (DataSet != null)
             {
+                customReportView1.SuppressRefresh = false;
                 customReportView1.ShowData(DataSet);
             }
             else if (LoadDirectExecutionReport && Context.Report is DirectExecutionReport)

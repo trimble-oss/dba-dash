@@ -20,6 +20,8 @@ namespace DBADashGUI.CustomReports
 
         public bool MenuBar { get; set; }
 
+        public bool MultiSelect { get; set; }
+
         public bool IsText
         {
             get => _IsText;

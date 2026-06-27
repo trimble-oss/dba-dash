@@ -125,10 +125,7 @@
     <Compile Update="HA\AG.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Update="DBFiles\DBFilesControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Update="DBFiles\DBSpaceHistory.cs">
+<Compile Update="DBFiles\DBSpaceHistory.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Update="DBFiles\TempDBConfig.cs">
