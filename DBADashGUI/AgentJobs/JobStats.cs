@@ -225,7 +225,7 @@ namespace DBADashGUI.AgentJobs
                 dd.Click += MeasureDropDown_Click;
                 tsMeasures.DropDownItems.Add(dd);
             }
-            AgentJobsControl.AddContextMenuItems(dgv, this);
+            AgentJobsView.AddContextMenuItems(dgv, this);
 
             if (UseGlobalTime) return;
             if (DateRange.SelectedTimeSpan.HasValue)

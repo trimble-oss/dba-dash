@@ -170,22 +170,22 @@ namespace DBADashGUI.CustomReports
             if (Status != null)
             {
                 formattedCell.SetStatusColor((DBADashStatus.DBADashStatusEnum)(Status));
-                formattedCell.Style.Font = Font;
+                if (Font != null) formattedCell.Style.Font = Font;
                 return;
             }
             var b = isDarkMode && BackColorDark != Color.Empty ? BackColorDark : BackColor;
             var f = isDarkMode && ForeColorDark != Color.Empty ? ForeColorDark : ForeColor;
-            formattedCell.Style.BackColor = b;
-            formattedCell.Style.ForeColor = f;
-            formattedCell.Style.Font = Font;
+            if (b != Color.Empty) formattedCell.Style.BackColor = b;
+            if (f != Color.Empty) formattedCell.Style.ForeColor = f;
+            if (Font != null) formattedCell.Style.Font = Font;
 
-            if (formattedCell is DataGridViewLinkCell linkCell)
+            if (f != Color.Empty && formattedCell is DataGridViewLinkCell linkCell)
             {
                 linkCell.LinkColor = f;
                 linkCell.ActiveLinkColor = f;
                 linkCell.VisitedLinkColor = f;
             }
-            formattedCell.Style.SelectionBackColor = b.AdjustBasedOnLuminance();
+            if (b != Color.Empty) formattedCell.Style.SelectionBackColor = b.AdjustBasedOnLuminance();
         }
 
         /// <summary>

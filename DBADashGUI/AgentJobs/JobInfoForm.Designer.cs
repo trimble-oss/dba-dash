@@ -32,7 +32,7 @@
             tabInfo = new System.Windows.Forms.TabPage();
             jobInfo1 = new JobInfo();
             tabStatus = new System.Windows.Forms.TabPage();
-            agentJobsControl1 = new AgentJobsControl();
+            agentJobsControl1 = new AgentJobsView();
             tabDDL = new System.Windows.Forms.TabPage();
             jobddlHistory1 = new DBADashGUI.Changes.JobDDLHistory();
             tabStats = new System.Windows.Forms.TabPage();
@@ -98,15 +98,9 @@
             // agentJobsControl1
             // 
             agentJobsControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            agentJobsControl1.IncludeAcknowledged = true;
-            agentJobsControl1.IncludeCritical = true;
-            agentJobsControl1.IncludeNA = true;
-            agentJobsControl1.IncludeOK = true;
-            agentJobsControl1.IncludeWarning = true;
             agentJobsControl1.Location = new System.Drawing.Point(3, 3);
             agentJobsControl1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             agentJobsControl1.Name = "agentJobsControl1";
-            agentJobsControl1.ShowSteps = false;
             agentJobsControl1.Size = new System.Drawing.Size(1366, 898);
             agentJobsControl1.TabIndex = 0;
             // 
@@ -196,7 +190,7 @@
         private System.Windows.Forms.TabPage tabStats;
         private System.Windows.Forms.TabPage tabTimeline;
         private JobInfo jobInfo1;
-        private AgentJobsControl agentJobsControl1;
+        private AgentJobsView agentJobsControl1;
         private Changes.JobDDLHistory jobddlHistory1;
         private JobStats jobStats1;
         private JobTimeline jobTimeline1;
