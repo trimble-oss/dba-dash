@@ -38,6 +38,7 @@ namespace DBADashGUI.CustomReports
                     "DATETIME2" => SqlDbType.DateTime2,
                     "DATETIMEOFFSET" => SqlDbType.DateTimeOffset,
                     "IDS" => SqlDbType.Structured,
+                    "UNIQUEIDENTIFIER" => SqlDbType.UniqueIdentifier,
                     _ => SqlDbType.NVarChar
                 };
             }
@@ -66,6 +67,7 @@ namespace DBADashGUI.CustomReports
                 "BIT" => true,
                 "DATETIME2" => DateTime.Now.Date,
                 "DATETIMEOFFSET" => DateTime.Now.Date,
+                "UNIQUEIDENTIFIER" => Guid.Empty,
                 _ => ""
             };
             return new CustomSqlParameter()

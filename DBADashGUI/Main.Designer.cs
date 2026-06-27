@@ -119,7 +119,7 @@ namespace DBADashGUI
             tabLogShipping = new System.Windows.Forms.TabPage();
             logShippingControl1 = new DBADashGUI.LogShipping.LogShippingView();
             tabJobs = new System.Windows.Forms.TabPage();
-            agentJobsControl1 = new DBADashGUI.AgentJobs.AgentJobsControl();
+            agentJobsControl1 = new DBADashGUI.AgentJobs.AgentJobsView();
             tabSummary = new System.Windows.Forms.TabPage();
             summary1 = new Summary();
             tabFiles = new System.Windows.Forms.TabPage();
@@ -2780,7 +2780,7 @@ namespace DBADashGUI
         private System.Windows.Forms.TabPage tabLogShipping;
         private LogShipping.LogShippingView logShippingControl1;
         private System.Windows.Forms.TabPage tabJobs;
-        private AgentJobs.AgentJobsControl agentJobsControl1;
+        private AgentJobs.AgentJobsView agentJobsControl1;
         private System.Windows.Forms.TabPage tabSummary;
         private Summary summary1;
         private System.Windows.Forms.TabPage tabFiles;

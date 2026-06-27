@@ -159,6 +159,148 @@ namespace DBADashGUI.CustomReports
             toolStrip1.Items.Insert(0, tsBack);
         }
 
+        #region Child report panel
+
+        private SplitContainer splitChildReport;
+        private CustomReportView childReportView;
+        private CustomReportView parentReportView;
+
+        public void ShowChildReport(CustomReport report, DBADashContext newContext, List<CustomSqlParameter> customParams, Dictionary<int, string> filters, string title = null)
+        {
+            EnsureChildSplitContainer();
+
+            if (childReportView != null && report.ViewType != null && !report.ViewType.IsAssignableFrom(childReportView.GetType()))
+            {
+                HideChildReport();
+            }
+
+            if (childReportView == null)
+            {
+                var viewType = report.ViewType ?? typeof(CustomReportView);
+                childReportView = (CustomReportView)Activator.CreateInstance(viewType);
+                childReportView.Dock = DockStyle.Fill;
+                childReportView.parentReportView = this;
+                childReportView.statusStrip1.Visible = false;
+                splitChildReport.Panel2.Controls.Add(childReportView);
+            }
+
+            childReportView.Report = report;
+            childReportView.PreventReportOverwrite = true;
+            childReportView.DrillDownGridFilters = filters;
+            ShowChildCloseButton();
+            SetChildPanelTitle(title ?? report.ReportName);
+            splitChildReport.Panel2Collapsed = false;
+            SetChildSplitterDistance();
+            _ = childReportView.SetContext(newContext, customParams);
+        }
+
+        public void HideChildReport()
+        {
+            if (splitChildReport == null) return;
+            HideChildCloseButton();
+            splitChildReport.Panel1Collapsed = false;
+            splitChildReport.Panel2Collapsed = true;
+            if (childReportView != null)
+            {
+                splitChildReport.Panel2.Controls.Remove(childReportView);
+                childReportView.Dispose();
+                childReportView = null;
+                childTitleLabel = null;
+                childMaximizeButton = null;
+            }
+        }
+
+        private ToolStripButton childMaximizeButton;
+
+        private void ShowChildCloseButton()
+        {
+            if (childReportView == null) return;
+            if (childMaximizeButton == null)
+            {
+                childMaximizeButton = new ToolStripButton("+", null, ParentChildMaximize_Click)
+                {
+                    Alignment = ToolStripItemAlignment.Right,
+                    DisplayStyle = ToolStripItemDisplayStyle.Text,
+                };
+                childReportView.ToolStrip.Items.Add(childMaximizeButton);
+            }
+            childMaximizeButton.Visible = true;
+        }
+
+        private void ParentChildMaximize_Click(object sender, EventArgs e)
+        {
+            if (splitChildReport == null) return;
+            var btn = sender as ToolStripButton;
+            if (splitChildReport.Panel1Collapsed)
+            {
+                splitChildReport.Panel1Collapsed = false;
+                SetChildSplitterDistance();
+                if (btn != null) btn.Text = "+";
+            }
+            else
+            {
+                splitChildReport.Panel1Collapsed = true;
+                if (btn != null) btn.Text = "-";
+            }
+        }
+
+        private void HideChildCloseButton()
+        {
+            if (childMaximizeButton != null)
+            {
+                childMaximizeButton.Visible = false;
+            }
+        }
+
+        private ToolStripLabel childTitleLabel;
+
+        private void SetChildPanelTitle(string title)
+        {
+            if (childReportView == null) return;
+            if (childTitleLabel == null)
+            {
+                childTitleLabel = new ToolStripLabel
+                {
+                    Alignment = ToolStripItemAlignment.Right,
+                    Font = new Font(Font.FontFamily, 9F, FontStyle.Bold),
+                };
+                childReportView.ToolStrip.Items.Add(childTitleLabel);
+            }
+            childTitleLabel.Text = title;
+        }
+
+        private void SetChildSplitterDistance()
+        {
+            if (splitChildReport == null || splitChildReport.Panel2Collapsed) return;
+            try
+            {
+                splitChildReport.SplitterDistance = Math.Max(splitChildReport.Height / 2, splitChildReport.Panel1MinSize);
+            }
+            catch (InvalidOperationException) { }
+            catch (ArgumentOutOfRangeException) { }
+        }
+
+        private void EnsureChildSplitContainer()
+        {
+            if (splitChildReport != null) return;
+
+            splitChildReport = new SplitContainer
+            {
+                Dock = DockStyle.Fill,
+                Orientation = Orientation.Horizontal,
+                Panel2Collapsed = true,
+            };
+
+            var parent = splitResultsAndParams.Parent;
+            var idx = parent.Controls.GetChildIndex(splitResultsAndParams);
+            parent.Controls.Remove(splitResultsAndParams);
+            splitChildReport.Panel1.Controls.Add(splitResultsAndParams);
+            parent.Controls.Add(splitChildReport);
+            parent.Controls.SetChildIndex(splitChildReport, idx);
+        }
+
+
+        #endregion Child report panel
 
         private void TsSinglePage_CheckedChanged(object sender, EventArgs e)
         {
@@ -973,6 +1115,11 @@ namespace DBADashGUI.CustomReports
 
         public void SetStatus(string message, string tooltip, Color color)
         {
+            if (parentReportView != null)
+            {
+                parentReportView.SetStatus(message, tooltip, color);
+                return;
+            }
             this.Invoke(() =>
             {
                 lblDescription.Text = message;
@@ -1483,11 +1630,12 @@ namespace DBADashGUI.CustomReports
             tsToggleCharts.Visible = showToggles;
             splitToggle1.Visible = showToggles;
             splitToggle2.Visible = showToggles;
-            tsCols.Visible = hasData;
+            var hasGridToolbar = hasData && (reportDS.Tables.Count > 1 || Charts.Count > 0);
+            tsCols.Visible = hasData && !hasGridToolbar;
             tsScriptResults.Visible = hasData;
             tsExcel.Visible = hasData;
-            tsCopy.Visible = hasData;
-            tsClearFilter.Visible = hasData;
+            tsCopy.Visible = hasData && !hasGridToolbar;
+            tsClearFilter.Visible = hasData && !hasGridToolbar;
             saveSystemChartStateToolStripMenuItem.Visible = Charts.Any(c => c.Tag is CustomReportChart crc && crc.Metric != null);
             SetChartPanelCollapsed(Charts.Count == 0 || !Report.ChartVisible);
 
@@ -1521,6 +1669,7 @@ namespace DBADashGUI.CustomReports
                 };
                 var dgv = new DBADashDataGridView()
                 {
+                    AutoGenerateColumns = false,
                     DataSource = new DataView(table),
                     ReadOnly = true,
                     Dock = DockStyle.Fill,
@@ -1560,15 +1709,16 @@ namespace DBADashGUI.CustomReports
                 Grids.Add(dgv);
                 panels.Add(pnl);
 
-                if (tables.Length > 1 || panels.Count > 0)
+                if (hasGridToolbar)
                 {
                     var ts = new ToolStrip() { Dock = DockStyle.Top };
-                    ts.Items.Add(new ToolStripButton("+", null, Maximize_Click)
+                    var maximizeButton = new ToolStripButton("+", null, Maximize_Click)
                     {
                         Alignment = ToolStripItemAlignment.Right,
                         DisplayStyle = ToolStripItemDisplayStyle.Text,
-                        Tag = i
-                    });
+                        Tag = i,
+                    };
+                    ts.Items.Add(maximizeButton);
                     ts.Items.Add(new ToolStripLabel(Report.CustomReportResults[i].ResultName)
                     {
                         Alignment = ToolStripItemAlignment.Right,
@@ -2331,6 +2481,10 @@ namespace DBADashGUI.CustomReports
             statusFilter.Warning = true;
             statusFilter.NA = single;
             statusFilter.OK = single;
+            if (statusFilter.AcknowledgedVisible)
+            {
+                statusFilter.Acknowledged = true;
+            }
         }
 
         /// <summary>

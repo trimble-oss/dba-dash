@@ -1,4 +1,3 @@
-﻿using System.ComponentModel;
 using System.Windows.Forms;
 
 namespace DBADashGUI.AgentJobs
@@ -8,12 +7,6 @@ namespace DBADashGUI.AgentJobs
         public JobStatusAndHistory()
         {
             InitializeComponent();
-        }
-
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public bool ShowSteps
-        {
-            get => agentJobsControl1.ShowSteps; set => agentJobsControl1.ShowSteps = value;
         }
 
         public void SetContext(DBADashContext _context)

@@ -28,17 +28,12 @@
         /// </summary>
         private void InitializeComponent()
         {
-            agentJobsControl1 = new AgentJobsControl();
+            agentJobsControl1 = new AgentJobsView();
             SuspendLayout();
-            // 
+            //
             // agentJobsControl1
-            // 
+            //
             agentJobsControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            agentJobsControl1.IncludeAcknowledged = true;
-            agentJobsControl1.IncludeCritical = true;
-            agentJobsControl1.IncludeNA = true;
-            agentJobsControl1.IncludeOK = true;
-            agentJobsControl1.IncludeWarning = true;
             agentJobsControl1.Location = new System.Drawing.Point(0, 0);
             agentJobsControl1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             agentJobsControl1.Name = "agentJobsControl1";
@@ -58,6 +53,6 @@
 
         #endregion
 
-        private AgentJobsControl agentJobsControl1;
+        private AgentJobsView agentJobsControl1;
     }
 }

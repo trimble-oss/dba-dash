@@ -18,6 +18,9 @@ namespace DBADashGUI.CustomReports
 
         /// <summary>Load the drill-down report in the existing window/control.</summary>
         ExistingWindow,
+
+        /// <summary>Load the drill-down report in a child panel below the parent report.</summary>
+        ChildPanel,
     }
 
     public abstract class LinkColumnInfo
@@ -151,6 +154,12 @@ namespace DBADashGUI.CustomReports
         [JsonIgnore]
         public Func<DataGridViewRow, Dictionary<int, string>> GridFilterFactory { get; set; }
 
+        /// <summary>
+        /// Title template for the child panel. Column placeholders use {ColumnName} syntax,
+        /// e.g. "{InstanceDisplayName} | {name}". Only used with <see cref="DrillDownMode.ChildPanel"/>.
+        /// </summary>
+        public string ChildPanelTitle { get; set; }
+
         protected abstract CustomReport GetReport(DBADashContext context);
 
         public override void Navigate(DBADashContext context, DataGridViewRow row, int selectedTableIndex, ContainerControl sender)
@@ -184,12 +193,30 @@ namespace DBADashGUI.CustomReports
             var filters = GridFilterFactory?.Invoke(row) ?? GridFilters;
 
             var targetViewType = report.ViewType ?? typeof(CustomReportView);
+            var ctrlClick = Control.ModifierKeys.HasFlag(Keys.Control);
             var useExistingWindow = DrillDownMode == DrillDownMode.ExistingWindow
                                     && sender is CustomReportView
-                                    && !Control.ModifierKeys.HasFlag(Keys.Control) // Ctrl+Click forces new window
+                                    && !ctrlClick
                                     && targetViewType.IsAssignableFrom(sender.GetType()); // Fall back to new window if ViewType is incompatible
+            var useChildPanel = DrillDownMode == DrillDownMode.ChildPanel
+                                && sender is CustomReportView
+                                && !ctrlClick;
 
-            if (useExistingWindow && sender is CustomReportView existingView)
+            if (useChildPanel && sender is CustomReportView parentView)
+            {
+                string title = null;
+                if (!string.IsNullOrEmpty(ChildPanelTitle))
+                {
+                    title = System.Text.RegularExpressions.Regex.Replace(ChildPanelTitle, @"\{(\w+)\}", m =>
+                    {
+                        var colName = m.Groups[1].Value;
+                        var cell = row.Cells.Cast<DataGridViewCell>().FirstOrDefault(c => c.OwningColumn.Name == colName);
+                        return cell?.Value is { } v && v != DBNull.Value ? Convert.ToString(v) : string.Empty;
+                    });
+                }
+                parentView.ShowChildReport(report, newContext, customParams, filters, title);
+            }
+            else if (useExistingWindow && sender is CustomReportView existingView)
             {
                 existingView.PushNavigationState();
                 existingView.Report = report;

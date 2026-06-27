@@ -27,7 +27,7 @@ namespace DBADashGUI.AgentJobs
             InitializeComponent();
             dgvRunningJobs.RegisterClearFilter(tsClearFilter);
             AddColsToDGV();
-            AgentJobsControl.AddContextMenuItems(dgvRunningJobs, this);
+            AgentJobsView.AddContextMenuItems(dgvRunningJobs, this);
         }
 
         private void AddColsToDGV()
@@ -204,7 +204,6 @@ namespace DBADashGUI.AgentJobs
                     RegularInstanceIDsWithHidden = new HashSet<int>() { instanceId },
                     JobStepID = -1
                 };
-                jobHistoryForm.ShowSteps = true;
                 jobHistoryForm.Load += (_, _) => jobHistoryForm.SetContext(jobContext);
                 await jobHistoryForm.ShowSingleInstanceAsync();
             }

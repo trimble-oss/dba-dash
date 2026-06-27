@@ -1,0 +1,83 @@
+CREATE PROC dbo.AgentJobsReport_Get(
+	@InstanceIDs IDs READONLY,
+	@enabled TINYINT=NULL,
+	@IncludeCritical BIT=1,
+	@IncludeWarning BIT=1,
+	@IncludeNA BIT=0,
+	@IncludeOK BIT=0,
+    @IncludeACK BIT=1,
+	@JobName SYSNAME=NULL,
+    @JobID UNIQUEIDENTIFIER=NULL,
+    @ShowHidden BIT=1
+)
+AS
+DECLARE @SQL NVARCHAR(MAX)
+DECLARE @StatusesString NVARCHAR(MAX) = '0' + CASE WHEN @IncludeCritical=1 THEN ',1' ELSE '' END +
+                                              CASE WHEN @IncludeWarning=1 THEN ',2' ELSE '' END +
+                                              CASE WHEN @IncludeNA=1 THEN ',3' ELSE '' END +
+                                              CASE WHEN @IncludeOK=1 THEN ',4' ELSE '' END +
+                                              CASE WHEN @IncludeACK=1 THEN ',5' ELSE '' END
+
+SET @SQL = N'
+SELECT J.Instance,
+       J.InstanceDisplayName,
+       J.InstanceID,
+       J.job_id,
+       J.name,
+	   J.description,
+       J.LastFailed,
+       J.TimeSinceLastFailed,
+       J.TimeSinceLastFailureStatus,
+       J.LastSucceeded,
+       J.TimeSinceLastSucceeded,
+       J.TimeSinceLastSucceededStatus,
+       J.FailCount24Hrs,
+       J.FailCount24HrsStatus,
+       J.SucceededCount24Hrs,
+       J.FailCount7Days,
+       J.FailCount7DaysStatus,
+       J.SucceededCount7Days,
+       J.JobStepFails7Days,
+       J.JobStepFail7DaysStatus,
+       J.JobStepFails24Hrs,
+       J.JobStepFail24HrsStatus,
+       J.enabled,
+       J.MaxDurationSec,
+       J.MaxDuration,
+       J.AvgDurationSec,
+       J.AvgDuration,
+       J.LastFailStatus,
+       J.IsLastFail,
+       J.TimeSinceLastFailureWarning,
+       J.TimeSinceLastFailureCritical,
+       J.TimeSinceLastSucceededWarning,
+       J.TimeSinceLastSucceededCritical,
+       J.FailCount24HrsWarning,
+       J.FailCount24HrsCritical,
+       J.FailCount7DaysCritical,
+       J.FailCount7DaysWarning,
+       J.JobStepFails24HrsWarning,
+       J.JobStepFails24HrsCritical,
+       J.JobStepFails7DaysWarning,
+       J.JobStepFails7DaysCritical,
+       J.LastFailIsCritical,
+       J.LastFailIsWarning,
+       J.ConfiguredLevel,
+	   J.JobStatus,
+       J.AckDate,
+       J.AckStatus,
+       J.StepLastFailed
+FROM dbo.AgentJobStatus J
+WHERE J.JobStatus IN(' + @StatusesString + ')
+' + CASE WHEN @enabled IS NULL THEN '' ELSE 'AND J.enabled=@enabled' END + '
+' + CASE WHEN EXISTS(SELECT 1 FROM @InstanceIDs) THEN 'AND EXISTS(SELECT 1 FROM @InstanceIDs I WHERE I.ID = J.InstanceID)' ELSE '' END + '
+' + CASE WHEN @JobName IS NULL THEN '' ELSE 'AND J.name LIKE @JobName' END + '
+' + CASE WHEN @JobID IS NULL THEN '' ELSE 'AND J.job_id = @JobID' END + '
+' + CASE WHEN @ShowHidden=1 THEN '' ELSE 'AND J.ShowInSummary=1' END + '
+ORDER BY J.IsLastFail DESC,J.LastFailed DESC'
+
+EXEC sp_executesql @SQL,N'@InstanceIDs IDs READONLY,@JobName SYSNAME,@JobID UNIQUEIDENTIFIER,@enabled TINYINT',@InstanceIDs,@JobName,@JobID,@enabled
+GO
+GRANT EXECUTE
+    ON OBJECT::[dbo].[AgentJobsReport_Get] TO [Reports]
+    AS [dbo];
