@@ -1,5 +1,6 @@
 ﻿using DBADash;
 using DBADash.Messaging;
+using DBADashGUI.CustomReports;
 using DBADashGUI.Interface;
 using DBADashGUI.Theme;
 using System;
@@ -173,7 +174,7 @@ namespace DBADashGUI.Messaging
                     string.Join(", ", instance.CollectionTypes), "Pending", string.Empty);
             }
 
-            grid = new DataGridView
+            grid = new DBADashDataGridView
             {
                 Dock = DockStyle.Fill,
                 ReadOnly = true,
