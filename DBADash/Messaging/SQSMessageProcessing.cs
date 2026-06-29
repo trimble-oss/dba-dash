@@ -6,6 +6,7 @@ using Polly;
 using Polly.Retry;
 using Serilog;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -25,7 +26,21 @@ namespace DBADash.Messaging
         private const int delayBetweenMessages = 100; // ms
         private const int errorDelay = 1000; // ms
         private const int MaxDegreeOfParallelism = 2;
+        private const int DeferredReplyTimeoutMs = 30_000;
         private readonly AsyncKeyedLocker<string> _semaphores = new(o => o.MaxCount = MaxDegreeOfParallelism);
+
+        // Tracks per-handle state for out-of-order SQS reply handling.  When a terminal reply
+        // (Success/Failure/Warning) carries an ExpectedProgressCount, the import agent defers
+        // ending the Service Broker conversation until all Progress messages have been forwarded
+        // (or a timeout elapses), so late-arriving progress messages aren't lost.
+        private readonly ConcurrentDictionary<Guid, ReplyTracker> _replyTrackers = new();
+
+        private sealed class ReplyTracker
+        {
+            public int ProgressReceived;
+            public int ExpectedProgressCount;
+            public TaskCompletionSource<bool> AllProgressReceived = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        }
 
         private static readonly ResiliencePipeline pipeline = new ResiliencePipelineBuilder()
             .AddRetry(new RetryStrategyOptions
@@ -281,6 +296,11 @@ namespace DBADash.Messaging
             await SendReplyMessage(DBADashAgentIdentifier, handle, destinationConnectionHash, replySQS, replyAgent,
                 ResponseMessage.ResponseTypes.Progress, "Message Received");
 
+            // Count progress messages sent so the terminal reply can carry the total.  The import agent
+            // uses this to wait for all Progress messages before ending the Service Broker conversation,
+            // compensating for SQS not guaranteeing delivery order.
+            var progressCount = 0;
+
             // Allow the message to stream intermediate replies back to the origin/GUI (e.g. per-instance
             // progress for a batched collection).  Any data carried on a progress reply is ferried via S3
             // just like the final result so the origin can write it to the repository database.
@@ -295,6 +315,7 @@ namespace DBADash.Messaging
                 }
                 await AWSTools.SendSQSMessageAsync(Config, Convert.ToBase64String(progress.Serialize()),
                     DBADashAgentIdentifier, replyAgent, handle, replySQS, "REPLY", destinationConnectionHash);
+                Interlocked.Increment(ref progressCount);
             };
 
             var ds = await msg.ProcessWithCancellation(Config, handle);
@@ -310,15 +331,16 @@ namespace DBADash.Messaging
 
             // Send a reply message to the source agent
             await SendReplyMessage(DBADashAgentIdentifier, handle, destinationConnectionHash, replySQS, replyAgent,
-                ResponseMessage.ResponseTypes.Success, "Completed", messageDataPath).ConfigureAwait(false);
+                ResponseMessage.ResponseTypes.Success, "Completed", messageDataPath,
+                expectedProgressCount: progressCount).ConfigureAwait(false);
         }
 
         private async Task SendReplyMessage(string DBADashAgentIdentifier, Guid handle,
             string destinationConnectionHash, string replySQS, string replyAgent,
             ResponseMessage.ResponseTypes responseType, string message, string messageDataPath = null,
-            List<string> disabledCollections = null)
+            List<string> disabledCollections = null, int? expectedProgressCount = null)
         {
-            var payload = CreateResponsePayload(responseType, message, messageDataPath, disabledCollections);
+            var payload = CreateResponsePayload(responseType, message, messageDataPath, disabledCollections, expectedProgressCount);
             await AWSTools.SendSQSMessageAsync(Config, Convert.ToBase64String(payload),
                 DBADashAgentIdentifier, replyAgent, handle, replySQS, "REPLY", destinationConnectionHash);
         }
@@ -366,14 +388,15 @@ namespace DBADash.Messaging
         }
 
         private static byte[] CreateResponsePayload(ResponseMessage.ResponseTypes responseType, string message,
-            string messageDataPath = null, List<string> disabledCollections = null)
+            string messageDataPath = null, List<string> disabledCollections = null, int? expectedProgressCount = null)
         {
             var responseMessage = new ResponseMessage
             {
                 Type = responseType,
                 Message = message,
                 MessageDataPath = messageDataPath,
-                DisabledCollections = disabledCollections
+                DisabledCollections = disabledCollections,
+                ExpectedProgressCount = expectedProgressCount
             };
             return responseMessage.Serialize();
         }
@@ -449,24 +472,84 @@ namespace DBADash.Messaging
             {
                 case ResponseMessage.ResponseTypes.Success:
                     Log.Information("Message with handle {handle} processed successfully by remote service.", handle);
-                    await MessageProcessing.EndConversation(handle, Config.DestinationConnection.ConnectionString);
+                    DeferEndConversation(handle, responseMessage.ExpectedProgressCount);
                     break;
 
                 case ResponseMessage.ResponseTypes.Progress:
                     Log.Information("Message with handle {handle} is in progress on remote service. {message}", handle, responseMessage.Message);
+                    if (responseMessage.CollectionProgress != null)
+                    {
+                        TrackProgressReceived(handle);
+                    }
                     break;
 
                 case ResponseMessage.ResponseTypes.Warning:
-                    // Terminal like Failure (e.g. all requested collections are disabled) - end the conversation
-                    // so the handle isn't leaked.  The forwarded warning has already been sent to the GUI above.
                     Log.Warning("Message with handle {handle} returned a warning from remote service: {message}", handle, responseMessage.Message);
-                    await MessageProcessing.EndConversation(handle, Config.DestinationConnection.ConnectionString);
+                    DeferEndConversation(handle, responseMessage.ExpectedProgressCount);
                     break;
 
                 case ResponseMessage.ResponseTypes.Failure:
                     Log.Error("Message with handle {handle} failed on remote service: {message}", handle, responseMessage.Message);
-                    await MessageProcessing.EndConversation(handle, Config.DestinationConnection.ConnectionString);
+                    DeferEndConversation(handle, responseMessage.ExpectedProgressCount);
                     break;
+            }
+        }
+
+        private void TrackProgressReceived(Guid handle)
+        {
+            var tracker = _replyTrackers.GetOrAdd(handle, _ => new ReplyTracker());
+            var count = Interlocked.Increment(ref tracker.ProgressReceived);
+            if (tracker.ExpectedProgressCount > 0 && count >= tracker.ExpectedProgressCount)
+            {
+                tracker.AllProgressReceived.TrySetResult(true);
+            }
+        }
+
+        /// <summary>
+        /// Ends the Service Broker conversation, waiting for outstanding Progress messages first if the
+        /// terminal reply carries an <see cref="ResponseMessage.ExpectedProgressCount"/>.  Runs on a
+        /// fire-and-forget task so the SQS processing loop isn't blocked — if we awaited inline, a
+        /// late Progress message in the same SQS batch would deadlock because the loop processes
+        /// messages sequentially.
+        /// </summary>
+        private void DeferEndConversation(Guid handle, int? expectedProgressCount)
+        {
+            _ = DeferEndConversationAsync(handle, expectedProgressCount);
+        }
+
+        private async Task DeferEndConversationAsync(Guid handle, int? expectedProgressCount)
+        {
+            try
+            {
+                if (expectedProgressCount is > 0)
+                {
+                    var tracker = _replyTrackers.GetOrAdd(handle, _ => new ReplyTracker());
+                    tracker.ExpectedProgressCount = expectedProgressCount.Value;
+
+                    if (tracker.ProgressReceived < tracker.ExpectedProgressCount)
+                    {
+                        var outstanding = tracker.ExpectedProgressCount - tracker.ProgressReceived;
+                        Log.Information("Handle {handle}: terminal reply arrived but {outstanding} of {expected} progress messages still pending, waiting up to {timeout}ms",
+                            handle, outstanding, tracker.ExpectedProgressCount, DeferredReplyTimeoutMs);
+
+                        var completed = await Task.WhenAny(tracker.AllProgressReceived.Task,
+                            Task.Delay(DeferredReplyTimeoutMs)) == tracker.AllProgressReceived.Task;
+
+                        if (!completed)
+                        {
+                            Log.Warning("Handle {handle}: timed out waiting for {outstanding} outstanding progress messages",
+                                handle, tracker.ExpectedProgressCount - tracker.ProgressReceived);
+                        }
+                    }
+
+                    _replyTrackers.TryRemove(handle, out _);
+                }
+
+                await MessageProcessing.EndConversation(handle, Config.DestinationConnection.ConnectionString);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error ending conversation for handle {handle}", handle);
             }
         }
     }

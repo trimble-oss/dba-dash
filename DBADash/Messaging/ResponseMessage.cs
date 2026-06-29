@@ -61,6 +61,14 @@ namespace DBADash.Messaging
         /// </summary>
         public CollectionProgress CollectionProgress { get; set; }
 
+        /// <summary>
+        /// On a terminal reply (Success/Failure/Warning), the number of Progress messages that were
+        /// sent before this one.  The SQS relay uses this to wait for all Progress messages to arrive
+        /// before ending the Service Broker conversation, compensating for out-of-order SQS delivery.
+        /// Null when not applicable (e.g. single-instance messages or the local/non-relay path).
+        /// </summary>
+        public int? ExpectedProgressCount { get; set; }
+
         [JsonIgnore] public DataSet Data { get; set; }
 
         public string DataString
