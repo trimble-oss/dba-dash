@@ -138,8 +138,11 @@ jobs:
       - name: Run Pester Tests
         shell: powershell
         run: |     
-          if (-not (Get-PSRepository -Name PSGallery -ErrorAction SilentlyContinue)) {
-            Register-PSRepository -Default
+          try { $null = Get-PSRepository -Name PSGallery -ErrorAction Stop } catch {
+            Register-PSRepository -Default -ErrorAction SilentlyContinue
+            if (-not (Get-PSRepository -Name PSGallery -ErrorAction SilentlyContinue)) {
+              Register-PSRepository -Name PSGallery -SourceLocation https://www.powershellgallery.com/api/v2 -InstallationPolicy Trusted
+            }
           }
           Install-Module Pester -Force -SkipPublisherCheck
           Import-Module Pester -PassThru
