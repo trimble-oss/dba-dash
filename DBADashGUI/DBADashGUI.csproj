@@ -223,12 +223,12 @@
     <PackageReference Include="DiffPlex" Version="1.9.0" />
     <PackageReference Include="DiffPlex.Wpf" Version="1.9.1" />
     <PackageReference Include="Humanizer" Version="3.0.10" />
-    <PackageReference Include="LiveChartsCore.SkiaSharpView.WinForms" Version="2.0.4" />
-    <PackageReference Include="Microsoft.Data.SqlClient.Extensions.Azure" Version="1.0.0" />
+    <PackageReference Include="LiveChartsCore.SkiaSharpView.WinForms" Version="2.0.5" />
+    <PackageReference Include="Microsoft.Data.SqlClient.Extensions.Azure" Version="7.0.2" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.9" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.9" />
     <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="181.25.0" />
-    <PackageReference Include="Microsoft.SqlServer.TransactSql.ScriptDom" Version="180.18.1" />
+    <PackageReference Include="Microsoft.SqlServer.TransactSql.ScriptDom" Version="180.37.3" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4022.49" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
     <PackageReference Include="System.Data.SqlClient" Version="4.9.1" />
