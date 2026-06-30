@@ -103,6 +103,7 @@ namespace DBADashGUI
         #endregion Assembly Attribute Accessors
 
         public Version DBVersion = new();
+        public bool IncludePreRelease;
         public bool upgradeAvailable;
         public string upgradeMessage = "The upgrade check hasn't completed yet.\nIf this server doesn't have internet access, an offline upgrade can be performed. See:\nhttps://dbadash.com/upgrades";
         public bool StartGUIOnUpgrade;
@@ -117,17 +118,32 @@ namespace DBADashGUI
         {
             lblDeploymentType.Text = Upgrade.DeploymentType.ToString();
             lblRepoVersion.Text = DBVersion.ToString();
-            await SetLatestVersionAsync(); // Display the latest version from github
+            chkPreRelease.Checked = IncludePreRelease;
+            chkPreRelease.CheckedChanged += ChkPreRelease_CheckedChanged;
+            await SetLatestVersionAsync();
+        }
+
+        private async void ChkPreRelease_CheckedChanged(object sender, EventArgs e)
+        {
+            await SetLatestVersionAsync();
         }
 
         /// <summary>Update about box with latest version info</summary>
         private async Task SetLatestVersionAsync()
         {
+            upgradeAvailable = false;
+            bttnUpgrade.Enabled = false;
+            lblLatest.Text = "Latest Version:";
+            lblLatest.Font = new Font(lblLatest.Font, FontStyle.Regular);
+            lnkLatestRelease.Font = new Font(lnkLatestRelease.Font, FontStyle.Regular);
+            upgradeIcon = MessageBoxIcon.Warning;
+            upgradeMessage = "The upgrade check hasn't completed yet.\nIf this server doesn't have internet access, an offline upgrade can be performed. See:\nhttps://dbadash.com/upgrades";
+
             Release release;
             Version releaseVersion;
             try
             {
-                release = await Upgrade.GetLatestVersionAsync();
+                release = await Upgrade.GetLatestVersionAsync(chkPreRelease.Checked);
                 releaseVersion = new Version(release.TagName);
             }
             catch (Exception ex)
@@ -137,7 +153,8 @@ namespace DBADashGUI
                 upgradeMessage = "Error checking for the latest version.\nIf this server doesn't have internet access, an offline upgrade can be performed. See:\nhttps://dbadash.com/upgrades";
                 return;
             }
-            lnkLatestRelease.Text = release.TagName;
+            var preReleaseLabel = release.Prerelease ? " (Pre-Release)" : "";
+            lnkLatestRelease.Text = release.TagName + preReleaseLabel;
             try
             {
                 if (Upgrade.IsUpgradeAvailable(release))

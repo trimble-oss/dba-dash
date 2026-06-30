@@ -32,7 +32,7 @@ namespace DBADashService
                 Release release;
                 try
                 {
-                    release = await Upgrade.GetLatestVersionAsync();
+                    release = await Upgrade.GetLatestVersionAsync(config.UpgradeAllowPreRelease);
                 }
                 catch (Exception ex)
                 {

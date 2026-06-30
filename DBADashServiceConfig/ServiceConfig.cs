@@ -1026,6 +1026,7 @@ namespace DBADashServiceConfig
                     upgradeCheckSchedule = "Invalid Cron Expression";
                 }
                 lnkAutomaticUpdates.Text = string.IsNullOrEmpty(upgradeCheckSchedule) ? "Configure Automatic Updates..." : $"Automatic Update Checks: {upgradeCheckSchedule}";
+                chkUpgradeAllowPreRelease.Checked = collectionConfig.UpgradeAllowPreRelease;
                 UpdateThreadCount();
                 UpdateSummaryRefreshCronLabel();
                 UpdateScanInterval();
@@ -2173,11 +2174,11 @@ namespace DBADashServiceConfig
         {
             if (collectionConfig.DestinationConnection.Type == ConnectionType.SQL)
             {
-                CommonShared.ShowAbout(collectionConfig.DestinationConnection.ConnectionString, this, false);
+                CommonShared.ShowAbout(collectionConfig.DestinationConnection.ConnectionString, this, false, collectionConfig.UpgradeAllowPreRelease);
             }
             else
             {
-                CommonShared.ShowAbout(this, false);
+                CommonShared.ShowAbout(this, false, collectionConfig.UpgradeAllowPreRelease);
             }
         }
 
@@ -3202,6 +3203,13 @@ namespace DBADashServiceConfig
             {
                 // Unable to parse - validation will be handled elsewhere
             }
+        }
+
+        private void ChkUpgradeAllowPreRelease_CheckedChanged(object sender, EventArgs e)
+        {
+            if (IsSetFromJson) return;
+            collectionConfig.UpgradeAllowPreRelease = chkUpgradeAllowPreRelease.Checked;
+            SetJson();
         }
 
         private void AutoUpgradeDB_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)

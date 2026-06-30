@@ -41,6 +41,8 @@ namespace DBADash
 
         public string UpgradeCheckCron { get; set; }
 
+        public bool UpgradeAllowPreRelease { get; set; }
+
         public int? ImportCommandTimeout { get; set; }
         public int? PurgeDataCommandTimeout { get; set; }
         public int? AddPartitionsCommandTimeout { get; set; }

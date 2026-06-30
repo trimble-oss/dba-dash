@@ -48,6 +48,25 @@ namespace DBADash
             return await client.Repository.Release.GetLatest(GITHUB_OWNER, GITHUB_REPO);
         }
 
+        /// <summary>Get latest release from github, optionally including pre-release versions</summary>
+        public static async Task<Release> GetLatestVersionAsync(bool includePreRelease)
+        {
+            if (!includePreRelease)
+            {
+                return await GetLatestVersionAsync();
+            }
+
+            var client = new GitHubClient(new ProductHeaderValue(GITHUB_APP));
+            var releases = await client.Repository.Release.GetAll(GITHUB_OWNER, GITHUB_REPO, new ApiOptions { PageSize = 1, PageCount = 1 });
+
+            if (releases.Count > 0 && releases[0].Prerelease && Version.TryParse(releases[0].TagName, out _))
+            {
+                return releases[0];
+            }
+
+            return await client.Repository.Release.GetLatest(GITHUB_OWNER, GITHUB_REPO);
+        }
+
         public static bool IsUpgradeAvailable(Release release)
         {
             var releaseVersion = new Version(release.TagName);
