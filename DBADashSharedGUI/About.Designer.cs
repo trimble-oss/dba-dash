@@ -30,313 +30,325 @@ namespace DBADashGUI
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            this.labelVersion = new System.Windows.Forms.Label();
-            this.labelCopyright = new System.Windows.Forms.Label();
-            this.labelCompanyName = new System.Windows.Forms.Label();
-            this.bttnOK = new System.Windows.Forms.Button();
-            this.lnkDBADash = new System.Windows.Forms.LinkLabel();
-            this.lblRepoVersion = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
-            this.lnkLatestRelease = new System.Windows.Forms.LinkLabel();
-            this.lblLatest = new System.Windows.Forms.Label();
-            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.lblDeploymentType = new System.Windows.Forms.Label();
-            this.label8 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
-            this.label5 = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.lnkAuthor = new System.Windows.Forms.LinkLabel();
-            this.label7 = new System.Windows.Forms.Label();
-            this.lnkLicense = new System.Windows.Forms.LinkLabel();
-            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.bttnUpgrade = new System.Windows.Forms.Button();
-            this.tableLayoutPanel1.SuspendLayout();
-            this.SuspendLayout();
+            components = new System.ComponentModel.Container();
+            labelVersion = new Label();
+            labelCopyright = new Label();
+            labelCompanyName = new Label();
+            bttnOK = new Button();
+            lnkDBADash = new LinkLabel();
+            lblRepoVersion = new Label();
+            label1 = new Label();
+            lnkLatestRelease = new LinkLabel();
+            lblLatest = new Label();
+            tableLayoutPanel1 = new TableLayoutPanel();
+            lblDeploymentType = new Label();
+            label8 = new Label();
+            label3 = new Label();
+            label4 = new Label();
+            label5 = new Label();
+            label6 = new Label();
+            label2 = new Label();
+            lnkAuthor = new LinkLabel();
+            label7 = new Label();
+            lnkLicense = new LinkLabel();
+            toolTip1 = new ToolTip(components);
+            bttnUpgrade = new Button();
+            chkPreRelease = new CheckBox();
+            tableLayoutPanel1.SuspendLayout();
+            SuspendLayout();
             // 
             // labelVersion
             // 
-            this.labelVersion.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.labelVersion.Location = new System.Drawing.Point(295, 0);
-            this.labelVersion.MaximumSize = new System.Drawing.Size(0, 26);
-            this.labelVersion.Name = "labelVersion";
-            this.labelVersion.Size = new System.Drawing.Size(319, 26);
-            this.labelVersion.TabIndex = 0;
-            this.labelVersion.Text = "{Version}";
-            this.labelVersion.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            labelVersion.Dock = DockStyle.Fill;
+            labelVersion.Location = new Point(295, 0);
+            labelVersion.MaximumSize = new Size(0, 26);
+            labelVersion.Name = "labelVersion";
+            labelVersion.Size = new Size(319, 26);
+            labelVersion.TabIndex = 0;
+            labelVersion.Text = "{Version}";
+            labelVersion.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // labelCopyright
             // 
-            this.labelCopyright.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.labelCopyright.Location = new System.Drawing.Point(295, 78);
-            this.labelCopyright.MaximumSize = new System.Drawing.Size(0, 26);
-            this.labelCopyright.Name = "labelCopyright";
-            this.labelCopyright.Size = new System.Drawing.Size(319, 26);
-            this.labelCopyright.TabIndex = 21;
-            this.labelCopyright.Text = "{Copyright}";
-            this.labelCopyright.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            labelCopyright.Dock = DockStyle.Fill;
+            labelCopyright.Location = new Point(295, 78);
+            labelCopyright.MaximumSize = new Size(0, 26);
+            labelCopyright.Name = "labelCopyright";
+            labelCopyright.Size = new Size(319, 26);
+            labelCopyright.TabIndex = 21;
+            labelCopyright.Text = "{Copyright}";
+            labelCopyright.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // labelCompanyName
             // 
-            this.labelCompanyName.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.labelCompanyName.Location = new System.Drawing.Point(295, 104);
-            this.labelCompanyName.MaximumSize = new System.Drawing.Size(0, 26);
-            this.labelCompanyName.Name = "labelCompanyName";
-            this.labelCompanyName.Size = new System.Drawing.Size(319, 26);
-            this.labelCompanyName.TabIndex = 22;
-            this.labelCompanyName.Text = "{Company}";
-            this.labelCompanyName.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            labelCompanyName.Dock = DockStyle.Fill;
+            labelCompanyName.Location = new Point(295, 104);
+            labelCompanyName.MaximumSize = new Size(0, 26);
+            labelCompanyName.Name = "labelCompanyName";
+            labelCompanyName.Size = new Size(319, 26);
+            labelCompanyName.TabIndex = 22;
+            labelCompanyName.Text = "{Company}";
+            labelCompanyName.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // bttnOK
             // 
-            this.bttnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.bttnOK.BackColor = System.Drawing.SystemColors.ButtonFace;
-            this.bttnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.bttnOK.ForeColor = System.Drawing.Color.Black;
-            this.bttnOK.Location = new System.Drawing.Point(525, 306);
-            this.bttnOK.Name = "bttnOK";
-            this.bttnOK.Size = new System.Drawing.Size(115, 36);
-            this.bttnOK.TabIndex = 24;
-            this.bttnOK.Text = "OK";
-            this.bttnOK.UseVisualStyleBackColor = false;
+            bttnOK.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            bttnOK.BackColor = SystemColors.ButtonFace;
+            bttnOK.DialogResult = DialogResult.OK;
+            bttnOK.ForeColor = Color.Black;
+            bttnOK.Location = new Point(525, 306);
+            bttnOK.Name = "bttnOK";
+            bttnOK.Size = new Size(115, 36);
+            bttnOK.TabIndex = 24;
+            bttnOK.Text = "OK";
+            bttnOK.UseVisualStyleBackColor = false;
             // 
             // lnkDBADash
             // 
-            this.lnkDBADash.AutoSize = true;
-            this.lnkDBADash.Font = new System.Drawing.Font("Segoe UI", 20F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point);
-            this.lnkDBADash.LinkColor = System.Drawing.Color.White;
-            this.lnkDBADash.Location = new System.Drawing.Point(15, 14);
-            this.lnkDBADash.Name = "lnkDBADash";
-            this.lnkDBADash.Size = new System.Drawing.Size(182, 46);
-            this.lnkDBADash.TabIndex = 25;
-            this.lnkDBADash.TabStop = true;
-            this.lnkDBADash.Text = "DBA Dash";
-            this.lnkDBADash.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkDBADash_LinkClicked);
+            lnkDBADash.AutoSize = true;
+            lnkDBADash.Font = new Font("Segoe UI", 20F, FontStyle.Bold | FontStyle.Italic);
+            lnkDBADash.LinkColor = Color.White;
+            lnkDBADash.Location = new Point(15, 14);
+            lnkDBADash.Name = "lnkDBADash";
+            lnkDBADash.Size = new Size(182, 46);
+            lnkDBADash.TabIndex = 25;
+            lnkDBADash.TabStop = true;
+            lnkDBADash.Text = "DBA Dash";
+            lnkDBADash.LinkClicked += LnkDBADash_LinkClicked;
             // 
             // lblRepoVersion
             // 
-            this.lblRepoVersion.AutoSize = true;
-            this.lblRepoVersion.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblRepoVersion.Location = new System.Drawing.Point(295, 52);
-            this.lblRepoVersion.Name = "lblRepoVersion";
-            this.lblRepoVersion.Size = new System.Drawing.Size(319, 26);
-            this.lblRepoVersion.TabIndex = 26;
-            this.lblRepoVersion.Text = "{DB Version}";
+            lblRepoVersion.AutoSize = true;
+            lblRepoVersion.Dock = DockStyle.Fill;
+            lblRepoVersion.Location = new Point(295, 52);
+            lblRepoVersion.Name = "lblRepoVersion";
+            lblRepoVersion.Size = new Size(319, 26);
+            lblRepoVersion.TabIndex = 26;
+            lblRepoVersion.Text = "{DB Version}";
             // 
             // label1
             // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point);
-            this.label1.Location = new System.Drawing.Point(439, 14);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(205, 28);
-            this.label1.TabIndex = 27;
-            this.label1.Text = "SQL Server Monitoring";
+            label1.AutoSize = true;
+            label1.Font = new Font("Segoe UI", 12F, FontStyle.Italic);
+            label1.Location = new Point(439, 14);
+            label1.Name = "label1";
+            label1.Size = new Size(205, 28);
+            label1.TabIndex = 27;
+            label1.Text = "SQL Server Monitoring";
             // 
             // lnkLatestRelease
             // 
-            this.lnkLatestRelease.AutoSize = true;
-            this.lnkLatestRelease.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lnkLatestRelease.LinkColor = System.Drawing.Color.White;
-            this.lnkLatestRelease.Location = new System.Drawing.Point(295, 26);
-            this.lnkLatestRelease.Name = "lnkLatestRelease";
-            this.lnkLatestRelease.Size = new System.Drawing.Size(319, 26);
-            this.lnkLatestRelease.TabIndex = 28;
-            this.lnkLatestRelease.TabStop = true;
-            this.lnkLatestRelease.Text = "{Latest Release}";
-            this.lnkLatestRelease.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkLatestRelease_LinkClicked);
+            lnkLatestRelease.AutoSize = true;
+            lnkLatestRelease.Dock = DockStyle.Fill;
+            lnkLatestRelease.LinkColor = Color.White;
+            lnkLatestRelease.Location = new Point(295, 26);
+            lnkLatestRelease.Name = "lnkLatestRelease";
+            lnkLatestRelease.Size = new Size(319, 26);
+            lnkLatestRelease.TabIndex = 28;
+            lnkLatestRelease.TabStop = true;
+            lnkLatestRelease.Text = "{Latest Release}";
+            lnkLatestRelease.LinkClicked += LnkLatestRelease_LinkClicked;
             // 
             // lblLatest
             // 
-            this.lblLatest.AutoSize = true;
-            this.lblLatest.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblLatest.Location = new System.Drawing.Point(3, 26);
-            this.lblLatest.Name = "lblLatest";
-            this.lblLatest.Size = new System.Drawing.Size(286, 26);
-            this.lblLatest.TabIndex = 29;
-            this.lblLatest.Text = "Latest Version:";
+            lblLatest.AutoSize = true;
+            lblLatest.Dock = DockStyle.Fill;
+            lblLatest.Location = new Point(3, 26);
+            lblLatest.Name = "lblLatest";
+            lblLatest.Size = new Size(286, 26);
+            lblLatest.TabIndex = 29;
+            lblLatest.Text = "Latest Version:";
             // 
             // tableLayoutPanel1
             // 
-            this.tableLayoutPanel1.ColumnCount = 2;
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 47.3384F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 52.6616F));
-            this.tableLayoutPanel1.Controls.Add(this.lblDeploymentType, 1, 6);
-            this.tableLayoutPanel1.Controls.Add(this.label8, 0, 6);
-            this.tableLayoutPanel1.Controls.Add(this.lnkLatestRelease, 1, 1);
-            this.tableLayoutPanel1.Controls.Add(this.lblLatest, 0, 1);
-            this.tableLayoutPanel1.Controls.Add(this.labelCompanyName, 1, 4);
-            this.tableLayoutPanel1.Controls.Add(this.labelCopyright, 1, 3);
-            this.tableLayoutPanel1.Controls.Add(this.labelVersion, 1, 0);
-            this.tableLayoutPanel1.Controls.Add(this.label3, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.lblRepoVersion, 1, 2);
-            this.tableLayoutPanel1.Controls.Add(this.label4, 0, 2);
-            this.tableLayoutPanel1.Controls.Add(this.label5, 0, 4);
-            this.tableLayoutPanel1.Controls.Add(this.label6, 0, 3);
-            this.tableLayoutPanel1.Controls.Add(this.label2, 0, 5);
-            this.tableLayoutPanel1.Controls.Add(this.lnkAuthor, 1, 5);
-            this.tableLayoutPanel1.Controls.Add(this.label7, 0, 7);
-            this.tableLayoutPanel1.Controls.Add(this.lnkLicense, 1, 7);
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(23, 79);
-            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 8;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 26F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 26F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 26F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 26F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 26F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 26F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 26F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 26F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(617, 204);
-            this.tableLayoutPanel1.TabIndex = 30;
+            tableLayoutPanel1.ColumnCount = 2;
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 47.3384F));
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 52.6616F));
+            tableLayoutPanel1.Controls.Add(lblDeploymentType, 1, 6);
+            tableLayoutPanel1.Controls.Add(label8, 0, 6);
+            tableLayoutPanel1.Controls.Add(lnkLatestRelease, 1, 1);
+            tableLayoutPanel1.Controls.Add(lblLatest, 0, 1);
+            tableLayoutPanel1.Controls.Add(labelCompanyName, 1, 4);
+            tableLayoutPanel1.Controls.Add(labelCopyright, 1, 3);
+            tableLayoutPanel1.Controls.Add(labelVersion, 1, 0);
+            tableLayoutPanel1.Controls.Add(label3, 0, 0);
+            tableLayoutPanel1.Controls.Add(lblRepoVersion, 1, 2);
+            tableLayoutPanel1.Controls.Add(label4, 0, 2);
+            tableLayoutPanel1.Controls.Add(label5, 0, 4);
+            tableLayoutPanel1.Controls.Add(label6, 0, 3);
+            tableLayoutPanel1.Controls.Add(label2, 0, 5);
+            tableLayoutPanel1.Controls.Add(lnkAuthor, 1, 5);
+            tableLayoutPanel1.Controls.Add(label7, 0, 7);
+            tableLayoutPanel1.Controls.Add(lnkLicense, 1, 7);
+            tableLayoutPanel1.Location = new Point(23, 79);
+            tableLayoutPanel1.Name = "tableLayoutPanel1";
+            tableLayoutPanel1.RowCount = 8;
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 26F));
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 26F));
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 26F));
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 26F));
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 26F));
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 26F));
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 26F));
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 26F));
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tableLayoutPanel1.Size = new Size(617, 204);
+            tableLayoutPanel1.TabIndex = 30;
             // 
             // lblDeploymentType
             // 
-            this.lblDeploymentType.AutoSize = true;
-            this.lblDeploymentType.Location = new System.Drawing.Point(295, 156);
-            this.lblDeploymentType.Name = "lblDeploymentType";
-            this.lblDeploymentType.Size = new System.Drawing.Size(132, 20);
-            this.lblDeploymentType.TabIndex = 35;
-            this.lblDeploymentType.Text = "{DeploymentType}";
+            lblDeploymentType.AutoSize = true;
+            lblDeploymentType.Location = new Point(295, 156);
+            lblDeploymentType.Name = "lblDeploymentType";
+            lblDeploymentType.Size = new Size(132, 20);
+            lblDeploymentType.TabIndex = 35;
+            lblDeploymentType.Text = "{DeploymentType}";
             // 
             // label8
             // 
-            this.label8.AutoSize = true;
-            this.label8.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label8.Location = new System.Drawing.Point(3, 156);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(286, 26);
-            this.label8.TabIndex = 35;
-            this.label8.Text = "Deployment Type:";
+            label8.AutoSize = true;
+            label8.Dock = DockStyle.Fill;
+            label8.Location = new Point(3, 156);
+            label8.Name = "label8";
+            label8.Size = new Size(286, 26);
+            label8.TabIndex = 35;
+            label8.Text = "Deployment Type:";
             // 
             // label3
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(3, 0);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(60, 20);
-            this.label3.TabIndex = 30;
-            this.label3.Text = "Version:";
+            label3.AutoSize = true;
+            label3.Location = new Point(3, 0);
+            label3.Name = "label3";
+            label3.Size = new Size(60, 20);
+            label3.TabIndex = 30;
+            label3.Text = "Version:";
             // 
             // label4
             // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(3, 52);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(84, 20);
-            this.label4.TabIndex = 31;
-            this.label4.Text = "DB Version:";
+            label4.AutoSize = true;
+            label4.Location = new Point(3, 52);
+            label4.Name = "label4";
+            label4.Size = new Size(84, 20);
+            label4.TabIndex = 31;
+            label4.Text = "DB Version:";
             // 
             // label5
             // 
-            this.label5.AutoSize = true;
-            this.label5.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label5.Location = new System.Drawing.Point(3, 104);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(286, 26);
-            this.label5.TabIndex = 32;
-            this.label5.Text = "Company:";
+            label5.AutoSize = true;
+            label5.Dock = DockStyle.Fill;
+            label5.Location = new Point(3, 104);
+            label5.Name = "label5";
+            label5.Size = new Size(286, 26);
+            label5.TabIndex = 32;
+            label5.Text = "Company:";
             // 
             // label6
             // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(3, 78);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(77, 20);
-            this.label6.TabIndex = 33;
-            this.label6.Text = "Copyright:";
+            label6.AutoSize = true;
+            label6.Location = new Point(3, 78);
+            label6.Name = "label6";
+            label6.Size = new Size(77, 20);
+            label6.TabIndex = 33;
+            label6.Text = "Copyright:";
             // 
             // label2
             // 
-            this.label2.AutoSize = true;
-            this.label2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label2.Location = new System.Drawing.Point(3, 130);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(286, 26);
-            this.label2.TabIndex = 34;
-            this.label2.Text = "Created By:";
+            label2.AutoSize = true;
+            label2.Dock = DockStyle.Fill;
+            label2.Location = new Point(3, 130);
+            label2.Name = "label2";
+            label2.Size = new Size(286, 26);
+            label2.TabIndex = 34;
+            label2.Text = "Created By:";
             // 
             // lnkAuthor
             // 
-            this.lnkAuthor.AutoSize = true;
-            this.lnkAuthor.LinkColor = System.Drawing.Color.White;
-            this.lnkAuthor.Location = new System.Drawing.Point(295, 130);
-            this.lnkAuthor.Name = "lnkAuthor";
-            this.lnkAuthor.Size = new System.Drawing.Size(113, 20);
-            this.lnkAuthor.TabIndex = 35;
-            this.lnkAuthor.TabStop = true;
-            this.lnkAuthor.Text = "David Wiseman";
-            this.lnkAuthor.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkAuthor_LinkClicked);
+            lnkAuthor.AutoSize = true;
+            lnkAuthor.LinkColor = Color.White;
+            lnkAuthor.Location = new Point(295, 130);
+            lnkAuthor.Name = "lnkAuthor";
+            lnkAuthor.Size = new Size(113, 20);
+            lnkAuthor.TabIndex = 35;
+            lnkAuthor.TabStop = true;
+            lnkAuthor.Text = "David Wiseman";
+            lnkAuthor.LinkClicked += LnkAuthor_LinkClicked;
             // 
             // label7
             // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(3, 182);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(60, 20);
-            this.label7.TabIndex = 36;
-            this.label7.Text = "License:";
+            label7.AutoSize = true;
+            label7.Location = new Point(3, 182);
+            label7.Name = "label7";
+            label7.Size = new Size(60, 20);
+            label7.TabIndex = 36;
+            label7.Text = "License:";
             // 
             // lnkLicense
             // 
-            this.lnkLicense.AutoSize = true;
-            this.lnkLicense.LinkColor = System.Drawing.Color.White;
-            this.lnkLicense.Location = new System.Drawing.Point(295, 182);
-            this.lnkLicense.Name = "lnkLicense";
-            this.lnkLicense.Size = new System.Drawing.Size(86, 20);
-            this.lnkLicense.TabIndex = 37;
-            this.lnkLicense.TabStop = true;
-            this.lnkLicense.Text = "MIT License";
-            this.lnkLicense.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkLicense_LinkClicked);
+            lnkLicense.AutoSize = true;
+            lnkLicense.LinkColor = Color.White;
+            lnkLicense.Location = new Point(295, 182);
+            lnkLicense.Name = "lnkLicense";
+            lnkLicense.Size = new Size(86, 20);
+            lnkLicense.TabIndex = 37;
+            lnkLicense.TabStop = true;
+            lnkLicense.Text = "MIT License";
+            lnkLicense.LinkClicked += LnkLicense_LinkClicked;
             // 
             // toolTip1
             // 
-            this.toolTip1.ShowAlways = true;
+            toolTip1.ShowAlways = true;
             // 
             // bttnUpgrade
             // 
-            this.bttnUpgrade.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.bttnUpgrade.BackColor = System.Drawing.SystemColors.ButtonFace;
-            this.bttnUpgrade.ForeColor = System.Drawing.Color.Black;
-            this.bttnUpgrade.Location = new System.Drawing.Point(23, 306);
-            this.bttnUpgrade.Name = "bttnUpgrade";
-            this.bttnUpgrade.Size = new System.Drawing.Size(115, 36);
-            this.bttnUpgrade.TabIndex = 31;
-            this.bttnUpgrade.Text = "Upgrade";
-            this.bttnUpgrade.UseVisualStyleBackColor = false;
-            this.bttnUpgrade.Click += new System.EventHandler(this.BttnUpgrade_Click);
+            bttnUpgrade.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            bttnUpgrade.BackColor = SystemColors.ButtonFace;
+            bttnUpgrade.ForeColor = Color.Black;
+            bttnUpgrade.Location = new Point(23, 306);
+            bttnUpgrade.Name = "bttnUpgrade";
+            bttnUpgrade.Size = new Size(115, 36);
+            bttnUpgrade.TabIndex = 31;
+            bttnUpgrade.Text = "Upgrade";
+            bttnUpgrade.UseVisualStyleBackColor = false;
+            bttnUpgrade.Click += BttnUpgrade_Click;
+            // 
+            // chkPreRelease
+            // 
+            chkPreRelease.AutoSize = true;
+            chkPreRelease.Location = new Point(155, 313);
+            chkPreRelease.Name = "chkPreRelease";
+            chkPreRelease.Size = new Size(229, 24);
+            chkPreRelease.TabIndex = 32;
+            chkPreRelease.Text = "Check for pre-release updates";
+            chkPreRelease.UseVisualStyleBackColor = true;
             // 
             // About
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(99)))), ((int)(((byte)(163)))));
-            this.ClientSize = new System.Drawing.Size(659, 359);
-            this.Controls.Add(this.bttnUpgrade);
-            this.Controls.Add(this.tableLayoutPanel1);
-            this.Controls.Add(this.label1);
-            this.Controls.Add(this.lnkDBADash);
-            this.Controls.Add(this.bttnOK);
-            this.ForeColor = System.Drawing.Color.White;
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
-            this.Name = "About";
-            this.Padding = new System.Windows.Forms.Padding(12, 14, 12, 14);
-            this.ShowIcon = false;
-            this.ShowInTaskbar = false;
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "About";
-            this.Load += new System.EventHandler(this.About_Load);
-            this.tableLayoutPanel1.ResumeLayout(false);
-            this.tableLayoutPanel1.PerformLayout();
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleMode = AutoScaleMode.Font;
+            BackColor = Color.FromArgb(0, 99, 163);
+            ClientSize = new Size(659, 359);
+            Controls.Add(chkPreRelease);
+            Controls.Add(bttnUpgrade);
+            Controls.Add(tableLayoutPanel1);
+            Controls.Add(label1);
+            Controls.Add(lnkDBADash);
+            Controls.Add(bttnOK);
+            ForeColor = Color.White;
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            Margin = new Padding(4, 5, 4, 5);
+            MaximizeBox = false;
+            MinimizeBox = false;
+            Name = "About";
+            Padding = new Padding(12, 14, 12, 14);
+            ShowIcon = false;
+            ShowInTaskbar = false;
+            StartPosition = FormStartPosition.CenterParent;
+            Text = "About";
+            Load += About_Load;
+            tableLayoutPanel1.ResumeLayout(false);
+            tableLayoutPanel1.PerformLayout();
+            ResumeLayout(false);
+            PerformLayout();
 
         }
 
@@ -363,5 +375,6 @@ namespace DBADashGUI
         private System.Windows.Forms.Button bttnUpgrade;
         private System.Windows.Forms.Label lblDeploymentType;
         private System.Windows.Forms.Label label8;
+        private CheckBox chkPreRelease;
     }
 }

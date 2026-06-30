@@ -72,6 +72,7 @@ namespace DBADashServiceConfig
             chkQueueBasedScheduling = new System.Windows.Forms.CheckBox();
             label24 = new System.Windows.Forms.Label();
             lnkAutomaticUpdates = new System.Windows.Forms.LinkLabel();
+            chkUpgradeAllowPreRelease = new System.Windows.Forms.CheckBox();
             lnkAutoUpgradeDB = new System.Windows.Forms.LinkLabel();
             lnkDeployDatabase = new System.Windows.Forms.LinkLabel();
             picConfigFileAccess = new System.Windows.Forms.PictureBox();
@@ -677,6 +678,17 @@ namespace DBADashServiceConfig
             lnkAutomaticUpdates.Text = "Configure automatic updates...";
             toolTip1.SetToolTip(lnkAutomaticUpdates, resources.GetString("lnkAutomaticUpdates.ToolTip"));
             lnkAutomaticUpdates.LinkClicked += AutomaticUpdates_LinkClicked;
+            // 
+            // chkUpgradeAllowPreRelease
+            // 
+            chkUpgradeAllowPreRelease.AutoSize = true;
+            chkUpgradeAllowPreRelease.Location = new System.Drawing.Point(103, 209);
+            chkUpgradeAllowPreRelease.Name = "chkUpgradeAllowPreRelease";
+            chkUpgradeAllowPreRelease.Size = new System.Drawing.Size(210, 24);
+            chkUpgradeAllowPreRelease.TabIndex = 28;
+            chkUpgradeAllowPreRelease.Text = "Allow Pre-Release Updates";
+            toolTip1.SetToolTip(chkUpgradeAllowPreRelease, "When enabled, automatic update checks will include pre-release versions. This allows you to receive updates before they are widely released.");
+            chkUpgradeAllowPreRelease.CheckedChanged += ChkUpgradeAllowPreRelease_CheckedChanged;
             // 
             // lnkAutoUpgradeDB
             // 
@@ -1962,6 +1974,7 @@ namespace DBADashServiceConfig
             // 
             tabDest.Controls.Add(lnkDeployDatabase);
             tabDest.Controls.Add(lnkAutoUpgradeDB);
+            tabDest.Controls.Add(chkUpgradeAllowPreRelease);
             tabDest.Controls.Add(lnkAutomaticUpdates);
             tabDest.Controls.Add(lblRunningAs);
             tabDest.Controls.Add(bttnViewServiceLog);
@@ -2399,6 +2412,7 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.NumericUpDown numLowMaxThreadPct;
         private System.Windows.Forms.Label lblRunningAs;
         private System.Windows.Forms.LinkLabel lnkAutomaticUpdates;
+        private System.Windows.Forms.CheckBox chkUpgradeAllowPreRelease;
         private System.Windows.Forms.LinkLabel lnkSummaryRefreshCron;
         private System.Windows.Forms.LinkLabel lnkAutoUpgradeDB;
         private System.Windows.Forms.LinkLabel lnkDeployDatabase;

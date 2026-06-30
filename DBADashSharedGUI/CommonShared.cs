@@ -67,18 +67,19 @@ namespace DBADashSharedGUI
         }
 
         [SupportedOSPlatform("windows")]
-        public static void ShowAbout(IWin32Window owner, bool StartGUIOnUpgrade)
+        public static void ShowAbout(IWin32Window owner, bool StartGUIOnUpgrade, bool includePreRelease = false)
         {
             using About frm = new()
             {
                 DBVersion = new Version(),
-                StartGUIOnUpgrade = StartGUIOnUpgrade
+                StartGUIOnUpgrade = StartGUIOnUpgrade,
+                IncludePreRelease = includePreRelease
             };
             frm.ShowDialog(owner);
         }
 
         [SupportedOSPlatform("windows")]
-        public static void ShowAbout(string connectionString, IWin32Window owner, bool StartGUIOnUpgrade)
+        public static void ShowAbout(string connectionString, IWin32Window owner, bool StartGUIOnUpgrade, bool includePreRelease = false)
         {
             Version dbVersion = new();
             if (!string.IsNullOrEmpty(connectionString))
@@ -95,7 +96,8 @@ namespace DBADashSharedGUI
             using About frm = new()
             {
                 DBVersion = dbVersion,
-                StartGUIOnUpgrade = StartGUIOnUpgrade
+                StartGUIOnUpgrade = StartGUIOnUpgrade,
+                IncludePreRelease = includePreRelease
             };
             frm.ShowDialog(owner);
         }
