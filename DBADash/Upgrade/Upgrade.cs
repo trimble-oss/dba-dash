@@ -57,14 +57,28 @@ namespace DBADash
             }
 
             var client = new GitHubClient(new ProductHeaderValue(GITHUB_APP));
-            var releases = await client.Repository.Release.GetAll(GITHUB_OWNER, GITHUB_REPO, new ApiOptions { PageSize = 1, PageCount = 1 });
+            var latestStable = await client.Repository.Release.GetLatest(GITHUB_OWNER, GITHUB_REPO);
+            Version.TryParse(latestStable.TagName, out var stableVersion);
 
-            if (releases.Count > 0 && releases[0].Prerelease && Version.TryParse(releases[0].TagName, out _))
+            var releases = await client.Repository.Release.GetAll(GITHUB_OWNER, GITHUB_REPO, new ApiOptions { PageSize = 20, PageCount = 1 });
+            Release bestPreRelease = null;
+            Version bestPreReleaseVersion = null;
+            foreach (var release in releases)
             {
-                return releases[0];
+                if (release.Prerelease && !release.Draft && Version.TryParse(release.TagName, out var v))
+                {
+                    if (bestPreReleaseVersion == null || v > bestPreReleaseVersion)
+                    {
+                        bestPreRelease = release;
+                        bestPreReleaseVersion = v;
+                    }
+                }
             }
 
-            return await client.Repository.Release.GetLatest(GITHUB_OWNER, GITHUB_REPO);
+            if (bestPreRelease != null && (stableVersion == null || bestPreReleaseVersion > stableVersion))
+                return bestPreRelease;
+
+            return latestStable;
         }
 
         public static bool IsUpgradeAvailable(Release release)
