@@ -128,66 +128,85 @@ namespace DBADashGUI
             await SetLatestVersionAsync();
         }
 
+        private string _latestReleaseUrl = Upgrade.LatestVersionLink;
+
         /// <summary>Update about box with latest version info</summary>
         private async Task SetLatestVersionAsync()
         {
-            upgradeAvailable = false;
-            bttnUpgrade.Enabled = false;
-            lblLatest.Text = "Latest Version:";
-            lblLatest.Font = new Font(lblLatest.Font, FontStyle.Regular);
-            lnkLatestRelease.Font = new Font(lnkLatestRelease.Font, FontStyle.Regular);
-            upgradeIcon = MessageBoxIcon.Warning;
-            upgradeMessage = "The upgrade check hasn't completed yet.\nIf this server doesn't have internet access, an offline upgrade can be performed. See:\nhttps://dbadash.com/upgrades";
+            chkPreRelease.Enabled = false;
+            try
+            {
+                upgradeAvailable = false;
+                bttnUpgrade.Enabled = false;
+                lblLatest.Text = "Latest Version:";
+                SetFontStyle(lblLatest, FontStyle.Regular);
+                SetFontStyle(lnkLatestRelease, FontStyle.Regular);
+                upgradeIcon = MessageBoxIcon.Warning;
+                upgradeMessage = "The upgrade check hasn't completed yet.\nIf this server doesn't have internet access, an offline upgrade can be performed. See:\nhttps://dbadash.com/upgrades";
 
-            Release release;
-            Version releaseVersion;
-            try
-            {
-                release = await Upgrade.GetLatestVersionAsync(chkPreRelease.Checked);
-                releaseVersion = new Version(release.TagName);
-            }
-            catch (Exception ex)
-            {
-                lnkLatestRelease.Text = "???";
-                toolTip1.SetToolTip(lnkLatestRelease, ex.Message);
-                upgradeMessage = "Error checking for the latest version.\nIf this server doesn't have internet access, an offline upgrade can be performed. See:\nhttps://dbadash.com/upgrades";
-                return;
-            }
-            var preReleaseLabel = release.Prerelease ? " (Pre-Release)" : "";
-            lnkLatestRelease.Text = release.TagName + preReleaseLabel;
-            try
-            {
-                if (Upgrade.IsUpgradeAvailable(release))
+                Release release;
+                Version releaseVersion;
+                try
                 {
-                    if (Upgrade.DeploymentType == Upgrade.DeploymentTypes.GUI && (DBVersion.Major != releaseVersion.Major || DBVersion.Minor != releaseVersion.Minor || DBVersion.Build != releaseVersion.Build))
+                    release = await Upgrade.GetLatestVersionAsync(chkPreRelease.Checked);
+                    releaseVersion = new Version(release.TagName);
+                }
+                catch (Exception ex)
+                {
+                    lnkLatestRelease.Text = "???";
+                    toolTip1.SetToolTip(lnkLatestRelease, ex.Message);
+                    upgradeMessage = "Error checking for the latest version.\nIf this server doesn't have internet access, an offline upgrade can be performed. See:\nhttps://dbadash.com/upgrades";
+                    return;
+                }
+                var preReleaseLabel = release.Prerelease ? " (Pre-Release)" : "";
+                lnkLatestRelease.Text = release.TagName + preReleaseLabel;
+                _latestReleaseUrl = release.Prerelease ? release.HtmlUrl : Upgrade.LatestVersionLink;
+                try
+                {
+                    if (Upgrade.IsUpgradeAvailable(release))
                     {
-                        upgradeMessage = "An upgrade is available.  Please upgrade the DBA Dash service first.";
+                        if (Upgrade.DeploymentType == Upgrade.DeploymentTypes.GUI && (DBVersion.Major != releaseVersion.Major || DBVersion.Minor != releaseVersion.Minor || DBVersion.Build != releaseVersion.Build))
+                        {
+                            upgradeMessage = "An upgrade is available.  Please upgrade the DBA Dash service first.";
+                        }
+                        else
+                        {
+                            upgradeAvailable = true;
+                            SetFontStyle(lnkLatestRelease, FontStyle.Bold);
+                            SetFontStyle(lblLatest, FontStyle.Bold);
+                            lblLatest.Text = "Latest Version (Upgrade Available):";
+                            bttnUpgrade.Enabled = true;
+                        }
                     }
                     else
                     {
-                        upgradeAvailable = true;
-                        lnkLatestRelease.Font = new Font(lnkLatestRelease.Font, FontStyle.Bold);
-                        lblLatest.Font = new Font(lblLatest.Font, FontStyle.Bold);
-                        lblLatest.Text = "Latest Version (Upgrade Available):";
-                        bttnUpgrade.Enabled = true;
+                        upgradeMessage = "No upgrades are available at this time";
+                        upgradeIcon = MessageBoxIcon.Information;
                     }
                 }
-                else
+                catch
                 {
-                    upgradeMessage = "No upgrades are available at this time";
-                    upgradeIcon = MessageBoxIcon.Information;
+                    lblLatest.Text = "Latest Version (Unable to Compare):";
+                    upgradeMessage = "Error comparing versions.  Upgrade is not available at this time. See:\nhttps://dbadash.com/upgrades";
                 }
             }
-            catch
+            finally
             {
-                lblLatest.Text = "Latest Version (Unable to Compare):";
-                upgradeMessage = "Error comparing versions.  Upgrade is not available at this time. See:\nhttps://dbadash.com/upgrades";
+                chkPreRelease.Enabled = true;
             }
+        }
+
+        private static void SetFontStyle(Control control, FontStyle style)
+        {
+            if (control.Font.Style == style) return;
+            var old = control.Font;
+            control.Font = new Font(old, style);
+            old.Dispose();
         }
 
         private void LnkLatestRelease_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            CommonShared.OpenURL(Upgrade.LatestVersionLink);
+            CommonShared.OpenURL(_latestReleaseUrl);
         }
 
         private void LnkAuthor_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
