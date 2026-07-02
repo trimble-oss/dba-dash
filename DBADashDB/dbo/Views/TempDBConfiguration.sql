@@ -1,5 +1,6 @@
-﻿CREATE VIEW dbo.TempDBConfiguration
+CREATE VIEW dbo.TempDBConfiguration
 AS
+WITH Base AS (
 SELECT i.InstanceID,
 		i.Instance,
 		i.InstanceDisplayName,
@@ -8,7 +9,7 @@ SELECT i.InstanceID,
 		CASE WHEN SUM(CASE WHEN f.type=0 THEN 1 ELSE 0 END) < calc.MinimumRecommendedFiles THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS InsufficientFiles,
 		SUM(CASE WHEN f.type=1 THEN 1 ELSE 0 END) NumberOfLogFiles,
 		CASE WHEN COUNT(DISTINCT CASE WHEN type= 0 THEN f.size ELSE NULL END) =1 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS IsEvenlySized,
-		CASE WHEN COUNT(DISTINCT CASE WHEN type= 0 THEN f.growth ELSE NULL END)=1 
+		CASE WHEN COUNT(DISTINCT CASE WHEN type= 0 THEN f.growth ELSE NULL END)=1
 					AND COUNT(DISTINCT CASE WHEN type= 0 THEN f.is_percent_growth ELSE NULL END)=1 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS IsEvenGrowth,
 		SUM(CASE WHEN f.type=0 THEN f.size ELSE NULL END)/128 AS TotalSizeMB,
 		SUM(CASE WHEN f.type=1 THEN f.size ELSE NULL END)/128 AS LogMB,
@@ -24,14 +25,14 @@ SELECT i.InstanceID,
 		CASE WHEN I.ProductMajorVersion<13 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS IsTraceFlagRequired,
 		i.IsTempDBMetadataMemoryOptimized,
 		i.ShowInSummary
-FROM dbo.InstanceInfo i 
+FROM dbo.InstanceInfo i
 JOIN dbo.Databases d ON d.InstanceID = i.InstanceID
 JOIN dbo.DBFiles f ON d.DatabaseID = f.DatabaseID
 OUTER APPLY(SELECT CASE WHEN ISNULL(i.cpu_core_count,i.cpu_count) >8 THEN 8 ELSE COALESCE(i.cpu_core_count,i.cpu_count,8) END AS MinimumRecommendedFiles) calc
-OUTER APPLY(SELECT	MAX(CASE WHEN TF.TraceFlag=1117 THEN 1 ELSE 0 END) AS T1117, 
+OUTER APPLY(SELECT	MAX(CASE WHEN TF.TraceFlag=1117 THEN 1 ELSE 0 END) AS T1117,
 					MAX(CASE WHEN TF.TraceFlag=1118 THEN 1 ELSE 0 END) T1118
-			FROM dbo.TraceFlags TF 
-			WHERE TF.InstanceID = i.InstanceID 
+			FROM dbo.TraceFlags TF
+			WHERE TF.InstanceID = i.InstanceID
 			AND TF.TraceFlag IN(1118,1117)
 			) T
 WHERE d.name = 'tempdb'
@@ -42,7 +43,7 @@ GROUP BY	i.Instance,
 			i.InstanceID,
 			i.InstanceDisplayName,
 			i.cpu_core_count,
-			d.DatabaseID, 
+			d.DatabaseID,
 			T.T1118,
 			T.T1117,
 			i.ProductMajorVersion,
@@ -50,3 +51,19 @@ GROUP BY	i.Instance,
 			i.IsTempDBMetadataMemoryOptimized,
 			i.cpu_count,
 			i.ShowInSummary
+)
+/* Status columns (DBADashStatusEnum: 1=Critical,2=Warning,3=NA,4=OK,5=Acknowledged,6=WarningLow,7=Information)
+   are derived here, in one place, so consumers (SPs, reports) don't need to duplicate this logic. */
+SELECT *,
+		CASE WHEN InsufficientFiles = 1 THEN 2 ELSE 3 END AS InsufficientFilesStatus, -- Warning / NA
+		CASE WHEN NumberOfLogFiles > 1 THEN 2 ELSE 4 END AS NumberOfLogFilesStatus, -- Warning / OK
+		CASE WHEN IsEvenlySized = 1 THEN 4 ELSE 2 END AS IsEvenlySizedStatus, -- OK / Warning
+		CASE WHEN IsEvenGrowth = 1 THEN 4 ELSE 2 END AS IsEvenGrowthStatus, -- OK / Warning
+		CASE WHEN IsTraceFlagRequired = 1 THEN CASE WHEN T1117 = 1 THEN 4 ELSE 2 END -- OK / Warning
+			ELSE CASE WHEN T1117 = 1 THEN 6 ELSE 3 END END AS T1117Status, -- WarningLow / NA
+		CASE WHEN IsTraceFlagRequired = 1 THEN CASE WHEN T1118 = 1 THEN 4 ELSE 2 END -- OK / Warning
+			ELSE CASE WHEN T1118 = 1 THEN 6 ELSE 3 END END AS T1118Status, -- WarningLow / NA
+		CASE WHEN IsTempDBMetadataMemoryOptimized IS NULL THEN 3 -- NA
+			WHEN IsTempDBMetadataMemoryOptimized = 1 THEN 4 -- OK
+			ELSE 7 END AS TempDBMemoryOptStatus -- Information
+FROM Base
