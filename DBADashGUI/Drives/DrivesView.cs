@@ -357,7 +357,11 @@ namespace DBADashGUI.Drives
             base.OnPostGridRefresh();
             foreach (var grid in Grids)
             {
-                ApplyThresholdStyling(grid);
+                grid.RowsAdded -= Grid_RowsAdded;
+                grid.RowsAdded += Grid_RowsAdded;
+                ApplyThresholdStyling(grid, 0, grid.RowCount);
+                if (grid.Columns["Configure"] != null)
+                    grid.Columns["Configure"].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
             }
 
             var rowCount = Grids.FirstOrDefault()?.RowCount ?? 0;
@@ -382,16 +386,25 @@ namespace DBADashGUI.Drives
             UpdateToolbarState();
         }
 
-        private static void ApplyThresholdStyling(DBADashDataGridView grid)
+        // FreeGB/PctFreeSpace status and the threshold column formats depend on both Status and DriveCheckType,
+        // which doesn't fit the declarative CellHighlightingRuleSet model (single source column per target), so
+        // they're applied here instead. This is hooked to RowsAdded (rather than a one-shot pass) so formatting
+        // survives grid sorting, since sorting a bound DataGridView resets and re-adds all rows.
+        private void Grid_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            foreach (DataGridViewRow row in grid.Rows)
+            if (sender is DBADashDataGridView grid)
             {
+                ApplyThresholdStyling(grid, e.RowIndex, e.RowCount);
+            }
+        }
+
+        private static void ApplyThresholdStyling(DBADashDataGridView grid, int startIndex, int rowCount)
+        {
+            for (var idx = startIndex; idx < startIndex + rowCount && idx < grid.Rows.Count; idx++)
+            {
+                var row = grid.Rows[idx];
                 if (row.DataBoundItem is not DataRowView drv) continue;
                 var status = (DBADashStatusEnum)drv["Status"];
-                var snapshotStatus = (DBADashStatusEnum)drv["SnapshotStatus"];
-
-                if (grid.Columns["SnapshotAgeMins"] != null)
-                    row.Cells["SnapshotAgeMins"].SetStatusColor(snapshotStatus);
 
                 if (drv["DriveCheckType"] != DBNull.Value && (string)drv["DriveCheckType"] == "G")
                 {
@@ -415,19 +428,6 @@ namespace DBADashGUI.Drives
                     if (grid.Columns["DriveCriticalThreshold"] != null)
                         row.Cells["DriveCriticalThreshold"].Style.Format = "P2";
                 }
-
-                if (grid.Columns["Configure"] != null)
-                {
-                    var inherited = drv["IsInheritedThreshold"] != DBNull.Value && (bool)drv["IsInheritedThreshold"];
-                    row.Cells["Configure"].Style.Font = inherited
-                        ? new Font(grid.Font, FontStyle.Regular)
-                        : new Font(grid.Font, FontStyle.Bold);
-                }
-            }
-
-            if (grid.Columns["Configure"] != null)
-            {
-                grid.Columns["Configure"].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
             }
         }
 
@@ -512,7 +512,7 @@ namespace DBADashGUI.Drives
                         ["DriveWarningThreshold"] = new ColumnMetadata { DisplayIndex = 7, Alias = "Warning" },
                         ["DriveCriticalThreshold"] = new ColumnMetadata { DisplayIndex = 8, Alias = "Critical" },
                         ["SnapshotDate"] = new ColumnMetadata { DisplayIndex = 9, Alias = "Snapshot Date", FormatString = "yyyy-MM-dd HH:mm" },
-                        ["SnapshotAgeMins"] = new ColumnMetadata { DisplayIndex = 10, Alias = "Snapshot Age (Mins)", FormatString = "N0" },
+                        ["SnapshotAgeMins"] = new ColumnMetadata { DisplayIndex = 10, Alias = "Snapshot Age (Mins)", FormatString = "N0", Highlighting = new CellHighlightingRuleSet("SnapshotStatus") { IsStatusColumn = true } },
                         ["ChangeUsedGB24Hrs"] = new ColumnMetadata { DisplayIndex = 11, Alias = "Used 24Hrs Change (GB+-)", FormatString = "+#,##0.0GB;-#,##0.0GB;-" },
                         ["ChangeUsedGB7Days"] = new ColumnMetadata { DisplayIndex = 12, Alias = "Used 7 Days Change (GB+-)", FormatString = "+#,##0.0GB;-#,##0.0GB;-" },
                         ["ChangeUsedGB30Days"] = new ColumnMetadata { DisplayIndex = 13, Alias = "Used 30 Days Change (GB+-)", FormatString = "+#,##0.0GB;-#,##0.0GB;-" },
@@ -532,7 +532,20 @@ namespace DBADashGUI.Drives
                         // Unbound link columns
                         ["Files"] = new ColumnMetadata { DisplayIndex = 26, Alias = "Files", Link = new DriveFilesLink(), Description = "View database files on this drive" },
                         ["History"] = new ColumnMetadata { DisplayIndex = 27, Alias = "History", Link = new DriveHistoryLink(), Description = "View drive space history" },
-                        ["Configure"] = new ColumnMetadata { DisplayIndex = 28, Alias = "Configure", Link = new DriveConfigureLink(), Description = "Configure drive thresholds" },
+                        ["Configure"] = new ColumnMetadata
+                        {
+                            DisplayIndex = 28,
+                            Alias = "Configure",
+                            Link = new DriveConfigureLink(),
+                            Description = "Configure drive thresholds",
+                            Highlighting = new CellHighlightingRuleSet("IsInheritedThreshold")
+                            {
+                                Rules = new List<CellHighlightingRule>
+                                {
+                                    new() { ConditionType = CellHighlightingRule.ConditionTypes.Equals, Value1 = "False", Font = new Font("Segoe UI", 9F, FontStyle.Bold) },
+                                }
+                            }
+                        },
                     }
                 }
             },

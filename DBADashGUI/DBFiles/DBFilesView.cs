@@ -184,11 +184,26 @@ namespace DBADashGUI.DBFiles
             foreach (var grid in Grids)
             {
                 ToggleFileLevel(grid);
-                ApplyThresholdStyling(grid);
+                grid.RowsAdded -= Grid_RowsAdded;
+                grid.RowsAdded += Grid_RowsAdded;
+                ApplyThresholdStyling(grid, 0, grid.RowCount);
                 grid.GridFilterChanged += (_, _) => UpdateTotals();
             }
             UpdateToolbarState();
             UpdateTotals();
+        }
+
+        // FilegroupPctFree/FilegroupFreeMB status depends on both FreeSpaceStatus and FreeSpaceCheckType, and
+        // the Configure column font depends on ConfiguredLevel/data_space_id - neither fits the declarative
+        // CellHighlightingRuleSet model (single source column per target), so they're applied here instead.
+        // This is hooked to RowsAdded (rather than a one-shot pass) so formatting survives grid sorting, since
+        // sorting a bound DataGridView resets and re-adds all rows.
+        private void Grid_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        {
+            if (sender is DBADashDataGridView grid)
+            {
+                ApplyThresholdStyling(grid, e.RowIndex, e.RowCount);
+            }
         }
 
         private void UpdateTotals()
@@ -233,47 +248,33 @@ namespace DBADashGUI.DBFiles
             }
         }
 
-        private static void ApplyThresholdStyling(DBADashDataGridView grid)
+        private static void ApplyThresholdStyling(DBADashDataGridView grid, int startIndex, int rowCount)
         {
-            foreach (DataGridViewRow row in grid.Rows)
+            var hasConfigureColumn = grid.Columns["Configure"] != null;
+
+            for (var idx = startIndex; idx < startIndex + rowCount && idx < grid.Rows.Count; idx++)
             {
+                var row = grid.Rows[idx];
                 if (row.DataBoundItem is not DataRowView drv) continue;
 
                 var status = (DBADashStatusEnum)drv["FreeSpaceStatus"];
-                var snapshotStatus = (DBADashStatusEnum)drv["FileSnapshotAgeStatus"];
-                var maxSizeStatus = (DBADashStatusEnum)drv["PctMaxSizeStatus"];
-                var fgAutogrowStatus = (DBADashStatusEnum)drv["FilegroupAutogrowStatus"];
                 var checkType = drv["FreeSpaceCheckType"] == DBNull.Value ? "-" : (string)drv["FreeSpaceCheckType"];
 
-                if (grid.Columns["FileSnapshotAge"] != null)
-                    row.Cells["FileSnapshotAge"].SetStatusColor(snapshotStatus);
-                if (grid.Columns["FilegroupPctOfMaxSize"] != null)
-                    row.Cells["FilegroupPctOfMaxSize"].SetStatusColor(maxSizeStatus);
-                if (grid.Columns["FilegroupAutogrowFileCount"] != null)
-                    row.Cells["FilegroupAutogrowFileCount"].SetStatusColor(fgAutogrowStatus);
                 if (grid.Columns["FilegroupPctFree"] != null)
                     row.Cells["FilegroupPctFree"].SetStatusColor(checkType == "%" ? status : DBADashStatusEnum.NA);
                 if (grid.Columns["FilegroupFreeMB"] != null)
                     row.Cells["FilegroupFreeMB"].SetStatusColor(checkType == "M" ? status : DBADashStatusEnum.NA);
 
-                if (grid.Columns["Configure"] != null)
+                if (hasConfigureColumn)
                 {
-                    if (drv["ConfiguredLevel"] != DBNull.Value && (string)drv["ConfiguredLevel"] == "FG")
-                    {
-                        row.Cells["Configure"].Style.Font = new Font(grid.Font, FontStyle.Bold);
-                    }
-                    else if (drv["ConfiguredLevel"] != DBNull.Value && (string)drv["ConfiguredLevel"] == "DB" && (int)drv["data_space_id"] == 0)
-                    {
-                        row.Cells["Configure"].Style.Font = new Font(grid.Font, FontStyle.Bold);
-                    }
-                    else
-                    {
-                        row.Cells["Configure"].Style.Font = new Font(grid.Font, FontStyle.Regular);
-                    }
+                    var isConfiguredHere = drv["ConfiguredLevel"] != DBNull.Value &&
+                                            ((string)drv["ConfiguredLevel"] == "FG" ||
+                                             ((string)drv["ConfiguredLevel"] == "DB" && (int)drv["data_space_id"] == 0));
+                    row.Cells["Configure"].Style.Font = new Font(grid.Font, isConfiguredHere ? FontStyle.Bold : FontStyle.Regular);
                 }
             }
 
-            if (grid.Columns["Configure"] != null)
+            if (hasConfigureColumn)
             {
                 grid.Columns["Configure"].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
             }
@@ -361,10 +362,10 @@ namespace DBADashGUI.DBFiles
                         ["FilegroupFreeMB"] = new() { Alias = "Filegroup Free (MB)", FormatString = "N1" },
                         ["FilegroupPctFree"] = new() { Alias = "Filegroup Free %", FormatString = "P1" },
                         ["FilegroupMaxSizeMB"] = new() { Alias = "Filegroup Max Size (MB)", FormatString = "N0" },
-                        ["FilegroupPctOfMaxSize"] = new() { Alias = "Filegroup % Of Max Size", FormatString = "P1" },
+                        ["FilegroupPctOfMaxSize"] = new() { Alias = "Filegroup % Of Max Size", FormatString = "P1", Highlighting = new CellHighlightingRuleSet("PctMaxSizeStatus") { IsStatusColumn = true } },
                         ["FilegroupUsedPctOfMaxSize"] = new() { Alias = "Filegroup Used % Max Size", FormatString = "P1" },
                         ["FilegroupNumberOfFiles"] = new() { Alias = "Filegroup Number of Files" },
-                        ["FilegroupAutogrowFileCount"] = new() { Alias = "Filegroup Autogrow File Count" },
+                        ["FilegroupAutogrowFileCount"] = new() { Alias = "Filegroup Autogrow File Count", Highlighting = new CellHighlightingRuleSet("FilegroupAutogrowStatus") { IsStatusColumn = true } },
                         ["ExcludedReason"] = new() { Alias = "Excluded Reason" },
                         ["MaxSizeExcludedReason"] = new() { Alias = "Max Size Excluded Reason" },
                         ["is_read_only"] = new() { Alias = "Read Only" },
@@ -372,7 +373,7 @@ namespace DBADashGUI.DBFiles
                         ["is_in_standby"] = new() { Alias = "Standby" },
                         ["state_desc"] = new() { Alias = "State" },
                         ["ConfiguredLevel"] = new() { Alias = "Configured Level" },
-                        ["FileSnapshotAge"] = new() { Alias = "File Snapshot Age" },
+                        ["FileSnapshotAge"] = new() { Alias = "File Snapshot Age", Highlighting = new CellHighlightingRuleSet("FileSnapshotAgeStatus") { IsStatusColumn = true } },
                         ["History"] = new() { Alias = "History", Link = new FileHistoryLink(), Description = "View file space history" },
                         ["Configure"] = new() { Alias = "Configure", Link = new FileConfigureLink(), Description = "Configure file thresholds" },
                         // Hidden columns

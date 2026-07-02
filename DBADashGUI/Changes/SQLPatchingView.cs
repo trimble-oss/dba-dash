@@ -217,9 +217,23 @@ namespace DBADashGUI.Changes
             {
                 if (grid.ResultSetID == 0)
                 {
-                    ApplyVersionInfoStyling(grid);
+                    grid.RowsAdded -= Grid_RowsAdded;
+                    grid.RowsAdded += Grid_RowsAdded;
+                    ApplyVersionInfoStyling(grid, 0, grid.RowCount);
                     UpdateBuildReferenceStatus(grid);
                 }
+            }
+        }
+
+        // Status here is computed from live, admin-configurable Config.*Threshold settings rather than a
+        // precomputed DB status column, so it doesn't fit the declarative CellHighlightingRuleSet model (whose
+        // rule values are fixed at definition time). This is hooked to RowsAdded (rather than a one-shot pass)
+        // so formatting survives grid sorting, since sorting a bound DataGridView resets and re-adds all rows.
+        private void Grid_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        {
+            if (sender is DBADashDataGridView grid)
+            {
+                ApplyVersionInfoStyling(grid, e.RowIndex, e.RowCount);
             }
         }
 
@@ -239,12 +253,13 @@ namespace DBADashGUI.Changes
             return DBADashStatusEnum.NA;
         }
 
-        private static void ApplyVersionInfoStyling(DBADashDataGridView grid)
+        private static void ApplyVersionInfoStyling(DBADashDataGridView grid, int startIndex, int rowCount)
         {
             var hasWindowsUpdateCol = grid.Columns["IsWindowsUpdate"] is not null;
 
-            foreach (DataGridViewRow gRow in grid.Rows)
+            for (var idx = startIndex; idx < startIndex + rowCount && idx < grid.Rows.Count; idx++)
             {
+                var gRow = grid.Rows[idx];
                 if (gRow.DataBoundItem is not DataRowView drv) continue;
 
                 var supportedUntilStatus = GetThresholdStatus(
