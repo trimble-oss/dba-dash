@@ -542,7 +542,7 @@ namespace DBADashGUI.Drives
                             {
                                 Rules = new List<CellHighlightingRule>
                                 {
-                                    new() { ConditionType = CellHighlightingRule.ConditionTypes.Equals, Value1 = "False", Font = new Font("Segoe UI", 9F, FontStyle.Bold) },
+                                    new() { ConditionType = CellHighlightingRule.ConditionTypes.Equals, Value1 = "False", RelativeFontStyle = FontStyle.Bold },
                                 }
                             }
                         },

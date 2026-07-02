@@ -223,7 +223,7 @@ namespace DBADashGUI.Backups
             {
                 Rules = new List<CellHighlightingRule>
                 {
-                    new() { ConditionType = CellHighlightingRule.ConditionTypes.Equals, Value1 = valueWhenConfigured, Font = new Font("Segoe UI", 9F, FontStyle.Bold) },
+                    new() { ConditionType = CellHighlightingRule.ConditionTypes.Equals, Value1 = valueWhenConfigured, RelativeFontStyle = FontStyle.Bold },
                 }
             };
 

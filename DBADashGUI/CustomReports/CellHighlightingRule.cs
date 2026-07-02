@@ -20,6 +20,14 @@ namespace DBADashGUI.CustomReports
 
         public Font Font { get; set; }
 
+        /// <summary>
+        /// Font style (e.g. Bold) to apply relative to the cell's own current font, instead of a fixed <see cref="Font"/>.
+        /// Preferred over <see cref="Font"/> for a style-only change (no family/size change), since it stays
+        /// consistent with the grid's actual theme/DPI-scaled font rather than a hard-coded one. Ignored if
+        /// <see cref="Font"/> is also set.
+        /// </summary>
+        public FontStyle? RelativeFontStyle { get; set; }
+
         public DBADashStatus.DBADashStatusEnum? Status { get; set; }
 
         private bool value1IsNumeric;
@@ -170,14 +178,14 @@ namespace DBADashGUI.CustomReports
             if (Status != null)
             {
                 formattedCell.SetStatusColor((DBADashStatus.DBADashStatusEnum)(Status));
-                if (Font != null) formattedCell.Style.Font = Font;
+                ApplyFont(formattedCell);
                 return;
             }
             var b = isDarkMode && BackColorDark != Color.Empty ? BackColorDark : BackColor;
             var f = isDarkMode && ForeColorDark != Color.Empty ? ForeColorDark : ForeColor;
             if (b != Color.Empty) formattedCell.Style.BackColor = b;
             if (f != Color.Empty) formattedCell.Style.ForeColor = f;
-            if (Font != null) formattedCell.Style.Font = Font;
+            ApplyFont(formattedCell);
 
             if (f != Color.Empty && formattedCell is DataGridViewLinkCell linkCell)
             {
@@ -186,6 +194,28 @@ namespace DBADashGUI.CustomReports
                 linkCell.VisitedLinkColor = f;
             }
             if (b != Color.Empty) formattedCell.Style.SelectionBackColor = b.AdjustBasedOnLuminance();
+        }
+
+        // Cache of the derived RelativeFontStyle font, keyed by the base font it was derived from, so repeated
+        // calls (e.g. once per row on every RowsAdded/sort) don't each allocate a new Font/GDI handle.
+        private Font relativeFontCacheBase;
+        private Font relativeFontCache;
+
+        private void ApplyFont(DataGridViewCell formattedCell)
+        {
+            if (Font != null)
+            {
+                formattedCell.Style.Font = Font;
+                return;
+            }
+            if (RelativeFontStyle == null) return;
+            var baseFont = formattedCell.InheritedStyle.Font;
+            if (relativeFontCacheBase != baseFont)
+            {
+                relativeFontCache = new Font(baseFont, RelativeFontStyle.Value);
+                relativeFontCacheBase = baseFont;
+            }
+            formattedCell.Style.Font = relativeFontCache;
         }
 
         /// <summary>
