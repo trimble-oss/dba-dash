@@ -187,11 +187,14 @@ namespace DBADashGUI.DBFiles
                 grid.RowsAdded -= Grid_RowsAdded;
                 grid.RowsAdded += Grid_RowsAdded;
                 ApplyThresholdStyling(grid, 0, grid.RowCount);
-                grid.GridFilterChanged += (_, _) => UpdateTotals();
+                grid.GridFilterChanged -= Grid_GridFilterChanged;
+                grid.GridFilterChanged += Grid_GridFilterChanged;
             }
             UpdateToolbarState();
             UpdateTotals();
         }
+
+        private void Grid_GridFilterChanged(object sender, EventArgs e) => UpdateTotals();
 
         // FilegroupPctFree/FilegroupFreeMB status depends on both FreeSpaceStatus and FreeSpaceCheckType, and
         // the Configure column font depends on ConfiguredLevel/data_space_id - neither fits the declarative
@@ -251,6 +254,9 @@ namespace DBADashGUI.DBFiles
         private static void ApplyThresholdStyling(DBADashDataGridView grid, int startIndex, int rowCount)
         {
             var hasConfigureColumn = grid.Columns["Configure"] != null;
+            // Reuse a single bold font across all rows (created lazily) and the grid's own font for the regular
+            // case rather than allocating a Font per row every time this runs (including on every sort).
+            Font boldFont = null;
 
             for (var idx = startIndex; idx < startIndex + rowCount && idx < grid.Rows.Count; idx++)
             {
@@ -270,7 +276,8 @@ namespace DBADashGUI.DBFiles
                     var isConfiguredHere = drv["ConfiguredLevel"] != DBNull.Value &&
                                             ((string)drv["ConfiguredLevel"] == "FG" ||
                                              ((string)drv["ConfiguredLevel"] == "DB" && (int)drv["data_space_id"] == 0));
-                    row.Cells["Configure"].Style.Font = new Font(grid.Font, isConfiguredHere ? FontStyle.Bold : FontStyle.Regular);
+                    row.Cells["Configure"].Style.Font =
+                        isConfiguredHere ? boldFont ??= new Font(grid.Font, FontStyle.Bold) : grid.Font;
                 }
             }
 
