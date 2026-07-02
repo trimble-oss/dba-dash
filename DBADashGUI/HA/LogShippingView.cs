@@ -19,8 +19,6 @@ namespace DBADashGUI.LogShipping
     /// </summary>
     internal class LogShippingView : CustomReportView
     {
-        private const string ConfigureColumnName = "Configure";
-
         private ToolStripMenuItem mnuMetricsRoot;
         private ToolStripMenuItem mnuMetricsInstance;
         private ToolStripMenuItem mnuThresholdInstance;
@@ -170,41 +168,7 @@ namespace DBADashGUI.LogShipping
         protected override void OnPostGridRefresh()
         {
             base.OnPostGridRefresh();
-            foreach (var grid in Grids)
-            {
-                ApplyThresholdStyling(grid);
-            }
             UpdateToolbarState();
-        }
-
-        /// <summary>
-        /// Bold the Configure link where a threshold is explicitly configured at that level (matching the
-        /// styling in the legacy LogShippingControl).
-        /// </summary>
-        private static void ApplyThresholdStyling(DBADashDataGridView grid)
-        {
-            if (grid.Columns[ConfigureColumnName] == null) return;
-            // Reuse a single bold font across all rows (created lazily) and the grid's own font for the regular case
-            // rather than allocating a Font per row on every refresh.
-            Font boldFont = null;
-            foreach (DataGridViewRow row in grid.Rows)
-            {
-                if (row.DataBoundItem is not DataRowView drv) continue;
-                var table = drv.Row.Table;
-                bool bold;
-                if (grid.ResultSetID == 0)
-                {
-                    bold = table.Columns.Contains("InstanceLevelThreshold")
-                           && drv["InstanceLevelThreshold"].DBNullToNull() is bool b && b;
-                }
-                else
-                {
-                    bold = table.Columns.Contains("ThresholdConfiguredLevel")
-                           && (drv["ThresholdConfiguredLevel"] as string) == "Database";
-                }
-                row.Cells[ConfigureColumnName].Style.Font =
-                    bold ? boldFont ??= new Font(grid.Font, FontStyle.Bold) : grid.Font;
-            }
         }
 
         #endregion Grid post-processing
@@ -266,6 +230,17 @@ namespace DBADashGUI.LogShipping
         private static CellHighlightingRuleSet SnapshotHighlight() =>
             new("SnapshotAgeStatus") { IsStatusColumn = true };
 
+        // Configure link bolding: bold when a threshold is explicitly configured at that level (matching the
+        // styling in the legacy LogShippingControl).
+        private static CellHighlightingRuleSet ConfiguredHighlight(string column, string valueWhenConfigured) =>
+            new(column)
+            {
+                Rules = new List<CellHighlightingRule>
+                {
+                    new() { ConditionType = CellHighlightingRule.ConditionTypes.Equals, Value1 = valueWhenConfigured, Font = new Font("Segoe UI", 9F, FontStyle.Bold) },
+                }
+            };
+
         private static ColumnMetadata Hidden(int displayIndex) =>
             new() { Visible = false, DisplayIndex = displayIndex };
 
@@ -311,7 +286,7 @@ namespace DBADashGUI.LogShipping
                         ["MaxDateOfLastBackupRestored"] = new ColumnMetadata { DisplayIndex = 18, Alias = "Backup Date of Newest File" },
                         ["MinLastRestoreCompleted"] = new ColumnMetadata { DisplayIndex = 19, Alias = "Restore Date of Oldest File" },
                         ["MaxLastRestoreCompleted"] = new ColumnMetadata { DisplayIndex = 20, Alias = "Restore Date of Newest File" },
-                        ["Configure"] = new ColumnMetadata { DisplayIndex = 21, Alias = "Configure", Link = new LogShippingConfigureThresholdLink { DatabaseLevel = false }, Description = "Configure instance-level thresholds" },
+                        ["Configure"] = new ColumnMetadata { DisplayIndex = 21, Alias = "Configure", Link = new LogShippingConfigureThresholdLink { DatabaseLevel = false }, Description = "Configure instance-level thresholds", Highlighting = ConfiguredHighlight("InstanceLevelThreshold", "True") },
                         // Numeric (minutes) columns - hidden by default, available via the column chooser.
                         ["MaxTotalTimeBehind"] = Hidden(22),
                         ["MinTotalTimeBehind"] = Hidden(23),
@@ -348,7 +323,7 @@ namespace DBADashGUI.LogShipping
                         ["SnapshotDate"] = new ColumnMetadata { DisplayIndex = 12, Alias = "Snapshot Date" },
                         ["last_file"] = new ColumnMetadata { DisplayIndex = 13, Alias = "Last File" },
                         ["ThresholdConfiguredLevel"] = new ColumnMetadata { DisplayIndex = 14, Alias = "Threshold Level" },
-                        ["Configure"] = new ColumnMetadata { DisplayIndex = 15, Alias = "Configure", Link = new LogShippingConfigureThresholdLink { DatabaseLevel = true }, Description = "Configure database-level thresholds" },
+                        ["Configure"] = new ColumnMetadata { DisplayIndex = 15, Alias = "Configure", Link = new LogShippingConfigureThresholdLink { DatabaseLevel = true }, Description = "Configure database-level thresholds", Highlighting = ConfiguredHighlight("ThresholdConfiguredLevel", "Database") },
                         // Numeric (minutes) columns - hidden by default, available via the column chooser.
                         ["TotalTimeBehind"] = Hidden(16),
                         ["LatencyOfLast"] = Hidden(17),

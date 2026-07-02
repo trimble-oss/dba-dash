@@ -23,7 +23,6 @@ namespace DBADashGUI.Backups
     /// </summary>
     internal class BackupsView : CustomReportView
     {
-        private const string ConfigureColumnName = "Configure";
         private const string BackupReportProcedureName = "BackupReport_Get";
 
         private ToolStripDropDownButton tsConfigureBackups;
@@ -147,41 +146,7 @@ namespace DBADashGUI.Backups
         protected override void OnPostGridRefresh()
         {
             base.OnPostGridRefresh();
-            foreach (var grid in Grids)
-            {
-                ApplyThresholdStyling(grid);
-            }
             UpdateToolbarState();
-        }
-
-        /// <summary>
-        /// Bold the Configure link where a threshold is explicitly configured at that level (matching the styling
-        /// in the legacy BackupsControl).
-        /// </summary>
-        private static void ApplyThresholdStyling(DBADashDataGridView grid)
-        {
-            if (grid.Columns[ConfigureColumnName] == null) return;
-            // Reuse a single bold font across all rows (created lazily) and the grid's own font for the regular case
-            // rather than allocating a Font per row on every refresh.
-            Font boldFont = null;
-            foreach (DataGridViewRow row in grid.Rows)
-            {
-                if (row.DataBoundItem is not DataRowView drv) continue;
-                var table = drv.Row.Table;
-                bool bold;
-                if (grid.ResultSetID == 0)
-                {
-                    bold = table.Columns.Contains("InstanceThresholdConfiguration")
-                           && drv["InstanceThresholdConfiguration"].DBNullToNull() is bool b && b;
-                }
-                else
-                {
-                    bold = table.Columns.Contains("ThresholdsConfiguredLevel")
-                           && (drv["ThresholdsConfiguredLevel"] as string) == "Database";
-                }
-                row.Cells[ConfigureColumnName].Style.Font =
-                    bold ? boldFont ??= new Font(grid.Font, FontStyle.Bold) : grid.Font;
-            }
         }
 
         #endregion Grid post-processing
@@ -248,6 +213,17 @@ namespace DBADashGUI.Backups
                 {
                     new() { ConditionType = CellHighlightingRule.ConditionTypes.GreaterThan, Value1 = "0", Status = statusWhenPositive },
                     new() { ConditionType = CellHighlightingRule.ConditionTypes.All, Status = DBADashStatusEnum.NA },
+                }
+            };
+
+        // Configure link bolding: bold when a threshold is explicitly configured at that level (matching the
+        // styling in the legacy BackupsControl).
+        private static CellHighlightingRuleSet ConfiguredHighlight(string column, string valueWhenConfigured) =>
+            new(column)
+            {
+                Rules = new List<CellHighlightingRule>
+                {
+                    new() { ConditionType = CellHighlightingRule.ConditionTypes.Equals, Value1 = valueWhenConfigured, Font = new Font("Segoe UI", 9F, FontStyle.Bold) },
                 }
             };
 
@@ -329,7 +305,7 @@ namespace DBADashGUI.Backups
                         ["FullCompressionAlgorithms"] = new ColumnMetadata { DisplayIndex = 48, Alias = "Full Compression Algorithms" },
                         ["DiffCompressionAlgorithms"] = new ColumnMetadata { DisplayIndex = 49, Alias = "Diff Compression Algorithms" },
                         ["LogCompressionAlgorithms"] = new ColumnMetadata { DisplayIndex = 50, Alias = "Log Compression Algorithms" },
-                        ["Configure"] = new ColumnMetadata { DisplayIndex = 51, Alias = "Configure", Link = new BackupConfigureThresholdLink { DatabaseLevel = false }, Description = "Configure instance-level thresholds" },
+                        ["Configure"] = new ColumnMetadata { DisplayIndex = 51, Alias = "Configure", Link = new BackupConfigureThresholdLink { DatabaseLevel = false }, Description = "Configure instance-level thresholds", Highlighting = ConfiguredHighlight("InstanceThresholdConfiguration", "True") },
                         // Hidden technical columns.
                         ["Instance"] = Hidden(52),
                         ["SnapshotAgeStatus"] = Hidden(53),
@@ -402,7 +378,7 @@ namespace DBADashGUI.Backups
                         ["FullCompressionAlgorithm"] = new ColumnMetadata { DisplayIndex = 58, Alias = "Full Compression Algorithm" },
                         ["DiffCompressionAlgorithm"] = new ColumnMetadata { DisplayIndex = 59, Alias = "Diff Compression Algorithm" },
                         ["LogCompressionAlgorithm"] = new ColumnMetadata { DisplayIndex = 60, Alias = "Log Compression Algorithm" },
-                        ["Configure"] = new ColumnMetadata { DisplayIndex = 61, Alias = "Configure", Link = new BackupConfigureThresholdLink { DatabaseLevel = true }, Description = "Configure database-level thresholds" },
+                        ["Configure"] = new ColumnMetadata { DisplayIndex = 61, Alias = "Configure", Link = new BackupConfigureThresholdLink { DatabaseLevel = true }, Description = "Configure database-level thresholds", Highlighting = ConfiguredHighlight("ThresholdsConfiguredLevel", "Database") },
                         // Hidden technical columns - status enums driving cell highlighting and values not displayed.
                         ["Instance"] = Hidden(62),
                         ["recovery_model"] = Hidden(63),
