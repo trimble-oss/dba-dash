@@ -128,9 +128,6 @@
 <Compile Update="DBFiles\DBSpaceHistory.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Update="DBFiles\TempDBConfig.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
     <Compile Update="SchemaCompare\DiffControl.cs">
       <SubType>UserControl</SubType>
     </Compile>

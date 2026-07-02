@@ -160,7 +160,7 @@ namespace DBADashGUI
             dbConfiguration1 = new DBADashGUI.Changes.DBConfiguration();
             tabDBOptions = new System.Windows.Forms.TabPage();
             tabTempDB = new System.Windows.Forms.TabPage();
-            tempDBConfig1 = new DBADashGUI.DBFiles.TempDBConfig();
+            tempDBConfig1 = new DBADashGUI.DBFiles.TempDBConfigView();
             tabCustomChecks = new System.Windows.Forms.TabPage();
             customChecks1 = new DBADashGUI.Checks.CustomChecks();
             tabMetrics = new System.Windows.Forms.TabPage();
@@ -2845,7 +2845,7 @@ namespace DBADashGUI
         private Changes.DBConfiguration dbConfiguration1;
         private System.Windows.Forms.TabPage tabDBOptions;
         private System.Windows.Forms.TabPage tabTempDB;
-        private DBFiles.TempDBConfig tempDBConfig1;
+        private DBFiles.TempDBConfigView tempDBConfig1;
         private System.Windows.Forms.TabPage tabCustomChecks;
         private Checks.CustomChecks customChecks1;
         private System.Windows.Forms.TabPage tabMetrics;

@@ -662,9 +662,15 @@ namespace DBADashGUI
                 DataGridViewColumn column;
                 customReportResult.Columns.TryGetValue(dataColumn.ColumnName, out var colInfo);
 
+                var isBooleanAsText = dataColumn.DataType == typeof(bool) && (colInfo?.BooleanTrueValue != null || colInfo?.BooleanFalseValue != null);
+
                 if (colInfo?.Link != null)
                 {
                     column = new DataGridViewLinkColumn();
+                }
+                else if (isBooleanAsText)
+                {
+                    column = new DataGridViewTextBoxColumn { Tag = colInfo };
                 }
                 else if (dataColumn.DataType == typeof(bool))
                 {
@@ -700,6 +706,26 @@ namespace DBADashGUI
                 };
                 dgv.Columns.Add(column);
             }
+
+            // Re-registered on every call (rather than assuming a fresh grid) since some callers reuse the same
+            // DataGridView instance across refreshes (e.g. QueryStoreTopQueries); -= before += avoids stacking duplicates.
+            dgv.CellFormatting -= FormatBooleanAsTextCell;
+            dgv.CellFormatting += FormatBooleanAsTextCell;
+        }
+
+        /// <summary>
+        /// Renders a boolean cell using ColumnMetadata.BooleanTrueValue/BooleanFalseValue instead of the raw bool,
+        /// for columns opted into text display via AddColumns. Null values are left alone so the column's
+        /// DefaultCellStyle.NullValue (set from ColumnMetadata.NullValue in AddColumns) applies as normal.
+        /// </summary>
+        private static void FormatBooleanAsTextCell(object sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (sender is not DataGridView dgv) return;
+            if (e.ColumnIndex < 0 || e.ColumnIndex >= dgv.Columns.Count) return;
+            if (dgv.Columns[e.ColumnIndex].Tag is not ColumnMetadata colInfo) return;
+            if (e.Value is not bool boolValue) return;
+            e.Value = boolValue ? colInfo.BooleanTrueValue ?? bool.TrueString : colInfo.BooleanFalseValue ?? bool.FalseString;
+            e.FormattingApplied = true;
         }
 
         public static DateTime RoundDownToPreviousHour(this DateTime dateTime)

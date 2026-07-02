@@ -1,5 +1,5 @@
-CREATE PROC dbo.TempDBConfig_Get(
-	@InstanceIDs VARCHAR(MAX),
+CREATE PROC dbo.TempDBConfigReport_Get(
+	@InstanceIDs IDs READONLY,
     @ShowHidden BIT=1
 )
 AS
@@ -9,9 +9,13 @@ SELECT InstanceID,
        NumberOfDataFiles,
        MinimumRecommendedFiles,
        InsufficientFiles,
+       InsufficientFilesStatus,
        NumberOfLogFiles,
+       NumberOfLogFilesStatus,
        IsEvenlySized,
+       IsEvenlySizedStatus,
        IsEvenGrowth,
+       IsEvenGrowthStatus,
        TotalSizeMB,
        LogMB,
        FileSizeMB,
@@ -24,9 +28,12 @@ SELECT InstanceID,
        T1117,
        T1118,
        IsTraceFlagRequired,
-       IsTempDBMetadataMemoryOptimized
+       T1117Status,
+       T1118Status,
+       IsTempDBMetadataMemoryOptimized,
+       TempDBMemoryOptStatus
 FROM dbo.TempDBConfiguration T
 WHERE EXISTS(SELECT 1
-            FROM STRING_SPLIT(@InstanceIDs,',') ss
-            WHERE ss.value = T.InstanceID)
+            FROM @InstanceIDs ids
+            WHERE ids.ID = T.InstanceID)
 AND (T.ShowInSummary=1 OR @ShowHidden=1)
