@@ -125,7 +125,7 @@ namespace DBADashGUI
             tabFiles = new System.Windows.Forms.TabPage();
             dbFilesControl1 = new DBADashGUI.DBFiles.DBFilesView();
             tabLastGood = new System.Windows.Forms.TabPage();
-            lastGoodCheckDBControl1 = new DBADashGUI.LastGoodCheckDB.LastGoodCheckDBControl();
+            lastGoodCheckDBControl1 = new DBADashGUI.LastGoodCheckDB.LastGoodCheckDBView();
             tabDBADashErrorLog = new System.Windows.Forms.TabPage();
             collectionErrors1 = new DBADashGUI.CollectionDates.CollectionErrors();
             tabCollectionDates = new System.Windows.Forms.TabPage();
@@ -2786,7 +2786,7 @@ namespace DBADashGUI
         private System.Windows.Forms.TabPage tabFiles;
         private DBFiles.DBFilesView dbFilesControl1;
         private System.Windows.Forms.TabPage tabLastGood;
-        private LastGoodCheckDB.LastGoodCheckDBControl lastGoodCheckDBControl1;
+        private LastGoodCheckDB.LastGoodCheckDBView lastGoodCheckDBControl1;
         private System.Windows.Forms.TabPage tabDBADashErrorLog;
         private System.Windows.Forms.TabPage tabCollectionDates;
         private CollectionDates.CollectionDates collectionDates1;
