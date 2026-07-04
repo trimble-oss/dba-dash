@@ -192,7 +192,7 @@ namespace DBADashGUI
             lblSQLMonitoring = new System.Windows.Forms.Label();
             lblDBADash = new System.Windows.Forms.Label();
             tabIdentityColumns = new System.Windows.Forms.TabPage();
-            identityColumns1 = new DBADashGUI.Checks.IdentityColumns();
+            identityColumns1 = new DBADashGUI.Checks.IdentityColumnsView();
             tabOSLoadedModules = new System.Windows.Forms.TabPage();
             osLoadedModules1 = new DBADashGUI.Checks.OSLoadedModules();
             tabJobTimeline = new System.Windows.Forms.TabPage();
@@ -2900,7 +2900,7 @@ namespace DBADashGUI
         private System.Windows.Forms.ToolStripMenuItem tsTimeFilter;
         private System.Windows.Forms.ToolStripMenuItem tsDayOfWeek;
         private System.Windows.Forms.TabPage tabIdentityColumns;
-        private Checks.IdentityColumns identityColumns1;
+        private Checks.IdentityColumnsView identityColumns1;
         private System.Windows.Forms.TabPage tabOSLoadedModules;
         private Checks.OSLoadedModules osLoadedModules1;
         private System.Windows.Forms.ToolStrip tsTree;
