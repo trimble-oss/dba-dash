@@ -194,7 +194,7 @@ namespace DBADashGUI
             tabIdentityColumns = new System.Windows.Forms.TabPage();
             identityColumns1 = new DBADashGUI.Checks.IdentityColumnsView();
             tabOSLoadedModules = new System.Windows.Forms.TabPage();
-            osLoadedModules1 = new DBADashGUI.Checks.OSLoadedModules();
+            osLoadedModules1 = new DBADashGUI.Checks.OSLoadedModulesView();
             tabJobTimeline = new System.Windows.Forms.TabPage();
             jobTimeline1 = new DBADashGUI.AgentJobs.JobTimeline();
             tabDrivePerformance = new System.Windows.Forms.TabPage();
@@ -2902,7 +2902,7 @@ namespace DBADashGUI
         private System.Windows.Forms.TabPage tabIdentityColumns;
         private Checks.IdentityColumnsView identityColumns1;
         private System.Windows.Forms.TabPage tabOSLoadedModules;
-        private Checks.OSLoadedModules osLoadedModules1;
+        private Checks.OSLoadedModulesView osLoadedModules1;
         private System.Windows.Forms.ToolStrip tsTree;
         private System.Windows.Forms.ToolStripButton tsHome;
         private System.Windows.Forms.ToolStripButton tsBack;

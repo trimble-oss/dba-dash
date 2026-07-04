@@ -693,7 +693,9 @@
     <Build Include="dbo\Tables\DatabaseExtendedPropertiesHistory.sql" />
     <Build Include="dbo\Stored Procedures\DatabaseExtendedProperties_Upd.sql" />
     <Build Include="dbo\Stored Procedures\OSLoadedModuleSummary_Get.sql" />
+    <Build Include="dbo\Stored Procedures\OSLoadedModuleSummaryReport_Get.sql" />
     <Build Include="dbo\Stored Procedures\OSLoadedModules_Get.sql" />
+    <Build Include="dbo\Stored Procedures\OSLoadedModulesReport_Get.sql" />
     <Build Include="dbo\Stored Procedures\OSLoadedModulesStatus_Get.sql" />
     <Build Include="dbo\Stored Procedures\OSLoadedModulesStatus_Del.sql" />
     <Build Include="dbo\Stored Procedures\OSLoadedModulesStatus_Upd.sql" />
