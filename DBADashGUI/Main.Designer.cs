@@ -200,7 +200,7 @@ namespace DBADashGUI
             tabDrivePerformance = new System.Windows.Forms.TabPage();
             drivePerformance1 = new DBADashGUI.Performance.DrivePerformance();
             tabRunningJobs = new System.Windows.Forms.TabPage();
-            runningJobs1 = new DBADashGUI.AgentJobs.RunningJobs();
+            runningJobs1 = new DBADashGUI.AgentJobs.RunningJobsView();
             tabCustomReport = new System.Windows.Forms.TabPage();
             customReportView1 = new DBADashGUI.CustomReports.CustomReportView();
             tabTableSize = new System.Windows.Forms.TabPage();
@@ -2141,7 +2141,6 @@ namespace DBADashGUI
             runningJobs1.Dock = System.Windows.Forms.DockStyle.Fill;
             runningJobs1.Location = new System.Drawing.Point(1, 2);
             runningJobs1.Margin = new System.Windows.Forms.Padding(1);
-            runningJobs1.MinimumDuration = 60;
             runningJobs1.Name = "runningJobs1";
             runningJobs1.Size = new System.Drawing.Size(190, 53);
             runningJobs1.TabIndex = 0;
@@ -2930,7 +2929,7 @@ namespace DBADashGUI
         private System.Windows.Forms.ToolStripMenuItem darkToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem whiteToolStripMenuItem;
         private System.Windows.Forms.TabPage tabRunningJobs;
-        private AgentJobs.RunningJobs runningJobs1;
+        private AgentJobs.RunningJobsView runningJobs1;
         private System.Windows.Forms.TabPage tabCustomReport;
         private CustomReports.CustomReportView customReportView1;
         private System.Windows.Forms.TabPage tabTableSize;
