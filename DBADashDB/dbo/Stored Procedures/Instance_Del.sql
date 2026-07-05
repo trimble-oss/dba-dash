@@ -518,6 +518,9 @@ BEGIN
 	DELETE dbo.ResourceGovernorResourcePools 
 	WHERE InstanceID = @InstanceID
 
+	DELETE dbo.ScheduleInfo
+	WHERE InstanceID = @InstanceID
+
 	IF EXISTS(SELECT 1 
 			FROM dbo.InstanceMetadataHistory
 			WHERE InstanceID = @InstanceID)

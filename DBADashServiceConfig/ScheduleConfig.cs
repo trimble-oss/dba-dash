@@ -1,8 +1,6 @@
 ﻿using DBADash;
 using DBADashGUI.Theme;
 using DBADashService;
-using Humanizer;
-using Quartz;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -59,15 +57,17 @@ namespace DBADashServiceConfig
             {
                 foreach (var s in userSchedule)
                 {
-                    int idx = dgv.Rows.Add(Enum.GetName(typeof(CollectionType), s.Key), s.Value.Schedule, GetScheduleDescription(s.Value.Schedule), s.Value.RunOnServiceStart, false);
+                    if (s.Key == CollectionType.ScheduleInfo) continue; // Internal bookkeeping type - not user configurable
+                    int idx = dgv.Rows.Add(Enum.GetName(typeof(CollectionType), s.Key), s.Value.Schedule, CronParser.GetScheduleDescription(s.Value.Schedule, s.Value.RunOnServiceStart), s.Value.RunOnServiceStart, false);
                     FormatRow(idx);
                 }
             }
             foreach (var s in BaseSchedule)
             {
+                if (s.Key == CollectionType.ScheduleInfo) continue; // Internal bookkeeping type - not user configurable
                 if (userSchedule == null || !userSchedule.ContainsKey(s.Key))
                 {
-                    int idx = dgv.Rows.Add(Enum.GetName(typeof(CollectionType), s.Key), s.Value.Schedule, GetScheduleDescription(s.Value.Schedule), s.Value.RunOnServiceStart, true);
+                    int idx = dgv.Rows.Add(Enum.GetName(typeof(CollectionType), s.Key), s.Value.Schedule, CronParser.GetScheduleDescription(s.Value.Schedule, s.Value.RunOnServiceStart), s.Value.RunOnServiceStart, true);
                     FormatRow(idx);
                 }
             }
@@ -75,36 +75,14 @@ namespace DBADashServiceConfig
             this.ApplyTheme();
         }
 
-        public static string GetScheduleDescription(string schedule)
-        {
-            if (string.IsNullOrEmpty(schedule))
-            {
-                return "Disabled";
-            }
-            if (int.TryParse(schedule, out int seconds))
-            {
-                return TimeSpan.FromSeconds(seconds).Humanize(5);
-            }
-            else
-            {
-                if (CronExpression.IsValidExpression(schedule)) // Check expression is valid for Quartz
-                {
-                    return CronExpressionDescriptor.ExpressionDescriptor.GetDescription(schedule);
-                }
-                else
-                {
-                    throw new Exception("Invalid cron expression");
-                }
-            }
-        }
-
         private void Dgv_RowValidating(object sender, DataGridViewCellCancelEventArgs e)
         {
             var schedule = (string)dgv[1, e.RowIndex].Value;
+            var runOnServiceStart = Convert.ToBoolean(dgv.Rows[e.RowIndex].Cells["RunOnStart"].Value);
 
             try
             {
-                dgv[2, e.RowIndex].Value = GetScheduleDescription(schedule);
+                dgv[2, e.RowIndex].Value = CronParser.GetScheduleDescription(schedule, runOnServiceStart);
             }
             catch (Exception ex)
             {
@@ -153,7 +131,7 @@ namespace DBADashServiceConfig
                 row.Cells["Schedule"].Value = BaseSchedule[collectType].Schedule;
                 row.Cells["RunOnStart"].Value = BaseSchedule[collectType].RunOnServiceStart;
             }
-            row.Cells["ScheduleDescription"].Value = GetScheduleDescription(Convert.ToString(row.Cells["Schedule"].Value));
+            row.Cells["ScheduleDescription"].Value = CronParser.GetScheduleDescription(Convert.ToString(row.Cells["Schedule"].Value), Convert.ToBoolean(row.Cells["RunOnStart"].Value));
         }
 
  

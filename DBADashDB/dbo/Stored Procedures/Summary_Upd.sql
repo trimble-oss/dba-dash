@@ -109,7 +109,7 @@ SELECT InstanceID,
 	MIN(SnapshotDate) AS OldestSnapshot
 INTO #CollectionStatus
 FROM dbo.CollectionDatesStatus C
-WHERE Status<>3
+WHERE Status NOT IN (3,8) /* Exclude NA and Disabled from the rollup */
 GROUP BY InstanceID
 
 SELECT InstanceID,

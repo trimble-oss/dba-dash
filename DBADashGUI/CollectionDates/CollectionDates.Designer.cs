@@ -44,18 +44,25 @@ namespace DBADashGUI.CollectionDates
             tsTriggerSelected = new System.Windows.Forms.ToolStripMenuItem();
             tsTriggerAll = new System.Windows.Forms.ToolStripMenuItem();
             dgvCollectionDates = new DBADashDataGridView();
+            statusStrip1 = new System.Windows.Forms.StatusStrip();
+            lblStatus = new System.Windows.Forms.ToolStripStatusLabel();
             Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             Reference = new System.Windows.Forms.DataGridViewTextBoxColumn();
             WarningThreshold = new System.Windows.Forms.DataGridViewTextBoxColumn();
             CriticalThreshold = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            IsScheduleThreshold = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             SnapshotAge = new System.Windows.Forms.DataGridViewTextBoxColumn();
             SnapshotDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            NextFireTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            ScheduleLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            CronExpression = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            ScheduleDescription = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            RunOnServiceStart = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            MaxIntervalMinutes = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ConfiguredLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
             Configure = new System.Windows.Forms.DataGridViewLinkColumn();
             ConfigureRoot = new System.Windows.Forms.DataGridViewLinkColumn();
             colRun = new System.Windows.Forms.DataGridViewLinkColumn();
-            statusStrip1 = new System.Windows.Forms.StatusStrip();
-            lblStatus = new System.Windows.Forms.ToolStripStatusLabel();
             toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvCollectionDates).BeginInit();
             statusStrip1.SuspendLayout();
@@ -167,7 +174,7 @@ namespace DBADashGUI.CollectionDates
             dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
             dgvCollectionDates.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             dgvCollectionDates.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvCollectionDates.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { Instance, Reference, WarningThreshold, CriticalThreshold, SnapshotAge, SnapshotDate, ConfiguredLevel, Configure, ConfigureRoot, colRun });
+            dgvCollectionDates.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { Instance, Reference, WarningThreshold, CriticalThreshold, IsScheduleThreshold, SnapshotAge, SnapshotDate, NextFireTime, ScheduleLevel, CronExpression, ScheduleDescription, RunOnServiceStart, MaxIntervalMinutes, ConfiguredLevel, Configure, ConfigureRoot, colRun });
             dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle2.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
             dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 9F);
@@ -189,103 +196,6 @@ namespace DBADashGUI.CollectionDates
             dgvCollectionDates.CellContentClick += Dgv_CellContentClick;
             dgvCollectionDates.RowsAdded += Dgv_RowsAdded;
             // 
-            // Instance
-            // 
-            Instance.DataPropertyName = "InstanceDisplayName";
-            Instance.HeaderText = "Instance";
-            Instance.MinimumWidth = 6;
-            Instance.Name = "Instance";
-            Instance.ReadOnly = true;
-            Instance.Width = 90;
-            // 
-            // Reference
-            // 
-            Reference.DataPropertyName = "Reference";
-            Reference.HeaderText = "Reference";
-            Reference.MinimumWidth = 6;
-            Reference.Name = "Reference";
-            Reference.ReadOnly = true;
-            Reference.Width = 103;
-            // 
-            // WarningThreshold
-            // 
-            WarningThreshold.DataPropertyName = "WarningThreshold";
-            WarningThreshold.HeaderText = "Warning Threshold";
-            WarningThreshold.MinimumWidth = 6;
-            WarningThreshold.Name = "WarningThreshold";
-            WarningThreshold.ReadOnly = true;
-            WarningThreshold.Width = 154;
-            // 
-            // CriticalThreshold
-            // 
-            CriticalThreshold.DataPropertyName = "CriticalThreshold";
-            CriticalThreshold.HeaderText = "Critical Threshold";
-            CriticalThreshold.MinimumWidth = 6;
-            CriticalThreshold.Name = "CriticalThreshold";
-            CriticalThreshold.ReadOnly = true;
-            CriticalThreshold.Width = 135;
-            // 
-            // SnapshotAge
-            // 
-            SnapshotAge.DataPropertyName = "HumanSnapshotAge";
-            SnapshotAge.HeaderText = "Snapshot Age";
-            SnapshotAge.MinimumWidth = 6;
-            SnapshotAge.Name = "SnapshotAge";
-            SnapshotAge.ReadOnly = true;
-            SnapshotAge.Width = 122;
-            // 
-            // SnapshotDate
-            // 
-            SnapshotDate.DataPropertyName = "SnapshotDate";
-            SnapshotDate.HeaderText = "Snapshot Date";
-            SnapshotDate.MinimumWidth = 6;
-            SnapshotDate.Name = "SnapshotDate";
-            SnapshotDate.ReadOnly = true;
-            SnapshotDate.Width = 120;
-            // 
-            // ConfiguredLevel
-            // 
-            ConfiguredLevel.DataPropertyName = "ConfiguredLevel";
-            ConfiguredLevel.HeaderText = "Configured Level";
-            ConfiguredLevel.MinimumWidth = 6;
-            ConfiguredLevel.Name = "ConfiguredLevel";
-            ConfiguredLevel.ReadOnly = true;
-            ConfiguredLevel.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            ConfiguredLevel.Width = 132;
-            // 
-            // Configure
-            // 
-            Configure.HeaderText = "Configure Instance";
-            Configure.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            Configure.MinimumWidth = 6;
-            Configure.Name = "Configure";
-            Configure.ReadOnly = true;
-            Configure.Text = "Configure Instance";
-            Configure.UseColumnTextForLinkValue = true;
-            Configure.Width = 119;
-            // 
-            // ConfigureRoot
-            // 
-            ConfigureRoot.HeaderText = "Configure Root";
-            ConfigureRoot.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            ConfigureRoot.MinimumWidth = 6;
-            ConfigureRoot.Name = "ConfigureRoot";
-            ConfigureRoot.ReadOnly = true;
-            ConfigureRoot.Text = "Configure Root";
-            ConfigureRoot.UseColumnTextForLinkValue = true;
-            ConfigureRoot.Width = 98;
-            // 
-            // colRun
-            // 
-            colRun.HeaderText = "Run";
-            colRun.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            colRun.MinimumWidth = 6;
-            colRun.Name = "colRun";
-            colRun.ReadOnly = true;
-            colRun.Text = "Run Now";
-            colRun.UseColumnTextForLinkValue = true;
-            colRun.Width = 125;
-            // 
             // statusStrip1
             // 
             statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
@@ -301,6 +211,183 @@ namespace DBADashGUI.CollectionDates
             lblStatus.Name = "lblStatus";
             lblStatus.Size = new System.Drawing.Size(50, 20);
             lblStatus.Text = "Ready";
+            // 
+            // Instance
+            // 
+            Instance.DataPropertyName = "InstanceDisplayName";
+            Instance.HeaderText = "Instance";
+            Instance.MinimumWidth = 6;
+            Instance.Name = "Instance";
+            Instance.ReadOnly = true;
+            Instance.ToolTipText = "The name of the instance";
+            Instance.Width = 90;
+            // 
+            // Reference
+            // 
+            Reference.DataPropertyName = "Reference";
+            Reference.HeaderText = "Reference";
+            Reference.MinimumWidth = 6;
+            Reference.Name = "Reference";
+            Reference.ReadOnly = true;
+            Reference.ToolTipText = "The name of the collection";
+            Reference.Width = 103;
+            // 
+            // WarningThreshold
+            // 
+            WarningThreshold.DataPropertyName = "WarningThreshold";
+            WarningThreshold.HeaderText = "Warning Threshold";
+            WarningThreshold.MinimumWidth = 6;
+            WarningThreshold.Name = "WarningThreshold";
+            WarningThreshold.ReadOnly = true;
+            WarningThreshold.ToolTipText = "If the collection hasn't run in this number of minutes, it will be highlighted in yellow";
+            WarningThreshold.Width = 154;
+            // 
+            // CriticalThreshold
+            // 
+            CriticalThreshold.DataPropertyName = "CriticalThreshold";
+            CriticalThreshold.HeaderText = "Critical Threshold";
+            CriticalThreshold.MinimumWidth = 6;
+            CriticalThreshold.Name = "CriticalThreshold";
+            CriticalThreshold.ReadOnly = true;
+            CriticalThreshold.ToolTipText = "If the collection hasn't run in this number of minutes, it will be highlighted in red";
+            CriticalThreshold.Width = 135;
+            // 
+            // IsScheduleThreshold
+            // 
+            IsScheduleThreshold.DataPropertyName = "IsScheduleThreshold";
+            IsScheduleThreshold.HeaderText = "Scheduled Threshold";
+            IsScheduleThreshold.MinimumWidth = 6;
+            IsScheduleThreshold.Name = "IsScheduleThreshold";
+            IsScheduleThreshold.ReadOnly = true;
+            IsScheduleThreshold.ToolTipText = "Checked when the thresholds shown are computed from the collection schedule rather than explicitly configured";
+            IsScheduleThreshold.Width = 110;
+            // 
+            // SnapshotAge
+            // 
+            SnapshotAge.DataPropertyName = "HumanSnapshotAge";
+            SnapshotAge.HeaderText = "Snapshot Age";
+            SnapshotAge.MinimumWidth = 6;
+            SnapshotAge.Name = "SnapshotAge";
+            SnapshotAge.ReadOnly = true;
+            SnapshotAge.ToolTipText = "How long since the collection last ran (at last report refresh)";
+            SnapshotAge.Width = 122;
+            // 
+            // SnapshotDate
+            // 
+            SnapshotDate.DataPropertyName = "SnapshotDate";
+            SnapshotDate.HeaderText = "Snapshot Date";
+            SnapshotDate.MinimumWidth = 6;
+            SnapshotDate.Name = "SnapshotDate";
+            SnapshotDate.ReadOnly = true;
+            SnapshotDate.ToolTipText = "The date/time the collection last ran";
+            SnapshotDate.Width = 120;
+            // 
+            // NextFireTime
+            // 
+            NextFireTime.DataPropertyName = "NextFireTime";
+            NextFireTime.HeaderText = "Next Fire Time";
+            NextFireTime.MinimumWidth = 6;
+            NextFireTime.Name = "NextFireTime";
+            NextFireTime.ReadOnly = true;
+            NextFireTime.ToolTipText = "The time the collection is next scheduled to run, calculated from the schedule (cron expression or interval)";
+            NextFireTime.Width = 120;
+            // 
+            // ScheduleLevel
+            // 
+            ScheduleLevel.DataPropertyName = "ScheduleLevel";
+            ScheduleLevel.HeaderText = "Schedule Level";
+            ScheduleLevel.MinimumWidth = 6;
+            ScheduleLevel.Name = "ScheduleLevel";
+            ScheduleLevel.ReadOnly = true;
+            ScheduleLevel.ToolTipText = "Indicates whether the schedule is configured at service level or customized for this instance. Schedules are configured using the service configuration tool.";
+            ScheduleLevel.Width = 110;
+            // 
+            // CronExpression
+            // 
+            CronExpression.DataPropertyName = "Schedule";
+            CronExpression.HeaderText = "Schedule";
+            CronExpression.MinimumWidth = 6;
+            CronExpression.Name = "CronExpression";
+            CronExpression.ReadOnly = true;
+            CronExpression.ToolTipText = "Cron expression or interval (in seconds) used to calculate the frequency of the collection";
+            CronExpression.Width = 130;
+            // 
+            // ScheduleDescription
+            // 
+            ScheduleDescription.DataPropertyName = "ScheduleDescription";
+            ScheduleDescription.HeaderText = "Schedule Description";
+            ScheduleDescription.MinimumWidth = 6;
+            ScheduleDescription.Name = "ScheduleDescription";
+            ScheduleDescription.ReadOnly = true;
+            ScheduleDescription.ToolTipText = "Description of the collection schedule calculated from the cron expression";
+            ScheduleDescription.Width = 160;
+            // 
+            // RunOnServiceStart
+            // 
+            RunOnServiceStart.DataPropertyName = "RunOnServiceStart";
+            RunOnServiceStart.HeaderText = "Run On Service Start";
+            RunOnServiceStart.MinimumWidth = 6;
+            RunOnServiceStart.Name = "RunOnServiceStart";
+            RunOnServiceStart.ReadOnly = true;
+            RunOnServiceStart.ToolTipText = "Indicates whether the collection runs when the service is started instead of waiting for the next scheduled execution";
+            RunOnServiceStart.Width = 130;
+            // 
+            // MaxIntervalMinutes
+            // 
+            MaxIntervalMinutes.DataPropertyName = "MaxIntervalMinutes";
+            MaxIntervalMinutes.HeaderText = "Max Interval (mins)";
+            MaxIntervalMinutes.MinimumWidth = 6;
+            MaxIntervalMinutes.Name = "MaxIntervalMinutes";
+            MaxIntervalMinutes.ReadOnly = true;
+            MaxIntervalMinutes.ToolTipText = resources.GetString("MaxIntervalMinutes.ToolTipText");
+            MaxIntervalMinutes.Width = 140;
+            // 
+            // ConfiguredLevel
+            // 
+            ConfiguredLevel.DataPropertyName = "ConfiguredLevel";
+            ConfiguredLevel.HeaderText = "Configured Level";
+            ConfiguredLevel.MinimumWidth = 6;
+            ConfiguredLevel.Name = "ConfiguredLevel";
+            ConfiguredLevel.ReadOnly = true;
+            ConfiguredLevel.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            ConfiguredLevel.ToolTipText = "Indicates whether the warning/critical thresholds use the application defaults, or have been overridden at root or instance level.";
+            ConfiguredLevel.Width = 132;
+            // 
+            // Configure
+            // 
+            Configure.HeaderText = "Configure Instance";
+            Configure.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            Configure.MinimumWidth = 6;
+            Configure.Name = "Configure";
+            Configure.ReadOnly = true;
+            Configure.Text = "Configure Instance";
+            Configure.ToolTipText = "Configure the warning/critical thresholds for this collection at the instance level. The collection is highlighted when it hasn't run successfully within the specified period of time.";
+            Configure.UseColumnTextForLinkValue = true;
+            Configure.Width = 119;
+            // 
+            // ConfigureRoot
+            // 
+            ConfigureRoot.HeaderText = "Configure Root";
+            ConfigureRoot.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            ConfigureRoot.MinimumWidth = 6;
+            ConfigureRoot.Name = "ConfigureRoot";
+            ConfigureRoot.ReadOnly = true;
+            ConfigureRoot.Text = "Configure Root";
+            ConfigureRoot.ToolTipText = "Configure the warning/critical thresholds for this collection at the root level, applying to all instances. The collection is highlighted when it hasn't run successfully within the specified period of time.";
+            ConfigureRoot.UseColumnTextForLinkValue = true;
+            ConfigureRoot.Width = 98;
+            // 
+            // colRun
+            // 
+            colRun.HeaderText = "Run";
+            colRun.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            colRun.MinimumWidth = 6;
+            colRun.Name = "colRun";
+            colRun.ReadOnly = true;
+            colRun.Text = "Run Now";
+            colRun.ToolTipText = "Trigger the collection to run now";
+            colRun.UseColumnTextForLinkValue = true;
+            colRun.Width = 125;
             // 
             // CollectionDates
             // 
@@ -329,16 +416,6 @@ namespace DBADashGUI.CollectionDates
         private System.Windows.Forms.ToolStripButton tsCopy;
         private System.Windows.Forms.ToolStripButton tsExcel;
         private StatusFilterToolStrip statusFilterToolStrip1;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Instance;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Reference;
-        private System.Windows.Forms.DataGridViewTextBoxColumn WarningThreshold;
-        private System.Windows.Forms.DataGridViewTextBoxColumn CriticalThreshold;
-        private System.Windows.Forms.DataGridViewTextBoxColumn SnapshotAge;
-        private System.Windows.Forms.DataGridViewTextBoxColumn SnapshotDate;
-        private System.Windows.Forms.DataGridViewTextBoxColumn ConfiguredLevel;
-        private System.Windows.Forms.DataGridViewLinkColumn Configure;
-        private System.Windows.Forms.DataGridViewLinkColumn ConfigureRoot;
-        private System.Windows.Forms.DataGridViewLinkColumn colRun;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripButton tsClearFilter;
         private System.Windows.Forms.ToolStripDropDownButton tsTriggerMenu;
@@ -346,5 +423,22 @@ namespace DBADashGUI.CollectionDates
         private System.Windows.Forms.ToolStripMenuItem tsTriggerSelected;
         private System.Windows.Forms.ToolStripMenuItem tsTriggerAll;
         private System.Windows.Forms.ToolStripStatusLabel lblStatus;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Instance;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Reference;
+        private System.Windows.Forms.DataGridViewTextBoxColumn WarningThreshold;
+        private System.Windows.Forms.DataGridViewTextBoxColumn CriticalThreshold;
+        private System.Windows.Forms.DataGridViewCheckBoxColumn IsScheduleThreshold;
+        private System.Windows.Forms.DataGridViewTextBoxColumn SnapshotAge;
+        private System.Windows.Forms.DataGridViewTextBoxColumn SnapshotDate;
+        private System.Windows.Forms.DataGridViewTextBoxColumn NextFireTime;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ScheduleLevel;
+        private System.Windows.Forms.DataGridViewTextBoxColumn CronExpression;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ScheduleDescription;
+        private System.Windows.Forms.DataGridViewCheckBoxColumn RunOnServiceStart;
+        private System.Windows.Forms.DataGridViewTextBoxColumn MaxIntervalMinutes;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ConfiguredLevel;
+        private System.Windows.Forms.DataGridViewLinkColumn Configure;
+        private System.Windows.Forms.DataGridViewLinkColumn ConfigureRoot;
+        private System.Windows.Forms.DataGridViewLinkColumn colRun;
     }
 }

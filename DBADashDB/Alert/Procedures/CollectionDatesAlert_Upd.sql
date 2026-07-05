@@ -51,10 +51,11 @@ OUTER APPLY(SELECT 	NULLIF(TRY_CAST(JSON_VALUE(R.Details,'$.Reference') AS VARCH
 					ISNULL(TRY_CAST(JSON_VALUE(R.Details,'$.UseCriticalStatus') AS BIT),0) AS UseCriticalStatus
 		) AS Calc
 CROSS APPLY Alert.ApplicableInstances_Get(R.ApplyToTagID,R.ApplyToInstanceID,R.AlertKey,R.ApplyToHidden) I
-JOIN dbo.CollectionDatesStatus CDS ON CDS.InstanceID = I.InstanceID 
+JOIN dbo.CollectionDatesStatus CDS ON CDS.InstanceID = I.InstanceID
 		AND (CDS.Status=1 OR Calc.UseCriticalStatus=0)
 		AND (CDS.SnapshotAge >= R.Threshold OR R.Threshold IS NULL)
 		AND (CDS.Reference = Calc.Reference OR Calc.Reference IS NULL)
+		AND CDS.Status <> 8 /* Never alert on collection types disabled in the schedule */
 WHERE R.Type = @Type
 AND R.IsActive=1
 

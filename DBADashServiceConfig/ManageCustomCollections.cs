@@ -108,7 +108,7 @@ namespace DBADashServiceConfig
 
             try
             {
-                lnkConfigureSchedule.Text = ScheduleConfig.GetScheduleDescription(schedule);
+                lnkConfigureSchedule.Text = CronParser.GetScheduleDescription(schedule, chkRunOnStart.Checked);
             }
             catch
             {
@@ -161,7 +161,7 @@ ORDER BY ProcName", cn);
             dgvCustom.Rows.Clear();
             foreach (var kvp in CustomCollections)
             {
-                dgvCustom.Rows.Add(kvp.Key, kvp.Value.ProcedureName, kvp.Value.Schedule, GetScheduleDescription(kvp.Value.Schedule),
+                dgvCustom.Rows.Add(kvp.Key, kvp.Value.ProcedureName, kvp.Value.Schedule, CronParser.GetScheduleDescriptionSafe(kvp.Value.Schedule, "Invalid Schedule", kvp.Value.RunOnServiceStart),
                     kvp.Value.CommandTimeout, kvp.Value.RunOnServiceStart);
             }
             dgvCustom.ApplyTheme();
@@ -572,10 +572,10 @@ ORDER BY ProcName", cn);
         private void CopyRecord(string name)
         {
             cboProcedureName.Text = CustomCollections[name].ProcedureName;
+            chkRunOnStart.Checked = CustomCollections[name].RunOnServiceStart;
             Schedule = CustomCollections[name].Schedule;
             chkDefaultTimeout.Checked = CustomCollections[name].CommandTimeout == null;
             numTimeout.Value = CustomCollections[name].CommandTimeout == null ? numTimeout.Value : Convert.ToDecimal(CustomCollections[name].CommandTimeout);
-            chkRunOnStart.Checked = CustomCollections[name].RunOnServiceStart;
             txtName.Text = name;
             if (!CustomCollections.TryGetValue(name, out var value)) return;
             KeyValuePair<string, CustomCollection> collection = new(name, value);
@@ -587,30 +587,19 @@ ORDER BY ProcName", cn);
         {
             if (collection.Value == null) return;
             cboProcedureName.Text = collection.Value.ProcedureName;
+            chkRunOnStart.Checked = collection.Value.RunOnServiceStart;
             Schedule = collection.Value.Schedule;
             chkDefaultTimeout.Checked = collection.Value.CommandTimeout == null;
             numTimeout.Value = collection.Value.CommandTimeout == null ? numTimeout.Value : Convert.ToDecimal(collection.Value.CommandTimeout);
-            chkRunOnStart.Checked = collection.Value.RunOnServiceStart;
             txtName.Text = collection.Key;
-        }
-
-        private static string GetScheduleDescription(string schedule)
-        {
-            try
-            {
-                return ScheduleConfig.GetScheduleDescription(schedule);
-            }
-            catch
-            {
-                return string.IsNullOrWhiteSpace(schedule) ? "Disabled" : "Invalid Schedule";
-            }
         }
 
         private void RefreshScheduleDescription(int rowIndex)
         {
             if (rowIndex < 0 || rowIndex >= dgvCustom.Rows.Count) return;
             var row = dgvCustom.Rows[rowIndex];
-            row.Cells["ScheduleDescription"].Value = GetScheduleDescription(Convert.ToString(row.Cells["Schedule"].Value));
+            var runOnServiceStart = Convert.ToBoolean(row.Cells["RunOnServiceStart"].Value);
+            row.Cells["ScheduleDescription"].Value = CronParser.GetScheduleDescriptionSafe(Convert.ToString(row.Cells["Schedule"].Value), "Invalid Schedule", runOnServiceStart);
         }
 
         private void OpenScheduleBuilder(int rowIndex)
@@ -628,7 +617,7 @@ ORDER BY ProcName", cn);
             if (dlg.ShowDialog(this) == DialogResult.OK)
             {
                 row.Cells["Schedule"].Value = dlg.CronExpression ?? string.Empty;
-                row.Cells["ScheduleDescription"].Value = GetScheduleDescription(Convert.ToString(row.Cells["Schedule"].Value));
+                RefreshScheduleDescription(rowIndex);
                 var name = Convert.ToString(row.Cells["Name"].Value);
                 if (!string.IsNullOrWhiteSpace(name) && CustomCollections.ContainsKey(name))
                 {
@@ -670,7 +659,7 @@ ORDER BY ProcName", cn);
             {
                 try
                 {
-                    ScheduleConfig.GetScheduleDescription(schedule);
+                    CronParser.GetScheduleDescription(schedule);
                 }
                 catch
                 {

@@ -62,7 +62,29 @@ namespace DBADashService
 
             var dequeueLatencyMs = EnqueueSW.ElapsedMilliseconds;
             var collectJobs = Types.Contains(CollectionType.Jobs);
-            var types = collectJobs ? Types.Where(t => t != CollectionType.Jobs).ToArray() : Types;
+            var reportSchedule = Types.Contains(CollectionType.ScheduleInfo);
+            var types = (collectJobs || reportSchedule)
+                ? Types.Where(t => t != CollectionType.Jobs && t != CollectionType.ScheduleInfo).ToArray()
+                : Types;
+
+            if (reportSchedule)
+            {
+                // Reported independently of the rest of the collection below - schedule info comes entirely
+                // from the service's own config and never needs to query the instance, so it must not be
+                // blocked by the instance being offline (see ScheduleInfoReporter).
+                try
+                {
+                    var effectiveSchedule = Source.CollectionSchedules is { Count: > 0 }
+                        ? CollectionSchedules.Combine(config.GetSchedules(), Source.CollectionSchedules)
+                        : config.GetSchedules();
+                    var effectiveCustomCollections = Source.CustomCollections.CombineCollections(config.CustomCollections);
+                    await ScheduleInfoReporter.ReportAsync(Source, effectiveSchedule, effectiveCustomCollections, config);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Error reporting schedule info for instance {instance}", Source.SourceConnection.ConnectionForPrint);
+                }
+            }
 
             try
             {

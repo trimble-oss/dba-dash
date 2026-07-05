@@ -20,6 +20,8 @@ namespace DBADashGUI.Theme
             LinkColor = DashColors.BluePale;
             NotApplicableBackColor = DashColors.Gray9;
             NotApplicableForeColor = DashColors.White;
+            DisabledBackColor = DashColors.Gray7;
+            DisabledForeColor = DashColors.White;
             SearchBackColor = DashColors.Gray9;
             TimeZoneBackColor = DashColors.Gray9;
             TimeZoneForeColor = DashColors.White;

@@ -13,7 +13,8 @@ namespace DBADashGUI
             OK = 4,
             Acknowledged = 5,
             WarningLow = 6,
-            Information = 7
+            Information = 7,
+            Disabled = 8
         }
 
         public static Color GetStatusBackColor(DBADashStatusEnum status)
@@ -27,6 +28,7 @@ namespace DBADashGUI
                 DBADashStatusEnum.Acknowledged => DBADashUser.SelectedTheme.AcknowledgedBackColor,
                 DBADashStatusEnum.WarningLow => DBADashUser.SelectedTheme.WarningLowBackColor,
                 DBADashStatusEnum.Information => DBADashUser.SelectedTheme.InformationBackColor,
+                DBADashStatusEnum.Disabled => DBADashUser.SelectedTheme.DisabledBackColor,
                 _ => DashColors.RedPale
             };
         }
@@ -42,6 +44,7 @@ namespace DBADashGUI
                 DBADashStatusEnum.Acknowledged => DBADashUser.SelectedTheme.AcknowledgedForeColor,
                 DBADashStatusEnum.WarningLow => DBADashUser.SelectedTheme.WarningLowForeColor,
                 DBADashStatusEnum.Information => DBADashUser.SelectedTheme.InformationForeColor,
+                DBADashStatusEnum.Disabled => DBADashUser.SelectedTheme.DisabledForeColor,
                 _ => DashColors.RedPale
             };
         }

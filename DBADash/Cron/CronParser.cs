@@ -1,3 +1,5 @@
+using Humanizer;
+using Quartz;
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -469,6 +471,111 @@ namespace DBADash
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Compute the maximum number of minutes that can elapse between firings for a recognized cron
+        /// expression - used to size an auto-threshold that tolerates the longest normal gap (e.g. a
+        /// day-of-week restriction) rather than the average, which would false-alarm after the longest
+        /// legitimate gap.
+        /// </summary>
+        /// <param name="cron">Cron expression to evaluate.</param>
+        /// <param name="minutes">Maximum interval in minutes when the expression is recognized; otherwise 0.</param>
+        /// <returns>True if a maximum interval could be derived; false for unrecognized/custom expressions.</returns>
+        public static bool TryGetMaxIntervalMinutes(string cron, out double minutes)
+        {
+            minutes = 0;
+            if (int.TryParse(cron, out var seconds))
+            {
+                // Integer-seconds interval schedule (e.g. "30") rather than a cron expression -
+                // same format GetScheduleDescription already recognizes.
+                minutes = seconds / 60.0;
+                return minutes > 0;
+            }
+            if (!TryParseCronState(cron, out var state)) return false;
+
+            var hasDayRestriction = state.SelectedDays is { Length: > 0 };
+            // dayGap is the largest number of days between consecutive active days (cyclic); 1 when every day is active.
+            var dayGap = hasDayRestriction ? MaxDayGap(state.SelectedDays) : 1;
+
+            minutes = state.Mode switch
+            {
+                FrequencyMode.EveryNSeconds => (dayGap - 1) * 1440.0 + state.Interval / 60.0,
+                FrequencyMode.EveryNMinutes => (dayGap - 1) * 1440.0 + state.Interval,
+                FrequencyMode.EveryNHours => (dayGap - 1) * 1440.0 + state.Interval * 60.0,
+                FrequencyMode.Daily => 1440.0,
+                FrequencyMode.Weekly => dayGap * 1440.0,
+                _ => 0
+            };
+            return minutes > 0;
+        }
+
+        /// <summary>
+        /// Largest cyclic gap in days between consecutive entries in a set of selected days (e.g. MON+WED
+        /// selected returns 5, the Wed-to-Mon gap). Returns 1 when every day is selected (no real restriction).
+        /// </summary>
+        private static int MaxDayGap(string[] selectedDays)
+        {
+            var names = DayNames();
+            var indices = selectedDays
+                .Select(d => Array.IndexOf(names, d.Trim().ToUpperInvariant()))
+                .Where(i => i >= 0)
+                .Distinct()
+                .OrderBy(i => i)
+                .ToArray();
+            if (indices.Length == 0) return 1;
+
+            var maxGap = 0;
+            for (var k = 0; k < indices.Length; k++)
+            {
+                var gap = indices[(k + 1) % indices.Length] - indices[k];
+                if (gap <= 0) gap += 7;
+                maxGap = Math.Max(maxGap, gap);
+            }
+            return maxGap;
+        }
+
+        /// <summary>
+        /// Build a human-readable description of a schedule (cron expression, integer-seconds interval, or empty/disabled).
+        /// </summary>
+        /// <param name="schedule">Cron expression, integer seconds interval, or empty string for disabled.</param>
+        /// <param name="runOnServiceStart">
+        /// When <paramref name="schedule"/> is empty, distinguishes a collection that only ever runs once at
+        /// service start from one that's genuinely disabled - both are represented the same way (empty
+        /// schedule) but "Disabled" would be misleading for the former.
+        /// </param>
+        /// <exception cref="ArgumentException">Thrown when the schedule is a non-empty string that isn't a valid cron expression.</exception>
+        public static string GetScheduleDescription(string schedule, bool runOnServiceStart = false)
+        {
+            if (string.IsNullOrEmpty(schedule))
+            {
+                return runOnServiceStart ? "Startup Only" : "Disabled";
+            }
+            if (int.TryParse(schedule, out int seconds))
+            {
+                return TimeSpan.FromSeconds(seconds).Humanize(5);
+            }
+            if (!CronExpression.IsValidExpression(schedule))
+            {
+                throw new ArgumentException("Invalid cron expression", nameof(schedule));
+            }
+            return CronExpressionDescriptor.ExpressionDescriptor.GetDescription(schedule);
+        }
+
+        /// <summary>
+        /// <see cref="GetScheduleDescription"/>, falling back to <paramref name="invalidFallback"/> (or the
+        /// raw schedule string when not supplied) if the schedule can't be parsed as a cron expression.
+        /// </summary>
+        public static string GetScheduleDescriptionSafe(string schedule, string invalidFallback = null, bool runOnServiceStart = false)
+        {
+            try
+            {
+                return GetScheduleDescription(schedule, runOnServiceStart);
+            }
+            catch (ArgumentException)
+            {
+                return invalidFallback ?? schedule;
+            }
         }
 
         /// <summary>

@@ -83,7 +83,8 @@ namespace DBADash
         InstanceMetadata,
         FailedLogins,
         ResourceGovernorWorkloadGroups,
-        ResourceGovernorResourcePools
+        ResourceGovernorResourcePools,
+        ScheduleInfo
     }
 
     public enum HostPlatform
@@ -705,6 +706,12 @@ namespace DBADash
             }
             else if (collectionType == CollectionType.InstanceMetadata && (IsAzureDB || IsRDS || noWMI))
             {
+                return false;
+            }
+            else if (collectionType == CollectionType.ScheduleInfo)
+            {
+                // Reported independently of the monitored instance (see ScheduleInfoReporter) - should
+                // never reach the normal per-instance collection pipeline.
                 return false;
             }
             if (collectionType == CollectionType.ResourceGovernorWorkloadGroups || collectionType == CollectionType.ResourceGovernorResourcePools)

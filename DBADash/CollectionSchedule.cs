@@ -73,6 +73,8 @@ namespace DBADashService
 
                             {CollectionType.TableSize, new CollectionSchedule() {Schedule = disabled, RunOnServiceStart = false} },
                             {CollectionType.FailedLogins, new CollectionSchedule() {Schedule = disabled, RunOnServiceStart = false} },
+
+                            {CollectionType.ScheduleInfo, new CollectionSchedule() {Schedule = disabled, RunOnServiceStart = true} },
         };
 
         public static readonly CollectionSchedules DefaultSchedules
