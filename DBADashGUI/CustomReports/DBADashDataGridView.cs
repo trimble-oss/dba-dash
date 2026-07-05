@@ -155,6 +155,38 @@ namespace DBADashGUI.CustomReports
                 $"Grid Data Error on `{e.Context.ToString()}`: {e.Exception}";
         }
 
+        private const int WM_MOUSEHWHEEL = 0x020E;
+        private const int WheelDelta = 120;
+        private const int HorizontalScrollPixelsPerNotch = 40;
+
+        // DataGridView doesn't natively handle the horizontal wheel/tilt-wheel message (WM_MOUSEHWHEEL),
+        // so horizontal scrolling via a mouse's tilt wheel or a trackpad's horizontal swipe does nothing without this.
+        // Only mark the message as handled when a scroll was actually applied so it still bubbles to the
+        // parent chain (standard WM_MOUSEHWHEEL behavior) when this grid has nothing to scroll.
+        protected override void WndProc(ref Message m)
+        {
+            if (m.Msg == WM_MOUSEHWHEEL)
+            {
+                var delta = (short)((m.WParam.ToInt64() >> 16) & 0xFFFF);
+                if (ScrollHorizontal(delta))
+                {
+                    m.Result = IntPtr.Zero;
+                    return;
+                }
+            }
+            base.WndProc(ref m);
+        }
+
+        // HorizontalScrollingOffset already clamps to the valid range internally, so there's no need
+        // to pre-compute the usable viewport width here.
+        private bool ScrollHorizontal(short delta)
+        {
+            var previousOffset = HorizontalScrollingOffset;
+            var pixels = delta * HorizontalScrollPixelsPerNotch / WheelDelta;
+            HorizontalScrollingOffset = Math.Max(0, previousOffset + pixels);
+            return HorizontalScrollingOffset != previousOffset;
+        }
+
         private static void Dgv_ColumnsAdded(object sender, DataGridViewColumnEventArgs e)
         {
             e.Column.ApplyTheme();
