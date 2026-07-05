@@ -153,6 +153,9 @@
   <metadata name="SnapshotDate.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
+  <data name="MaxIntervalMinutes.ToolTipText" xml:space="preserve">
+    <value>The interval between collections in minutes, calculated from the cron expression. If the interval isn't constant (e.g. it runs on specific days of the week), this is the maximum interval between collections.</value>
+  </data>
   <metadata name="ConfiguredLevel.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>

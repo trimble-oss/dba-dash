@@ -1,4 +1,4 @@
-﻿namespace DBADashGUI.CollectionDates
+namespace DBADashGUI.CollectionDates
 {
     partial class CollectionDatesThresholds
     {
@@ -28,212 +28,367 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.label10 = new System.Windows.Forms.Label();
-            this.label8 = new System.Windows.Forms.Label();
-            this.label7 = new System.Windows.Forms.Label();
-            this.label9 = new System.Windows.Forms.Label();
-            this.numWarning = new System.Windows.Forms.NumericUpDown();
-            this.numCritical = new System.Windows.Forms.NumericUpDown();
-            this.bttnCancel = new System.Windows.Forms.Button();
-            this.bttnUpdate = new System.Windows.Forms.Button();
-            this.optInherit = new System.Windows.Forms.RadioButton();
-            this.OptDisabled = new System.Windows.Forms.RadioButton();
-            this.optEnabled = new System.Windows.Forms.RadioButton();
-            this.pnlThresholds = new System.Windows.Forms.Panel();
-            this.chkReferences = new System.Windows.Forms.CheckedListBox();
-            this.chkCheckAll = new System.Windows.Forms.CheckBox();
-            ((System.ComponentModel.ISupportInitialize)(this.numWarning)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numCritical)).BeginInit();
-            this.pnlThresholds.SuspendLayout();
-            this.SuspendLayout();
+            label10 = new System.Windows.Forms.Label();
+            label8 = new System.Windows.Forms.Label();
+            label7 = new System.Windows.Forms.Label();
+            label9 = new System.Windows.Forms.Label();
+            numWarning = new System.Windows.Forms.NumericUpDown();
+            numCritical = new System.Windows.Forms.NumericUpDown();
+            labelWarningMultiplier = new System.Windows.Forms.Label();
+            numWarningMultiplier = new System.Windows.Forms.NumericUpDown();
+            labelWarningMultiplierSuffix = new System.Windows.Forms.Label();
+            labelCriticalMultiplier = new System.Windows.Forms.Label();
+            numCriticalMultiplier = new System.Windows.Forms.NumericUpDown();
+            labelCriticalMultiplierSuffix = new System.Windows.Forms.Label();
+            numWarningBuffer = new System.Windows.Forms.NumericUpDown();
+            labelWarningBufferSuffix = new System.Windows.Forms.Label();
+            numCriticalBuffer = new System.Windows.Forms.NumericUpDown();
+            labelCriticalBufferSuffix = new System.Windows.Forms.Label();
+            bttnCancel = new System.Windows.Forms.Button();
+            bttnUpdate = new System.Windows.Forms.Button();
+            optInherit = new System.Windows.Forms.RadioButton();
+            OptDisabled = new System.Windows.Forms.RadioButton();
+            optExplicit = new System.Windows.Forms.RadioButton();
+            optSchedule = new System.Windows.Forms.RadioButton();
+            pnlThresholds = new System.Windows.Forms.Panel();
+            pnlSchedule = new System.Windows.Forms.Panel();
+            chkReferences = new System.Windows.Forms.CheckedListBox();
+            chkCheckAll = new System.Windows.Forms.CheckBox();
+            ((System.ComponentModel.ISupportInitialize)numWarning).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)numCritical).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)numWarningMultiplier).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)numCriticalMultiplier).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)numWarningBuffer).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)numCriticalBuffer).BeginInit();
+            pnlThresholds.SuspendLayout();
+            pnlSchedule.SuspendLayout();
+            SuspendLayout();
             // 
             // label10
             // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(228, 16);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(37, 17);
-            this.label10.TabIndex = 52;
-            this.label10.Text = "mins";
+            label10.AutoSize = true;
+            label10.Location = new System.Drawing.Point(227, 10);
+            label10.Name = "label10";
+            label10.Size = new System.Drawing.Size(40, 20);
+            label10.TabIndex = 52;
+            label10.Text = "mins";
             // 
             // label8
             // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(228, 49);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(37, 17);
-            this.label8.TabIndex = 51;
-            this.label8.Text = "mins";
+            label8.AutoSize = true;
+            label8.Location = new System.Drawing.Point(227, 48);
+            label8.Name = "label8";
+            label8.Size = new System.Drawing.Size(40, 20);
+            label8.TabIndex = 51;
+            label8.Text = "mins";
             // 
             // label7
             // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(4, 46);
-            this.label7.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(54, 17);
-            this.label7.TabIndex = 47;
-            this.label7.Text = "Critical:";
+            label7.AutoSize = true;
+            label7.Location = new System.Drawing.Point(4, 48);
+            label7.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            label7.Name = "label7";
+            label7.Size = new System.Drawing.Size(58, 20);
+            label7.TabIndex = 47;
+            label7.Text = "Critical:";
             // 
             // label9
             // 
-            this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(4, 11);
-            this.label9.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(65, 17);
-            this.label9.TabIndex = 46;
-            this.label9.Text = "Warning:";
+            label9.AutoSize = true;
+            label9.Location = new System.Drawing.Point(4, 8);
+            label9.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            label9.Name = "label9";
+            label9.Size = new System.Drawing.Size(67, 20);
+            label9.TabIndex = 46;
+            label9.Text = "Warning:";
             // 
             // numWarning
             // 
-            this.numWarning.Location = new System.Drawing.Point(121, 11);
-            this.numWarning.Margin = new System.Windows.Forms.Padding(4);
-            this.numWarning.Maximum = new decimal(new int[] {
-            2147483647,
-            0,
-            0,
-            0});
-            this.numWarning.Name = "numWarning";
-            this.numWarning.Size = new System.Drawing.Size(100, 22);
-            this.numWarning.TabIndex = 48;
+            numWarning.Location = new System.Drawing.Point(140, 6);
+            numWarning.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            numWarning.Maximum = new decimal(new int[] { int.MaxValue, 0, 0, 0 });
+            numWarning.Name = "numWarning";
+            numWarning.Size = new System.Drawing.Size(80, 27);
+            numWarning.TabIndex = 48;
             // 
             // numCritical
             // 
-            this.numCritical.Location = new System.Drawing.Point(121, 44);
-            this.numCritical.Margin = new System.Windows.Forms.Padding(4);
-            this.numCritical.Maximum = new decimal(new int[] {
-            2147483647,
-            0,
-            0,
-            0});
-            this.numCritical.Name = "numCritical";
-            this.numCritical.Size = new System.Drawing.Size(100, 22);
-            this.numCritical.TabIndex = 49;
+            numCritical.Location = new System.Drawing.Point(140, 46);
+            numCritical.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            numCritical.Maximum = new decimal(new int[] { int.MaxValue, 0, 0, 0 });
+            numCritical.Name = "numCritical";
+            numCritical.Size = new System.Drawing.Size(80, 27);
+            numCritical.TabIndex = 49;
+            // 
+            // labelWarningMultiplier
+            // 
+            labelWarningMultiplier.AutoSize = true;
+            labelWarningMultiplier.Location = new System.Drawing.Point(4, 8);
+            labelWarningMultiplier.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            labelWarningMultiplier.Name = "labelWarningMultiplier";
+            labelWarningMultiplier.Size = new System.Drawing.Size(135, 20);
+            labelWarningMultiplier.TabIndex = 63;
+            labelWarningMultiplier.Text = "Warning multiplier:";
+            // 
+            // numWarningMultiplier
+            // 
+            numWarningMultiplier.DecimalPlaces = 1;
+            numWarningMultiplier.Increment = new decimal(new int[] { 5, 0, 0, 65536 });
+            numWarningMultiplier.Location = new System.Drawing.Point(140, 5);
+            numWarningMultiplier.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            numWarningMultiplier.Minimum = new decimal(new int[] { 1, 0, 0, 65536 });
+            numWarningMultiplier.Name = "numWarningMultiplier";
+            numWarningMultiplier.Size = new System.Drawing.Size(80, 27);
+            numWarningMultiplier.TabIndex = 64;
+            numWarningMultiplier.Value = new decimal(new int[] { 3, 0, 0, 0 });
+            // 
+            // labelWarningMultiplierSuffix
+            // 
+            labelWarningMultiplierSuffix.AutoSize = true;
+            labelWarningMultiplierSuffix.Location = new System.Drawing.Point(227, 8);
+            labelWarningMultiplierSuffix.Name = "labelWarningMultiplierSuffix";
+            labelWarningMultiplierSuffix.Size = new System.Drawing.Size(151, 20);
+            labelWarningMultiplierSuffix.TabIndex = 65;
+            labelWarningMultiplierSuffix.Text = "* collection interval +";
+            // 
+            // labelCriticalMultiplier
+            // 
+            labelCriticalMultiplier.AutoSize = true;
+            labelCriticalMultiplier.Location = new System.Drawing.Point(4, 48);
+            labelCriticalMultiplier.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            labelCriticalMultiplier.Name = "labelCriticalMultiplier";
+            labelCriticalMultiplier.Size = new System.Drawing.Size(126, 20);
+            labelCriticalMultiplier.TabIndex = 70;
+            labelCriticalMultiplier.Text = "Critical multiplier:";
+            // 
+            // numCriticalMultiplier
+            // 
+            numCriticalMultiplier.DecimalPlaces = 1;
+            numCriticalMultiplier.Increment = new decimal(new int[] { 5, 0, 0, 65536 });
+            numCriticalMultiplier.Location = new System.Drawing.Point(140, 45);
+            numCriticalMultiplier.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            numCriticalMultiplier.Minimum = new decimal(new int[] { 1, 0, 0, 65536 });
+            numCriticalMultiplier.Name = "numCriticalMultiplier";
+            numCriticalMultiplier.Size = new System.Drawing.Size(80, 27);
+            numCriticalMultiplier.TabIndex = 71;
+            numCriticalMultiplier.Value = new decimal(new int[] { 6, 0, 0, 0 });
+            // 
+            // labelCriticalMultiplierSuffix
+            // 
+            labelCriticalMultiplierSuffix.AutoSize = true;
+            labelCriticalMultiplierSuffix.Location = new System.Drawing.Point(227, 48);
+            labelCriticalMultiplierSuffix.Name = "labelCriticalMultiplierSuffix";
+            labelCriticalMultiplierSuffix.Size = new System.Drawing.Size(151, 20);
+            labelCriticalMultiplierSuffix.TabIndex = 72;
+            labelCriticalMultiplierSuffix.Text = "* collection interval +";
+            // 
+            // numWarningBuffer
+            // 
+            numWarningBuffer.DecimalPlaces = 1;
+            numWarningBuffer.Location = new System.Drawing.Point(386, 8);
+            numWarningBuffer.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            numWarningBuffer.Maximum = new decimal(new int[] { 1440, 0, 0, 0 });
+            numWarningBuffer.Name = "numWarningBuffer";
+            numWarningBuffer.Size = new System.Drawing.Size(80, 27);
+            numWarningBuffer.TabIndex = 67;
+            numWarningBuffer.Value = new decimal(new int[] { 5, 0, 0, 0 });
+            // 
+            // labelWarningBufferSuffix
+            // 
+            labelWarningBufferSuffix.AutoSize = true;
+            labelWarningBufferSuffix.Location = new System.Drawing.Point(473, 11);
+            labelWarningBufferSuffix.Name = "labelWarningBufferSuffix";
+            labelWarningBufferSuffix.Size = new System.Drawing.Size(40, 20);
+            labelWarningBufferSuffix.TabIndex = 68;
+            labelWarningBufferSuffix.Text = "mins";
+            // 
+            // numCriticalBuffer
+            // 
+            numCriticalBuffer.DecimalPlaces = 1;
+            numCriticalBuffer.Location = new System.Drawing.Point(386, 45);
+            numCriticalBuffer.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            numCriticalBuffer.Maximum = new decimal(new int[] { 1440, 0, 0, 0 });
+            numCriticalBuffer.Name = "numCriticalBuffer";
+            numCriticalBuffer.Size = new System.Drawing.Size(80, 27);
+            numCriticalBuffer.TabIndex = 74;
+            numCriticalBuffer.Value = new decimal(new int[] { 5, 0, 0, 0 });
+            // 
+            // labelCriticalBufferSuffix
+            // 
+            labelCriticalBufferSuffix.AutoSize = true;
+            labelCriticalBufferSuffix.Location = new System.Drawing.Point(473, 48);
+            labelCriticalBufferSuffix.Name = "labelCriticalBufferSuffix";
+            labelCriticalBufferSuffix.Size = new System.Drawing.Size(40, 20);
+            labelCriticalBufferSuffix.TabIndex = 75;
+            labelCriticalBufferSuffix.Text = "mins";
             // 
             // bttnCancel
             // 
-            this.bttnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.bttnCancel.Location = new System.Drawing.Point(290, 467);
-            this.bttnCancel.Name = "bttnCancel";
-            this.bttnCancel.Size = new System.Drawing.Size(75, 23);
-            this.bttnCancel.TabIndex = 56;
-            this.bttnCancel.Text = "Cancel";
-            this.bttnCancel.UseVisualStyleBackColor = true;
-            this.bttnCancel.Click += new System.EventHandler(this.BttnCancel_Click);
+            bttnCancel.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
+            bttnCancel.Location = new System.Drawing.Point(435, 605);
+            bttnCancel.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            bttnCancel.Name = "bttnCancel";
+            bttnCancel.Size = new System.Drawing.Size(75, 29);
+            bttnCancel.TabIndex = 56;
+            bttnCancel.Text = "Cancel";
+            bttnCancel.UseVisualStyleBackColor = true;
+            bttnCancel.Click += BttnCancel_Click;
             // 
             // bttnUpdate
             // 
-            this.bttnUpdate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.bttnUpdate.Location = new System.Drawing.Point(371, 467);
-            this.bttnUpdate.Name = "bttnUpdate";
-            this.bttnUpdate.Size = new System.Drawing.Size(75, 23);
-            this.bttnUpdate.TabIndex = 55;
-            this.bttnUpdate.Text = "Update";
-            this.bttnUpdate.UseVisualStyleBackColor = true;
-            this.bttnUpdate.Click += new System.EventHandler(this.BttnUpdate_Click);
+            bttnUpdate.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
+            bttnUpdate.Location = new System.Drawing.Point(516, 605);
+            bttnUpdate.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            bttnUpdate.Name = "bttnUpdate";
+            bttnUpdate.Size = new System.Drawing.Size(75, 29);
+            bttnUpdate.TabIndex = 55;
+            bttnUpdate.Text = "Update";
+            bttnUpdate.UseVisualStyleBackColor = true;
+            bttnUpdate.Click += BttnUpdate_Click;
             // 
             // optInherit
             // 
-            this.optInherit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.optInherit.AutoSize = true;
-            this.optInherit.Location = new System.Drawing.Point(209, 329);
-            this.optInherit.Margin = new System.Windows.Forms.Padding(4);
-            this.optInherit.Name = "optInherit";
-            this.optInherit.Size = new System.Drawing.Size(68, 21);
-            this.optInherit.TabIndex = 59;
-            this.optInherit.Text = "Inherit";
-            this.optInherit.UseVisualStyleBackColor = true;
-            this.optInherit.CheckedChanged += new System.EventHandler(this.OptInherit_CheckedChanged);
+            optInherit.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
+            optInherit.AutoSize = true;
+            optInherit.Location = new System.Drawing.Point(341, 459);
+            optInherit.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            optInherit.Name = "optInherit";
+            optInherit.Size = new System.Drawing.Size(72, 24);
+            optInherit.TabIndex = 59;
+            optInherit.Text = "Inherit";
+            optInherit.UseVisualStyleBackColor = true;
+            optInherit.CheckedChanged += OptInherit_CheckedChanged;
             // 
             // OptDisabled
             // 
-            this.OptDisabled.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.OptDisabled.AutoSize = true;
-            this.OptDisabled.Location = new System.Drawing.Point(102, 329);
-            this.OptDisabled.Margin = new System.Windows.Forms.Padding(4);
-            this.OptDisabled.Name = "OptDisabled";
-            this.OptDisabled.Size = new System.Drawing.Size(84, 21);
-            this.OptDisabled.TabIndex = 58;
-            this.OptDisabled.Text = "Disabled";
-            this.OptDisabled.UseVisualStyleBackColor = true;
-            this.OptDisabled.CheckedChanged += new System.EventHandler(this.OptDisabled_CheckedChanged);
+            OptDisabled.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
+            OptDisabled.AutoSize = true;
+            OptDisabled.Location = new System.Drawing.Point(246, 459);
+            OptDisabled.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            OptDisabled.Name = "OptDisabled";
+            OptDisabled.Size = new System.Drawing.Size(89, 24);
+            OptDisabled.TabIndex = 58;
+            OptDisabled.Text = "Disabled";
+            OptDisabled.UseVisualStyleBackColor = true;
+            OptDisabled.CheckedChanged += OptDisabled_CheckedChanged;
             // 
-            // optEnabled
+            // optExplicit
             // 
-            this.optEnabled.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.optEnabled.AutoSize = true;
-            this.optEnabled.Checked = true;
-            this.optEnabled.Location = new System.Drawing.Point(13, 329);
-            this.optEnabled.Margin = new System.Windows.Forms.Padding(4);
-            this.optEnabled.Name = "optEnabled";
-            this.optEnabled.Size = new System.Drawing.Size(81, 21);
-            this.optEnabled.TabIndex = 57;
-            this.optEnabled.TabStop = true;
-            this.optEnabled.Text = "Enabled";
-            this.optEnabled.UseVisualStyleBackColor = true;
-            this.optEnabled.CheckedChanged += new System.EventHandler(this.OptEnabled_CheckedChanged);
+            optExplicit.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
+            optExplicit.AutoSize = true;
+            optExplicit.Location = new System.Drawing.Point(156, 459);
+            optExplicit.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            optExplicit.Name = "optExplicit";
+            optExplicit.Size = new System.Drawing.Size(78, 24);
+            optExplicit.TabIndex = 57;
+            optExplicit.Text = "Explicit";
+            optExplicit.UseVisualStyleBackColor = true;
+            optExplicit.CheckedChanged += OptExplicit_CheckedChanged;
+            // 
+            // optSchedule
+            // 
+            optSchedule.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
+            optSchedule.AutoSize = true;
+            optSchedule.Checked = true;
+            optSchedule.Location = new System.Drawing.Point(14, 459);
+            optSchedule.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            optSchedule.Name = "optSchedule";
+            optSchedule.Size = new System.Drawing.Size(134, 24);
+            optSchedule.TabIndex = 69;
+            optSchedule.TabStop = true;
+            optSchedule.Text = "Schedule Based";
+            optSchedule.UseVisualStyleBackColor = true;
+            optSchedule.CheckedChanged += OptSchedule_CheckedChanged;
             // 
             // pnlThresholds
             // 
-            this.pnlThresholds.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.pnlThresholds.Controls.Add(this.label9);
-            this.pnlThresholds.Controls.Add(this.numCritical);
-            this.pnlThresholds.Controls.Add(this.numWarning);
-            this.pnlThresholds.Controls.Add(this.label7);
-            this.pnlThresholds.Controls.Add(this.label8);
-            this.pnlThresholds.Controls.Add(this.label10);
-            this.pnlThresholds.Location = new System.Drawing.Point(12, 357);
-            this.pnlThresholds.Name = "pnlThresholds";
-            this.pnlThresholds.Size = new System.Drawing.Size(386, 85);
-            this.pnlThresholds.TabIndex = 60;
+            pnlThresholds.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
+            pnlThresholds.Controls.Add(label9);
+            pnlThresholds.Controls.Add(numCritical);
+            pnlThresholds.Controls.Add(numWarning);
+            pnlThresholds.Controls.Add(label7);
+            pnlThresholds.Controls.Add(label8);
+            pnlThresholds.Controls.Add(label10);
+            pnlThresholds.Location = new System.Drawing.Point(14, 492);
+            pnlThresholds.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            pnlThresholds.Name = "pnlThresholds";
+            pnlThresholds.Size = new System.Drawing.Size(386, 89);
+            pnlThresholds.TabIndex = 60;
+            // 
+            // pnlSchedule
+            // 
+            pnlSchedule.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
+            pnlSchedule.Controls.Add(labelWarningMultiplier);
+            pnlSchedule.Controls.Add(numWarningMultiplier);
+            pnlSchedule.Controls.Add(labelWarningMultiplierSuffix);
+            pnlSchedule.Controls.Add(labelCriticalMultiplier);
+            pnlSchedule.Controls.Add(numCriticalMultiplier);
+            pnlSchedule.Controls.Add(labelCriticalMultiplierSuffix);
+            pnlSchedule.Controls.Add(numWarningBuffer);
+            pnlSchedule.Controls.Add(labelWarningBufferSuffix);
+            pnlSchedule.Controls.Add(numCriticalBuffer);
+            pnlSchedule.Controls.Add(labelCriticalBufferSuffix);
+            pnlSchedule.Location = new System.Drawing.Point(13, 492);
+            pnlSchedule.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            pnlSchedule.Name = "pnlSchedule";
+            pnlSchedule.Size = new System.Drawing.Size(578, 89);
+            pnlSchedule.TabIndex = 76;
             // 
             // chkReferences
             // 
-            this.chkReferences.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.chkReferences.CheckOnClick = true;
-            this.chkReferences.FormattingEnabled = true;
-            this.chkReferences.Location = new System.Drawing.Point(12, 46);
-            this.chkReferences.Name = "chkReferences";
-            this.chkReferences.Size = new System.Drawing.Size(434, 276);
-            this.chkReferences.TabIndex = 61;
+            chkReferences.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            chkReferences.CheckOnClick = true;
+            chkReferences.FormattingEnabled = true;
+            chkReferences.Location = new System.Drawing.Point(12, 58);
+            chkReferences.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            chkReferences.Name = "chkReferences";
+            chkReferences.Size = new System.Drawing.Size(590, 378);
+            chkReferences.TabIndex = 61;
             // 
             // chkCheckAll
             // 
-            this.chkCheckAll.AutoSize = true;
-            this.chkCheckAll.Location = new System.Drawing.Point(13, 12);
-            this.chkCheckAll.Name = "chkCheckAll";
-            this.chkCheckAll.Size = new System.Drawing.Size(88, 21);
-            this.chkCheckAll.TabIndex = 62;
-            this.chkCheckAll.Text = "Check All";
-            this.chkCheckAll.UseVisualStyleBackColor = true;
-            this.chkCheckAll.CheckedChanged += new System.EventHandler(this.ChkCheckAll_CheckedChanged);
+            chkCheckAll.AutoSize = true;
+            chkCheckAll.Location = new System.Drawing.Point(13, 15);
+            chkCheckAll.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            chkCheckAll.Name = "chkCheckAll";
+            chkCheckAll.Size = new System.Drawing.Size(92, 24);
+            chkCheckAll.TabIndex = 62;
+            chkCheckAll.Text = "Check All";
+            chkCheckAll.UseVisualStyleBackColor = true;
+            chkCheckAll.CheckedChanged += ChkCheckAll_CheckedChanged;
             // 
             // CollectionDatesThresholds
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(458, 503);
-            this.Controls.Add(this.chkCheckAll);
-            this.Controls.Add(this.chkReferences);
-            this.Controls.Add(this.pnlThresholds);
-            this.Controls.Add(this.optInherit);
-            this.Controls.Add(this.OptDisabled);
-            this.Controls.Add(this.bttnCancel);
-            this.Controls.Add(this.bttnUpdate);
-            this.Controls.Add(this.optEnabled);
-            this.Name = "CollectionDatesThresholds";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Collection Dates Thresholds";
-            this.Load += new System.EventHandler(this.CollectionDatesThresholds_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.numWarning)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numCritical)).EndInit();
-            this.pnlThresholds.ResumeLayout(false);
-            this.pnlThresholds.PerformLayout();
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            ClientSize = new System.Drawing.Size(614, 647);
+            Controls.Add(chkCheckAll);
+            Controls.Add(chkReferences);
+            Controls.Add(pnlSchedule);
+            Controls.Add(pnlThresholds);
+            Controls.Add(optInherit);
+            Controls.Add(OptDisabled);
+            Controls.Add(bttnCancel);
+            Controls.Add(bttnUpdate);
+            Controls.Add(optExplicit);
+            Controls.Add(optSchedule);
+            Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            Name = "CollectionDatesThresholds";
+            StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            Text = "Collection Dates Thresholds";
+            Load += CollectionDatesThresholds_Load;
+            ((System.ComponentModel.ISupportInitialize)numWarning).EndInit();
+            ((System.ComponentModel.ISupportInitialize)numCritical).EndInit();
+            ((System.ComponentModel.ISupportInitialize)numWarningMultiplier).EndInit();
+            ((System.ComponentModel.ISupportInitialize)numCriticalMultiplier).EndInit();
+            ((System.ComponentModel.ISupportInitialize)numWarningBuffer).EndInit();
+            ((System.ComponentModel.ISupportInitialize)numCriticalBuffer).EndInit();
+            pnlThresholds.ResumeLayout(false);
+            pnlThresholds.PerformLayout();
+            pnlSchedule.ResumeLayout(false);
+            pnlSchedule.PerformLayout();
+            ResumeLayout(false);
+            PerformLayout();
 
         }
 
@@ -245,12 +400,24 @@
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.NumericUpDown numWarning;
         private System.Windows.Forms.NumericUpDown numCritical;
+        private System.Windows.Forms.Label labelWarningMultiplier;
+        private System.Windows.Forms.NumericUpDown numWarningMultiplier;
+        private System.Windows.Forms.Label labelWarningMultiplierSuffix;
+        private System.Windows.Forms.Label labelCriticalMultiplier;
+        private System.Windows.Forms.NumericUpDown numCriticalMultiplier;
+        private System.Windows.Forms.Label labelCriticalMultiplierSuffix;
+        private System.Windows.Forms.NumericUpDown numWarningBuffer;
+        private System.Windows.Forms.Label labelWarningBufferSuffix;
+        private System.Windows.Forms.NumericUpDown numCriticalBuffer;
+        private System.Windows.Forms.Label labelCriticalBufferSuffix;
         private System.Windows.Forms.Button bttnCancel;
         private System.Windows.Forms.Button bttnUpdate;
         private System.Windows.Forms.RadioButton optInherit;
         private System.Windows.Forms.RadioButton OptDisabled;
-        private System.Windows.Forms.RadioButton optEnabled;
+        private System.Windows.Forms.RadioButton optExplicit;
+        private System.Windows.Forms.RadioButton optSchedule;
         private System.Windows.Forms.Panel pnlThresholds;
+        private System.Windows.Forms.Panel pnlSchedule;
         private System.Windows.Forms.CheckedListBox chkReferences;
         private System.Windows.Forms.CheckBox chkCheckAll;
     }

@@ -1393,73 +1393,11 @@ WHEN NOT MATCHED BY TARGET THEN
 INSERT(ObjectType,TypeDescription)
 VALUES(S.ObjectType,S.TypeDescription);
 
-INSERT INTO dbo.CollectionDatesThresholds
-(
-    InstanceID,
-    Reference,
-    WarningThreshold,
-    CriticalThreshold
-)
-
-SELECT T.InstanceID,
-       T.Reference,
-       T.WarningThreshold,
-       T.CriticalThreshold
-FROM 
-(VALUES
-(-1,'DBFiles',125,180),
-(-1,'ServerExtraProperties',125,180),
-(-1,'OSLoadedModules',1445,2880),
-(-1,'TraceFlags',125,180),
-(-1,'ServerProperties',125,180),
-(-1,'LogRestores',125,180),
-(-1,'DatabasesHADR',5,10),
-(-1,'LastGoodCheckDB',125,180),
-(-1,'Alerts',125,180),
-(-1,'DBTuningOptions',125,180),
-(-1,'DBConfig',125,180),
-(-1,'OSInfo',5,10),
-(-1,'Drives',125,180),
-(-1,'Databases',125,180),
-(-1,'Instance',125,180),
-(-1,'Drivers',1445,2880),
-(-1,'SysConfig',125,180),
-(-1,'Backups',125,180),
-(-1,'AzureDBServiceObjectives',125,180),
-(-1,'Corruption',125,180),
-(-1,'RunningQueries',5,10),
-(-1,'CPU',5,10),
-(-1,'IOStats',5,10),
-(-1,'ObjectExecutionStats',5,10),
-(-1,'SlowQueries',5,10),
-(-1,'SlowQueriesStats',5,10),
-(-1,'AzureDBElasticPoolResourceStat',5,10),
-(-1,'Waits',5,10),
-(-1,'AzureDBResourceStats',5,10),
-(-1,'DatabasePrincipals',1445,2880),
-(-1,'ServerPermissions',1445,2880),
-(-1,'ServerPrincipals',1445,2880),
-(-1,'DatabasePermissions',1445,2880),
-(-1,'ServerRoleMembers',1445,2880),
-(-1,'DatabaseRoleMembers',1445,2880),
-(-1,'DatabaseMirroring',125,180),
-(-1,'Jobs',1445,2880),
-(-1,'JobHistory',5,10),
-(-1,'VLF',1445,2880),
-(-1,'CustomChecks',125,180),
-(-1,'PerformanceCounters',5,10),
-(-1,'DatabaseQueryStoreOptions',1445,2880),
-(-1,'AzureDBResourceGovernance',125,180),
-(-1,'ResourceGovernorConfiguration',1445,2880),
-(-1,'MemoryUsage',5,10),
-(-1,'IdentityColumns',10080,20160),
-(-1,'RunningJobs',5,10),
-(-1,'TableSize',4320,11520),
-(-1,'ServerServices',1445,2880),
-(-1,'FailedLogins',1445,2880),
-(-1,'ResourceGovernorWorkloadGroups',5,10)
-) T(InstanceID,Reference,WarningThreshold,CriticalThreshold)
-WHERE NOT EXISTS(SELECT 1 FROM dbo.CollectionDatesThresholds CDT WHERE CDT.InstanceID = T.InstanceID AND CDT.Reference = T.Reference)
+-- Note: static per-reference root thresholds are no longer seeded here - schedule-based thresholds
+-- (interval x multiplier + buffer, see dbo.CollectionDatesStatus) now compute a threshold from each
+-- collection type's actual configured schedule, so new installs get a sensible default automatically.
+-- See the migration below, which removes any leftover rows from the old hardcoded defaults so existing
+-- installs pick up schedule-based thresholds too.
 
 -- Delete thresholds for legacy collections
 DELETE dbo.CollectionDatesThresholds WHERE Reference IN('AgentJobs','BlockingSnapshot','Database','DatabaseHADR')
@@ -1468,13 +1406,84 @@ DELETE dbo.CollectionDatesThresholds WHERE Reference IN('AgentJobs','BlockingSna
 DELETE dbo.CollectionDates
 WHERE Reference IN('AgentJobs','BlockingSnapshot','Database')
 
---replace old defaults
-UPDATE dbo.CollectionDatesThresholds
-SET WarningThreshold=1445,
-	CriticalThreshold=2880
-WHERE Reference IN('Drivers','OSLoadedModules')
-AND WarningThreshold=125
-AND CriticalThreshold=180
+-- One-time migration only (gated below) - a value-matching DELETE/UPDATE like this must not run on
+-- every deployment, or it would keep wiping out a user's threshold if they ever set it back to a value
+-- that happens to match one of these old hardcoded defaults.
+IF NOT EXISTS(SELECT 1 FROM dbo.Settings WHERE SettingName = 'CollectionDatesLegacyThresholdsMigrated')
+BEGIN
+	--replace old defaults
+	UPDATE dbo.CollectionDatesThresholds
+	SET WarningThreshold=1445,
+		CriticalThreshold=2880
+	WHERE Reference IN('Drivers','OSLoadedModules')
+	AND WarningThreshold=125
+	AND CriticalThreshold=180
+
+	-- Remove root threshold rows that still match a historical hardcoded default (i.e. were never
+	-- customized), so schedule-based auto thresholds take over for them going forward. Rows that don't
+	-- match exactly (because a user changed them, or InstanceID>0 overrides) are left alone.
+	DELETE CDT
+	FROM dbo.CollectionDatesThresholds CDT
+	JOIN (VALUES
+	(-1,'DBFiles',125,180),
+	(-1,'ServerExtraProperties',125,180),
+	(-1,'OSLoadedModules',1445,2880),
+	(-1,'TraceFlags',125,180),
+	(-1,'ServerProperties',125,180),
+	(-1,'LogRestores',125,180),
+	(-1,'DatabasesHADR',5,10),
+	(-1,'LastGoodCheckDB',125,180),
+	(-1,'Alerts',125,180),
+	(-1,'DBTuningOptions',125,180),
+	(-1,'DBConfig',125,180),
+	(-1,'OSInfo',5,10),
+	(-1,'Drives',125,180),
+	(-1,'Databases',125,180),
+	(-1,'Instance',125,180),
+	(-1,'Drivers',1445,2880),
+	(-1,'SysConfig',125,180),
+	(-1,'Backups',125,180),
+	(-1,'AzureDBServiceObjectives',125,180),
+	(-1,'Corruption',125,180),
+	(-1,'RunningQueries',5,10),
+	(-1,'CPU',5,10),
+	(-1,'IOStats',5,10),
+	(-1,'ObjectExecutionStats',5,10),
+	(-1,'SlowQueries',5,10),
+	(-1,'SlowQueriesStats',5,10),
+	(-1,'AzureDBElasticPoolResourceStat',5,10),
+	(-1,'Waits',5,10),
+	(-1,'AzureDBResourceStats',5,10),
+	(-1,'DatabasePrincipals',1445,2880),
+	(-1,'ServerPermissions',1445,2880),
+	(-1,'ServerPrincipals',1445,2880),
+	(-1,'DatabasePermissions',1445,2880),
+	(-1,'ServerRoleMembers',1445,2880),
+	(-1,'DatabaseRoleMembers',1445,2880),
+	(-1,'DatabaseMirroring',125,180),
+	(-1,'Jobs',1445,2880),
+	(-1,'JobHistory',5,10),
+	(-1,'VLF',1445,2880),
+	(-1,'CustomChecks',125,180),
+	(-1,'PerformanceCounters',5,10),
+	(-1,'DatabaseQueryStoreOptions',1445,2880),
+	(-1,'AzureDBResourceGovernance',125,180),
+	(-1,'ResourceGovernorConfiguration',1445,2880),
+	(-1,'MemoryUsage',5,10),
+	(-1,'IdentityColumns',10080,20160),
+	(-1,'RunningJobs',5,10),
+	(-1,'TableSize',4320,11520),
+	(-1,'ServerServices',1445,2880),
+	(-1,'FailedLogins',1445,2880),
+	(-1,'ResourceGovernorWorkloadGroups',5,10)
+	) T(InstanceID,Reference,WarningThreshold,CriticalThreshold)
+	ON CDT.InstanceID = T.InstanceID
+	AND CDT.Reference = T.Reference
+	AND CDT.WarningThreshold = T.WarningThreshold
+	AND CDT.CriticalThreshold = T.CriticalThreshold
+
+	INSERT INTO dbo.Settings(SettingName,SettingValue) VALUES('CollectionDatesLegacyThresholdsMigrated',1)
+END
 
 UPDATE dbo.CollectionDates
 	SET Reference = 'DatabasesHADR'

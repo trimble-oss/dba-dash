@@ -41,8 +41,12 @@ namespace DBADashGUI
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool Acknowledged { get => (MenuAcknowledged.Checked && AcknowledgedVisible) || AllUnchecked; set => MenuAcknowledged.Checked = value; }
 
-        public bool AllChecked => (MenuOK.Checked || !OKVisible) && (MenuWarning.Checked || !WarningVisible) && (MenuCritical.Checked || !CriticalVisible) && (MenuNA.Checked | !NAVisible) && (MenuAcknowledged.Checked || !AcknowledgedVisible);
-        public bool AnyChecked => (MenuOK.Checked && OKVisible) || (MenuWarning.Checked && WarningVisible) || (MenuCritical.Checked && CriticalVisible) || (MenuNA.Checked && NAVisible) || (MenuAcknowledged.Checked && AcknowledgedVisible);
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool Disabled { get => (MenuDisabled.Checked && DisabledVisible) || AllUnchecked; set => MenuDisabled.Checked = value; }
+
+        private IEnumerable<ToolStripMenuItem> StatusMenuItems => DropDownItems.OfType<ToolStripMenuItem>().Where(i => i != MenuCheckAll);
+        public bool AllChecked => StatusMenuItems.All(i => i.Checked || !i.Available);
+        public bool AnyChecked => StatusMenuItems.Any(i => i.Checked && i.Available);
         public bool AllUnchecked => !AnyChecked;
 
         private readonly ToolStripMenuItem MenuOK = new() { Text = "OK", BackColor = DBADashStatus.DBADashStatusEnum.OK.GetBackColor(), ForeColor = DBADashStatus.DBADashStatusEnum.OK.GetBackColor().ContrastColor(), CheckOnClick = true };
@@ -50,10 +54,14 @@ namespace DBADashGUI
         private readonly ToolStripMenuItem MenuCritical = new() { Text = "Critical", BackColor = DBADashStatus.DBADashStatusEnum.Critical.GetBackColor(), ForeColor = DBADashStatus.DBADashStatusEnum.Critical.GetBackColor().ContrastColor(), CheckOnClick = true };
         private readonly ToolStripMenuItem MenuNA = new() { Text = "N/A", BackColor = DBADashStatus.DBADashStatusEnum.NA.GetBackColor(), ForeColor = DBADashStatus.DBADashStatusEnum.NA.GetBackColor().ContrastColor(), CheckOnClick = true };
         private readonly ToolStripMenuItem MenuAcknowledged = new() { Text = "Acknowledged", BackColor = DBADashStatus.DBADashStatusEnum.Acknowledged.GetBackColor(), ForeColor = DBADashStatus.DBADashStatusEnum.Acknowledged.GetBackColor().ContrastColor(), CheckOnClick = true };
+        private readonly ToolStripMenuItem MenuDisabled = new() { Text = "Disabled", BackColor = DBADashStatus.DBADashStatusEnum.Disabled.GetBackColor(), ForeColor = DBADashStatus.DBADashStatusEnum.Disabled.GetBackColor().ContrastColor(), CheckOnClick = true, Available = false };
         private readonly ToolStripMenuItem MenuCheckAll = new() { Text = "Check ALL" };
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool AcknowledgedVisible { get => MenuAcknowledged.Available; set => MenuAcknowledged.Available = value; }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool DisabledVisible { get => MenuDisabled.Available; set => MenuDisabled.Available = value; }
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool CriticalVisible { get => MenuCritical.Available; set => MenuCritical.Available = value; }
@@ -75,18 +83,16 @@ namespace DBADashGUI
             if (NAVisible) { sqlParams.Add(new SqlParameter() { ParameterName = "IncludeNA", DbType = System.Data.DbType.Boolean, Value = NA }); }
             if (AcknowledgedVisible) { sqlParams.Add(new SqlParameter() { ParameterName = "IncludeACK", DbType = System.Data.DbType.Boolean, Value = Acknowledged }); }
             if (OKVisible) { sqlParams.Add(new SqlParameter() { ParameterName = "IncludeOK", DbType = System.Data.DbType.Boolean, Value = OK }); }
+            if (DisabledVisible) { sqlParams.Add(new SqlParameter() { ParameterName = "IncludeDisabled", DbType = System.Data.DbType.Boolean, Value = Disabled }); }
             return sqlParams.ToArray();
         }
 
         private void CheckAll()
         {
             bool isChecked = !AllChecked;
-            foreach (ToolStripMenuItem itm in DropDownItems.OfType<ToolStripMenuItem>())
+            foreach (var itm in StatusMenuItems)
             {
-                if (itm != MenuCheckAll)
-                {
-                    itm.Checked = isChecked && itm.Available;
-                }
+                itm.Checked = isChecked && itm.Available;
             }
         }
 
@@ -97,15 +103,17 @@ namespace DBADashGUI
             MenuWarning.CheckedChanged += StatusFilterChanged;
             MenuAcknowledged.CheckedChanged += StatusFilterChanged;
             MenuNA.CheckedChanged += StatusFilterChanged;
+            MenuDisabled.CheckedChanged += StatusFilterChanged;
 
             MenuCritical.Click += Status_Click;
             MenuOK.Click += Status_Click;
             MenuWarning.Click += Status_Click;
             MenuAcknowledged.Click += Status_Click;
             MenuNA.Click += Status_Click;
+            MenuDisabled.Click += Status_Click;
 
             MenuCheckAll.Click += MenuCheckAll_Click;
-            DropDownItems.AddRange(new ToolStripItem[] { MenuCritical, MenuWarning, MenuNA, MenuOK, MenuAcknowledged, new ToolStripSeparator(), MenuCheckAll });
+            DropDownItems.AddRange(new ToolStripItem[] { MenuCritical, MenuWarning, MenuNA, MenuOK, MenuAcknowledged, MenuDisabled, new ToolStripSeparator(), MenuCheckAll });
         }
 
         private void Status_Click(object sender, EventArgs e)
@@ -134,7 +142,7 @@ namespace DBADashGUI
             }
             else if (AnyChecked)
             {
-                Text = ((Critical ? ",Critical" : "") + (Warning ? ",Warning" : "") + (OK ? ",OK" : "") + (NA ? ",NA" : "") + (Acknowledged ? ",Acknowledged" : ""))[1..];
+                Text = ((Critical ? ",Critical" : "") + (Warning ? ",Warning" : "") + (OK ? ",OK" : "") + (NA ? ",NA" : "") + (Acknowledged ? ",Acknowledged" : "") + (Disabled ? ",Disabled" : ""))[1..];
                 Font = new Font(Font, FontStyle.Bold);
             }
             foreach (ToolStripMenuItem itm in DropDownItems.OfType<ToolStripMenuItem>())

@@ -2296,7 +2296,7 @@ namespace DBADashServiceConfig
             {
                 description = string.IsNullOrEmpty(collectionConfig.SummaryRefreshCron)
                     ? string.Empty
-                    : ScheduleConfig.GetScheduleDescription(collectionConfig.SummaryRefreshCron);
+                    : CronParser.GetScheduleDescription(collectionConfig.SummaryRefreshCron);
             }
             catch
             {

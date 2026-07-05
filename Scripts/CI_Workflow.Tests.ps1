@@ -23,7 +23,6 @@ $TableCountGreaterThanZeroTestCases = @(
       @{TableName="dbo.AzureDBElasticPoolStorageThresholds"}
       @{TableName="dbo.BackupThresholds"}
       @{TableName="dbo.CollectionDates"}
-      @{TableName="dbo.CollectionDatesThresholds"}
       @{TableName="dbo.CounterMapping"}
       @{TableName="dbo.Counters"}
       @{TableName="dbo.CPU"}

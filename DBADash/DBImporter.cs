@@ -396,11 +396,43 @@ namespace DBADash
             await cmd.ExecuteNonQueryAsync();
         }
 
+        /// <summary>
+        /// Schedule info is reported independently of a full instance snapshot (see ScheduleInfoReporter) -
+        /// resolved/created by ConnectionID rather than requiring a pre-resolved InstanceID, since it must
+        /// work even when the instance has never had a normal collection succeed (offline, or an Azure DB
+        /// discovered on the fly).
+        /// </summary>
+        private async Task UpdateScheduleInfoAsync()
+        {
+            var agentRow = data.Tables["DBADash"]!.Rows[0];
+            var collectAgent = GetAgent(agentRow);
+            snapshotDate = (DateTime)agentRow["SnapshotDateUTC"];
+            var connectionID = (string)agentRow["ConnectionID"];
+            var dt = data.Tables["ScheduleInfo"];
+            await using var cn = new SqlConnection(connectionString);
+            await using var cmd = new SqlCommand("dbo.ScheduleInfo_Upd", cn) { CommandTimeout = CommandTimeout, CommandType = CommandType.StoredProcedure };
+            await cn.OpenAsync();
+            cmd.Parameters.AddWithValue("ConnectionID", connectionID);
+            cmd.Parameters.AddWithValue("CollectAgentID", collectAgent.GetDBADashAgentID(connectionString));
+            cmd.Parameters.AddWithValue("ImportAgentID", importAgent.GetDBADashAgentID(connectionString));
+            cmd.Parameters.AddWithValue("SnapshotDate", snapshotDate);
+            if (dt.Rows.Count > 0)
+            {
+                cmd.Parameters.AddWithValue("ScheduleInfo", dt);
+            }
+            await cmd.ExecuteNonQueryAsync();
+        }
+
         public async Task UpdateAsync()
         {
             if (data.DataSetName == "OfflineInstances")
             {
                 await UpdateOfflineAsync();
+                return;
+            }
+            if (data.DataSetName == "ScheduleInfo")
+            {
+                await UpdateScheduleInfoAsync();
                 return;
             }
             List<Exception> exceptions = new();

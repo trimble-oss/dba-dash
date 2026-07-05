@@ -21,6 +21,7 @@ namespace DBADashGUI.CollectionDates
             dgvCollectionDates.RegisterClearFilter(tsClearFilter);
             dgvCollectionDates.GridFilterChanged += ((_, _) => PersistFilter = dgvCollectionDates.RowFilter);
             statusFilterToolStrip1.AcknowledgedVisible = false;
+            statusFilterToolStrip1.DisabledVisible = true;
         }
 
         private string PersistFilter;
@@ -52,6 +53,12 @@ namespace DBADashGUI.CollectionDates
             get => statusFilterToolStrip1.OK; set => statusFilterToolStrip1.OK = value;
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool IncludeDisabled
+        {
+            get => statusFilterToolStrip1.Disabled; set => statusFilterToolStrip1.Disabled = value;
+        }
+
         private static readonly string[] NoTriggerCollectionTypes = new[] { "QueryPlans", "QueryText", "SlowQueriesStats", "InternalPerformanceCounters", "SessionWaits" };
 
         private DataTable GetCollectionDates()
@@ -65,8 +72,40 @@ namespace DBADashGUI.CollectionDates
             cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
             DataTable dt = new();
             da.Fill(dt);
+            AddScheduleColumns(dt);
             DateHelper.ConvertUTCToAppTimeZone(ref dt);
             return dt;
+        }
+
+        /// <summary>
+        /// Derives display-only schedule columns from the raw cron/interval string reported by the service.
+        /// Next fire time is computed on demand rather than persisted, since it changes every time the job
+        /// actually runs - only the schedule definition itself is static.  Added before the timezone conversion
+        /// pass so NextFireTime converts along with the other datetime columns.
+        /// </summary>
+        private static void AddScheduleColumns(DataTable dt)
+        {
+            dt.Columns.Add("NextFireTime", typeof(DateTime));
+            dt.Columns.Add("ScheduleDescription", typeof(string));
+            dt.Columns.Add("ScheduleLevel", typeof(string));
+            var now = DateTimeOffset.UtcNow;
+            foreach (DataRow row in dt.Rows)
+            {
+                var schedule = row["Schedule"] == DBNull.Value ? null : (string)row["Schedule"];
+                // No ScheduleInfo row at all (schedule is null) means the service hasn't reported its
+                // schedule yet - distinct from an explicitly disabled schedule (schedule == "").
+                var notReported = schedule == null;
+                // An empty schedule with RunOnServiceStart set (e.g. ScheduleInfo itself) means the
+                // collection only ever runs once at service start, not that it's disabled.
+                var runOnServiceStart = row["RunOnServiceStart"] != DBNull.Value && (bool)row["RunOnServiceStart"];
+                var disabledLabel = runOnServiceStart ? "Startup Only" : "Disabled";
+                row["NextFireTime"] = (object)CronNextFireTime.TryGetNextFireTimeUtc(schedule, now) ?? DBNull.Value;
+                row["ScheduleDescription"] = notReported ? "Not Reported" : CronParser.GetScheduleDescriptionSafe(schedule, runOnServiceStart: runOnServiceStart);
+                row["ScheduleLevel"] = row["IsInstanceOverride"] == DBNull.Value
+                    ? string.Empty
+                    : (bool)row["IsInstanceOverride"] ? "Instance" : "Service";
+                row["Schedule"] = notReported ? "Not Reported" : (string.IsNullOrEmpty(schedule) ? disabledLabel : schedule);
+            }
         }
 
         private DBADashContext CurrentContext;
@@ -81,6 +120,7 @@ namespace DBADashGUI.CollectionDates
             IncludeWarning = true;
             IncludeNA = _context.InstanceID > 0;
             IncludeOK = _context.InstanceID > 0;
+            IncludeDisabled = _context.InstanceID > 0;
             lblStatus.Visible = false;
             RefreshData();
         }
@@ -114,16 +154,18 @@ namespace DBADashGUI.CollectionDates
             {
                 InstanceID = InstanceID
             };
-            if (row["WarningThreshold"] == DBNull.Value || row["CriticalThreshold"] == DBNull.Value)
-            {
-                frm.Disabled = true;
-            }
-            else
+            // Just a display default shown briefly before CollectionDatesThresholds_Load re-reads the
+            // authoritative config (if any) from CollectionDatesThresholds_Get - null here just means no
+            // effective threshold could be computed yet (e.g. no schedule info collected), not that
+            // monitoring was explicitly disabled, so leave the dialog's Auto default in that case.
+            if (row["WarningThreshold"] != DBNull.Value && row["CriticalThreshold"] != DBNull.Value)
             {
                 frm.WarningThreshold = (int)row["WarningThreshold"];
                 frm.CriticalThreshold = (int)row["CriticalThreshold"];
             }
-            if ((string)row["ConfiguredLevel"] != "Instance")
+            // Only pre-select Inherit when there's an actual root-level override to inherit from -
+            // "Default" means no config exists anywhere, which isn't the same thing.
+            if ((string)row["ConfiguredLevel"] == "Root")
             {
                 frm.Inherit = true;
             }
@@ -187,7 +229,9 @@ namespace DBADashGUI.CollectionDates
 
                 dgvCollectionDates.Rows[idx].Cells["SnapshotAge"].SetStatusColor(Status);
 
-                dgvCollectionDates.Rows[idx].Cells["Configure"].Style.Font = (string)row["ConfiguredLevel"] == "Instance" ? new Font(dgvCollectionDates.Font, FontStyle.Bold) : new Font(dgvCollectionDates.Font, FontStyle.Regular);
+                var configuredLevel = (string)row["ConfiguredLevel"];
+                dgvCollectionDates.Rows[idx].Cells["Configure"].Style.Font = configuredLevel == "Instance" ? new Font(dgvCollectionDates.Font, FontStyle.Bold) : new Font(dgvCollectionDates.Font, FontStyle.Regular);
+                dgvCollectionDates.Rows[idx].Cells["ConfigureRoot"].Style.Font = configuredLevel == "Root" ? new Font(dgvCollectionDates.Font, FontStyle.Bold) : new Font(dgvCollectionDates.Font, FontStyle.Regular);
             }
         }
 

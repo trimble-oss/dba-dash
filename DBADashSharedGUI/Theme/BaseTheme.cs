@@ -49,6 +49,10 @@ namespace DBADashGUI.Theme
         public Color InformationBackColor { get; set; } = DashColors.Information;
         public Color InformationForeColor { get; set; } = DashColors.Information.ContrastColor();
 
+        public Color DisabledBackColor { get; set; } = DashColors.Gray3;
+
+        public Color DisabledForeColor { get; set; } = DashColors.Gray3.ContrastColor();
+
         public Color SearchBackColor { get; set; } = DashColors.GrayLight;
 
         public Color TimeZoneBackColor { get; set; } = DashColors.TrimbleBlue;
