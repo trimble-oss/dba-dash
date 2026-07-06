@@ -67,12 +67,12 @@
     <PackageReference Include="Humanizer" Version="3.0.10" />
     <PackageReference Include="Meziantou.Framework.Win32.CredentialManager" Version="2.0.2" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="10.0.9" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.2" />
-    <PackageReference Include="Microsoft.Data.SqlClient.Extensions.Azure" Version="7.0.2" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.1" />
+    <PackageReference Include="Microsoft.Data.SqlClient.Extensions.Azure" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.9" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.9" />
-    <PackageReference Include="Microsoft.Identity.Client" Version="4.85.2" />
-    <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="4.85.2" />
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.84.2" />
+    <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="4.84.2" />
     <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.19.1" />
     <PackageReference Include="Microsoft.IdentityModel.Logging" Version="8.19.1" />
     <PackageReference Include="Microsoft.IdentityModel.Protocols" Version="8.19.1" />
