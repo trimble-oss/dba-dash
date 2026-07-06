@@ -42,8 +42,8 @@
     <PackageReference Include="Common.Logging.Core" Version="3.4.1" />
     <PackageReference Include="Humanizer" Version="3.0.10" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="10.0.9" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.2" />
-    <PackageReference Include="Microsoft.Data.SqlClient.Extensions.Azure" Version="7.0.2" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.1" />
+    <PackageReference Include="Microsoft.Data.SqlClient.Extensions.Azure" Version="1.0.0" />
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="3.1.6" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.9" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.9" />
@@ -60,8 +60,8 @@
     <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.9" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.9" />
     <PackageReference Include="Microsoft.Extensions.Primitives" Version="10.0.9" />
-    <PackageReference Include="Microsoft.Identity.Client" Version="4.85.2" />
-    <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="4.85.2" />
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.84.2" />
+    <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="4.84.2" />
     <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.19.1" />
     <PackageReference Include="Microsoft.IdentityModel.Logging" Version="8.19.1" />
     <PackageReference Include="Microsoft.IdentityModel.Protocols" Version="8.19.1" />
