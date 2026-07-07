@@ -110,7 +110,7 @@ namespace DBADashService
             get
             {
                 return this
-                    .Where(s => s.Key != CollectionType.SchemaSnapshot && !string.IsNullOrEmpty(s.Value.NormalizedSchedule))
+                    .Where(s => !string.IsNullOrEmpty(s.Value.NormalizedSchedule))
                     .GroupBy(s => s.Value.NormalizedSchedule)
                     .ToDictionary(g => g.Key, g => g.Select(s => s.Key).ToArray());
             }
