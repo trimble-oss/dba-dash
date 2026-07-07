@@ -19,7 +19,7 @@ GRANT EXECUTE ON OBJECT::AI.ServiceConfig_Get TO AIUser;
 DECLARE @ProductMajorVersion INT = TRY_CAST(SERVERPROPERTY('ProductMajorVersion') AS INT);
 IF ISNULL(@ProductMajorVersion, 0) >= 16
 BEGIN
-	/*	
+	/*
 		Grant UNMASK on ApiKey column of AI.ServiceConfig to AIService and AIUser roles.  Revoke DB level UNMASK which might have been granted on older SQL versions.
 		Dynamic SQL to avoid syntax errors in older versions of SQL Server that do not support column-level UNMASK permissions
 	*/
@@ -42,7 +42,7 @@ DECLARE @GrantAppReadOnlySQL NVARCHAR(MAX);
 WITH Grants AS (
 		SELECT CONCAT('GRANT EXECUTE ON ',QUOTENAME(SCHEMA_NAME(schema_id)),'.',QUOTENAME(name),' TO AppReadOnly') GrantSQL
 		FROM sys.objects
-		WHERE name LIKE '%_Get' 
+		WHERE name LIKE '%_Get'
 		AND type = 'P'
 		AND SCHEMA_NAME(schema_id) IN('dbo','DBADash','Alert')
 		UNION ALL
@@ -65,7 +65,7 @@ GRANT EXEC ON TYPE::dbo.IDs TO AppReadOnly
 -- for setting timezone & theme
 GRANT EXEC ON DBADash.User_Upd TO AppReadOnly
 
-EXEC sp_executesql @GrantAppReadOnlySQL 
+EXEC sp_executesql @GrantAppReadOnlySQL
 
 /************/
 MERGE INTO [dbo].[SysConfigOptions] AS [Target]
@@ -178,20 +178,20 @@ USING (VALUES
 ) AS [Source] ([configuration_id],[name],[description],[is_dynamic],[is_advanced],[default_value],[minimum],[maximum])
 ON ([Target].[configuration_id] = [Source].[configuration_id])
 WHEN MATCHED AND (
-	NULLIF([Source].[name], [Target].[name]) IS NOT NULL OR NULLIF([Target].[name], [Source].[name]) IS NOT NULL OR 
-	NULLIF([Source].[description], [Target].[description]) IS NOT NULL OR NULLIF([Target].[description], [Source].[description]) IS NOT NULL OR 
-	NULLIF([Source].[is_dynamic], [Target].[is_dynamic]) IS NOT NULL OR NULLIF([Target].[is_dynamic], [Source].[is_dynamic]) IS NOT NULL OR 
-	NULLIF([Source].[is_advanced], [Target].[is_advanced]) IS NOT NULL OR NULLIF([Target].[is_advanced], [Source].[is_advanced]) IS NOT NULL OR 
-	NULLIF([Source].[default_value], [Target].[default_value]) IS NOT NULL OR NULLIF([Target].[default_value], [Source].[default_value]) IS NOT NULL OR 
-	NULLIF([Source].[minimum], [Target].[minimum]) IS NOT NULL OR NULLIF([Target].[minimum], [Source].[minimum]) IS NOT NULL OR 
+	NULLIF([Source].[name], [Target].[name]) IS NOT NULL OR NULLIF([Target].[name], [Source].[name]) IS NOT NULL OR
+	NULLIF([Source].[description], [Target].[description]) IS NOT NULL OR NULLIF([Target].[description], [Source].[description]) IS NOT NULL OR
+	NULLIF([Source].[is_dynamic], [Target].[is_dynamic]) IS NOT NULL OR NULLIF([Target].[is_dynamic], [Source].[is_dynamic]) IS NOT NULL OR
+	NULLIF([Source].[is_advanced], [Target].[is_advanced]) IS NOT NULL OR NULLIF([Target].[is_advanced], [Source].[is_advanced]) IS NOT NULL OR
+	NULLIF([Source].[default_value], [Target].[default_value]) IS NOT NULL OR NULLIF([Target].[default_value], [Source].[default_value]) IS NOT NULL OR
+	NULLIF([Source].[minimum], [Target].[minimum]) IS NOT NULL OR NULLIF([Target].[minimum], [Source].[minimum]) IS NOT NULL OR
 	NULLIF([Source].[maximum], [Target].[maximum]) IS NOT NULL OR NULLIF([Target].[maximum], [Source].[maximum]) IS NOT NULL) THEN
  UPDATE SET
-  [Target].[name] = [Source].[name], 
-  [Target].[description] = [Source].[description], 
-  [Target].[is_dynamic] = [Source].[is_dynamic], 
-  [Target].[is_advanced] = [Source].[is_advanced], 
-  [Target].[default_value] = [Source].[default_value], 
-  [Target].[minimum] = [Source].[minimum], 
+  [Target].[name] = [Source].[name],
+  [Target].[description] = [Source].[description],
+  [Target].[is_dynamic] = [Source].[is_dynamic],
+  [Target].[is_advanced] = [Source].[is_advanced],
+  [Target].[default_value] = [Source].[default_value],
+  [Target].[minimum] = [Source].[minimum],
   [Target].[maximum] = [Source].[maximum]
 WHEN NOT MATCHED BY TARGET THEN
  INSERT([configuration_id],[name],[description],[is_dynamic],[is_advanced],[default_value],[minimum],[maximum])
@@ -1133,10 +1133,10 @@ USING (VALUES
 ) AS [Source] ([WaitType],[IsCriticalWait],[Description])
 ON ([Target].[WaitType] = [Source].[WaitType])
 WHEN MATCHED AND (
-	NULLIF([Source].[IsCriticalWait], [Target].[IsCriticalWait]) IS NOT NULL OR NULLIF([Target].[IsCriticalWait], [Source].[IsCriticalWait]) IS NOT NULL OR 
+	NULLIF([Source].[IsCriticalWait], [Target].[IsCriticalWait]) IS NOT NULL OR NULLIF([Target].[IsCriticalWait], [Source].[IsCriticalWait]) IS NOT NULL OR
 	NULLIF([Source].[Description], [Target].[Description]) IS NOT NULL OR NULLIF([Target].[Description], [Source].[Description]) IS NOT NULL) THEN
  UPDATE SET
-  [Target].[IsCriticalWait] = [Source].[IsCriticalWait], 
+  [Target].[IsCriticalWait] = [Source].[IsCriticalWait],
   [Target].[Description] = [Source].[Description]
 WHEN NOT MATCHED BY TARGET THEN
  INSERT([WaitType],[IsCriticalWait],[Description])
@@ -1217,7 +1217,7 @@ FROM (VALUES('dbo','ObjectExecutionStats',120),
 				('dbo','ResourceGovernorWorkloadGroupsMetrics',90),
 				('dbo','ResourceGovernorResourcePoolsMetrics',90)
 				) AS t(SchemaName,TableName,RetentionDays)
-WHERE NOT EXISTS(SELECT 1 
+WHERE NOT EXISTS(SELECT 1
 				FROM dbo.DataRetention DR
 				WHERE DR.TableName = T.TableName
 				AND DR.SchemaName = T.SchemaName)
@@ -1231,34 +1231,34 @@ WHERE IsSystem=1
 MERGE INTO dbo.OSLoadedModulesStatus AS [Target]
 USING (
 	VALUES
-	( N'%', N'%', N'XTP Native DLL', 4,NULL,1 ), 
-	( N'%', N'Microsoft Corporation', N'%', 4,NULL,1 ), 
-	( N'%', N'Корпорация Майкрософт', N'%', 4, NULL,1 ), 
-	( N'%\ENTAPI.DLL', N'%', N'%', 1, N'McAfee VirusScan Enterprise',1 ), 
-	( N'%\HcApi.dll', N'%', N'%', 1, N'McAfee Host Intrusion',1  ), 
-	( N'%\HcSQL.dll', N'%', N'%', 1, N'McAfee Host Intrusion',1  ), 
-	( N'%\HcThe.dll', N'%', N'%', 1, N'McAfee Host Intrusion',1  ), 
-	( N'%\HIPI.DLL', N'%', N'%', 1, N'McAfee Host Intrusion',1  ), 
-	( N'%\PIOLEDB.DLL', N'%', N'%', 1, N'OSISoft PI data access',1  ), 
-	( N'%\PISDK.DLL', N'%', N'%', 1, N'OSISoft PI data access',1   ), 
-	( N'%\SOPHOS_DETOURED.DLL', N'%', N'%', 1,N'Sophos AV',1  ), 
-	( N'%\SOPHOS_DETOURED_x64.DLL', N'%', N'%', 1,N'Sophos AV',1  ), 
-	( N'%\SOPHOS~%.dll', N'%', N'%', 1,N'Sophos AV',1  ), 
-	( N'%\SWI_IFSLSP_64.dll', N'%', N'%', 1, N'Sophos AV',1  ), 
-	( N'%IisRTL.DLL', N'%', N'%', 4, NULL,1 ), 
-	( N'%iisutil.dll', N'%', N'%', 4, NULL,1 ), 
-	( N'%instapi.dll', N'%', N'%', 4, NULL,1 ), 
-	( N'%MSDART.DLL', N'%', N'%', 4, NULL,1 ), 
-	( N'%msxml3.dll', N'%', N'%', 4, NULL,1 ), 
-	( N'%msxmlsql.dll', N'%', N'%', 4, NULL,1 ), 
-	( N'%ODBC32.dll', N'%', N'%', 4, NULL,1 ), 
-	( N'%oledb32.dll', N'%', N'%', 4, NULL,1 ), 
-	( N'%OLEDB32R.DLL', N'%', N'%', 4, NULL,1 ), 
-	( N'%ScriptControl64%.dll', N'%', N'%', 1, N'CrowdStrike',1 ), 
-	( N'%UMPDC.dll', N'%', N'%', 4, NULL,1 ), 
-	( N'%umppc%.dll', N'%', N'%', 1, N'CrowdStrike',1 ), 
-	( N'%w3ctrs.dll', N'%', N'%', 4 , NULL,1 ), 
-	( N'%XmlLite.dll', N'%', N'%', 4, NULL,1 ), 
+	( N'%', N'%', N'XTP Native DLL', 4,NULL,1 ),
+	( N'%', N'Microsoft Corporation', N'%', 4,NULL,1 ),
+	( N'%', N'Корпорация Майкрософт', N'%', 4, NULL,1 ),
+	( N'%\ENTAPI.DLL', N'%', N'%', 1, N'McAfee VirusScan Enterprise',1 ),
+	( N'%\HcApi.dll', N'%', N'%', 1, N'McAfee Host Intrusion',1  ),
+	( N'%\HcSQL.dll', N'%', N'%', 1, N'McAfee Host Intrusion',1  ),
+	( N'%\HcThe.dll', N'%', N'%', 1, N'McAfee Host Intrusion',1  ),
+	( N'%\HIPI.DLL', N'%', N'%', 1, N'McAfee Host Intrusion',1  ),
+	( N'%\PIOLEDB.DLL', N'%', N'%', 1, N'OSISoft PI data access',1  ),
+	( N'%\PISDK.DLL', N'%', N'%', 1, N'OSISoft PI data access',1   ),
+	( N'%\SOPHOS_DETOURED.DLL', N'%', N'%', 1,N'Sophos AV',1  ),
+	( N'%\SOPHOS_DETOURED_x64.DLL', N'%', N'%', 1,N'Sophos AV',1  ),
+	( N'%\SOPHOS~%.dll', N'%', N'%', 1,N'Sophos AV',1  ),
+	( N'%\SWI_IFSLSP_64.dll', N'%', N'%', 1, N'Sophos AV',1  ),
+	( N'%IisRTL.DLL', N'%', N'%', 4, NULL,1 ),
+	( N'%iisutil.dll', N'%', N'%', 4, NULL,1 ),
+	( N'%instapi.dll', N'%', N'%', 4, NULL,1 ),
+	( N'%MSDART.DLL', N'%', N'%', 4, NULL,1 ),
+	( N'%msxml3.dll', N'%', N'%', 4, NULL,1 ),
+	( N'%msxmlsql.dll', N'%', N'%', 4, NULL,1 ),
+	( N'%ODBC32.dll', N'%', N'%', 4, NULL,1 ),
+	( N'%oledb32.dll', N'%', N'%', 4, NULL,1 ),
+	( N'%OLEDB32R.DLL', N'%', N'%', 4, NULL,1 ),
+	( N'%ScriptControl64%.dll', N'%', N'%', 1, N'CrowdStrike',1 ),
+	( N'%UMPDC.dll', N'%', N'%', 4, NULL,1 ),
+	( N'%umppc%.dll', N'%', N'%', 1, N'CrowdStrike',1 ),
+	( N'%w3ctrs.dll', N'%', N'%', 4 , NULL,1 ),
+	( N'%XmlLite.dll', N'%', N'%', 4, NULL,1 ),
 	( N'%xpsqlbot.dll', N'%', N'%', 4, NULL,1 ),
 	( N'%perfiCrcPerfMonMgr.DLL',N'%',N'%',1,N'Trend Micro',1),
 	( N'%MFEBOPK.SYS',N'%',N'%',1,N'McAfee VirusScan Enterprise',1),
@@ -1274,17 +1274,17 @@ USING (
 	)  [Source](Name,Company,Description,Status,Notes,IsSystem)
 ON ([Target].[Name] = [Source].[Name] AND [Target].[Company] = [Source].[Company] AND [Target].[Description] = [Source].[Description])
 WHEN MATCHED AND (
-	NULLIF([Source].[Status], [Target].[Status]) IS NOT NULL OR NULLIF([Target].[Status], [Source].[Status]) IS NOT NULL OR 
-	NULLIF([Source].[Notes], [Target].[Notes]) IS NOT NULL OR NULLIF([Target].[Notes], [Source].[Notes]) IS NOT NULL OR 
+	NULLIF([Source].[Status], [Target].[Status]) IS NOT NULL OR NULLIF([Target].[Status], [Source].[Status]) IS NOT NULL OR
+	NULLIF([Source].[Notes], [Target].[Notes]) IS NOT NULL OR NULLIF([Target].[Notes], [Source].[Notes]) IS NOT NULL OR
 	NULLIF([Source].[IsSystem], [Target].[IsSystem]) IS NOT NULL OR NULLIF([Target].[IsSystem], [Source].[IsSystem]) IS NOT NULL) THEN
 UPDATE SET
-  [Target].[Status] = [Source].[Status], 
-  [Target].[Notes] = [Source].[Notes], 
+  [Target].[Status] = [Source].[Status],
+  [Target].[Notes] = [Source].[Notes],
   [Target].[IsSystem] = [Source].[IsSystem]
 WHEN NOT MATCHED BY TARGET THEN
  INSERT([Name],[Company],[Description],[Status],[Notes],[IsSystem])
  VALUES([Source].[Name],[Source].[Company],[Source].[Description],[Source].[Status],[Source].[Notes],[Source].[IsSystem])
-WHEN NOT MATCHED BY SOURCE AND [Target].IsSystem=1 THEN 
+WHEN NOT MATCHED BY SOURCE AND [Target].IsSystem=1 THEN
  DELETE;
 
  IF @@ROWCOUNT>0
@@ -1293,7 +1293,7 @@ WHEN NOT MATCHED BY SOURCE AND [Target].IsSystem=1 THEN
  END
 
 IF NOT EXISTS(SELECT 1 FROM dbo.DriveThresholds)
-BEGIN 
+BEGIN
 	INSERT INTO dbo.DriveThresholds
 	(
 		InstanceID,
@@ -1382,7 +1382,7 @@ USING(
 	('TR','Trigger')
 	) AS S (ObjectType,TypeDescription)
 ON S.ObjectType = T.ObjectType
-WHEN MATCHED 
+WHEN MATCHED
 AND EXISTS (SELECT T.TypeDescription
 			EXCEPT
 			SELECT S.TypeDescription
@@ -1485,14 +1485,28 @@ BEGIN
 	INSERT INTO dbo.Settings(SettingName,SettingValue) VALUES('CollectionDatesLegacyThresholdsMigrated',1)
 END
 
+-- SchemaSnapshot's "last collected" date is not a reliable staleness signal even when it's configured and
+-- running - a configured DB pattern (e.g. "*") can still match zero databases at runtime. Disable alerting
+-- for it by default at root level; an admin can still re-enable/configure it explicitly per instance or
+-- root.  One-time seed only (gated below), so a later admin change isn't overwritten on next deploy.
+IF NOT EXISTS(SELECT 1 FROM dbo.Settings WHERE SettingName = 'SchemaSnapshotAlertingDisabledByDefault')
+BEGIN
+	IF NOT EXISTS(SELECT 1 FROM dbo.CollectionDatesThresholds WHERE InstanceID = -1 AND Reference = 'SchemaSnapshot')
+	BEGIN
+		INSERT INTO dbo.CollectionDatesThresholds(InstanceID,Reference,Disabled)
+		VALUES(-1,'SchemaSnapshot',1)
+	END
+	INSERT INTO dbo.Settings(SettingName,SettingValue) VALUES('SchemaSnapshotAlertingDisabledByDefault',1)
+END
+
 UPDATE dbo.CollectionDates
 	SET Reference = 'DatabasesHADR'
 WHERE Reference = 'DatabaseHADR'
 
-DELETE CD 
+DELETE CD
 FROM dbo.CollectionDates CD
 WHERE Reference='DatabasesHADR'
-AND NOT EXISTS(SELECT 1 
+AND NOT EXISTS(SELECT 1
 		FROM dbo.DatabasesHADR HA
 		JOIN dbo.Databases D ON D.DatabaseID = HA.DatabaseID
 		WHERE D.InstanceID = CD.InstanceID)
@@ -1555,10 +1569,10 @@ USING (VALUES
 ) AS [Source] ([configuration_id],[name],[default_value])
 ON ([Target].[configuration_id] = [Source].[configuration_id])
 WHEN MATCHED AND (
-	NULLIF([Source].[name], [Target].[name]) IS NOT NULL OR NULLIF([Target].[name], [Source].[name]) IS NOT NULL OR 
+	NULLIF([Source].[name], [Target].[name]) IS NOT NULL OR NULLIF([Target].[name], [Source].[name]) IS NOT NULL OR
 	NULLIF([Source].[default_value], [Target].[default_value]) IS NOT NULL OR NULLIF([Target].[default_value], [Source].[default_value]) IS NOT NULL) THEN
  UPDATE SET
-  [Target].[name] = [Source].[name], 
+  [Target].[name] = [Source].[name],
   [Target].[default_value] = [Source].[default_value]
 WHEN NOT MATCHED BY TARGET THEN
  INSERT([configuration_id],[name],[default_value])
@@ -1614,7 +1628,7 @@ WHEN MATCHED AND (
 WHEN NOT MATCHED BY TARGET THEN
  INSERT([object_name],[counter_name],[base_counter_name])
  VALUES([Source].[object_name],[Source].[counter_name],[Source].[base_counter_name])
-WHEN NOT MATCHED BY SOURCE THEN 
+WHEN NOT MATCHED BY SOURCE THEN
 	DELETE;
 
  IF NOT EXISTS(SELECT 1 FROM dbo.AzureDBElasticPoolStorageThresholds)
@@ -1648,10 +1662,10 @@ BEGIN
 		-1,
 		0.2,
 		0.1,
-		'%',  
-		0.8, 
-		0.9, 
-		1 
+		'%',
+		0.8,
+		0.9,
+		1
 		)
 END
 IF NOT EXISTS(SELECT 1 FROM dbo.DBFileThresholds WHERE InstanceID =-1 AND DatabaseID = -1 AND data_space_id=0)
@@ -1675,9 +1689,9 @@ BEGIN
 		0,
 		0.2,
 		0.1,
-		'%',  
-		0.8, 
-		0.9, 
+		'%',
+		0.8,
+		0.9,
 		0
 		)
 END
@@ -1703,7 +1717,7 @@ BEGIN
 			SUM(PC.Value),
 			MIN(PC.Value),
 			MAX(PC.Value),
-			COUNT(*)  
+			COUNT(*)
 	FROM dbo.PerformanceCounters PC
 	CROSS APPLY [dbo].[DateGroupingMins](PC.SnapshotDate,60) DG
 	GROUP BY  PC.InstanceID,
@@ -1825,20 +1839,20 @@ USING (VALUES
 ('USERSTORE_TOKENPERM','TokenAndPermUserStore is a single SOS user store that keeps track of security entries for security context, login, user, permission, and audit. Multiple hash tables are allocated to store these objects.')
 ) AS S(MemoryClerkType,MemoryClerkDescription)
 ON S.MemoryClerkType = T.MemoryClerkType
-WHEN MATCHED AND (NULLIF(S.MemoryClerkDescription,T.MemoryClerkDescription) IS NOT NULL OR NULLIF(T.MemoryClerkDescription,S.MemoryClerkDescription) IS NOT NULL) THEN 
-UPDATE SET 
+WHEN MATCHED AND (NULLIF(S.MemoryClerkDescription,T.MemoryClerkDescription) IS NOT NULL OR NULLIF(T.MemoryClerkDescription,S.MemoryClerkDescription) IS NOT NULL) THEN
+UPDATE SET
 T.MemoryClerkDescription = S.MemoryClerkDescription
 WHEN NOT MATCHED BY TARGET THEN
 INSERT(MemoryClerkType,MemoryClerkDescription)
 VALUES(S.MemoryClerkType,S.MemoryClerkDescription);
 
-IF NOT EXISTS(SELECT 1 
+IF NOT EXISTS(SELECT 1
 			FROM dbo.Settings
 			WHERE SettingName = 'InstanceTagIDsMigratedDate'
 			)
 BEGIN
 	PRINT 'Migrating Tags'
-	/* 
+	/*
 		Migrate tags from InstanceTags to InstanceIDsTags table
 		Excluding user tags on AzureDB
 	*/
@@ -1848,19 +1862,19 @@ BEGIN
 	)
 	SELECT I.InstanceID,
 			IT.TagID
-	FROM dbo.InstanceTags IT 
-	JOIN dbo.Instances I ON IT.Instance = I.Instance 
+	FROM dbo.InstanceTags IT
+	JOIN dbo.Instances I ON IT.Instance = I.Instance
 	JOIN dbo.Tags T ON IT.TagID = T.TagID
 	WHERE NOT (I.EngineEdition=5 AND T.TagName NOT LIKE '{%')
-	AND NOT EXISTS(SELECT 1 
-					FROM dbo.InstanceIDsTags IDT 
-					WHERE IT.TagID = IDT.TagID 
+	AND NOT EXISTS(SELECT 1
+					FROM dbo.InstanceIDsTags IDT
+					WHERE IT.TagID = IDT.TagID
 					AND I.InstanceID = IDT.InstanceID
 					)
 
-	DELETE IT 
-	FROM dbo.InstanceTags IT 
-	JOIN dbo.Instances I ON IT.Instance = I.Instance 
+	DELETE IT
+	FROM dbo.InstanceTags IT
+	JOIN dbo.Instances I ON IT.Instance = I.Instance
 	JOIN dbo.Tags T ON IT.TagID = T.TagID
 	WHERE NOT (I.EngineEdition=5 AND T.TagName NOT LIKE '{%')
 
@@ -1878,16 +1892,16 @@ USING (VALUES
 	('Plan Cache','Cache Object Counts','_Total',0,200,200,1000,NULL,NULL),
 	('General Statistics','Processes blocked','',50,9999999999999999999.999999999,1,50,0,0)
 ) AS S (object_name,counter_name,instance_name,SystemCriticalFrom,SystemCriticalTo,SystemWarningFrom,SystemWarningTo,SystemGoodFrom,SystemGoodTo)
-ON T.object_name = S.object_name AND T.counter_name = S.counter_name AND T.instance_name = S.instance_name 
-WHEN MATCHED THEN 
+ON T.object_name = S.object_name AND T.counter_name = S.counter_name AND T.instance_name = S.instance_name
+WHEN MATCHED THEN
 UPDATE SET T.SystemCriticalFrom = S.SystemCriticalFrom,
 			T.SystemCriticalTo = S.SystemCriticalTo,
 			T.SystemWarningFrom = S.SystemWarningfrom,
 			T.SystemWarningTo = S.SystemWarningTo,
 			T.SystemGoodFrom = S.SystemGoodFrom,
 			T.SystemGoodTo = S.SystemGoodTo,
-			/* 
-				Set user values to NULL if they match system value and system value isn't set yet.  Handling upgrades before System columns were added 
+			/*
+				Set user values to NULL if they match system value and system value isn't set yet.  Handling upgrades before System columns were added
 				System thresholds can always be updated now without impacting user preferences
 			*/
 			T.CriticalFrom = CASE WHEN T.CriticalFrom = S.SystemCriticalFrom AND T.SystemCriticalFrom IS NULL THEN NULL  ELSE T.CriticalFrom END,
@@ -1916,12 +1930,12 @@ WHEN MATCHED AND (
 WHEN NOT MATCHED BY TARGET THEN
  INSERT([ViewTypeID],[ViewType])
  VALUES([Source].[ViewTypeID],[Source].[ViewType])
-WHEN NOT MATCHED BY SOURCE THEN 
+WHEN NOT MATCHED BY SOURCE THEN
  DELETE;
 
 IF NOT EXISTS(
-		SELECT 1 
-		FROM DBADash.Users 
+		SELECT 1
+		FROM DBADash.Users
 		WHERE UserID=-1
 		)
 BEGIN
@@ -1935,7 +1949,7 @@ BEGIN
 	SET IDENTITY_INSERT DBADash.Users OFF
 END
 
-IF NOT EXISTS(SELECT 1 
+IF NOT EXISTS(SELECT 1
 			FROM dbo.IdentityColumnThresholds
 			WHERE InstanceID=-1
 			AND DatabaseID=-1
@@ -1970,7 +1984,7 @@ WHEN MATCHED AND (
 WHEN NOT MATCHED BY TARGET THEN
  INSERT([NotificationChannelTypeID],[NotificationChannelType])
  VALUES([Source].[NotificationChannelTypeID],[Source].[NotificationChannelType])
-WHEN NOT MATCHED BY SOURCE THEN 
+WHEN NOT MATCHED BY SOURCE THEN
  DELETE;
 
 /* Add default notification channel group. */
@@ -1981,7 +1995,7 @@ BEGIN
 	SET IDENTITY_INSERT Alert.NotificationChannelGroup OFF
 END
 
-/* 
+/*
 	ResourceGovernorConfiguration collection no longer run non-enterprise edition engines.
 	Remove the row from CollectionDates to prevent warnings about snapshot age for this collection
 	where it's no longer applicable.
@@ -1996,7 +2010,7 @@ AND NOT EXISTS(SELECT 1
 	AND I.EngineEdition = 3 /* Enterprise */
 )
 
-UPDATE dbo.Instances 
+UPDATE dbo.Instances
 	SET ProductMinorVersion = TRY_CAST(PARSENAME(ProductVersion,3) AS INT),
 		ProductBuild= TRY_CAST(PARSENAME(ProductVersion,2) AS INT),
 		ProductRevision = TRY_CAST(PARSENAME(ProductVersion,1) AS INT)
@@ -2008,7 +2022,7 @@ INSERT INTO dbo.Counters(
 	instance_name,
 	CounterType
 )
-SELECT object_name,counter_name,instance_name,CounterType 
+SELECT object_name,counter_name,instance_name,CounterType
 FROM (VALUES('Running Queries','Running Query Count','',2),
 	('Running Queries','Blocked Query Count','',2),
 	('Running Queries','Oldest Transaction (ms)','',2),
@@ -2035,8 +2049,8 @@ FROM (VALUES('Running Queries','Running Query Count','',2),
 	('sys.dm_db_resource_stats', 'cpu_limit','',4)
 	) VirtualCounters(object_name,counter_name,instance_name,CounterType)
 WHERE NOT EXISTS(
-				SELECT 1 
-				FROM dbo.Counters C 
+				SELECT 1
+				FROM dbo.Counters C
 				WHERE C.counter_name = VirtualCounters.counter_name
 				AND C.object_name = VirtualCounters.object_name
 				AND C.instance_name = VirtualCounters.instance_name
@@ -2087,7 +2101,7 @@ FROM (VALUES -- AG aggregate
 			('Databases Dropped',1,0,'Databases')
 		) M(MetricName,IsAggregate,IsEnabled,MetricType)
 WHERE NOT EXISTS(
-				SELECT 1 
+				SELECT 1
 				FROM dbo.RepositoryMetricsConfig AGM
 				WHERE M.MetricName = AGM.MetricName
 				AND AGM.InstanceID = -1
@@ -2252,7 +2266,7 @@ BEGIN
 END
 /* Migrate LogRestores data from old schema */
 IF OBJECT_ID('dbo.LogRestoresTemp') IS NOT NULL
-BEGIN 
+BEGIN
 
 	INSERT INTO dbo.LogRestores(
 			InstanceID,
@@ -2267,11 +2281,11 @@ BEGIN
 			T.restore_date,
 			T.backup_start_date,
 			T.last_file,
-			T.backup_time_zone	 
+			T.backup_time_zone
 	FROM dbo.LogRestoresTemp T
 	JOIN dbo.Databases D ON D.DatabaseID = T.DatabaseID
-	WHERE NOT EXISTS(SELECT 1 
-					FROM dbo.LogRestores LR 
+	WHERE NOT EXISTS(SELECT 1
+					FROM dbo.LogRestores LR
 					WHERE LR.InstanceID = D.InstanceID
 					AND LR.DatabaseID = T.DatabaseID
 					)
@@ -2290,7 +2304,7 @@ END
 ALTER TABLE dbo.DBFiles SET (LOCK_ESCALATION = DISABLE);
 ALTER TABLE dbo.DBFileSnapshot SET (LOCK_ESCALATION = DISABLE);
 
-/* 
+/*
 	Changes between 4.7.1 and 4.8.0 resulted in Alert.ActiveAlerts table rebuild which can reset the identity value.
 	This can cause issues closing alerts due to re-use of identity values.  The proc below will detect and fix the issue for existing deployments.
 */
@@ -2303,7 +2317,7 @@ BEGIN
 		(N'claude-opus-4-7', N'Claude Opus 4.7', 2, 1);
 END
 
-/* 
+/*
 	Update extended property to indicate that a DB deployment is no longer in progress, allowing the GUI to continue loading.
 */
 EXECUTE sp_updateextendedproperty
