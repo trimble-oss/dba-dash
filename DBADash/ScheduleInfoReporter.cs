@@ -61,6 +61,14 @@ namespace DBADashService
 
             foreach (var (type, schedule) in effectiveSchedule)
             {
+                if (type == CollectionType.SchemaSnapshot && source.SchemaSnapshotDBs is not { Length: > 0 })
+                {
+                    // SchedulerService only ever schedules a SchemaSnapshot job when at least one DB is
+                    // configured for it - otherwise it never collects, so reporting a schedule for it here
+                    // would make it look like a permanently-stale/Critical reference instead of simply not
+                    // applicable to this instance.
+                    continue;
+                }
                 AddRow(dt, type.ToString(), schedule,
                     source.CollectionSchedules != null && source.CollectionSchedules.ContainsKey(type));
             }

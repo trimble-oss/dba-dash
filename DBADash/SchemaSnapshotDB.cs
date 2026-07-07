@@ -954,6 +954,7 @@ namespace DBADash
             }
             Log.Information("DB Snapshots from instance {source}", src.SourceConnection.ConnectionForPrint);
 
+            var matchedCount = 0;
             foreach (Database db in instance.Databases)
             {
                 if (!db.IsUpdateable || !db.IsAccessible || db.IsSystemObject) continue;
@@ -961,6 +962,7 @@ namespace DBADash
                 var include = dbs.Any(strDB => strDB == "*" || string.Equals(strDB, db.Name, StringComparison.OrdinalIgnoreCase)) &&
                               !dbs.Any(strDB => strDB.StartsWith('-') && string.Equals(strDB[1..], db.Name, StringComparison.OrdinalIgnoreCase));
                 if (!include) continue;
+                matchedCount++;
 
                 Log.Information("DB Snapshot {db} from instance {instance}", db.Name, builder.DataSource);
                 DataTable dt = null;
@@ -987,6 +989,15 @@ namespace DBADash
                     dsSnapshot.Tables.Remove(dt);
                 }
                 collector.ClearErrors();
+            }
+
+            if (matchedCount == 0)
+            {
+                // The job "ran" but did nothing - no error to catch, so nothing else would otherwise
+                // surface this. Without at least one match, dbo.CollectionDates for SchemaSnapshot never
+                // gets touched here, so its age grows indefinitely with no other indication why.
+                Log.Warning("SchemaSnapshotDBs ({schemaSnapshotDBs}) matched no databases on {instance} - schema snapshot will not run until this is corrected",
+                    src.SchemaSnapshotDBs, src.SourceConnection.ConnectionForPrint);
             }
         }
     }
