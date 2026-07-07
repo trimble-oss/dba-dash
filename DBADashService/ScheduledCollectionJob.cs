@@ -135,11 +135,15 @@ namespace DBADashService
 
             var typesSet = new HashSet<CollectionType>(collectionTypes);
             var hasSnapshot = typesSet.Contains(CollectionType.SchemaSnapshot);
+            // SchemaSnapshot is never collected as part of a normal WorkItem - it has its own work item.
             var typesWithoutSnapshot = hasSnapshot
                 ? collectionTypes.Where(c => c != CollectionType.SchemaSnapshot).ToArray()
                 : collectionTypes;
 
-            if (hasSnapshot)
+            // Only enqueue a schema snapshot when this instance actually has snapshot DBs configured.
+            // The schedule's type set is shared across all instances in the group, so hasSnapshot alone
+            // isn't enough - without this guard every instance on the schedule would attempt a snapshot.
+            if (hasSnapshot && source.SchemaSnapshotDBs is { Length: > 0 })
             {
                 var snapshotWorkItem = new SchemaSnapshotWorkItem
                 {
@@ -149,10 +153,12 @@ namespace DBADashService
 
                 enqueueTasks.Add(_workQueue.EnqueueAsync(snapshotWorkItem, context.CancellationToken));
                 enqueueCount++;
-                if (typesWithoutSnapshot.Length == 0 && customCollections.Count == 0)
-                {
-                    return enqueueCount;
-                }
+            }
+
+            if (typesWithoutSnapshot.Length == 0 && customCollections.Count == 0)
+            {
+                // Nothing left to collect (e.g. a snapshot-only schedule) - avoid enqueuing an empty work item.
+                return enqueueCount;
             }
 
             var workItem = new WorkItem

@@ -580,12 +580,19 @@ namespace DBADashService
                         foreach (var s in groupedSchedule)
                         {
                             if (string.IsNullOrEmpty(s.Key)) continue; /* Collection is disabled */
-                            var collections = RemoveNotApplicableCollections(s.Value);
-
+                            // SchemaSnapshot is handled separately below, not as a regular collection job
+                            var collections = RemoveNotApplicableCollections(s.Value)
+                                .Where(c => c != CollectionType.SchemaSnapshot)
+                                .ToArray();
                             var custom = customCollections
                                 .Where(c => c.Value.NormalizedSchedule == s.Key)
                                 .ToDictionary(c => c.Key, c => c.Value);
-                            var job = GetJob(collections.ToArray(), src, cfgString, custom, s.Key);
+                            if (collections.Length == 0 && custom.Count == 0)
+                            {
+                                continue; // No collections to schedule for this time slot
+                            }
+
+                            var job = GetJob(collections, src, cfgString, custom, s.Key);
                             Log.Information("Add schedule for {source} to collect {collection},{custom} on schedule {schedule}", src.SourceConnection.ConnectionForPrint, collections, custom.Keys, s.Key);
                             ScheduleJob(s.Key, job);
                         }
