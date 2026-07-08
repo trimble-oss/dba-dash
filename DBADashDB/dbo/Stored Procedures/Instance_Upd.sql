@@ -79,11 +79,28 @@ BEGIN
 	IF @InstanceID IS NULL
 	BEGIN
 		BEGIN TRAN
+		/*	@InstanceID was read without a lock at the top of the proc, so two concurrent imports for a
+			new ConnectionID can both reach this branch and race to INSERT, causing a duplicate key
+			violation on IX_Instances_ConnectionID (and a cascading NULL InstanceID error inserting into
+			CollectionDates).  Re-read under UPDLOCK,HOLDLOCK to serialize: the first session inserts, any
+			concurrent session blocks until it commits, then finds the row and skips the insert. */
+		SELECT @InstanceID = InstanceID
+		FROM dbo.Instances WITH (UPDLOCK, HOLDLOCK)
+		WHERE ConnectionID = @ConnectionID
+
+		IF @InstanceID IS NOT NULL
+		BEGIN
+			/* A concurrent import won the race: it already created the instance and recorded the
+			   collection date, so there is nothing more to do here. */
+			COMMIT
+			RETURN
+		END
+
 		INSERT INTO dbo.Instances(Instance,ConnectionID,IsActive,EditionID,UTCOffset,CollectAgentID,ImportAgentID,EngineEdition,IsRDS)
 		VALUES(@Instance,@ConnectionID,CAST(1 as BIT),@EditionID,@UTCOffset,@CollectAgentID,@ImportAgentID,@EngineEdition,@IsRDS)
 		SELECT @InstanceID = SCOPE_IDENTITY();
 
-		EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  
+		EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,
 										 @Reference = @Ref,
 										 @SnapshotDate = @SnapshotDate
 		COMMIT
