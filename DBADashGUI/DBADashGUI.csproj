@@ -211,22 +211,22 @@
     <ProjectReference Include="..\DBADash\DBADash.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AsyncKeyedLock" Version="8.0.2" />
-    <PackageReference Include="ClosedXML" Version="0.105.0" />
-    <PackageReference Include="CommandLineParser" Version="2.9.1" />
-    <PackageReference Include="DiffPlex" Version="1.9.0" />
-    <PackageReference Include="DiffPlex.Wpf" Version="1.9.1" />
-    <PackageReference Include="Humanizer" Version="3.0.10" />
-    <PackageReference Include="LiveChartsCore.SkiaSharpView.WinForms" Version="2.0.5" />
-    <PackageReference Include="Microsoft.Data.SqlClient.Extensions.Azure" Version="1.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.9" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.9" />
-    <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="181.25.0" />
-    <PackageReference Include="Microsoft.SqlServer.TransactSql.ScriptDom" Version="180.37.3" />
-    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4022.49" />
-    <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
-    <PackageReference Include="System.Data.SqlClient" Version="4.9.1" />
-    <PackageReference Include="System.Windows.Forms.DataVisualization" Version="1.0.0-prerelease.20110.1" />
+    <PackageReference Include="AsyncKeyedLock" />
+    <PackageReference Include="ClosedXML" />
+    <PackageReference Include="CommandLineParser" />
+    <PackageReference Include="DiffPlex" />
+    <PackageReference Include="DiffPlex.Wpf" />
+    <PackageReference Include="Humanizer" />
+    <PackageReference Include="LiveChartsCore.SkiaSharpView.WinForms" />
+    <PackageReference Include="Microsoft.Data.SqlClient.Extensions.Azure" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Options" />
+    <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" />
+    <PackageReference Include="Microsoft.SqlServer.TransactSql.ScriptDom" />
+    <PackageReference Include="Microsoft.Web.WebView2" />
+    <PackageReference Include="System.Data.DataSetExtensions" />
+    <PackageReference Include="System.Data.SqlClient" />
+    <PackageReference Include="System.Windows.Forms.DataVisualization" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Update="Properties\Resources.resx">

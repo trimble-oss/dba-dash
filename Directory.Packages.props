@@ -1,0 +1,116 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="AsyncKeyedLock" Version="8.0.2" />
+    <PackageVersion Include="AvalonEdit" Version="6.3.1.120" />
+    <PackageVersion Include="AWSSDK.Core" Version="4.0.100" />
+    <PackageVersion Include="AWSSDK.S3" Version="4.0.100" />
+    <PackageVersion Include="AWSSDK.SQS" Version="4.0.100" />
+    <PackageVersion Include="Azure.Core" Version="1.59.0" />
+    <PackageVersion Include="Azure.Extensions.AspNetCore.Configuration.Secrets" Version="1.5.1" />
+    <PackageVersion Include="Azure.Identity" Version="1.21.0" />
+    <PackageVersion Include="ClosedXML" Version="0.105.0" />
+    <PackageVersion Include="CommandLineParser" Version="2.9.1" />
+    <PackageVersion Include="Common.Logging" Version="3.4.1" />
+    <PackageVersion Include="Common.Logging.Core" Version="3.4.1" />
+    <PackageVersion Include="coverlet.collector" Version="10.0.1" />
+    <PackageVersion Include="CronExpressionDescriptor" Version="2.50.0" />
+    <PackageVersion Include="DiffPlex" Version="1.9.0" />
+    <PackageVersion Include="DiffPlex.Wpf" Version="1.9.1" />
+    <PackageVersion Include="Humanizer" Version="3.0.10" />
+    <PackageVersion Include="Humanizer.Core" Version="3.0.10" />
+    <PackageVersion Include="LiveChartsCore.SkiaSharpView.WinForms" Version="2.0.5" />
+    <PackageVersion Include="MailKit" Version="4.17.0" />
+    <PackageVersion Include="Markdig" Version="1.3.2" />
+    <PackageVersion Include="Markdig.SyntaxHighlighting" Version="1.1.7" />
+    <PackageVersion Include="Meziantou.Framework.Win32.CredentialManager" Version="2.0.2" />
+    <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="10.0.9" />
+
+    <!--
+      Microsoft.Data.SqlClient / Extensions.Azure / Microsoft.Identity.Client(.Extensions.Msal):
+      DELIBERATELY PINNED below their latest available versions.
+      SqlClient 7.0.2 + Extensions.Azure 7.0.2 (paired with Identity.Client 4.85.2) breaks Microsoft
+      Entra ID authentication (ActiveDirectoryIntegrated / ActiveDirectoryPassword) with
+      "unknown_broker_error" when run from a non-interactive Windows Service - see
+      https://github.com/trimble-oss/dba-dash/issues/1964 and the upstream report at
+      https://github.com/dotnet/SqlClient/issues/4426.
+      Do NOT bump these via a bulk "Update NuGet Packages" pass - only raise this pin intentionally,
+      once the upstream issue is confirmed fixed, and re-test the Windows Service scenario specifically.
+    -->
+    <PackageVersion Include="Microsoft.Data.SqlClient" Version="7.0.1" />
+    <PackageVersion Include="Microsoft.Data.SqlClient.Extensions.Azure" Version="1.0.0" />
+    <PackageVersion Include="Microsoft.Identity.Client" Version="4.84.2" />
+    <PackageVersion Include="Microsoft.Identity.Client.Extensions.Msal" Version="4.84.2" />
+
+    <PackageVersion Include="Microsoft.DotNet.PlatformAbstractions" Version="3.1.6" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="10.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.FileExtensions" Version="10.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="10.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.Diagnostics.Abstractions" Version="10.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.FileProviders.Abstractions" Version="10.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.FileProviders.Physical" Version="10.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.FileSystemGlobbing" Version="10.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.Primitives" Version="10.0.9" />
+    <PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.19.1" />
+    <PackageVersion Include="Microsoft.IdentityModel.Logging" Version="8.19.1" />
+    <PackageVersion Include="Microsoft.IdentityModel.Protocols" Version="8.19.1" />
+    <PackageVersion Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.19.1" />
+    <PackageVersion Include="Microsoft.IdentityModel.Tokens" Version="8.19.1" />
+    <PackageVersion Include="Microsoft.Management.Infrastructure" Version="3.0.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.7.0" />
+    <PackageVersion Include="Microsoft.PowerShell.SDK" Version="7.6.3" />
+    <PackageVersion Include="Microsoft.SqlServer.Assessment" Version="1.1.17" />
+    <PackageVersion Include="Microsoft.SqlServer.Assessment.Authoring" Version="1.1.0" />
+    <PackageVersion Include="Microsoft.SqlServer.DacFx" Version="170.4.83" />
+    <PackageVersion Include="Microsoft.SqlServer.Management.SqlParser" Version="180.4.0" />
+    <PackageVersion Include="Microsoft.SqlServer.SqlManagementObjects" Version="181.25.0" />
+    <PackageVersion Include="Microsoft.SqlServer.TransactSql.ScriptDom" Version="180.37.3" />
+    <PackageVersion Include="Microsoft.Web.WebView2" Version="1.0.4022.49" />
+    <PackageVersion Include="MSTest.TestAdapter" Version="4.2.3" />
+    <PackageVersion Include="MSTest.TestFramework" Version="4.2.3" />
+    <PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageVersion Include="Octokit" Version="14.0.0" />
+    <PackageVersion Include="Polly.Core" Version="8.7.0" />
+    <PackageVersion Include="Quartz" Version="3.18.2" />
+    <PackageVersion Include="Serilog" Version="4.3.1" />
+    <PackageVersion Include="Serilog.Enrichers.Thread" Version="4.0.0" />
+    <PackageVersion Include="Serilog.Extensions.Hosting" Version="10.0.0" />
+    <PackageVersion Include="Serilog.Extensions.Logging" Version="10.0.0" />
+    <PackageVersion Include="Serilog.Formatting.Compact" Version="3.0.0" />
+    <PackageVersion Include="Serilog.Settings.Configuration" Version="10.0.1" />
+    <PackageVersion Include="Serilog.Sinks.Async" Version="2.1.0" />
+    <PackageVersion Include="Serilog.Sinks.Console" Version="6.1.1" />
+    <PackageVersion Include="Serilog.Sinks.File" Version="7.0.0" />
+    <PackageVersion Include="Serilog.Sinks.PeriodicBatching" Version="5.0.0" />
+    <PackageVersion Include="Serilog.Sinks.Seq" Version="9.1.0" />
+    <PackageVersion Include="SerilogTimings" Version="3.1.0" />
+    <PackageVersion Include="System.ComponentModel.Composition" Version="10.0.9" />
+    <PackageVersion Include="System.Configuration.ConfigurationManager" Version="10.0.9" />
+    <PackageVersion Include="System.Data.DataSetExtensions" Version="4.5.0" />
+    <PackageVersion Include="System.Data.SqlClient" Version="4.9.1" />
+    <PackageVersion Include="System.Drawing.Common" Version="10.0.9" />
+    <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.19.1" />
+    <PackageVersion Include="System.IO.Packaging" Version="10.0.9" />
+    <PackageVersion Include="System.Management" Version="10.0.9" />
+    <PackageVersion Include="System.Management.Automation" Version="7.6.3" />
+    <PackageVersion Include="System.Memory.Data" Version="10.0.9" />
+    <PackageVersion Include="System.Runtime.Caching" Version="10.0.9" />
+    <PackageVersion Include="System.Security.Cryptography.ProtectedData" Version="10.0.9" />
+    <PackageVersion Include="System.Security.Cryptography.Xml" Version="10.0.9" />
+    <PackageVersion Include="System.Security.Permissions" Version="10.0.9" />
+    <PackageVersion Include="System.ServiceProcess.ServiceController" Version="10.0.9" />
+    <PackageVersion Include="System.Windows.Forms.DataVisualization" Version="1.0.0-prerelease.20110.1" />
+  </ItemGroup>
+</Project>
