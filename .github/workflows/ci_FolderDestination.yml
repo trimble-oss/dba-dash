@@ -201,22 +201,24 @@ jobs:
           ./Scripts/Get-LogContent -LogPath  "C:\DBADashReadFromFolder\Logs" -ThrowError
 
       - name: Run Pester Tests FromFolder
-        shell: powershell
-        run: |     
-          try { $null = Get-PSRepository -Name PSGallery -ErrorAction Stop } catch {
-            Register-PSRepository -Default -ErrorAction SilentlyContinue
-            if (-not (Get-PSRepository -Name PSGallery -ErrorAction SilentlyContinue)) {
-              Register-PSRepository -Name PSGallery -SourceLocation https://www.powershellgallery.com/api/v2 -InstallationPolicy Trusted
-            }
+        shell: pwsh
+        run: |
+          # pwsh ships Pester 5.x preinstalled; only install if it is missing
+          if (-not (Get-Module -ListAvailable -Name Pester | Where-Object { $_.Version -ge [version]'5.0.0' })) {
+            Install-Module Pester -Force -SkipPublisherCheck -Scope CurrentUser -MinimumVersion 5.0.0
           }
-          Install-Module Pester -Force -SkipPublisherCheck
-          Import-Module Pester -PassThru
+          Import-Module Pester -MinimumVersion 5.0.0
           $container = New-PesterContainer -Path 'Scripts\CI_Workflow.Tests.ps1' -Data @{ Database = "DBADashDB_FromFolder" }
           Invoke-Pester -Container $container -Output Detailed
 
       - name: Run Pester Tests Direct
-        shell: powershell
-        run: |     
-            $container = New-PesterContainer -Path 'Scripts\CI_Workflow.Tests.ps1' -Data @{ Database = "DBADashDB_Direct" }
-            Invoke-Pester -Container $container -Output Detailed
+        shell: pwsh
+        run: |
+          # pwsh ships Pester 5.x preinstalled; only install if it is missing
+          if (-not (Get-Module -ListAvailable -Name Pester | Where-Object { $_.Version -ge [version]'5.0.0' })) {
+            Install-Module Pester -Force -SkipPublisherCheck -Scope CurrentUser -MinimumVersion 5.0.0
+          }
+          Import-Module Pester -MinimumVersion 5.0.0
+          $container = New-PesterContainer -Path 'Scripts\CI_Workflow.Tests.ps1' -Data @{ Database = "DBADashDB_Direct" }
+          Invoke-Pester -Container $container -Output Detailed
       
