@@ -1485,6 +1485,33 @@ BEGIN
 	INSERT INTO dbo.Settings(SettingName,SettingValue) VALUES('CollectionDatesLegacyThresholdsMigrated',1)
 END
 
+-- Separate gate from CollectionDatesLegacyThresholdsMigrated above (even though both are one-time
+-- threshold migrations) - a beta user may have already deployed a build that ran that gate before this
+-- Disabled backfill existed, which would leave their flag already set and this logic permanently skipped
+-- if it were folded into the same gate.
+--
+-- Before the Disabled column existed, WarningThreshold=NULL AND CriticalThreshold=NULL was the ONLY way
+-- to represent "monitoring disabled" for a reference - there was no separate flag, and the
+-- multiplier/buffer columns (which now distinguish that from Schedule Based) didn't exist either.
+-- Without this, every pre-existing "disabled" row would silently pick up Disabled's new default of 0 and
+-- re-enable alerting on upgrade.  Require the multiplier/buffer columns to be NULL too - a real legacy row
+-- will always have them NULL (they didn't exist yet), whereas the current GUI always writes non-null
+-- values for Schedule Based, so this can't misfire on a row saved by current code.
+IF NOT EXISTS(SELECT 1 FROM dbo.Settings WHERE SettingName = 'CollectionDatesThresholdsDisabledFlagMigrated')
+BEGIN
+	UPDATE dbo.CollectionDatesThresholds
+	SET Disabled = 1
+	WHERE WarningThreshold IS NULL
+	AND CriticalThreshold IS NULL
+	AND WarningMultiplier IS NULL
+	AND CriticalMultiplier IS NULL
+	AND WarningBufferMinutes IS NULL
+	AND CriticalBufferMinutes IS NULL
+	AND Disabled = 0
+
+	INSERT INTO dbo.Settings(SettingName,SettingValue) VALUES('CollectionDatesThresholdsDisabledFlagMigrated',1)
+END
+
 -- SchemaSnapshot's "last collected" date is not a reliable staleness signal even when it's configured and
 -- running - a configured DB pattern (e.g. "*") can still match zero databases at runtime. Disable alerting
 -- for it by default at root level; an admin can still re-enable/configure it explicitly per instance or
