@@ -68,6 +68,7 @@
     <PackageVersion Include="Microsoft.IdentityModel.Tokens" Version="8.19.1" />
     <PackageVersion Include="Microsoft.Management.Infrastructure" Version="3.0.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.7.0" />
+    <PackageVersion Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0" />
     <PackageVersion Include="Microsoft.PowerShell.SDK" Version="7.6.3" />
     <PackageVersion Include="Microsoft.SqlServer.Assessment" Version="1.1.17" />
     <PackageVersion Include="Microsoft.SqlServer.Assessment.Authoring" Version="1.1.0" />
