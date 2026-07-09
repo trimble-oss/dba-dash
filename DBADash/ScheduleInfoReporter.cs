@@ -10,9 +10,11 @@ namespace DBADashService
     /// <summary>
     /// Reports each instance's effective collection schedule to the repository independently of the normal
     /// per-instance collection pipeline. Schedule info comes entirely from the service's own in-memory
-    /// config and never needs to query the monitored instance, so it must not be gated behind a live
-    /// connection to that instance - e.g. an offline instance, or an Azure DB discovered on the fly whose
-    /// first connection attempt hasn't necessarily succeeded yet.
+    /// config, so it doesn't need to query the monitored instance and must not be gated behind a live
+    /// connection to it - e.g. an offline instance, or an Azure DB discovered on the fly whose first
+    /// connection attempt hasn't necessarily succeeded yet. The one exception is a source whose
+    /// ConnectionID isn't already known (normally only happens if it wasn't added via the config tools),
+    /// where a live connection is attempted as a best-effort fallback to resolve it - see ReportAsync.
     /// </summary>
     public static class ScheduleInfoReporter
     {
@@ -21,9 +23,33 @@ namespace DBADashService
         {
             if (string.IsNullOrEmpty(source.ConnectionID))
             {
-                Log.Warning("Skipping schedule info report for {connection} - ConnectionID isn't known yet (instance has never connected)",
-                    source.SourceConnection.ConnectionForPrint);
-                return;
+                // Normally already set when the source was added via the config tools (DBADashConfig/
+                // ServiceConfig both call this on save) - if it wasn't, e.g. a hand-edited config, fall
+                // back to resolving it live rather than giving up outright. This is the one case where
+                // schedule info reporting still depends on the instance being reachable; once resolved it's
+                // cached on the source (GetGeneratedConnectionIDAsync) for the rest of this process's
+                // lifetime, so this only pays the live-connection cost once.
+                //
+                // Skip the attempt entirely if the instance is already known offline (e.g. from an earlier
+                // collection this run)
+                if (!OfflineInstances.IsOffline(source))
+                {
+                    try
+                    {
+                        source.ConnectionID = await source.GetGeneratedConnectionIDAsync();
+                    }
+                    catch (DatabaseConnectionException)
+                    {
+                        // Instance is offline and ConnectionID still isn't known - nothing to attach a report to.
+                    }
+                }
+
+                if (string.IsNullOrEmpty(source.ConnectionID))
+                {
+                    Log.Warning("Skipping schedule info report for {connection} - ConnectionID isn't known and couldn't be resolved (instance may be offline, or this source wasn't added via the config tools)",
+                        source.SourceConnection.ConnectionForPrint);
+                    return;
+                }
             }
 
             var ds = BuildDataSet(source, effectiveSchedule, effectiveCustomCollections);
