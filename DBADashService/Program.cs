@@ -82,7 +82,7 @@ namespace DBADashService
 
             var builder = Host.CreateApplicationBuilder();
 
-            const int shutdownTimeout = 60;
+            const int shutdownTimeout = 90;
             builder.Services.Configure<HostOptions>(options =>
             {
                 options.ShutdownTimeout = TimeSpan.FromSeconds(shutdownTimeout);
@@ -91,7 +91,18 @@ namespace DBADashService
             builder.Services.AddHostedService<ScheduleService>();
 
             var host = builder.Build();
-            host.Run();
+            try
+            {
+                host.Run();
+            }
+            catch (OperationCanceledException)
+            {
+                // Benign: a cancellation observed while the host is stopping (e.g. the shutdown
+                // timeout elapsing during a service stop/restart).  This is not a startup failure,
+                // so don't let it reach the fatal error handler in Main.  A slow shutdown may leave
+                // some extended events sessions running, but is otherwise harmless.
+                Log.Information("Shutdown cancellation observed during host stop.");
+            }
         }
 
         private static void SetupLogging()
