@@ -90,18 +90,19 @@ namespace DBADashService
             builder.Services.AddWindowsService(options => { options.ServiceName = cfg.ServiceName; });
             builder.Services.AddHostedService<ScheduleService>();
 
-            var host = builder.Build();
+            using var host = builder.Build();
             try
             {
                 host.Run();
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException ex)
             {
                 // Benign: a cancellation observed while the host is stopping (e.g. the shutdown
                 // timeout elapsing during a service stop/restart).  This is not a startup failure,
                 // so don't let it reach the fatal error handler in Main.  A slow shutdown may leave
-                // some extended events sessions running, but is otherwise harmless.
-                Log.Information("Shutdown cancellation observed during host stop.");
+                // some extended events sessions running, but is otherwise harmless.  Log the
+                // exception so a cancellation raised outside of shutdown can still be diagnosed.
+                Log.Information(ex, "Shutdown cancellation observed during host stop.  This is expected during a service stop/restart and can usually be ignored.");
             }
         }
 
