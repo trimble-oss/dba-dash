@@ -226,6 +226,14 @@ namespace DBADashService
                         SchedulerServiceConfig.FailedMessageFolder, fileName, config);
                 }
             }
+            else if (collector.JobsSkippedNoChange)
+            {
+                // Collection ran but nothing changed since JobLastModified, so no data was written.  Emit a
+                // heartbeat so CollectionDatesStatus knows Jobs is still being collected on schedule and
+                // doesn't flag it as overdue.  JobCollectDate is deliberately left unchanged so the ~daily
+                // forced collection still runs relative to the last *actual* collection.
+                await CollectionHeartbeatReporter.ReportAsync(cfg, new[] { nameof(CollectionType.Jobs) }, config);
+            }
         }
     }
 }

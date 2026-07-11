@@ -423,6 +423,26 @@ namespace DBADash
             await cmd.ExecuteNonQueryAsync();
         }
 
+        /// <summary>
+        /// Applies a "collection ran, nothing changed" heartbeat (see CollectionHeartbeatReporter) - resolved
+        /// by ConnectionID like schedule info, and a no-op if the instance/reference hasn't collected before.
+        /// </summary>
+        private async Task UpdateCollectionDatesHeartbeatAsync()
+        {
+            var agentRow = data.Tables["DBADash"]!.Rows[0];
+            snapshotDate = (DateTime)agentRow["SnapshotDateUTC"];
+            var connectionID = (string)agentRow["ConnectionID"];
+            var dt = data.Tables["CollectionDatesHeartbeat"];
+            if (dt == null || dt.Rows.Count == 0) return;
+            await using var cn = new SqlConnection(connectionString);
+            await using var cmd = new SqlCommand("dbo.CollectionDatesHeartbeat_Upd", cn) { CommandTimeout = CommandTimeout, CommandType = CommandType.StoredProcedure };
+            await cn.OpenAsync();
+            cmd.Parameters.AddWithValue("ConnectionID", connectionID);
+            cmd.Parameters.AddWithValue("SnapshotDate", snapshotDate);
+            cmd.Parameters.AddWithValue("Heartbeat", dt);
+            await cmd.ExecuteNonQueryAsync();
+        }
+
         public async Task UpdateAsync()
         {
             if (data.DataSetName == "OfflineInstances")
@@ -433,6 +453,11 @@ namespace DBADash
             if (data.DataSetName == "ScheduleInfo")
             {
                 await UpdateScheduleInfoAsync();
+                return;
+            }
+            if (data.DataSetName == "CollectionDatesHeartbeat")
+            {
+                await UpdateCollectionDatesHeartbeatAsync();
                 return;
             }
             List<Exception> exceptions = new();
