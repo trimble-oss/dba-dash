@@ -115,6 +115,13 @@ namespace DBADash
         private string productVersion;
         private HostPlatform platform;
         public DateTime JobLastModified = DateTime.MinValue;
+
+        /// <summary>
+        /// Set when a Jobs collection ran but was skipped because nothing changed since <see cref="JobLastModified"/>.
+        /// Distinguishes a legitimate no-op (emit a heartbeat so monitoring knows the collection is alive) from a
+        /// failure or unsupported instance (no heartbeat, so the collection is allowed to go stale/critical).
+        /// </summary>
+        public bool JobsSkippedNoChange;
         private bool IsHadrEnabled;
         private static readonly ResiliencePipeline EnabledPipeline = CreatePipeline();
         private static readonly ResiliencePipeline DisabledRetryPipeline = new ResiliencePipelineBuilder().Build();
@@ -1045,6 +1052,10 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             }
             else if (collectionType == CollectionType.Jobs)
             {
+                // Reset each attempt so the flag reflects only this run's outcome - guards against a stale
+                // "skipped" leaking into a later run (or reused collector) and masking a real failure as a
+                // heartbeat.  Only the "not modified" branch below sets it true.
+                JobsSkippedNoChange = false;
                 var currentJobModified = await GetJobLastModifiedAsync();
                 if (currentJobModified > JobLastModified)
                 {
@@ -1066,6 +1077,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
                 }
                 else
                 {
+                    JobsSkippedNoChange = true;
                     Log.Information("Skipping jobs collection for {Instance}.  Not Modified since {JobLastModified}.", instanceName, JobLastModified);
                 }
             }

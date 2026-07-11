@@ -53,6 +53,7 @@ namespace DBADashGUI.CollectionDates
             IsScheduleThreshold = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             SnapshotAge = new System.Windows.Forms.DataGridViewTextBoxColumn();
             SnapshotDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            HeartbeatDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
             NextFireTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ScheduleLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
             CronExpression = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -174,7 +175,7 @@ namespace DBADashGUI.CollectionDates
             dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
             dgvCollectionDates.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             dgvCollectionDates.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvCollectionDates.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { Instance, Reference, WarningThreshold, CriticalThreshold, IsScheduleThreshold, SnapshotAge, SnapshotDate, NextFireTime, ScheduleLevel, CronExpression, ScheduleDescription, RunOnServiceStart, MaxIntervalMinutes, ConfiguredLevel, Configure, ConfigureRoot, colRun });
+            dgvCollectionDates.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { Instance, Reference, WarningThreshold, CriticalThreshold, IsScheduleThreshold, SnapshotAge, HeartbeatDate, SnapshotDate, NextFireTime, ScheduleLevel, CronExpression, ScheduleDescription, RunOnServiceStart, MaxIntervalMinutes, ConfiguredLevel, Configure, ConfigureRoot, colRun });
             dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle2.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
             dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 9F);
@@ -264,22 +265,32 @@ namespace DBADashGUI.CollectionDates
             // 
             // SnapshotAge
             // 
-            SnapshotAge.DataPropertyName = "HumanSnapshotAge";
-            SnapshotAge.HeaderText = "Snapshot Age";
+            SnapshotAge.DataPropertyName = "HumanHeartbeatAge";
+            SnapshotAge.HeaderText = "Age";
             SnapshotAge.MinimumWidth = 6;
             SnapshotAge.Name = "SnapshotAge";
             SnapshotAge.ReadOnly = true;
-            SnapshotAge.ToolTipText = "How long since the collection last ran (at last report refresh)";
+            SnapshotAge.ToolTipText = "How long since the collection last ran (a heartbeat or an actual data collection).  This drives the status.";
             SnapshotAge.Width = 122;
-            // 
+            //
+            // HeartbeatDate
+            //
+            HeartbeatDate.DataPropertyName = "HeartbeatDate";
+            HeartbeatDate.HeaderText = "Last Run";
+            HeartbeatDate.MinimumWidth = 6;
+            HeartbeatDate.Name = "HeartbeatDate";
+            HeartbeatDate.ReadOnly = true;
+            HeartbeatDate.ToolTipText = "The date/time the collection last ran.  For change-detection collections (e.g. Jobs) this is a heartbeat that advances even when no data changed.";
+            HeartbeatDate.Width = 120;
+            //
             // SnapshotDate
-            // 
+            //
             SnapshotDate.DataPropertyName = "SnapshotDate";
-            SnapshotDate.HeaderText = "Snapshot Date";
+            SnapshotDate.HeaderText = "Last Collected";
             SnapshotDate.MinimumWidth = 6;
             SnapshotDate.Name = "SnapshotDate";
             SnapshotDate.ReadOnly = true;
-            SnapshotDate.ToolTipText = "The date/time the collection last ran";
+            SnapshotDate.ToolTipText = "The date/time data was last actually collected.  For change-detection collections (e.g. Jobs) this can be older than Last Run, as data is only written when it changes.";
             SnapshotDate.Width = 120;
             // 
             // NextFireTime
@@ -430,6 +441,7 @@ namespace DBADashGUI.CollectionDates
         private System.Windows.Forms.DataGridViewCheckBoxColumn IsScheduleThreshold;
         private System.Windows.Forms.DataGridViewTextBoxColumn SnapshotAge;
         private System.Windows.Forms.DataGridViewTextBoxColumn SnapshotDate;
+        private System.Windows.Forms.DataGridViewTextBoxColumn HeartbeatDate;
         private System.Windows.Forms.DataGridViewTextBoxColumn NextFireTime;
         private System.Windows.Forms.DataGridViewTextBoxColumn ScheduleLevel;
         private System.Windows.Forms.DataGridViewTextBoxColumn CronExpression;
