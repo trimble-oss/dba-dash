@@ -245,6 +245,13 @@ namespace DBADash.Messaging
                 Log.Warning("Message of type {MessageType} with handle {handle} skipped: {Message}", type, handle, ex.Message);
                 await SendReplyMessage(handle, (new ResponseMessage() { Type = ResponseMessage.ResponseTypes.Warning, Message = ex.Message, DisabledCollections = ex.DisabledCollections }).Serialize(), dest.ConnectionString);
             }
+            catch (UnknownCollectionTypeException ex)
+            {
+                // None of the requested collections are valid for the instance - report as a warning, not an
+                // error.  No disabled list: unlike unscheduled collections there's nothing to offer to re-run.
+                Log.Warning("Message of type {MessageType} with handle {handle} skipped: {Message}", type, handle, ex.Message);
+                await SendReplyMessage(handle, (new ResponseMessage() { Type = ResponseMessage.ResponseTypes.Warning, Message = ex.Message }).Serialize(), dest.ConnectionString);
+            }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error processing message of type {MessageType} with handle {handle}", type, handle);

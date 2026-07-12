@@ -26,6 +26,16 @@ namespace DBADash.Messaging
         /// </summary>
         public bool IgnoreDisabledSchedule { get; set; }
 
+        /// <summary>
+        /// Collection type names from the request that don't match any standard or custom collection for the
+        /// target instance (e.g. a custom collection that has since been removed).  Populated by
+        /// <see cref="CollectAsync"/>.  When some valid collections still ran these are surfaced as a warning
+        /// by the caller rather than failing the whole request; when nothing valid was left to run an
+        /// <see cref="UnknownCollectionTypeException"/> is thrown instead.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnore]
+        public List<string> UnknownCollectionTypes { get; private set; }
+
         public CollectionMessage(List<string> collectionTypes, string connectionID)
         {
             CollectionTypes = collectionTypes;
@@ -71,7 +81,8 @@ namespace DBADash.Messaging
                 connectionID);
             var src = await cfg.GetSourceConnectionAsync(connectionID);
 
-            var (standardCollections, customCollections) = ParseCollectionTypes(src, cfg);
+            var (standardCollections, customCollections, unknownCollections) = ParseCollectionTypes(src, cfg);
+            UnknownCollectionTypes = unknownCollections;
 
             // Don't run collections whose schedule has been disabled for this instance - a manual trigger
             // shouldn't collect something the user has turned off.  Disabled collections are skipped and, if
@@ -80,6 +91,18 @@ namespace DBADash.Messaging
             if (!IgnoreDisabledSchedule)
             {
                 SkipDisabledCollections(cfg, src, standardCollections, customCollections, connectionID);
+            }
+
+            // A requested collection type that doesn't exist for this instance (e.g. a custom collection that
+            // has since been removed) shouldn't sink the whole request - run whatever's valid and warn about
+            // the rest.  Only when nothing valid is left to run do we surface a warning rather than collecting.
+            if (unknownCollections.Count > 0)
+            {
+                if (standardCollections.Count == 0 && customCollections.Count == 0)
+                {
+                    throw new UnknownCollectionTypeException(unknownCollections);
+                }
+                Log.Warning("Message {Id}: skipping unknown collection type(s) {unknown} for {instance}", Id, unknownCollections, connectionID);
             }
 
             var collector = await DBCollector.CreateAsync(src, cfg.ServiceName, true);
@@ -174,10 +197,11 @@ namespace DBADash.Messaging
             Log.Warning("Message {Id}: skipping disabled collection(s) {disabled} for {instance}", Id, disabled, connectionID);
         }
 
-        private (List<CollectionType>, Dictionary<string, CustomCollection>) ParseCollectionTypes(DBADashSource src, CollectionConfig cfg)
+        private (List<CollectionType>, Dictionary<string, CustomCollection>, List<string>) ParseCollectionTypes(DBADashSource src, CollectionConfig cfg)
         {
             var standardCollections = new List<CollectionType>();
             var customCollections = new Dictionary<string, CustomCollection>();
+            var unknownCollections = new List<string>();
 
             foreach (var type in CollectionTypes)
             {
@@ -213,11 +237,14 @@ namespace DBADash.Messaging
                 }
                 else
                 {
-                    throw new ArgumentException($"Unknown collection type {type}");
+                    // Unknown collection type (e.g. a custom collection that's no longer configured).  Collected
+                    // here rather than thrown so the remaining valid collections can still run - the caller
+                    // (CollectAsync) decides whether to warn-and-continue or, if nothing valid is left, fail.
+                    unknownCollections.Add(type);
                 }
             }
 
-            return (standardCollections, customCollections);
+            return (standardCollections, customCollections, unknownCollections);
         }
     }
 
@@ -236,5 +263,34 @@ namespace DBADash.Messaging
         {
             DisabledCollections = disabledCollections;
         }
+    }
+
+    /// <summary>
+    /// Thrown when every collection type requested by a message is unknown for the target instance (e.g. all
+    /// were custom collections that have since been removed), so nothing could be run.  Reported back to the
+    /// GUI as a warning.  When only some requested types are unknown the valid ones still run and the unknown
+    /// ones are surfaced as a warning instead (see <see cref="CollectionMessage.UnknownCollectionTypes"/>).
+    /// </summary>
+    public class UnknownCollectionTypeException : Exception
+    {
+        public List<string> UnknownCollectionTypes { get; }
+
+        public UnknownCollectionTypeException(List<string> unknownCollectionTypes)
+            : base(unknownCollectionTypes is { Count: 1 }
+                ? $"Collection type '{unknownCollectionTypes[0]}' is not valid for this instance - nothing was collected."
+                : $"Collection types [{string.Join(", ", unknownCollectionTypes)}] are not valid for this instance - nothing was collected.")
+        {
+            UnknownCollectionTypes = unknownCollectionTypes;
+        }
+
+        /// <summary>
+        /// Describes unknown collection types that were skipped while other valid collections still ran.
+        /// Used to surface a warning for the partial case (unlike the constructor message, which is for the
+        /// all-unknown case where nothing was collected).
+        /// </summary>
+        public static string DescribeSkipped(List<string> unknownCollectionTypes) =>
+            unknownCollectionTypes is { Count: 1 }
+                ? $"Collection type '{unknownCollectionTypes[0]}' is not valid for this instance and was skipped."
+                : $"Collection types [{string.Join(", ", unknownCollectionTypes)}] are not valid for this instance and were skipped.";
     }
 }

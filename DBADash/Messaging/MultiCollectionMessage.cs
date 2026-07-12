@@ -113,6 +113,16 @@ namespace DBADash.Messaging
                         status = "Failed";
                         detail = errorDetail;
                     }
+                    else if (collector.UnknownCollectionTypes is { Count: > 0 })
+                    {
+                        // Some requested collection types were unknown for this instance (e.g. a custom
+                        // collection that's since been removed); the valid ones still ran.  Report a warning so
+                        // the skipped types are visible rather than silently dropped.
+                        status = "Warning";
+                        detail = UnknownCollectionTypeException.DescribeSkipped(collector.UnknownCollectionTypes);
+                        Log.Warning("Batched collection {Id} skipped unknown collection type(s) for instance {InstanceID} ({ConnectionID}): {detail}",
+                            Id, instance.InstanceID, instance.ConnectionID, detail);
+                    }
                     else
                     {
                         status = "Success";
@@ -121,6 +131,15 @@ namespace DBADash.Messaging
                 catch (OperationCanceledException)
                 {
                     throw; // Abort the batch - remaining instances are reported as cancelled by the GUI.
+                }
+                catch (UnknownCollectionTypeException ex)
+                {
+                    // None of the requested collections are valid for this instance - report a warning, not a
+                    // failure.  Unlike disabled collections there's nothing to re-run, so no disabled list.
+                    status = "Warning";
+                    detail = ex.Message;
+                    Log.Warning("Batched collection {Id} skipped all-unknown collection type(s) for instance {InstanceID} ({ConnectionID}): {detail}",
+                        Id, instance.InstanceID, instance.ConnectionID, ex.Message);
                 }
                 catch (CollectionScheduleDisabledException ex)
                 {
