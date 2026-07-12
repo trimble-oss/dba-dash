@@ -1,9 +1,14 @@
 ﻿using DBADash;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace DBADashService
 {
+    [JsonConverter(typeof(CollectionSchedulesJsonConverter))]
     public class CollectionSchedules : Dictionary<CollectionType, CollectionSchedule>
     {
         private const string every1min = "0 0/1 * * * ?";
@@ -61,7 +66,7 @@ namespace DBADashService
                             {CollectionType.DatabaseRoleMembers, new CollectionSchedule(){ Schedule = midnight } },
                             {CollectionType.DatabasePermissions, new CollectionSchedule(){ Schedule = midnight } },
                             {CollectionType.VLF, new CollectionSchedule(){ Schedule = midnight } },
-                            {CollectionType.DriversWMI, new CollectionSchedule(){ Schedule = midnight } },
+                            {CollectionType.Drivers, new CollectionSchedule(){ Schedule = midnight } },
                             {CollectionType.OSLoadedModules, new CollectionSchedule(){ Schedule = midnight } },
                             {CollectionType.ResourceGovernorConfiguration, new CollectionSchedule(){ Schedule = midnight } },
                             {CollectionType.DatabaseQueryStoreOptions, new CollectionSchedule(){ Schedule = midnight } },
@@ -145,5 +150,44 @@ namespace DBADashService
 
         private static readonly CollectionSchedule importSchedule = new() { Schedule = "10" };
         public static readonly CollectionSchedule DefaultImportSchedule = importSchedule;
+    }
+
+    /// <summary>
+    /// Serializes <see cref="CollectionSchedules"/> as a { "CollectionType": schedule } object, writing the
+    /// current enum name for each key.  On read it maps legacy names to their current member (e.g. the
+    /// renamed "DriversWMI" -> <see cref="CollectionType.Drivers"/>) so custom schedules saved before the
+    /// rename still load, and quietly skips keys for collection types that no longer exist rather than
+    /// failing the whole config load.
+    /// </summary>
+    public class CollectionSchedulesJsonConverter : JsonConverter<CollectionSchedules>
+    {
+        public override void WriteJson(JsonWriter writer, CollectionSchedules value, JsonSerializer serializer)
+        {
+            writer.WriteStartObject();
+            foreach (var kvp in value)
+            {
+                writer.WritePropertyName(kvp.Key.ToString());
+                serializer.Serialize(writer, kvp.Value);
+            }
+            writer.WriteEndObject();
+        }
+
+        public override CollectionSchedules ReadJson(JsonReader reader, Type objectType, CollectionSchedules existingValue, bool hasExistingValue, JsonSerializer serializer)
+        {
+            if (reader.TokenType == JsonToken.Null) return null;
+
+            var result = existingValue ?? new CollectionSchedules();
+            var jObject = JObject.Load(reader);
+            foreach (var property in jObject.Properties())
+            {
+                if (!CollectionTypeLegacyNames.TryParse(property.Name, out var type))
+                {
+                    Log.Warning("Ignoring unknown collection type '{type}' in custom schedule", property.Name);
+                    continue;
+                }
+                result[type] = property.Value.ToObject<CollectionSchedule>(serializer);
+            }
+            return result;
+        }
     }
 }
