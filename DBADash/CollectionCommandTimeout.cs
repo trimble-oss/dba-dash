@@ -4,6 +4,7 @@ using System;
 using System.Data;
 using Serilog;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace DBADash
 {
@@ -44,7 +45,7 @@ namespace DBADash
 
             try
             {
-                var json = File.ReadAllText(FilePath);
+                var json = RemapLegacyNames(File.ReadAllText(FilePath));
 
                 Settings = JsonConvert.DeserializeObject<CommandTimeoutSettings>(json, serializationOpts);
 
@@ -64,8 +65,34 @@ namespace DBADash
             {
                 return new CommandTimeoutSettingsBase();
             }
-            var json = File.ReadAllText(FilePath);
+            var json = RemapLegacyNames(File.ReadAllText(FilePath));
             return JsonConvert.DeserializeObject<CommandTimeoutSettingsBase>(json, serializationOpts);
+        }
+
+        /// <summary>
+        /// Rewrite any renamed CollectionType keys (e.g. the legacy "DriversWMI" -> Drivers) in the
+        /// CollectionCommandTimeouts object so a timeout customized before the rename is preserved rather
+        /// than dropped as an unknown collection type.  Returns the original text if it can't be parsed;
+        /// callers handle malformed JSON as before.
+        /// </summary>
+        internal static string RemapLegacyNames(string json)
+        {
+            JObject root;
+            try
+            {
+                root = JObject.Parse(json);
+            }
+            catch (JsonException ex)
+            {
+                // Leave malformed JSON untouched so callers handle (and log) the error as before.
+                Log.Debug(ex, "Skipping legacy collection type remap - {FilePath} is not valid JSON", FilePath);
+                return json;
+            }
+            if (root["CollectionCommandTimeouts"] is JObject timeouts)
+            {
+                CollectionTypeLegacyNames.RemapLegacyKeys(timeouts);
+            }
+            return root.ToString();
         }
 
         private static string FilePath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "commandTimeouts.json");
@@ -113,7 +140,7 @@ namespace DBADash
                 { CollectionType.ServerRoleMembers, 300 },
                 { CollectionType.ServerPermissions, 300 },
                 { CollectionType.VLF, 300 },
-                { CollectionType.DriversWMI, 300 },
+                { CollectionType.Drivers, 300 },
                 { CollectionType.OSLoadedModules, 300 },
                 { CollectionType.ResourceGovernorConfiguration, 300 },
                 { CollectionType.DatabaseQueryStoreOptions, 300 },

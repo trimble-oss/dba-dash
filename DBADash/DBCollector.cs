@@ -35,7 +35,7 @@ namespace DBADash
         Corruption,
         OSInfo,
         TraceFlags,
-        DriversWMI,
+        Drivers,
         CPU,
         BlockingSnapshot,
         IOStats,
@@ -1027,7 +1027,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             {
                 await CollectServerExtraPropertiesAsync();
             }
-            else if (collectionType == CollectionType.DriversWMI)
+            else if (collectionType == CollectionType.Drivers)
             {
                 CollectDriversWMI();
             }

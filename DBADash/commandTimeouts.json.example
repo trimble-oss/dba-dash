@@ -30,7 +30,7 @@
     "ServerRoleMembers": 300,
     "ServerPermissions": 300,
     "VLF": 300,
-    "DriversWMI": 300,
+    "Drivers": 300,
     "OSLoadedModules": 300,
     "ResourceGovernorConfiguration": 300,
     "DatabaseQueryStoreOptions": 300,

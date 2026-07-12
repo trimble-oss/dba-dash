@@ -186,11 +186,7 @@ namespace DBADash.Messaging
                     throw new ArgumentException("Collection type cannot be null");
                 }
                 var customCollectionName = type.StartsWith("UserData.", StringComparison.OrdinalIgnoreCase) ? type["UserData.".Length..] : type;
-                if (string.Equals(type, "Drivers", StringComparison.OrdinalIgnoreCase))
-                {
-                    standardCollections.Add(CollectionType.DriversWMI);
-                }
-                else if (string.Equals(type, "QueryPlans", StringComparison.OrdinalIgnoreCase) || string.Equals(type, "QueryText", StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(type, "QueryPlans", StringComparison.OrdinalIgnoreCase) || string.Equals(type, "QueryText", StringComparison.OrdinalIgnoreCase))
                 {
                     throw new ArgumentException("QueryPlan and QueryText are collected as part of the RunningQueries collection");
                 }
@@ -202,8 +198,9 @@ namespace DBADash.Messaging
                 {
                     throw new ArgumentException("InternalPerformanceCounters collection can't be triggered manually");
                 }
-                else if (Enum.TryParse<CollectionType>(type, out var collectionType))
+                else if (CollectionTypeLegacyNames.TryParse(type, out var collectionType))
                 {
+                    // Honors legacy renames (e.g. "DriversWMI" -> Drivers) via the central map.
                     standardCollections.Add(collectionType);
                 }
                 else if (src.CustomCollections.TryGetValue(customCollectionName, out var customCollection))
