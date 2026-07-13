@@ -47,21 +47,32 @@ BEGIN
 	/*	Handle database rename 
 		Update name where database_id and service_broker_guid match, but name is different and new name doesn't already exist
 	*/
-	UPDATE D 
-		SET D.name = T.name,
+	;WITH Renames AS (
+		SELECT  D.DatabaseID,
+				T.name AS NewName,
+				ROW_NUMBER() OVER (PARTITION BY D.InstanceID, T.name
+								   ORDER BY D.create_date DESC, D.DatabaseID DESC) AS rn
+		FROM dbo.Databases D
+		JOIN @Databases T ON D.database_id = T.database_id
+				AND D.service_broker_guid = T.service_broker_guid
+		WHERE D.InstanceID = @InstanceID
+		AND D.IsActive = 1
+		AND D.service_broker_guid <> '00000000-0000-0000-0000-000000000000'
+		AND D.name <> T.name
+		AND NOT EXISTS(	SELECT 1 
+						FROM dbo.Databases D2
+						WHERE D2.InstanceID = @InstanceID 
+						AND D2.name = T.name
+						)
+	)
+	UPDATE D
+		SET D.name = R.NewName, 
 		D.UpdatedDate = @SnapshotDate
-	OUTPUT INSERTED.DatabaseID, 'name',DELETED.name,INSERTED.name,@SnapshotDate INTO #History(DatabaseID,Setting,OldValue,NewValue,ChangeDate)
-	FROM dbo.Databases D 
-	JOIN @Databases T ON D.database_id = T.database_id 
-			AND D.service_broker_guid = T.service_broker_guid /* Provides some confidence it's the same database.  Note: create_date is updated on rename */
-	WHERE D.InstanceID = @InstanceID 
-	AND D.service_broker_guid <> '00000000-0000-0000-0000-000000000000'
-	AND D.name <> T.name
-    AND NOT EXISTS(	SELECT 1 
-					FROM dbo.Databases D2 
-					WHERE D2.InstanceID = @InstanceID 
-					AND D2.name = T.name
-					);
+	OUTPUT INSERTED.DatabaseID,'name',DELETED.name,INSERTED.name,@SnapshotDate
+		INTO #History(DatabaseID,Setting,OldValue,NewValue,ChangeDate)
+	FROM dbo.Databases D
+	JOIN Renames R ON D.DatabaseID = R.DatabaseID
+	WHERE R.rn = 1;
 
 	/* Handle dropped databases - set IsActive=0 where database doesn't exist in new data */
 	UPDATE D 
