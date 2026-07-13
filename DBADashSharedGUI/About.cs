@@ -129,6 +129,7 @@ namespace DBADashGUI
         }
 
         private string _latestReleaseUrl = Upgrade.LatestVersionLink;
+        private string _latestReleaseTag;
 
         /// <summary>Update about box with latest version info</summary>
         private async Task SetLatestVersionAsync()
@@ -137,6 +138,8 @@ namespace DBADashGUI
             try
             {
                 upgradeAvailable = false;
+                _latestReleaseTag = null;
+                _latestReleaseUrl = Upgrade.LatestVersionLink;
                 bttnUpgrade.Enabled = false;
                 lblLatest.Text = "Latest Version:";
                 SetFontStyle(lblLatest, FontStyle.Regular);
@@ -161,6 +164,7 @@ namespace DBADashGUI
                 var preReleaseLabel = release.Prerelease ? " (Pre-Release)" : "";
                 lnkLatestRelease.Text = release.TagName + preReleaseLabel;
                 _latestReleaseUrl = release.Prerelease ? release.HtmlUrl : Upgrade.LatestVersionLink;
+                _latestReleaseTag = release.TagName;
                 try
                 {
                     if (Upgrade.IsUpgradeAvailable(release))
@@ -232,7 +236,7 @@ namespace DBADashGUI
             }
             try
             {
-                await Upgrade.UpgradeDBADashAsync(startGUI: StartGUIOnUpgrade);
+                await Upgrade.UpgradeDBADashAsync(tag: _latestReleaseTag ?? string.Empty, startGUI: StartGUIOnUpgrade);
             }
             catch (NotFoundException ex)
             {

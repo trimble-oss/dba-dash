@@ -109,6 +109,7 @@ namespace DBADash
             // Escape single quotes for PowerShell single-quoted strings ('' is the PS escape sequence for ').
             var psLogPath = logPath.Replace("'", "''");
             var psAppPath = ApplicationPath.Replace("'", "''");
+            var psTag = tag.Replace("'", "''");
             // Note: Setting working directory via ProcessStartInfo doesn't work when using "runas" verb.
             // -NonInteractive is passed to both powershell.exe and the script itself.
             var arguments = "-NoProfile " + (nonInteractive ? "-NonInteractive " : "") + (noExit ? "-NoExit " : "") + "-ExecutionPolicy ByPass -Command &{" +
@@ -116,7 +117,7 @@ namespace DBADash
                                $"Set-Location -Path '{psAppPath}'; " +
                                "try { " +
                                $"./{GITHUB_UPGRADESCRIPT}" +
-                                            (tag == string.Empty ? string.Empty : " -Tag " + tag)
+                                            (tag == string.Empty ? string.Empty : " -Tag '" + psTag + "'")
                                             + (startGUI ? " -StartGUI" : string.Empty)
                                             + (startConfig ? " -StartConfig" : string.Empty)
                                             + (nonInteractive ? " -NonInteractive" : string.Empty)
