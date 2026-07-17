@@ -3,8 +3,6 @@ using Microsoft.Data.SqlClient;
 using System;
 using System.IO;
 using System.Net.Http;
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -50,26 +48,36 @@ namespace DBADashGUI.AI
         private static readonly HttpClient _probeClient = new() { Timeout = TimeSpan.FromSeconds(3) };
 
         /// <summary>
+        /// Default loopback URL probed when no local service URL is configured in user
+        /// settings. Matches the AI service's default listening port (Registration:Port).
+        /// </summary>
+        private const string DefaultLocalServiceUrl = "http://localhost:5055";
+
+        /// <summary>
         /// Resolves the AI service using the priority chain: local → repository DB.
         /// Returns null if no service is available.
         /// </summary>
         public static async Task<ServiceInfo?> GetServiceInfoAsync()
         {
-            // Priority 1: explicitly configured local service URL
+            // Priority 1: local service on localhost. Use the URL from user settings if
+            // configured, otherwise fall back to the default loopback URL. In local mode
+            // the service is not registered in the DB, so this probe is the only way to
+            // discover it - skipping it when the (user-scoped, empty-by-default) setting
+            // is blank is what hid the AI tab for local-mode installs (issue #2000).
             var localUrl = Properties.Settings.Default.LocalAIServiceUrl?.Trim();
-            if (!string.IsNullOrWhiteSpace(localUrl))
-            {
-                var localInfo = await TryGetLocalServiceAsync(localUrl);
-                if (localInfo != null)
-                {
-                    // If the local service has no API key yet, try to pull it from the
-                    // repository DB. This handles the case where the service runs on the
-                    // same machine but still requires authentication (ApiKey scheme).
-                    if (localInfo.ApiKey == null)
-                        localInfo = await MergeRepositoryKeyAsync(localInfo);
+            if (string.IsNullOrWhiteSpace(localUrl))
+                localUrl = DefaultLocalServiceUrl;
 
-                    return localInfo;
-                }
+            var localInfo = await TryGetLocalServiceAsync(localUrl);
+            if (localInfo != null)
+            {
+                // If the local service has no API key yet, try to pull it from the
+                // repository DB. This handles the case where the service runs on the
+                // same machine but still requires authentication (ApiKey scheme).
+                if (localInfo.ApiKey == null)
+                    localInfo = await MergeRepositoryKeyAsync(localInfo);
+
+                return localInfo;
             }
 
             // Priority 2: shared service registered in the repository database
@@ -77,28 +85,7 @@ namespace DBADashGUI.AI
         }
 
         /// <summary>
-        /// Computes a SHA-256 fingerprint of the repository connection (server|database),
-        /// matching what the AI service returns from its health endpoint.
-        /// </summary>
-        public static string? GetLocalFingerprint(string? connectionString)
-        {
-            if (string.IsNullOrWhiteSpace(connectionString))
-                return null;
-            try
-            {
-                var b = new SqlConnectionStringBuilder(connectionString);
-                var key = $"{b.DataSource.ToLowerInvariant()}|{b.InitialCatalog.ToLowerInvariant()}";
-                var hash = SHA256.HashData(Encoding.UTF8.GetBytes(key));
-                return Convert.ToHexString(hash);
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Probes the user-configured local AI service URL. Checks the repository
+        /// Probes the user-configured local AI service URL.
         /// fingerprint from the health response to detect mismatches. Local mode is
         /// unauthenticated — the loopback binding is the security boundary.
         /// </summary>
@@ -123,7 +110,9 @@ namespace DBADashGUI.AI
                 }
                 catch { }
 
-                var guiFingerprint = GetLocalFingerprint(Common.ConnectionString);
+                // Fingerprint of the repository the GUI is connected to, for comparison
+                // against the fingerprint the service reports from its health endpoint.
+                var guiFingerprint = DBADash.RepositoryFingerprint.GetFingerprint(Common.ConnectionString);
 
                 // Mismatch: both sides have a fingerprint but they differ
                 var mismatch = serviceFingerprint != null
@@ -166,9 +155,8 @@ namespace DBADashGUI.AI
 
                     // Successfully retrieved the key from the current repository DB, which
                     // proves this local service IS registered against the same repository
-                    // the GUI is connected to.  Any fingerprint mismatch is therefore just
-                    // a server-name alias difference (e.g. "localhost" vs "lab2022") and
-                    // should not block the tab.
+                    // the GUI is connected to. That is stronger positive proof than the
+                    // fingerprint comparison, so clear any reported mismatch.
                     localInfo.RepositoryMismatch = false;
                 }
                 else

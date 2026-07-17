@@ -232,24 +232,22 @@ namespace DBADashGUI.AI
             // Only seed if we actually have a key - seeding null would cause the cache to serve null
             // and suppress the fallback DB lookup in GetApiKeyAsync.
             if (serviceInfo.ApiKey != null)
-                AIApiKeyProvider.SeedFromServiceInfo(serviceInfo);
-            else
             {
-                // No key yet - the service may still be in its startup registration delay.
-                // Show the tab so it's visible, but schedule a retry to pick up the key
-                // once the service has written it to the DB.
+                AIApiKeyProvider.SeedFromServiceInfo(serviceInfo);
+            }
+            else if (serviceInfo.Source != AIServiceDiscovery.ServiceSource.Local)
+            {
+                // Repository mode expects a key. A null key here means the service hasn't
+                // finished writing its registration to the DB yet - show the tab so it's
+                // visible, but schedule a retry to pick up the key once it's registered.
                 IsServiceAvailable = true;
                 ShowServiceStartingMessage();
                 _initRetryTimer.Start();
                 return;
             }
-
-            if (serviceInfo.RepositoryMismatch)
-            {
-                ShowRepositoryMismatchWarning();
-                IsServiceAvailable = false;
-                return;
-            }
+            // Local mode is unauthenticated by design (the loopback binding is the security
+            // boundary, so the service never registers a key in the DB). A null key is the
+            // expected, permanent state - fall through and use the service directly.
 
             if (!serviceInfo.IsActive)
             {
@@ -271,6 +269,18 @@ namespace DBADashGUI.AI
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"InitializeAsync: examples/models load failed: {ex}");
+            }
+
+            // The repository fingerprint is derived from SQL Server's own canonical
+            // identity (SERVERPROPERTY('ServerName') + DB_NAME()), so server-name aliases
+            // (localhost vs machine name, FQDN, IP, named port) do NOT cause false
+            // mismatches - a mismatch means the service really is pointed at a different
+            // server/database. It is surfaced as a non-blocking warning rather than hiding
+            // the tab, so the user is informed but can still use the service (issue #2000).
+            if (serviceInfo.RepositoryMismatch)
+            {
+                ShowStatusWarning("⚠ The local AI service may be connected to a different repository than the one you are viewing. " +
+                                  "If AI answers don't match this repository, check the AI service's repository connection.");
             }
         }
         catch (Exception ex)
@@ -394,18 +404,6 @@ namespace DBADashGUI.AI
         cboCategory.Items.Add("(AI service access restricted)");
         cboCategory.SelectedIndex = 0;
         lblStatus.Text = "⚠ You do not have permission to use the AI service. Ask your DBA to grant you the AIUser role in the repository database.";
-        lblStatus.Visible = true;
-        lblStatus.ForeColor = System.Drawing.Color.OrangeRed;
-        btnAsk.Enabled = false;
-    }
-
-    private void ShowRepositoryMismatchWarning()
-    {
-        cboCategory.Items.Clear();
-        cboCategory.Items.Add("(AI service is connected to a different repository)");
-        cboCategory.SelectedIndex = 0;
-        lblStatus.Text = "⚠ The local AI service is pointed at a different repository than the one you are connected to. " +
-                         "Reconfigure the AI service or switch your repository connection.";
         lblStatus.Visible = true;
         lblStatus.ForeColor = System.Drawing.Color.OrangeRed;
         btnAsk.Enabled = false;
@@ -593,13 +591,10 @@ namespace DBADashGUI.AI
 
         try
         {
+            // In local unauthenticated mode there is no API key (by design) - send the
+            // request anyway. AddApiKeyHeader omits the header when the key is empty, and
+            // the 401 path below handles the authenticated case by fetching/retrying a key.
             var apiKey = await AIApiKeyProvider.GetApiKeyAsync();
-
-            if (string.IsNullOrWhiteSpace(apiKey))
-            {
-                ShowStatusWarning("⚠ No API key available — cannot load examples.");
-                return;
-            }
 
             var url = BuildUrl("/api/ai/examples");
 
