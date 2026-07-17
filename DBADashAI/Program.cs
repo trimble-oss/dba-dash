@@ -263,16 +263,18 @@ RouteHandlerBuilder ApplyAuthAndRateLimit(RouteHandlerBuilder builder) =>
 // Unauthenticated health check endpoint - safe for monitoring/load balancers
 // Returns basic status plus a repository fingerprint (SHA-256 of server|database)
 // so GUI clients can verify the AI service is pointed at the same repository.
-app.MapGet("/api/ai/health", (IConfiguration config) =>
+// The fingerprint is computed once at startup (it queries the DB for its canonical
+// identity) and cached so the health endpoint stays cheap under frequent probing.
+var cachedRepositoryFingerprint = DBADash.RepositoryFingerprint.GetFingerprint(app.Configuration.GetConnectionString("Repository"));
+app.MapGet("/api/ai/health", () =>
 {
-    var fingerprint = GetRepositoryFingerprint(config.GetConnectionString("Repository"));
     return Results.Ok(new
     {
         status = "healthy",
         service = "DBADashAI",
         version = typeof(Program).Assembly.GetName().Version?.ToString() ?? "unknown",
         timestamp = DateTime.UtcNow,
-        repositoryFingerprint = fingerprint
+        repositoryFingerprint = cachedRepositoryFingerprint
     });
 }).AllowAnonymous();
 
@@ -668,23 +670,6 @@ ApplyAuthAndRateLimit(app.MapPost("/api/ai/proactive-digest", async (
 }));
 
 app.Run();
-
-static string? GetRepositoryFingerprint(string? connectionString)
-{
-    if (string.IsNullOrWhiteSpace(connectionString))
-        return null;
-    try
-    {
-        var b = new Microsoft.Data.SqlClient.SqlConnectionStringBuilder(connectionString);
-        var key = $"{b.DataSource.ToLowerInvariant()}|{b.InitialCatalog.ToLowerInvariant()}";
-        var hash = System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(key));
-        return Convert.ToHexString(hash);
-    }
-    catch
-    {
-        return null;
-    }
-}
 
 static void LoadSettingsFromServiceConfig(ConfigurationManager config)
 {
