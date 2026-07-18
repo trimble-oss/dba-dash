@@ -156,6 +156,33 @@ namespace DBADashGUI.AgentJobs
                 }
             },
             Params = ReportParams,
+            Pickers = ToolbarPickers,
+        };
+
+        /// <summary>
+        /// Toolbar pickers for the Job History report.  "Steps" toggles @StepID between the job outcome record only
+        /// (the default - one row per execution) and NULL (every step record).  Passing NULL makes the already
+        /// completed steps of a job that is still running visible, since SQL Server Agent doesn't write the outcome
+        /// record until the whole job finishes (issue #2003).  "Failed Only" toggles @FailedOnly, which excludes
+        /// succeeded runs (run_status <> 1), so it surfaces failures along with retries and cancellations.
+        /// </summary>
+        private static List<Picker> ToolbarPickers => new()
+        {
+            new()
+            {
+                ParameterName = "@StepID",
+                Name = "Steps",
+                DefaultValue = 0,
+                DataType = typeof(int),
+                PickerItems = new Dictionary<object, string>
+                {
+                    { 0, "Outcome Only" },
+                    { DBNull.Value, "All Steps" },
+                },
+                MenuBar = true,
+                Image = Properties.Resources.List_NumberedHS
+            },
+            Picker.CreateBooleanPicker("@FailedOnly", "Failed Only", defaultValue: false, trueString: "Yes", falseString: "No", menuBar: true, image: Properties.Resources.Filter_16x)
         };
 
         private static SystemReport StepsInstance => new()

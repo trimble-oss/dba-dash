@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Drawing;
 using Microsoft.Data.SqlClient;
 using Newtonsoft.Json;
 
@@ -11,6 +12,13 @@ namespace DBADashGUI.CustomReports
         public string ParameterName { get; set; }
 
         public string Name { get; set; }
+
+        /// <summary>
+        /// Optional icon shown next to the picker on the toolbar (when <see cref="MenuBar"/> is set).  Not persisted -
+        /// intended for code-defined pickers on system reports.
+        /// </summary>
+        [JsonIgnore]
+        public Image Image { get; set; }
 
         public virtual Dictionary<object, string> PickerItems { get; set; }
 
@@ -61,7 +69,7 @@ namespace DBADashGUI.CustomReports
             };
         }
 
-        public static Picker CreateBooleanPicker(string paramName, string name, bool defaultValue = true, string trueString = "Yes", string falseString = "No", bool menuBar=false)
+        public static Picker CreateBooleanPicker(string paramName, string name, bool defaultValue = true, string trueString = "Yes", string falseString = "No", bool menuBar=false, Image image = null)
         {
             return new Picker()
             {
@@ -74,7 +82,8 @@ namespace DBADashGUI.CustomReports
                         {true, trueString},
                         {false, falseString}
                     },
-                MenuBar = menuBar
+                MenuBar = menuBar,
+                Image = image
             };
         }
     }

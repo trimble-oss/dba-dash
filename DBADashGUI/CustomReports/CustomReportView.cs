@@ -2730,6 +2730,11 @@ namespace DBADashGUI.CustomReports
                     if (picker.MenuBar)
                     {
                         var lbl = new ToolStripLabel(picker.Name + ":") { Tag = pickerTag };
+                        if (picker.Image != null)
+                        {
+                            lbl.Image = picker.Image;
+                            lbl.DisplayStyle = ToolStripItemDisplayStyle.ImageAndText;
+                        }
                         toolStrip1.Items.Insert(baseIdx + 1, lbl);
                         toolStrip1.Items.Insert(baseIdx + 2, txtItem);
                     }
@@ -2743,6 +2748,11 @@ namespace DBADashGUI.CustomReports
                 else if (picker.MultiSelect)
                 {
                     var pickerMenu = new ToolStripDropDownButton(picker.Name) { Tag = pickerTag, DisplayStyle = ToolStripItemDisplayStyle.Text };
+                    if (picker.Image != null)
+                    {
+                        pickerMenu.Image = picker.Image;
+                        pickerMenu.DisplayStyle = ToolStripItemDisplayStyle.ImageAndText;
+                    }
                     var selectedValues = param.UseDefaultValue
                         ? null
                         : param.Param.Value?.ToString()?.Split(',').Select(s => s.Trim()).ToHashSet(StringComparer.OrdinalIgnoreCase);
@@ -2775,6 +2785,11 @@ namespace DBADashGUI.CustomReports
                 else
                 {
                     var pickerMenu = new ToolStripMenuItem(picker.Name) { Tag = pickerTag };
+                    if (picker.Image != null)
+                    {
+                        pickerMenu.Image = picker.Image;
+                        pickerMenu.DisplayStyle = ToolStripItemDisplayStyle.ImageAndText;
+                    }
                     var isNonDefault = !param.UseDefaultValue && picker.DefaultValue != null
                         && param.Param.Value?.ToString() != picker.DefaultValue.ToString();
                     if (isNonDefault)
