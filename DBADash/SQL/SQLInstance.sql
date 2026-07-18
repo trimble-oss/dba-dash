@@ -26,6 +26,10 @@ BEGIN
 		CAST(SERVERPROPERTY('EditionID') AS BIGINT) AS EditionID,
 		ISNULL(CAST(SERVERPROPERTY('ComputerNamePhysicalNetBIOS') AS NVARCHAR(128)),'') AS ComputerNamePhysicalNetBIOS,
 		DB_NAME() AS DBName,
+		/* sys.dm_os_host_info exists only on SQL 2017+, where DATABASEPROPERTYEX('CompatibilityLevel') is reliable.
+		   The other branches can run on older versions where it returns NULL, so they read compatibility_level from
+		   sys.databases (available since SQL 2005) instead. */
+		CAST(DATABASEPROPERTYEX(DB_NAME(),'CompatibilityLevel') AS INT) AS ConnectionDBCompatibilityLevel,
 		SERVERPROPERTY ('ProductVersion') AS ProductVersion,
 		CAST(ROUND(DATEDIFF(s,GETDATE(),GETUTCDATE())/60.0,0) AS INT) AS UTCOffset,
 		SERVERPROPERTY('IsHadrEnabled') IsHadrEnabled,
@@ -49,6 +53,7 @@ BEGIN
 		CAST(SERVERPROPERTY('EditionID') AS BIGINT) AS EditionID,
 		ISNULL(CAST(SERVERPROPERTY('ComputerNamePhysicalNetBIOS') AS NVARCHAR(128)),'') AS ComputerNamePhysicalNetBIOS,
 		DB_NAME() AS DBName,
+		(SELECT CAST(compatibility_level AS INT) FROM sys.databases WHERE database_id = DB_ID()) AS ConnectionDBCompatibilityLevel,
 		SERVERPROPERTY ('ProductVersion') AS ProductVersion,
 		CAST(ROUND(DATEDIFF(s,GETDATE(),GETUTCDATE())/60.0,0) AS INT) AS UTCOffset,
 		SERVERPROPERTY('IsHadrEnabled') IsHadrEnabled,
@@ -71,6 +76,7 @@ BEGIN
 		CAST(SERVERPROPERTY('EditionID') AS BIGINT) AS EditionID,
 		ISNULL(CAST(SERVERPROPERTY('ComputerNamePhysicalNetBIOS') AS NVARCHAR(128)),'') AS ComputerNamePhysicalNetBIOS,
 		DB_NAME() AS DBName,
+		(SELECT CAST(compatibility_level AS INT) FROM sys.databases WHERE database_id = DB_ID()) AS ConnectionDBCompatibilityLevel,
 		SERVERPROPERTY ('ProductVersion') AS ProductVersion,
 		CAST(ROUND(DATEDIFF(s,GETDATE(),GETUTCDATE())/60.0,0) AS INT) AS UTCOffset,
 		SERVERPROPERTY('IsHadrEnabled') IsHadrEnabled,

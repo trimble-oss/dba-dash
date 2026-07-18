@@ -129,6 +129,16 @@ namespace DBADash
         private DatabaseEngineEdition engineEdition;
         public bool IsExtendedEventsNotSupportedException;
         private readonly bool DisableRetry;
+
+        // SqlClient connections never issue SET ARITHABORT ON, and ARITHABORT is only implicitly ON when
+        // ANSI_WARNINGS is ON *and* the connection database's compatibility level is >= 90.  On instances
+        // where the connection database is at compatibility level 80 (or has ANSI_WARNINGS OFF) any collection
+        // query that uses XML data type methods (e.g. CPU ring-buffer parsing) fails with "SET options have
+        // incorrect settings: 'ARITHABORT'".  This can't be set via the connection string in Microsoft.Data.SqlClient,
+        // and it doesn't survive pooled connection reuse (sp_reset_connection resets SET options), so it must ride
+        // along in each command batch.  Prepending it makes collection independent of the target's session/database
+        // settings.  See issue #1981 (same compatibility-level root cause).
+        private const string SetArithAbortOn = "SET ARITHABORT ON;\n";
         public List<Exception> Exceptions = new();
         public int FailedLoginsBackfillMinutes { get; set; } = CollectionConfig.DefaultFailedLoginsBackfillMinutes;
 
@@ -227,12 +237,73 @@ namespace DBADash
             return collector;
         }
 
+        /// <summary>
+        /// Minimum database compatibility level DBA-Dash supports.  90 = SQL Server 2005, the minimum
+        /// supported version.  Below this (i.e. compatibility level 80 / SQL 2000 semantics) collections that
+        /// use table-valued dynamic management functions (e.g. IOStats, Drives, VLF) or XML data type methods
+        /// fail against the connection database.  See issue #1981.
+        /// </summary>
+        private const int MinSupportedCompatibilityLevel = 90;
+
+        // Compatibility level of the connection database (the initial catalog), captured during the Instance
+        // collection (which always runs first).  Null if it couldn't be determined.
+        private int? connectionDBCompatibilityLevel;
+
         public void LogError(Exception ex, string errorSource, string errorContext = "Collect")
         {
-            Log.Error(ex, "{ErrorContext} {ErrorSource} {Connection}", errorContext, errorSource, Source.SourceConnection.ConnectionForPrint);
+            // When the failure is explained by an unsupported connection-database compatibility level, put the
+            // note on the error line itself (not a separate lower-severity line that a raised minimum log level
+            // could filter out) and prepend it to the CollectionErrorLog message.
+            var unsupportedCompatibilityNote = GetUnsupportedCompatibilityNote(ex);
+            if (unsupportedCompatibilityNote == null)
+            {
+                Log.Error(ex, "{ErrorContext} {ErrorSource} {Connection}", errorContext, errorSource, Source.SourceConnection.ConnectionForPrint);
+            }
+            else
+            {
+                Log.Error(ex, "{Note} {ErrorContext} {ErrorSource} {Connection}", unsupportedCompatibilityNote, errorContext, errorSource, Source.SourceConnection.ConnectionForPrint);
+            }
             Exceptions.Add(ex);
-            LogDBError(errorSource, ex.ToString(), errorContext);
+
+            var errorMessage = unsupportedCompatibilityNote == null
+                ? ex.ToString()
+                : unsupportedCompatibilityNote + Environment.NewLine + Environment.NewLine + ex;
+            LogDBError(errorSource, errorMessage, errorContext);
         }
+
+        /// <summary>
+        /// When a collection fails with a syntax error (Msg 102) and the database used as the initial catalog for
+        /// the source connection is at an unsupported compatibility level (below 90), returns a clear message
+        /// explaining that the configuration is unsupported and how to resolve it.  Returns null otherwise.
+        /// The syntax error is restricted deliberately: under compatibility level 80 the collection queries that
+        /// use table-valued DMVs (IOStats, Drives, VLF) fail to parse with Msg 102, whereas other errors on the
+        /// same instance are unrelated to the compatibility level and shouldn't be mislabelled.  This is a single
+        /// generic check rather than per-collection handling.  The compatibility level is captured during the
+        /// Instance collection.
+        /// </summary>
+        private string GetUnsupportedCompatibilityNote(Exception ex)
+        {
+            if (!ContainsSyntaxError(ex)) return null;
+            if (connectionDBCompatibilityLevel is null or >= MinSupportedCompatibilityLevel) return null;
+
+            var database = string.IsNullOrEmpty(dbName) ? "The database used as the initial catalog for the source connection" : $"The database '{dbName}' (the initial catalog for the source connection)";
+            var resolveDatabase = string.IsNullOrEmpty(dbName) ? "that database" : $"the '{dbName}' database";
+            return $"{database} is at compatibility level {connectionDBCompatibilityLevel}, which is not supported.  DBA-Dash requires compatibility level {MinSupportedCompatibilityLevel} (SQL Server 2005) or higher.  Some collections use table-valued dynamic management functions or XML data type methods that fail at this compatibility level.  To resolve, increase the compatibility level of {resolveDatabase}, or change the initial catalog of the source connection to a database with a supported compatibility level.";
+        }
+
+        /// <summary>
+        /// True if a SQL syntax error (Msg 102 - "Incorrect syntax near ...") appears anywhere in the exception
+        /// tree.  Some call sites wrap the original SqlException (e.g. RunningQueries text/plan collection wraps it
+        /// in a new Exception), so the whole InnerException / AggregateException tree is searched rather than only
+        /// the top-level exception.
+        /// </summary>
+        private static bool ContainsSyntaxError(Exception ex) => ex switch
+        {
+            null => false,
+            SqlException { Number: 102 } => true,
+            AggregateException agg => agg.InnerExceptions.Any(ContainsSyntaxError),
+            _ => ContainsSyntaxError(ex.InnerException)
+        };
 
         public void ClearErrors()
         {
@@ -511,6 +582,10 @@ namespace DBADash
             var clusterOrComputerName = (string)dt.Rows[0]["MachineName"];
             computerName = (string)dt.Rows[0]["ComputerNamePhysicalNetBIOS"];
             dbName = (string)dt.Rows[0]["DBName"];
+            if (dt.Columns.Contains("ConnectionDBCompatibilityLevel") && dt.Rows[0]["ConnectionDBCompatibilityLevel"] != DBNull.Value)
+            {
+                connectionDBCompatibilityLevel = Convert.ToInt32(dt.Rows[0]["ConnectionDBCompatibilityLevel"]);
+            }
             if (dt.Rows[0]["Instance"] == DBNull.Value)
             {
                 dt.Rows[0]["Instance"] = "";
@@ -1261,7 +1336,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             var sql = PerformanceCountersSQL(productVersion);
             if (sql == string.Empty) return null;
             await using var cn = new SqlConnection(connectionString);
-            using var da = new SqlDataAdapter(sql, cn);
+            using var da = new SqlDataAdapter(SetArithAbortOn + sql, cn);
             await cn.OpenAsync();
             var ds = new DataSet();
             SqlParameter pCountersXML = new("CountersXML", countersXML)
@@ -1414,7 +1489,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
         public async Task<DataTable> GetDataTableAsync(string tableName, string SQL, int commandTimeout, SqlParameter[] param = null)
         {
             await using var cn = new SqlConnection(ConnectionString);
-            var cmd = new SqlCommand(SQL, cn) { CommandTimeout = commandTimeout };
+            var cmd = new SqlCommand(SetArithAbortOn + SQL, cn) { CommandTimeout = commandTimeout };
             using var da = new SqlDataAdapter(cmd);
             try
             {

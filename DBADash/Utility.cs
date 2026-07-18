@@ -30,6 +30,7 @@ namespace DBADash
         private static readonly FrozenSet<int> ExcludedErrorCodes =
         [
         -2, // retryPolicy excludes query timeout #581
+        102, // Incorrect syntax near '%.*ls'. - deterministic syntax error, retrying never helps (e.g. IOStats table-valued DMV under database compatibility level 80)
         218, // Could not find the type '%.*ls'. Either it does not exist or you do not have the necessary permission.
         219, // The type '%.*ls' already exists, or you do not have permission to create it.
         229, // The %ls permission was denied on the object '%.*ls', database '%.*ls', schema '%.*ls'.
