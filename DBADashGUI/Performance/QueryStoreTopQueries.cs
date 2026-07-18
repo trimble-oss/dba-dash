@@ -238,6 +238,7 @@ namespace DBADashGUI.Performance
                         Alias = "Query ID",
                         Width = 80,
                         Visible = true,
+                        RequiresDataColumn = true,
                         Link = new DrillDownLinkColumnInfo()
                     }
                 },
@@ -248,6 +249,7 @@ namespace DBADashGUI.Performance
                         Alias = "Plan ID",
                         Width = 70,
                         Visible = true,
+                        RequiresDataColumn = true,
                         Link = new PlanIdLinkColumnInfo
                         {
                             DatabaseNameColumn = "DB",
@@ -260,6 +262,7 @@ namespace DBADashGUI.Performance
                         Alias = "Query Hash",
                         Width = 160,
                         Visible = true,
+                        RequiresDataColumn = true,
                         Link = new QueryStoreLinkColumnInfo()
                         {
                             TargetColumn = "query_hash",
@@ -273,6 +276,7 @@ namespace DBADashGUI.Performance
                         Alias = "Plan Hash",
                         Width = 160,
                         Visible = true,
+                        RequiresDataColumn = true,
                         Link = new QueryStoreLinkColumnInfo()
                         {
                             TargetColumn = "query_plan_hash",
@@ -286,6 +290,7 @@ namespace DBADashGUI.Performance
                         Alias = "Object Name",
                         Width = 180,
                         Visible = true,
+                        RequiresDataColumn = true,
                         Link = new QueryStoreLinkColumnInfo()
                         {
                             TargetColumn = "object_name",
@@ -299,6 +304,7 @@ namespace DBADashGUI.Performance
                         Alias = "Text",
                         Width = 250,
                         Visible = true,
+                        RequiresDataColumn = true,
                         Link = new TextLinkColumnInfo()
                         {
                             TargetColumn = "query_sql_text",
@@ -363,6 +369,7 @@ namespace DBADashGUI.Performance
                         Alias = "Plan Forcing",
                         Width = 100,
                         Visible = true,
+                        RequiresDataColumn = true,
                         Link = new DrillDownLinkColumnInfo(),
                         Highlighting = new CellHighlightingRuleSet("plan_forcing_type_desc")
                         {

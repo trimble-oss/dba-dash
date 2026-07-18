@@ -53,6 +53,15 @@ namespace DBADashGUI.CustomReports
 
         public LinkColumnInfo Link { get; set; }
 
+        /// <summary>
+        /// When true, this link column is only rendered when a matching column is present in the result set.
+        /// Use for data-backed link columns that are only conditionally present (e.g. columns that appear
+        /// for certain group by options) so they aren't rendered as empty link buttons showing the header
+        /// text when absent. Synthetic "action" link columns that are never backed by data (e.g. Configure /
+        /// History / Files) should leave this false so they are always added.
+        /// </summary>
+        public bool RequiresDataColumn { get; set; }
+
         public CellHighlightingRuleSet Highlighting { get; set; }
     }
 }
