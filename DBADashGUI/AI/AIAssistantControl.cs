@@ -302,7 +302,7 @@ namespace DBADashGUI.AI
     {
         try
         {
-            var apiKey = await AIApiKeyProvider.GetApiKeyAsync();
+            var apiKey = await GetRequestApiKeyAsync();
 
             using var request = new HttpRequestMessage(HttpMethod.Get, BuildUrl("/api/ai/diagnostics"));
             AddApiKeyHeader(request, apiKey);
@@ -594,7 +594,7 @@ namespace DBADashGUI.AI
             // In local unauthenticated mode there is no API key (by design) - send the
             // request anyway. AddApiKeyHeader omits the header when the key is empty, and
             // the 401 path below handles the authenticated case by fetching/retrying a key.
-            var apiKey = await AIApiKeyProvider.GetApiKeyAsync();
+            var apiKey = await GetRequestApiKeyAsync();
 
             var url = BuildUrl("/api/ai/examples");
 
@@ -696,7 +696,7 @@ namespace DBADashGUI.AI
 
         try
         {
-            var apiKey = await AIApiKeyProvider.GetApiKeyAsync();
+            var apiKey = await GetRequestApiKeyAsync();
 
             using var request = new HttpRequestMessage(HttpMethod.Get, BuildUrl("/api/ai/models"));
             AddApiKeyHeader(request, apiKey);
@@ -836,7 +836,7 @@ namespace DBADashGUI.AI
             _lastQuestionExcerpt = null;
 
             // Get API key from repository database
-            var apiKey = await AIApiKeyProvider.GetApiKeyAsync();
+            var apiKey = await GetRequestApiKeyAsync();
 
             var selectedModel = (cboModel.SelectedItem as ModelItem)?.ModelName;
             var payload = new
@@ -955,7 +955,7 @@ namespace DBADashGUI.AI
 
         try
         {
-            var apiKey = await AIApiKeyProvider.GetApiKeyAsync();
+            var apiKey = await GetRequestApiKeyAsync();
             var payload = new
             {
                 requestId = _lastRequestId,
@@ -1092,6 +1092,20 @@ namespace DBADashGUI.AI
         if (safe != null)
             request.Headers.Add("X-API-Key", safe);
     }
+
+    /// <summary>
+    /// Resolves the API key for an outgoing request. In local (unauthenticated) mode no
+    /// key exists and none will ever be registered, so this returns null immediately
+    /// rather than paying for the service-discovery + repository-DB fallback that
+    /// <see cref="AIApiKeyProvider.GetApiKeyAsync"/> performs on every call. That keeps
+    /// local-mode requests independent of the repository DB's availability. If a local
+    /// service unexpectedly has auth enabled, the caller's 401 retry path still fetches a
+    /// real key via <see cref="AIApiKeyProvider.GetApiKeyAsync"/>.
+    /// </summary>
+    private Task<string?> GetRequestApiKeyAsync() =>
+        _serviceSource == AIServiceDiscovery.ServiceSource.Local
+            ? Task.FromResult<string?>(null)
+            : AIApiKeyProvider.GetApiKeyAsync();
 }
 
 }

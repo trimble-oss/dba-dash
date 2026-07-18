@@ -85,7 +85,7 @@ namespace DBADashGUI.AI
         }
 
         /// <summary>
-        /// Probes the user-configured local AI service URL.
+        /// Probes the local AI service at the given URL and reads the repository
         /// fingerprint from the health response to detect mismatches. Local mode is
         /// unauthenticated — the loopback binding is the security boundary.
         /// </summary>
