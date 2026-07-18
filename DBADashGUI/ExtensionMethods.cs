@@ -694,7 +694,7 @@ namespace DBADashGUI
 
             foreach (var (colName, colInfo) in customReportResult.Columns)
             {
-                if (colInfo?.Link == null || dataColumnNames.Contains(colName)) continue;
+                if (colInfo?.Link == null || dataColumnNames.Contains(colName) || colInfo.RequiresDataColumn) continue;
                 var column = new DataGridViewLinkColumn
                 {
                     Name = colName,
