@@ -13,6 +13,17 @@ namespace DBADashGUI
     public class DBADashContext : ICloneable
     {
         public HashSet<int> InstanceIDs => new HashSet<int>(RegularInstanceIDs.Union(AzureInstanceIDs));
+
+        /// <summary>
+        /// Returns the subset of context instance IDs relevant to a report based on its
+        /// <see cref="CustomReport.AppliesTo"/> setting (e.g. exclude Azure SQL DB for SQL Patching).
+        /// </summary>
+        public HashSet<int> GetInstanceIDs(CustomReport.InstanceApplicability applicability) => applicability switch
+        {
+            CustomReport.InstanceApplicability.RegularOnly => RegularInstanceIDs,
+            CustomReport.InstanceApplicability.AzureOnly => AzureInstanceIDs,
+            _ => InstanceIDs
+        };
         public HashSet<int> AzureInstanceIDs => ShowHiddenInstances ? AzureInstanceIDsWithHidden : new HashSet<int>(AzureInstanceIDsWithHidden.Except(HiddenInstanceIDs));
         public HashSet<int> RegularInstanceIDs => ShowHiddenInstances ? RegularInstanceIDsWithHidden : new HashSet<int>(RegularInstanceIDsWithHidden.Except(HiddenInstanceIDs));
 

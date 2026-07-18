@@ -23,6 +23,29 @@ namespace DBADashGUI.CustomReports
             Right
         }
 
+        /// <summary>
+        /// Indicates which instances (by engine edition) a report is relevant to.  Used to filter the list of
+        /// context instance IDs passed to the report's @InstanceIDs parameter.  For example SQL Patching is not
+        /// relevant to Azure SQL DB and uses <see cref="InstanceApplicability.RegularOnly"/>.
+        /// </summary>
+        public enum InstanceApplicability
+        {
+            /// <summary>Report applies to all instances (default).</summary>
+            All,
+
+            /// <summary>Report applies to regular (non-Azure SQL DB) instances only.</summary>
+            RegularOnly,
+
+            /// <summary>Report applies to Azure SQL DB instances only.</summary>
+            AzureOnly
+        }
+
+        /// <summary>
+        /// Controls which subset of the current context's instances is passed to the report's @InstanceIDs
+        /// parameter.  Defaults to <see cref="InstanceApplicability.All"/>.
+        /// </summary>
+        public InstanceApplicability AppliesTo { get; set; } = InstanceApplicability.All;
+
         public ChartLocations ChartLocation { get; set; } = ChartLocations.Top;
 
         public double ChartSplitPercentage { get; set; } = 0.6;

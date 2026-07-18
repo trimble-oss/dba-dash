@@ -2231,7 +2231,16 @@ namespace DBADashGUI.CustomReports
             var pInstanceIDs = customParams.FirstOrDefault(p => p.Param.ParameterName.Equals("@InstanceIDs", StringComparison.InvariantCultureIgnoreCase) && p.UseDefaultValue);
             if (pInstanceIDs != null)
             {
-                pInstanceIDs.Param.Value = context.InstanceIDs.AsDataTable();
+                var reportInstanceIDs = context.GetInstanceIDs(Report.AppliesTo);
+                // When a report is scoped to a subset of engine editions (e.g. SQL Patching excludes Azure SQL DB)
+                // and none of the current context's instances apply, pass a non-existent InstanceID so the proc
+                // returns no rows.  An empty @InstanceIDs table is treated as "all active instances" by the procs,
+                // which would incorrectly widen the scope beyond the current context.
+                if (reportInstanceIDs.Count == 0 && Report.AppliesTo != CustomReport.InstanceApplicability.All)
+                {
+                    reportInstanceIDs = new HashSet<int> { 0 };
+                }
+                pInstanceIDs.Param.Value = reportInstanceIDs.AsDataTable();
             }
             var pInstanceID = customParams.FirstOrDefault(p => p.Param.ParameterName.Equals("@InstanceID", StringComparison.InvariantCultureIgnoreCase) && p.UseDefaultValue);
             if (pInstanceID != null)
