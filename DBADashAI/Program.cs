@@ -263,11 +263,23 @@ RouteHandlerBuilder ApplyAuthAndRateLimit(RouteHandlerBuilder builder) =>
 // Unauthenticated health check endpoint - safe for monitoring/load balancers
 // Returns basic status plus a repository fingerprint (SHA-256 of server|database)
 // so GUI clients can verify the AI service is pointed at the same repository.
-// The fingerprint is computed once at startup (it queries the DB for its canonical
-// identity) and cached so the health endpoint stays cheap under frequent probing.
-var cachedRepositoryFingerprint = DBADash.RepositoryFingerprint.GetFingerprint(app.Configuration.GetConnectionString("Repository"));
+// The fingerprint is computed once (it queries the DB for its canonical identity)
+// and cached so the health endpoint stays cheap under frequent probing. If the
+// repository is unavailable when first computed the value is null, so it is retried
+// lazily on subsequent health calls - a transient startup outage must not disable
+// mismatch detection until the service is restarted.
+var repositoryConnectionString = app.Configuration.GetConnectionString("Repository");
+var cachedRepositoryFingerprint = DBADash.RepositoryFingerprint.GetFingerprint(repositoryConnectionString);
+var fingerprintLock = new object();
 app.MapGet("/api/ai/health", () =>
 {
+    if (cachedRepositoryFingerprint == null)
+    {
+        lock (fingerprintLock)
+        {
+            cachedRepositoryFingerprint ??= DBADash.RepositoryFingerprint.GetFingerprint(repositoryConnectionString);
+        }
+    }
     return Results.Ok(new
     {
         status = "healthy",
