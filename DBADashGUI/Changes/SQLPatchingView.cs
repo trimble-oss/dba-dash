@@ -393,6 +393,8 @@ namespace DBADashGUI.Changes
             ProcedureName = "SQLPatchingReport_Get",
             QualifiedProcedureName = "dbo.SQLPatchingReport_Get",
             CanEditReport = false,
+            AppliesTo = CustomReport.InstanceApplicability.RegularOnly, // SQL Patching is not relevant to Azure SQL DB
+
             TriggerCollectionTypes = new List<string>
             {
                 CollectionType.ServerProperties.ToString()
