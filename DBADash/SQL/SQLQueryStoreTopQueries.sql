@@ -66,6 +66,7 @@ BEGIN
 	RAISERROR('Invalid sort',11,1)
 	RETURN
 END
+DECLARE @HasPlanForcingTypeDesc BIT
 DECLARE @SupportsTuningRecommendations BIT
 /* 
 	Requires 130 compatibility level or later for OPENJSON
@@ -83,7 +84,17 @@ SELECT @SupportsTuningRecommendations = CASE	WHEN EXISTS(SELECT 1
 													OR SERVERPROPERTY('EngineEdition') <> 3
 													)		
 												THEN CAST(1 AS BIT)
-												ELSE CAST(0 AS BIT) END
+												ELSE CAST(0 AS BIT) END,
+	@HasPlanForcingTypeDesc = CASE WHEN COLUMNPROPERTY(OBJECT_ID('sys.query_store_plan'), 'plan_forcing_type_desc', 'ColumnId') IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END
+
+/*
+	plan_forcing_type_desc doesn't exist on older instances.  Derive it from is_forced_plan (available on all
+	Query Store versions) so forced plans aren't mislabelled as "NONE" (unforced) in the UI.  is_forced_plan only
+	tells us the plan is forced - not whether it was forced manually or automatically - so we report 'MANUAL'.
+*/
+DECLARE @PlanForcingSelect NVARCHAR(MAX) = CASE WHEN @HasPlanForcingTypeDesc = 1 THEN 'P.plan_forcing_type_desc'
+	ELSE 'CASE WHEN P.is_forced_plan = 1 THEN ''MANUAL'' ELSE ''NONE'' END AS plan_forcing_type_desc' END
+DECLARE @PlanForcingGroupBy NVARCHAR(MAX) = CASE WHEN @HasPlanForcingTypeDesc = 1 THEN 'P.plan_forcing_type_desc' ELSE 'P.is_forced_plan' END
 
 IF @SupportsTuningRecommendations=1
 BEGIN
@@ -160,8 +171,8 @@ SELECT TOP (@Top)
 		WHEN @GroupBy = 'query_plan_hash' THEN 'P.query_plan_hash,'
 		WHEN @GroupBy = 'object_id' THEN 'Q.object_id,
 		ISNULL(OBJECT_NAME(Q.object_id),'''') object_name,'
-		WHEN @GroupBy = 'date_bucket' THEN 'RS.plan_id,P.plan_forcing_type_desc,'
-		ELSE NULL END, 
+		WHEN @GroupBy = 'date_bucket' THEN 'RS.plan_id,' + @PlanForcingSelect + ','
+		ELSE NULL END,
 		CASE WHEN @IncludeWaits = 1 THEN 'STUFF(
 				(SELECT TOP(3) '', '' + CONCAT(W.wait_category_desc, '' = '',SUM(W.total_query_wait_time_ms),''ms'')
 						FROM sys.query_store_wait_stats W
@@ -198,7 +209,7 @@ SELECT TOP (@Top)
 		', CASE WHEN COLUMNPROPERTY(OBJECT_ID('sys.query_store_runtime_stats'),'max_tempdb_space_used','ColumnId') IS NULL THEN '' ELSE 'MAX(RS.max_tempdb_space_used)*8 AS max_tempdb_space_used_kb,' END + '
 		MAX(RS.max_dop) AS max_dop,
 		', CASE WHEN @GroupBy IN('query_id','plan_id') THEN 'Q.query_parameterization_type_desc,' ELSE 'COUNT(DISTINCT Q.query_id) AS num_queries,' END, '
-		', CASE WHEN @GroupBy = 'plan_id' THEN 'P.plan_forcing_type_desc,P.force_failure_count,P.last_force_failure_reason_desc,P.is_parallel_plan,' ELSE 'COUNT(DISTINCT P.plan_id) num_plans,' END, '
+		', CASE WHEN @GroupBy = 'plan_id' THEN @PlanForcingSelect + ',P.force_failure_count,P.last_force_failure_reason_desc,P.is_parallel_plan,' ELSE 'COUNT(DISTINCT P.plan_id) num_plans,' END, '
 		' + CASE WHEN @GroupBy = 'date_bucket' THEN
 		CONCAT(@BucketStart,' AS bucket_start,',@BucketEnd,' AS bucket_end')
 		ELSE 'MIN(MIN(RS.first_execution_time)) OVER() interval_start,
@@ -229,8 +240,10 @@ GROUP BY ',CASE WHEN @GroupBy = 'query_id' THEN 'P.query_id, QT.query_sql_text, 
 			WHEN @GroupBy = 'query_plan_hash' THEN 'P.query_plan_hash'
 			WHEN @GroupBy = 'query_hash' THEN 'Q.query_hash'
 			WHEN @GroupBy = 'object_id' THEN 'Q.object_id'
-			WHEN @GroupBy = 'plan_id' THEN 'P.query_id, QT.query_sql_text, Q.object_id,Q.query_hash,Q.query_parameterization_type_desc,RS.plan_id,P.query_plan_hash,P.plan_forcing_type_desc,P.force_failure_count,P.last_force_failure_reason_desc,P.is_parallel_plan,Rec.recommended_plan_id,Reg.regressed_plan_id' 
-			WHEN @GroupBy = 'date_bucket' THEN CONCAT(@BucketStart,',',@BucketEnd,',RS.plan_id,P.plan_forcing_type_desc')
+			WHEN @GroupBy = 'plan_id' THEN 'P.query_id, QT.query_sql_text, Q.object_id,Q.query_hash,Q.query_parameterization_type_desc,RS.plan_id,P.query_plan_hash,P.force_failure_count,P.last_force_failure_reason_desc,P.is_parallel_plan'
+													+ ',' + @PlanForcingGroupBy
+													+ CASE WHEN @SupportsTuningRecommendations = 1 THEN ',Rec.recommended_plan_id,Reg.regressed_plan_id' ELSE '' END
+			WHEN @GroupBy = 'date_bucket' THEN CONCAT(@BucketStart,',',@BucketEnd,',RS.plan_id,' + @PlanForcingGroupBy)
 			ELSE NULL END, '
 ', CASE WHEN @MinimumPlanCount >1 THEN 'HAVING COUNT(DISTINCT RS.plan_id)>=@MinimumPlanCount' ELSE '' END,'
 ORDER BY ',@SortSQL,' DESC
@@ -238,4 +251,3 @@ OPTION(HASH JOIN, LOOP JOIN)')
 
 EXEC sp_executesql @SQL,N'@Top INT,@FromDate DATETIMEOFFSET(7),@ToDate DATETIMEOFFSET(7), @ObjectName NVARCHAR(128),@ObjectID INT,@QueryID BIGINT,@PlanID BIGINT,@QueryHash BINARY(8),@QueryPlanHash BINARY(8),@MinimumPlanCount INT',
 					@Top,@FromDate,@ToDate,@ObjectName,@ObjectID,@QueryID,@PlanID,@QueryHash,@QueryPlanHash,@MinimumPlanCount
-
