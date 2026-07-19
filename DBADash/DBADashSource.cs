@@ -149,6 +149,24 @@ namespace DBADash
             set => noWMI = value;
         }
 
+        /// <summary>
+        /// Per-instance perfmon counters, a tri-state override of the global list
+        /// (<see cref="CollectionConfig.PerfmonCounters"/>):
+        /// <list type="bullet">
+        /// <item><c>null</c> - inherit the global list.</item>
+        /// <item>empty list - disabled (collect no perfmon counters for this instance).</item>
+        /// <item>populated - collect exactly these counters.</item>
+        /// </list>
+        /// Only applies to SQL sources and requires WMI (no effect when <see cref="NoWMI"/> is set).
+        /// </summary>
+        public List<PerfmonCounter> PerfmonCounters
+        {
+            get => SourceConnection is { Type: ConnectionType.SQL } ? perfmonCounters : null;
+            set => perfmonCounters = value;
+        }
+
+        private List<PerfmonCounter> perfmonCounters;
+
         public int SlowQuerySessionMaxMemoryKB
         {
             get => SourceConnection is { Type: ConnectionType.SQL } ? slowQuerySessionMaxMemoryKB : 0;

@@ -37,6 +37,14 @@ namespace DBADash
         public CollectionSchedules CollectionSchedules;
         public Dictionary<string, CustomCollection> CustomCollections { get; set; } = new();
 
+        /// <summary>
+        /// OS-level (perfmon) performance counters collected from the host via WMI.  Separate from
+        /// the DMV performance counters (sys.dm_os_performance_counters).  Empty = collect nothing
+        /// (no auto-defaults at runtime; the curated <see cref="PerfmonCounter.DefaultCounters"/> are
+        /// only offered as a starting point via the "Defaults" button in the config UI).
+        /// </summary>
+        public List<PerfmonCounter> PerfmonCounters { get; set; } = new();
+
         public string SummaryRefreshCron { get; set; }
 
         public string UpgradeCheckCron { get; set; }

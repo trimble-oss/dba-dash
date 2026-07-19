@@ -98,6 +98,8 @@ jobs:
           "Configure"
           ./dbadashconfig -c "Data Source=localhost;UID=sa;pwd=dbatools.I0;Initial Catalog=DBADashDB_GitHubAction;Encrypt=True;TrustServerCertificate=True;" -a SetDestination
           ./dbadashconfig -c "Data Source=localhost;UID=sa;pwd=dbatools.I0;Encrypt=True;TrustServerCertificate=True;" -a Add --PlanCollectionEnabled --SlowQueryThresholdMs 1000 --SchemaSnapshotDBs "*"
+          "Enable OS-level (perfmon) counter collection"
+          ./dbadashconfig -a SetPerfmonCounters --PerfmonDefaults
           "Install Service"
           ./DBADashService install --localsystem
           "Start Service"
@@ -143,7 +145,9 @@ jobs:
             Install-Module Pester -Force -SkipPublisherCheck -Scope CurrentUser -MinimumVersion 5.0.0
           }
           Import-Module Pester -MinimumVersion 5.0.0
-          Invoke-Pester -Output Detailed Scripts\CI_Workflow.Tests.ps1
+          # Perfmon = $true: this leg enables the default perfmon counters, so assert they were collected.
+          $container = New-PesterContainer -Path 'Scripts\CI_Workflow.Tests.ps1' -Data @{ Perfmon = $true }
+          Invoke-Pester -Container $container -Output Detailed
 
       - name: Output Table Counts Following Delete
         shell: powershell

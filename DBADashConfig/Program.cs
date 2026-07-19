@@ -144,6 +144,10 @@ public class Program
             case CommandLineActionOption.SetAWS:
                 Helper.SetAWS(config, o);
                 break;
+
+            case CommandLineActionOption.SetPerfmonCounters:
+                await Helper.SetPerfmonCounters(config, o);
+                break;
         }
     }
 }

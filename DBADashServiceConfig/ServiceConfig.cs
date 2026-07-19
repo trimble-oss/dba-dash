@@ -712,6 +712,13 @@ namespace DBADashServiceConfig
             });
             dgvConnections.Columns.Add(new DataGridViewLinkColumn()
             {
+                Name = "PerfmonCounters",
+                HeaderText = "Perfmon Counters",
+                Text = "View/Edit",
+                LinkColor = DashColors.LinkColor
+            });
+            dgvConnections.Columns.Add(new DataGridViewLinkColumn()
+            {
                 Name = "Edit",
                 HeaderText = "Copy Connection",
                 Text = "Copy",
@@ -768,6 +775,7 @@ namespace DBADashServiceConfig
             dgvConnections.ApplyTheme();
             _ = Task.Run(AutoRefreshServiceStatus);
             UpdatePerformanceCountersLabel();
+            AddPerfmonCountersButton();
             CheckWriteAccessToConfig();
         }
 
@@ -1788,7 +1796,7 @@ namespace DBADashServiceConfig
             RefreshEncryption();
         }
 
-        private void DgvConnections_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private async void DgvConnections_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0 && e.ColumnIndex == dgvConnections.Columns["Delete"].Index)
             {
@@ -1864,6 +1872,38 @@ namespace DBADashServiceConfig
                 {
                     MessageBox.Show("Custom collections are only available for SQL connections", "Custom Collections",
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+            else if (e.RowIndex >= 0 && e.ColumnIndex == dgvConnections.Columns["PerfmonCounters"].Index)
+            {
+                var src = (DBADashSource)dgvConnections.Rows[e.RowIndex].DataBoundItem;
+                if (src.SourceConnection.Type != ConnectionType.SQL)
+                {
+                    MessageBox.Show("Perfmon counters are only available for SQL connections", "Perfmon Counters",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+                else if (src.NoWMI)
+                {
+                    MessageBox.Show("Perfmon counter collection requires WMI, which is disabled for this connection (NoWMI).",
+                        "WMI disabled", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+                else
+                {
+                    // Resolve the WMI host without blocking the UI thread - GetInstanceHostAsync queries
+                    // the instance (up to 5s) and must not freeze the config window.
+                    var host = await GetInstanceHostAsync(src.SourceConnection);
+                    var frm = new ManagePerfmonCounters()
+                    {
+                        // Preserve tri-state: null=inherit, empty=disabled, populated=custom.
+                        Counters = src.PerfmonCounters == null ? null : new List<PerfmonCounter>(src.PerfmonCounters),
+                        GlobalCounters = collectionConfig.PerfmonCounters ?? new List<PerfmonCounter>(),
+                        ComputerName = host
+                    };
+                    if (frm.ShowDialog() == DialogResult.OK)
+                    {
+                        src.PerfmonCounters = frm.Counters; // null=inherit, empty=disabled, populated=custom
+                        setDgv();
+                    }
                 }
             }
 
@@ -2043,6 +2083,21 @@ namespace DBADashServiceConfig
                         src.CustomCollections == null || src.CustomCollections.Keys.Count == 0
                             ? "Add Collection"
                             : string.Join(", ", src.CustomCollections.Keys.OrderBy(key => key));
+                    var perfmonCell = (DataGridViewLinkCell)dgvConnections.Rows[i].Cells["PerfmonCounters"];
+                    if (src.NoWMI)
+                    {
+                        perfmonCell.Value = "WMI disabled";
+                        perfmonCell.LinkColor = DashColors.NotApplicable;
+                        perfmonCell.ActiveLinkColor = DashColors.NotApplicable;
+                    }
+                    else
+                    {
+                        perfmonCell.Value = src.PerfmonCounters == null ? "Inherit"     // use global list
+                            : src.PerfmonCounters.Count == 0 ? "Disabled"               // collect none
+                            : $"Custom ({src.PerfmonCounters.Count})";
+                        perfmonCell.LinkColor = DashColors.LinkColor;
+                        perfmonCell.ActiveLinkColor = DashColors.LinkColor;
+                    }
                 }
                 var row = dgvConnections.Rows[i];
                 if (hasStatus)
@@ -2736,6 +2791,77 @@ namespace DBADashServiceConfig
             lblPerformanceCounters.Text = isCustom ? "Custom" : "Default";
             lblPerformanceCounters.Font =
                 new Font(lblPerformanceCounters.Font, isCustom ? FontStyle.Bold : FontStyle.Regular);
+        }
+
+        /// <summary>
+        /// Adds the global OS/perfmon counters button to the Performance Counters group box in code
+        /// (the DMV counters button is Designer-defined; this sits alongside it).
+        /// </summary>
+        private void AddPerfmonCountersButton()
+        {
+            if (groupBox5.Controls.ContainsKey("bttnPerfmonCounters")) return;
+            var bttn = new Button
+            {
+                Name = "bttnPerfmonCounters",
+                Text = "Perfmon Counters (OS)",
+                Location = new Point(580, 38),
+                Size = new Size(200, 35),
+                UseVisualStyleBackColor = true
+            };
+            bttn.Click += PerfmonCounters_Click;
+            groupBox5.Controls.Add(bttn);
+            bttn.ApplyTheme();
+        }
+
+        private void PerfmonCounters_Click(object sender, EventArgs e)
+        {
+            var frm = new ManagePerfmonCounters()
+            {
+                Counters = collectionConfig.PerfmonCounters == null
+                    ? new List<PerfmonCounter>()
+                    : new List<PerfmonCounter>(collectionConfig.PerfmonCounters),
+                // The global list isn't tied to any instance - discover counter names from the local machine.
+                ComputerName = "localhost"
+            };
+            if (frm.ShowDialog() != DialogResult.OK) return;
+            collectionConfig.PerfmonCounters = frm.Counters;
+            SetJson();
+        }
+
+        /// <summary>
+        /// Default WMI host for an instance: the physical NetBIOS name the collector targets
+        /// (SERVERPROPERTY('ComputerNamePhysicalNetBIOS')).  Falls back to the data source if the
+        /// instance can't be queried.
+        /// </summary>
+        private static async Task<string> GetInstanceHostAsync(DBADashConnection cn)
+        {
+            if (cn == null) return string.Empty;
+            try
+            {
+                await using var sqlCn = new SqlConnection(cn.ConnectionString);
+                await using var cmd = new SqlCommand("SELECT CAST(SERVERPROPERTY('ComputerNamePhysicalNetBIOS') AS NVARCHAR(128))", sqlCn) { CommandTimeout = 5 };
+                await sqlCn.OpenAsync();
+                if (await cmd.ExecuteScalarAsync() is string netbios && !string.IsNullOrEmpty(netbios)) return netbios;
+            }
+            catch
+            {
+                // Unreachable / permission - fall back to the data source below.
+            }
+            return DerivePerfmonHost(cn);
+        }
+
+        /// <summary>
+        /// Best-effort default host for WMI discovery from a SQL connection's data source
+        /// (strips the named instance / port; maps local aliases to the machine name).
+        /// </summary>
+        private static string DerivePerfmonHost(DBADashConnection cn)
+        {
+            var ds = cn?.DataSource();
+            if (string.IsNullOrEmpty(ds)) return string.Empty;
+            var host = ds.Split('\\')[0].Split(',')[0].Trim();
+            if (host.StartsWith("tcp:", StringComparison.OrdinalIgnoreCase)) host = host[4..];
+            if (host is "." or "(local)" or "localhost") host = Environment.MachineName;
+            return host;
         }
 
         private void CustomCountersHelp_Click(object sender, LinkLabelLinkClickedEventArgs e)

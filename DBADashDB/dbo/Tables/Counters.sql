@@ -16,6 +16,11 @@
 	SystemGoodFrom DECIMAL (28, 9)  NULL,
 	SystemGoodTo DECIMAL (28, 9)  NULL,
 	CounterType TINYINT NOT NULL CONSTRAINT DF_Counters_CounterType DEFAULT(1),
+    /* Stable WMI identity for OS-level (perfmon) counters (Win32_PerfRawData_* class / property).  NULL for
+       DMV performance counters.  The (object_name, counter_name) above is a display name that can vary by
+       config, so app features (e.g. a processor-utilization chart) key off this WMI identity instead. */
+    WmiClass NVARCHAR (128) NULL,
+    WmiProperty NVARCHAR (128) NULL,
     CONSTRAINT [PK_Counters] PRIMARY KEY CLUSTERED (CounterID ASC)
 );
 
@@ -24,4 +29,10 @@ GO
 CREATE UNIQUE NONCLUSTERED INDEX IX_Counters_object_name_counter_name_instance_name
     ON dbo.Counters(object_name ASC, counter_name ASC, instance_name ASC)
 INCLUDE(CounterType);
+
+GO
+/* Lookup by stable WMI identity (perfmon counters only). */
+CREATE NONCLUSTERED INDEX IX_Counters_WmiClass_WmiProperty_instance_name
+    ON dbo.Counters(WmiClass ASC, WmiProperty ASC, instance_name ASC)
+    WHERE WmiClass IS NOT NULL;
 

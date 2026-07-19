@@ -367,7 +367,7 @@ namespace DBADash
             "AzureDBServiceObjectives", "AzureDBElasticPoolResourceStats", "SlowQueries",
             "SlowQueriesStats", "LastGoodCheckDB", "Alerts", "ObjectExecutionStats", "ServerPrincipals",
             "ServerRoleMembers", "ServerPermissions", "DatabasePrincipals", "DatabaseRoleMembers",
-            "DatabasePermissions", "CustomChecks", "PerformanceCounters", "VLF", "DatabaseMirroring",
+            "DatabasePermissions", "CustomChecks", "PerformanceCounters", "PerfmonCounters", "VLF", "DatabaseMirroring",
             "Jobs", "JobHistory", "AvailabilityReplicas", "AvailabilityGroups", "JobSteps",
             "DatabaseQueryStoreOptions", "ResourceGovernorConfiguration", "AzureDBResourceGovernance",
             "RunningQueries", "QueryText", "QueryPlans", "InternalPerformanceCounters", "MemoryUsage",
