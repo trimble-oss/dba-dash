@@ -8,7 +8,9 @@ using Newtonsoft.Json.Converters;
 using Polly;
 using Polly.Retry;
 using Serilog;
+using Serilog.Events;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
@@ -84,7 +86,8 @@ namespace DBADash
         FailedLogins,
         ResourceGovernorWorkloadGroups,
         ResourceGovernorResourcePools,
-        ScheduleInfo
+        ScheduleInfo,
+        PerfmonCounters
     }
 
     public enum HostPlatform
@@ -101,6 +104,14 @@ namespace DBADash
         public bool LogInternalPerformanceCounters = false;
         private DataTable dtInternalPerfCounters;
         public int PerformanceCollectionPeriodMins = 60;
+        public List<PerfmonCounter> PerfmonCounters { get; set; }
+
+        // Perfmon counter schema (PERF type + base property) is immutable per class, so resolve it at most
+        // once per (host, class) for the life of the process rather than on every collection.  Only used as
+        // a fallback for counters whose type isn't persisted in config (see PerfmonCounter.CounterType).
+        private static readonly ConcurrentDictionary<string, Dictionary<string, PerfmonCounterDiscovery.DiscoveredCounter>> PerfmonMetadataCache
+            = new(StringComparer.OrdinalIgnoreCase);
+
         private string computerName;
         private readonly CollectionType[] azureCollectionTypes = new[] { CollectionType.SlowQueries, CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceStats, CollectionType.CPU, CollectionType.DBFiles, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ObjectExecutionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions, CollectionType.SysConfig, CollectionType.DatabasePrincipals, CollectionType.DatabaseRoleMembers, CollectionType.DatabasePermissions, CollectionType.OSInfo, CollectionType.CustomChecks, CollectionType.PerformanceCounters, CollectionType.VLF, CollectionType.DatabaseQueryStoreOptions, CollectionType.AzureDBResourceGovernance, CollectionType.RunningQueries, CollectionType.IdentityColumns, CollectionType.TableSize, CollectionType.AvailableProcs, CollectionType.DatabaseExtendedProperties };
         private readonly CollectionType[] azureOnlyCollectionTypes = new[] { CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceGovernance };
@@ -1106,6 +1117,10 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             {
                 CollectDriversWMI();
             }
+            else if (collectionType == CollectionType.PerfmonCounters)
+            {
+                await CollectPerfmonCountersWMIAsync();
+            }
             else if (collectionType == CollectionType.SlowQueries)
             {
                 try
@@ -1815,6 +1830,307 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             {
                 LogError(ex, "Drivers", "Collect:WMI");
             }
+        }
+
+        // Perfmon (PERF_*) counter types we normalise to.  The raw WMI CounterType is mapped to one of
+        // these; dbo.PerfmonCounters_Upd cooks each one (see that proc for the formulas).
+        private const int PerfLargeRawCount = 65792;   // value as-is
+        private const int PerfBulkCount = 272696576;   // rate: Δvalue/Δseconds
+        private const int PerfLargeRawFraction = 537003264; // value*100/base
+        private const int Perf100NsTimer = 542180608;  // 0x20510500 - % over interval
+        private const int Perf100NsTimerInv = 558957824; // 0x21510500 - inverse % over interval
+        private const int PerfAverageTimer = 805438464; // (Δvalue/1e7)/Δbase - value pre-scaled to 100ns
+        private const int PerfLargeRawBase = 1073939712; // base row marker
+        private const int PerfMultiCounter = 0x02000000; // flag: value is summed across instances (_Total)
+
+        // Per-class WMI query timeout.  A wedged perf provider must not hang the collection (and its
+        // Task.WhenAll) indefinitely - the collection runs on a 1-minute schedule, so this is a generous
+        // backstop that still frees the worker well within the next collection.
+        private static readonly TimeSpan PerfmonQueryTimeout = TimeSpan.FromSeconds(30);
+
+        /// <summary>
+        /// Collect OS-level (perfmon) performance counters from the host via WMI - the RAW
+        /// (Win32_PerfRawData_*) classes.  Emits raw accumulators (plus a "&lt;counter&gt; Base" row and,
+        /// for timer counters, a 100ns-scaled value) into a "PerfmonCounters" table which
+        /// dbo.PerfmonCounters_Upd cooks over the collection interval.  Uses the same WSMan/DCom
+        /// session as the other WMI collections.  Distinct from the DMV PerformanceCounters collection.
+        /// </summary>
+        private async Task CollectPerfmonCountersWMIAsync()
+        {
+            if (noWMI || !OperatingSystem.IsWindows()) return;
+            var counters = PerfmonCounters;
+            if (counters == null || counters.Count == 0) return; // no counters configured => nothing to collect
+            if (Data.Tables.Contains("PerfmonCounters")) return; // already collected this batch
+
+            try
+            {
+                var dt = new DataTable("PerfmonCounters");
+                dt.Columns.Add("SnapshotDate", typeof(DateTime));
+                dt.Columns.Add("object_name", typeof(string));
+                dt.Columns.Add("counter_name", typeof(string));
+                dt.Columns.Add("instance_name", typeof(string));
+                dt.Columns.Add("cntr_value", typeof(decimal));
+                dt.Columns.Add("cntr_type", typeof(int));
+                dt.Columns.Add("timebase", typeof(decimal)); // Timestamp_Sys100NS for 100ns timers, else 0
+                // Stable WMI identity (persisted on dbo.Counters).  Appended last to keep the TVP ordinals stable.
+                dt.Columns.Add("WmiClass", typeof(string));
+                dt.Columns.Add("WmiProperty", typeof(string));
+
+                var snapshotDate = DateTime.UtcNow;
+
+                var debug = Log.IsEnabled(LogEventLevel.Debug);
+                var swSession = debug ? Stopwatch.StartNew() : null;
+                using CimSession session = CimSession.Create(computerName, WMISessionOptions);
+                if (debug) Log.Debug("Perfmon {computer}: CimSession created in {ms}ms", computerName, swSession.ElapsedMilliseconds);
+
+                // Build a query plan per class (metadata resolve + projection) - cheap and synchronous.
+                var plans = counters
+                    .Where(c => !string.IsNullOrEmpty(c.WmiClass) && !string.IsNullOrEmpty(c.WmiProperty))
+                    .GroupBy(c => c.WmiClass, StringComparer.OrdinalIgnoreCase)
+                    .Select(g => BuildPerfmonClassPlan(session, g))
+                    .Where(p => p != null)
+                    .ToList();
+                if (plans.Count == 0) return;
+
+                // Each class query is an independent WSMan round-trip, and cost is dominated by that
+                // round-trip (not row count), so run them concurrently via native async I/O.  Awaiting
+                // (rather than blocking) releases the collection worker thread for the duration of the
+                // WMI wait instead of parking it.
+                var perClassRows = await Task.WhenAll(plans.Select(p => CollectPerfmonClassAsync(session, p, snapshotDate)))
+                    .ConfigureAwait(false);
+
+                foreach (var rows in perClassRows)
+                    foreach (var row in rows)
+                        dt.Rows.Add(row);
+
+                if (dt.Rows.Count > 0) Data.Tables.Add(dt);
+            }
+            catch (Exception ex)
+            {
+                LogError(ex, "PerfmonCounters", "Collect:WMI");
+            }
+        }
+
+        /// <summary>A resolved plan to collect one WMI perf class: the narrowed WQL query and, per configured
+        /// counter, the metadata (PERF type + base property) needed to cook it.</summary>
+        private sealed class PerfmonClassPlan
+        {
+            public string WmiClass;
+            public string Query;
+            public List<(PerfmonCounter Ctr, PerfmonCounterDiscovery.DiscoveredCounter Meta)> Resolved;
+        }
+
+        private PerfmonClassPlan BuildPerfmonClassPlan(CimSession session, IGrouping<string, PerfmonCounter> classGroup)
+        {
+            // Resolve each counter's PERF type + base property.  Prefer the values persisted in config
+            // (no WMI round-trip); only fall back to the class schema (process-cached) for counters that
+            // lack a persisted type - e.g. a hand-edited config.
+            Dictionary<string, PerfmonCounterDiscovery.DiscoveredCounter> schema = null;
+            var resolved = new List<(PerfmonCounter Ctr, PerfmonCounterDiscovery.DiscoveredCounter Meta)>();
+            foreach (var ctr in classGroup)
+            {
+                PerfmonCounterDiscovery.DiscoveredCounter cm;
+                if (ctr.CounterType != 0)
+                {
+                    cm = new PerfmonCounterDiscovery.DiscoveredCounter
+                    {
+                        WmiProperty = ctr.WmiProperty,
+                        CounterType = ctr.CounterType,
+                        BaseWmiProperty = ctr.BaseWmiProperty
+                    };
+                }
+                else
+                {
+                    schema ??= GetCachedPerfmonMetadata(session, classGroup.Key);
+                    if (!schema.TryGetValue(ctr.WmiProperty, out cm)) continue;
+                }
+                resolved.Add((ctr, cm));
+            }
+            if (resolved.Count == 0) return null;
+
+            // Only project the columns we actually read (plus the always-present timing columns), rather
+            // than SELECT * which marshals every counter the class exposes.
+            var columns = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                { "Name", "Frequency_PerfTime", "Timestamp_Sys100NS" };
+            foreach (var (_, cm) in resolved)
+            {
+                columns.Add(cm.WmiProperty);
+                if (!string.IsNullOrEmpty(cm.BaseWmiProperty)) columns.Add(cm.BaseWmiProperty);
+            }
+            return new PerfmonClassPlan
+            {
+                WmiClass = classGroup.Key,
+                Query = "SELECT " + string.Join(", ", columns) + " FROM " + classGroup.Key,
+                Resolved = resolved
+            };
+        }
+
+        /// <summary>Query one perf class asynchronously and cook its rows.  Never throws - a class absent on
+        /// this OS (or any other per-class failure) is logged and yields no rows, so it can't fail the batch
+        /// (or the Task.WhenAll).</summary>
+        private async Task<List<object[]>> CollectPerfmonClassAsync(CimSession session, PerfmonClassPlan plan, DateTime snapshotDate)
+        {
+            var rows = new List<object[]>();
+            // dbo.Counters key is (object_name, counter_name, instance_name); dedupe overlapping config
+            // within the class (cross-class collisions can't happen - object_name is class-derived).
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            List<CimInstance> instances = null;
+            // Per-class timing: which WMI class dominates varies by host, so log it to pinpoint slow classes
+            // (some perf providers are far slower to enumerate on certain machines).  Gated so the Stopwatch
+            // and the 4-arg log (which allocates + boxes) cost nothing when Debug isn't enabled.
+            var debug = Log.IsEnabled(LogEventLevel.Debug);
+            var swClass = debug ? Stopwatch.StartNew() : null;
+            try
+            {
+                instances = await QueryInstancesAsync(session, plan.Query).ConfigureAwait(false);
+                if (debug) Log.Debug("Perfmon {computer}: {class} queried {instances} instance(s) in {ms}ms",
+                    computerName, plan.WmiClass, instances.Count, swClass.ElapsedMilliseconds);
+
+                foreach (var itm in instances)
+                {
+                    // Single-instance classes (e.g. Memory, System) return a null Name.
+                    // The raw _Total for timer counters is already the per-core average (not a sum),
+                    // so no instance-count division is needed.
+                    var wmiName = Convert.ToString(itm.CimInstanceProperties["Name"]?.Value) ?? string.Empty;
+                    var freqPerfTime = ToDecimalOrZero(itm.CimInstanceProperties["Frequency_PerfTime"]?.Value);
+                    // The counter's own 100ns timestamp, sampled atomically with the values - used as the
+                    // exact time base for 100ns-timer counters instead of wall-clock time.
+                    var timestampSys100Ns = ToDecimalOrZero(itm.CimInstanceProperties["Timestamp_Sys100NS"]?.Value);
+
+                    foreach (var (ctr, cm) in plan.Resolved)
+                    {
+                        // "*" => every instance; otherwise match the WMI Name property.
+                        if (ctr.InstanceName != "*" &&
+                            !string.Equals(ctr.InstanceName ?? string.Empty, wmiName, StringComparison.OrdinalIgnoreCase))
+                            continue;
+                        var rawValue = itm.CimInstanceProperties[ctr.WmiProperty]?.Value;
+                        if (rawValue == null) continue;
+
+                        // Resolve the display names deterministically from the WMI identity (not from the
+                        // per-config names) so the same WMI counter always stores under one identity.  The
+                        // stable key (WmiClass / WmiProperty) is persisted alongside for the app to key off.
+                        var (resolvedObject, counterName) = PerfmonCounter.ResolveStorageNames(ctr.WmiClass, ctr.WmiProperty);
+                        // Namespace the stored object_name so perfmon counters can never collide with DMV
+                        // counters in dbo.Counters (see ObjectNamePrefix).
+                        var objectName = PerfmonCounter.ObjectNamePrefix + resolvedObject;
+                        if (!seen.Add(objectName + "|" + counterName + "|" + wmiName)) continue;
+
+                        var value = ToDecimalOrZero(rawValue);
+                        decimal? baseValue = null;
+                        int emitType;
+                        // Some timers carry the MULTI flag (0x02000000); clear it to reduce to the base
+                        // type we cook (harmless for non-multi types).
+                        switch (cm.CounterType & ~PerfMultiCounter)
+                        {
+                            case 65536: case 65792: // RAWCOUNT / LARGE_RAWCOUNT
+                                emitType = PerfLargeRawCount; break;
+                            case 272696320: case 272696576: // COUNTER / BULK_COUNT (rate)
+                                emitType = PerfBulkCount; break;
+                            case 537003008: case 537003264: // RAW_FRACTION / LARGE_RAW_FRACTION
+                                // Fraction counters can't be cooked without their base (value*100/base).
+                                // A base-less config (e.g. stale Win32_PerfFormattedData_* data) is skipped.
+                                if (string.IsNullOrEmpty(cm.BaseWmiProperty)) continue;
+                                emitType = PerfLargeRawFraction;
+                                baseValue = ToDecimalOrZero(itm.CimInstanceProperties[cm.BaseWmiProperty]?.Value);
+                                break;
+                            case 542180608: emitType = Perf100NsTimer; break;    // 100NSEC_TIMER (+ MULTI)
+                            case 558957824: emitType = Perf100NsTimerInv; break; // 100NSEC_TIMER_INV (+ MULTI)
+                            case 805438464: // AVERAGE_TIMER (e.g. disk latency)
+                                // Average-timer counters need their base too (Δvalue/Δbase); skip if absent.
+                                if (string.IsNullOrEmpty(cm.BaseWmiProperty)) continue;
+                                emitType = PerfAverageTimer;
+                                baseValue = ToDecimalOrZero(itm.CimInstanceProperties[cm.BaseWmiProperty]?.Value);
+                                if (freqPerfTime > 0) value = value * 10000000m / freqPerfTime; // ticks -> 100ns units
+                                break;
+                            default: // unhandled type: collect raw as-is, but flag it so it's not silently wrong
+                                Log.Warning("Perfmon counter {object}\\{counter} has unhandled CounterType {type} - collected as a raw value",
+                                    objectName, counterName, cm.CounterType);
+                                emitType = PerfLargeRawCount; break;
+                        }
+
+                        var timebase = emitType is Perf100NsTimer or Perf100NsTimerInv ? timestampSys100Ns : 0m;
+                        // Column order must match the DataTable schema built in CollectPerfmonCountersWMIAsync.
+                        rows.Add(new object[] { snapshotDate, objectName, counterName, wmiName, value, emitType, timebase, ctr.WmiClass, ctr.WmiProperty });
+                        if (baseValue.HasValue)
+                        {
+                            // Base rows aren't registered as counters (excluded by cntr_type), so their WMI
+                            // identity carries the base property for traceability only.
+                            rows.Add(new object[] { snapshotDate, objectName, counterName.TrimEnd() + " Base", wmiName, baseValue.Value, PerfLargeRawBase, 0m, ctr.WmiClass, cm.BaseWmiProperty });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // A class absent on this OS shouldn't fail the whole collection.
+                LogError(ex, "PerfmonCounters", $"Collect:WMI {plan.WmiClass}");
+            }
+            finally
+            {
+                if (instances != null) foreach (var itm in instances) itm.Dispose();
+            }
+            return rows;
+        }
+
+        /// <summary>
+        /// Bridge the MI async query (an IObservable&lt;CimInstance&gt;) to a Task that completes with all
+        /// instances.  Lets several class queries overlap their WSMan round-trips without a thread each.
+        /// A server-side operation timeout (<see cref="PerfmonQueryTimeout"/>) bounds a wedged provider so
+        /// it can't hang the collection forever, and the subscription is disposed once the operation ends.
+        /// </summary>
+        private static Task<List<CimInstance>> QueryInstancesAsync(CimSession session, string query)
+        {
+            var tcs = new TaskCompletionSource<List<CimInstance>>(TaskCreationOptions.RunContinuationsAsynchronously);
+            // Not a 'using': keep the options alive for the whole operation, not just until this method
+            // returns, in case MI reads them past Subscribe.  Disposed in the completion continuation below.
+            var options = new CimOperationOptions { Timeout = PerfmonQueryTimeout };
+            IObservable<CimInstance> op = session.QueryInstancesAsync(@"root\cimv2", "WQL", query, options);
+            IDisposable subscription = op.Subscribe(new CimInstanceObserver(tcs));
+            // Release the subscription and options once the operation finishes (completed, faulted, or timed out).
+            _ = tcs.Task.ContinueWith(_ =>
+            {
+                subscription.Dispose();
+                options.Dispose();
+            }, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
+            return tcs.Task;
+        }
+
+        private sealed class CimInstanceObserver : IObserver<CimInstance>
+        {
+            private readonly List<CimInstance> results = new();
+            private readonly TaskCompletionSource<List<CimInstance>> tcs;
+            public CimInstanceObserver(TaskCompletionSource<List<CimInstance>> tcs) => this.tcs = tcs;
+            public void OnNext(CimInstance value) => results.Add(value); // delivered sequentially per operation
+
+            public void OnError(Exception error)
+            {
+                // On the error path the buffered instances are never handed to the consumer (it awaits the
+                // faulted task), so nothing else can dispose them - do it here.  Only when we win the race to
+                // complete the task, otherwise OnCompleted already handed ownership to the consumer.
+                if (tcs.TrySetException(error))
+                    foreach (var itm in results) itm.Dispose();
+            }
+
+            public void OnCompleted() => tcs.TrySetResult(results);
+        }
+
+        private static decimal ToDecimalOrZero(object value)
+        {
+            try { return value == null ? 0m : Convert.ToDecimal(value); }
+            catch { return 0m; }
+        }
+
+        /// <summary>
+        /// Resolve a perf class's counter metadata, cached for the life of the process (schema never
+        /// changes).  A transient empty result is not cached, so a failed lookup is retried next time.
+        /// </summary>
+        private Dictionary<string, PerfmonCounterDiscovery.DiscoveredCounter> GetCachedPerfmonMetadata(CimSession session, string wmiClass)
+        {
+            var key = (computerName ?? string.Empty) + "|" + wmiClass;
+            if (PerfmonMetadataCache.TryGetValue(key, out var cached)) return cached;
+            var meta = PerfmonCounterDiscovery.GetCounterMetadata(session, computerName, wmiClass);
+            if (meta.Count > 0) PerfmonMetadataCache[key] = meta;
+            return meta;
         }
 
         private void AddPVDriverVersion(ref DataTable dtDrivers)

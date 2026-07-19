@@ -488,14 +488,17 @@
     <Build Include="Storage\PS_DBIOStats_60MIN.sql" />
     <Build Include="Storage\PS_CPU_60MIN.sql" />
     <Build Include="Staging\Tables\PerformanceCounters.sql" />
+    <Build Include="Staging\Tables\PerfmonCounters.sql" />
     <Build Include="dbo\Tables\PerformanceCounters.sql" />
     <Build Include="dbo\Tables\InstanceCounters.sql" />
     <Build Include="dbo\Tables\Counters.sql" />
     <Build Include="dbo\Tables\CounterMapping.sql" />
     <Build Include="dbo\Stored Procedures\PerformanceCounterSummary_Get.sql" />
     <Build Include="dbo\Stored Procedures\PerformanceCounters_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\PerfmonCounters_Upd.sql" />
     <Build Include="dbo\Stored Procedures\PerformanceCounter_Get.sql" />
     <Build Include="dbo\User Defined Types\PerformanceCounters.sql" />
+    <Build Include="dbo\User Defined Types\PerfmonCounters.sql" />
     <Build Include="Storage\PF_PerformanceCounters.sql" />
     <Build Include="Storage\PS_PerformanceCounters.sql" />
     <Build Include="Security\App.sql" />

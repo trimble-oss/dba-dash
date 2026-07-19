@@ -1,6 +1,8 @@
 param(
     [string]$Database = "DBADashDB_GitHubAction",
-	[string]$Server = "LOCALHOST"
+	[string]$Server = "LOCALHOST",
+	# Only the leg that enables the default perfmon counters asserts they were collected.
+	[bool]$Perfmon = $false
 )
 
 # Get SQL Server version at the script level
@@ -128,11 +130,38 @@ Describe 'CI Workflow checks' {
 	)
 	It 'Check WMI table counts for <TableName>' -TestCases $TableCountGreaterThanZeroTestCasesWMI -Skip:$NoWMI {
 		param($tableName)
-			
+
 			$results= Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "SELECT COUNT(*) cnt FROM $tableName"
-										
+
 			$results.cnt | Should -BeGreaterThan 0
-					
+
+	}
+
+	# OS-level (perfmon) counters land in the shared dbo.PerformanceCounters table, namespaced with the
+	# 'PerfMon:' object_name prefix.  Skipped unless this leg enabled the default counters (-Perfmon).
+	It 'Perfmon counters collected' -Skip:(-not $Perfmon) {
+		$results = Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "SELECT COUNT(*) cnt FROM dbo.PerformanceCounters PC JOIN dbo.Counters C ON C.CounterID = PC.CounterID WHERE C.object_name LIKE 'PerfMon:%'"
+		$results.cnt | Should -BeGreaterThan 0
+	}
+	It 'Perfmon Processor % Processor Time collected' -Skip:(-not $Perfmon) {
+		$results = Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "SELECT COUNT(*) cnt FROM dbo.PerformanceCounters PC JOIN dbo.Counters C ON C.CounterID = PC.CounterID WHERE C.object_name = 'PerfMon:Processor' AND C.counter_name = '% Processor Time'"
+		$results.cnt | Should -BeGreaterThan 0
+	}
+	It 'Perfmon Processor % Processor Time is within 0-100' -Skip:(-not $Perfmon) {
+		# Proves the raw-delta cooking in PerfmonCounters_Upd produced sane values, not just that rows exist.
+		$results = Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "SELECT COUNT(*) cnt FROM dbo.PerformanceCounters PC JOIN dbo.Counters C ON C.CounterID = PC.CounterID WHERE C.object_name = 'PerfMon:Processor' AND C.counter_name = '% Processor Time' AND (PC.Value < 0 OR PC.Value > 100)"
+		$results.cnt | Should -Be 0
+	}
+	It 'Perfmon counters carry their stable WMI identity' -Skip:(-not $Perfmon) {
+		# WmiClass/WmiProperty must be populated so the app can key off the WMI identity, not the display name.
+		$results = Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "SELECT COUNT(*) cnt FROM dbo.Counters WHERE object_name LIKE 'PerfMon:%' AND (WmiClass IS NULL OR WmiProperty IS NULL)"
+		$results.cnt | Should -Be 0
+	}
+	It 'Processor utilization counter is findable by WMI identity (exactly one row)' -Skip:(-not $Perfmon) {
+		# The scenario that motivated this: a chart can locate the counter by WMI identity with confidence,
+		# and there is exactly one row for it (no fragmentation across display names).
+		$results = Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "SELECT COUNT(*) cnt FROM dbo.Counters WHERE WmiClass = 'Win32_PerfRawData_PerfOS_Processor' AND WmiProperty = 'PercentProcessorTime' AND instance_name = '_Total'"
+		$results.cnt | Should -Be 1
 	}
 
 }

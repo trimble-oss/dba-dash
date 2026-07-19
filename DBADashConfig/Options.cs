@@ -27,7 +27,8 @@ Decrypt - Decrypt the config file. --DecryptionPassword can be used if required.
 SetConfigFileBackupRetention - Specify how long to keep config file backups. --RetentionDays
 PopulateConnectionID - Add ConnectionID to source connections without a ConnectionID
 PopulateConnectionID2 - Add ConnectionID to source connections without a ConnectionID.  If connection fails, set ConnectionID based on Data Source in connection string.
-SetAWS - Set AWS Credentials")]
+SetAWS - Set AWS Credentials
+SetPerfmonCounters - Set OS-level (perfmon) counters.  Sets the global list, or a per-connection override when -c/--ConnectionID is supplied.  Use --PerfmonDefaults, --PerfmonCounters, --PerfmonClear and/or --PerfmonInherit.")]
         public CommandLineActionOption Option { get; set; }
 
         [Option('r', "Replace", Required = false, HelpText = "Option to replace the existing connection if it already exists", Default = false)]
@@ -143,6 +144,18 @@ SetAWS - Set AWS Credentials")]
         [Option("AWSProfile", Required = false, HelpText = "Use with -a SetAWS to set AWS Profile for S3 storage")]
         public string? AWSProfile { get; set; }
 
+        [Option("PerfmonDefaults", Default = false, Required = false, HelpText = "Use with -a SetPerfmonCounters to enable the curated default OS-level (perfmon) counters.  Can be combined with --PerfmonCounters to add extras on top.")]
+        public bool PerfmonDefaults { get; set; }
+
+        [Option("PerfmonCounters", Required = false, HelpText = "Use with -a SetPerfmonCounters to set specific OS-level (perfmon) counters.  Comma-separated list of WmiClass:WmiProperty[:Instance] e.g. \"Win32_PerfRawData_PerfOS_Processor:PercentProcessorTime:_Total\".  Instance defaults to *.  The counter type is resolved automatically at collection time.")]
+        public string? PerfmonCounters { get; set; }
+
+        [Option("PerfmonClear", Default = false, Required = false, HelpText = "Use with -a SetPerfmonCounters to clear the perfmon counter list.  Global: disables OS-level counter collection.  Per-connection (with -c/--ConnectionID): disables collection for that instance only.")]
+        public bool PerfmonClear { get; set; }
+
+        [Option("PerfmonInherit", Default = false, Required = false, HelpText = "Use with -a SetPerfmonCounters and -c/--ConnectionID to make a connection inherit the global perfmon counter list (removes any per-connection override).")]
+        public bool PerfmonInherit { get; set; }
+
         public enum CommandLineActionOption
         {
             Add,
@@ -166,7 +179,8 @@ SetAWS - Set AWS Credentials")]
             Restore,
             PopulateConnectionID,
             PopulateConnectionID2,
-            SetAWS
+            SetAWS,
+            SetPerfmonCounters
         }
     }
 }

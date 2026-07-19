@@ -8,37 +8,80 @@ AS
 SET XACT_ABORT ON
 DECLARE @Ref NVARCHAR(128)='PerformanceCounters'
 
-/* Insert any new performance counters into dbo.Counters table */
-INSERT INTO dbo.Counters
-(
-    object_name,
-    counter_name,
-    instance_name
-)
-SELECT	RTRIM(object_name),
-		RTRIM(counter_name),
-		RTRIM(instance_name) 
-FROM @PerformanceCounters
-WHERE cntr_type <> 1073939712 /* PERF_LARGE_RAW_BASE.  Excluding this counter as it's just used in calculations for another counter */
-EXCEPT 
-SELECT	object_name,
-		counter_name,
-		instance_name 
-FROM dbo.Counters WITH(UPDLOCK);
+/* Register any new performance counters (dbo.Counters) and instance associations (dbo.InstanceCounters).
 
-/* Associate performance counters collected with this SQL Instance */
-INSERT INTO dbo.InstanceCounters(InstanceID,CounterID)
-SELECT	@InstanceID,
-		C.CounterID
-FROM @PerformanceCounters pc 
-JOIN dbo.Counters C ON C.counter_name = pc.counter_name 
-					AND C.instance_name = pc.instance_name
-					AND C.object_name = pc.object_name
-EXCEPT 
-SELECT	InstanceID,
-		CounterID 
-FROM dbo.InstanceCounters
-WHERE InstanceID =@InstanceID;
+   Concurrency: dbo.Counters is a small shared natural-key table.  Registering a brand-new counter is a
+   check-then-insert, which two concurrent imports can race:
+     - with no guard they both insert -> 2601 duplicate key on IX_Counters_object_name_counter_name_instance_name;
+     - with UPDLOCK/HOLDLOCK range locks they instead deadlock (1205) on overlapping key ranges.
+   So we serialise registration with an application lock (a single named mutex) - concurrent registrants
+   queue instead of racing, and there is no cross-key cycle to deadlock on.
+
+   Fast path: cheap lock-free existence checks first.  Steady-state imports register nothing, so they
+   take neither the app lock nor any range locks.  We only enter the serialised block when there is
+   actually something new to register (first sighting of a counter / first association for an instance). */
+IF EXISTS (
+		SELECT	RTRIM(object_name), RTRIM(counter_name), RTRIM(instance_name)
+		FROM @PerformanceCounters
+		WHERE cntr_type <> 1073939712 /* PERF_LARGE_RAW_BASE */
+		EXCEPT
+		SELECT	object_name, counter_name, instance_name
+		FROM dbo.Counters
+	)
+	OR EXISTS (
+		SELECT	@InstanceID, C.CounterID
+		FROM @PerformanceCounters pc
+		JOIN dbo.Counters C ON C.counter_name = pc.counter_name
+							AND C.instance_name = pc.instance_name
+							AND C.object_name = pc.object_name
+		EXCEPT
+		SELECT	InstanceID, CounterID
+		FROM dbo.InstanceCounters
+		WHERE InstanceID = @InstanceID
+	)
+BEGIN
+	DECLARE @LockResult INT;
+	BEGIN TRAN
+		EXEC @LockResult = sp_getapplock @Resource = 'DBADash_CounterRegistration',
+										 @LockMode = 'Exclusive',
+										 @LockOwner = 'Transaction',
+										 @LockTimeout = 30000; /* ms.  On timeout (<0) skip registration this round - it self-heals next import */
+		IF @LockResult >= 0
+		BEGIN
+			/* Insert any new performance counters into dbo.Counters table */
+			INSERT INTO dbo.Counters
+			(
+			    object_name,
+			    counter_name,
+			    instance_name
+			)
+			SELECT	RTRIM(object_name),
+					RTRIM(counter_name),
+					RTRIM(instance_name)
+			FROM @PerformanceCounters
+			WHERE cntr_type <> 1073939712 /* PERF_LARGE_RAW_BASE.  Excluding this counter as it's just used in calculations for another counter */
+			EXCEPT
+			SELECT	object_name,
+					counter_name,
+					instance_name
+			FROM dbo.Counters;
+
+			/* Associate performance counters collected with this SQL Instance */
+			INSERT INTO dbo.InstanceCounters(InstanceID,CounterID)
+			SELECT	@InstanceID,
+					C.CounterID
+			FROM @PerformanceCounters pc
+			JOIN dbo.Counters C ON C.counter_name = pc.counter_name
+								AND C.instance_name = pc.instance_name
+								AND C.object_name = pc.object_name
+			EXCEPT
+			SELECT	InstanceID,
+					CounterID
+			FROM dbo.InstanceCounters
+			WHERE InstanceID =@InstanceID;
+		END
+	COMMIT
+END
 
 /* Update the date of counter last collection for this SQL Instance */
 UPDATE IC 

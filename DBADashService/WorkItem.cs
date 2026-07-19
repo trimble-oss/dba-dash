@@ -113,6 +113,10 @@ namespace DBADashService
 
                     collector.LogInternalPerformanceCounters = config.LogInternalPerformanceCounters;
 
+                    // Tri-state: a non-null per-instance list wins (empty => disabled for this instance);
+                    // null inherits the global list.  Empty overall => nothing collected (no auto-defaults).
+                    collector.PerfmonCounters = Source.PerfmonCounters ?? config.PerfmonCounters ?? new List<PerfmonCounter>();
+
                     using (var op = SerilogTimings.Operation.Begin("Collect {types} from instance {instance} on schedule {schedule} with priority {priority}. Dequeue latency {latency}ms.",
                                string.Join(", ", types.Select(s => s.ToString())),
                                Source.SourceConnection.ConnectionForPrint,

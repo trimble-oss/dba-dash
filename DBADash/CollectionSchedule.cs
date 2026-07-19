@@ -48,6 +48,7 @@ namespace DBADashService
                             {CollectionType.AzureDBElasticPoolResourceStats, new CollectionSchedule(){ Schedule = every1min,RunOnServiceStart=false  } },
                             {CollectionType.SlowQueries, new CollectionSchedule(){ Schedule = every1min,RunOnServiceStart=false  } },
                             {CollectionType.PerformanceCounters, new CollectionSchedule(){ Schedule = every1min,RunOnServiceStart=false } },
+                            {CollectionType.PerfmonCounters, new CollectionSchedule(){ Schedule = every1min,RunOnServiceStart=false } },
                             {CollectionType.JobHistory, new CollectionSchedule(){ Schedule = every1min,RunOnServiceStart=false  } },
                             {CollectionType.RunningQueries, new CollectionSchedule(){ Schedule = every1min,RunOnServiceStart=false  } },
                             {CollectionType.DatabasesHADR, new CollectionSchedule(){ Schedule = every1min,RunOnServiceStart=false  } },

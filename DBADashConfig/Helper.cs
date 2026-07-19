@@ -356,6 +356,88 @@ namespace DBADashConfig
             }
         }
 
+        public static async Task SetPerfmonCounters(CollectionConfig config, Options o)
+        {
+            // A connection target (-c or --ConnectionID) switches to a per-connection override; otherwise
+            // we edit the global list.  --PerfmonInherit only makes sense per-connection.
+            var perConnection = !string.IsNullOrEmpty(o.ConnectionString) || !string.IsNullOrEmpty(o.ConnectionID);
+
+            if (o.PerfmonInherit && !perConnection)
+            {
+                Log.Error("--PerfmonInherit requires a connection (-c or --ConnectionID).  The global list has nothing to inherit from.");
+                Environment.Exit(1);
+                return;
+            }
+
+            // Resolve the requested action into a tri-state result:
+            //   null  = inherit the global list (per-connection only)
+            //   empty = collect nothing (disabled)
+            //   list  = these counters
+            List<PerfmonCounter>? result;
+            if (o.PerfmonInherit)
+            {
+                if (o.PerfmonDefaults || o.PerfmonClear || !string.IsNullOrWhiteSpace(o.PerfmonCounters))
+                {
+                    Log.Error("--PerfmonInherit cannot be combined with --PerfmonDefaults, --PerfmonCounters or --PerfmonClear.");
+                    Environment.Exit(1);
+                    return;
+                }
+                result = null;
+            }
+            else if (o.PerfmonClear)
+            {
+                if (o.PerfmonDefaults || !string.IsNullOrWhiteSpace(o.PerfmonCounters))
+                {
+                    Log.Error("--PerfmonClear cannot be combined with --PerfmonDefaults or --PerfmonCounters.");
+                    Environment.Exit(1);
+                    return;
+                }
+                result = new List<PerfmonCounter>();
+            }
+            else if (o.PerfmonDefaults || !string.IsNullOrWhiteSpace(o.PerfmonCounters))
+            {
+                try
+                {
+                    result = PerfmonCounter.BuildList(o.PerfmonDefaults, o.PerfmonCounters);
+                }
+                catch (ArgumentException ex)
+                {
+                    Log.Error("Invalid --PerfmonCounters value: {Message}", ex.Message);
+                    Environment.Exit(1);
+                    return;
+                }
+            }
+            else
+            {
+                Log.Error("Nothing to do.  Specify --PerfmonDefaults and/or --PerfmonCounters, --PerfmonClear to disable{0}.",
+                    perConnection ? ", or --PerfmonInherit to use the global list" : string.Empty);
+                Environment.Exit(1);
+                return;
+            }
+
+            if (perConnection)
+            {
+                var source = await GetSourceConnectionAsync(o, config);
+                if (source == null)
+                {
+                    Log.Error("Source connection not found.");
+                    Environment.Exit(1);
+                    return;
+                }
+                source.PerfmonCounters = result;
+                Log.Information("Perfmon counters for {Connection} set to {State}", source.SourceConnection.ConnectionForPrint,
+                    result == null ? "inherit global" : result.Count == 0 ? "disabled" : $"{result.Count} counter(s)");
+            }
+            else
+            {
+                config.PerfmonCounters = result!; // never null on the global path (--PerfmonInherit is blocked above)
+                Log.Information("Global perfmon counter list set to {State}",
+                    result!.Count == 0 ? "disabled" : $"{result.Count} counter(s)");
+            }
+
+            SaveConfig(config, o);
+        }
+
         public static void SaveConfig(CollectionConfig config, Options o)
         {
             Log.Information("Saving config");
