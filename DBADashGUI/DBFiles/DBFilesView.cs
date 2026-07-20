@@ -143,6 +143,14 @@ namespace DBADashGUI.DBFiles
 
             SetParam("@DatabaseID", GetDatabaseID().HasValue ? GetDatabaseID() : DBNull.Value);
             SetParam("@DriveName", context?.DriveName != null ? context.DriveName : DBNull.Value);
+
+            // The @DriveName filter matches against physical_name, which only exists at the file level
+            // (dbo.FileStatus). Force file-level so the drive filtering works - the Level picker is also
+            // hidden in this case (see SetLevelPickerVisibility).
+            if (context?.DriveName != null)
+            {
+                SetParam("@FilegroupLevel", false);
+            }
         }
 
         private void SetParam(string paramName, object value)
