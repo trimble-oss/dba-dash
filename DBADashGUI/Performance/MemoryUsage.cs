@@ -457,6 +457,7 @@ namespace DBADashGUI.Performance
             performanceCounterSummaryGrid1.ObjectLink = false;
             performanceCounterSummaryGrid1.InstanceLink = false;
             performanceCounterSummaryGrid1.CounterLink = false;
+            performanceCounterSummaryGrid1.AddLink = false;
             performanceCounterSummaryGrid1.CounterSelected += PerformanceCounterSummaryGrid1_CounterSelected;
             DateHelper.AddDateGroups(tsDateGroup, TsDateGroup_Click);
         }

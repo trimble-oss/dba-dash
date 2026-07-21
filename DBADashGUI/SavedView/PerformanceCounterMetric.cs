@@ -1,4 +1,5 @@
-﻿using DBADashGUI.Performance;
+﻿using DBADashGUI.Charts;
+using DBADashGUI.Performance;
 using LiveChartsCore.Measure;
 using Newtonsoft.Json;
 using System.Collections.Generic;
@@ -48,6 +49,23 @@ namespace DBADashGUI
         private AggregateTypes _aggregateType = AggregateTypes.Avg;
 
         public LegendPosition LegendPosition { get; set; } = LegendPosition.Hidden;
+
+        /// <summary>
+        /// The type of chart to render. Defaults to Line. The field initializer ensures older saved
+        /// views (which don't persist this property) continue to render as line charts rather than
+        /// falling back to the enum's zero value.
+        /// </summary>
+        public ChartTypes ChartType { get; set; } = ChartTypes.Line;
+
+        /// <summary>
+        /// Optional fixed minimum for the Y-axis. When null the axis auto-scales.
+        /// </summary>
+        public double? YAxisMin { get; set; }
+
+        /// <summary>
+        /// Optional fixed maximum for the Y-axis. When null the axis auto-scales.
+        /// </summary>
+        public double? YAxisMax { get; set; }
 
         /// <summary>
         /// Legacy global aggregate type. For backward compatibility this will

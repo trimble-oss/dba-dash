@@ -72,6 +72,8 @@ namespace DBADashGUI.Performance
         private void PerformanceCounterSummary_Load(object sender, EventArgs e)
         {
             splitContainer1.Panel1Collapsed = true;
+            performanceCounterSummaryGrid1.ViewLinkText = "New";
+            performanceCounterSummaryGrid1.AddLinkText = "Existing";
             performanceCounterSummaryGrid1.CounterSelected += PerformanceCounterSummaryGrid1_CounterSelected;
             performanceCounterSummaryGrid1.TextSelected += PerformanceCounterSummaryGrid1_TextSelected;
         }
@@ -84,6 +86,24 @@ namespace DBADashGUI.Performance
 
         private void PerformanceCounterSummaryGrid1_CounterSelected(object sender, PerformanceCounterSummaryGrid.CounterSelectedEventArgs e)
         {
+            if (e.AddToExisting)
+            {
+                // Add the counter to the most recently added performance counter chart (if any)
+                var lastChart = layout1.Controls.OfType<PerformanceCounters>().LastOrDefault();
+                if (lastChart != null)
+                {
+                    lastChart.AddCounter(new Counter
+                    {
+                        CounterID = e.CounterID,
+                        CounterName = e.CounterName,
+                        ObjectName = e.ObjectName,
+                        InstanceName = e.InstanceName
+                    });
+                    DeSelectView();
+                    return;
+                }
+                // No existing chart to add to - fall through and create a new chart instead
+            }
             AddCounter(e.CounterName, e.CounterID, e.ObjectName, e.InstanceName);
         }
 
