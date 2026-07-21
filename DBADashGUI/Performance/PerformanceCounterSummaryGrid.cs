@@ -29,6 +29,13 @@ namespace DBADashGUI.Performance
         public bool ObjectLink = true;
         public bool CounterLink = true;
         public bool InstanceLink = true;
+        public bool AddLink = true;
+
+        /// <summary>Link text for the column that opens the counter in a new chart.</summary>
+        public string ViewLinkText = "View";
+
+        /// <summary>Link text for the column that adds the counter to an existing chart.</summary>
+        public string AddLinkText = "Add";
 
         public class CounterSelectedEventArgs : EventArgs
         {
@@ -36,6 +43,12 @@ namespace DBADashGUI.Performance
             public string CounterName { get; set; }
             public string ObjectName { get; set; }
             public string InstanceName { get; set; }
+
+            /// <summary>
+            /// True when the user requested the counter be added to an existing chart
+            /// (via the "Add" link) rather than opening it in a new chart (the "View" link).
+            /// </summary>
+            public bool AddToExisting { get; set; }
         }
 
         public class TextSelectedEventArgs : EventArgs
@@ -109,14 +122,15 @@ namespace DBADashGUI.Performance
             var counterName = (string)row["counter_name"];
             var instanceName = (string)row["instance_name"];
             var colName = Columns[e.ColumnIndex].Name;
-            if (colName == "lnkView")
+            if (colName == "lnkView" || colName == "lnkAdd")
             {
                 CounterSelected?.Invoke(this, new CounterSelectedEventArgs()
                 {
                     CounterID = (int)row["CounterID"],
                     CounterName = counterName,
                     ObjectName = objectName,
-                    InstanceName = instanceName
+                    InstanceName = instanceName,
+                    AddToExisting = colName == "lnkAdd"
                 });
             }
             else if (colName == "lnkCounter")
@@ -187,7 +201,8 @@ namespace DBADashGUI.Performance
                 new DataGridViewTextBoxColumn() { Name = "colSampleCount", HeaderText = "Sample Count", DataPropertyName = "SampleCount", DefaultCellStyle = Common.DataGridViewNumericCellStyle },
                 new DataGridViewTextBoxColumn() { Name = "colCurrentValue", HeaderText = "Current Value", DataPropertyName = "CurrentValue", DefaultCellStyle = Common.DataGridViewNumericCellStyle },
                 new DataGridViewLinkColumn() { Name = "lnkThresholds", HeaderText = "Thresholds", Text = "Edit", LinkColor = DashColors.LinkColor, UseColumnTextForLinkValue = true },
-                new DataGridViewLinkColumn() { Name = "lnkView", HeaderText = "Chart", Text = "View", LinkColor = DashColors.LinkColor, UseColumnTextForLinkValue = true, ToolTipText = "Click to view chart." }
+                new DataGridViewLinkColumn() { Name = "lnkView", HeaderText = "Chart", Text = ViewLinkText, LinkColor = DashColors.LinkColor, UseColumnTextForLinkValue = true, ToolTipText = "Open the counter in a new chart." },
+                new DataGridViewLinkColumn() { Name = "lnkAdd", HeaderText = "Chart", Text = AddLinkText, LinkColor = DashColors.LinkColor, UseColumnTextForLinkValue = true, Visible = AddLink, ToolTipText = "Add the counter to the last chart." }
             );
         }
 

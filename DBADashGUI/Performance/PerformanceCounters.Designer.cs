@@ -28,36 +28,43 @@
         /// </summary>
         private void InitializeComponent()
         {
-            LiveChartsCore.SkiaSharpView.SKCharts.SKDefaultLegend skDefaultLegend2 = new LiveChartsCore.SkiaSharpView.SKCharts.SKDefaultLegend();
+            LiveChartsCore.SkiaSharpView.SKCharts.SKDefaultLegend skDefaultLegend1 = new LiveChartsCore.SkiaSharpView.SKCharts.SKDefaultLegend();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PerformanceCounters));
-            LiveChartsCore.Drawing.Padding padding3 = new LiveChartsCore.Drawing.Padding();
-            LiveChartsCore.SkiaSharpView.SKCharts.SKDefaultTooltip skDefaultTooltip2 = new LiveChartsCore.SkiaSharpView.SKCharts.SKDefaultTooltip();
-            LiveChartsCore.Drawing.Padding padding4 = new LiveChartsCore.Drawing.Padding();
+            LiveChartsCore.Drawing.Padding padding1 = new LiveChartsCore.Drawing.Padding();
+            LiveChartsCore.SkiaSharpView.SKCharts.SKDefaultTooltip skDefaultTooltip1 = new LiveChartsCore.SkiaSharpView.SKCharts.SKDefaultTooltip();
+            LiveChartsCore.Drawing.Padding padding2 = new LiveChartsCore.Drawing.Padding();
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             tsDateGrouping = new System.Windows.Forms.ToolStripDropDownButton();
-            tsAgg = new System.Windows.Forms.ToolStripDropDownButton();
-            totalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            minToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            maxToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            avgToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            sampleCountToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            tsClose = new System.Windows.Forms.ToolStripButton();
-            tsUp = new System.Windows.Forms.ToolStripButton();
-            tsTitle = new System.Windows.Forms.ToolStripLabel();
-            chart1 = new LiveChartsCore.SkiaSharpView.WinForms.CartesianChart();
             tsLegend = new System.Windows.Forms.ToolStripDropDownButton();
             leftToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             rightToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             topToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             bottomToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             hiddenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            tsCounters = new System.Windows.Forms.ToolStripDropDownButton();
+            tsConfigure = new System.Windows.Forms.ToolStripDropDownButton();
+            tsChartType = new System.Windows.Forms.ToolStripMenuItem();
+            lineChartTypeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            areaChartTypeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            columnChartTypeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            stackedColumnChartTypeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            scatterChartTypeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            tsYAxis = new System.Windows.Forms.ToolStripMenuItem();
+            autoYAxisMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            percentYAxisMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            customYAxisMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            editTitleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            tsClose = new System.Windows.Forms.ToolStripButton();
+            tsUp = new System.Windows.Forms.ToolStripButton();
+            tsTitle = new System.Windows.Forms.ToolStripLabel();
+            chart1 = new LiveChartsCore.SkiaSharpView.WinForms.CartesianChart();
             toolStrip1.SuspendLayout();
             SuspendLayout();
             // 
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsDateGrouping, tsAgg, tsClose, tsUp, tsTitle, tsLegend });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsDateGrouping, tsLegend, tsCounters, tsConfigure, tsClose, tsUp, tsTitle });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new System.Drawing.Size(1299, 27);
@@ -71,57 +78,172 @@
             tsDateGrouping.Name = "tsDateGrouping";
             tsDateGrouping.Size = new System.Drawing.Size(120, 24);
             tsDateGrouping.Text = "Date Group";
+            //
+            // tsLegend
+            //
+            tsLegend.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsLegend.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { leftToolStripMenuItem, rightToolStripMenuItem, topToolStripMenuItem, bottomToolStripMenuItem, hiddenToolStripMenuItem });
+            tsLegend.Image = Properties.Resources.LegendHS;
+            tsLegend.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsLegend.Name = "tsLegend";
+            tsLegend.Size = new System.Drawing.Size(34, 24);
+            tsLegend.Text = "Legend Position";
             // 
-            // tsAgg
+            // leftToolStripMenuItem
             // 
-            tsAgg.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { totalToolStripMenuItem, minToolStripMenuItem, maxToolStripMenuItem, avgToolStripMenuItem, sampleCountToolStripMenuItem });
-            tsAgg.Image = Properties.Resources.AddComputedField_16x;
-            tsAgg.ImageTransparentColor = System.Drawing.Color.Magenta;
-            tsAgg.Name = "tsAgg";
-            tsAgg.Size = new System.Drawing.Size(69, 24);
-            tsAgg.Text = "Avg";
+            leftToolStripMenuItem.Name = "leftToolStripMenuItem";
+            leftToolStripMenuItem.Size = new System.Drawing.Size(142, 26);
+            leftToolStripMenuItem.Tag = "Left";
+            leftToolStripMenuItem.Text = "Left";
+            leftToolStripMenuItem.Click += SetLegendPosition;
             // 
-            // totalToolStripMenuItem
+            // rightToolStripMenuItem
             // 
-            totalToolStripMenuItem.Name = "totalToolStripMenuItem";
-            totalToolStripMenuItem.Size = new System.Drawing.Size(185, 26);
-            totalToolStripMenuItem.Tag = "Total";
-            totalToolStripMenuItem.Text = "Total";
-            totalToolStripMenuItem.Click += TsAgg_Click;
+            rightToolStripMenuItem.Name = "rightToolStripMenuItem";
+            rightToolStripMenuItem.Size = new System.Drawing.Size(142, 26);
+            rightToolStripMenuItem.Tag = "Right";
+            rightToolStripMenuItem.Text = "Right";
+            rightToolStripMenuItem.Click += SetLegendPosition;
             // 
-            // minToolStripMenuItem
+            // topToolStripMenuItem
             // 
-            minToolStripMenuItem.Name = "minToolStripMenuItem";
-            minToolStripMenuItem.Size = new System.Drawing.Size(185, 26);
-            minToolStripMenuItem.Tag = "Min";
-            minToolStripMenuItem.Text = "Min";
-            minToolStripMenuItem.Click += TsAgg_Click;
+            topToolStripMenuItem.Name = "topToolStripMenuItem";
+            topToolStripMenuItem.Size = new System.Drawing.Size(142, 26);
+            topToolStripMenuItem.Tag = "Top";
+            topToolStripMenuItem.Text = "Top";
+            topToolStripMenuItem.Click += SetLegendPosition;
             // 
-            // maxToolStripMenuItem
+            // bottomToolStripMenuItem
             // 
-            maxToolStripMenuItem.Name = "maxToolStripMenuItem";
-            maxToolStripMenuItem.Size = new System.Drawing.Size(185, 26);
-            maxToolStripMenuItem.Tag = "Max";
-            maxToolStripMenuItem.Text = "Max";
-            maxToolStripMenuItem.Click += TsAgg_Click;
+            bottomToolStripMenuItem.Name = "bottomToolStripMenuItem";
+            bottomToolStripMenuItem.Size = new System.Drawing.Size(142, 26);
+            bottomToolStripMenuItem.Tag = "Bottom";
+            bottomToolStripMenuItem.Text = "Bottom";
+            bottomToolStripMenuItem.Click += SetLegendPosition;
             // 
-            // avgToolStripMenuItem
+            // hiddenToolStripMenuItem
             // 
-            avgToolStripMenuItem.Checked = true;
-            avgToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
-            avgToolStripMenuItem.Name = "avgToolStripMenuItem";
-            avgToolStripMenuItem.Size = new System.Drawing.Size(185, 26);
-            avgToolStripMenuItem.Tag = "Avg";
-            avgToolStripMenuItem.Text = "Avg";
-            avgToolStripMenuItem.Click += TsAgg_Click;
+            hiddenToolStripMenuItem.Checked = true;
+            hiddenToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            hiddenToolStripMenuItem.Name = "hiddenToolStripMenuItem";
+            hiddenToolStripMenuItem.Size = new System.Drawing.Size(142, 26);
+            hiddenToolStripMenuItem.Tag = "Hidden";
+            hiddenToolStripMenuItem.Text = "Hidden";
+            hiddenToolStripMenuItem.Click += SetLegendPosition;
             // 
-            // sampleCountToolStripMenuItem
+            // tsCounters
             // 
-            sampleCountToolStripMenuItem.Name = "sampleCountToolStripMenuItem";
-            sampleCountToolStripMenuItem.Size = new System.Drawing.Size(185, 26);
-            sampleCountToolStripMenuItem.Tag = "SampleCount";
-            sampleCountToolStripMenuItem.Text = "Sample Count";
-            sampleCountToolStripMenuItem.Click += TsAgg_Click;
+            tsCounters.Image = Properties.Resources.AddComputedField_16x;
+            tsCounters.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsCounters.Name = "tsCounters";
+            tsCounters.Size = new System.Drawing.Size(91, 24);
+            tsCounters.Text = "Metrics";
+            tsCounters.ToolTipText = "Show, hide or remove counters on this chart";
+            tsCounters.DropDownOpening += TsCounters_DropDownOpening;
+            // 
+            // tsConfigure
+            // 
+            tsConfigure.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsConfigure.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { tsChartType, tsYAxis, editTitleToolStripMenuItem });
+            tsConfigure.Image = Properties.Resources.SettingsOutline_16x;
+            tsConfigure.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsConfigure.Name = "tsConfigure";
+            tsConfigure.Size = new System.Drawing.Size(34, 24);
+            tsConfigure.Text = "Configure";
+            tsConfigure.ToolTipText = "Add metrics, manage counters and axis settings";
+            //
+            // tsChartType
+            //
+            tsChartType.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { lineChartTypeMenuItem, areaChartTypeMenuItem, columnChartTypeMenuItem, stackedColumnChartTypeMenuItem, scatterChartTypeMenuItem });
+            tsChartType.Image = Properties.Resources.LineChart_16x;
+            tsChartType.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsChartType.Name = "tsChartType";
+            tsChartType.Size = new System.Drawing.Size(172, 26);
+            tsChartType.Text = "Chart Type: Line";
+            tsChartType.ToolTipText = "Change how the data is plotted";
+            //
+            // lineChartTypeMenuItem
+            //
+            lineChartTypeMenuItem.Checked = true;
+            lineChartTypeMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            lineChartTypeMenuItem.Name = "lineChartTypeMenuItem";
+            lineChartTypeMenuItem.Size = new System.Drawing.Size(180, 26);
+            lineChartTypeMenuItem.Tag = "Line";
+            lineChartTypeMenuItem.Text = "Line";
+            lineChartTypeMenuItem.Click += TsChartType_Click;
+            //
+            // areaChartTypeMenuItem
+            //
+            areaChartTypeMenuItem.Name = "areaChartTypeMenuItem";
+            areaChartTypeMenuItem.Size = new System.Drawing.Size(180, 26);
+            areaChartTypeMenuItem.Tag = "StackedArea";
+            areaChartTypeMenuItem.Text = "Stacked Area";
+            areaChartTypeMenuItem.Click += TsChartType_Click;
+            //
+            // columnChartTypeMenuItem
+            //
+            columnChartTypeMenuItem.Name = "columnChartTypeMenuItem";
+            columnChartTypeMenuItem.Size = new System.Drawing.Size(180, 26);
+            columnChartTypeMenuItem.Tag = "Column";
+            columnChartTypeMenuItem.Text = "Column";
+            columnChartTypeMenuItem.Click += TsChartType_Click;
+            //
+            // stackedColumnChartTypeMenuItem
+            //
+            stackedColumnChartTypeMenuItem.Name = "stackedColumnChartTypeMenuItem";
+            stackedColumnChartTypeMenuItem.Size = new System.Drawing.Size(180, 26);
+            stackedColumnChartTypeMenuItem.Tag = "StackedColumn";
+            stackedColumnChartTypeMenuItem.Text = "Stacked Column";
+            stackedColumnChartTypeMenuItem.Click += TsChartType_Click;
+            //
+            // scatterChartTypeMenuItem
+            //
+            scatterChartTypeMenuItem.Name = "scatterChartTypeMenuItem";
+            scatterChartTypeMenuItem.Size = new System.Drawing.Size(180, 26);
+            scatterChartTypeMenuItem.Tag = "Scatter";
+            scatterChartTypeMenuItem.Text = "Scatter";
+            scatterChartTypeMenuItem.Click += TsChartType_Click;
+            //
+            // tsYAxis
+            //
+            tsYAxis.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { autoYAxisMenuItem, percentYAxisMenuItem, customYAxisMenuItem });
+            tsYAxis.Image = Properties.Resources.Percentage_16x;
+            tsYAxis.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsYAxis.Name = "tsYAxis";
+            tsYAxis.Size = new System.Drawing.Size(172, 26);
+            tsYAxis.Text = "Y-Axis: Auto";
+            tsYAxis.ToolTipText = "Configure the Y-axis scale";
+            // 
+            // autoYAxisMenuItem
+            // 
+            autoYAxisMenuItem.Checked = true;
+            autoYAxisMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            autoYAxisMenuItem.Name = "autoYAxisMenuItem";
+            autoYAxisMenuItem.Size = new System.Drawing.Size(164, 26);
+            autoYAxisMenuItem.Text = "Auto";
+            autoYAxisMenuItem.Click += TsYAxisAuto_Click;
+            // 
+            // percentYAxisMenuItem
+            // 
+            percentYAxisMenuItem.Name = "percentYAxisMenuItem";
+            percentYAxisMenuItem.Size = new System.Drawing.Size(164, 26);
+            percentYAxisMenuItem.Text = "0 - 100 (%)";
+            percentYAxisMenuItem.Click += TsYAxisPercent_Click;
+            // 
+            // customYAxisMenuItem
+            // 
+            customYAxisMenuItem.Name = "customYAxisMenuItem";
+            customYAxisMenuItem.Size = new System.Drawing.Size(164, 26);
+            customYAxisMenuItem.Text = "Custom...";
+            customYAxisMenuItem.Click += TsYAxisCustom_Click;
+            // 
+            // editTitleToolStripMenuItem
+            // 
+            editTitleToolStripMenuItem.Image = Properties.Resources.Rename_16x;
+            editTitleToolStripMenuItem.Name = "editTitleToolStripMenuItem";
+            editTitleToolStripMenuItem.Size = new System.Drawing.Size(172, 26);
+            editTitleToolStripMenuItem.Text = "Edit Title";
+            editTitleToolStripMenuItem.Click += TsTitle_Click;
             // 
             // tsClose
             // 
@@ -154,99 +276,48 @@
             tsTitle.Name = "tsTitle";
             tsTitle.Size = new System.Drawing.Size(54, 24);
             tsTitle.Text = "Metric";
+            tsTitle.ToolTipText = "Click to edit the chart label";
             // 
             // chart1
             // 
             chart1.AutoUpdateEnabled = true;
             chart1.ChartTheme = null;
             chart1.Dock = System.Windows.Forms.DockStyle.Fill;
-            skDefaultLegend2.AnimationsSpeed = System.TimeSpan.Parse("00:00:00.1500000");
-            skDefaultLegend2.Content = null;
-            skDefaultLegend2.IsValid = false;
-            skDefaultLegend2.Opacity = 1F;
-            padding3.Bottom = 0F;
-            padding3.Left = 0F;
-            padding3.Right = 0F;
-            padding3.Top = 0F;
-            skDefaultLegend2.Padding = padding3;
-            skDefaultLegend2.RemoveOnCompleted = false;
-            skDefaultLegend2.RotateTransform = 0F;
-            skDefaultLegend2.X = 0F;
-            skDefaultLegend2.Y = 0F;
-            chart1.Legend = skDefaultLegend2;
+            skDefaultLegend1.AnimationsSpeed = System.TimeSpan.Parse("00:00:00.1500000");
+            skDefaultLegend1.Content = null;
+            skDefaultLegend1.IsValid = false;
+            skDefaultLegend1.Opacity = 1F;
+            padding1.Bottom = 0F;
+            padding1.Left = 0F;
+            padding1.Right = 0F;
+            padding1.Top = 0F;
+            skDefaultLegend1.Padding = padding1;
+            skDefaultLegend1.RemoveOnCompleted = false;
+            skDefaultLegend1.RotateTransform = 0F;
+            skDefaultLegend1.X = 0F;
+            skDefaultLegend1.Y = 0F;
+            chart1.Legend = skDefaultLegend1;
             chart1.Location = new System.Drawing.Point(0, 27);
             chart1.MatchAxesScreenDataRatio = false;
             chart1.Name = "chart1";
             chart1.Size = new System.Drawing.Size(1299, 965);
             chart1.TabIndex = 2;
-            skDefaultTooltip2.AnimationsSpeed = System.TimeSpan.Parse("00:00:00.1500000");
-            skDefaultTooltip2.Content = null;
-            skDefaultTooltip2.IsValid = false;
-            skDefaultTooltip2.Opacity = 1F;
-            padding4.Bottom = 0F;
-            padding4.Left = 0F;
-            padding4.Right = 0F;
-            padding4.Top = 0F;
-            skDefaultTooltip2.Padding = padding4;
-            skDefaultTooltip2.RemoveOnCompleted = false;
-            skDefaultTooltip2.RotateTransform = 0F;
-            skDefaultTooltip2.Wedge = 10;
-            skDefaultTooltip2.X = 0F;
-            skDefaultTooltip2.Y = 0F;
-            chart1.Tooltip = skDefaultTooltip2;
+            skDefaultTooltip1.AnimationsSpeed = System.TimeSpan.Parse("00:00:00.1500000");
+            skDefaultTooltip1.Content = null;
+            skDefaultTooltip1.IsValid = false;
+            skDefaultTooltip1.Opacity = 1F;
+            padding2.Bottom = 0F;
+            padding2.Left = 0F;
+            padding2.Right = 0F;
+            padding2.Top = 0F;
+            skDefaultTooltip1.Padding = padding2;
+            skDefaultTooltip1.RemoveOnCompleted = false;
+            skDefaultTooltip1.RotateTransform = 0F;
+            skDefaultTooltip1.Wedge = 10;
+            skDefaultTooltip1.X = 0F;
+            skDefaultTooltip1.Y = 0F;
+            chart1.Tooltip = skDefaultTooltip1;
             chart1.UpdaterThrottler = System.TimeSpan.Parse("00:00:00.0500000");
-            // 
-            // tsLegend
-            // 
-            tsLegend.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            tsLegend.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { leftToolStripMenuItem, rightToolStripMenuItem, topToolStripMenuItem, bottomToolStripMenuItem, hiddenToolStripMenuItem });
-            tsLegend.Image = Properties.Resources.LegendHS;
-            tsLegend.ImageTransparentColor = System.Drawing.Color.Magenta;
-            tsLegend.Name = "tsLegend";
-            tsLegend.Size = new System.Drawing.Size(34, 24);
-            tsLegend.Text = "Legend Position";
-            // 
-            // leftToolStripMenuItem
-            // 
-            leftToolStripMenuItem.Name = "leftToolStripMenuItem";
-            leftToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            leftToolStripMenuItem.Tag = "Left";
-            leftToolStripMenuItem.Text = "Left";
-            leftToolStripMenuItem.Click += SetLegendPosition;
-            // 
-            // rightToolStripMenuItem
-            // 
-            rightToolStripMenuItem.Name = "rightToolStripMenuItem";
-            rightToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            rightToolStripMenuItem.Tag = "Right";
-            rightToolStripMenuItem.Text = "Right";
-            rightToolStripMenuItem.Click += SetLegendPosition;
-            // 
-            // topToolStripMenuItem
-            // 
-            topToolStripMenuItem.Name = "topToolStripMenuItem";
-            topToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            topToolStripMenuItem.Tag = "Top";
-            topToolStripMenuItem.Text = "Top";
-            topToolStripMenuItem.Click += SetLegendPosition;
-            // 
-            // bottomToolStripMenuItem
-            // 
-            bottomToolStripMenuItem.Name = "bottomToolStripMenuItem";
-            bottomToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            bottomToolStripMenuItem.Tag = "Bottom";
-            bottomToolStripMenuItem.Text = "Bottom";
-            bottomToolStripMenuItem.Click += SetLegendPosition;
-            // 
-            // hiddenToolStripMenuItem
-            // 
-            hiddenToolStripMenuItem.Checked = true;
-            hiddenToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
-            hiddenToolStripMenuItem.Name = "hiddenToolStripMenuItem";
-            hiddenToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            hiddenToolStripMenuItem.Tag = "Hidden";
-            hiddenToolStripMenuItem.Text = "Hidden";
-            hiddenToolStripMenuItem.Click += SetLegendPosition;
             // 
             // PerformanceCounters
             // 
@@ -268,12 +339,17 @@
         #endregion
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripDropDownButton tsDateGrouping;
-        private System.Windows.Forms.ToolStripDropDownButton tsAgg;
-        private System.Windows.Forms.ToolStripMenuItem totalToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem minToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem maxToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem avgToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem sampleCountToolStripMenuItem;
+        private System.Windows.Forms.ToolStripDropDownButton tsCounters;
+        private System.Windows.Forms.ToolStripMenuItem tsChartType;
+        private System.Windows.Forms.ToolStripMenuItem lineChartTypeMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem areaChartTypeMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem columnChartTypeMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem stackedColumnChartTypeMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem scatterChartTypeMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem tsYAxis;
+        private System.Windows.Forms.ToolStripMenuItem autoYAxisMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem percentYAxisMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem customYAxisMenuItem;
         private System.Windows.Forms.ToolStripButton tsClose;
         private System.Windows.Forms.ToolStripButton tsUp;
         private LiveChartsCore.SkiaSharpView.WinForms.CartesianChart chart1;
@@ -284,5 +360,7 @@
         private System.Windows.Forms.ToolStripMenuItem topToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem bottomToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem hiddenToolStripMenuItem;
+        private System.Windows.Forms.ToolStripDropDownButton tsConfigure;
+        private System.Windows.Forms.ToolStripMenuItem editTitleToolStripMenuItem;
     }
 }

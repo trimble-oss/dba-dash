@@ -255,7 +255,7 @@
             // layout1
             // 
             layout1.ColumnCount = 1;
-            layout1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            layout1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             layout1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             layout1.Dock = System.Windows.Forms.DockStyle.Fill;
             layout1.Location = new System.Drawing.Point(0, 0);

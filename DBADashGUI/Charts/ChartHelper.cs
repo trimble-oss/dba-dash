@@ -710,6 +710,14 @@ namespace DBADashGUI.Charts
 
                     return lineSeries;
 
+                case ChartTypes.Scatter:
+                    return new ScatterSeries<ObservablePoint>()
+                    {
+                        Name = groupName,
+                        Values = values,
+                        GeometrySize = geometrySize
+                    };
+
                 default:
                     throw new ArgumentOutOfRangeException(nameof(chartType), $"Unsupported chart type: {chartType}");
             }
@@ -931,6 +939,14 @@ namespace DBADashGUI.Charts
                     }
 
                     return lineSeries;
+
+                case ChartTypes.Scatter:
+                    return new ScatterSeries<DateTimePoint>()
+                    {
+                        Name = groupName,
+                        Values = values,
+                        GeometrySize = geometrySize
+                    };
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(chartType), $"Unsupported chart type: {chartType}");

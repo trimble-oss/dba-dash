@@ -32,7 +32,12 @@ namespace DBADashGUI.Charts
         /// <summary>
         /// Pie chart - category/value slices
         /// </summary>
-        Pie
+        Pie,
+
+        /// <summary>
+        /// Scatter chart - individual points for each series, no connecting line
+        /// </summary>
+        Scatter
     }
 
     /// <summary>

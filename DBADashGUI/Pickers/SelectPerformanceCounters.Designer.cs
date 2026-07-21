@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            dgvCounters = new System.Windows.Forms.DataGridView();
+            dgvCounters = new DBADashGUI.CustomReports.DBADashDataGridView();
             colObjectName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             colCounterName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             colInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -254,7 +254,7 @@
 
         #endregion
 
-        private System.Windows.Forms.DataGridView dgvCounters;
+        private DBADashGUI.CustomReports.DBADashDataGridView dgvCounters;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Button bttnOK;
         private System.Windows.Forms.DataGridViewTextBoxColumn colObjectName;

@@ -1,5 +1,6 @@
 ﻿using DBADashGUI.Charts;
 using DBADashGUI.Theme;
+using System.Collections.Generic;
 using LiveChartsCore;
 using LiveChartsCore.Measure;
 using LiveChartsCore.SkiaSharpView;
@@ -81,7 +82,7 @@ namespace DBADashGUI.Performance
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public PerformanceCounterMetric Metric
-        { get => _metric; set { _metric = value; SelectAggregate(); UpdateLegendMenuChecked(); } }
+        { get => _metric; set { _metric = value; EnsureCountersHaveAggregate(); UpdateLegendMenuChecked(); UpdateYAxisMenuChecked(); UpdateChartTypeMenuChecked(); } }
 
         IMetric IMetricChart.Metric => Metric;
 
@@ -111,63 +112,6 @@ namespace DBADashGUI.Performance
         private int durationMins;
         private int DateGrouping;
         private DataTable dt;
-
-        private void SelectAggregate()
-        {
-            // Determine visible aggregate based on per-counter aggregation flags.
-            // If counters have differing enabled aggregates (or a counter has multiple), hide the aggregate selector.
-            if (Metric?.Counters == null || Metric.Counters.Count == 0)
-            {
-                // Legacy single-metric behavior
-                tsAgg.Visible = true;
-                tsAgg.Text = Enum.GetName(Metric.AggregateType);
-                foreach (ToolStripMenuItem mnu in tsAgg.DropDownItems)
-                {
-                    mnu.Checked = (string)mnu.Tag == Enum.GetName(Metric.AggregateType);
-                }
-                return;
-            }
-
-            var distinctAggs = new System.Collections.Generic.HashSet<string>();
-            foreach (var c in Metric.Counters)
-            {
-                var aggs = c.GetAggColumns(includeCurrent: false);
-                if (aggs == null || aggs.Count == 0)
-                {
-                    // Default to Avg when no per-counter flags set
-                    distinctAggs.Add("Avg");
-                }
-                else
-                {
-                    foreach (var a in aggs)
-                    {
-                        distinctAggs.Add(a);
-                    }
-                }
-            }
-
-            if (distinctAggs.Count != 1)
-            {
-                // Multiple different aggregates in use across counters - hide selector
-                tsAgg.Visible = false;
-                return;
-            }
-
-            // Single aggregate in use - show selector and select the matching menu item
-            var aggName = distinctAggs.First();
-            tsAgg.Visible = true;
-            foreach (ToolStripMenuItem mnu in tsAgg.DropDownItems)
-            {
-                var tag = (string)mnu.Tag;
-                var isMatch = tag == aggName;
-                mnu.Checked = isMatch;
-                if (isMatch)
-                {
-                    // Use the menu item's display text (handles "Sample Count" spacing)
-                    tsAgg.Text = mnu.Text;
-                }
-            }
-        }
 
         public void RefreshData()
         {
@@ -216,7 +160,7 @@ namespace DBADashGUI.Performance
 
         private void RefreshChart()
         {
-            tsTitle.Text = Metric.GetTitle();
+            tsTitle.SetTruncatedText(Metric.GetTitle());
             if (dt == null || dt.Rows.Count < 2)
             {
                 chart1.Series = Array.Empty<ISeries>();
@@ -232,34 +176,32 @@ namespace DBADashGUI.Performance
             {
                 foreach (var c in Metric.Counters)
                 {
-                    var aggCols = c.GetAggColumns(includeCurrent: false);
-                    if (aggCols.Count == 0)
+                    // A counter with no aggregate selected shows nothing (it stays in the Counters menu so
+                    // the aggregate can be re-enabled).
+                    foreach (var agg in c.GetAggColumns(includeCurrent: false))
                     {
-                        seriesDefs.Add((c.CounterID, c.FullName, "Avg", "Value_Avg"));
-                    }
-                    else
-                    {
-                        foreach (var agg in aggCols)
-                        {
-                            // Map aggregation to column name produced by stored proc
-                            string col;
-                            if (agg == "SampleCount") col = "Value_SampleCount";
-                            else if (agg == "Total") col = "Value_Total";
-                            else col = "Value_" + agg;
+                        // Map aggregation to column name produced by stored proc
+                        string col;
+                        if (agg == "SampleCount") col = "Value_SampleCount";
+                        else if (agg == "Total") col = "Value_Total";
+                        else col = "Value_" + agg;
 
-                            if (dt.Columns.Contains(col))
-                            {
-                                seriesDefs.Add((c.CounterID, c.FullName, agg, col));
-                            }
+                        if (dt.Columns.Contains(col))
+                        {
+                            seriesDefs.Add((c.CounterID, c.FullName, agg, col));
                         }
                     }
                 }
             }
             if (seriesDefs.Count == 0)
             {
-                ToggleError(true, "No valid counters or aggregates selected.");
+                ToggleError(true, "No valid counters or aggregates selected. Enable an aggregate from the Counters menu.");
                 return;
             }
+
+            // We have something to draw - clear any prior error so the chart is shown again
+            // (RefreshChart can be called directly, e.g. from the Counters menu, bypassing RefreshData).
+            ToggleError(false);
 
             // Build a flattened datatable where each counter+agg becomes a series (SeriesName) with SelectedValue
             var dtSeries = new DataTable();
@@ -297,13 +239,37 @@ namespace DBADashGUI.Performance
                 dtSeries.EndLoadData();
             }
 
-            // Calculate min/max for Y-axis scaling from dtSeries
+            // Calculate min/max for Y-axis scaling from dtSeries.
             double maxValue = 0, minValue = 0;
-            foreach (DataRow r in dtSeries.Rows)
+            var isStacked = Metric.ChartType is ChartTypes.StackedArea or ChartTypes.StackedColumn;
+            if (isStacked)
             {
-                var value = Convert.ToDouble(r["SelectedValue"]);
-                maxValue = value > maxValue ? value : maxValue;
-                minValue = value < minValue ? value : minValue;
+                // For stacked charts the visual extent at each timestamp is the sum of the series,
+                // not any individual value, so the axis must be scaled to the stacked total.
+                // Positive and negative values stack in opposite directions - track them separately.
+                var stackByDate = new Dictionary<DateTime, (double Positive, double Negative)>();
+                foreach (DataRow r in dtSeries.Rows)
+                {
+                    var date = (DateTime)r["SnapshotDate"];
+                    var value = Convert.ToDouble(r["SelectedValue"]);
+                    stackByDate.TryGetValue(date, out var acc);
+                    if (value >= 0) acc.Positive += value; else acc.Negative += value;
+                    stackByDate[date] = acc;
+                }
+                foreach (var acc in stackByDate.Values)
+                {
+                    maxValue = acc.Positive > maxValue ? acc.Positive : maxValue;
+                    minValue = acc.Negative < minValue ? acc.Negative : minValue;
+                }
+            }
+            else
+            {
+                foreach (DataRow r in dtSeries.Rows)
+                {
+                    var value = Convert.ToDouble(r["SelectedValue"]);
+                    maxValue = value > maxValue ? value : maxValue;
+                    minValue = value < minValue ? value : minValue;
+                }
             }
 
             // Adjust Y-axis limits
@@ -312,15 +278,32 @@ namespace DBADashGUI.Performance
                 maxValue = 1;
             }
             maxValue *= 1.1;
-            // Auto-adjust point size based on data count (use flattened series table)
-            var effectiveGeometrySize = dtSeries.Rows.Count > 500 ? 0 : geometrySize;
+
+            // Apply any user-configured fixed axis limits (overrides auto-scaling)
+            if (Metric.YAxisMin.HasValue) minValue = Metric.YAxisMin.Value;
+            if (Metric.YAxisMax.HasValue) maxValue = Metric.YAxisMax.Value;
+
+            // A one-sided override can leave the bounds crossed (e.g. a user-set min above the auto-scaled
+            // max). Keep min < max so the axis still renders instead of collapsing or throwing.
+            if (maxValue <= minValue)
+            {
+                maxValue = minValue + (minValue == 0 ? 1 : Math.Abs(minValue) * 0.1);
+            }
+
+            // Auto-adjust point size based on data count (use flattened series table).
+            // Scatter charts are nothing but points, so keep them visible (smaller) rather than
+            // hiding them entirely on dense datasets the way line/area charts do.
+            var isScatter = Metric.ChartType == ChartTypes.Scatter;
+            var effectiveGeometrySize = dtSeries.Rows.Count > 500
+                ? (isScatter ? 4 : 0)
+                : geometrySize;
 
             var config = new ChartConfiguration
             {
                 XColumn = "SnapshotDate",
                 MetricColumn = "SelectedValue",
                 SeriesColumn = "SeriesName",
-                ChartType = ChartTypes.Line,
+                ChartType = Metric.ChartType,
                 LineSmoothness = lineSmoothness,
                 LineFill = true,
                 GeometrySize = effectiveGeometrySize,
@@ -375,6 +358,9 @@ namespace DBADashGUI.Performance
         private void PerformanceCounters_Load(object sender, EventArgs e)
         {
             DateHelper.AddDateGroups(tsDateGrouping, TsDateGrouping_Click);
+            tsTitle.EnableAutoTruncate(t => string.IsNullOrEmpty(t)
+                ? "Click to edit the chart label"
+                : t + "\n(Click to edit)");
         }
 
         private void TsDateGrouping_Click(object sender, EventArgs e)
@@ -393,68 +379,362 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private void TsAgg_Click(object sender, EventArgs e)
+        /// <summary>
+        /// Set the aggregation flags on a counter to the single selected aggregate type,
+        /// clearing any previously enabled aggregates.
+        /// </summary>
+        private static void SetCounterAggregate(Counter c, AggregateTypes aggType)
         {
-            var selected = sender as ToolStripMenuItem;
-            if (selected == null) return;
+            // Clear existing flags
+            c.Avg = false;
+            c.Max = false;
+            c.Min = false;
+            c.Total = false;
+            c.SampleCount = false;
+            c.Current = false;
 
-            foreach (ToolStripMenuItem itm in tsAgg.DropDownItems)
+            switch (aggType)
             {
-                itm.Checked = itm == selected;
+                case AggregateTypes.Avg:
+                    c.Avg = true;
+                    break;
+
+                case AggregateTypes.Max:
+                    c.Max = true;
+                    break;
+
+                case AggregateTypes.Min:
+                    c.Min = true;
+                    break;
+
+                case AggregateTypes.Total:
+                case AggregateTypes.Sum:
+                    c.Total = true;
+                    break;
+
+                case AggregateTypes.SampleCount:
+                    c.SampleCount = true;
+                    break;
+
+                case AggregateTypes.None:
+                default:
+                    // leave all flags false
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Ensures every counter has at least one aggregate selected, defaulting to the chart aggregate
+        /// (Avg) - e.g. for the first counter, which is created from the grid without aggregate flags.
+        /// </summary>
+        private void EnsureCountersHaveAggregate()
+        {
+            if (Metric?.Counters == null) return;
+            foreach (var c in Metric.Counters.Where(c => c.GetAggColumns(includeCurrent: false).Count == 0))
+            {
+                SetCounterAggregate(c, Metric.AggregateType);
+            }
+        }
+
+        /// <summary>
+        /// Add a counter to this chart and refresh.  Used by the Metrics tab "Add" link
+        /// to combine multiple counters on a single chart.
+        /// </summary>
+        public void AddCounter(Counter counter)
+        {
+            if (AddCounterInternal(counter))
+            {
+                RefreshData();
+            }
+        }
+
+        /// <summary>
+        /// Add multiple counters to this chart, refreshing only once.  Used by the "Add Metric" button.
+        /// </summary>
+        public void AddCounters(IEnumerable<Counter> counters)
+        {
+            if (counters == null) return;
+            var added = false;
+            foreach (var counter in counters)
+            {
+                added |= AddCounterInternal(counter);
+            }
+            if (added)
+            {
+                RefreshData();
+            }
+        }
+
+        /// <summary>
+        /// Add a counter to the metric without refreshing.  Returns true if the counter was added.
+        /// </summary>
+        private bool AddCounterInternal(Counter counter)
+        {
+            if (counter == null) return false;
+            Metric.Counters ??= new List<Counter>();
+
+            // If the counter is already on the chart, don't add a duplicate.
+            if (counter.CounterID > 0 && Metric.Counters.Any(c => c.CounterID == counter.CounterID))
+            {
+                return false;
             }
 
-            var aggStr = (string)selected.Tag!;
-            var aggType = Enum.Parse<AggregateTypes>(aggStr);
+            // Default the new counter's aggregate to match the chart's current selection
+            if (counter.GetAggColumns(includeCurrent: false).Count == 0)
+            {
+                SetCounterAggregate(counter, Metric.AggregateType);
+            }
 
-            // Update Metric.AggregateType for backward compatibility
-            Metric.AggregateType = aggType;
+            Metric.Counters.Add(counter);
+            return true;
+        }
 
-            // If there are multiple counters, apply the selected aggregate to all counters
-            if (Metric?.Counters != null && Metric.Counters.Count > 0)
+        private void TsAddMetric_Click(object sender, EventArgs e)
+        {
+            // ShowCurrent = false: this is a time-series chart, so only the over-time aggregates
+            // (Avg/Max/Min/Total/Sample Count) are offered, selected per counter in the dialog.
+            using var picker = new SelectPerformanceCounters() { ShowCurrent = false };
+            picker.ApplyTheme();
+            if (picker.ShowDialog(this) != DialogResult.OK || picker.SelectedCounters == null || picker.SelectedCounters.Count == 0) return;
+            AddCounters(picker.SelectedCounters.Values);
+        }
+
+        // Aggregates offered per counter on time-series charts (Current is a point-in-time value, not plotted).
+        private static readonly (string Text, AggregateTypes Value)[] ChartAggregates =
+        {
+            ("Avg", AggregateTypes.Avg),
+            ("Max", AggregateTypes.Max),
+            ("Min", AggregateTypes.Min),
+            ("Total", AggregateTypes.Total),
+            ("Sample Count", AggregateTypes.SampleCount),
+        };
+
+        private void TsCounters_DropDownOpening(object sender, EventArgs e)
+        {
+            tsCounters.DropDownItems.Clear();
+
+            if (Metric?.Counters is { Count: > 0 })
             {
                 foreach (var c in Metric.Counters)
                 {
-                    // Clear existing flags
-                    c.Avg = false;
-                    c.Max = false;
-                    c.Min = false;
-                    c.Total = false;
-                    c.SampleCount = false;
-                    c.Current = false;
+                    // Each counter has a submenu of aggregate check items. Clicking an aggregate toggles it on
+                    // the chart, so several aggregates can be shown for a counter at once (the "All" item and
+                    // the Add Counter dialog set them in bulk).
+                    var counterItem = new ToolStripMenuItem(CounterMenuText(c)) { Tag = c };
 
-                    switch (aggType)
+                    var allItem = new ToolStripMenuItem("All")
                     {
-                        case AggregateTypes.Avg:
-                            c.Avg = true;
-                            break;
+                        Checked = ChartAggregates.All(a => IsAggregateSet(c, a.Value)),
+                        Tag = c,
+                        ToolTipText = "Show every aggregate (click again to clear them all)."
+                    };
+                    allItem.Click += CounterAllAggregates_Click;
+                    counterItem.DropDownItems.Add(allItem);
+                    counterItem.DropDownItems.Add(new ToolStripSeparator());
 
-                        case AggregateTypes.Max:
-                            c.Max = true;
-                            break;
-
-                        case AggregateTypes.Min:
-                            c.Min = true;
-                            break;
-
-                        case AggregateTypes.Total:
-                        case AggregateTypes.Sum:
-                            c.Total = true;
-                            break;
-
-                        case AggregateTypes.SampleCount:
-                            c.SampleCount = true;
-                            break;
-
-                        case AggregateTypes.None:
-                        default:
-                            // leave all flags false
-                            break;
+                    foreach (var (text, agg) in ChartAggregates)
+                    {
+                        var aggItem = new ToolStripMenuItem(text)
+                        {
+                            Checked = IsAggregateSet(c, agg),
+                            Tag = (c, agg),
+                            ToolTipText = "Click to toggle this aggregate on the chart."
+                        };
+                        aggItem.Click += CounterAggregate_Click;
+                        counterItem.DropDownItems.Add(aggItem);
                     }
+                    counterItem.DropDownItems.Add(new ToolStripSeparator());
+                    var removeItem = new ToolStripMenuItem("Remove", Properties.Resources.Close_red_16x) { Tag = c };
+                    removeItem.Click += RemoveCounter_Click;
+                    counterItem.DropDownItems.Add(removeItem);
+
+                    tsCounters.DropDownItems.Add(counterItem);
+                }
+                tsCounters.DropDownItems.Add(new ToolStripSeparator());
+
+                if (Metric.Counters.Count > 1)
+                {
+                    // Quick way to switch every counter to a single aggregate (Max, Avg, ...).
+                    var setAll = new ToolStripMenuItem("Set All To") { ToolTipText = "Set every counter to a single aggregate" };
+                    foreach (var (text, agg) in ChartAggregates)
+                    {
+                        var setAllItem = new ToolStripMenuItem(text) { Tag = agg };
+                        setAllItem.Click += SetAllAggregate_Click;
+                        setAll.DropDownItems.Add(setAllItem);
+                    }
+                    tsCounters.DropDownItems.Add(setAll);
+                    tsCounters.DropDownItems.Add(new ToolStripSeparator());
                 }
             }
 
-            tsAgg.Text = selected.Text;
+            var addItem = new ToolStripMenuItem("Add Counter...", Properties.Resources.LineChart_16x);
+            addItem.Click += TsAddMetric_Click;
+            tsCounters.DropDownItems.Add(addItem);
+        }
+
+        private static string CounterMenuText(Counter c)
+        {
+            var aggs = c.GetAggColumns(includeCurrent: false);
+            return aggs.Count > 0 ? $"{c.FullName}  ({string.Join(", ", aggs)})" : c.FullName;
+        }
+
+        private void CounterAggregate_Click(object sender, EventArgs e)
+        {
+            if (sender is not ToolStripMenuItem item || item.Tag is not (Counter c, AggregateTypes agg)) return;
+            // Toggle: clicking a checked aggregate removes it from the chart (it stays in the menu so it
+            // can be re-enabled); a counter may end up with none selected, showing nothing.
+            SetCounterAggregateFlag(c, agg, !IsAggregateSet(c, agg));
             RefreshChart();
+        }
+
+        private void CounterAllAggregates_Click(object sender, EventArgs e)
+        {
+            if (sender is not ToolStripMenuItem item || item.Tag is not Counter c) return;
+            // Toggle all aggregates on; if they are already all on, clear them.
+            var enable = !ChartAggregates.All(a => IsAggregateSet(c, a.Value));
+            foreach (var (_, agg) in ChartAggregates)
+            {
+                SetCounterAggregateFlag(c, agg, enable);
+            }
+            RefreshChart();
+        }
+
+        private void SetAllAggregate_Click(object sender, EventArgs e)
+        {
+            if (sender is not ToolStripMenuItem item || item.Tag is not AggregateTypes agg || Metric?.Counters == null) return;
+            // Switch every counter to just this aggregate.
+            foreach (var c in Metric.Counters)
+            {
+                SetCounterAggregate(c, agg);
+            }
+            RefreshChart();
+        }
+
+        private void RemoveCounter_Click(object sender, EventArgs e)
+        {
+            if (sender is not ToolStripMenuItem item || item.Tag is not Counter c || Metric?.Counters == null) return;
+            if (Metric.Counters.Count <= 1)
+            {
+                MessageBox.Show("At least one counter must remain. Use Close to remove the whole chart.", "Remove Counter", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            Metric.Counters.Remove(c);
+            RefreshData();
+        }
+
+        private static bool IsAggregateSet(Counter c, AggregateTypes agg) => agg switch
+        {
+            AggregateTypes.Avg => c.Avg,
+            AggregateTypes.Max => c.Max,
+            AggregateTypes.Min => c.Min,
+            AggregateTypes.Total or AggregateTypes.Sum => c.Total,
+            AggregateTypes.SampleCount => c.SampleCount,
+            _ => false
+        };
+
+        private static void SetCounterAggregateFlag(Counter c, AggregateTypes agg, bool value)
+        {
+            switch (agg)
+            {
+                case AggregateTypes.Avg: c.Avg = value; break;
+                case AggregateTypes.Max: c.Max = value; break;
+                case AggregateTypes.Min: c.Min = value; break;
+                case AggregateTypes.Total:
+                case AggregateTypes.Sum: c.Total = value; break;
+                case AggregateTypes.SampleCount: c.SampleCount = value; break;
+            }
+        }
+
+        private void TsChartType_Click(object sender, EventArgs e)
+        {
+            if (sender is not ToolStripMenuItem item || item.Tag is not string tag) return;
+            if (!Enum.TryParse<ChartTypes>(tag, out var chartType)) return;
+            Metric.ChartType = chartType;
+            UpdateChartTypeMenuChecked();
+            RefreshChart();
+        }
+
+        private void UpdateChartTypeMenuChecked()
+        {
+            try
+            {
+                foreach (ToolStripMenuItem menuItem in tsChartType.DropDownItems.OfType<ToolStripMenuItem>())
+                {
+                    var tag = menuItem.Tag?.ToString();
+                    menuItem.Checked = tag != null && Metric != null && tag == Metric.ChartType.ToString();
+                    if (menuItem.Checked)
+                    {
+                        tsChartType.Text = "Chart Type: " + menuItem.Text;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+            }
+        }
+
+        private void TsYAxisAuto_Click(object sender, EventArgs e)
+        {
+            Metric.YAxisMin = null;
+            Metric.YAxisMax = null;
+            UpdateYAxisMenuChecked();
+            RefreshChart();
+        }
+
+        private void TsYAxisPercent_Click(object sender, EventArgs e)
+        {
+            Metric.YAxisMin = 0;
+            Metric.YAxisMax = 100;
+            UpdateYAxisMenuChecked();
+            RefreshChart();
+        }
+
+        private void TsYAxisCustom_Click(object sender, EventArgs e)
+        {
+            using var frm = new YAxisRangeDialog(Metric.YAxisMin, Metric.YAxisMax);
+            if (frm.ShowDialog(this) != DialogResult.OK) return;
+            Metric.YAxisMin = frm.AxisMin;
+            Metric.YAxisMax = frm.AxisMax;
+            UpdateYAxisMenuChecked();
+            RefreshChart();
+        }
+
+        private void UpdateYAxisMenuChecked()
+        {
+            try
+            {
+                var min = Metric?.YAxisMin;
+                var max = Metric?.YAxisMax;
+                bool isAuto = !min.HasValue && !max.HasValue;
+                bool isPercent = min == 0 && max == 100;
+
+                autoYAxisMenuItem.Checked = isAuto;
+                percentYAxisMenuItem.Checked = isPercent;
+                customYAxisMenuItem.Checked = !isAuto && !isPercent;
+
+                tsYAxis.Text = isAuto
+                    ? "Y-Axis: Auto"
+                    : isPercent
+                        ? "Y-Axis: 0-100 %"
+                        : $"Y-Axis: {(min.HasValue ? min.Value.ToString("#,##0.###") : "Auto")} - {(max.HasValue ? max.Value.ToString("#,##0.###") : "Auto")}";
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+            }
+        }
+
+        private void TsTitle_Click(object sender, EventArgs e)
+        {
+            var label = Metric.GetTitle() ?? string.Empty;
+            if (CommonShared.ShowInputDialog(ref label, "Chart Label",
+                    description: "Enter a label for the chart. Leave blank to use the counter name(s).") != DialogResult.OK)
+            {
+                return;
+            }
+            Metric.Title = label?.Trim() ?? string.Empty;
+            tsTitle.SetTruncatedText(Metric.GetTitle());
         }
 
         private void TsClose_Click(object sender, EventArgs e)
