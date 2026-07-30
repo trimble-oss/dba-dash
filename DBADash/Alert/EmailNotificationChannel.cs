@@ -130,14 +130,37 @@ namespace DBADash.Alert
             };
 
             using var client = new SmtpClient();
-            await client.ConnectAsync(Host, Port, SecureSocketOption);
-            if (!string.IsNullOrEmpty(UserName) || !string.IsNullOrEmpty(Password)) // Authenticate if username or password is supplied
+            try
             {
-                await client.AuthenticateAsync(UserName, Password);
-            }
+                await client.ConnectAsync(Host, Port, SecureSocketOption);
+                if (!string.IsNullOrEmpty(UserName) || !string.IsNullOrEmpty(Password)) // Authenticate if username or password is supplied
+                {
+                    await client.AuthenticateAsync(UserName, Password);
+                }
 
-            await client.SendAsync(message);
-            await client.DisconnectAsync(true);
+                await client.SendAsync(message);
+                await client.DisconnectAsync(true);
+            }
+            catch (AuthenticationException ex)
+            {
+                throw new Exception($"SMTP authentication failed on {Host}:{Port} (security: {SecureSocketOption}). Check the username and password.", ex);
+            }
+            catch (SmtpCommandException ex)
+            {
+                throw new Exception($"The mail server at {Host}:{Port} (security: {SecureSocketOption}) rejected the request with status {(int)ex.StatusCode} ({ex.StatusCode}, {ex.ErrorCode}). Verify the port, security option and that this host is permitted to relay. {ex.Message}", ex);
+            }
+            catch (SmtpProtocolException ex)
+            {
+                throw new Exception($"SMTP protocol error connecting to {Host}:{Port} (security: {SecureSocketOption}). The server may not support the selected security option on this port - try a different port/security option combination. {ex.Message}", ex);
+            }
+            catch (SslHandshakeException ex)
+            {
+                throw new Exception($"TLS handshake failed connecting to {Host}:{Port} (security: {SecureSocketOption}). Check the security option matches the port (e.g. SslOnConnect for 465, StartTls for 587) and that the server certificate is trusted. {ex.Message}", ex);
+            }
+            catch (System.Net.Sockets.SocketException ex)
+            {
+                throw new Exception($"Could not connect to {Host}:{Port} (security: {SecureSocketOption}). Check the host name, port and that a firewall/network is not blocking the connection. {ex.Message}", ex);
+            }
         }
 
         public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
