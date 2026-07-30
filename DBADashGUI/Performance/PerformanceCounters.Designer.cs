@@ -44,6 +44,9 @@
             tsCounters = new System.Windows.Forms.ToolStripDropDownButton();
             tsConfigure = new System.Windows.Forms.ToolStripDropDownButton();
             tsChartType = new System.Windows.Forms.ToolStripMenuItem();
+            fillMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            pointsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            smoothLinesMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             lineChartTypeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             areaChartTypeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             columnChartTypeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -144,7 +147,7 @@
             // tsConfigure
             // 
             tsConfigure.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            tsConfigure.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { tsChartType, tsYAxis, editTitleToolStripMenuItem });
+            tsConfigure.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { tsChartType, fillMenuItem, pointsMenuItem, smoothLinesMenuItem, tsYAxis, editTitleToolStripMenuItem });
             tsConfigure.Image = Properties.Resources.SettingsOutline_16x;
             tsConfigure.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsConfigure.Name = "tsConfigure";
@@ -203,6 +206,33 @@
             scatterChartTypeMenuItem.Tag = "Scatter";
             scatterChartTypeMenuItem.Text = "Scatter";
             scatterChartTypeMenuItem.Click += TsChartType_Click;
+            //
+            // fillMenuItem
+            //
+            fillMenuItem.CheckOnClick = true;
+            fillMenuItem.Name = "fillMenuItem";
+            fillMenuItem.Size = new System.Drawing.Size(172, 26);
+            fillMenuItem.Text = "Fill";
+            fillMenuItem.ToolTipText = "Fill the area under the line (Line charts only)";
+            fillMenuItem.Click += TsFill_Click;
+            //
+            // pointsMenuItem
+            //
+            pointsMenuItem.CheckOnClick = true;
+            pointsMenuItem.Name = "pointsMenuItem";
+            pointsMenuItem.Size = new System.Drawing.Size(172, 26);
+            pointsMenuItem.Text = "Points";
+            pointsMenuItem.ToolTipText = "Show data points on line/area charts (auto-hidden on dense data)";
+            pointsMenuItem.Click += TsPoints_Click;
+            //
+            // smoothLinesMenuItem
+            //
+            smoothLinesMenuItem.CheckOnClick = true;
+            smoothLinesMenuItem.Name = "smoothLinesMenuItem";
+            smoothLinesMenuItem.Size = new System.Drawing.Size(172, 26);
+            smoothLinesMenuItem.Text = "Smooth Lines";
+            smoothLinesMenuItem.ToolTipText = "Use curved lines on line/area charts";
+            smoothLinesMenuItem.Click += TsSmoothLines_Click;
             //
             // tsYAxis
             //
@@ -346,6 +376,9 @@
         private System.Windows.Forms.ToolStripMenuItem columnChartTypeMenuItem;
         private System.Windows.Forms.ToolStripMenuItem stackedColumnChartTypeMenuItem;
         private System.Windows.Forms.ToolStripMenuItem scatterChartTypeMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem fillMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem pointsMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem smoothLinesMenuItem;
         private System.Windows.Forms.ToolStripMenuItem tsYAxis;
         private System.Windows.Forms.ToolStripMenuItem autoYAxisMenuItem;
         private System.Windows.Forms.ToolStripMenuItem percentYAxisMenuItem;

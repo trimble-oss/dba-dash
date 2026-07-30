@@ -82,32 +82,11 @@ namespace DBADashGUI.Performance
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public PerformanceCounterMetric Metric
-        { get => _metric; set { _metric = value; EnsureCountersHaveAggregate(); UpdateLegendMenuChecked(); UpdateYAxisMenuChecked(); UpdateChartTypeMenuChecked(); } }
+        { get => _metric; set { _metric = value; EnsureCountersHaveAggregate(); UpdateLegendMenuChecked(); UpdateYAxisMenuChecked(); UpdateChartTypeMenuChecked(); UpdateDisplayOptionsMenuChecked(); } }
 
         IMetric IMetricChart.Metric => Metric;
 
-        private bool smoothLines = false;
-        private double geometrySize = ChartConfiguration.DefaultGeometrySize;
-        private double lineSmoothness = 0;
         private Label lblError = new Label() { Dock = DockStyle.Fill, Visible = false, TextAlign = System.Drawing.ContentAlignment.MiddleCenter };
-
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public bool SmoothLines
-        {
-            get => smoothLines;
-            set
-            {
-                smoothLines = value;
-                lineSmoothness = value ? ChartConfiguration.DefaultLineSmoothness : 0;
-            }
-        }
-
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public double PointSize
-        {
-            get => geometrySize;
-            set => geometrySize = value;
-        }
 
         private int durationMins;
         private int DateGrouping;
@@ -292,11 +271,19 @@ namespace DBADashGUI.Performance
 
             // Auto-adjust point size based on data count (use flattened series table).
             // Scatter charts are nothing but points, so keep them visible (smaller) rather than
-            // hiding them entirely on dense datasets the way line/area charts do.
+            // hiding them entirely on dense datasets the way line/area charts do. For line/area the
+            // user's Points toggle controls whether geometry is drawn at all.
             var isScatter = Metric.ChartType == ChartTypes.Scatter;
-            var effectiveGeometrySize = dtSeries.Rows.Count > 500
-                ? (isScatter ? 4 : 0)
-                : geometrySize;
+            double effectiveGeometrySize;
+            if (isScatter)
+            {
+                effectiveGeometrySize = dtSeries.Rows.Count > 500 ? 4 : ChartConfiguration.DefaultGeometrySize;
+            }
+            else
+            {
+                var baseSize = Metric.ShowPoints ? ChartConfiguration.DefaultGeometrySize : 0;
+                effectiveGeometrySize = dtSeries.Rows.Count > 500 ? 0 : baseSize;
+            }
 
             var config = new ChartConfiguration
             {
@@ -304,8 +291,10 @@ namespace DBADashGUI.Performance
                 MetricColumn = "SelectedValue",
                 SeriesColumn = "SeriesName",
                 ChartType = Metric.ChartType,
-                LineSmoothness = lineSmoothness,
-                LineFill = true,
+                // When smoothing is on, leave LineSmoothness null so ChartHelper applies the
+                // per-chart-type default (StackedArea gets a stronger curve than Line); 0 = sharp corners.
+                LineSmoothness = Metric.SmoothLines ? (double?)null : 0,
+                LineFill = Metric.LineFill,
                 GeometrySize = effectiveGeometrySize,
                 XAxisMin = (FromDate == DateTime.MinValue ? DateRange.FromUTC : FromDate).ToAppTimeZone(),
                 XAxisMax = (ToDate == DateTime.MinValue ? DateRange.ToUTC : ToDate).ToAppTimeZone(),
@@ -651,6 +640,7 @@ namespace DBADashGUI.Performance
             if (!Enum.TryParse<ChartTypes>(tag, out var chartType)) return;
             Metric.ChartType = chartType;
             UpdateChartTypeMenuChecked();
+            UpdateDisplayOptionsMenuChecked();
             RefreshChart();
         }
 
@@ -667,6 +657,52 @@ namespace DBADashGUI.Performance
                         tsChartType.Text = "Chart Type: " + menuItem.Text;
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+            }
+        }
+
+        // These items are CheckOnClick, so their Checked state is already toggled to the new value
+        // when the handler fires - read from it rather than negating the metric to avoid a double
+        // toggle if the UI and metric ever drift out of sync.
+        private void TsFill_Click(object sender, EventArgs e)
+        {
+            Metric.LineFill = fillMenuItem.Checked;
+            UpdateDisplayOptionsMenuChecked();
+            RefreshChart();
+        }
+
+        private void TsPoints_Click(object sender, EventArgs e)
+        {
+            Metric.ShowPoints = pointsMenuItem.Checked;
+            UpdateDisplayOptionsMenuChecked();
+            RefreshChart();
+        }
+
+        private void TsSmoothLines_Click(object sender, EventArgs e)
+        {
+            Metric.SmoothLines = smoothLinesMenuItem.Checked;
+            UpdateDisplayOptionsMenuChecked();
+            RefreshChart();
+        }
+
+        private void UpdateDisplayOptionsMenuChecked()
+        {
+            try
+            {
+                if (Metric == null) return;
+                fillMenuItem.Checked = Metric.LineFill;
+                pointsMenuItem.Checked = Metric.ShowPoints;
+                smoothLinesMenuItem.Checked = Metric.SmoothLines;
+
+                // Fill only applies to the Line chart type; the Points/Smooth toggles apply to
+                // line and area charts. Disable options that have no effect for the current type
+                // so the menu reflects what will actually change.
+                fillMenuItem.Enabled = Metric.ChartType == ChartTypes.Line;
+                smoothLinesMenuItem.Enabled = Metric.ChartType is ChartTypes.Line or ChartTypes.StackedArea;
+                pointsMenuItem.Enabled = Metric.ChartType is ChartTypes.Line or ChartTypes.StackedArea;
             }
             catch (Exception ex)
             {

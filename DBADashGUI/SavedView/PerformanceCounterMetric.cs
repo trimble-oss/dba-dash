@@ -58,6 +58,24 @@ namespace DBADashGUI
         public ChartTypes ChartType { get; set; } = ChartTypes.Line;
 
         /// <summary>
+        /// Whether line charts fill the area under the line. Only affects the Line chart type.
+        /// Defaults to true to preserve the appearance of older saved views (which rendered filled lines).
+        /// </summary>
+        public bool LineFill { get; set; } = true;
+
+        /// <summary>
+        /// Whether data points (geometry) are drawn on line/area charts. Defaults to true.
+        /// Points are auto-hidden on dense datasets regardless of this setting. Scatter charts
+        /// always show points as that is all they render.
+        /// </summary>
+        public bool ShowPoints { get; set; } = true;
+
+        /// <summary>
+        /// Whether line/area charts use smoothed (curved) lines. Defaults to false (straight segments).
+        /// </summary>
+        public bool SmoothLines { get; set; } = false;
+
+        /// <summary>
         /// Optional fixed minimum for the Y-axis. When null the axis auto-scales.
         /// </summary>
         public double? YAxisMin { get; set; }
