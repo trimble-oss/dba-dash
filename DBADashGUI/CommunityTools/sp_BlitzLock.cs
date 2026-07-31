@@ -14,6 +14,7 @@ namespace DBADashGUI.CommunityTools
             URL = CommunityTools.FirstResponderKitUrl,
             Description = "SQL Server Deadlock Analysis Stored Procedure",
             DatabaseNameParameter = "@DatabaseName",
+            SinglePageLayout = true,
             Params = new Params()
             {
                 ParamList = new List<Param>
