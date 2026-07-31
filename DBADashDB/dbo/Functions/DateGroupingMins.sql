@@ -2,4 +2,4 @@
 RETURNS TABLE
 AS
 RETURN
-SELECT DATEADD(MINUTE, (DATEDIFF(MINUTE, 0, @DateTime) / @Mins) * @Mins, 0) AS DateGroup
+SELECT CASE WHEN @Mins = 0 THEN @DateTime ELSE DATEADD(MINUTE, (DATEDIFF(MINUTE, 0, @DateTime) / @Mins) * @Mins, 0) END AS DateGroup
