@@ -1,0 +1,2 @@
+CREATE SCHEMA UserAlert
+    AUTHORIZATION dbo;

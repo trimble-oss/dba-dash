@@ -34,7 +34,8 @@ namespace DBADashGUI.DBADashAlerts.Rules
             Offline,
             Restart,
             SQLAgentAlert,
-            AgentNotRunning
+            AgentNotRunning,
+            CustomSql
         }
 
         public static AlertRuleBase CreateRule(RuleTypes type)
@@ -54,6 +55,7 @@ namespace DBADashGUI.DBADashAlerts.Rules
                 RuleTypes.Restart => new RestartRule(),
                 RuleTypes.SQLAgentAlert => new SQLAgentAlertRule(),
                 RuleTypes.AgentNotRunning => new AgentNotRunningRule(),
+                RuleTypes.CustomSql => new CustomSqlRule(),
                 _ => throw new ArgumentOutOfRangeException()
             };
         }
@@ -245,6 +247,7 @@ namespace DBADashGUI.DBADashAlerts.Rules
                 RuleTypes.BackupAlert => string.IsNullOrEmpty(details) ? new BackupAlertRule() : JsonConvert.DeserializeObject<BackupAlertRule>(details),
                 RuleTypes.SQLAgentAlert => string.IsNullOrEmpty(details) ? new SQLAgentAlertRule() : JsonConvert.DeserializeObject<SQLAgentAlertRule>(details),
                 RuleTypes.AgentNotRunning=> string.IsNullOrEmpty(details) ? new AgentNotRunningRule() : JsonConvert.DeserializeObject<AgentNotRunningRule>(details),
+                RuleTypes.CustomSql => string.IsNullOrEmpty(details) ? new CustomSqlRule() : JsonConvert.DeserializeObject<CustomSqlRule>(details),
                 _ => throw new NotImplementedException()
             };
             rule.RuleID = ruleID;

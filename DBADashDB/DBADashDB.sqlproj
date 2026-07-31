@@ -110,6 +110,8 @@
     <Folder Include="DBADash\Tables" />
     <Folder Include="DBADash\Stored Procedures" />
     <Folder Include="UserReport" />
+    <Folder Include="UserAlert" />
+    <Folder Include="UserAlert\Stored Procedures" />
     <Folder Include="Messaging" />
     <Folder Include="Alert" />
     <Folder Include="Alert\Tables" />
@@ -767,6 +769,7 @@
     <Build Include="dbo\Stored Procedures\RunningQueriesForJob_Get.sql" />
     <Build Include="dbo\Stored Procedures\CustomReport_Get.sql" />
     <Build Include="Security\UserReport.sql" />
+    <Build Include="Security\UserAlert.sql" />
     <Build Include="dbo\Stored Procedures\UserReportMetaData_Upd.sql" />
     <Build Include="Security\RunUserReports.sql" />
     <Build Include="dbo\Tables\CustomReport.sql" />
@@ -952,6 +955,10 @@
     <Build Include="dbo\Stored Procedures\DBOptionsSummary_Get.sql" />
     <Build Include="dbo\Stored Procedures\DBOptionsDetail_Get.sql" />
     <Build Include="Alert\Procedures\AgentNotRunningAlert_Upd.sql" />
+    <Build Include="Alert\Procedures\CustomSqlAlert_Upd.sql" />
+    <Build Include="Alert\Procedures\CustomSqlAlertError_Log.sql" />
+    <Build Include="Alert\Procedures\CustomSqlProcs_Get.sql" />
+    <Build Include="UserAlert\Stored Procedures\DatabaseCorruptionExample.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
