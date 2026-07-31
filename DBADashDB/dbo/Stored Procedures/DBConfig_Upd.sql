@@ -30,16 +30,28 @@ BEGIN
 		GROUP BY t.configuration_id
 	END;
 
-	INSERT INTO dbo.DBConfig(DatabaseID,configuration_id,value,value_for_secondary,ValidFrom)
-	SELECT d.DatabaseID,t.configuration_id,t.value,t.value_for_secondary,@SnapshotDate
+	CREATE TABLE #DBConfig(
+		DatabaseID INT,
+		configuration_id INT,
+		value NVARCHAR(128) COLLATE DATABASE_DEFAULT,
+		value_for_secondary NVARCHAR(128) COLLATE DATABASE_DEFAULT,
+		PRIMARY KEY(DatabaseID,configuration_id)
+	)
+	INSERT INTO #DBConfig(DatabaseID,configuration_id,value,value_for_secondary)
+	SELECT d.DatabaseID,t.configuration_id,t.value,t.value_for_secondary
 	FROM @DBConfig t
 	JOIN dbo.Databases d ON t.database_id = d.database_id
 	WHERE d.InstanceID = @InstanceID
-	AND NOT EXISTS(SELECT 1 
-					FROM dbo.DBConfig c 
-					WHERE c.DatabaseID = d.DatabaseID 
+	AND d.IsActive = 1
+
+	INSERT INTO dbo.DBConfig(DatabaseID,configuration_id,value,value_for_secondary,ValidFrom)
+	SELECT t.DatabaseID,t.configuration_id,t.value,t.value_for_secondary,@SnapshotDate
+	FROM #DBConfig t
+	WHERE NOT EXISTS(SELECT 1
+					FROM dbo.DBConfig c
+					WHERE c.DatabaseID = t.DatabaseID
 					AND c.configuration_id = t.configuration_id
-					);
+					)
 
 	UPDATE c
 	SET C.value = cfg.value,
@@ -62,18 +74,16 @@ BEGIN
 							ValidTo
 							)
 	FROM dbo.DBConfig c
-	JOIN dbo.Databases d ON d.DatabaseID = c.DatabaseID
-	JOIN @DBConfig cfg ON c.configuration_id = cfg.configuration_id AND cfg.database_id = d.database_id
-	WHERE d.InstanceID = @InstanceID
-	AND d.IsActive=1
-	AND (	EXISTS(SELECT c.value 
+	JOIN #DBConfig cfg ON c.configuration_id = cfg.configuration_id AND cfg.DatabaseID = c.DatabaseID
+	WHERE  (	EXISTS(SELECT c.value
 					EXCEPT SELECT cfg.value
 					)
 			OR EXISTS(SELECT c.value_for_secondary 
 						EXCEPT 
 						SELECT cfg.value_for_secondary
 						)
-		);
+		)
+	OPTION (MAXDOP 1);
 
 
 	EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  
