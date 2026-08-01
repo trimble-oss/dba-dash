@@ -828,6 +828,7 @@
     <Build Include="Alert\Procedures\ActiveAlerts_Upd.sql" />
     <Build Include="Alert\Procedures\CounterAlert_Upd.sql" />
     <Build Include="Alert\Procedures\FailedLoginsAlert_Upd.sql" />
+    <Build Include="Alert\Procedures\DatabaseMailAlert_Upd.sql" />
     <Build Include="Alert\Tables\BackoutPeriod.sql" />
     <Build Include="Alert\Procedures\BlackoutPeriod_Add.sql" />
     <Build Include="Alert\Procedures\BlackoutPeriod_Del.sql" />
