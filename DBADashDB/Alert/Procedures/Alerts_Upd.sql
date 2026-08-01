@@ -44,6 +44,7 @@ EXEC Alert.BackupAlert_Upd
 EXEC Alert.AgentNotRunningAlert_Upd
 EXEC Alert.CustomSqlAlert_Upd
 EXEC Alert.FailedLoginsAlert_Upd
+EXEC Alert.DatabaseMailAlert_Upd
 
 /* Close Alerts that have been resolved for a period of time */
 

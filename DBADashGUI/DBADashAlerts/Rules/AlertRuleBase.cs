@@ -36,7 +36,8 @@ namespace DBADashGUI.DBADashAlerts.Rules
             SQLAgentAlert,
             AgentNotRunning,
             CustomSql,
-            FailedLogins
+            FailedLogins,
+            DatabaseMail
         }
 
         public static AlertRuleBase CreateRule(RuleTypes type)
@@ -58,6 +59,7 @@ namespace DBADashGUI.DBADashAlerts.Rules
                 RuleTypes.AgentNotRunning => new AgentNotRunningRule(),
                 RuleTypes.CustomSql => new CustomSqlRule(),
                 RuleTypes.FailedLogins => new FailedLoginsRule(),
+                RuleTypes.DatabaseMail => new DatabaseMailRule(),
                 _ => throw new ArgumentOutOfRangeException()
             };
         }
@@ -251,6 +253,7 @@ namespace DBADashGUI.DBADashAlerts.Rules
                 RuleTypes.AgentNotRunning=> string.IsNullOrEmpty(details) ? new AgentNotRunningRule() : JsonConvert.DeserializeObject<AgentNotRunningRule>(details),
                 RuleTypes.CustomSql => string.IsNullOrEmpty(details) ? new CustomSqlRule() : JsonConvert.DeserializeObject<CustomSqlRule>(details),
                 RuleTypes.FailedLogins => new FailedLoginsRule(),
+                RuleTypes.DatabaseMail => string.IsNullOrEmpty(details) ? new DatabaseMailRule() : JsonConvert.DeserializeObject<DatabaseMailRule>(details),
                 _ => throw new NotImplementedException()
             };
             rule.RuleID = ruleID;
