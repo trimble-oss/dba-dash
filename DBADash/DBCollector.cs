@@ -181,6 +181,12 @@ namespace DBADash
         private const string TableSizeDatabasesDefault = "*";
         private const int TableSizeMaxTableThresholdDefault = 2000;
         private const int TableSizeMaxDatabaseThreshold = 500;
+
+        // TableSize collection uses STRING_SPLIT (to parse the database include/exclude filter), which requires the
+        // connection database to be at compatibility level 130 (SQL 2016) or higher.  Note this is the compatibility
+        // level of the connection database (initial catalog), not the engine version - a 2016+ engine can still fail
+        // here if the initial catalog (e.g. master) is left at a lower compatibility level.  See issue #1196.
+        private const int TableSizeMinCompatibilityLevel = 130;
         public string ConnectionID => Data.Tables["DBADash"]?.Rows[0]["ConnectionID"].ToString();
 
         public int Job_instance_id
@@ -297,9 +303,21 @@ namespace DBADash
             if (!ContainsSyntaxError(ex)) return null;
             if (connectionDBCompatibilityLevel is null or >= MinSupportedCompatibilityLevel) return null;
 
-            var database = string.IsNullOrEmpty(dbName) ? "The database used as the initial catalog for the source connection" : $"The database '{dbName}' (the initial catalog for the source connection)";
-            var resolveDatabase = string.IsNullOrEmpty(dbName) ? "that database" : $"the '{dbName}' database";
+            var (database, resolveDatabase) = GetConnectionDatabasePhrasing();
             return $"{database} is at compatibility level {connectionDBCompatibilityLevel}, which is not supported.  DBA-Dash requires compatibility level {MinSupportedCompatibilityLevel} (SQL Server 2005) or higher.  Some collections use table-valued dynamic management functions or XML data type methods that fail at this compatibility level.  To resolve, increase the compatibility level of {resolveDatabase}, or change the initial catalog of the source connection to a database with a supported compatibility level.";
+        }
+
+        /// <summary>
+        /// Returns two consistent phrasings referring to the connection database (initial catalog) for use in
+        /// compatibility-level error messages: <c>subject</c> to open a sentence (e.g. "The database 'master' ...")
+        /// and <c>resolve</c> for mid-sentence use (e.g. "... increase the compatibility level of the 'master'
+        /// database").  Centralised so the wording stays consistent across the checks that reference it.
+        /// </summary>
+        private (string subject, string resolve) GetConnectionDatabasePhrasing()
+        {
+            var subject = string.IsNullOrEmpty(dbName) ? "The database used as the initial catalog for the source connection" : $"The database '{dbName}' (the initial catalog for the source connection)";
+            var resolve = string.IsNullOrEmpty(dbName) ? "that database" : $"the '{dbName}' database";
+            return (subject, resolve);
         }
 
         /// <summary>
@@ -792,6 +810,18 @@ namespace DBADash
                 && engineEdition != DatabaseEngineEdition.SqlManagedInstance)
             {
                 return false; // Table size collection not supported on SQL 2014 and below
+            }
+            else if (collectionType == CollectionType.TableSize && !IsAzureDB
+                && engineEdition != DatabaseEngineEdition.SqlManagedInstance
+                && connectionDBCompatibilityLevel is int compatLevel && compatLevel < TableSizeMinCompatibilityLevel)
+            {
+                // 2016+ engine, but the connection database (initial catalog) is at a compatibility level below 130.
+                // The collection query uses STRING_SPLIT, which requires compatibility level 130, so it would fail
+                // with "Invalid object name 'STRING_SPLIT'".  Skip the collection and log a clear, actionable error
+                // rather than letting the query fail cryptically every cycle.  See issue #1196.
+                var (database, resolveDatabase) = GetConnectionDatabasePhrasing();
+                LogDBError(collectionTypeString, $"Table size collection was skipped.  {database} is at compatibility level {compatLevel}.  Table size collection requires compatibility level {TableSizeMinCompatibilityLevel} (SQL Server 2016) or higher because it uses the STRING_SPLIT function.  To resolve, increase the compatibility level of {resolveDatabase}, or change the initial catalog of the source connection to a database with a supported compatibility level.");
+                return false;
             }
             else if (collectionType == CollectionType.ServerServices && SQLVersion.Major < 11)
             {
