@@ -17,6 +17,7 @@ namespace DBADashGUI.AgentJobs
     {
         private ToolStripDropDownButton tsConfigure;
         private ToolStripMenuItem mnuThresholdInstance;
+        private ToolStripMenuItem mnuExclusionsInstance;
         private ToolStripMenuItem mnuAcknowledgeErrors;
 
         public AgentJobsView()
@@ -33,7 +34,7 @@ namespace DBADashGUI.AgentJobs
             tsConfigure = new ToolStripDropDownButton("Configure")
             {
                 Name = "tsConfigure",
-                ToolTipText = "Configure agent job thresholds",
+                ToolTipText = "Configure agent job thresholds, exclusions & acknowledge errors",
                 Image = Properties.Resources.SettingsOutline_16x,
                 DisplayStyle = ToolStripItemDisplayStyle.ImageAndText
             };
@@ -45,9 +46,16 @@ namespace DBADashGUI.AgentJobs
             {
                 if (TryGetSingleInstanceId(out var id)) ConfigureThresholds(id, Guid.Empty);
             };
+            var mnuExclusionsRoot = new ToolStripMenuItem("Configure Root Exclusions");
+            mnuExclusionsRoot.Click += (_, _) => ConfigureExclusions(-1);
+            mnuExclusionsInstance = new ToolStripMenuItem("Configure Instance Exclusions");
+            mnuExclusionsInstance.Click += (_, _) =>
+            {
+                if (TryGetSingleInstanceId(out var id)) ConfigureExclusions(id);
+            };
             mnuAcknowledgeErrors = new ToolStripMenuItem("Acknowledge Errors");
             mnuAcknowledgeErrors.Click += AcknowledgeErrorsToolStripMenuItem_Click;
-            tsConfigure.DropDownItems.AddRange(new ToolStripItem[] { mnuThresholdInstance, mnuThresholdRoot, mnuAcknowledgeErrors });
+            tsConfigure.DropDownItems.AddRange(new ToolStripItem[] { mnuThresholdInstance, mnuThresholdRoot, mnuExclusionsInstance, mnuExclusionsRoot, mnuAcknowledgeErrors });
 
             var insertAt = ToolStrip.Items.IndexOfKey("tsParams");
             insertAt = insertAt >= 0 ? insertAt + 1 : ToolStrip.Items.Count;
@@ -57,6 +65,7 @@ namespace DBADashGUI.AgentJobs
         private void UpdateToolbarState()
         {
             mnuThresholdInstance.Enabled = TryGetSingleInstanceId(out _);
+            mnuExclusionsInstance.Enabled = TryGetSingleInstanceId(out _);
         }
 
         #endregion Toolbar
@@ -105,6 +114,22 @@ namespace DBADashGUI.AgentJobs
             if (frm.DialogResult == DialogResult.OK)
             {
                 control.RefreshData();
+            }
+        }
+
+        private void ConfigureExclusions(int instanceID)
+        {
+            var levelName = instanceID == -1 ? "{Root}" : CommonData.GetDBADashContext(instanceID).InstanceName;
+            var frm = new AgentJobExclusionsConfig
+            {
+                InstanceID = instanceID,
+                ConnectionString = Common.ConnectionString,
+                LevelName = levelName
+            };
+            frm.ShowDialog();
+            if (frm.DialogResult == DialogResult.OK)
+            {
+                RefreshData();
             }
         }
 
@@ -434,6 +459,7 @@ namespace DBADashGUI.AgentJobs
                         ["InstanceDisplayName"] = new() { Alias = "Instance" },
                         ["name"] = new() { Alias = "Job Name", Link = new JobNameLink(), Highlighting = StatusHighlight("JobStatus") },
                         ["enabled"] = new() { Alias = "Enabled" },
+                        ["category"] = new() { Alias = "Category" },
                         ["description"] = new() { Alias = "Description" },
                         ["LastFailed"] = new() { Alias = "Last Failed", Highlighting = StatusHighlight("LastFailStatus") },
                         ["IsLastFail"] = new() { Alias = "Is Last Fail?", Highlighting = StatusHighlight("LastFailStatus") },
@@ -453,6 +479,7 @@ namespace DBADashGUI.AgentJobs
                         ["AvgDurationSec"] = new() { Alias = "Avg Duration (sec)" },
                         ["AvgDuration"] = new() { Alias = "Avg Duration" },
                         ["ConfiguredLevel"] = new() { Alias = "Configured Level" },
+                        ["IsExcluded"] = Hidden(),
                         ["Configure"] = new() { Alias = "Configure", Link = new JobConfigureLink(), Description = "Configure job thresholds",
                             Highlighting = new CellHighlightingRuleSet("ConfiguredLevel", true)
                             {
