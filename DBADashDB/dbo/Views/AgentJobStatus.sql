@@ -5,6 +5,7 @@ SELECT	J.Instance,
 		J.InstanceID,
 		J.job_id,
 		J.name,
+		J.category,
 		J.description,
 		J.LastFailed, 
 		J.TimeSinceLastFailed,
@@ -43,11 +44,15 @@ SELECT	J.Instance,
 		cfg.JobStepFails7DaysCritical,
 		cfg.LastFailIsCritical,
 		cfg.LastFailIsWarning,
-		CASE WHEN cfg.job_id='00000000-0000-0000-0000-000000000000' AND cfg.InstanceID =-1 THEN 'Root' 
-			WHEN cfg.job_id='00000000-0000-0000-0000-000000000000' THEN 'Instance' 
-			WHEN cfg.job_id IS NULL THEN 'N/A' 
+		CASE WHEN exc.IsExcluded=1 AND exc.ExcludedAtInstanceID=-1 THEN 'Excluded (Root)'
+			WHEN exc.IsExcluded=1 THEN 'Excluded (Instance)'
+			WHEN cfg.job_id='00000000-0000-0000-0000-000000000000' AND cfg.InstanceID =-1 THEN 'Root'
+			WHEN cfg.job_id='00000000-0000-0000-0000-000000000000' THEN 'Instance'
+			WHEN cfg.job_id IS NULL THEN 'N/A'
 			ELSE 'Job' END AS ConfiguredLevel,
-		CASE	WHEN J.enabled=0 THEN 3 /* N/A.  Not enabled */
+		exc.IsExcluded,
+		CASE	WHEN exc.IsExcluded=1 THEN 3 /* N/A.  Job excluded by a name/category exclusion rule */
+				WHEN J.enabled=0 THEN 3 /* N/A.  Not enabled */
 				WHEN	(
 						st.TimeSinceLastFailureStatus=1 
 						OR st.TimeSinceLastSucceededStatus=1 
@@ -101,7 +106,19 @@ OUTER APPLY(SELECT TOP(1) *
 			WHERE (T.InstanceID = J.InstanceID OR T.InstanceID =-1) 
 			AND (T.job_id = J.job_id OR T.job_id ='00000000-0000-0000-0000-000000000000')
 			ORDER BY T.InstanceID DESC,T.job_id DESC) cfg
-OUTER APPLY(SELECT	CASE WHEN J.enabled=0 THEN 3 /* N/A. Job not enabled */
+/* Job is excluded from monitoring if it matches a name/category/description exclusion defined at root (InstanceID=-1) or instance level.
+   Filters use LIKE-or-equals matching (mirrors Alert.AgentJobAlert_Upd).  A NULL filter matches any value. */
+OUTER APPLY(SELECT CAST(CASE WHEN COUNT(*)>0 THEN 1 ELSE 0 END AS BIT) AS IsExcluded,
+					/* MAX prefers an instance-level match (InstanceID>=0) over a root match (-1) when both apply */
+					MAX(ex.InstanceID) AS ExcludedAtInstanceID
+				FROM dbo.AgentJobExclusions ex
+				WHERE (ex.InstanceID = J.InstanceID OR ex.InstanceID = -1)
+				AND (ex.JobNameFilter IS NULL OR J.name LIKE ex.JobNameFilter OR J.name = ex.JobNameFilter)
+				AND (ex.CategoryFilter IS NULL OR J.category LIKE ex.CategoryFilter OR J.category = ex.CategoryFilter)
+				AND (ex.DescriptionFilter IS NULL OR J.description LIKE ex.DescriptionFilter OR J.description = ex.DescriptionFilter)
+				) exc
+OUTER APPLY(SELECT	CASE WHEN exc.IsExcluded=1 THEN 3 /* N/A. Job excluded by a name/category/description exclusion rule */
+						WHEN J.enabled=0 THEN 3 /* N/A. Job not enabled */
 						WHEN (J.TimeSinceLastFailedMin <= cfg.TimeSinceLastFailureCritical OR J.TimeSinceLastFailedMin <= cfg.TimeSinceLastFailureWarning) 
 							AND J.AckDate > ISNULL(J.LastFailed,'19000101') THEN 5 /* Acknowledged.  Warning or Critical threshold met but acknowledged date greater than last failed */
 						WHEN J.TimeSinceLastFailedMin <= cfg.TimeSinceLastFailureCritical THEN 1 /* Critical. */
@@ -110,7 +127,8 @@ OUTER APPLY(SELECT	CASE WHEN J.enabled=0 THEN 3 /* N/A. Job not enabled */
 						ELSE 4 END /* Good. */
 						AS TimeSinceLastFailureStatus, 
 
-					CASE WHEN J.enabled=0 THEN 3 /* N/A. Job not enabled */
+					CASE WHEN exc.IsExcluded=1 THEN 3 /* N/A. Job excluded by a name/category/description exclusion rule */
+						WHEN J.enabled=0 THEN 3 /* N/A. Job not enabled */
 						WHEN (J.TimeSinceLastSucceededMin  >= cfg.TimeSinceLastSucceededCritical OR  J.TimeSinceLastSucceededMin >= cfg.TimeSinceLastSucceededWarning)
 							AND J.AckDate > ISNULL(J.LastFailed,'19000101') 
 							AND J.AckDate > ISNULL(J.LastSucceeded,'19000101') 
@@ -122,7 +140,8 @@ OUTER APPLY(SELECT	CASE WHEN J.enabled=0 THEN 3 /* N/A. Job not enabled */
 						ELSE 4 END /* Good. */
 						AS TimeSinceLastSucceededStatus, 
 
-					CASE WHEN J.enabled=0 THEN 3 /* N/A. Job not enabled */
+					CASE WHEN exc.IsExcluded=1 THEN 3 /* N/A. Job excluded by a name/category/description exclusion rule */
+						WHEN J.enabled=0 THEN 3 /* N/A. Job not enabled */
 						WHEN (J.FailCount24Hrs >= cfg.FailCount24HrsCritical OR  J.FailCount24Hrs >= cfg.FailCount24HrsWarning) 
 							AND J.AckDate > ISNULL(J.LastFailed,'19000101') 
 							THEN 5  /* Acknowledged.  Warning or Critical threshold met but acknowledged date greater than last failed */
@@ -132,7 +151,8 @@ OUTER APPLY(SELECT	CASE WHEN J.enabled=0 THEN 3 /* N/A. Job not enabled */
 						ELSE 4 END /* Good. */
 						AS FailCount24HrsStatus, 
 
-					CASE WHEN J.enabled=0 THEN 3 /* N/A. Job not enabled */
+					CASE WHEN exc.IsExcluded=1 THEN 3 /* N/A. Job excluded by a name/category/description exclusion rule */
+						WHEN J.enabled=0 THEN 3 /* N/A. Job not enabled */
 						WHEN (J.FailCount7Days >= cfg.FailCount7DaysCritical OR J.FailCount7Days >= cfg.FailCount7DaysWarning) 
 							AND J.AckDate > ISNULL(J.LastFailed,'19000101') THEN 5  /* Acknowledged.  Warning or Critical threshold met but acknowledged date greater than last failed */
 						WHEN J.FailCount7Days >= cfg.FailCount7DaysCritical THEN 1 /* Critical. */
@@ -141,7 +161,8 @@ OUTER APPLY(SELECT	CASE WHEN J.enabled=0 THEN 3 /* N/A. Job not enabled */
 						ELSE 4 END /* Good. */
 						AS FailCount7DaysStatus, 
 						
-					CASE WHEN J.enabled=0 THEN 3 /* N/A. Job not enabled */
+					CASE WHEN exc.IsExcluded=1 THEN 3 /* N/A. Job excluded by a name/category/description exclusion rule */
+						WHEN J.enabled=0 THEN 3 /* N/A. Job not enabled */
 						WHEN (J.JobStepFails7Days >= cfg.JobStepFails7DaysCritical OR J.JobStepFails7Days >= cfg.JobStepFails7DaysWarning) 
 							AND  J.AckDate > ISNULL(J.StepLastFailed,'19000101') 
 							THEN 5  /* Acknowledged.  Warning or Critical threshold met but acknowledged date greater than last failed */
@@ -151,7 +172,8 @@ OUTER APPLY(SELECT	CASE WHEN J.enabled=0 THEN 3 /* N/A. Job not enabled */
 						ELSE 4 END /* Good. */
 						AS JobStepFail7DaysStatus,
 
-					CASE WHEN J.enabled=0 THEN 3 /* N/A. Job not enabled */
+					CASE WHEN exc.IsExcluded=1 THEN 3 /* N/A. Job excluded by a name/category/description exclusion rule */
+						WHEN J.enabled=0 THEN 3 /* N/A. Job not enabled */
 						WHEN (J.JobStepFails24Hrs >= cfg.JobStepFails24HrsCritical OR J.JobStepFails24Hrs >= cfg.JobStepFails24HrsWarning) 
 							AND J.AckDate > ISNULL(J.StepLastFailed,'19000101') 
 							THEN 5  /* Acknowledged.  Warning or Critical threshold met but acknowledged date greater than last failed */
@@ -161,7 +183,8 @@ OUTER APPLY(SELECT	CASE WHEN J.enabled=0 THEN 3 /* N/A. Job not enabled */
 						ELSE 4 END /* Good. */
 						AS JobStepFail24HrsStatus,
 
-					CASE WHEN J.enabled=0 THEN 3 /* N/A. Job not enabled */
+					CASE WHEN exc.IsExcluded=1 THEN 3 /* N/A. Job excluded by a name/category/description exclusion rule */
+						WHEN J.enabled=0 THEN 3 /* N/A. Job not enabled */
 						WHEN J.AckDate > ISNULL(J.LastFailed,'19000101') 
 							AND J.IsLastFail=1 
 							AND (cfg.LastFailIsCritical=1 OR cfg.LastFailIsWarning=1) 

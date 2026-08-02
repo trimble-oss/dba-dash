@@ -149,6 +149,7 @@
     <Build Include="dbo\Stored Procedures\ServerProperties_Upd.sql" />
     <Build Include="dbo\User Defined Types\ServerProperties.sql" />
     <Build Include="dbo\Tables\AgentJobThresholds.sql" />
+    <Build Include="dbo\Tables\AgentJobExclusions.sql" />
     <Build Include="dbo\Views\AgentJobStatus.sql" />
     <Build Include="dbo\Tables\DBFiles.sql" />
     <Build Include="dbo\Stored Procedures\DBFiles_Upd.sql" />
@@ -355,6 +356,9 @@
     <Build Include="dbo\Stored Procedures\SQLPatchingReport_Get.sql" />
     <Build Include="dbo\Stored Procedures\AgentJobThresholds_Upd.sql" />
     <Build Include="dbo\Stored Procedures\AgentJobThresholds_Get.sql" />
+    <Build Include="dbo\Stored Procedures\AgentJobExclusions_Get.sql" />
+    <Build Include="dbo\Stored Procedures\AgentJobExclusions_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\AgentJobExclusions_Del.sql" />
     <Build Include="dbo\Stored Procedures\AgentJobs_Get.sql" />
     <Build Include="dbo\Stored Procedures\AgentJobsReport_Get.sql" />
     <Build Include="dbo\Stored Procedures\Summary_Get.sql" />
