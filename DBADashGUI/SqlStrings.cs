@@ -18,7 +18,7 @@ namespace DBADashGUI
 
         private static string FindPlan => GetSqlString("FindPlan");
 
-        private static string DecipherWaitResource => GetSqlString("DecipherWaitResource");
+        private static string DecipherWaitResource => GetSqlString("DecipherWaitResourceUserScript");
         private static string CorruptionInfo => GetSqlString("CorruptionInfo");
 
         public static string GetFindPlan(string queryPlanHash, string queryHash, string planHandle, string sqlHandle, string db, int statementStartOffset, int statementEndOffset, string instance)

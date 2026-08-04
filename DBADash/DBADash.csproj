@@ -21,6 +21,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Alert\HTMLEmailAlertTemplate.html" />
+    <None Remove="SQL\SQLDecipherWaitResource.sql" />
     <None Remove="SQL\SQLIdentityColumns.sql" />
     <None Remove="SQL\SQLJobs.sql" />
     <None Remove="SQL\SQLJobSteps.sql" />
@@ -56,6 +57,7 @@
 	<EmbeddedResource Include="SQL\SQLBackups.sql" />
 	<EmbeddedResource Include="SQL\SQLBlockingSnapshot.sql" />
 	<EmbeddedResource Include="SQL\SQLCorruption.sql" />
+	<EmbeddedResource Include="SQL\SQLDecipherWaitResource.sql" />
 	<EmbeddedResource Include="SQL\SQLCPU.sql" />
 	<EmbeddedResource Include="SQL\SQLCustomChecks.sql" />
 	<EmbeddedResource Include="SQL\SQLDatabaseMirroring.sql" />

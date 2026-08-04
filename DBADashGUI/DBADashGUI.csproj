@@ -33,7 +33,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="SQL\CorruptionInfo.sql" />
-    <None Remove="SQL\DecipherWaitResource.sql" />
+    <None Remove="SQL\DecipherWaitResourceUserScript.sql" />
     <None Remove="SQL\FindPlan.sql" />
   </ItemGroup>
   <ItemGroup>
@@ -195,7 +195,7 @@
       <SubType>UserControl</SubType>
     </Compile>
     <EmbeddedResource Include="SQL\CorruptionInfo.sql" />
-    <EmbeddedResource Include="SQL\DecipherWaitResource.sql" />
+    <EmbeddedResource Include="SQL\DecipherWaitResourceUserScript.sql" />
     <EmbeddedResource Include="SQL\FindPlan.sql" />
   </ItemGroup>
   <ItemGroup>

@@ -1,10 +1,12 @@
 ﻿CREATE PROC dbo.DatabasesAllInfo_Get(
 		@InstanceIDs VARCHAR(MAX)=NULL,
 		@DatabaseID INT=NULL,
-        @ShowHidden BIT=1,
-        @InstanceGroupName NVARCHAR(128)=NULL
+		@ShowHidden BIT=1,
+		@InstanceGroupName NVARCHAR(128)=NULL,
+		@DatabaseName SYSNAME=NULL
 )
 AS
+SET NOCOUNT ON;
 DECLARE @SQL NVARCHAR(MAX) 
 SET @SQL = N'
 SELECT  I.InstanceGroupName AS Instance,
@@ -108,6 +110,7 @@ AND I.IsActive=1
 			)
 ' END + '
 ' + CASE WHEN @DatabaseID IS NULL THEN '' ELSE 'AND D.DatabaseID = @DatabaseID' END + '
+' + CASE WHEN @DatabaseName IS NULL THEN '' ELSE 'AND D.name = @DatabaseName' END + '
 ' + CASE WHEN @ShowHidden=1 THEN '' ELSE 'AND I.ShowInSummary=1' END
 
-EXEC sp_executesql @SQL,N'@InstanceIDs VARCHAR(MAX),@DatabaseID INT,@InstanceGroupName NVARCHAR(128)',@InstanceIDs,@DatabaseID,@InstanceGroupName
+EXEC sp_executesql @SQL,N'@InstanceIDs VARCHAR(MAX),@DatabaseID INT,@InstanceGroupName NVARCHAR(128),@DatabaseName SYSNAME',@InstanceIDs,@DatabaseID,@InstanceGroupName,@DatabaseName
