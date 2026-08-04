@@ -1079,7 +1079,7 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private static string GetPlan(DataRowView row)
+        internal static string GetPlan(DataRowView row)
         {
             using var cn = new SqlConnection(Common.ConnectionString);
             using var cmd = new SqlCommand("dbo.QueryPlan_Get", cn) { CommandType = CommandType.StoredProcedure };
@@ -1095,7 +1095,7 @@ namespace DBADashGUI.Performance
             return Encoding.Unicode.GetString(((byte[])result).Decompress().ToArray());
         }
 
-        private static QueryPlanCollectionMessage GetPlanCollectionMessage(DataRowView row, DBADashContext context)
+        internal static QueryPlanCollectionMessage GetPlanCollectionMessage(DataRowView row, DBADashContext context)
         {
             if (row["plan_handle"] == DBNull.Value)
             {
@@ -1211,13 +1211,13 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private static void FindPlanScript(DataRowView row)
+        internal static void FindPlanScript(DataRowView row)
         {
             var db = Convert.ToString(row["database_name"]);
-            var planHandle = Convert.ToString(row["plan_handle"]);
-            var planHash = Convert.ToString(row["query_plan_hash"]);
-            var queryHash = Convert.ToString(row["query_hash"]);
-            var sqlHandle = Convert.ToString(row["sql_handle"]);
+            var planHandle = Convert.ToString(row["plan_handle"]).Trim();
+            var planHash = Convert.ToString(row["query_plan_hash"]).Trim();
+            var queryHash = Convert.ToString(row["query_hash"]).Trim();
+            var sqlHandle = Convert.ToString(row["sql_handle"]).Trim();
             var statementStartOffset =
                 Convert.ToInt32(row["statement_start_offset"] == DBNull.Value ? -1 : row["statement_start_offset"]);
             var statementEndOffset =
@@ -1305,10 +1305,10 @@ namespace DBADashGUI.Performance
                         GroupByFilter(e, row);
                         break;
                     }
-                // Load the associated RPC/Batch completed event when the user clicks the session ID column
+                // Open the session detail viewer (tabbed) when the user clicks the session ID column
                 case "colSessionID":
                     {
-                        ShowCompletedBatchRPC(row);
+                        ShowSessionDetail(row);
                         break;
                     }
                 // Show a summary of the waits for the session
@@ -1505,19 +1505,56 @@ namespace DBADashGUI.Performance
             tsBack.Enabled = true;
         }
 
-        private void ShowCompletedBatchRPC(DataRowView row)
+        private void ShowSessionDetail(DataRowView row)
         {
-            var frm = new CompletedRPCBatchEvent()
+            // Ctrl+click opens a new copy of the viewer instead of reusing the single instance.
+            var forceNewInstance = (Control.ModifierKeys & Keys.Control) == Keys.Control;
+            var frm = new SessionDetailViewer(row, CurrentContext);
+            frm.ShowSingleInstance(forceNewInstance: forceNewInstance);
+        }
+
+        /// <summary>
+        /// Load a specific session from the running queries snapshot identified by instance and snapshot date,
+        /// and open it in a <see cref="SessionDetailViewer"/>. Used for drill down (e.g. opening a blocking session).
+        /// <paramref name="snapshotDateUtc"/> is the UTC snapshot date.
+        /// Returns false if the session was not found in the snapshot.
+        /// </summary>
+        public static bool ShowSessionDetail(int instanceId, int sessionId, DateTime snapshotDateUtc, DBADashContext context)
+        {
+            var filters = new RunningQueriesFilters
             {
-                SessionID = Convert.ToInt32(row["session_id"]),
-                InstanceID = Convert.ToInt32(row["InstanceID"]),
-                SnapshotDateUTC = Convert.ToDateTime(row["SnapshotDate"]).AppTimeZoneToUtc(),
-                StartTimeUTC = row["start_time"] == DBNull.Value
-                    ? Convert.ToDateTime(row["last_request_start_time"]).AppTimeZoneToUtc()
-                    : Convert.ToDateTime(row["start_time"]).AppTimeZoneToUtc(),
-                IsSleeping = Convert.ToString(row["status"]) == "sleeping"
+                InstanceID = instanceId,
+                From = snapshotDateUtc,
+                To = snapshotDateUtc,
+                SessionID = sessionId
             };
-            frm.Show(this);
+            var hasAnyCursors = false;
+            var dt = RunningQueriesSnapshot(ref filters, ref hasAnyCursors);
+            if (dt.Rows.Count == 0)
+            {
+                return false;
+            }
+
+            var frm = new SessionDetailViewer(new DataView(dt)[0], context);
+            frm.ShowSingleInstance();
+            return true;
+        }
+
+        /// <summary>
+        /// Load the full running queries snapshot (all sessions) for an instance at a specific snapshot date.
+        /// Used by the session detail viewer to assess peer contention when an in-memory snapshot isn't available
+        /// (e.g. when drilling in from session history, which spans multiple snapshots).
+        /// </summary>
+        public static DataTable GetFullSnapshot(int instanceId, DateTime snapshotDateUtc)
+        {
+            var filters = new RunningQueriesFilters
+            {
+                InstanceID = instanceId,
+                From = snapshotDateUtc,
+                To = snapshotDateUtc
+            };
+            var hasAnyCursors = false;
+            return RunningQueriesSnapshot(ref filters, ref hasAnyCursors);
         }
 
         private void ShowSessionWaits(DataRowView row)
@@ -1871,7 +1908,7 @@ namespace DBADashGUI.Performance
         }
 
         /// <summary>Get session level wait stats for a specified session or for all sessions</summary>
-        private static DataTable GetSessionWaits(int InstanceID, short? SessionID, DateTime? SnapshotDateUTC,
+        internal static DataTable GetSessionWaits(int InstanceID, short? SessionID, DateTime? SnapshotDateUTC,
             DateTime? LoginTimeUTC)
         {
             using var cn = new SqlConnection(Common.ConnectionString);
@@ -2002,6 +2039,41 @@ namespace DBADashGUI.Performance
 
             tsBack.Enabled = true;
             tsBlockingFilter.Font = new Font(tsBlockingFilter.Font, FontStyle.Bold);
+        }
+
+        /// <summary>Filter the loaded snapshot to show the sessions blocked (directly or indirectly) by the specified session.</summary>
+        public void ShowSessionsBlockedBy(short sessionID) => ShowBlocking(sessionID, recursive: true);
+
+        /// <summary>
+        /// Filter the loaded snapshot to show the sessions involved in the blocking chain for the specified session.
+        /// The chain is the set of session IDs from the root blocker down to the session itself (from BlockingHierarchy).
+        /// </summary>
+        public void ShowBlockingChain(short sessionID, string blockingHierarchy)
+        {
+            var ids = ParseBlockingHierarchy(blockingHierarchy);
+            ids.Add(sessionID);
+            tsGroupByFilter.Visible = false;
+            dgv.SetFilter("session_id IN (" + string.Join(",", ids.Distinct()) + ")");
+            tsBlockingFilter.Text = $"Blocking : Chain for {sessionID}";
+            tsBack.Enabled = true;
+            tsBlockingFilter.Font = new Font(tsBlockingFilter.Font, FontStyle.Bold);
+        }
+
+        /// <summary>Extract the session IDs from a BlockingHierarchy value (e.g. "72 \ 60 \ 53").</summary>
+        private static List<int> ParseBlockingHierarchy(string blockingHierarchy)
+        {
+            var ids = new List<int>();
+            if (string.IsNullOrWhiteSpace(blockingHierarchy)) return ids;
+            // BlockingHierarchy is formatted as "123 \ 456 \ 789"; split on spaces and let the
+            // int.TryParse below discard the "\" separators.
+            foreach (var part in blockingHierarchy.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+            {
+                if (int.TryParse(part, out var id))
+                {
+                    ids.Add(id);
+                }
+            }
+            return ids;
         }
 
         /// <summary>Remove blocking filter applied to grid with showBlocking()</summary>

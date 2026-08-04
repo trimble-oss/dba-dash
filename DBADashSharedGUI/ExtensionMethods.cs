@@ -194,13 +194,15 @@ namespace DBADashSharedGUI
         /// Shows a single instance of the form, closing any existing instance.
         /// </summary>
         /// <param name="form"></param>
-        public static void ShowSingleInstance(this Form form, bool trackFormState = true)
+        /// <param name="trackFormState">Persist and restore the form size/position.</param>
+        /// <param name="forceNewInstance">When true, always open a new copy of the form instead of reusing/closing the existing single instance (e.g. Ctrl+click).</param>
+        public static void ShowSingleInstance(this Form form, bool trackFormState = true, bool forceNewInstance = false)
         {
             if (form.InvokeRequired)
             {
                 form.BeginInvoke(new Action(() =>
                 {
-                    var task = ShowSingleInstanceAsync(form, trackFormState);
+                    var task = ShowSingleInstanceAsync(form, trackFormState, forceNewInstance);
                     task.ContinueWith(t =>
                     {
                         try
@@ -217,7 +219,7 @@ namespace DBADashSharedGUI
             }
             else
             {
-                _ = ShowSingleInstanceAsync(form, trackFormState);
+                _ = ShowSingleInstanceAsync(form, trackFormState, forceNewInstance);
             }
         }
 
@@ -225,10 +227,13 @@ namespace DBADashSharedGUI
         /// Shows a single instance of the form, closing any existing instance.
         /// </summary>
         /// <param name="form"></param>
-        public static async Task ShowSingleInstanceAsync(this Form form, bool trackFormState = true)
+        /// <param name="trackFormState">Persist and restore the form size/position.</param>
+        /// <param name="forceNewInstance">When true, always open a new copy of the form instead of reusing/closing the existing single instance (e.g. Ctrl+click).</param>
+        public static async Task ShowSingleInstanceAsync(this Form form, bool trackFormState = true, bool forceNewInstance = false)
         {
-            if (!ChildFormSingleInstance)
+            if (!ChildFormSingleInstance || forceNewInstance)
             {
+                // Open a new, independent copy without touching the single-instance tracking.
                 form.Show();
                 return;
             }

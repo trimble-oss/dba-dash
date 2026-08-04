@@ -343,6 +343,12 @@ namespace DBADashGUI
             return obj == DBNull.Value ? null : obj;
         }
 
+        // Read a DataRow cell as an int, treating DBNull/null as 0.
+        public static int CellInt(this DataRow row, string column) => Convert.ToInt32(row[column].DBNullToNull() ?? 0);
+
+        // Read a DataRow cell as a string, treating DBNull/null as an empty string.
+        public static string CellStr(this DataRow row, string column) => Convert.ToString(row[column].DBNullToNull()) ?? string.Empty;
+
         public static int GetValueAsInt(this Dictionary<string, object> dict, string key, int defaultValue)
         {
             // Check if the key exists
@@ -903,7 +909,7 @@ namespace DBADashGUI
 
         public static byte[] GetHexStringColumnAsByteArray(this DataRowView row, string columnName)
         {
-            return row[columnName] == DBNull.Value ? null : ((string)row[columnName]).HexStringToByteArray();
+            return row[columnName] == DBNull.Value ? null : ((string)row[columnName]).Trim().HexStringToByteArray();
         }
 
         public static DateTime StartOfMonth(this DateTime dt) => new DateTime(dt.Year, dt.Month, 1);
