@@ -65,9 +65,12 @@ SELECT wr2.wait_resource_type,
        wr2.wait_hash,
        wr2.wait_slot,
        wr2.wait_is_compile,
-	   CASE WHEN wr2.wait_page_id % 8088 =0 OR wr2.wait_page_id=1 THEN 'PFS' 
-			WHEN wr2.wait_page_id % 511232 =0 OR wr2.wait_page_id=2 THEN 'GAM' 
-			WHEN (wr2.wait_page_id-1) % 511232 =0 OR wr2.wait_page_id=3 THEN 'SGAM' 
+	   CASE WHEN wr2.wait_page_id = 0 THEN 'HEADER' /* FILEHEADER_PAGE | m_type 15 */
+			WHEN wr2.wait_page_id = 1 OR wr2.wait_page_id % 8088 =0 THEN 'PFS' /* Page Free Space | PFS_PAGE | m_type 11 */
+			WHEN wr2.wait_page_id = 2 OR wr2.wait_page_id % 511232 =0 THEN 'GAM' /* Global Allocation Map | GAM_PAGE | m_type 8 */
+			WHEN wr2.wait_page_id = 3 OR (wr2.wait_page_id-1) % 511232 =0 THEN 'SGAM' /* Shared Global Allocation Map | SGAM_PAGE | m_type 9 */
+			WHEN wr2.wait_page_id = 6 OR (wr2.wait_page_id-6) % 511232 = 0 THEN 'DCM' /* Differential Changed Map | DIFF_MAP_PAGE | m_type 16 */
+			WHEN wr2.wait_page_id = 7 OR (wr2.wait_page_id-7) % 511232 = 0 THEN 'BCM' /* Bulk Changed Map | ML_MAP_PAGE | m_type 17 */ 
 			WHEN wr2.wait_page_id IS NOT NULL THEN 'Other'
 	   ELSE NULL END AS page_type
 FROM wr2
