@@ -31,6 +31,10 @@ namespace DBADashGUI.Performance
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             tsPlan = new System.Windows.Forms.ToolStripButton();
             tsJobInfo = new System.Windows.Forms.ToolStripButton();
+            tsKill = new System.Windows.Forms.ToolStripButton();
+            tsLatest = new System.Windows.Forms.ToolStripButton();
+            tsCollectNow = new System.Windows.Forms.ToolStripButton();
+            tsBack = new System.Windows.Forms.ToolStripButton();
             tsStatus = new System.Windows.Forms.ToolStripStatusLabel();
             statusStrip1 = new System.Windows.Forms.StatusStrip();
             tabs = new DBADashGUI.Theme.ThemedTabControl();
@@ -41,7 +45,7 @@ namespace DBADashGUI.Performance
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsPlan, tsJobInfo });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsBack, tsLatest, tsCollectNow, tsPlan, tsJobInfo, tsKill });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new System.Drawing.Size(1000, 27);
@@ -63,7 +67,47 @@ namespace DBADashGUI.Performance
             tsJobInfo.Text = "Job Info";
             tsJobInfo.Visible = false;
             tsJobInfo.Click += TsJobInfo_Click;
-            // 
+            //
+            // tsKill
+            //
+            tsKill.Image = Properties.Resources.Close_red_16x;
+            tsKill.Name = "tsKill";
+            tsKill.Size = new System.Drawing.Size(80, 24);
+            tsKill.Text = "Kill";
+            tsKill.ToolTipText = "Kill this session (SPID) on the source instance.";
+            tsKill.Visible = false;
+            tsKill.Click += TsKill_Click;
+            //
+            // tsLatest
+            //
+            tsLatest.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            tsLatest.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsLatest.Name = "tsLatest";
+            tsLatest.Size = new System.Drawing.Size(80, 24);
+            tsLatest.Text = "Get Latest";
+            tsLatest.ToolTipText = "Load the most recent snapshot that contains this session.";
+            tsLatest.Click += TsLatest_Click;
+            //
+            // tsCollectNow
+            //
+            tsCollectNow.Image = Properties.Resources.ProjectSystemModelRefresh_16x;
+            tsCollectNow.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsCollectNow.Name = "tsCollectNow";
+            tsCollectNow.Size = new System.Drawing.Size(80, 24);
+            tsCollectNow.Text = "Trigger Collection";
+            tsCollectNow.ToolTipText = "Trigger Collection & Refresh\r\nThis avoids the need to wait for the next collection by sending a message to the service to trigger the collection to run immediately.";
+            tsCollectNow.Click += TsCollectNow_Click;
+            //
+            // tsBack
+            //
+            tsBack.Image = Properties.Resources.arrow_back_16xLG;
+            tsBack.Name = "tsBack";
+            tsBack.Size = new System.Drawing.Size(80, 24);
+            tsBack.Text = "Back";
+            tsBack.ToolTipText = "Return to the previously viewed snapshot.";
+            tsBack.Enabled = false;
+            tsBack.Click += TsBack_Click;
+            //
             // tsStatus
             // 
             tsStatus.Name = "tsStatus";
@@ -115,6 +159,10 @@ namespace DBADashGUI.Performance
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripButton tsPlan;
         private System.Windows.Forms.ToolStripButton tsJobInfo;
+        private System.Windows.Forms.ToolStripButton tsKill;
+        private System.Windows.Forms.ToolStripButton tsLatest;
+        private System.Windows.Forms.ToolStripButton tsCollectNow;
+        private System.Windows.Forms.ToolStripButton tsBack;
         private DBADashGUI.Theme.ThemedTabControl tabs;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel tsStatus;

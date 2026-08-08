@@ -1519,7 +1519,24 @@ namespace DBADashGUI.Performance
         /// <paramref name="snapshotDateUtc"/> is the UTC snapshot date.
         /// Returns false if the session was not found in the snapshot.
         /// </summary>
-        public static bool ShowSessionDetail(int instanceId, int sessionId, DateTime snapshotDateUtc, DBADashContext context)
+        public static bool ShowSessionDetail(int instanceId, int sessionId, DateTime snapshotDateUtc, DBADashContext context, string staleWarning = null)
+        {
+            var row = GetSessionSnapshotRow(instanceId, sessionId, snapshotDateUtc);
+            if (row == null)
+            {
+                return false;
+            }
+
+            var frm = new SessionDetailViewer(row, context) { StaleWarning = staleWarning };
+            frm.ShowSingleInstance();
+            return true;
+        }
+
+        /// <summary>
+        /// Fetch a single session's row from the running queries snapshot identified by instance and (UTC) snapshot
+        /// date, or null if the session isn't in that snapshot. Used for in-place snapshot navigation in the viewer.
+        /// </summary>
+        public static DataRowView GetSessionSnapshotRow(int instanceId, int sessionId, DateTime snapshotDateUtc)
         {
             var filters = new RunningQueriesFilters
             {
@@ -1530,14 +1547,7 @@ namespace DBADashGUI.Performance
             };
             var hasAnyCursors = false;
             var dt = RunningQueriesSnapshot(ref filters, ref hasAnyCursors);
-            if (dt.Rows.Count == 0)
-            {
-                return false;
-            }
-
-            var frm = new SessionDetailViewer(new DataView(dt)[0], context);
-            frm.ShowSingleInstance();
-            return true;
+            return dt.Rows.Count == 0 ? null : new DataView(dt)[0];
         }
 
         /// <summary>

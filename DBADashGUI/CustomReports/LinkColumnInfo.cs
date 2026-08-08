@@ -237,8 +237,8 @@ namespace DBADashGUI.CustomReports
 
         protected override CustomReport GetReport(DBADashContext context)
         {
-            return context.Report is SystemReport 
-                ? CustomReports.SystemReports.FirstOrDefault(r => r.ProcedureName == ReportProcedureName) 
+            return context.Report is SystemReport
+                ? CustomReports.SystemReports.FirstOrDefault(r => r.ProcedureName == ReportProcedureName)
                 : CustomReports.GetCustomReports().FirstOrDefault(r => r.ProcedureName == ReportProcedureName);
         }
     }
@@ -251,6 +251,81 @@ namespace DBADashGUI.CustomReports
         protected override CustomReport GetReport(DBADashContext context)
         {
             return ReportFactory?.Invoke();
+        }
+    }
+
+    /// <summary>
+    /// Opens the Running Queries session detail for the snapshot a row refers to.  Used by the Killed Sessions
+    /// report to link back to the exact snapshot (instance + session + snapshot date) the kill was actioned from.
+    /// </summary>
+    public class RunningQueriesSessionDetailLinkColumnInfo : LinkColumnInfo
+    {
+        public string InstanceColumn { get; set; } = "InstanceID";
+        public string SessionIdColumn { get; set; } = "session_id";
+        public string SnapshotDateColumn { get; set; } = "SnapshotDate";
+
+        public override void Navigate(DBADashContext context, DataGridViewRow row, int selectedTableIndex, ContainerControl sender)
+        {
+            var instanceId = row.Cells[InstanceColumn].Value.DBNullToNull();
+            var sessionIdVal = row.Cells[SessionIdColumn].Value.DBNullToNull();
+            var snapshotVal = row.Cells[SnapshotDateColumn].Value.DBNullToNull();
+            if (instanceId == null || snapshotVal == null) return;
+
+            var id = Convert.ToInt32(instanceId);
+            var sessionId = sessionIdVal == null ? 0 : Convert.ToInt32(sessionIdVal);
+            // SnapshotDate is displayed in the app timezone (auto-converted); convert back to UTC for the lookup.
+            var snapshotUtc = ((DateTime)snapshotVal).AppTimeZoneToUtc();
+
+            try
+            {
+                var ctx = CommonData.GetDBADashContext(id);
+                if (!Performance.RunningQueries.ShowSessionDetail(id, sessionId, snapshotUtc, ctx))
+                {
+                    MessageBox.Show(
+                        $"Session {sessionId} was not found in the snapshot at {snapshotVal}. The Running Queries snapshot may have been purged by retention.",
+                        "Snapshot not found", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Opens the whole Running Queries snapshot (all sessions) for the instance + snapshot date a row refers to.
+    /// Used by the Killed Sessions report to link the snapshot date to the full snapshot.
+    /// </summary>
+    public class RunningQueriesLinkColumnInfo : LinkColumnInfo
+    {
+        public string InstanceColumn { get; set; } = "InstanceID";
+        public string SnapshotDateColumn { get; set; } = "SnapshotDate";
+
+        public override void Navigate(DBADashContext context, DataGridViewRow row, int selectedTableIndex, ContainerControl sender)
+        {
+            var instanceId = row.Cells[InstanceColumn].Value.DBNullToNull();
+            var snapshotVal = row.Cells[SnapshotDateColumn].Value.DBNullToNull();
+            if (instanceId == null || snapshotVal == null) return;
+
+            var id = Convert.ToInt32(instanceId);
+            // SnapshotDate is displayed in the app timezone (auto-converted); convert back to UTC for the lookup.
+            var snapshotUtc = ((DateTime)snapshotVal).AppTimeZoneToUtc();
+
+            try
+            {
+                var viewer = new Performance.RunningQueriesViewer
+                {
+                    InstanceID = id,
+                    SnapshotDateFrom = snapshotUtc,
+                    SnapshotDateTo = snapshotUtc
+                };
+                viewer.ShowSingleInstance();
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex);
+            }
         }
     }
 

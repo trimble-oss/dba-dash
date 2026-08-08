@@ -233,6 +233,12 @@ namespace DBADashGUI
             }
         }
 
+        /// <summary>
+        /// True when the session can be killed via messaging: messaging is available AND the collect agent
+        /// (the service that owns the source connection and runs the KILL) has session killing enabled.
+        /// </summary>
+        public bool CanKillSession => CanMessage && CollectAgent is { KillSessionEnabled: true };
+
         public bool IsReportAllowed(DirectExecutionReport rpt)
         {
             if (rpt is SystemDirectExecutionReport srpt)

@@ -86,6 +86,8 @@ namespace DBADash
 
         public bool AllowPlanForcing { get; set; }
 
+        public bool AllowKillSession { get; set; }
+
         public string AllowedScripts { get; set; }
 
         public string AllowedCustomProcs { get; set; }

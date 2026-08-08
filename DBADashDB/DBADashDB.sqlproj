@@ -798,6 +798,12 @@
     <Build Include="Security\AppReadOnly.sql" />
     <Build Include="dbo\Stored Procedures\DBADashAgent_Get.sql" />
     <Build Include="dbo\Tables\PlanForcingLog.sql" />
+    <Build Include="dbo\Tables\KillSessionLog.sql" />
+    <Build Include="dbo\Stored Procedures\KillSessionLog_Add.sql" />
+    <Build Include="dbo\Stored Procedures\KillSessionLog_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\KillSessionLog_Get.sql" />
+    <Build Include="dbo\Stored Procedures\KillSessionLog_IsKilled.sql" />
+    <Build Include="dbo\Stored Procedures\RunningQueriesSessionLatestSnapshot_Get.sql" />
     <Build Include="dbo\Stored Procedures\PlanForcingLog_Add.sql" />
     <Build Include="dbo\Stored Procedures\PlanForcingLog_Get.sql" />
     <Build Include="Security\AllowPlanForcing.sql" />
@@ -891,6 +897,7 @@
     <Build Include="dbo\Stored Procedures\DatabaseFinder_Get.sql" />
     <Build Include="dbo\Stored Procedures\QueryPlan_Get.sql" />
     <Build Include="Security\AllowJobExecution.sql" />
+    <Build Include="Security\AllowKillSession.sql" />
     <Build Include="dbo\Tables\AvailableProcs.sql" />
     <Build Include="dbo\User Defined Types\AvailableProcs.sql" />
     <Build Include="dbo\Stored Procedures\AvailableProcs_Upd.sql" />
