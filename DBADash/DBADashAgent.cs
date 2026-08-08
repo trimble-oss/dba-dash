@@ -19,6 +19,7 @@ namespace DBADash
         public string AgentVersion { get; set; }
         public string ServiceSQSQueueUrl { get; set; }
         public bool MessagingEnabled { get; set; }
+        public bool KillSessionEnabled { get; set; }
         public string AllowedScriptsCSV { get; set; }
         public string AllowedCustomProcsCSV { get; set; }
 
@@ -55,7 +56,7 @@ namespace DBADash
             int agentID;
             var cacheKey =
                 // Caching takes all properties into account + connection string (as we could be writing to multiple repositories and the agent could have different IDs for each).  Base off MD5 hash which should be sufficient for this use case.
-                Convert.ToBase64String(MD5.HashData(System.Text.Encoding.UTF8.GetBytes(string.Join('|', connectionString, AgentServiceName, AgentVersion, AgentHostName, AgentPath, ServiceSQSQueueUrl, MessagingEnabled, S3Path, AllowedScriptsCSV, AllowedCustomProcsCSV))));
+                Convert.ToBase64String(MD5.HashData(System.Text.Encoding.UTF8.GetBytes(string.Join('|', connectionString, AgentServiceName, AgentVersion, AgentHostName, AgentPath, ServiceSQSQueueUrl, MessagingEnabled, KillSessionEnabled, S3Path, AllowedScriptsCSV, AllowedCustomProcsCSV))));
             if (cache.Contains(cacheKey))
             {
                 agentID = (int)cache[cacheKey];
@@ -133,6 +134,7 @@ namespace DBADash
                 AgentPath = AppDomain.CurrentDomain.BaseDirectory,
                 ServiceSQSQueueUrl = cfg.ServiceSQSQueueUrl,
                 MessagingEnabled = cfg.EnableMessaging,
+                KillSessionEnabled = cfg.AllowKillSession,
                 AllowedScriptsCSV = cfg.AllowedScripts,
                 AllowedCustomProcsCSV = cfg.AllowedCustomProcs
             };
@@ -158,6 +160,7 @@ namespace DBADash
                     ServiceSQSQueueUrl = rdr["ServiceSQSQueueURL"].ToString(),
                     S3Path = rdr["S3Path"] == DBNull.Value ? null : rdr["S3Path"].ToString(),
                     MessagingEnabled = rdr["MessagingEnabled"] != DBNull.Value && (bool)rdr["MessagingEnabled"],
+                    KillSessionEnabled = rdr["KillSessionEnabled"] != DBNull.Value && (bool)rdr["KillSessionEnabled"],
                     AllowedScriptsCSV = allowedScripts,
                     AllowedCustomProcsCSV = allowedCustomProcs
                 };
@@ -185,6 +188,7 @@ namespace DBADash
                 cmd.Parameters.AddWithValue("S3Path", S3Path);
             }
             cmd.Parameters.AddWithValue("MessagingEnabled", MessagingEnabled);
+            cmd.Parameters.AddWithValue("KillSessionEnabled", KillSessionEnabled);
             cmd.Parameters.AddWithValue("AllowedScripts", AllowedScriptsCSV);
             cmd.Parameters.AddWithValue("AllowedCustomProcs", AllowedCustomProcsCSV);
             pAgentID.Direction = System.Data.ParameterDirection.Output;

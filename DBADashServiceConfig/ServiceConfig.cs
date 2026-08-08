@@ -995,6 +995,7 @@ namespace DBADashServiceConfig
                 chkEnableMessaging.Checked = collectionConfig.EnableMessaging;
                 txtSQS.Text = collectionConfig.ServiceSQSQueueUrl;
                 chkAllowPlanForcing.Checked = collectionConfig.AllowPlanForcing;
+                chkAllowKillSession.Checked = collectionConfig.AllowKillSession;
                 txtAllowScripts.Text = collectionConfig.AllowedScripts;
                 txtAllowedJobs.Text = collectionConfig.AllowedJobs;
                 chkProcessAlerts.Checked = collectionConfig.ProcessAlerts;
@@ -2512,6 +2513,12 @@ namespace DBADashServiceConfig
         private void ChkAllowPlanForcing_CheckedChanged(object sender, EventArgs e)
         {
             collectionConfig.AllowPlanForcing = chkAllowPlanForcing.Checked;
+            SetJson();
+        }
+
+        private void ChkAllowKillSession_CheckedChanged(object sender, EventArgs e)
+        {
+            collectionConfig.AllowKillSession = chkAllowKillSession.Checked;
             SetJson();
         }
 

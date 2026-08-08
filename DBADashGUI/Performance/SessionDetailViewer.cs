@@ -23,15 +23,28 @@ namespace DBADashGUI.Performance
     /// Tabbed viewer for a single running queries session.  Opened when the Session ID link is clicked.
     /// Each tab is loaded on demand (the first time it is selected) and is not reloaded when switching tabs.
     /// </summary>
-    public partial class SessionDetailViewer : Form
+    public partial class SessionDetailViewer : Form, Interface.ISetStatus
     {
-        private readonly DataRowView Row;
+        private DataRowView Row;
         private readonly DBADashContext Context;
         private readonly int InstanceID;
         private readonly int SessionID;
-        private readonly DateTime SnapshotDateUtc;
-        private readonly DateTime StartTimeUtc;
-        private readonly DateTime HistoryFromUtc;
+        private DateTime SnapshotDateUtc;
+        private DateTime StartTimeUtc;
+        private DateTime HistoryFromUtc;
+
+        // Previously-viewed snapshots (row + stale warning) for Back navigation.
+        private readonly Stack<(DataRowView Row, string StaleWarning)> navHistory = new();
+
+        // True while a user-triggered "Collect Now" is in flight, so the collection reply reloads to the latest snapshot.
+        private bool collectRequested;
+
+        /// <summary>
+        /// Optional warning shown in the status bar when the viewer opens - used by the "Latest Snapshot" navigation
+        /// to flag that the session is no longer active (the shown snapshot is the last one it appeared in).
+        /// </summary>
+        [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+        public string StaleWarning { get; set; }
 
         // Number of other sessions in the same snapshot queued on RESOURCE_SEMAPHORE (waiting for a memory grant).
         // Computed lazily from the full snapshot (in-memory when available, otherwise queried) when the Overview loads.
@@ -57,7 +70,7 @@ namespace DBADashGUI.Performance
 
         // Independent copy of the whole snapshot (all sessions). Retained so drill-down (e.g. opening a blocking
         // session) keeps context about other queries, and so peer counts survive a grid refresh.
-        private readonly DataTable Snapshot;
+        private DataTable Snapshot;
 
         // Cached fonts for insight cards, shared across labels and disposed when the form closes.
         private Font insightBoldFont;
@@ -68,32 +81,53 @@ namespace DBADashGUI.Performance
         public SessionDetailViewer(DataRowView sourceRow, DBADashContext context)
         {
             InitializeComponent();
+            Context = context;
+            InstanceID = Convert.ToInt32(sourceRow["InstanceID"]);
+            SessionID = Convert.ToInt32(sourceRow["session_id"]);
+            LoadSnapshotRow(sourceRow, null);
+        }
 
-            // Take an independent copy of the row so the viewer is not affected by the grid being refreshed.
+        /// <summary>
+        /// (Re)load the viewer for a running-queries snapshot row. Called from the constructor and when navigating to
+        /// a different snapshot of the same session in place (Latest Snapshot / Back / after Collect Now).
+        /// </summary>
+        private void LoadSnapshotRow(DataRowView sourceRow, string staleWarning)
+        {
+            // Take independent copies so the viewer isn't affected by the source grid being refreshed.
             var table = sourceRow.Row.Table.Clone();
             table.ImportRow(sourceRow.Row);
             Row = new DataView(table)[0];
-            Context = context;
-
-            // Keep an independent copy of the full snapshot so peer counts and drill-down retain context
-            // about the rest of the snapshot even after the source grid is refreshed.
             Snapshot = sourceRow.Row.Table.Copy();
-
-            InstanceID = Convert.ToInt32(Row["InstanceID"]);
-            SessionID = Convert.ToInt32(Row["session_id"]);
 
             SnapshotDateUtc = Convert.ToDateTime(Row["SnapshotDate"]).AppTimeZoneToUtc();
             StartTimeUtc = Row["start_time"] == DBNull.Value
                 ? Convert.ToDateTime(Row["last_request_start_time"]).AppTimeZoneToUtc()
                 : Convert.ToDateTime(Row["start_time"]).AppTimeZoneToUtc();
             HistoryFromUtc = GetHistoryFromUtc();
+            StaleWarning = staleWarning;
+
+            // Reset lazily-computed peer state so it recomputes for the new snapshot.
+            peerCountsComputed = false;
+            ResourceSemaphoreWaiterCount = 0;
+            AllocationContentionPeerCount = 0;
+            BlockedReaderPeerCount = 0;
+            IsBlockedByReadCommittedReader = false;
 
             var instanceName = Convert.ToString(Row["InstanceDisplayName"]);
             Text = $"Session {SessionID} - {instanceName} - {SnapshotDateUtc.ToAppTimeZone().ToString(CultureInfo.CurrentCulture)}";
 
             SetupPlanButton();
             SetupJobInfoButton();
+            SetupKillButton();
+            SetupCollectButton();
+            UpdateNavButtons();
             BuildTabs();
+        }
+
+        /// <summary>Show the Trigger Collection button only when messaging is enabled and the user has access to it.</summary>
+        private void SetupCollectButton()
+        {
+            tsCollectNow.Visible = CommonData.GetDBADashContext(InstanceID).CanMessage;
         }
 
         protected override void OnFormClosed(FormClosedEventArgs e)
@@ -164,8 +198,355 @@ namespace DBADashGUI.Performance
             }
         }
 
+        #region Kill session
+
+        // A snapshot older than this can't be used to kill a session - the data is too likely to be stale
+        // (the request may have finished and the SPID been reused). Enforced in the GUI; the service also
+        // re-validates the live session before killing.
+        private static readonly TimeSpan KillRecencyWindow = TimeSpan.FromMinutes(5);
+
+        /// <summary>True for a user session (system sessions - session_id &lt;= 50 - are never killed).</summary>
+        private bool IsUserSpid() => SessionID > 50;
+
+        /// <summary>True when this snapshot is recent enough to act on (see <see cref="KillRecencyWindow"/>).</summary>
+        private bool IsRecentSnapshot() => DateTime.UtcNow - SnapshotDateUtc <= KillRecencyWindow;
+
+        /// <summary>
+        /// Show/enable the Kill button. Hidden unless the user is permitted (<see cref="DBADashUser.AllowKillSession"/>),
+        /// messaging is available and it's a user SPID. Disabled (with an explanatory tooltip) for stale snapshots.
+        /// </summary>
+        private void SetupKillButton()
+        {
+            var context = CommonData.GetDBADashContext(InstanceID);
+            // NB: don't re-read tsKill.Visible here as the guard - its getter returns Available && parent.Visible,
+            // which is false while the form hasn't been shown yet (constructor), so the Enabled line below would be
+            // skipped and the button would keep its designer default (Enabled = true). Use the computed value.
+            killButtonAvailable = DBADashUser.AllowKillSession && context.CanKillSession && IsUserSpid();
+            tsKill.Visible = killButtonAvailable;
+            if (!killButtonAvailable) return;
+
+            var recent = IsRecentSnapshot();
+            tsKill.Enabled = recent;
+            tsKill.ToolTipText = recent
+                ? "Kill this session (SPID) on the source instance."
+                : $"Kill is only available for recent snapshots (within {KillRecencyWindow.TotalMinutes:0} minutes). This snapshot is too old to act on safely.";
+        }
+
+        // Whether the Kill button is applicable at all (user permitted, messaging + kill enabled, user SPID).
+        // Tracked separately from tsKill.Visible because that getter is unreliable before the form is shown.
+        private bool killButtonAvailable;
+
+        private async void TsKill_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // Re-check recency at click time - the viewer may have been left open until the snapshot went stale.
+                if (!IsRecentSnapshot())
+                {
+                    tsKill.Enabled = false;
+                    tsKill.ToolTipText = $"Kill is only available for recent snapshots (within {KillRecencyWindow.TotalMinutes:0} minutes). This snapshot is too old to act on safely.";
+                    MessageBox.Show(
+                        $"This snapshot is more than {KillRecencyWindow.TotalMinutes:0} minutes old. Killing is only allowed for recent snapshots to avoid acting on stale data.",
+                        "Snapshot too old", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                var login = RowStr("login_name");
+                var db = RowStr("database_name");
+                var snippet = RowStr("text");
+                if (string.IsNullOrEmpty(snippet)) snippet = RowStr("command");
+                if (snippet.Length > 200) snippet = snippet[..200] + "...";
+
+                var confirm = MessageBox.Show(
+                    $"Kill session {SessionID} on {Convert.ToString(Row["InstanceDisplayName"])}?\r\n\r\n" +
+                    $"Login: {login}\r\nDatabase: {db}\r\n\r\n{snippet}\r\n\r\n" +
+                    "This terminates the session and rolls back any open transaction. This action cannot be undone.",
+                    "Confirm Kill Session", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
+                if (confirm != DialogResult.Yes) return;
+
+                var context = CommonData.GetDBADashContext(InstanceID);
+                if (!context.CanMessage)
+                {
+                    MessageBox.Show("Messaging is not available for this instance.", "Kill Session",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                tsKill.Enabled = false;
+                var messageGroup = Guid.NewGuid();
+                await LogKillRequestAsync(messageGroup); // Audit who killed what before we send the request
+                var message = new KillSessionMessage
+                {
+                    ConnectionID = context.ConnectionID,
+                    CollectAgent = context.CollectAgent,
+                    ImportAgent = context.ImportAgent,
+                    SessionID = SessionID,
+                    ExpectedLoginName = login,
+                    ExpectedStartTimeUtc = StartTimeUtc
+                };
+                tsStatus.InvokeSetStatus("Killing session...", string.Empty, DashColors.Information);
+                await MessagingHelper.SendMessageAndProcessReply(message, context, tsStatus, HandleKillReply, messageGroup);
+            }
+            catch (Exception ex)
+            {
+                tsKill.Enabled = IsRecentSnapshot(); // Allow a retry
+                CommonShared.ShowExceptionDialog(ex);
+            }
+        }
+
+        private async Task HandleKillReply(ResponseMessage reply, Guid messageGroup, MessagingHelper.SetStatusDelegate setStatus)
+        {
+            if (reply.Type == ResponseMessage.ResponseTypes.Success)
+            {
+                var msg = ExtractKillMessage(reply) ?? $"Session {SessionID} killed.";
+                setStatus(msg, string.Empty, DashColors.Green);
+                await UpdateKillLogAsync(messageGroup, "KILLED");
+                MessageBox.Show(msg, "Kill Session", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                // Leave the button disabled - the session has been killed.
+            }
+            else
+            {
+                setStatus(reply.Message, reply.Exception?.ToString(), DashColors.Fail);
+                await UpdateKillLogAsync(messageGroup, Truncate(reply.Message, 200));
+                tsKill.Enabled = IsRecentSnapshot(); // Allow a retry (e.g. transient failure)
+            }
+        }
+
+        private static string ExtractKillMessage(ResponseMessage reply)
+        {
+            var table = reply.Data != null && reply.Data.Tables.Count > 0 ? reply.Data.Tables[0] : null;
+            if (table == null || table.Rows.Count == 0 || !table.Columns.Contains("Message")) return null;
+            return Convert.ToString(table.Rows[0]["Message"]);
+        }
+
+        private static string Truncate(string value, int max) =>
+            string.IsNullOrEmpty(value) || value.Length <= max ? value : value[..max];
+
+        /// <summary>
+        /// Record the kill request in the repo (audit) before it is sent. Uses the message group as the key so the
+        /// outcome can be updated on reply. Only the keys back to the RunningQueries snapshot are stored - the session
+        /// detail is joined from dbo.RunningQueries when the log is read.
+        /// </summary>
+        private async Task LogKillRequestAsync(Guid messageGroup)
+        {
+            await using var cn = new SqlConnection(Common.ConnectionString);
+            await using var cmd = new SqlCommand("dbo.KillSessionLog_Add", cn) { CommandType = CommandType.StoredProcedure };
+            cmd.Parameters.AddWithValue("@MessageGroupID", messageGroup);
+            cmd.Parameters.AddWithValue("@InstanceID", InstanceID);
+            cmd.Parameters.AddWithValue("@session_id", SessionID);
+            cmd.Parameters.Add("@SnapshotDate", SqlDbType.DateTime2).Value = SnapshotDateUtc;
+            cmd.Parameters.AddWithValue("@killed_by", Environment.UserName);
+            await cn.OpenAsync();
+            await cmd.ExecuteNonQueryAsync();
+        }
+
+        /// <summary>Update the audit record with the outcome of the kill request.</summary>
+        private static async Task UpdateKillLogAsync(Guid messageGroup, string status)
+        {
+            try
+            {
+                await using var cn = new SqlConnection(Common.ConnectionString);
+                await using var cmd = new SqlCommand("dbo.KillSessionLog_Upd", cn) { CommandType = CommandType.StoredProcedure };
+                cmd.Parameters.AddWithValue("@MessageGroupID", messageGroup);
+                cmd.Parameters.AddWithValue("@Status", (object)status ?? DBNull.Value);
+                await cn.OpenAsync();
+                await cmd.ExecuteNonQueryAsync();
+            }
+            catch (Exception ex)
+            {
+                // The kill itself has already happened - a failure to record the outcome shouldn't surface as an error.
+                Serilog.Log.Warning(ex, "Failed to update KillSessionLog for message group {messageGroup}", messageGroup);
+            }
+        }
+
+        #endregion
+
+        #region Snapshot navigation
+
+        /// <summary>Navigate to the most recent snapshot that contains this session (in place).</summary>
+        private async void TsLatest_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                tsLatest.Enabled = false;
+                await NavigateToLatestAsync();
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex);
+            }
+            finally
+            {
+                tsLatest.Enabled = true;
+            }
+        }
+
+        /// <summary>Return to the previously viewed snapshot.</summary>
+        private async void TsBack_Click(object sender, EventArgs e)
+        {
+            if (navHistory.Count == 0) return;
+            try
+            {
+                var (row, stale) = navHistory.Pop();
+                LoadSnapshotRow(row, stale);
+                ApplyStaleWarning();
+                await LoadTab(tabs.SelectedTab);
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex);
+            }
+        }
+
+        /// <summary>Trigger a RunningQueries collection on the source instance (via messaging) and, on completion, load the latest snapshot.</summary>
+        private async void TsCollectNow_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (!CollectionMessaging.IsMessagingEnabled(InstanceID))
+                {
+                    MessageBox.Show("Messaging is not enabled for this instance, so a collection can't be triggered.",
+                        "Collect Now", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                tsCollectNow.Enabled = false;
+                collectRequested = true;
+                await CollectionMessaging.TriggerCollection(InstanceID, DBADash.CollectionType.RunningQueries, this);
+            }
+            catch (Exception ex)
+            {
+                collectRequested = false;
+                CommonShared.ShowExceptionDialog(ex);
+            }
+            finally
+            {
+                tsCollectNow.Enabled = true;
+            }
+        }
+
+        /// <summary>
+        /// Load the most recent snapshot containing this session. If that snapshot isn't the instance's latest (the
+        /// session has dropped out of newer snapshots) the reload is flagged as no longer active.
+        /// </summary>
+        private async Task NavigateToLatestAsync()
+        {
+            var (sessionLatest, instanceLatest) = await Task.Run(GetLatestSnapshots);
+            if (sessionLatest == null)
+            {
+                MessageBox.Show(
+                    $"Session {SessionID} was not found in any retained snapshot for this instance. It may have completed and aged out of the running queries history.",
+                    "Get Latest", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            var stale = instanceLatest != null && sessionLatest < instanceLatest;
+            var alreadyViewing = Math.Abs((sessionLatest.Value - SnapshotDateUtc).TotalSeconds) < 1;
+            var lastSeen = sessionLatest.Value.ToAppTimeZone().ToString(CultureInfo.CurrentCulture);
+            var latestInstance = instanceLatest?.ToAppTimeZone().ToString(CultureInfo.CurrentCulture);
+            var warning = stale
+                ? $"Session {SessionID} is no longer active - showing the most recent snapshot it appeared in ({lastSeen}). Latest snapshot for the instance: {latestInstance}."
+                : null;
+
+            // Load the session's most recent snapshot if we aren't already on it.
+            if (!alreadyViewing)
+            {
+                var row = await Task.Run(() => RunningQueries.GetSessionSnapshotRow(InstanceID, SessionID, sessionLatest.Value));
+                if (row == null)
+                {
+                    tsStatus.InvokeSetStatus("The latest snapshot for the session could not be loaded.", string.Empty, DashColors.Warning);
+                    return;
+                }
+                await NavigateToSnapshotAsync(row, warning);
+            }
+
+            // Clear, unmissable feedback: the session has ended (Get Latest / Trigger Collection found nothing newer for it).
+            if (stale)
+            {
+                tsStatus.InvokeSetStatus(warning, string.Empty, DashColors.Warning);
+                MessageBox.Show(
+                    $"Session {SessionID} is no longer active.\r\n\r\nIt last appeared in the snapshot taken at {lastSeen}.\r\nThe latest snapshot for the instance is {latestInstance}.\r\n\r\nShowing the most recent snapshot the session appeared in.",
+                    "Session no longer active", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else if (alreadyViewing)
+            {
+                tsStatus.InvokeSetStatus("This is already the latest snapshot for the session.", string.Empty, DashColors.Information);
+            }
+        }
+
+        /// <summary>Load a different snapshot in place, pushing the current one onto the Back history.</summary>
+        private async Task NavigateToSnapshotAsync(DataRowView row, string staleWarning)
+        {
+            navHistory.Push((Row, StaleWarning));
+            LoadSnapshotRow(row, staleWarning);
+            ApplyStaleWarning();
+            await LoadTab(tabs.SelectedTab);
+        }
+
+        /// <summary>Show the stale-session warning in the status bar, or clear the status bar when there is none.</summary>
+        private void ApplyStaleWarning()
+        {
+            if (!string.IsNullOrEmpty(StaleWarning))
+            {
+                tsStatus.InvokeSetStatus(StaleWarning, string.Empty, DashColors.Warning);
+            }
+            else
+            {
+                tsStatus.InvokeSetStatus(string.Empty, string.Empty, DashColors.Information);
+            }
+        }
+
+        private void UpdateNavButtons()
+        {
+            tsBack.Enabled = navHistory.Count > 0;
+        }
+
+        /// <summary>Get the most recent snapshot containing this session and the most recent snapshot for the instance (both UTC).</summary>
+        private (DateTime? sessionLatestUtc, DateTime? instanceLatestUtc) GetLatestSnapshots()
+        {
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.RunningQueriesSessionLatestSnapshot_Get", cn) { CommandType = CommandType.StoredProcedure };
+            cmd.Parameters.AddWithValue("@InstanceID", InstanceID);
+            cmd.Parameters.AddWithValue("@session_id", SessionID);
+            cn.Open();
+            using var rdr = cmd.ExecuteReader();
+            if (!rdr.Read()) return (null, null);
+            DateTime? sessionLatest = rdr["SessionLatestSnapshotUTC"] == DBNull.Value ? null : Convert.ToDateTime(rdr["SessionLatestSnapshotUTC"]);
+            DateTime? instanceLatest = rdr["InstanceLatestSnapshotUTC"] == DBNull.Value ? null : Convert.ToDateTime(rdr["InstanceLatestSnapshotUTC"]);
+            return (sessionLatest, instanceLatest);
+        }
+
+        // ISetStatus - used by the Collect Now trigger to report progress and, on completion, reload to the latest snapshot.
+        public void SetStatus(string message, string tooltip, System.Drawing.Color color) =>
+            tsStatus.InvokeSetStatus(message, tooltip, color);
+
+        public void RefreshData()
+        {
+            if (!collectRequested) return;
+            if (InvokeRequired)
+            {
+                BeginInvoke(new Action(RefreshData));
+                return;
+            }
+            collectRequested = false;
+            _ = NavigateToLatestAsync();
+        }
+
+        #endregion
+
         private void BuildTabs()
         {
+            // Support in-place reload: unhook the change handler and dispose any existing tabs/loaders first
+            // (dispose rather than Clear so nested controls - grids, code editors, RunningQueries controls - are freed).
+            tabs.SelectedIndexChanged -= Tabs_SelectedIndexChanged;
+            while (tabs.TabPages.Count > 0)
+            {
+                var old = tabs.TabPages[tabs.TabPages.Count - 1];
+                tabs.TabPages.RemoveAt(tabs.TabPages.Count - 1);
+                old.Dispose();
+            }
+            loaders.Clear();
+            loadedTabs.Clear();
+
             AddTab("Overview", LoadOverview);
             AddTab("Slow Query Capture", LoadSlowQueryCapture);
             AddTab("Batch Text", LoadBatchText);
@@ -240,7 +621,37 @@ namespace DBADashGUI.Performance
         {
             this.ApplyTheme();
             tabs.ApplyTheme();
+            ApplyStaleWarning();
+            await DisableKillIfAlreadyKilledAsync();
             await LoadTab(tabs.SelectedTab);
+        }
+
+        /// <summary>
+        /// Disable the Kill button when this session (in this snapshot) has already been killed from DBA Dash - e.g.
+        /// when the viewer is opened from the Killed Sessions report. The server-side re-validation would reject a
+        /// repeat kill anyway, but this avoids offering an action that's already been done.
+        /// </summary>
+        private async Task DisableKillIfAlreadyKilledAsync()
+        {
+            if (!killButtonAvailable || !IsRecentSnapshot()) return;
+            try
+            {
+                await using var cn = new SqlConnection(Common.ConnectionString);
+                await using var cmd = new SqlCommand("dbo.KillSessionLog_IsKilled", cn) { CommandType = CommandType.StoredProcedure };
+                cmd.Parameters.AddWithValue("@InstanceID", InstanceID);
+                cmd.Parameters.AddWithValue("@session_id", SessionID);
+                cmd.Parameters.Add("@SnapshotDate", SqlDbType.DateTime2).Value = SnapshotDateUtc;
+                await cn.OpenAsync();
+                if (await cmd.ExecuteScalarAsync() != null)
+                {
+                    tsKill.Enabled = false;
+                    tsKill.ToolTipText = "This session has already been killed from DBA Dash (see the Killed Sessions report).";
+                }
+            }
+            catch (Exception ex)
+            {
+                Serilog.Log.Warning(ex, "Failed to check KillSessionLog for session {session}", SessionID);
+            }
         }
 
         private async void Tabs_SelectedIndexChanged(object sender, EventArgs e)

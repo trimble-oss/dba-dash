@@ -132,6 +132,7 @@ namespace DBADashServiceConfig
             label18 = new System.Windows.Forms.Label();
             txtAllowScripts = new System.Windows.Forms.TextBox();
             chkAllowPlanForcing = new System.Windows.Forms.CheckBox();
+            chkAllowKillSession = new System.Windows.Forms.CheckBox();
             label8 = new System.Windows.Forms.Label();
             label6 = new System.Windows.Forms.Label();
             txtSQS = new System.Windows.Forms.TextBox();
@@ -1258,6 +1259,7 @@ namespace DBADashServiceConfig
             groupBox6.Controls.Add(label18);
             groupBox6.Controls.Add(txtAllowScripts);
             groupBox6.Controls.Add(chkAllowPlanForcing);
+            groupBox6.Controls.Add(chkAllowKillSession);
             groupBox6.Controls.Add(label8);
             groupBox6.Controls.Add(label6);
             groupBox6.Controls.Add(txtSQS);
@@ -1377,6 +1379,17 @@ namespace DBADashServiceConfig
             chkAllowPlanForcing.Text = "Allow Plan Forcing";
             chkAllowPlanForcing.UseVisualStyleBackColor = true;
             chkAllowPlanForcing.CheckedChanged += ChkAllowPlanForcing_CheckedChanged;
+            // 
+            // chkAllowKillSession
+            // 
+            chkAllowKillSession.AutoSize = true;
+            chkAllowKillSession.Location = new System.Drawing.Point(247, 68);
+            chkAllowKillSession.Name = "chkAllowKillSession";
+            chkAllowKillSession.Size = new System.Drawing.Size(147, 24);
+            chkAllowKillSession.TabIndex = 6;
+            chkAllowKillSession.Text = "Allow Kill Session";
+            chkAllowKillSession.UseVisualStyleBackColor = true;
+            chkAllowKillSession.CheckedChanged += ChkAllowKillSession_CheckedChanged;
             // 
             // label8
             // 
@@ -2358,6 +2371,7 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.TextBox txtSQS;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.CheckBox chkAllowPlanForcing;
+        private System.Windows.Forms.CheckBox chkAllowKillSession;
         private System.Windows.Forms.Button bttnCheckConnections;
         private System.Windows.Forms.ComboBox cboDeleteAction;
         private System.Windows.Forms.Label label12;

@@ -32,6 +32,8 @@ namespace DBADashGUI
 
         public static bool AllowJobExecution;
 
+        public static bool AllowKillSession;
+
         public static TimeZoneInfo UserTimeZone = TimeZoneInfo.Local;
 
         public static HashSet<string> Roles;
@@ -125,10 +127,11 @@ namespace DBADashGUI
             var pAllowMessaging = new SqlParameter("AllowMessaging", SqlDbType.Bit) { Direction = ParameterDirection.Output };
             var pAllowPlanForcing = new SqlParameter("AllowPlanForcing", SqlDbType.Bit) { Direction = ParameterDirection.Output };
             var pAllowJobExecution = new SqlParameter("AllowJobExecution", SqlDbType.Bit) { Direction = ParameterDirection.Output };
+            var pAllowKillSession = new SqlParameter("AllowKillSession", SqlDbType.Bit) { Direction = ParameterDirection.Output };
             var pTZ = new SqlParameter("TimeZone", SqlDbType.VarChar, 50) { Direction = ParameterDirection.Output };
             var pTheme = new SqlParameter("Theme", SqlDbType.VarChar, 50) { Direction = ParameterDirection.Output };
             var pIsAdmin = new SqlParameter("IsAdmin", SqlDbType.Bit) { Direction = ParameterDirection.Output };
-            cmd.Parameters.AddRange(new[] { pUserID, pManageGlobalViews, pTZ, pTheme, pAllowMessaging, pAllowPlanForcing, pIsAdmin, pAllowJobExecution });
+            cmd.Parameters.AddRange(new[] { pUserID, pManageGlobalViews, pTZ, pTheme, pAllowMessaging, pAllowPlanForcing, pIsAdmin, pAllowJobExecution, pAllowKillSession });
             await using var rdr = await cmd.ExecuteReaderAsync(token);
             Roles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             while (await rdr.ReadAsync(token))
@@ -145,6 +148,7 @@ namespace DBADashGUI
                 AllowMessaging = (bool)pAllowMessaging.Value;
                 AllowPlanForcing = (bool)pAllowPlanForcing.Value && AllowMessaging;
                 AllowJobExecution = (bool)pAllowJobExecution.Value && AllowMessaging;
+                AllowKillSession = (bool)pAllowKillSession.Value && AllowMessaging;
                 IsAdmin = (bool)pIsAdmin.Value;
                 CommunityScripts = (IsInRole("CommunityScripts") && AllowMessaging) || IsAdmin;
                 CustomTools = (IsInRole("CustomTools") && AllowMessaging) || IsAdmin;
