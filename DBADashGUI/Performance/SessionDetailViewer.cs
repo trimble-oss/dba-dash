@@ -117,6 +117,7 @@ namespace DBADashGUI.Performance
             Text = $"Session {SessionID} - {instanceName} - {SnapshotDateUtc.ToAppTimeZone().ToString(CultureInfo.CurrentCulture)}";
 
             SetupPlanButton();
+            SetupFlushPlanButton();
             SetupJobInfoButton();
             SetupKillButton();
             SetupCollectButton();
@@ -356,6 +357,198 @@ namespace DBADashGUI.Performance
             {
                 // The kill itself has already happened - a failure to record the outcome shouldn't surface as an error.
                 Serilog.Log.Warning(ex, "Failed to update KillSessionLog for message group {messageGroup}", messageGroup);
+            }
+        }
+
+        #endregion
+
+        #region Flush plan
+
+        /// <summary>True when this snapshot has a plan handle we can flush from the cache.</summary>
+        private bool HasPlanHandle() =>
+            Row.Row.Table.Columns.Contains("plan_handle") && Row["plan_handle"] != DBNull.Value &&
+            !string.IsNullOrEmpty(Convert.ToString(Row["plan_handle"]));
+
+        /// <summary>
+        /// Show the Flush Plan button whenever there is a plan handle to act on.  Any user who can see the session can
+        /// use it: if the service can flush the plan (plan forcing enabled + messaging) and the user is in the
+        /// <see cref="DBADashUser.AllowPlanForcing"/> role, it is actioned via the service; otherwise a script is shown
+        /// for the user to run themselves (see <see cref="ShowFlushPlanScript"/>).  Unlike Kill there is no recency gate
+        /// - flushing a stale/already-evicted plan is harmless (FREEPROCCACHE is a no-op if the plan is gone).
+        /// </summary>
+        private void SetupFlushPlanButton()
+        {
+            tsFlushPlan.Visible = HasPlanHandle();
+        }
+
+        /// <summary>True when the plan can be flushed via the service: user is permitted and the service allows it.</summary>
+        private bool CanFlushViaService() =>
+            DBADashUser.AllowPlanForcing && CommonData.GetDBADashContext(InstanceID).CanFlushPlan;
+
+        private async void TsFlushPlan_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (!HasPlanHandle())
+                {
+                    return;
+                }
+
+                var planHandle = RowStr("plan_handle");
+
+                // When the plan can't be flushed via the service (service not enabled, no messaging, or the user isn't
+                // in the AllowPlanForcing role) show the script so the user can run it themselves.
+                if (!CanFlushViaService())
+                {
+                    ShowFlushPlanScript(planHandle);
+                    return;
+                }
+
+                var login = RowStr("login_name");
+                var db = RowStr("database_name");
+                var snippet = RowStr("text");
+                if (string.IsNullOrEmpty(snippet)) snippet = RowStr("command");
+                if (snippet.Length > 200) snippet = snippet[..200] + "...";
+
+                // Query Store (when enabled for the session's database) is a safer, more durable fix than flushing
+                // the cache - suggest it in the confirmation.
+                var queryStoreNote = RowBool("is_query_store_on") == true
+                    ? "\r\n\r\nTip: Query Store is enabled on this database. Forcing a known-good plan via Query Store is usually safer and more durable than flushing the cache."
+                    : string.Empty;
+
+                var confirm = MessageBox.Show(
+                    $"Flush the cached plan for session {SessionID} on {Convert.ToString(Row["InstanceDisplayName"])}?\r\n\r\n" +
+                    $"Login: {login}\r\nDatabase: {db}\r\nPlan handle: {planHandle}\r\n\r\n{snippet}\r\n\r\n" +
+                    "This removes only this query's plan from the cache so it recompiles on the next execution. " +
+                    "It will NOT affect the query that is currently executing." +
+                    queryStoreNote,
+                    "Confirm Flush Plan", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
+                if (confirm != DialogResult.Yes) return;
+
+                var context = CommonData.GetDBADashContext(InstanceID);
+
+                tsFlushPlan.Enabled = false;
+                var messageGroup = Guid.NewGuid();
+                await LogFlushRequestAsync(messageGroup, planHandle); // Audit who flushed what before we send the request
+                var message = new FlushPlanMessage
+                {
+                    ConnectionID = context.ConnectionID,
+                    CollectAgent = context.CollectAgent,
+                    ImportAgent = context.ImportAgent,
+                    PlanHandle = planHandle,
+                    SessionID = SessionID
+                };
+                tsStatus.InvokeSetStatus("Flushing plan...", string.Empty, DashColors.Information);
+                await MessagingHelper.SendMessageAndProcessReply(message, context, tsStatus, HandleFlushReply, messageGroup);
+            }
+            catch (Exception ex)
+            {
+                tsFlushPlan.Enabled = true; // Allow a retry
+                CommonShared.ShowExceptionDialog(ex);
+            }
+        }
+
+        private async Task HandleFlushReply(ResponseMessage reply, Guid messageGroup, MessagingHelper.SetStatusDelegate setStatus)
+        {
+            if (reply.Type == ResponseMessage.ResponseTypes.Success)
+            {
+                var msg = ExtractFlushMessage(reply) ?? "Plan flushed from cache.";
+                setStatus(msg, string.Empty, DashColors.Green);
+                await UpdateFlushLogAsync(messageGroup, "FLUSHED");
+                MessageBox.Show(msg, "Flush Plan", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                tsFlushPlan.Enabled = true; // The plan may be re-cached and flushed again if needed
+            }
+            else
+            {
+                setStatus(reply.Message, reply.Exception?.ToString(), DashColors.Fail);
+                await UpdateFlushLogAsync(messageGroup, Truncate(reply.Message, 200));
+                tsFlushPlan.Enabled = true; // Allow a retry (e.g. transient failure)
+            }
+        }
+
+        private static string ExtractFlushMessage(ResponseMessage reply)
+        {
+            var table = reply.Data != null && reply.Data.Tables.Count > 0 ? reply.Data.Tables[0] : null;
+            if (table == null || table.Rows.Count == 0 || !table.Columns.Contains("Message")) return null;
+            return Convert.ToString(table.Rows[0]["Message"]);
+        }
+
+        /// <summary>
+        /// Show the DBCC FREEPROCCACHE script (with guidance) for the user to run themselves.  Used when the plan can't
+        /// be flushed via the service - either the user isn't in the AllowPlanForcing role, messaging isn't available
+        /// for the instance, or plan forcing isn't enabled on the DBA Dash service.
+        /// </summary>
+        private void ShowFlushPlanScript(string planHandle)
+        {
+            // The instance/login/database names are user-controlled and are embedded inside a /* ... */ comment.
+            // Neutralise any comment delimiters they contain so they can't break out of (or nest) the comment and
+            // corrupt the displayed script. T-SQL supports nested block comments, so both /* and */ are neutralised.
+            var instance = CommentSafe(Convert.ToString(Row["InstanceDisplayName"]));
+            var login = CommentSafe(RowStr("login_name"));
+            var db = CommentSafe(RowStr("database_name"));
+            var queryStoreNote = RowBool("is_query_store_on") == true
+                ? "\r\n    Query Store is enabled on this database - forcing a known-good plan via Query Store is\r\n    usually safer and more durable than flushing the plan cache."
+                : string.Empty;
+
+            var sql =
+$@"/*
+    Flush a single plan from the plan cache on {instance}.
+
+    Session {SessionID} | Login: {login} | Database: {db}
+
+    This removes ONLY this query's cached plan, so it recompiles on the next execution.
+    It will NOT affect the query that is currently executing.{queryStoreNote}
+
+    You are seeing this script (rather than actioning it directly) because the plan could not be
+    flushed via the DBA Dash service.  To enable flushing from DBA Dash:
+      * Enable 'Allow Plan Forcing' in the DBA Dash service configuration tool (and enable messaging).
+      * Ensure your user is a member of the AllowPlanForcing role (or db_owner) in the repository DB.
+    Otherwise, run the statement below on the source instance yourself (requires ALTER SERVER STATE).
+*/
+DBCC FREEPROCCACHE({planHandle});";
+
+            Common.ShowCodeViewer(sql, "Flush Plan");
+        }
+
+        /// <summary>Neutralise SQL block-comment delimiters so a value can be safely embedded inside a /* ... */ comment.</summary>
+        private static string CommentSafe(string value) =>
+            (value ?? string.Empty).Replace("/*", "/ *").Replace("*/", "* /");
+
+        /// <summary>
+        /// Record the flush request in the repo (audit) before it is sent.  Uses the message group as the key so the
+        /// outcome can be updated on reply.  Only the keys back to the RunningQueries snapshot (plus the plan handle)
+        /// are stored - the session detail is joined from dbo.RunningQueries when the log is read.
+        /// </summary>
+        private async Task LogFlushRequestAsync(Guid messageGroup, string planHandle)
+        {
+            await using var cn = new SqlConnection(Common.ConnectionString);
+            await using var cmd = new SqlCommand("dbo.FlushPlanLog_Add", cn) { CommandType = CommandType.StoredProcedure };
+            cmd.Parameters.AddWithValue("@MessageGroupID", messageGroup);
+            cmd.Parameters.AddWithValue("@InstanceID", InstanceID);
+            cmd.Parameters.AddWithValue("@session_id", SessionID);
+            cmd.Parameters.Add("@SnapshotDate", SqlDbType.DateTime2).Value = SnapshotDateUtc;
+            cmd.Parameters.AddWithValue("@plan_handle", (object)planHandle ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@flushed_by", Environment.UserName);
+            await cn.OpenAsync();
+            await cmd.ExecuteNonQueryAsync();
+        }
+
+        /// <summary>Update the audit record with the outcome of the flush request.</summary>
+        private static async Task UpdateFlushLogAsync(Guid messageGroup, string status)
+        {
+            try
+            {
+                await using var cn = new SqlConnection(Common.ConnectionString);
+                await using var cmd = new SqlCommand("dbo.FlushPlanLog_Upd", cn) { CommandType = CommandType.StoredProcedure };
+                cmd.Parameters.AddWithValue("@MessageGroupID", messageGroup);
+                cmd.Parameters.AddWithValue("@Status", (object)status ?? DBNull.Value);
+                await cn.OpenAsync();
+                await cmd.ExecuteNonQueryAsync();
+            }
+            catch (Exception ex)
+            {
+                // The flush itself has already happened - a failure to record the outcome shouldn't surface as an error.
+                Serilog.Log.Warning(ex, "Failed to update FlushPlanLog for message group {messageGroup}", messageGroup);
             }
         }
 

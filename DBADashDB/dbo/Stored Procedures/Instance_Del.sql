@@ -524,7 +524,10 @@ BEGIN
 	DELETE dbo.KillSessionLog
 	WHERE InstanceID = @InstanceID
 
-	IF EXISTS(SELECT 1 
+	DELETE dbo.FlushPlanLog
+	WHERE InstanceID = @InstanceID
+
+	IF EXISTS(SELECT 1
 			FROM dbo.InstanceMetadataHistory
 			WHERE InstanceID = @InstanceID)
 	BEGIN

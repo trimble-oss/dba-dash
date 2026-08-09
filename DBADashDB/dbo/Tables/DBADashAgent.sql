@@ -13,6 +13,7 @@
 	CreatedDate DATETIME2 NOT NULL CONSTRAINT DF_DBADashAgent_CreatedDate DEFAULT (SYSUTCDATETIME()),
 	ModifiedDate DATETIME2 NOT NULL CONSTRAINT DF_DBADashAgent_ModifiedDate DEFAULT (SYSUTCDATETIME()),
 	KillSessionEnabled BIT NOT NULL CONSTRAINT DF_DBADashAgent_KillSessionEnabled DEFAULT(0),
+	PlanForcingEnabled BIT NOT NULL CONSTRAINT DF_DBADashAgent_PlanForcingEnabled DEFAULT(0),
 	CONSTRAINT PK_DBADashAgent PRIMARY KEY(DBADashAgentID),
 	INDEX IX_DBADashAgent UNIQUE NONCLUSTERED (AgentHostName,AgentServiceName),
 	INDEX IX_DBADashAgent_AgentIdentifier UNIQUE NONCLUSTERED (AgentIdentifier)

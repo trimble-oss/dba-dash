@@ -771,6 +771,8 @@ namespace DBADash
                 ServiceSQSQueueUrl = row.Table.Columns.Contains("ServiceSQSQueueUrl") && row["ServiceSQSQueueUrl"] != DBNull.Value ? (string)row["ServiceSQSQueueUrl"] : null,
                 S3Path = row.Table.Columns.Contains("S3Path") && row["S3Path"] != DBNull.Value ? (string)row["S3Path"] : null,
                 MessagingEnabled = row.Table.Columns.Contains("MessagingEnabled") && row["MessagingEnabled"] != DBNull.Value && (bool)row["MessagingEnabled"],
+                KillSessionEnabled = row.Table.Columns.Contains("KillSessionEnabled") && row["KillSessionEnabled"] != DBNull.Value && (bool)row["KillSessionEnabled"],
+                PlanForcingEnabled = row.Table.Columns.Contains("PlanForcingEnabled") && row["PlanForcingEnabled"] != DBNull.Value && (bool)row["PlanForcingEnabled"],
                 AllowedScriptsCSV = row.Table.Columns.Contains("AllowedScripts") && row["AllowedScripts"] != DBNull.Value ? (string)row["AllowedScripts"] : string.Empty,
                 AllowedCustomProcsCSV = row.Table.Columns.Contains("AllowedCustomProcs") && row["AllowedCustomProcs"] != DBNull.Value ? (string)row["AllowedCustomProcs"] : string.Empty
             };

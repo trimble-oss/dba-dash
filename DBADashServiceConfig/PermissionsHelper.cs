@@ -110,6 +110,10 @@ namespace DBADashServiceConfig
             new PermissionItem(){Name = "CONNECT ANY DATABASE", PermissionState = PermissionItem.PermissionStates.Grant },
             new PermissionItem(){Name = "VIEW ANY DEFINITION", PermissionState = PermissionItem.PermissionStates.Grant},
             new PermissionItem(){Name = "ALTER ANY EVENT SESSION", PermissionState = PermissionItem.PermissionStates.Grant},
+            // Elevated permissions required only by the optional messaging actions - defaulted to a grant below when the
+            // matching feature is enabled on the service (KILL needs ALTER ANY CONNECTION, DBCC FREEPROCCACHE needs ALTER SERVER STATE).
+            new PermissionItem(){Name = "ALTER ANY CONNECTION", PermissionState = PermissionItem.PermissionStates.None},
+            new PermissionItem(){Name = "ALTER SERVER STATE", PermissionState = PermissionItem.PermissionStates.None},
             new PermissionItem(){Name = "SELECT ALL USER SECURABLES", PermissionState = PermissionItem.PermissionStates.None},
             new PermissionItem(){Name = "msdb:db_datareader", PermissionState = PermissionItem.PermissionStates.Grant, PermissionType = PermissionItem.PermissionTypes.DatabaseRole},
             new PermissionItem(){Name = "msdb:SQLAgentReaderRole", PermissionState = PermissionItem.PermissionStates.None, PermissionType = PermissionItem.PermissionTypes.DatabaseRole},
@@ -121,6 +125,16 @@ namespace DBADashServiceConfig
 
         private void LoadGrid()
         {
+            // Default the elevated messaging permissions to a grant when the matching feature is enabled on the service.
+            if (Config.AllowKillSession)
+            {
+                SetPermissionState("ALTER ANY CONNECTION", PermissionItem.PermissionStates.Grant);
+            }
+            if (Config.AllowPlanForcing)
+            {
+                SetPermissionState("ALTER SERVER STATE", PermissionItem.PermissionStates.Grant);
+            }
+
             dgvPermissions.AutoGenerateColumns = false;
             dgvPermissions.Columns.AddRange(new DataGridViewColumn[]
             {
@@ -168,6 +182,15 @@ namespace DBADashServiceConfig
                 }
             };
             dgvPermissions.AutoResizeColumns();
+        }
+
+        private void SetPermissionState(string name, PermissionItem.PermissionStates state)
+        {
+            var item = Permissions.FirstOrDefault(p => p.Name == name);
+            if (item != null)
+            {
+                item.PermissionState = state;
+            }
         }
 
         private string currentDB;

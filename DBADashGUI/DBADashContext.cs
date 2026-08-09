@@ -239,6 +239,13 @@ namespace DBADashGUI
         /// </summary>
         public bool CanKillSession => CanMessage && CollectAgent is { KillSessionEnabled: true };
 
+        /// <summary>
+        /// True when a plan can be flushed / forced via messaging: messaging is available AND the collect agent
+        /// (the service that owns the source connection) has plan forcing enabled.  Note this reflects only the
+        /// service capability - the user must also be in the AllowPlanForcing role to action it.
+        /// </summary>
+        public bool CanFlushPlan => CanMessage && CollectAgent is { PlanForcingEnabled: true };
+
         public bool IsReportAllowed(DirectExecutionReport rpt)
         {
             if (rpt is SystemDirectExecutionReport srpt)
