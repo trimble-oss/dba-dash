@@ -17,6 +17,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Text;
 using System.Windows.Forms;
 
 namespace DBADashGUI.Performance
@@ -511,11 +512,9 @@ namespace DBADashGUI.Performance
 
             var firstPoint = foundPoints.FirstOrDefault();
 
-            // Show hand cursor for clickable blocking points and for deadlock squares (when user has access)
-            chartBlocking.Cursor = firstPoint is not null &&
-                (firstPoint.Context?.Series != _deadlockSeries || HasDeadlockReportAccess)
-                ? Cursors.Hand
-                : Cursors.Default;
+            // Show hand cursor for clickable blocking points and for deadlock squares. Deadlock squares
+            // are clickable even without report access - clicking then explains the missing prerequisites.
+            chartBlocking.Cursor = firstPoint is not null ? Cursors.Hand : Cursors.Default;
         }
 
         private void TsClose_Click(object sender, EventArgs e)
@@ -649,11 +648,14 @@ namespace DBADashGUI.Performance
             await ShowDeadlockReportAsync(DateRange.FromUTC, DateRange.ToUTC);
         }
 
+        private const string CommunityToolsHelpUrl = "https://dbadash.com/docs/help/community-tools/";
+        private const string MessagingHelpUrl = "https://dbadash.com/docs/help/messaging/";
+
         private Task ShowDeadlockReportAsync(DateTime fromUtc, DateTime toUtc)
         {
             if (!HasDeadlockReportAccess)
             {
-                MessageBox.Show("You do not have access to this report.");
+                ShowDeadlockAccessMessage();
                 return Task.CompletedTask;
             }
             var fromInstance = fromUtc.AddMinutes(-CurrentContext.UTCOffset);
@@ -670,6 +672,129 @@ namespace DBADashGUI.Performance
             customParams.Add(new CustomSqlParameter { Param = new SqlParameter("@EndDate", toInstance) { DbType = DbType.DateTime } });
             reportViewer.CustomParams = customParams;
             return reportViewer.ShowDialogAsync();
+        }
+
+        /// <summary>
+        /// Explains why the deadlock (sp_BlitzLock) report can't be opened and offers to open the relevant
+        /// setup documentation. Deadlock details are collected on demand by running sp_BlitzLock on the SQL
+        /// instance via DBA Dash messaging, which requires both the community tools and messaging to be configured.
+        /// </summary>
+        private void ShowDeadlockAccessMessage()
+        {
+            var issues = GetMissingDeadlockRequirements(out var communityToolsIssue, out var messagingIssue);
+
+            var links = new List<string>();
+            if (communityToolsIssue) links.Add(CommunityToolsHelpUrl);
+            if (messagingIssue) links.Add(MessagingHelpUrl);
+            // If we couldn't attribute the problem to a specific area (e.g. report visibility role only),
+            // offer both help pages so the user can review the full setup.
+            if (links.Count == 0)
+            {
+                links.Add(CommunityToolsHelpUrl);
+                links.Add(MessagingHelpUrl);
+            }
+
+            var sb = new StringBuilder();
+            sb.AppendLine("Deadlock details are retrieved on demand by running the sp_BlitzLock community tool on the SQL instance via DBA Dash messaging.");
+            sb.AppendLine();
+            sb.AppendLine("This requires the community tools and messaging to be configured. The following prerequisite(s) are not met:");
+            sb.AppendLine();
+            foreach (var issue in issues)
+            {
+                sb.AppendLine("• " + issue);
+            }
+            sb.AppendLine();
+            sb.AppendLine("See the documentation for setup instructions:");
+            foreach (var link in links)
+            {
+                sb.AppendLine(link);
+            }
+            sb.AppendLine();
+            sb.Append("Would you like to open the documentation now?");
+
+            if (MessageBox.Show(sb.ToString(), "Deadlock Report Unavailable", MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Information) != DialogResult.Yes)
+            {
+                return;
+            }
+
+            foreach (var link in links)
+            {
+                try
+                {
+                    Process.Start(new ProcessStartInfo(link) { UseShellExecute = true });
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Blocking.ShowDeadlockAccessMessage open url error: {ex}");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Builds the list of prerequisites that are missing for viewing the deadlock report and flags whether
+        /// the community tools and/or messaging help pages are relevant.
+        /// </summary>
+        private List<string> GetMissingDeadlockRequirements(out bool communityToolsIssue, out bool messagingIssue)
+        {
+            communityToolsIssue = false;
+            messagingIssue = false;
+            var issues = new List<string>();
+
+            if (CurrentContext == null || CurrentContext.InstanceID <= 0)
+            {
+                issues.Add("Select a single instance - deadlock analysis is not available at this level.");
+                return issues;
+            }
+
+            if (!DeadlockReport.HasAccess())
+            {
+                issues.Add("Your account does not have permission to view the deadlock report. Contact your DBA Dash administrator.");
+            }
+
+            // Messaging: the request to run sp_BlitzLock is sent to the collection service via messaging.
+            if (!DBADashUser.AllowMessaging)
+            {
+                messagingIssue = true;
+                issues.Add("Messaging is not enabled for your account.");
+            }
+            else if (!CurrentContext.CanMessage)
+            {
+                messagingIssue = true;
+                issues.Add("Messaging is not enabled on the DBA Dash service(s). Both the collection and import services must have messaging enabled.");
+            }
+
+            // Community tools: sp_BlitzLock must be enabled for your account and allowed on the collection service.
+            if (!DBADashUser.CommunityScripts)
+            {
+                communityToolsIssue = true;
+                issues.Add("Community tools are not enabled for your account.");
+            }
+            else
+            {
+                try
+                {
+                    var collectAgent = CurrentContext.CollectAgent;
+                    if (collectAgent != null && !collectAgent.IsAllowAllScripts &&
+                        !collectAgent.AllowedScripts.Contains("sp_BlitzLock"))
+                    {
+                        communityToolsIssue = true;
+                        issues.Add("sp_BlitzLock is not in the list of community scripts allowed for the collection service.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Blocking.GetMissingDeadlockRequirements error: {ex}");
+                }
+            }
+
+            if (issues.Count == 0)
+            {
+                // Fallback in case a condition wasn't attributed above - keep the message useful.
+                issues.Add("One or more prerequisites for the deadlock report are not met.");
+            }
+
+            return issues;
         }
 
         private bool HasDeadlockReportAccess => CurrentContext != null &&
