@@ -582,6 +582,8 @@ namespace DBADash
                 new DataColumn("ServiceSQSQueueUrl",typeof(string)),
                 new DataColumn("S3Path",typeof(string)),
                 new DataColumn("MessagingEnabled", typeof(bool)),
+                new DataColumn("KillSessionEnabled", typeof(bool)),
+                new DataColumn("PlanForcingEnabled", typeof(bool)),
                 new DataColumn("AllowedScripts", typeof(string)),
                 new DataColumn("AllowedCustomProcs",typeof(string))
             });
@@ -595,6 +597,8 @@ namespace DBADash
             dt.Rows[0]["AgentPath"] = dashAgent.AgentPath;
             dt.Rows[0]["ServiceSQSQueueUrl"] = dashAgent.ServiceSQSQueueUrl;
             dt.Rows[0]["MessagingEnabled"] = dashAgent.MessagingEnabled;
+            dt.Rows[0]["KillSessionEnabled"] = dashAgent.KillSessionEnabled;
+            dt.Rows[0]["PlanForcingEnabled"] = dashAgent.PlanForcingEnabled;
             dt.Rows[0]["AllowedScripts"] = dashAgent.AllowedScripts == null || dashAgent.AllowedScripts.Count == 0
                 ? DBNull.Value
                 : string.Join(',', dashAgent.AllowedScripts);

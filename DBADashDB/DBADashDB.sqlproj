@@ -803,6 +803,10 @@
     <Build Include="dbo\Stored Procedures\KillSessionLog_Upd.sql" />
     <Build Include="dbo\Stored Procedures\KillSessionLog_Get.sql" />
     <Build Include="dbo\Stored Procedures\KillSessionLog_IsKilled.sql" />
+    <Build Include="dbo\Tables\FlushPlanLog.sql" />
+    <Build Include="dbo\Stored Procedures\FlushPlanLog_Add.sql" />
+    <Build Include="dbo\Stored Procedures\FlushPlanLog_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\FlushPlanLog_Get.sql" />
     <Build Include="dbo\Stored Procedures\RunningQueriesSessionLatestSnapshot_Get.sql" />
     <Build Include="dbo\Stored Procedures\PlanForcingLog_Add.sql" />
     <Build Include="dbo\Stored Procedures\PlanForcingLog_Get.sql" />

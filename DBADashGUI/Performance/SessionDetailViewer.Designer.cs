@@ -30,6 +30,7 @@ namespace DBADashGUI.Performance
         {
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             tsPlan = new System.Windows.Forms.ToolStripButton();
+            tsFlushPlan = new System.Windows.Forms.ToolStripButton();
             tsJobInfo = new System.Windows.Forms.ToolStripButton();
             tsKill = new System.Windows.Forms.ToolStripButton();
             tsLatest = new System.Windows.Forms.ToolStripButton();
@@ -45,7 +46,7 @@ namespace DBADashGUI.Performance
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsBack, tsLatest, tsCollectNow, tsPlan, tsJobInfo, tsKill });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsBack, tsLatest, tsCollectNow, tsPlan, tsFlushPlan, tsJobInfo, tsKill });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new System.Drawing.Size(1000, 27);
@@ -58,7 +59,17 @@ namespace DBADashGUI.Performance
             tsPlan.Size = new System.Drawing.Size(61, 24);
             tsPlan.Text = "Plan";
             tsPlan.Click += TsPlan_Click;
-            // 
+            //
+            // tsFlushPlan
+            //
+            tsFlushPlan.Image = Properties.Resources.Eraser_16x;
+            tsFlushPlan.Name = "tsFlushPlan";
+            tsFlushPlan.Size = new System.Drawing.Size(80, 24);
+            tsFlushPlan.Text = "Flush Plan";
+            tsFlushPlan.ToolTipText = "Remove this query's plan from the plan cache on the source instance (DBCC FREEPROCCACHE).";
+            tsFlushPlan.Visible = false;
+            tsFlushPlan.Click += TsFlushPlan_Click;
+            //
             // tsJobInfo
             // 
             tsJobInfo.Image = Properties.Resources.Information_blue_6227_16x16;
@@ -158,6 +169,7 @@ namespace DBADashGUI.Performance
 
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripButton tsPlan;
+        private System.Windows.Forms.ToolStripButton tsFlushPlan;
         private System.Windows.Forms.ToolStripButton tsJobInfo;
         private System.Windows.Forms.ToolStripButton tsKill;
         private System.Windows.Forms.ToolStripButton tsLatest;
