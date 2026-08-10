@@ -1018,10 +1018,18 @@ namespace DBADashGUI
 
         private async void MnuRootRefresh_Click(object sender, EventArgs e)
         {
-            await AddInstancesAsync();
+            // Explicit user-initiated refresh - invalidate cached state so agent
+            // settings and custom report changes are picked up.
+            await AddInstancesAsync(forceRefresh: true);
         }
 
-        private async Task AddInstancesAsync(CancellationToken token = default)
+        /// <param name="forceRefresh">
+        /// When true, drops cached server/agent state and reloads custom report definitions
+        /// from the database. This should only be set for explicit refresh actions - not for
+        /// re-grouping, filtering or search, which rebuild the tree from already-cached data.
+        /// (Connection changes clear the cache separately via Common.SetConnectionString.)
+        /// </param>
+        private async Task AddInstancesAsync(CancellationToken token = default, bool forceRefresh = false)
         {
             // Back-compat wrapper - calls the cache-aware implementation when
             // a cache is present.
@@ -1030,6 +1038,16 @@ namespace DBADashGUI
             VisitedNodes.Clear();
             tsBack.Enabled = false;
             tv1.Nodes.Clear();
+
+            if (forceRefresh)
+            {
+                // Drop cached server state (agent settings such as Allow Kill Session, the counter
+                // list and metric drives) so a refresh picks up changes without restarting the app.
+                CommonData.ClearCache();
+
+                // Reload custom report definitions so new/edited reports appear without restarting.
+                customReports = CustomReports.CustomReports.GetCustomReports(true);
+            }
 
             // Build tree using shared helper
             await CommonData.UpdateInstancesListAsync(tagIDs: string.Join(",", SelectedTags()), searchString: SearchString, groupByTag: GroupByTag, token: token);
