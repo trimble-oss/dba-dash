@@ -1,10 +1,12 @@
 ﻿using CommandLine;
 using DBADash.Alert;
+using DBADashGUI.Pickers;
 using Microsoft.Data.SqlClient;
 using Newtonsoft.Json;
 using System;
 using System.ComponentModel;
 using System.Data;
+using System.Drawing.Design;
 using System.Linq;
 
 namespace DBADashGUI.DBADashAlerts.Rules
@@ -131,8 +133,10 @@ namespace DBADashGUI.DBADashAlerts.Rules
         public virtual decimal? Threshold { get; set; }
 
         [JsonIgnore]
-        [Description("Evaluation period to apply the threshold over in minutes")]
-        [DisplayName("Evaluation Period (Mins)")]
+        [Description("Evaluation period to apply the threshold over. Enter days / hours / minutes.")]
+        [DisplayName("Evaluation Period")]
+        [TypeConverter(typeof(MinuteDurationConverter))]
+        [Editor(typeof(MinuteDurationEditor), typeof(UITypeEditor))]
         public virtual int? EvaluationPeriodMins { get; set; } = 5;
 
         [Description("Set to false to disable this rule")]

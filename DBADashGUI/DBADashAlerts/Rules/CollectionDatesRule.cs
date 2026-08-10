@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel;
+using System.Drawing.Design;
+using DBADashGUI.Pickers;
 
 namespace DBADashGUI.DBADashAlerts.Rules
 {
@@ -15,7 +17,9 @@ namespace DBADashGUI.DBADashAlerts.Rules
 
         public override string AlertKey => "COLLECTION DATES";
 
-        [Description("Set a threshold in minutes or leave blank to rely on critical status only")]
+        [Description("Alert when the collection is older than this. Enter days / hours / minutes, or leave blank to rely on critical status only.")]
+        [TypeConverter(typeof(MinuteDurationConverter))]
+        [Editor(typeof(NullableMinuteDurationEditor), typeof(UITypeEditor))]
         public override decimal? Threshold { get; set; }
 
         [Description("Use the critical threshold already configured. This can be used instead of specifying an alert threshold or in combination with an additional threshold.")]

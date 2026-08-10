@@ -1,4 +1,6 @@
 using System.ComponentModel;
+using System.Drawing.Design;
+using DBADashGUI.Pickers;
 
 namespace DBADashGUI.DBADashAlerts.Rules
 {
@@ -8,8 +10,10 @@ namespace DBADashGUI.DBADashAlerts.Rules
 
         public override string AlertKey => "FailedLogins";
 
-        [Description("Evaluation period to apply the threshold over in minutes")]
-        [DisplayName("Evaluation Period (Mins)")]
+        [Description("Evaluation period to apply the threshold over. Enter days / hours / minutes.")]
+        [DisplayName("Evaluation Period")]
+        [TypeConverter(typeof(MinuteDurationConverter))]
+        [Editor(typeof(MinuteDurationEditor), typeof(UITypeEditor))]
         public override int? EvaluationPeriodMins { get; set; } = 60;
 
         public override (bool isValid, string message) Validate()
