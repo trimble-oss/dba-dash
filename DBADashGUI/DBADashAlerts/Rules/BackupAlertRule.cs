@@ -1,6 +1,8 @@
 using System.ComponentModel;
 using System;
+using System.Drawing.Design;
 using System.Linq;
+using DBADashGUI.Pickers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
@@ -99,8 +101,10 @@ namespace DBADashGUI.DBADashAlerts.Rules
             set;
         }
 
-        [DisplayName("Age Threshold (Mins)")]
-        [Description("When Alert Mode is AgeSinceLastBackup, alert when the selected backup is older than this threshold in minutes.")]
+        [DisplayName("Age Threshold")]
+        [Description("When Alert Mode is AgeSinceLastBackup, alert when the selected backup is older than this threshold. Enter days / hours / minutes.")]
+        [TypeConverter(typeof(MinuteDurationConverter))]
+        [Editor(typeof(MinuteDurationEditor), typeof(UITypeEditor))]
         public override decimal? Threshold
         {
             get => AlertMode == AlertModes.AgeSinceLastBackup ? field ?? DefaultThreshold : null;
@@ -118,7 +122,7 @@ namespace DBADashGUI.DBADashAlerts.Rules
             {
                 if (Threshold is not (>= 0M))
                 {
-                    return (false, "Age Threshold (Mins) must be >= 0");
+                    return (false, "Age Threshold must be >= 0");
                 }
             }
 
