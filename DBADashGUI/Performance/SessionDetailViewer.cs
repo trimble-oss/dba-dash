@@ -1018,6 +1018,12 @@ DBCC FREEPROCCACHE({planHandle});";
             var pageType = RowStr("page_type");
             var isAllocationPage = pageType is "PFS" or "GAM" or "SGAM";
 
+            // Cases where the RCSI recommendation shouldn't be shown even when there is reader/writer blocking:
+            //  - allocation-page latch contention (see above) - RCSI only relieves row/key lock blocking
+            //  - system databases (master/model/msdb/tempdb) - RCSI there is managed by SQL Server and shouldn't be changed
+            //  - the blocking is a compile lock (serialized plan compilation) - RCSI has no effect on it
+            var rcsiNotApplicable = isAllocationPage || IsSystemDatabase() || RowBool("wait_is_compile") == true;
+
             // The current wait time for this query.  A longer wait is a stronger signal, so it feeds both the wording and the severity.
             // The point at which a wait becomes "critical" depends on the wait type (see WaitSeverity thresholds).
             var waitMs = RowDouble("wait_time");
@@ -1037,7 +1043,7 @@ DBCC FREEPROCCACHE({planHandle});";
                 // Read Committed read), and when this query is blocked by a reader (the blocker is a Read Committed
                 // read that under RCSI wouldn't take shared locks) - so a writer blocked by a SELECT/CONDITIONAL qualifies too.
                 var thisQueryIsBlockedReader = IsReadingCommand() && IsReadCommittedIsolation();
-                if ((thisQueryIsBlockedReader || IsBlockedByReadCommittedReader) && rcsiEnabled != true && !isAllocationPage)
+                if ((thisQueryIsBlockedReader || IsBlockedByReadCommittedReader) && rcsiEnabled != true && !rcsiNotApplicable)
                 {
                     list.Add(RcsiInsight());
                 }
@@ -1057,7 +1063,7 @@ DBCC FREEPROCCACHE({planHandle});";
                 }
 
                 // The RCSI advice depends on the blocked victims being readers
-                if (BlockedReaderPeerCount > 0 && rcsiEnabled != true && !isAllocationPage)
+                if (BlockedReaderPeerCount > 0 && rcsiEnabled != true && !rcsiNotApplicable)
                 {
                     list.Add(RcsiInsight());
                 }
@@ -1350,6 +1356,18 @@ DBCC FREEPROCCACHE({planHandle});";
             var ms = RowDouble("BlockWaitTimeRecursiveMs");
             var human = HumanizeMs(ms);
             return human == null ? string.Empty : $" for a total of {human}";
+        }
+
+        /// <summary>
+        /// True when the session's database is a system database (master/model/msdb/tempdb). RCSI advice is
+        /// suppressed for these - their isolation behaviour is managed by SQL Server and shouldn't be reconfigured.
+        /// </summary>
+        private bool IsSystemDatabase()
+        {
+            var dbId = RowInt("database_id");
+            if (dbId is >= 1 and <= 4) return true; // master=1, tempdb=2, model=3, msdb=4
+            var dbName = RowStr("database_name").ToLowerInvariant();
+            return dbName is "master" or "model" or "msdb" or "tempdb";
         }
 
         private bool IsTempDbWait() =>
