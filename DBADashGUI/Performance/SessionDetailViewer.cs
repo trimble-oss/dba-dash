@@ -1358,6 +1358,9 @@ DBCC FREEPROCCACHE({planHandle});";
             return human == null ? string.Empty : $" for a total of {human}";
         }
 
+        private static readonly HashSet<string> SystemDatabaseNames =
+            new(StringComparer.OrdinalIgnoreCase) { "master", "model", "msdb", "tempdb" };
+
         /// <summary>
         /// True when the session's database is a system database (master/model/msdb/tempdb). RCSI advice is
         /// suppressed for these - their isolation behaviour is managed by SQL Server and shouldn't be reconfigured.
@@ -1366,8 +1369,7 @@ DBCC FREEPROCCACHE({planHandle});";
         {
             var dbId = RowInt("database_id");
             if (dbId is >= 1 and <= 4) return true; // master=1, tempdb=2, model=3, msdb=4
-            var dbName = RowStr("database_name").ToLowerInvariant();
-            return dbName is "master" or "model" or "msdb" or "tempdb";
+            return SystemDatabaseNames.Contains(RowStr("database_name"));
         }
 
         private bool IsTempDbWait() =>
