@@ -527,6 +527,18 @@ BEGIN
 	DELETE dbo.FlushPlanLog
 	WHERE InstanceID = @InstanceID
 
+	DELETE E
+	FROM dbo.XETraceEvent E
+	WHERE EXISTS(
+				SELECT 1
+				FROM dbo.XETraceSession S
+				WHERE S.InstanceID = @InstanceID
+				AND S.XETraceSessionID = E.XETraceSessionID
+				)
+
+	DELETE dbo.XETraceSession
+	WHERE InstanceID = @InstanceID
+
 	IF EXISTS(SELECT 1
 			FROM dbo.InstanceMetadataHistory
 			WHERE InstanceID = @InstanceID)

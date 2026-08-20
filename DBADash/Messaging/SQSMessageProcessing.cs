@@ -250,6 +250,13 @@ namespace DBADash.Messaging
                         ResponseMessage.ResponseTypes.Failure, "Message Cancelled").ConfigureAwait(false);
                     return;
                 }
+                if (msg is HeartbeatMessage heartbeatMessage) // Process heartbeat immediately - a keep-alive must not wait for the semaphore
+                {
+                    await heartbeatMessage.Process(Config, handle, CancellationToken.None);
+                    await SendReplyMessage(DBADashAgentIdentifier, handle, destinationConnectionHash, replySQS, replyAgent,
+                        ResponseMessage.ResponseTypes.Success, "Heartbeat").ConfigureAwait(false);
+                    return;
+                }
                 using var semaphore = await _semaphores.LockOrNullAsync(destinationConnectionHash, msg.SemaphoreTimeout);
                 if (semaphore is null) // Semaphore used to limit concurrent processing per connection
                 {

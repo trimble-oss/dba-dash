@@ -67,6 +67,9 @@
     <Compile Update="WebView2Wrapper.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Update="Pickers\DurationDropDown.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>

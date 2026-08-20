@@ -1,6 +1,7 @@
 using DBADashGUI.Theme;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
@@ -65,6 +66,10 @@ namespace DBADashGUI.CustomReports
 
         public bool IncludeCount => chkIncludeCount.Checked;
         public bool IncludePercentOfTotal => chkPercentOfTotal.Checked;
+
+        /// <summary>Initial state of the "Count % of Total" checkbox (lets a host default it on).</summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool DefaultCountPercentOfTotal { get => chkPercentOfTotal.Checked; set => chkPercentOfTotal.Checked = value; }
 
         public List<GroupByColumnConfig> Columns { get; private set; }
 
@@ -155,6 +160,8 @@ namespace DBADashGUI.CustomReports
             dgv.DataSource = dtConfig;
             dgv.CellValueChanged += Dgv_CellValueChanged;
             dgv.CurrentCellDirtyStateChanged += Dgv_CurrentCellDirtyStateChanged;
+            dgv.CellMouseDown += Dgv_CellMouseDown;
+            dgv.ContextMenuStrip = BuildGridContextMenu();
 
             AcceptButton = btnOK;
             CancelButton = btnCancel;
@@ -285,6 +292,91 @@ namespace DBADashGUI.CustomReports
             UpdateAggregationColumnReadOnly();
             this.ApplyTheme();
         }
+
+        // ---- Context menu: bulk check/uncheck aggregations ---------------------------------------
+
+        // The cell the context menu was opened on (rows = source columns, columns = aggregation types).
+        private int _ctxRowIndex = -1;
+        private int _ctxColIndex = -1;
+
+        // Aggregation columns in the config DataTable (order matches the DGV aggregation columns).
+        private static readonly int[] DtAggregationCols =
+            { DtColCountDistinct, DtColSum, DtColSumPercent, DtColAvg, DtColMin, DtColMax };
+
+        private void Dgv_CellMouseDown(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Right) return;
+            _ctxRowIndex = e.RowIndex;
+            _ctxColIndex = e.ColumnIndex;
+        }
+
+        private ContextMenuStrip BuildGridContextMenu()
+        {
+            var menu = new ContextMenuStrip();
+            var selRow = new ToolStripMenuItem("Select all aggregations (row)", null, (_, _) => SetRowAggregations(_ctxRowIndex, true));
+            var clrRow = new ToolStripMenuItem("Clear all aggregations (row)", null, (_, _) => SetRowAggregations(_ctxRowIndex, false));
+            var selCol = new ToolStripMenuItem("Select aggregation (all rows)", null, (_, _) => SetColumnAggregation(_ctxColIndex, true));
+            var clrCol = new ToolStripMenuItem("Clear aggregation (all rows)", null, (_, _) => SetColumnAggregation(_ctxColIndex, false));
+            var selAll = new ToolStripMenuItem("Select all aggregations (grid)", null, (_, _) => SetAllAggregations(true));
+            var clrAll = new ToolStripMenuItem("Clear all aggregations (grid)", null, (_, _) => SetAllAggregations(false));
+            menu.Items.AddRange(new ToolStripItem[]
+            {
+                selRow, clrRow, new ToolStripSeparator(),
+                selCol, clrCol, new ToolStripSeparator(),
+                selAll, clrAll
+            });
+
+            menu.Opening += (_, _) =>
+            {
+                var rowValid = _ctxRowIndex >= 0;
+                selRow.Enabled = clrRow.Enabled = rowValid;
+
+                var colValid = _ctxColIndex is >= DgvColCountDistinct and <= DgvColMax;
+                selCol.Enabled = clrCol.Enabled = colValid;
+                var aggName = colValid ? dgv.Columns[_ctxColIndex].HeaderText : null;
+                selCol.Text = colValid ? $"Select '{aggName}' (all rows)" : "Select aggregation (all rows)";
+                clrCol.Text = colValid ? $"Clear '{aggName}' (all rows)" : "Clear aggregation (all rows)";
+            };
+            return menu;
+        }
+
+        private void SetRowAggregations(int dgvRowIndex, bool value)
+        {
+            if (dgvRowIndex < 0 || dgvRowIndex >= dgv.Rows.Count) return;
+            var row = GetDataRow(dgvRowIndex);
+            foreach (var c in DtAggregationCols) row[c] = value;
+            // Re-run applicability so aggregations that don't apply (non-numeric, group key, ...) are pruned back off.
+            UpdateAggregationColumnReadOnly();
+            dgv.Refresh();
+        }
+
+        private void SetColumnAggregation(int dgvColIndex, bool value)
+        {
+            var dtCol = DgvAggregationColumnToDt(dgvColIndex);
+            if (dtCol < 0) return;
+            foreach (DataRow r in dtConfig.Rows) r[dtCol] = value;
+            UpdateAggregationColumnReadOnly();
+            dgv.Refresh();
+        }
+
+        private void SetAllAggregations(bool value)
+        {
+            foreach (DataRow r in dtConfig.Rows)
+                foreach (var c in DtAggregationCols) r[c] = value;
+            UpdateAggregationColumnReadOnly();
+            dgv.Refresh();
+        }
+
+        private static int DgvAggregationColumnToDt(int dgvCol) => dgvCol switch
+        {
+            DgvColCountDistinct => DtColCountDistinct,
+            DgvColSum => DtColSum,
+            DgvColSumPercent => DtColSumPercent,
+            DgvColAvg => DtColAvg,
+            DgvColMin => DtColMin,
+            DgvColMax => DtColMax,
+            _ => -1
+        };
 
         private void Dgv_CurrentCellDirtyStateChanged(object sender, EventArgs e)
         {

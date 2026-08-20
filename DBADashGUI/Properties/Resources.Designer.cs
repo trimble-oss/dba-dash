@@ -473,6 +473,26 @@ namespace DBADashGUI.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Event_594 {
+            get {
+                object obj = ResourceManager.GetObject("Event_594", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap EventLog_16x {
+            get {
+                object obj = ResourceManager.GetObject("EventLog_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap excel16x16 {
             get {
                 object obj = ResourceManager.GetObject("excel16x16", resourceCulture);
@@ -586,6 +606,16 @@ namespace DBADashGUI.Properties {
         internal static System.Drawing.Bitmap HighlightHS {
             get {
                 object obj = ResourceManager.GetObject("HighlightHS", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap history {
+            get {
+                object obj = ResourceManager.GetObject("history", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -992,9 +1022,39 @@ namespace DBADashGUI.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap StartLog_16x {
+            get {
+                object obj = ResourceManager.GetObject("StartLog_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap StartTime_16x {
             get {
                 object obj = ResourceManager.GetObject("StartTime_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap StatusAnnotations_Play_32xLG_color {
+            get {
+                object obj = ResourceManager.GetObject("StatusAnnotations_Play_32xLG_color", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap StatusAnnotations_Stop_32xLG_color {
+            get {
+                object obj = ResourceManager.GetObject("StatusAnnotations_Stop_32xLG_color", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -1045,6 +1105,16 @@ namespace DBADashGUI.Properties {
         internal static System.Drawing.Bitmap StopFilter_16x {
             get {
                 object obj = ResourceManager.GetObject("StopFilter_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap StopLog_16x {
+            get {
+                object obj = ResourceManager.GetObject("StopLog_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -1145,6 +1215,16 @@ namespace DBADashGUI.Properties {
         internal static System.Drawing.Bitmap VBReport_16x {
             get {
                 object obj = ResourceManager.GetObject("VBReport_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Watch_16x {
+            get {
+                object obj = ResourceManager.GetObject("Watch_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

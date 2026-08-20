@@ -119,7 +119,25 @@ namespace DBADash.Messaging
             }
         }
 
-        public byte[] Serialize() => Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(this, Formatting.Indented)).Compress();
+        public byte[] Serialize()
+        {
+            // Diagnostics (Debug): split JSON serialize vs gzip and log the payload sizes.  Off by default, so no
+            // per-reply noise; enable Debug when profiling a large payload (e.g. the XE "view data" reply).
+            if (!Log.IsEnabled(Serilog.Events.LogEventLevel.Debug))
+            {
+                return Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(this, Formatting.Indented)).Compress();
+            }
+
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            var json = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(this, Formatting.Indented));
+            var jsonMs = sw.ElapsedMilliseconds;
+            sw.Restart();
+            var compressed = json.Compress();
+            Log.Debug(
+                "ResponseMessage.Serialize ({type}): json {jsonBytes} bytes in {jsonMs}ms, gzip {gzipBytes} bytes in {gzipMs}ms",
+                Type, json.Length, jsonMs, compressed.Length, sw.ElapsedMilliseconds);
+            return compressed;
+        }
 
         public static ResponseMessage Deserialize(byte[] compressedData)
         {

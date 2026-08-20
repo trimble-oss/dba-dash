@@ -229,7 +229,9 @@ namespace DBADashGUI
             TuningRecommendations,
             PoolsAndGroups,
             DatabaseExtendedProperties,
-            AIAssistant
+            AIAssistant,
+            ExtendedEvents,
+            AdhocTrace
         }
 
         private static readonly List<Main.Tabs> InstanceOnlyTabs = new() { Main.Tabs.PerformanceSummary, Tabs.Metrics, Tabs.Waits, Tabs.Memory, Tabs.RunningQueries };
@@ -259,12 +261,17 @@ namespace DBADashGUI
         private TabPage tabDatabaseExtendedProperties;
         private TabPage tabAIAssistant;
         private AIAssistantControl aiAssistantControl;
+        private TabPage tabExtendedEvents;
+        private TabPage tabAdhocTrace;
 
         public Main(CommandLineOptions opts)
         {
             Application.AddMessageFilter(this);
             FormClosed += (s, e) => Application.RemoveMessageFilter(this);
             InitializeComponent();
+            // Append the Extended Events node icon to the tree image list (index 32).  The designer-serialized
+            // ImageStream holds indexes 0-31; adding here keeps the icon without re-serializing that blob.
+            TreeViewImageList.Images.Add("EventLog_16x.png", Properties.Resources.EventLog_16x);
             // Ensure cancel button is hidden until a cancellable connection attempt is in progress
             bttnCancel.InvokeSetEnabled(false);
             WindowState = FormWindowState.Maximized;
@@ -329,6 +336,12 @@ namespace DBADashGUI
             tabAIAssistant = new TabPage("AI Assistant") { Name = Tabs.AIAssistant.TabName() };
             aiAssistantControl = new AIAssistantControl { Dock = DockStyle.Fill };
             tabAIAssistant.Controls.Add(aiAssistantControl);
+
+            tabExtendedEvents = new TabPage("Extended Events") { Name = Tabs.ExtendedEvents.TabName() };
+            tabExtendedEvents.Controls.Add(new XETrace.ExtendedEventsViewer { Dock = DockStyle.Fill });
+
+            tabAdhocTrace = new TabPage("Ad-hoc Trace") { Name = Tabs.AdhocTrace.TabName() };
+            tabAdhocTrace.Controls.Add(new XETrace.QuickXETrace { Dock = DockStyle.Fill });
         }
 
         public TabPage GetCommunityToolsTabPage(ProcedureExecutionMessage.CommunityProcs proc)
@@ -1098,6 +1111,15 @@ namespace DBADashGUI
             var jobs = new SQLTreeItem("Jobs", SQLTreeItem.TreeType.AgentJobs) { InstanceID = instanceNode.InstanceID };
             jobs.AddDummyNode();
             nodesToAdd.Add(jobs);
+
+            // Extended Events: list / start / stop / watch the instance's existing XE sessions.  Requires messaging
+            // and the ManageXE permission (managing arbitrary user sessions is gated separately from ad-hoc trace).
+            if (instanceNode.Context.CanMessage && DBADashUser.AllowManageXE)
+            {
+                nodesToAdd.Add(new SQLTreeItem("Extended Events", SQLTreeItem.TreeType.ExtendedEvents)
+                { InstanceID = instanceNode.InstanceID });
+            }
+
             instanceNode.Nodes.AddRange(nodesToAdd.ToArray());
             instanceNode.AddReportsFolder(customReports.InstanceLevelReports);
             instanceNode.AddCommunityTools();
@@ -1285,6 +1307,11 @@ namespace DBADashGUI
             else if (n.Type == SQLTreeItem.TreeType.HADR)
             {
                 allowedTabs.AddRange(new[] { tabBackups, tabLogShipping, tabMirroring, tabAG });
+            }
+            else if (n.Type == SQLTreeItem.TreeType.ExtendedEvents)
+            {
+                allowedTabs.Add(tabExtendedEvents);
+                allowedTabs.Add(tabAdhocTrace);
             }
             else if (n.Type == SQLTreeItem.TreeType.DBAChecks)
             {
@@ -2000,6 +2027,11 @@ namespace DBADashGUI
                         case Tabs.Jobs or Tabs.RunningJobs or Tabs.JobTimeline or Tabs.JobStats:
                             selectedNode.Expand();
                             selectedNode = nInstance.FindChildOfType(SQLTreeItem.TreeType.AgentJobs);
+                            break;
+
+                        case Tabs.ExtendedEvents or Tabs.AdhocTrace:
+                            selectedNode.Expand();
+                            selectedNode = nInstance.FindChildOfType(SQLTreeItem.TreeType.ExtendedEvents);
                             break;
 
                         case Tabs.AzureSummary or Tabs.Performance or Tabs.Metrics or Tabs.PerformanceSummary or Tabs.SlowQueries or Tabs.Waits or Tabs.Memory or Tabs.ObjectExecutionSummary or Tabs.TopQueries or Tabs.QueryStoreForcedPlans:

@@ -202,6 +202,26 @@ BEGIN
 	PRINT 'Skipping OfflineInstances (Ran withing last 24hrs)'
 END
 
+/* Remove old ad-hoc XE traces.  Run once per day */
+UPDATE dbo.Settings
+	SET SettingValue = GETUTCDATE()
+WHERE SettingName = 'PurgeXETrace_StartDate'
+AND SettingValue < DATEADD(d,-1,GETUTCDATE())
+
+IF @@ROWCOUNT =1 OR @Force=1
+BEGIN
+	PRINT 'Cleanup XETrace'
+	EXEC dbo.PurgeXETrace
+
+	UPDATE dbo.Settings
+		SET SettingValue = GETUTCDATE()
+	WHERE SettingName = 'PurgeXETrace_CompletedDate'
+END
+ELSE
+BEGIN
+	PRINT 'Skipping XETrace (Ran withing last 24hrs)'
+END
+
 /* Service Broker Cleanup */
 EXEC Messaging.Cleanup
 

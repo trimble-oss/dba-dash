@@ -107,6 +107,27 @@ namespace DBADashGUI.Messaging
             }
         }
 
+        /// <summary>
+        /// Sends a single heartbeat for a running long-lived operation (an ad-hoc XE trace or a watch), telling the
+        /// service the client is still alive so it doesn't stop the operation.  Targets the operation by
+        /// <paramref name="messageGroup"/> (its message id), not by conversation, so - like a cancellation - it goes on
+        /// a <b>fresh</b> conversation group with no-op callbacks and drains its own reply, never touching the
+        /// operation's own UI status or reply loop.
+        /// </summary>
+        public static async Task SendHeartbeatAsync(DBADashContext context, Guid messageGroup)
+        {
+            if (messageGroup == Guid.Empty || context.ImportAgentID == null) return;
+            var msg = new HeartbeatMessage
+            {
+                CollectAgent = context.CollectAgent,
+                ImportAgent = context.ImportAgent,
+                Lifetime = 60,
+                TraceMessageId = messageGroup
+            };
+            await SendMessageAndProcessReply(msg, (int)context.ImportAgentID,
+                (_, _, _) => { }, (_, _, _) => Task.CompletedTask, Guid.NewGuid());
+        }
+
         public static async Task ForceQueryPlan(DBADashContext context, string db, QueryStorePlanForcingMessage.PlanForcingOperations operation, long queryId, long planId, string objectName, string text, byte[] queryHash, byte[] planHash, string notes, ToolStripStatusLabel lbl, MessagingHelper.MessageCompletedDelegate dCompletedDelegate)
         {
             if (!DBADashUser.AllowPlanForcing)

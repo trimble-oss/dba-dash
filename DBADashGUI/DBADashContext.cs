@@ -246,6 +246,27 @@ namespace DBADashGUI
         /// </summary>
         public bool CanFlushPlan => CanMessage && CollectAgent is { PlanForcingEnabled: true };
 
+        /// <summary>
+        /// The hard cap (seconds) the collect agent's service applies to ad-hoc XE trace / watch durations.  The GUI
+        /// uses this to warn about / clamp a requested duration up-front.  Falls back to the built-in default when the
+        /// collect agent is unknown or is running an older version that doesn't report it.
+        /// </summary>
+        public int AdhocXEMaxDurationSeconds =>
+            CollectAgent?.AdhocXEMaxDurationSeconds ?? CollectionConfig.DefaultAdhocXEMaxDurationSeconds;
+
+        /// <summary>
+        /// True when the collect agent may <b>start/stop</b> the named XE session.  Reflects only the service-side
+        /// policy (the collect agent's ManageXESessions list); the user must also hold the ManageXE permission
+        /// (<see cref="DBADashUser.AllowManageXE"/>).  When the agent hasn't advertised a policy (older service) the
+        /// attempt is allowed and the service enforces it (with clear feedback), so the GUI doesn't over-restrict.
+        /// </summary>
+        public bool CanManageXESession(string sessionName) =>
+            CanMessage && CollectAgent is { } a && a.CanManageXESession(sessionName);
+
+        /// <summary>True when the collect agent may <b>watch</b> the named XE session (service-side policy only).</summary>
+        public bool CanWatchXESession(string sessionName) =>
+            CanMessage && CollectAgent is { } a && a.CanWatchXESession(sessionName);
+
         public bool IsReportAllowed(DirectExecutionReport rpt)
         {
             if (rpt is SystemDirectExecutionReport srpt)
