@@ -27,6 +27,13 @@ namespace DBADash.Messaging
         protected Task ReportProgressAsync(ResponseMessage progress) =>
             ProgressReporter?.Invoke(progress) ?? Task.CompletedTask;
 
+        /// <summary>
+        /// When true the message is processed without acquiring the shared message-processing semaphore, so a
+        /// long-running message (e.g. an ad-hoc XE trace that can run for minutes) doesn't tie up one of the
+        /// limited message threads.  Such messages are responsible for bounding their own concurrency.
+        /// </summary>
+        [JsonIgnore] public virtual bool RunOutsideConcurrencyLimit => false;
+
         public abstract Task<DataSet> Process(CollectionConfig cfg, Guid handle, CancellationToken cancellationToken);
 
         /// <summary>

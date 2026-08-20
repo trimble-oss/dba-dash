@@ -20,6 +20,17 @@ namespace DBADashGUI
         {
             InitializeComponent();
             dgvSummary.ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing();
+            tsSummary.Items.Add(adhocTraceButton);
+            adhocTraceButton.Click += AdhocTrace_Click;
+        }
+
+        // Launches an ad-hoc XE trace for the current instance.  Added in code (gated on the XETrace role) rather
+        // than the designer so it only appears for permitted users at instance level.
+        private readonly ToolStripButton adhocTraceButton = new("Ad-hoc Trace...") { Visible = false, Alignment = ToolStripItemAlignment.Right };
+
+        private void AdhocTrace_Click(object sender, EventArgs e)
+        {
+            XETrace.XETraceLauncher.LaunchAdhocTrace(this, CurrentContext);
         }
 
         private DBADashContext CurrentContext;
@@ -323,6 +334,7 @@ namespace DBADashGUI
             resourcePoolToolStripMenuItem.Visible = _context.HasResourceGovernorWorkloadGroups;
             resourcePoolFilterToolStripMenuItem.Visible = _context.HasResourceGovernorWorkloadGroups;
             workloadGroupFilterToolStripMenuItem.Visible = _context.HasResourceGovernorWorkloadGroups;
+            adhocTraceButton.Visible = CurrentContext.InstanceID > 0 && DBADashUser.AllowXETrace && CurrentContext.CanMessage;
             ResetFilters();
             RefreshData();
         }

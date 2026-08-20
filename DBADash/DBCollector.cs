@@ -584,8 +584,11 @@ namespace DBADash
                 new DataColumn("MessagingEnabled", typeof(bool)),
                 new DataColumn("KillSessionEnabled", typeof(bool)),
                 new DataColumn("PlanForcingEnabled", typeof(bool)),
+                new DataColumn("AdhocXEMaxDurationSeconds", typeof(int)),
                 new DataColumn("AllowedScripts", typeof(string)),
-                new DataColumn("AllowedCustomProcs",typeof(string))
+                new DataColumn("AllowedCustomProcs",typeof(string)),
+                new DataColumn("ManageXESessions", typeof(string)),
+                new DataColumn("WatchXESessions", typeof(string))
             });
             if (dt.Rows.Count == 0)
             {
@@ -599,12 +602,15 @@ namespace DBADash
             dt.Rows[0]["MessagingEnabled"] = dashAgent.MessagingEnabled;
             dt.Rows[0]["KillSessionEnabled"] = dashAgent.KillSessionEnabled;
             dt.Rows[0]["PlanForcingEnabled"] = dashAgent.PlanForcingEnabled;
+            dt.Rows[0]["AdhocXEMaxDurationSeconds"] = dashAgent.AdhocXEMaxDurationSeconds;
             dt.Rows[0]["AllowedScripts"] = dashAgent.AllowedScripts == null || dashAgent.AllowedScripts.Count == 0
                 ? DBNull.Value
                 : string.Join(',', dashAgent.AllowedScripts);
             dt.Rows[0]["AllowedCustomProcs"] = dashAgent.AllowedCustomProcs == null || dashAgent.AllowedCustomProcs.Count == 0
                 ? DBNull.Value
                 : string.Join(',', dashAgent.AllowedCustomProcs);
+            dt.Rows[0]["ManageXESessions"] = (object)dashAgent.ManageXESessions ?? DBNull.Value;
+            dt.Rows[0]["WatchXESessions"] = (object)dashAgent.WatchXESessions ?? DBNull.Value;
         }
 
         public async Task GetInstanceAsync()

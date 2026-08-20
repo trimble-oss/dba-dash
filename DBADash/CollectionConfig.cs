@@ -88,6 +88,82 @@ namespace DBADash
 
         public bool AllowKillSession { get; set; }
 
+        /// <summary>
+        /// Ad-hoc extended-events tracing must be explicitly enabled on the service (mirrors
+        /// <see cref="AllowKillSession"/>).  When false, <see cref="Messaging.XETraceMessage"/> is rejected.
+        /// </summary>
+        public bool AllowAdhocXE { get; set; }
+
+        /// <summary>
+        /// Optional directory <b>on the monitored SQL Server</b> for ad-hoc XE event_file captures.  When empty the
+        /// instance's SQL Server LOG directory is resolved at trace start.  Not used for the ring_buffer target.
+        /// </summary>
+        public string AdhocXEDirectory { get; set; }
+
+        /// <summary>
+        /// Hard cap (seconds) on ad-hoc trace duration; a request longer than this is clamped down.  Traces longer
+        /// than <see cref="Messaging.XETraceHeartbeat.TimeoutSeconds"/> are kept alive by GUI heartbeats and
+        /// stop themselves if the client goes away, so a large cap is safe (an abandoned trace won't run to the cap).
+        /// </summary>
+        public int AdhocXEMaxDurationSeconds { get; set; } = DefaultAdhocXEMaxDurationSeconds;
+
+        public const int DefaultAdhocXEMaxDurationSeconds = 3600;
+
+        /// <summary>
+        /// Comma-separated allow/deny list of session names the Manage-XE feature may <b>start/stop</b> on a monitored
+        /// instance (see <see cref="XE.XESessionFilter"/> for the syntax; <c>*</c> = all, <c>-name</c> = deny, deny
+        /// always wins).  Blank disables start/stop entirely.  Separate from <see cref="WatchXESessions"/> so a service
+        /// can permit watching a session (read-only) without permitting it to be stopped - e.g. protect
+        /// <c>system_health</c> from being disabled while still allowing it to be viewed.
+        /// </summary>
+        public string ManageXESessions { get; set; }
+
+        /// <summary>
+        /// Comma-separated allow/deny list of session names the Manage-XE feature may <b>watch</b> (stream events from,
+        /// read-only) on a monitored instance.  Same syntax as <see cref="ManageXESessions"/>.  Blank disables watching.
+        /// Kept separate because watching can expose captured event data (query text, parameters) even though it never
+        /// changes the session.
+        /// </summary>
+        public string WatchXESessions { get; set; }
+
+        /// <summary>Recommended default for <see cref="ManageXESessions"/>: everything except the built-in health/telemetry sessions.</summary>
+        public const string DefaultManageXESessions = "*,-system_health,-AlwaysOn_health,-telemetry_xevents";
+
+        /// <summary>Recommended default for <see cref="WatchXESessions"/>: any session may be watched.</summary>
+        public const string DefaultWatchXESessions = "*";
+
+        /// <summary>
+        /// True when the Manage-XE feature is enabled at all (either start/stop or watch permits at least one session).
+        /// Gates the read-only <see cref="Messaging.XESessionListMessage"/> / <see cref="Messaging.XESessionScriptMessage"/>
+        /// and drives whether the tree node is offered.  The per-operation checks are <see cref="CanManageXESession"/>
+        /// and <see cref="CanWatchXESession"/>.
+        /// </summary>
+        [JsonIgnore]
+        public bool AllowManageXE =>
+            !string.IsNullOrWhiteSpace(ManageXESessions) || !string.IsNullOrWhiteSpace(WatchXESessions);
+
+        /// <summary>Legacy shim: older configs stored a bool; map <c>true</c> to the recommended defaults on load.</summary>
+        [JsonProperty("AllowManageXE")]
+        private bool LegacyAllowManageXE
+        {
+            set
+            {
+                if (value && string.IsNullOrWhiteSpace(ManageXESessions) && string.IsNullOrWhiteSpace(WatchXESessions))
+                {
+                    ManageXESessions = DefaultManageXESessions;
+                    WatchXESessions = DefaultWatchXESessions;
+                }
+            }
+        }
+
+        /// <summary>True if <paramref name="sessionName"/> may be started/stopped per <see cref="ManageXESessions"/>.</summary>
+        public bool CanManageXESession(string sessionName) =>
+            XE.XESessionFilter.Parse(ManageXESessions).IsAllowed(sessionName);
+
+        /// <summary>True if <paramref name="sessionName"/> may be watched per <see cref="WatchXESessions"/>.</summary>
+        public bool CanWatchXESession(string sessionName) =>
+            XE.XESessionFilter.Parse(WatchXESessions).IsAllowed(sessionName);
+
         public string AllowedScripts { get; set; }
 
         public string AllowedCustomProcs { get; set; }

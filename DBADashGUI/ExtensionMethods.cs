@@ -1013,5 +1013,22 @@ namespace DBADashGUI
                 control.Enabled = isEnabled;
             }
         }
+
+        /// <summary>
+        /// Returns a washed-out copy of the image by reducing its alpha, e.g. to signal an inactive/unavailable action.
+        /// </summary>
+        /// <param name="source">The image to fade.</param>
+        /// <param name="opacity">Resulting alpha multiplier (0 = transparent, 1 = unchanged). Defaults to 0.3.</param>
+        public static Image Fade(this Image source, float opacity = 0.3f)
+        {
+            var bmp = new Bitmap(source.Width, source.Height);
+            using var g = Graphics.FromImage(bmp);
+            var matrix = new System.Drawing.Imaging.ColorMatrix { Matrix33 = opacity };
+            using var attributes = new System.Drawing.Imaging.ImageAttributes();
+            attributes.SetColorMatrix(matrix);
+            g.DrawImage(source, new Rectangle(0, 0, source.Width, source.Height),
+                0, 0, source.Width, source.Height, GraphicsUnit.Pixel, attributes);
+            return bmp;
+        }
     }
 }

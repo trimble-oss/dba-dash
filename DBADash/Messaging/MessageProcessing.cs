@@ -210,6 +210,27 @@ namespace DBADash.Messaging
                             dest.ConnectionString);
                         return;
                     }
+
+                    if (msg is HeartbeatMessage)
+                    {
+                        // Heartbeat received - process immediately (never queue a keep-alive behind a busy service).
+                        await msg.Process(Config, handle, CancellationToken.None);
+                        await SendReplyMessage(handle,
+                            (new ResponseMessage()
+                            { Type = ResponseMessage.ResponseTypes.Success, Message = "Heartbeat", Data = null }).Serialize(),
+                            dest.ConnectionString);
+                        return;
+                    }
+
+                    if (msg.RunOutsideConcurrencyLimit)
+                    {
+                        // Long-running messages (e.g. an ad-hoc XE trace) must not hold one of the limited
+                        // message-processing slots for their whole duration.  They run outside the semaphore -
+                        // concurrency is bounded by the message itself (e.g. one trace per instance).
+                        await ProcessAndReply(msg, handle, dest, type);
+                        return;
+                    }
+
                     // Semaphore to limit the number of messages processed at once
                     using var messageLock = await MessageSemaphore.LockOrNullAsync(msg.SemaphoreTimeout);
                     if (messageLock is null)
@@ -223,19 +244,7 @@ namespace DBADash.Messaging
                     }
                     else
                     {
-                        Log.Information("Processing message {id} of type {MessageType} with handle {handle}", msg.Id, type,
-                            handle);
-
-                        // Allow the message to stream intermediate replies back to the GUI (e.g. per-instance
-                        // progress for a batched collection).  Local path - data (if any) is serialized inline.
-                        msg.ProgressReporter = progress => SendReplyMessage(handle, progress.Serialize(), dest.ConnectionString);
-
-                        var ds = await msg.ProcessWithCancellation(Config, msg.Id);
-                        await SendReplyMessage(handle,
-                            (new ResponseMessage()
-                            { Type = ResponseMessage.ResponseTypes.Success, Message = "Completed", Data = ds })
-                            .Serialize(),
-                            dest.ConnectionString);
+                        await ProcessAndReply(msg, handle, dest, type);
                     }
                 }
             }
@@ -264,6 +273,27 @@ namespace DBADash.Messaging
                     await EndConversation(handle, dest.ConnectionString);
                 }
             }
+        }
+
+        /// <summary>
+        /// Processes a message (with cancellation support and progress streaming) and sends the terminal Success
+        /// reply.  Shared by the semaphore-bounded path and the bypass path for <see
+        /// cref="MessageBase.RunOutsideConcurrencyLimit"/> messages.  Exceptions propagate to the caller's handlers.
+        /// </summary>
+        private async Task ProcessAndReply(MessageBase msg, Guid handle, DBADashConnection dest, string type)
+        {
+            Log.Information("Processing message {id} of type {MessageType} with handle {handle}", msg.Id, type, handle);
+
+            // Allow the message to stream intermediate replies back to the GUI (e.g. per-instance
+            // progress for a batched collection).  Local path - data (if any) is serialized inline.
+            msg.ProgressReporter = progress => SendReplyMessage(handle, progress.Serialize(), dest.ConnectionString);
+
+            var ds = await msg.ProcessWithCancellation(Config, msg.Id);
+            await SendReplyMessage(handle,
+                (new ResponseMessage()
+                { Type = ResponseMessage.ResponseTypes.Success, Message = "Completed", Data = ds })
+                .Serialize(),
+                dest.ConnectionString);
         }
 
         public static async Task EndConversation(Guid handle, string connectionString)

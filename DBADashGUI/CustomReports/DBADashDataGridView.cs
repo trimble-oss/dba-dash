@@ -34,6 +34,17 @@ namespace DBADashGUI.CustomReports
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string ResultSetName { get; set; }
 
+        /// <summary>
+        /// Optional hook to pre-configure a column's Group By aggregations when the Group By dialog is opened
+        /// (e.g. auto-select Sum/Avg/Min/Max for known metric columns).  Invoked once per candidate column.
+        /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public Action<GroupByColumnConfig> GroupByColumnInitializer { get; set; }
+
+        /// <summary>When true, the Group By dialog opens with "Count % of Total" pre-checked.</summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool GroupByDefaultCountPercent { get; set; }
+
         private ToolStripMenuItem GetCopyGridMenuItem() =>
             new("Grid", Properties.Resources.Table_16x, (_, _) => CopyGrid());
 
@@ -533,7 +544,12 @@ namespace DBADashGUI.CustomReports
                     })
                     .ToList();
 
-                using var dlg = new GroupByDialog(configs);
+                if (GroupByColumnInitializer != null)
+                {
+                    foreach (var cfg in configs) GroupByColumnInitializer(cfg);
+                }
+
+                using var dlg = new GroupByDialog(configs) { DefaultCountPercentOfTotal = GroupByDefaultCountPercent };
                 var title = string.IsNullOrEmpty(ResultSetName) ? "Group By" : $"Group By — {ResultSetName}";
                 dlg.Text = title;
                 if (dlg.ShowDialog(this) != DialogResult.OK) return;

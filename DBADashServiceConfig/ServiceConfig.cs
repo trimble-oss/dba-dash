@@ -43,6 +43,85 @@ namespace DBADashServiceConfig
             InitializeComponent();
             this.ApplyTheme();
             CustomCollectionsNew = new();
+            WireEvents();
+        }
+
+        private void WireEvents()
+        {
+            chkAllowAdhocXE.CheckedChanged += (_, _) =>
+            {
+                collectionConfig.AllowAdhocXE = chkAllowAdhocXE.Checked;
+                UpdateXEMaxDurationEnabled();
+                SetJson();
+            };
+
+            chkAllowManageXE.CheckedChanged += (_, _) =>
+            {
+                if (IsSetFromJson) return;
+                // AllowManageXE is now derived from the ManageXESessions / WatchXESessions allow-lists.  Ticking the box
+                // seeds the recommended defaults (all sessions except the built-in health/telemetry ones may be
+                // started/stopped; any session may be watched) when no pattern is set yet; unticking clears both so the
+                // feature is fully disabled.  The per-session patterns can be fine-tuned in the JSON config.
+                if (chkAllowManageXE.Checked)
+                {
+                    if (!collectionConfig.AllowManageXE)
+                    {
+                        collectionConfig.ManageXESessions = CollectionConfig.DefaultManageXESessions;
+                        collectionConfig.WatchXESessions = CollectionConfig.DefaultWatchXESessions;
+                    }
+                }
+                else
+                {
+                    collectionConfig.ManageXESessions = null;
+                    collectionConfig.WatchXESessions = null;
+                }
+                UpdateXEMaxDurationEnabled();
+                SetJson();
+            };
+
+            // Wire up XE max duration control (expects a DurationDropDown named xeMaxDuration in the designer)
+            try
+            {
+                if (xeMaxDuration != null)
+                {
+                    // DurationDropDown doesn't expose a ValueChanged event, use Validated to capture edits
+                    xeMaxDuration.Validated += (_, _) =>
+                    {
+                        if (IsSetFromJson) return;
+                        // DurationDropDown.Value is in minutes (decimal?) — store seconds in config
+                        var minutes = xeMaxDuration.Value ?? 0m;
+                        collectionConfig.AdhocXEMaxDurationSeconds = Convert.ToInt32(minutes * 60m);
+                        SetJson();
+                    };
+
+                    // initialise control from current config
+                    try
+                    {
+                        xeMaxDuration.Value = collectionConfig.AdhocXEMaxDurationSeconds / 60m;
+                        UpdateXEMaxDurationEnabled();
+                    }
+                    catch
+                    {
+                        // ignore any conversion errors during init
+                    }
+                }
+            }
+            catch
+            {
+                // Defensive: if control does not exist on older builds, ignore
+            }
+        }
+
+        /// <summary>
+        /// The XE max-duration cap applies to both ad-hoc traces and watching existing sessions, so the control is
+        /// editable whenever either capability is enabled.
+        /// </summary>
+        private void UpdateXEMaxDurationEnabled()
+        {
+            if (xeMaxDuration != null)
+            {
+                xeMaxDuration.Enabled = chkAllowAdhocXE.Checked || chkAllowManageXE.Checked;
+            }
         }
 
         private string originalJson = "";
@@ -996,6 +1075,11 @@ namespace DBADashServiceConfig
                 txtSQS.Text = collectionConfig.ServiceSQSQueueUrl;
                 chkAllowPlanForcing.Checked = collectionConfig.AllowPlanForcing;
                 chkAllowKillSession.Checked = collectionConfig.AllowKillSession;
+                chkAllowAdhocXE.Checked = collectionConfig.AllowAdhocXE;
+                chkAllowManageXE.Checked = collectionConfig.AllowManageXE;
+                // DurationDropDown.Value is in minutes; AdhocXEMaxDurationSeconds is stored in seconds.
+                xeMaxDuration.Value = collectionConfig.AdhocXEMaxDurationSeconds / 60m;
+                UpdateXEMaxDurationEnabled();
                 txtAllowScripts.Text = collectionConfig.AllowedScripts;
                 txtAllowedJobs.Text = collectionConfig.AllowedJobs;
                 chkProcessAlerts.Checked = collectionConfig.ProcessAlerts;
@@ -1412,7 +1496,7 @@ namespace DBADashServiceConfig
         }
 
         private async Task DestinationChangedAsync()
-            {
+        {
             if (collectionConfig.Destination != txtDestination.Text)
             {
                 try

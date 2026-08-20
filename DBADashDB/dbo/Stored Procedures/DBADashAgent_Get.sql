@@ -10,9 +10,12 @@ SELECT DBADashAgentID,
        MessagingEnabled,
        KillSessionEnabled,
        PlanForcingEnabled,
+       AdhocXEMaxDurationSeconds,
        ServiceSQSQueueUrl,
        S3Path,
        AllowedScripts,
-       AllowedCustomProcs
+       AllowedCustomProcs,
+       ManageXESessions,
+       WatchXESessions
 FROM dbo.DBADashAgent
 WHERE DBADashAgentID = @DBADashAgentID

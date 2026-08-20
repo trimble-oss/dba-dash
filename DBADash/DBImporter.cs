@@ -773,8 +773,13 @@ namespace DBADash
                 MessagingEnabled = row.Table.Columns.Contains("MessagingEnabled") && row["MessagingEnabled"] != DBNull.Value && (bool)row["MessagingEnabled"],
                 KillSessionEnabled = row.Table.Columns.Contains("KillSessionEnabled") && row["KillSessionEnabled"] != DBNull.Value && (bool)row["KillSessionEnabled"],
                 PlanForcingEnabled = row.Table.Columns.Contains("PlanForcingEnabled") && row["PlanForcingEnabled"] != DBNull.Value && (bool)row["PlanForcingEnabled"],
+                AdhocXEMaxDurationSeconds = row.Table.Columns.Contains("AdhocXEMaxDurationSeconds") && row["AdhocXEMaxDurationSeconds"] != DBNull.Value
+                    ? (int)row["AdhocXEMaxDurationSeconds"]
+                    : CollectionConfig.DefaultAdhocXEMaxDurationSeconds,
                 AllowedScriptsCSV = row.Table.Columns.Contains("AllowedScripts") && row["AllowedScripts"] != DBNull.Value ? (string)row["AllowedScripts"] : string.Empty,
-                AllowedCustomProcsCSV = row.Table.Columns.Contains("AllowedCustomProcs") && row["AllowedCustomProcs"] != DBNull.Value ? (string)row["AllowedCustomProcs"] : string.Empty
+                AllowedCustomProcsCSV = row.Table.Columns.Contains("AllowedCustomProcs") && row["AllowedCustomProcs"] != DBNull.Value ? (string)row["AllowedCustomProcs"] : string.Empty,
+                ManageXESessions = row.Table.Columns.Contains("ManageXESessions") && row["ManageXESessions"] != DBNull.Value ? (string)row["ManageXESessions"] : null,
+                WatchXESessions = row.Table.Columns.Contains("WatchXESessions") && row["WatchXESessions"] != DBNull.Value ? (string)row["WatchXESessions"] : null
             };
         }
 

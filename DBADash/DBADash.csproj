@@ -144,6 +144,7 @@
     <PackageReference Include="Microsoft.SqlServer.DacFx" />
     <PackageReference Include="Microsoft.SqlServer.Management.SqlParser" />
     <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" />
+    <PackageReference Include="Microsoft.SqlServer.XEvent.XELite" />
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="Octokit" />
     <PackageReference Include="Polly.Core" />

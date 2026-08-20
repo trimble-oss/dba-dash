@@ -79,7 +79,8 @@ namespace DBADashGUI
             CustomToolsFolder,
             CustomTool,
             DirectSystemReport,
-            DatabaseExtendedProperties
+            DatabaseExtendedProperties,
+            ExtendedEvents
         }
 
         private DatabaseEngineEdition _engineEdition = DatabaseEngineEdition.Unknown;
@@ -515,6 +516,10 @@ namespace DBADashGUI
 
                 case TreeType.DirectSystemReport:
                     ImageIndex = 31;
+                    break;
+
+                case TreeType.ExtendedEvents:
+                    ImageIndex = 32; // EventLog_16x.png, appended to TreeViewImageList at runtime (see Main ctor)
                     break;
 
                 default:

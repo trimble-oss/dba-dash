@@ -75,6 +75,11 @@ namespace DBADashServiceConfig
             chkUpgradeAllowPreRelease = new System.Windows.Forms.CheckBox();
             lnkAutoUpgradeDB = new System.Windows.Forms.LinkLabel();
             lnkDeployDatabase = new System.Windows.Forms.LinkLabel();
+            chkAllowAdhocXE = new System.Windows.Forms.CheckBox();
+            chkAllowManageXE = new System.Windows.Forms.CheckBox();
+            chkAllowPlanForcing = new System.Windows.Forms.CheckBox();
+            chkAllowKillSession = new System.Windows.Forms.CheckBox();
+            chkEnableMessaging = new System.Windows.Forms.CheckBox();
             picConfigFileAccess = new System.Windows.Forms.PictureBox();
             lblConfigFileAccess = new System.Windows.Forms.Label();
             pnlBottom = new System.Windows.Forms.Panel();
@@ -121,6 +126,8 @@ namespace DBADashServiceConfig
             label11 = new System.Windows.Forms.Label();
             label10 = new System.Windows.Forms.Label();
             groupBox6 = new System.Windows.Forms.GroupBox();
+            xeMaxDuration = new DBADashGUI.Pickers.DurationDropDown();
+            label25 = new System.Windows.Forms.Label();
             label22 = new System.Windows.Forms.Label();
             txtAllowedCustomProcs = new System.Windows.Forms.TextBox();
             lnkAllowNoJobs = new System.Windows.Forms.LinkLabel();
@@ -131,13 +138,10 @@ namespace DBADashServiceConfig
             lnkAllowAll = new System.Windows.Forms.LinkLabel();
             label18 = new System.Windows.Forms.Label();
             txtAllowScripts = new System.Windows.Forms.TextBox();
-            chkAllowPlanForcing = new System.Windows.Forms.CheckBox();
-            chkAllowKillSession = new System.Windows.Forms.CheckBox();
             label8 = new System.Windows.Forms.Label();
             label6 = new System.Windows.Forms.Label();
             txtSQS = new System.Windows.Forms.TextBox();
             label4 = new System.Windows.Forms.Label();
-            chkEnableMessaging = new System.Windows.Forms.CheckBox();
             tabSource = new System.Windows.Forms.TabPage();
             groupBox2 = new System.Windows.Forms.GroupBox();
             tabSrcOptions = new ThemedTabControl();
@@ -719,6 +723,66 @@ namespace DBADashServiceConfig
             toolTip1.SetToolTip(lnkDeployDatabase, "Option to deploy the database manually.  This is usually done automatically for you on service start.");
             lnkDeployDatabase.LinkClicked += DeployDatabase_LinkClicked;
             // 
+            // chkAllowAdhocXE
+            // 
+            chkAllowAdhocXE.AutoSize = true;
+            chkAllowAdhocXE.Location = new System.Drawing.Point(426, 39);
+            chkAllowAdhocXE.Name = "chkAllowAdhocXE";
+            chkAllowAdhocXE.Size = new System.Drawing.Size(143, 24);
+            chkAllowAdhocXE.TabIndex = 19;
+            chkAllowAdhocXE.Text = "Allow Ad-hoc XE";
+            toolTip1.SetToolTip(chkAllowAdhocXE, "Allow access to configure and run an ad-hoc XE session via the messaging feature");
+            chkAllowAdhocXE.UseVisualStyleBackColor = true;
+            // 
+            // chkAllowManageXE
+            // 
+            chkAllowManageXE.AutoSize = true;
+            chkAllowManageXE.Location = new System.Drawing.Point(247, 39);
+            chkAllowManageXE.Name = "chkAllowManageXE";
+            chkAllowManageXE.Size = new System.Drawing.Size(148, 24);
+            chkAllowManageXE.TabIndex = 18;
+            chkAllowManageXE.Text = "Allow Manage XE";
+            toolTip1.SetToolTip(chkAllowManageXE, "Allow start/stop/watch of existing extended event sessions via the messaging feature. Ticking applies safe defaults (all sessions except system_health / AlwaysOn_health / telemetry_xevents may be started or stopped; any session may be watched). Fine-tune which sessions are manageable/watchable via the ManageXESessions / WatchXESessions values in the JSON config (e.g. *,-system_health).");
+            chkAllowManageXE.UseVisualStyleBackColor = true;
+            // 
+            // chkAllowPlanForcing
+            // 
+            chkAllowPlanForcing.AutoSize = true;
+            chkAllowPlanForcing.Location = new System.Drawing.Point(18, 69);
+            chkAllowPlanForcing.Name = "chkAllowPlanForcing";
+            chkAllowPlanForcing.Size = new System.Drawing.Size(154, 24);
+            chkAllowPlanForcing.TabIndex = 5;
+            chkAllowPlanForcing.Text = "Allow Plan Forcing";
+            toolTip1.SetToolTip(chkAllowPlanForcing, "Allow access to force query plans via the messaging feature.");
+            chkAllowPlanForcing.UseVisualStyleBackColor = true;
+            chkAllowPlanForcing.CheckedChanged += ChkAllowPlanForcing_CheckedChanged;
+            // 
+            // chkAllowKillSession
+            // 
+            chkAllowKillSession.AutoSize = true;
+            chkAllowKillSession.Location = new System.Drawing.Point(247, 68);
+            chkAllowKillSession.Name = "chkAllowKillSession";
+            chkAllowKillSession.Size = new System.Drawing.Size(147, 24);
+            chkAllowKillSession.TabIndex = 6;
+            chkAllowKillSession.Text = "Allow Kill Session";
+            toolTip1.SetToolTip(chkAllowKillSession, "Allow access to kill sessions via the messaging feature");
+            chkAllowKillSession.UseVisualStyleBackColor = true;
+            chkAllowKillSession.CheckedChanged += ChkAllowKillSession_CheckedChanged;
+            // 
+            // chkEnableMessaging
+            // 
+            chkEnableMessaging.AutoSize = true;
+            chkEnableMessaging.Checked = true;
+            chkEnableMessaging.CheckState = System.Windows.Forms.CheckState.Checked;
+            chkEnableMessaging.Location = new System.Drawing.Point(18, 39);
+            chkEnableMessaging.Name = "chkEnableMessaging";
+            chkEnableMessaging.Size = new System.Drawing.Size(185, 24);
+            chkEnableMessaging.TabIndex = 0;
+            chkEnableMessaging.Text = "Enable Communication";
+            toolTip1.SetToolTip(chkEnableMessaging, "Uncheck to disable all messaging related features. ");
+            chkEnableMessaging.UseVisualStyleBackColor = true;
+            chkEnableMessaging.CheckedChanged += ChkEnableMessaging_CheckedChanged;
+            // 
             // picConfigFileAccess
             // 
             picConfigFileAccess.Image = Properties.Resources.Security_Shields_Alert_32xLG_color;
@@ -1247,6 +1311,10 @@ namespace DBADashServiceConfig
             // 
             // groupBox6
             // 
+            groupBox6.Controls.Add(xeMaxDuration);
+            groupBox6.Controls.Add(label25);
+            groupBox6.Controls.Add(chkAllowAdhocXE);
+            groupBox6.Controls.Add(chkAllowManageXE);
             groupBox6.Controls.Add(label22);
             groupBox6.Controls.Add(txtAllowedCustomProcs);
             groupBox6.Controls.Add(lnkAllowNoJobs);
@@ -1271,6 +1339,25 @@ namespace DBADashServiceConfig
             groupBox6.TabIndex = 39;
             groupBox6.TabStop = false;
             groupBox6.Text = "Messaging";
+            // 
+            // xeMaxDuration
+            // 
+            xeMaxDuration.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            xeMaxDuration.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            xeMaxDuration.IncludeSeconds = true;
+            xeMaxDuration.Location = new System.Drawing.Point(247, 233);
+            xeMaxDuration.Name = "xeMaxDuration";
+            xeMaxDuration.Size = new System.Drawing.Size(370, 34);
+            xeMaxDuration.TabIndex = 22;
+            // 
+            // label25
+            // 
+            label25.AutoSize = true;
+            label25.Location = new System.Drawing.Point(18, 235);
+            label25.Name = "label25";
+            label25.Size = new System.Drawing.Size(157, 20);
+            label25.TabIndex = 21;
+            label25.Text = "XE Trace max duration";
             // 
             // label22
             // 
@@ -1369,28 +1456,6 @@ namespace DBADashServiceConfig
             txtAllowScripts.TabIndex = 7;
             txtAllowScripts.TextChanged += TxtAllowScripts_TextChanged;
             // 
-            // chkAllowPlanForcing
-            // 
-            chkAllowPlanForcing.AutoSize = true;
-            chkAllowPlanForcing.Location = new System.Drawing.Point(18, 69);
-            chkAllowPlanForcing.Name = "chkAllowPlanForcing";
-            chkAllowPlanForcing.Size = new System.Drawing.Size(154, 24);
-            chkAllowPlanForcing.TabIndex = 5;
-            chkAllowPlanForcing.Text = "Allow Plan Forcing";
-            chkAllowPlanForcing.UseVisualStyleBackColor = true;
-            chkAllowPlanForcing.CheckedChanged += ChkAllowPlanForcing_CheckedChanged;
-            // 
-            // chkAllowKillSession
-            // 
-            chkAllowKillSession.AutoSize = true;
-            chkAllowKillSession.Location = new System.Drawing.Point(247, 68);
-            chkAllowKillSession.Name = "chkAllowKillSession";
-            chkAllowKillSession.Size = new System.Drawing.Size(147, 24);
-            chkAllowKillSession.TabIndex = 6;
-            chkAllowKillSession.Text = "Allow Kill Session";
-            chkAllowKillSession.UseVisualStyleBackColor = true;
-            chkAllowKillSession.CheckedChanged += ChkAllowKillSession_CheckedChanged;
-            // 
             // label8
             // 
             label8.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic);
@@ -1426,19 +1491,6 @@ namespace DBADashServiceConfig
             label4.Size = new System.Drawing.Size(466, 53);
             label4.TabIndex = 1;
             label4.Text = "Allow the GUI to send messages to this service via the service broker.  e.g. To trigger collections to run on demand.";
-            // 
-            // chkEnableMessaging
-            // 
-            chkEnableMessaging.AutoSize = true;
-            chkEnableMessaging.Checked = true;
-            chkEnableMessaging.CheckState = System.Windows.Forms.CheckState.Checked;
-            chkEnableMessaging.Location = new System.Drawing.Point(18, 39);
-            chkEnableMessaging.Name = "chkEnableMessaging";
-            chkEnableMessaging.Size = new System.Drawing.Size(185, 24);
-            chkEnableMessaging.TabIndex = 0;
-            chkEnableMessaging.Text = "Enable Communication";
-            chkEnableMessaging.UseVisualStyleBackColor = true;
-            chkEnableMessaging.CheckedChanged += ChkEnableMessaging_CheckedChanged;
             // 
             // tabSource
             // 
@@ -2430,6 +2482,10 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.LinkLabel lnkSummaryRefreshCron;
         private System.Windows.Forms.LinkLabel lnkAutoUpgradeDB;
         private System.Windows.Forms.LinkLabel lnkDeployDatabase;
+        private System.Windows.Forms.CheckBox chkAllowAdhocXE;
+        private System.Windows.Forms.CheckBox chkAllowManageXE;
+        private System.Windows.Forms.Label label25;
+        private DBADashGUI.Pickers.DurationDropDown xeMaxDuration;
     }
 }
 
