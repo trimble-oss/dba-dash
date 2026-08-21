@@ -5,6 +5,7 @@ CREATE PROC dbo.XETraceSession_Start(
     @EventTypes VARCHAR(200),
     @MaxDurationSeconds INT,
     @FiltersJson NVARCHAR(MAX) = NULL,
+    @RunGroupID UNIQUEIDENTIFIER = NULL, /* set (same GUID) for every instance of a multi-instance run; NULL for single-instance */
     @XETraceSessionID BIGINT OUT
 )
 AS
@@ -25,8 +26,8 @@ AND StartTime < DATEADD(SECOND, -(MaxDurationSeconds + 300), GETUTCDATE())
 
 BEGIN TRY
     INSERT INTO dbo.XETraceSession(InstanceID, MessageGroupID, RequestedBy, EventTypes, MaxDurationSeconds,
-        FiltersJson, Status)
-    VALUES(@InstanceID, @MessageGroupID, @RequestedBy, @EventTypes, @MaxDurationSeconds, @FiltersJson, 0)
+        FiltersJson, RunGroupID, Status)
+    VALUES(@InstanceID, @MessageGroupID, @RequestedBy, @EventTypes, @MaxDurationSeconds, @FiltersJson, @RunGroupID, 0)
 
     SET @XETraceSessionID = SCOPE_IDENTITY()
 END TRY

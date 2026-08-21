@@ -15,7 +15,7 @@ namespace DBADashGUI.XETrace
     internal static class XETraceRepo
     {
         public static async Task<long> StartAsync(int instanceID, Guid messageGroup, string eventTypes,
-            int maxDurationSeconds, string filtersJson)
+            int maxDurationSeconds, string filtersJson, Guid? runGroupID = null)
         {
             await using var cn = new SqlConnection(Common.ConnectionString);
             await using var cmd = new SqlCommand("dbo.XETraceSession_Start", cn) { CommandType = CommandType.StoredProcedure };
@@ -25,6 +25,7 @@ namespace DBADashGUI.XETrace
             cmd.Parameters.AddWithValue("@EventTypes", eventTypes);
             cmd.Parameters.AddWithValue("@MaxDurationSeconds", maxDurationSeconds);
             cmd.Parameters.AddWithValue("@FiltersJson", (object)filtersJson ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@RunGroupID", (object)runGroupID ?? DBNull.Value);
             var pId = cmd.Parameters.Add("@XETraceSessionID", SqlDbType.BigInt);
             pId.Direction = ParameterDirection.Output;
             await cn.OpenAsync();
@@ -108,6 +109,14 @@ namespace DBADashGUI.XETrace
             FillAsync("dbo.XETraceSession_GetRunning", cmd =>
                 cmd.Parameters.AddWithValue("@InstanceIDs", instanceIDs.AsDataTable()));
 
+        /// <summary>
+        /// Returns the other monitored instances that share an availability group with <paramref name="instanceID"/>
+        /// (columns InstanceID, InstanceName), so the trace UI can offer to trace every AG replica at once.
+        /// Empty when the instance isn't in an AG or has no other monitored replicas.
+        /// </summary>
+        public static Task<DataTable> GetAgInstancesAsync(int instanceID) =>
+            FillAsync("dbo.AvailabilityGroupInstances_Get", cmd => cmd.Parameters.AddWithValue("@InstanceID", instanceID));
+
         public static Task<DataTable> GetHistoryAsync(IEnumerable<int> instanceIDs, int days) =>
             FillAsync("dbo.XETraceSession_Get", cmd =>
             {
@@ -117,6 +126,13 @@ namespace DBADashGUI.XETrace
 
         public static Task<DataTable> GetEventsAsync(long sessionID) =>
             FillAsync("dbo.XETraceEvents_Get", cmd => cmd.Parameters.AddWithValue("@XETraceSessionID", sessionID));
+
+        /// <summary>
+        /// Returns the merged events of every per-instance session of a multi-instance run (each event's source
+        /// instance is carried inside its Fields JSON), in time order.  Used to reload an AG-wide trace as one grid.
+        /// </summary>
+        public static Task<DataTable> GetEventsByRunGroupAsync(Guid runGroupID) =>
+            FillAsync("dbo.XETraceEvents_GetByRunGroup", cmd => cmd.Parameters.AddWithValue("@RunGroupID", runGroupID));
 
         public static async Task<byte[]> GetXelAsync(long sessionID)
         {

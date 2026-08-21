@@ -81,6 +81,11 @@
             tsHistory = new System.Windows.Forms.ToolStripDropDownButton();
             splitContainer1 = new System.Windows.Forms.SplitContainer();
             panel1 = new System.Windows.Forms.Panel();
+            grpInstances = new DBADashGUI.Controls.IconGroupBox();
+            chkIncludeAg = new System.Windows.Forms.CheckBox();
+            btnAddInstance = new System.Windows.Forms.Button();
+            lblInstanceCount = new System.Windows.Forms.Label();
+            clbInstances = new System.Windows.Forms.CheckedListBox();
             statusStrip1 = new System.Windows.Forms.StatusStrip();
             tsStatus = new System.Windows.Forms.ToolStripStatusLabel();
             toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
@@ -99,6 +104,7 @@
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.SuspendLayout();
             panel1.SuspendLayout();
+            grpInstances.SuspendLayout();
             statusStrip1.SuspendLayout();
             SuspendLayout();
             // 
@@ -122,9 +128,9 @@
             Filter.Controls.Add(cboComparison);
             Filter.Controls.Add(cboField);
             Filter.Controls.Add(cboEvent);
-            Filter.Location = new System.Drawing.Point(9, 427);
+            Filter.Location = new System.Drawing.Point(12, 582);
             Filter.Name = "Filter";
-            Filter.Size = new System.Drawing.Size(727, 297);
+            Filter.Size = new System.Drawing.Size(733, 243);
             Filter.TabIndex = 1;
             Filter.TabStop = false;
             Filter.Text = "Filter";
@@ -155,7 +161,7 @@
             dgvFilters.Location = new System.Drawing.Point(6, 88);
             dgvFilters.Name = "dgvFilters";
             dgvFilters.RowHeadersWidth = 51;
-            dgvFilters.Size = new System.Drawing.Size(709, 188);
+            dgvFilters.Size = new System.Drawing.Size(709, 140);
             dgvFilters.TabIndex = 9;
             // 
             // bttnAddFilter
@@ -238,9 +244,9 @@
             groupBox1.Controls.Add(chkErrorReported);
             groupBox1.Controls.Add(chkBatchCompleted);
             groupBox1.Controls.Add(chkRPC);
-            groupBox1.Location = new System.Drawing.Point(3, 138);
+            groupBox1.Location = new System.Drawing.Point(12, 300);
             groupBox1.Name = "groupBox1";
-            groupBox1.Size = new System.Drawing.Size(733, 283);
+            groupBox1.Size = new System.Drawing.Size(733, 276);
             groupBox1.TabIndex = 2;
             groupBox1.TabStop = false;
             groupBox1.Text = "Events";
@@ -283,7 +289,7 @@
             dgvEvents.Name = "dgvEvents";
             dgvEvents.RowHeadersVisible = false;
             dgvEvents.RowHeadersWidth = 51;
-            dgvEvents.Size = new System.Drawing.Size(709, 144);
+            dgvEvents.Size = new System.Drawing.Size(709, 140);
             dgvEvents.TabIndex = 9;
             // 
             // label3
@@ -374,9 +380,9 @@
             grpConfig.Controls.Add(numMaxRunHrs);
             grpConfig.Controls.Add(lblTarget);
             grpConfig.Controls.Add(cboTarget);
-            grpConfig.Location = new System.Drawing.Point(3, 3);
+            grpConfig.Location = new System.Drawing.Point(12, 167);
             grpConfig.Name = "grpConfig";
-            grpConfig.Size = new System.Drawing.Size(733, 129);
+            grpConfig.Size = new System.Drawing.Size(733, 127);
             grpConfig.TabIndex = 3;
             grpConfig.TabStop = false;
             grpConfig.Text = "XE Trace Configuration:";
@@ -561,6 +567,7 @@
             // 
             // panel1
             // 
+            panel1.Controls.Add(grpInstances);
             panel1.Controls.Add(grpConfig);
             panel1.Controls.Add(Filter);
             panel1.Controls.Add(groupBox1);
@@ -569,6 +576,57 @@
             panel1.Name = "panel1";
             panel1.Size = new System.Drawing.Size(764, 847);
             panel1.TabIndex = 6;
+            // 
+            // grpInstances
+            // 
+            grpInstances.Controls.Add(chkIncludeAg);
+            grpInstances.Controls.Add(btnAddInstance);
+            grpInstances.Controls.Add(lblInstanceCount);
+            grpInstances.Controls.Add(clbInstances);
+            grpInstances.Location = new System.Drawing.Point(12, 16);
+            grpInstances.Name = "grpInstances";
+            grpInstances.Size = new System.Drawing.Size(733, 145);
+            grpInstances.TabIndex = 7;
+            grpInstances.TabStop = false;
+            grpInstances.Text = "Instances to Trace:";
+            // 
+            // chkIncludeAg
+            // 
+            chkIncludeAg.AutoSize = true;
+            chkIncludeAg.Location = new System.Drawing.Point(6, 26);
+            chkIncludeAg.Name = "chkIncludeAg";
+            chkIncludeAg.Size = new System.Drawing.Size(158, 24);
+            chkIncludeAg.TabIndex = 1;
+            chkIncludeAg.Text = "Include AG replicas";
+            chkIncludeAg.UseVisualStyleBackColor = true;
+            // 
+            // btnAddInstance
+            // 
+            btnAddInstance.Location = new System.Drawing.Point(200, 22);
+            btnAddInstance.Name = "btnAddInstance";
+            btnAddInstance.Size = new System.Drawing.Size(130, 29);
+            btnAddInstance.TabIndex = 2;
+            btnAddInstance.Text = "Add Instance...";
+            btnAddInstance.UseVisualStyleBackColor = true;
+            // 
+            // lblInstanceCount
+            // 
+            lblInstanceCount.AutoSize = true;
+            lblInstanceCount.Location = new System.Drawing.Point(345, 28);
+            lblInstanceCount.Name = "lblInstanceCount";
+            lblInstanceCount.Size = new System.Drawing.Size(127, 20);
+            lblInstanceCount.TabIndex = 3;
+            lblInstanceCount.Text = "Tracing 1 instance";
+            // 
+            // clbInstances
+            // 
+            clbInstances.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            clbInstances.CheckOnClick = true;
+            clbInstances.IntegralHeight = false;
+            clbInstances.Location = new System.Drawing.Point(6, 57);
+            clbInstances.Name = "clbInstances";
+            clbInstances.Size = new System.Drawing.Size(715, 82);
+            clbInstances.TabIndex = 4;
             // 
             // statusStrip1
             // 
@@ -626,6 +684,8 @@
             ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
             splitContainer1.ResumeLayout(false);
             panel1.ResumeLayout(false);
+            grpInstances.ResumeLayout(false);
+            grpInstances.PerformLayout();
             statusStrip1.ResumeLayout(false);
             statusStrip1.PerformLayout();
             ResumeLayout(false);
@@ -684,5 +744,10 @@
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
         private System.Windows.Forms.LinkLabel lnkGlobalFields;
         private System.Windows.Forms.ToolTip toolTip1;
+        private DBADashGUI.Controls.IconGroupBox grpInstances;
+        private System.Windows.Forms.CheckBox chkIncludeAg;
+        private System.Windows.Forms.Button btnAddInstance;
+        private System.Windows.Forms.Label lblInstanceCount;
+        private System.Windows.Forms.CheckedListBox clbInstances;
     }
 }

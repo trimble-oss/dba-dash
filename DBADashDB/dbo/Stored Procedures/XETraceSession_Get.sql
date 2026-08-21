@@ -16,6 +16,7 @@ SELECT  S.XETraceSessionID,
         S.MaxDurationSeconds,
         S.TotalEvents,
         S.MessageGroupID,
+        S.RunGroupID,
         S.ErrorMessage,
         CAST(CASE WHEN S.XelData IS NULL THEN 0 ELSE 1 END AS BIT) AS HasXel
 FROM dbo.XETraceSession S

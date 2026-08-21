@@ -38,6 +38,13 @@ namespace DBADashGUI.XETrace
 
         public bool CaptureXel { get; set; }
 
+        /// <summary>
+        /// Reload with "Include AG replicas" ticked, so the trace fans out to every monitored replica of the current
+        /// instance's availability group(s).  The resolved replica list is NOT stored (membership can change) - only
+        /// the intent; it is re-resolved against the current instance on load.
+        /// </summary>
+        public bool IncludeAgReplicas { get; set; }
+
         public string Serialize() => JsonConvert.SerializeObject(this, Formatting.Indented);
     }
 
