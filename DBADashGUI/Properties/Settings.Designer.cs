@@ -70,6 +70,18 @@ namespace DBADashGUI.Properties {
                 this["RunningQueriesSummaryMaxRows"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool SuppressXETraceWarning {
+            get {
+                return ((bool)(this["SuppressXETraceWarning"]));
+            }
+            set {
+                this["SuppressXETraceWarning"] = value;
+            }
+        }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]

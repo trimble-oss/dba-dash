@@ -78,13 +78,19 @@ namespace DBADashGUI.XETrace
         /// be used to cancel the trace (see <see cref="CancelAsync"/>).  Returns the repo session id, or null if the
         /// session couldn't be opened (e.g. one already running for the instance).
         /// </summary>
+        /// <summary>Column added to each event batch to identify its source instance in a multi-instance run.</summary>
+        public const string InstanceColumn = "Instance";
+
         public static async Task<XETraceOutcome> RunTraceAsync(
             DBADashContext context,
             XETraceConfig config,
             Guid messageGroup,
             MessagingHelper.SetStatusDelegate setStatus,
             Func<DataTable, Task> onBatch,
-            Action<DataRow> onSummary)
+            Action<DataRow> onSummary,
+            Guid? runGroupID = null,
+            bool tagInstance = false,
+            Action onRunningConfirmed = null)
         {
             if (context.ImportAgentID == null)
             {
@@ -97,7 +103,7 @@ namespace DBADashGUI.XETrace
             try
             {
                 sessionID = await XETraceRepo.StartAsync(context.InstanceID, messageGroup, config.EventTypesCsv,
-                    config.MaxDurationSeconds, config.FiltersJson);
+                    config.MaxDurationSeconds, config.FiltersJson, runGroupID);
             }
             catch (Exception ex)
             {
@@ -131,8 +137,20 @@ namespace DBADashGUI.XETrace
 
             async Task OnProgress(ResponseMessage reply, Guid group)
             {
+                // The service sends a "Trace running on ..." progress reply once the session is actually created and
+                // started - that's the confirmation to move the UI from "request sent" to "running".  (The generic
+                // "Message Received" ack that precedes it carries no such text.)
+                if (reply.Type == ResponseMessage.ResponseTypes.Progress &&
+                    reply.Message?.Contains("running on", StringComparison.OrdinalIgnoreCase) == true)
+                {
+                    onRunningConfirmed?.Invoke();
+                }
+
                 var table = reply.Data?.Tables.Count > 0 ? reply.Data.Tables[0] : null;
                 if (table == null || !table.Columns.Contains("event_type") || table.Rows.Count == 0) return;
+                // In a multi-instance run, stamp the source instance so the merged grid (and persisted history) can
+                // tell which replica each event came from.  Single-instance runs leave the schema untouched.
+                if (tagInstance) StampInstanceColumn(table, context.InstanceName);
                 await XETraceRepo.AddEventsAsync(sessionID, table);
                 await onBatch(table);
             }
@@ -198,6 +216,19 @@ namespace DBADashGUI.XETrace
             }
 
             return new XETraceOutcome(ok, cancelled, outcomeMessage, sessionID);
+        }
+
+        /// <summary>Adds/sets the <see cref="InstanceColumn"/> on every row of a batch to identify its source instance.</summary>
+        private static void StampInstanceColumn(DataTable table, string instanceName)
+        {
+            if (!table.Columns.Contains(InstanceColumn))
+            {
+                table.Columns.Add(InstanceColumn, typeof(string));
+            }
+            foreach (DataRow row in table.Rows)
+            {
+                row[InstanceColumn] = instanceName ?? string.Empty;
+            }
         }
 
         private static async Task SafeCompleteAsync(long sessionID, string errorMessage)

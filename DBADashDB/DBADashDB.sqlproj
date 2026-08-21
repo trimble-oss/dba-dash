@@ -560,6 +560,7 @@
     <Build Include="dbo\Stored Procedures\AvailabilityGroups_Upd.sql" />
     <Build Include="dbo\Stored Procedures\AvailabilityGroup_Get.sql" />
     <Build Include="dbo\Stored Procedures\AvailabilityGroupSummary_Get.sql" />
+    <Build Include="dbo\Stored Procedures\AvailabilityGroupInstances_Get.sql" />
     <Build Include="dbo\User Defined Types\JobSteps.sql" />
     <Build Include="dbo\Tables\JobSteps.sql" />
     <Build Include="dbo\Stored Procedures\JobSteps_Upd.sql" />
@@ -919,6 +920,7 @@
     <Build Include="dbo\Stored Procedures\XETraceSession_CancelRunning.sql" />
     <Build Include="dbo\Stored Procedures\XETraceSession_GetRunning.sql" />
     <Build Include="dbo\Stored Procedures\XETraceSession_Get.sql" />
+    <Build Include="dbo\Stored Procedures\XETraceEvents_GetByRunGroup.sql" />
     <Build Include="dbo\Stored Procedures\XETraceSession_GetXel.sql" />
     <Build Include="dbo\Stored Procedures\XETraceEvents_Get.sql" />
     <Build Include="dbo\Stored Procedures\PurgeXETrace.sql" />

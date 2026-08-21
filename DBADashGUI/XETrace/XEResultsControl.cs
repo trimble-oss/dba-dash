@@ -70,7 +70,7 @@ namespace DBADashGUI.XETrace
             _split.Panel2.Controls.Add(_dgvDetail);
             Controls.Add(_split);
 
-            _dgvXE.DataBindingComplete += (_, _) => LinkifyColumns();
+            _dgvXE.DataBindingComplete += (_, _) => { LinkifyColumns(); PinInstanceColumn(); };
             _dgvXE.CellContentClick += DgvXE_CellContentClick;
             _dgvXE.SelectionChanged += (_, _) => UpdateDetailGrid();
             _dgvDetail.DataBindingComplete += DgvDetail_DataBindingComplete;
@@ -155,6 +155,19 @@ namespace DBADashGUI.XETrace
                 cfg.IncludeMin = true;
                 cfg.IncludeMax = true;
             }
+        }
+
+        // The source-instance column added in a multi-instance run (see XETraceController.InstanceColumn).  Kept
+        // left-most so the merged grid reads "which replica, then the event".
+        private const string InstanceColumn = "Instance";
+
+        /// <summary>Moves the source-instance column (present only in a multi-instance run) to the far left.</summary>
+        private void PinInstanceColumn()
+        {
+            var col = _dgvXE.Columns[InstanceColumn];
+            if (col == null) return;
+            col.DisplayIndex = 0;
+            col.Frozen = Common.FreezeKeyColumn;
         }
 
         private void LinkifyColumns()

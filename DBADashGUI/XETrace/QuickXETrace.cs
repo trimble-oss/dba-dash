@@ -26,6 +26,10 @@ namespace DBADashGUI.XETrace
     {
         private const string AllEventsLabel = "(All events)";
 
+        // Above this many instances in a single run, warn before starting - the trace overhead applies to each instance
+        // independently, so tracing many at once multiplies the impact.
+        private const int ManyInstancesWarningThreshold = 5;
+
         private DBADashContext _context;
         private XEObjectCatalog _catalog = new();
 
@@ -42,25 +46,60 @@ namespace DBADashGUI.XETrace
         private readonly List<XEActionDef> _globalActions = new(XETraceDefinition.DefaultGlobalActions);
 
         private readonly XEResultsControl _results = new() { Dock = DockStyle.Fill };
-        private Guid _messageGroup;
         private bool _cancelling;
         private bool _isRunning;
+
+        // One entry per instance currently being traced (the current context instance plus any AG replicas / manually
+        // added instances).  A single-instance run holds exactly one.  Each trace has its own conversation group and
+        // repo session; a multi-instance run shares one RunGroupID so its sessions reload together in history.
+        private sealed class RunningTrace
+        {
+            public DBADashContext Context;
+            public Guid MessageGroup;
+            public long? SessionID;
+        }
+
+        private readonly List<RunningTrace> _runningTraces = new();
+
+        // How many of the run's instances the service has confirmed are actually running (each sends a confirmation
+        // once its session is created + started).  Drives the "request sent" -> "running" status transition.
+        private int _confirmedRunningCount;
+
+        // An instance shown in the instances list.  The current context instance is always present as a mandatory,
+        // checked item (IsCurrent - can't be unchecked or removed); the rest are AG replicas or manual additions.  The
+        // "Instances to Trace" selection controls (grpInstances, chkIncludeAg, clbInstances, ...) live in the designer.
+        private sealed class TraceInstance
+        {
+            public int InstanceID;
+            public string Name;
+            public bool IsAg;      // discovered via "Include AG replicas" (removed when that box is unticked)
+            public bool IsCurrent; // the current context instance - mandatory, always traced
+
+            public override string ToString() => IsCurrent ? $"{Name} (Current Instance - required)" : Name;
+        }
+
+        // Guards the AG checkbox handler while we set it programmatically (context switch / template load).
+        private bool _loadingInstances;
 
         // Bumped on every trace start and whenever a running trace is stopped to switch instances.  Batch and summary
         // callbacks capture the generation they were started with and drop themselves if it no longer matches, so a
         // cancelled trace's in-flight events can't leak into a freshly cleared grid.
         private int _traceGeneration;
 
-        // The history snapshot currently shown in the grid (XETraceSessionID), or null for a live/empty grid.  We track
-        // this per instance so switching back to an instance can re-load whatever snapshot it was showing (the events
-        // themselves live in the DB, so only this id needs preserving).
-        private long? _loadedHistoryId;
-        private readonly Dictionary<int, long?> _historyByInstance = new();
+        // The history snapshot currently shown in the grid, or null for a live/empty grid.  We track this per instance
+        // so switching back to an instance re-loads whatever snapshot it was showing (the events live in the DB, so
+        // only the identifiers need preserving).  RunGroup is set for a multi-instance run so switching back reloads
+        // the whole merged grid (all replicas), not just this instance's slice.
+        private readonly record struct HistorySnapshot(long SessionId, Guid? RunGroup);
+
+        private HistorySnapshot? _loadedSnapshot;
+        private readonly Dictionary<int, HistorySnapshot> _historyByInstance = new();
         private byte[] _xelData;
 
         // While applying a saved template we set the checkboxes/filters directly, so suppress the CheckedChanged
         // handlers that would otherwise add/remove the default filters and rebuild grids mid-apply.
         private bool _loadingTemplate;
+
         private string _lastTemplateName;
 
         private readonly System.Windows.Forms.Timer _runTimer = new() { Interval = 1000 };
@@ -72,6 +111,7 @@ namespace DBADashGUI.XETrace
         // itself.  A background timer (not the UI-thread _runTimer) so a busy UI thread can't stall the beats and
         // cause a false "client gone" stop.
         private System.Threading.Timer _heartbeatTimer;
+
         private int _heartbeatInFlight; // 0/1 guard (Interlocked) so a slow beat can't stack with the next tick
 
         private const int DefaultErrorSeverityThreshold = 11; // default for error_reported filter
@@ -202,6 +242,11 @@ namespace DBADashGUI.XETrace
             cboEvent.SelectedIndexChanged += (_, _) => RefreshFilterFields();
             bttnAddFilter.Click += (_, _) => AddFilter();
             dgvFilters.CellContentClick += DgvFilters_CellContentClick;
+
+            // Instances-to-trace selection (grpInstances, designer).
+            chkIncludeAg.CheckedChanged += (_, _) => { if (!_loadingInstances) _ = OnIncludeAgChangedAsync(); };
+            btnAddInstance.Click += (_, _) => AddInstancesViaPicker();
+            clbInstances.ItemCheck += ClbInstances_ItemCheck;
         }
 
         public void SetContext(DBADashContext context)
@@ -214,8 +259,9 @@ namespace DBADashGUI.XETrace
             {
                 if (_isRunning)
                 {
+                    var extra = _runningTraces.Count > 1 ? $" (and {_runningTraces.Count - 1} other instance(s))" : string.Empty;
                     var answer = MessageBox.Show(this,
-                        $"A trace is running for {_context.InstanceName}.\r\n\r\nStop it and switch to {context?.InstanceName}?",
+                        $"A trace is running for {_context.InstanceName}{extra}.\r\n\r\nStop it and switch to {context?.InstanceName}?",
                         "Ad-hoc Trace", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                     if (answer != DialogResult.Yes)
                     {
@@ -230,28 +276,42 @@ namespace DBADashGUI.XETrace
                         }
                         return;
                     }
-                    // Stop the outgoing trace using ITS context/group before we re-point _context (avoid cross-wiring),
-                    // and bump the generation so its in-flight batches can't leak into the next instance's grid.
+                    // Stop every outgoing trace using ITS own context/group before we re-point _context (avoid
+                    // cross-wiring), and bump the generation so their in-flight batches can't leak into the next
+                    // instance's grid.
                     _cancelling = true;
                     _traceGeneration++;
                     SetRunningState(false);
-                    _ = StopTraceAsync(_context, _messageGroup);
+                    foreach (var rt in _runningTraces.ToList()) _ = StopTraceAsync(rt.Context, rt.MessageGroup);
+                    _runningTraces.Clear();
                 }
 
-                _historyByInstance[_context.InstanceID] = _loadedHistoryId; // remember the outgoing instance's snapshot
+                if (_loadedSnapshot is { } outgoing)
+                {
+                    _historyByInstance[_context.InstanceID] = outgoing; // remember the outgoing instance's snapshot
+                }
+                else
+                {
+                    _historyByInstance.Remove(_context.InstanceID); // nothing loaded - don't re-show a stale snapshot
+                }
             }
 
             _context = context;
+            // Reset the instance list on a switch (the AG/added instances belonged to the previous instance); otherwise
+            // just make sure the current instance is seeded (first load, or re-selecting the same instance).
+            if (switchingInstance) ResetInstances();
+            else EnsureCurrentInstanceSeeded();
             UpdateXelCaptureState(); // engine edition is now known (in-memory), so Auto+Azure DB can disable xel capture
             _ = LoadCatalogAsync();
 
             if (switchingInstance && context is { InstanceID: > 0 })
             {
                 // Show the incoming instance's grid: re-load its remembered history snapshot from the DB, else clear.
+                // A multi-instance run reloads its whole merged grid (RunGroup carried in the snapshot).
                 ClearGrid();
-                if (_historyByInstance.TryGetValue(context.InstanceID, out var id) && id.HasValue)
+                if (_historyByInstance.TryGetValue(context.InstanceID, out var snapshot))
                 {
-                    _ = LoadHistoryEventsAsync(id.Value);
+                    _ = LoadHistoryEventsAsync(snapshot.SessionId, snapshot.RunGroup);
                 }
             }
         }
@@ -629,6 +689,149 @@ namespace DBADashGUI.XETrace
             dgvFilters.DataSource = dt;
         }
 
+        // ---- Instances to trace ------------------------------------------------------------------
+
+        /// <summary>Resolves (or removes) the current instance's AG replicas in the instances list.</summary>
+        private async Task OnIncludeAgChangedAsync()
+        {
+            if (chkIncludeAg.Checked)
+            {
+                if (_context is not { InstanceID: > 0 }) { chkIncludeAg.Checked = false; return; }
+                try
+                {
+                    var dt = await XETraceRepo.GetAgInstancesAsync(_context.InstanceID);
+                    if (dt.Rows.Count == 0)
+                    {
+                        SetStatus("No other monitored AG replicas found for this instance.", string.Empty, DashColors.Warning);
+                        _loadingInstances = true;
+                        try { chkIncludeAg.Checked = false; } finally { _loadingInstances = false; }
+                        return;
+                    }
+                    foreach (DataRow r in dt.Rows)
+                    {
+                        AddInstanceItem(Convert.ToInt32(r["InstanceID"]), r["InstanceName"] as string, isAg: true, check: true);
+                    }
+                    SetStatus($"Added {dt.Rows.Count} AG replica(s) to the trace.", string.Empty, DashColors.Information);
+                }
+                catch (Exception ex)
+                {
+                    SetStatus(ex.Message, ex.ToString(), DashColors.Fail);
+                    _loadingInstances = true;
+                    try { chkIncludeAg.Checked = false; } finally { _loadingInstances = false; }
+                }
+            }
+            else
+            {
+                // Drop only the AG-discovered items; keep anything the user added manually.
+                for (var i = clbInstances.Items.Count - 1; i >= 0; i--)
+                {
+                    if (clbInstances.Items[i] is TraceInstance { IsAg: true }) clbInstances.Items.RemoveAt(i);
+                }
+            }
+            UpdateInstanceCount();
+        }
+
+        private void AddInstancesViaPicker()
+        {
+            if (_context is not { InstanceID: > 0 }) return;
+            var existing = new HashSet<int>(clbInstances.Items.Cast<TraceInstance>().Select(t => t.InstanceID)) { _context.InstanceID };
+            var candidates = CommonData.Instances.Rows.Cast<DataRow>()
+                .Select(r => (ID: Convert.ToInt32(r["InstanceID"]), Name: r["InstanceGroupName"] as string))
+                .Where(c => c.ID > 0 && !existing.Contains(c.ID) && !string.IsNullOrEmpty(c.Name))
+                .OrderBy(c => c.Name, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+            if (candidates.Count == 0)
+            {
+                SetStatus("No other instances available to add.", string.Empty, DashColors.Warning);
+                return;
+            }
+            var picked = XEFieldPickerForm.Pick(this, "Add Instances to Trace",
+                candidates.Select(c => c.Name), Enumerable.Empty<string>());
+            if (picked == null) return;
+            foreach (var c in candidates.Where(c => picked.Contains(c.Name)))
+            {
+                AddInstanceItem(c.ID, c.Name, isAg: false, check: true);
+            }
+            UpdateInstanceCount();
+        }
+
+        /// <summary>Adds an instance to the instances list (deduped by InstanceID) with the given checked state.</summary>
+        private void AddInstanceItem(int instanceId, string name, bool isAg, bool check)
+        {
+            if (instanceId <= 0 || instanceId == _context?.InstanceID) return;
+            if (clbInstances.Items.Cast<TraceInstance>().Any(t => t.InstanceID == instanceId)) return;
+            var idx = clbInstances.Items.Add(new TraceInstance { InstanceID = instanceId, Name = name ?? instanceId.ToString(), IsAg = isAg });
+            clbInstances.SetItemChecked(idx, check);
+        }
+
+        private void UpdateInstanceCount()
+        {
+            var n = Math.Max(1, clbInstances.CheckedItems.Count); // the current instance is always checked
+            lblInstanceCount.Text = $"Tracing {n} instance{(n == 1 ? string.Empty : "s")}";
+        }
+
+        /// <summary>The current instance is mandatory - block any attempt to uncheck its (IsCurrent) list item.</summary>
+        private void ClbInstances_ItemCheck(object sender, ItemCheckEventArgs e)
+        {
+            if (clbInstances.Items[e.Index] is TraceInstance { IsCurrent: true } && e.NewValue == CheckState.Unchecked)
+            {
+                e.NewValue = CheckState.Checked;
+                return;
+            }
+            BeginInvoke(new Action(UpdateInstanceCount));
+        }
+
+        /// <summary>Resets the instance selection to just the (mandatory) current instance - used when it changes.</summary>
+        private void ResetInstances()
+        {
+            _loadingInstances = true;
+            try { chkIncludeAg.Checked = false; } finally { _loadingInstances = false; }
+            clbInstances.Items.Clear();
+            EnsureCurrentInstanceSeeded();
+            UpdateInstanceCount();
+        }
+
+        /// <summary>Ensures the current instance is present as the mandatory, checked, first item in the list.</summary>
+        private void EnsureCurrentInstanceSeeded()
+        {
+            if (_context is not { InstanceID: > 0 }) return;
+            if (clbInstances.Items.Cast<TraceInstance>().Any(i => i.IsCurrent && i.InstanceID == _context.InstanceID)) return;
+
+            // Drop any stale current-instance item (e.g. left over from a previous instance) then seed this one.
+            for (var i = clbInstances.Items.Count - 1; i >= 0; i--)
+            {
+                if (clbInstances.Items[i] is TraceInstance { IsCurrent: true }) clbInstances.Items.RemoveAt(i);
+            }
+            clbInstances.Items.Insert(0, new TraceInstance
+            { InstanceID = _context.InstanceID, Name = _context.InstanceName, IsCurrent = true });
+            clbInstances.SetItemChecked(0, true);
+            UpdateInstanceCount();
+        }
+
+        /// <summary>
+        /// The set of contexts to trace: the current instance plus every other checked instance.  Non-current
+        /// instances get a fresh context so their own ConnectionID / agents / edition resolve independently.
+        /// </summary>
+        private List<DBADashContext> EffectiveInstanceContexts()
+        {
+            var list = new List<DBADashContext>();
+            foreach (var item in clbInstances.CheckedItems.Cast<TraceInstance>())
+            {
+                list.Add(item.IsCurrent && item.InstanceID == _context.InstanceID
+                    ? _context
+                    : BuildContextForInstance(item.InstanceID, item.Name));
+            }
+            if (list.Count == 0) list.Add(_context); // safety - the current instance is always seeded + checked
+            return list.GroupBy(c => c.InstanceID).Select(g => g.First()).ToList();
+        }
+
+        private static DBADashContext BuildContextForInstance(int instanceId, string name) => new()
+        {
+            InstanceID = instanceId,
+            InstanceName = name,
+            RegularInstanceIDsWithHidden = new HashSet<int> { instanceId }
+        };
+
         // ---- Run / stop --------------------------------------------------------------------------
 
         private XETraceConfig BuildConfig()
@@ -686,9 +889,47 @@ namespace DBADashGUI.XETrace
                 return;
             }
 
-            // The service hard-caps the trace duration (AdhocXEMaxDurationSeconds).  Warn and clamp up-front rather
-            // than letting the request be silently reduced server-side.  The server-side clamp remains as a backstop.
-            var cap = _context.AdhocXEMaxDurationSeconds;
+            var instances = EffectiveInstanceContexts();
+
+            // First-run cost warning.  XE traces add overhead to the monitored instance; make sure the user understands
+            // that once, before they build the habit.  Suppressible ("Don't show this again") via a user setting.
+            if (!Properties.Settings.Default.SuppressXETraceWarning)
+            {
+                var warn = XEWarningForm.Show(this, "Extended Events Trace",
+                    "Extended Events traces can generate large volumes of data and add overhead to the monitored " +
+                    "instance.  The impact depends on the events you select, the filters you apply and how busy the " +
+                    "instance is.\r\n\r\n" +
+                    "The most expensive traces capture high-frequency events (for example statement-level events on a " +
+                    "busy server) or events that make the server do extra work (for example capturing query execution " +
+                    "plans).\r\n\r\n" +
+                    "Be selective about the events and filters you use, especially on busy production instances.",
+                    showSuppress: true);
+                if (!warn.Continue) return;
+                if (warn.Suppress)
+                {
+                    Properties.Settings.Default.SuppressXETraceWarning = true;
+                    Properties.Settings.Default.Save();
+                }
+            }
+
+            // Many-instances warning.  The trace overhead applies to each instance independently, so tracing a large
+            // number at once multiplies the impact.  Not suppressible - the risk scales with the count each run.
+            if (instances.Count > ManyInstancesWarningThreshold)
+            {
+                var warn = XEWarningForm.Show(this, "Multi-Instance XE Trace",
+                    $"You are about to start XE traces on {instances.Count} instances at the same time.\r\n\r\n" +
+                    "The data streams back through the DBA Dash service and into this window at once.  Tracing many " +
+                    "instances can put the service and this client under heavy load depending on the events and filter " +
+                    "selection.\r\n\r\n" +
+                    "Consider tracing fewer instances, or make sure your events and filters are selective.",
+                    showSuppress: false);
+                if (!warn.Continue) return;
+            }
+
+            // The service hard-caps the trace duration (AdhocXEMaxDurationSeconds).  With several instances the caps
+            // may differ, so use the smallest so no instance's request is silently clamped server-side.  Warn and
+            // clamp up-front; the per-instance server-side clamp remains as a backstop.
+            var cap = instances.Select(t => t.AdhocXEMaxDurationSeconds).Where(c => c > 0).DefaultIfEmpty(0).Min();
             if (cap > 0 && config.MaxDurationSeconds > cap)
             {
                 var result = MessageBox.Show(this,
@@ -703,68 +944,126 @@ namespace DBADashGUI.XETrace
 
             ClearGrid();
             _cancelling = false;
-            _messageGroup = Guid.NewGuid();
             var generation = ++_traceGeneration;
-            var traceInstanceId = _context.InstanceID; // the instance this run belongs to (we may switch away before it ends)
+            // Multi-instance run: tag each event with its source instance and share one RunGroupID so the per-instance
+            // sessions reload together in history.  A single-instance run stays exactly as before (no tag, no group).
+            var multi = instances.Count > 1;
+            var runGroupID = multi ? Guid.NewGuid() : (Guid?)null;
+            var instanceCount = instances.Count;
+
+            _runningTraces.Clear();
+            foreach (var t in instances)
+            {
+                _runningTraces.Add(new RunningTrace { Context = t, MessageGroup = Guid.NewGuid() });
+            }
+
+            _confirmedRunningCount = 0;
             _traceStartTime = DateTime.UtcNow;
             _traceDurationSeconds = config.MaxDurationSeconds;
             SetRunningState(true);
             splitContainer1.Panel1Collapsed = true; // auto-hide config once running
-            SetStatus("Trace started.  Waiting for data...", string.Empty, DashColors.Information);
+            // The message has been sent but the service hasn't confirmed yet - say so, and flip to "running" only when
+            // the service reports each trace has actually started (see OnTraceConfirmedRunning).
+            SetStatus(multi
+                    ? $"Trace request sent to {instanceCount} instances.  Waiting for the service..."
+                    : "Trace request sent.  Waiting for the service...",
+                string.Empty, DashColors.Information);
             RunTimer_Tick(null, EventArgs.Empty);
             _runTimer.Start();
 
-            XETraceController.XETraceOutcome outcome = null;
-            try
+            var tasks = _runningTraces
+                .Select(rt => RunOneTraceAsync(rt, config, generation, runGroupID, multi, instanceCount))
+                .ToList();
+            var outcomes = await Task.WhenAll(tasks);
+
+            if (generation != _traceGeneration) return; // superseded (switched away / restarted) - the newer run owns the state
+
+            SetRunningState(false);
+            _runTimer.Stop();
+            lblTime.Text = $"Ran for {FormatDuration(DateTime.UtcNow - _traceStartTime)}";
+
+            // Remember the current instance's session so History can re-load this run's snapshot for it.  (Each run,
+            // even a cancelled one, is persisted.)
+            var primary = _runningTraces.FirstOrDefault(rt => rt.Context.InstanceID == _context.InstanceID);
+            if (primary?.SessionID is { } sessionID)
             {
-                outcome = await XETraceController.RunTraceAsync(_context, config, _messageGroup, ControllerStatus,
-                    batch => AppendEventsAsync(generation, batch), summary => OnSummary(generation, summary));
-            }
-            catch (Exception ex)
-            {
-                if (generation == _traceGeneration)
-                {
-                    SetStatus(ex.Message, ex.ToString(), DashColors.Fail);
-                    MessageBox.Show(this, ex.Message, "Ad-hoc Trace", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-            finally
-            {
-                if (generation == _traceGeneration) // suppress if we've since switched away / started another trace
-                {
-                    SetRunningState(false);
-                    _runTimer.Stop();
-                    lblTime.Text = $"Ran for {FormatDuration(DateTime.UtcNow - _traceStartTime)}";
-                }
+                // Carry the RunGroupID for a multi-instance run so switching away and back reloads the whole merged grid.
+                var snapshot = new HistorySnapshot(sessionID, runGroupID);
+                _historyByInstance[_context.InstanceID] = snapshot;
+                _loadedSnapshot = snapshot;
             }
 
-            // The run (even a cancelled one) is persisted; remember its snapshot id so this instance can re-load it
-            // later - including after we've switched away and stopped it.
-            if (outcome?.SessionID is { } sessionID)
-            {
-                _historyByInstance[traceInstanceId] = sessionID;
-                if (generation == _traceGeneration) _loadedHistoryId = sessionID; // the grid now reflects that snapshot
-            }
-
-            if (generation != _traceGeneration) return; // stale (switched away / superseded) - don't touch the UI
+            _runningTraces.Clear();
 
             if (_cancelling)
             {
                 SetStatus("Trace stopped.", string.Empty, DashColors.Information);
+                return;
             }
-            else if (outcome is { Ok: false })
+
+            var failures = outcomes.Where(o => o is { Ok: false }).ToList();
+            var alreadyRunning = failures.FirstOrDefault(o =>
+                o.Message?.Contains("already running", StringComparison.OrdinalIgnoreCase) == true);
+            if (alreadyRunning != null &&
+                MessageBox.Show(this, alreadyRunning.Message + "\r\n\r\nStop and clean it up now?", "Ad-hoc Trace",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
             {
-                if (outcome.Message?.Contains("already running", StringComparison.OrdinalIgnoreCase) == true &&
-                    MessageBox.Show(this, outcome.Message + "\r\n\r\nStop and clean it up now?", "Ad-hoc Trace",
-                        MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
-                {
-                    await CleanupAsync();
-                }
-                else
-                {
-                    MessageBox.Show(this, outcome.Message, "Ad-hoc Trace", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                }
+                await CleanupAsync();
             }
+            else if (failures.Count > 0)
+            {
+                var msg = failures.Count == 1
+                    ? failures[0].Message
+                    : $"{failures.Count} of {outcomes.Length} traces did not complete successfully:\r\n\r\n" +
+                      string.Join("\r\n", failures.Select(f => f.Message));
+                MessageBox.Show(this, msg, "Ad-hoc Trace", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            else
+            {
+                SetStatus(multi
+                        ? $"Trace complete.  Collected {_results.RowCount} events from {outcomes.Length} instances."
+                        : $"Trace complete.  Collected {_results.RowCount} events.",
+                    string.Empty, DashColors.Success);
+            }
+        }
+
+        /// <summary>Runs one instance's trace, recording its session id.  Never throws - failures come back as an outcome.</summary>
+        private async Task<XETraceController.XETraceOutcome> RunOneTraceAsync(RunningTrace rt, XETraceConfig config,
+            int generation, Guid? runGroupID, bool tagInstance, int instanceCount)
+        {
+            try
+            {
+                var capturesXel = !tagInstance; // single-instance run only - a multi-instance .xel would be per-instance
+                var outcome = await XETraceController.RunTraceAsync(rt.Context, config, rt.MessageGroup, ControllerStatus,
+                    batch => AppendEventsAsync(generation, batch),
+                    summary => OnSummary(generation, summary, capturesXel),
+                    runGroupID, tagInstance,
+                    onRunningConfirmed: () => OnTraceConfirmedRunning(generation, instanceCount));
+                rt.SessionID = outcome?.SessionID;
+                return outcome ?? new XETraceController.XETraceOutcome(false, false,
+                    $"No result from the trace on {rt.Context.InstanceName}.", null);
+            }
+            catch (Exception ex)
+            {
+                if (generation == _traceGeneration) SetStatus(ex.Message, ex.ToString(), DashColors.Fail);
+                return new XETraceController.XETraceOutcome(false, false,
+                    $"{rt.Context.InstanceName}: {ex.Message}", rt.SessionID);
+            }
+        }
+
+        /// <summary>
+        /// The service has confirmed one instance's trace is actually running (session created + started).  Moves the
+        /// status from "request sent" to "running"; for a multi-instance run it counts how many have started so far.
+        /// Superseded once events arrive (AppendEventsAsync shows the collected count instead).
+        /// </summary>
+        private void OnTraceConfirmedRunning(int generation, int instanceCount)
+        {
+            if (generation != _traceGeneration) return; // stale (switched away / superseded)
+            var confirmed = System.Threading.Interlocked.Increment(ref _confirmedRunningCount);
+            SetStatus(instanceCount > 1
+                    ? $"Trace running on {confirmed} of {instanceCount} instances.  Waiting for data..."
+                    : "Trace running.  Waiting for data...",
+                string.Empty, DashColors.Information);
         }
 
         private void RunTimer_Tick(object sender, EventArgs e)
@@ -791,14 +1090,30 @@ namespace DBADashGUI.XETrace
             {
                 // Trip the token first - this is what actually ends the trace loop (for the event_file target the
                 // reader reads the file, so dropping the session alone wouldn't stop it).  Then drop the session and
-                // free the repo lock as a guarantee.
-                await XETraceController.CancelAsync(_context, _messageGroup, ControllerStatus);
-                await CleanupAsync();
+                // free the repo lock as a guarantee.  Fan out to every instance being traced.
+                foreach (var rt in _runningTraces.ToList())
+                {
+                    await XETraceController.CancelAsync(rt.Context, rt.MessageGroup, ControllerStatus);
+                    await XETraceController.CleanupAsync(rt.Context, ControllerStatus);
+                }
             }
             catch (Exception ex) { SetStatus(ex.Message, ex.ToString(), DashColors.Fail); }
         }
 
-        private Task CleanupAsync() => XETraceController.CleanupAsync(_context, ControllerStatus);
+        /// <summary>Force-cleans every instance being traced (or the current instance when nothing is running).</summary>
+        private async Task CleanupAsync()
+        {
+            var traces = _runningTraces.ToList();
+            if (traces.Count == 0)
+            {
+                await XETraceController.CleanupAsync(_context, ControllerStatus);
+                return;
+            }
+            foreach (var rt in traces)
+            {
+                await XETraceController.CleanupAsync(rt.Context, ControllerStatus);
+            }
+        }
 
         // ---- Live grid ---------------------------------------------------------------------------
 
@@ -812,21 +1127,23 @@ namespace DBADashGUI.XETrace
             return Task.CompletedTask;
         }
 
-        private void OnSummary(int generation, DataRow summary)
+        private void OnSummary(int generation, DataRow summary, bool capturesXel)
         {
             if (generation != _traceGeneration) return; // stale trace (switched/reset) - ignore its summary
-            var total = summary.Table.Columns.Contains("TotalEvents") ? summary["TotalEvents"] : 0;
-            var target = summary.Table.Columns.Contains("TargetType") ? summary["TargetType"] as string : "";
-            _xelData = summary.Table.Columns.Contains("XelData") && summary["XelData"] != DBNull.Value
-                ? (byte[])summary["XelData"]
-                : null;
-            SetStatus($"Trace complete.  Collected {total} events ({target}).", string.Empty, DashColors.Success);
+            // Only a single-instance run captures a .xel (a multi-instance capture would be one file per instance).
+            // The aggregate "Trace complete" status is set once the whole run finishes (see StartAsync).
+            if (capturesXel)
+            {
+                _xelData = summary.Table.Columns.Contains("XelData") && summary["XelData"] != DBNull.Value
+                    ? (byte[])summary["XelData"]
+                    : null;
+            }
         }
 
         private void ClearGrid()
         {
             _xelData = null;
-            _loadedHistoryId = null; // the grid no longer shows a saved snapshot
+            _loadedSnapshot = null; // the grid no longer shows a saved snapshot
             _results.Clear();
         }
 
@@ -860,9 +1177,13 @@ namespace DBADashGUI.XETrace
                 foreach (DataRow r in dt.Rows)
                 {
                     var id = Convert.ToInt64(r["XETraceSessionID"]);
-                    var text = $"{r["StartTime"]:g}  -  {r["EventTypes"]}  ({r["TotalEvents"]} events)";
+                    Guid? runGroup = r.Table.Columns.Contains("RunGroupID") && r["RunGroupID"] != DBNull.Value
+                        ? (Guid)r["RunGroupID"]
+                        : null;
+                    var groupLabel = runGroup.HasValue ? "  [multi-instance]" : string.Empty;
+                    var text = $"{r["StartTime"]:g}  -  {r["EventTypes"]}  ({r["TotalEvents"]} events){groupLabel}";
                     var item = new ToolStripMenuItem(text) { Tag = id };
-                    item.Click += async (_, _) => await LoadHistoryEventsAsync(id);
+                    item.Click += async (_, _) => await LoadHistoryEventsAsync(id, runGroup);
                     tsHistory.DropDownItems.Add(item);
                 }
             }
@@ -872,14 +1193,20 @@ namespace DBADashGUI.XETrace
             }
         }
 
-        private async Task LoadHistoryEventsAsync(long sessionID)
+        private async Task LoadHistoryEventsAsync(long sessionID, Guid? runGroupID = null)
         {
             try
             {
-                var stored = await XETraceRepo.GetEventsAsync(sessionID);
+                // A multi-instance run reloads every replica's events together (merged, in time order); a single run
+                // loads just its one session.
+                var stored = runGroupID.HasValue
+                    ? await XETraceRepo.GetEventsByRunGroupAsync(runGroupID.Value)
+                    : await XETraceRepo.GetEventsAsync(sessionID);
                 _xelData = null;
                 _results.LoadEvents(ExpandStoredEvents(stored));
-                _loadedHistoryId = sessionID; // remember so switching back to this instance re-loads the same snapshot
+                // Remember what's shown so switching back to this instance re-loads the same snapshot (the whole merged
+                // grid when it's a multi-instance run).
+                _loadedSnapshot = new HistorySnapshot(sessionID, runGroupID);
                 SetStatus($"Loaded {_results.RowCount} events from history", string.Empty, DashColors.Information);
             }
             catch (Exception ex)
@@ -996,6 +1323,7 @@ namespace DBADashGUI.XETrace
                 Target = cfg.Target,
                 MaxDurationSeconds = cfg.MaxDurationSeconds,
                 CaptureXel = cfg.CaptureXel,
+                IncludeAgReplicas = chkIncludeAg.Checked,
                 Filters = filters.Select((f, i) => new XETraceFilterTemplate
                 {
                     Filter = f,
@@ -1168,6 +1496,12 @@ namespace DBADashGUI.XETrace
             RefreshFilterGrid();
             UpdateGlobalFieldsLabel();
             UpdateXelCaptureState(); // clear xel capture if the loaded target can't produce one
+
+            // Re-resolve AG replicas against the current instance (membership isn't stored - only the intent).  Setting
+            // the checkbox fires OnIncludeAgChangedAsync, which adds the replicas (or clears the box if there are none).
+            ResetInstances();
+            if (t.IncludeAgReplicas) chkIncludeAg.Checked = true;
+
             _lastTemplateName = t.Name;
             SetStatus($"Loaded template '{t.Name}'.", string.Empty, DashColors.Information);
         }
@@ -1209,7 +1543,7 @@ namespace DBADashGUI.XETrace
             _isRunning = running;
             tsStartTrace.Enabled = !running;
             tsStopTrace.Enabled = running;
-            grpConfig.Enabled = groupBox1.Enabled = Filter.Enabled = !running;
+            grpConfig.Enabled = groupBox1.Enabled = Filter.Enabled = grpInstances.Enabled = !running;
 
             if (running)
             {
@@ -1228,10 +1562,12 @@ namespace DBADashGUI.XETrace
         private void StartHeartbeat()
         {
             StopHeartbeat();
-            var group = _messageGroup;
-            var context = _context;
+            // Snapshot the (context, group) pairs at start so the timer never touches the mutable _runningTraces list
+            // from a background thread.  A run's instances don't change once started.
+            var beats = _runningTraces.Select(rt => (rt.Context, rt.MessageGroup)).ToArray();
+            if (beats.Length == 0) return;
             var interval = TimeSpan.FromSeconds(XETraceHeartbeat.IntervalSeconds);
-            _heartbeatTimer = new System.Threading.Timer(_ => SendHeartbeat(context, group), null, interval, interval);
+            _heartbeatTimer = new System.Threading.Timer(_ => SendHeartbeats(beats), null, interval, interval);
         }
 
         private void StopHeartbeat()
@@ -1241,17 +1577,23 @@ namespace DBADashGUI.XETrace
             timer?.Dispose();
         }
 
-        /// <summary>Fires one heartbeat (fire-and-forget).  Guarded so a slow send can't stack with the next tick.</summary>
-        private void SendHeartbeat(DBADashContext context, Guid group)
+        /// <summary>Beats every running trace (fire-and-forget).  Guarded so a slow tick can't stack with the next.</summary>
+        private void SendHeartbeats((DBADashContext Context, Guid Group)[] beats)
         {
             if (System.Threading.Interlocked.CompareExchange(ref _heartbeatInFlight, 1, 0) != 0) return; // already in flight
-            _ = SendHeartbeatAsync(context, group);
+            _ = SendHeartbeatsAsync(beats);
         }
 
-        private async Task SendHeartbeatAsync(DBADashContext context, Guid group)
+        private async Task SendHeartbeatsAsync((DBADashContext Context, Guid Group)[] beats)
         {
-            try { await MessagingHelper.SendHeartbeatAsync(context, group); }
-            catch (Exception ex) { Serilog.Log.Debug(ex, "Error sending XE trace heartbeat for {group}", group); }
+            try
+            {
+                foreach (var (context, group) in beats)
+                {
+                    try { await MessagingHelper.SendHeartbeatAsync(context, group); }
+                    catch (Exception ex) { Serilog.Log.Debug(ex, "Error sending XE trace heartbeat for {group}", group); }
+                }
+            }
             finally { System.Threading.Interlocked.Exchange(ref _heartbeatInFlight, 0); }
         }
 
