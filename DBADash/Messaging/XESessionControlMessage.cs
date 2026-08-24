@@ -42,6 +42,12 @@ namespace DBADash.Messaging
             {
                 throw new Exception("No session name was supplied.");
             }
+            // Only Start/Stop are valid; reject anything else rather than silently treating it as STOP (an unknown
+            // value from a malformed or newer client must not stop a session unexpectedly).
+            if (Operation != XESessionOperation.Start && Operation != XESessionOperation.Stop)
+            {
+                throw new Exception($"Unsupported XE session operation '{Operation}'.");
+            }
             if (!cfg.CanManageXESession(SessionName))
             {
                 throw new Exception(

@@ -389,7 +389,7 @@ namespace DBADashGUI.XETrace
                 EventName = "error_reported",
                 Field = "severity",
                 FieldPackage = "sqlserver",
-                IsAction = true,
+                IsAction = false, // severity is an error_reported data column, referenced as [severity] (not [sqlserver].[severity])
                 IsNumeric = true,
                 Op = XEFilterOp.GreaterThanOrEqual,
                 Value = DefaultErrorSeverityThreshold.ToString()
@@ -993,6 +993,9 @@ namespace DBADashGUI.XETrace
                 _loadedSnapshot = snapshot;
             }
 
+            // Snapshot the instances that ran before clearing, so a follow-up cleanup targets the actual instances
+            // (including AG replicas / manually-added ones) rather than falling back to just the current instance.
+            var completedTraces = _runningTraces.ToList();
             _runningTraces.Clear();
 
             if (_cancelling)
@@ -1008,7 +1011,7 @@ namespace DBADashGUI.XETrace
                 MessageBox.Show(this, alreadyRunning.Message + "\r\n\r\nStop and clean it up now?", "Ad-hoc Trace",
                     MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
             {
-                await CleanupAsync();
+                await CleanupAsync(completedTraces);
             }
             else if (failures.Count > 0)
             {
@@ -1086,32 +1089,45 @@ namespace DBADashGUI.XETrace
             _cancelling = true;
             tsStopTrace.Enabled = false; // immediate feedback + prevent stacking clicks
             SetStatus("Stop requested...", string.Empty, DashColors.Warning);
-            try
+            // Trip the token first - this is what actually ends the trace loop (for the event_file target the
+            // reader reads the file, so dropping the session alone wouldn't stop it).  Then drop the session and
+            // free the repo lock as a guarantee.  Fan out to every instance being traced - a failure stopping one
+            // instance must not abort the stop/cleanup of the rest (they'd be left with orphaned sessions/locks).
+            var errors = new List<string>();
+            foreach (var rt in _runningTraces.ToList())
             {
-                // Trip the token first - this is what actually ends the trace loop (for the event_file target the
-                // reader reads the file, so dropping the session alone wouldn't stop it).  Then drop the session and
-                // free the repo lock as a guarantee.  Fan out to every instance being traced.
-                foreach (var rt in _runningTraces.ToList())
+                try
                 {
                     await XETraceController.CancelAsync(rt.Context, rt.MessageGroup, ControllerStatus);
                     await XETraceController.CleanupAsync(rt.Context, ControllerStatus);
                 }
+                catch (Exception ex) { errors.Add($"{rt.Context.InstanceName}: {ex.Message}"); }
             }
-            catch (Exception ex) { SetStatus(ex.Message, ex.ToString(), DashColors.Fail); }
+            if (errors.Count > 0)
+            {
+                SetStatus("Error stopping one or more traces.", string.Join("\r\n", errors), DashColors.Fail);
+            }
         }
 
-        /// <summary>Force-cleans every instance being traced (or the current instance when nothing is running).</summary>
-        private async Task CleanupAsync()
+        /// <summary>Force-cleans the given instances (or the current instance when none are supplied/running).  A
+        /// failure cleaning one instance never aborts cleanup of the rest.</summary>
+        private async Task CleanupAsync(IReadOnlyList<RunningTrace> traces = null)
         {
-            var traces = _runningTraces.ToList();
+            traces ??= _runningTraces.ToList();
             if (traces.Count == 0)
             {
                 await XETraceController.CleanupAsync(_context, ControllerStatus);
                 return;
             }
+            var errors = new List<string>();
             foreach (var rt in traces)
             {
-                await XETraceController.CleanupAsync(rt.Context, ControllerStatus);
+                try { await XETraceController.CleanupAsync(rt.Context, ControllerStatus); }
+                catch (Exception ex) { errors.Add($"{rt.Context.InstanceName}: {ex.Message}"); }
+            }
+            if (errors.Count > 0)
+            {
+                SetStatus("Error cleaning up one or more traces.", string.Join("\r\n", errors), DashColors.Fail);
             }
         }
 
@@ -1588,11 +1604,14 @@ namespace DBADashGUI.XETrace
         {
             try
             {
-                foreach (var (context, group) in beats)
+                // Beat every instance concurrently - a slow/unavailable instance must not delay beats to the others
+                // (a serial loop could let one instance consume the whole interval and starve the rest, causing
+                // healthy traces to be declared abandoned).  Each beat swallows its own error.
+                await Task.WhenAll(beats.Select(async b =>
                 {
-                    try { await MessagingHelper.SendHeartbeatAsync(context, group); }
-                    catch (Exception ex) { Serilog.Log.Debug(ex, "Error sending XE trace heartbeat for {group}", group); }
-                }
+                    try { await MessagingHelper.SendHeartbeatAsync(b.Context, b.Group); }
+                    catch (Exception ex) { Serilog.Log.Debug(ex, "Error sending XE trace heartbeat for {group}", b.Group); }
+                }));
             }
             finally { System.Threading.Interlocked.Exchange(ref _heartbeatInFlight, 0); }
         }

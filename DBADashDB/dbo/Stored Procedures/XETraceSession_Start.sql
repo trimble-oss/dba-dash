@@ -2,7 +2,7 @@ CREATE PROC dbo.XETraceSession_Start(
     @InstanceID INT,
     @MessageGroupID UNIQUEIDENTIFIER,
     @RequestedBy NVARCHAR(256),
-    @EventTypes VARCHAR(200),
+    @EventTypes VARCHAR(MAX),
     @MaxDurationSeconds INT,
     @FiltersJson NVARCHAR(MAX) = NULL,
     @RunGroupID UNIQUEIDENTIFIER = NULL, /* set (same GUID) for every instance of a multi-instance run; NULL for single-instance */
