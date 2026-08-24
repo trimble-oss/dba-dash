@@ -62,7 +62,8 @@ namespace DBADashGUI.XETrace
                 Dock = DockStyle.Fill,
                 AllowUserToAddRows = false,
                 ReadOnly = true,
-                AutoGenerateColumns = true
+                AutoGenerateColumns = true,
+                RowHeadersVisible = false,
             };
 
             _split = new SplitContainer { Dock = DockStyle.Fill, Orientation = Orientation.Horizontal };

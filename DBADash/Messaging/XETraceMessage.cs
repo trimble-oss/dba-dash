@@ -260,9 +260,10 @@ namespace DBADash.Messaging
                 {
                     // event_file: a final drain after STOP picks up events still buffered at cancel/deadline, using
                     // the SAME reader so it continues from its cursor (not re-reading the file).  Ring buffer isn't
-                    // drained here - its reader flushes on every read and would restart the session.
-                    await StopReadDrainAndDropAsync(reader, connectionString, scope, targetType, readPath, totalEvents,
-                        cancellationToken);
+                    // drained here - its reader flushes on every read and would restart the session.  Add the drained
+                    // count to the running total so the summary (and TotalEvents) includes these final events.
+                    totalEvents += await StopReadDrainAndDropAsync(reader, connectionString, scope, targetType, readPath,
+                        totalEvents, cancellationToken);
                 }
             }
 
@@ -477,6 +478,12 @@ namespace DBADash.Messaging
         /// </summary>
         private static XETraceTargetType ResolveTarget(XETraceTargetPreference pref, ConnectionInfo info)
         {
+            // The preference comes from the client - reject an undefined enum value rather than letting it fall
+            // through the switch below to target-less live streaming (which would bypass a requested durable target).
+            if (!Enum.IsDefined(typeof(XETraceTargetPreference), pref))
+            {
+                throw new Exception($"Unsupported target preference '{pref}'.");
+            }
             if (info.IsAzureDB)
             {
                 if (pref == XETraceTargetPreference.EventFile)
@@ -538,9 +545,12 @@ namespace DBADash.Messaging
             }
         }
 
-        private async Task StopReadDrainAndDropAsync(IXETraceReader reader, string connectionString,
+        /// <summary>Stops, drains and drops the session.  Returns the number of events picked up by the final drain
+        /// (0 for the ring buffer, which isn't drained here) so the caller can add them to the running total.</summary>
+        private async Task<int> StopReadDrainAndDropAsync(IXETraceReader reader, string connectionString,
             XESessionScope scope, XETraceTargetType targetType, string readPath, int runningTotal, CancellationToken ct)
         {
+            var drained = 0;
             // Cleanup must run even when the trace was cancelled, so don't observe the (already-cancelled) token here.
             try
             {
@@ -549,7 +559,7 @@ namespace DBADash.Messaging
                 if (targetType == XETraceTargetType.EventFile && reader != null)
                 {
                     await Task.Delay(TimeSpan.FromSeconds(1), CancellationToken.None); // let buffered events flush
-                    await ReadAndReportAsync(reader, runningTotal, CancellationToken.None);
+                    drained = await ReadAndReportAsync(reader, runningTotal, CancellationToken.None);
                 }
 
                 // Grab the native .xel bytes now (after STOP has flushed, file still on disk).  The file has a unique
@@ -568,6 +578,7 @@ namespace DBADash.Messaging
                 try { await ExecAsync(connectionString, DropIfExistsSql(scope), CancellationToken.None); }
                 catch (Exception ex) { Log.Warning(ex, "Error dropping ad-hoc XE session on {instance}", ConnectionID); }
             }
+            return drained;
         }
 
         private DataSet BuildSummary(XETraceTargetType targetType, int totalEvents, DateTime startUtc, DateTime endUtc,

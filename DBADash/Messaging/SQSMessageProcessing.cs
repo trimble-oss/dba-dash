@@ -257,6 +257,15 @@ namespace DBADash.Messaging
                         ResponseMessage.ResponseTypes.Success, "Heartbeat").ConfigureAwait(false);
                     return;
                 }
+                if (msg.RunOutsideConcurrencyLimit)
+                {
+                    // Long-running messages (e.g. an ad-hoc XE trace) must not hold one of the limited per-connection
+                    // processing slots for their whole duration.  They run outside the semaphore - concurrency is
+                    // bounded by the message itself (e.g. one trace per instance).
+                    await DoProcessMessageAsync(msg, DBADashAgentIdentifier, handle, destinationConnectionHash,
+                        replySQS, replyAgent);
+                    return;
+                }
                 using var semaphore = await _semaphores.LockOrNullAsync(destinationConnectionHash, msg.SemaphoreTimeout);
                 if (semaphore is null) // Semaphore used to limit concurrent processing per connection
                 {
