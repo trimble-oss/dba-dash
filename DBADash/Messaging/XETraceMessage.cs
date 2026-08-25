@@ -13,8 +13,9 @@ namespace DBADash.Messaging
 {
     /// <summary>
     /// Which target the requester would like.  <see cref="Auto"/> lets the service pick the best available - live
-    /// streaming on-prem / Managed Instance, ring buffer on Azure SQL Database (which can't stream live).
-    /// <see cref="LiveStream"/> is a target-less, real-time trace (not available on Azure SQL DB).
+    /// streaming everywhere it's supported (on-prem, Managed Instance and, since Microsoft enabled the live event
+    /// stream there, Azure SQL Database), falling back to a durable target otherwise.
+    /// <see cref="LiveStream"/> is a target-less, real-time trace.
     /// </summary>
     public enum XETraceTargetPreference
     {
@@ -290,6 +291,14 @@ namespace DBADash.Messaging
                 "Ad-hoc LIVE XE trace on {instance} ({duration}s) triggered from message {id} with handle {handle}",
                 ConnectionID, duration, Id, handle);
 
+            // A .xel capture bolts an event_file target onto the live session, but Azure SQL Database can't write one
+            // (no local disk).  Live streaming itself works there; the .xel capture doesn't, so reject that combination.
+            if (CaptureXel && databaseScoped)
+            {
+                throw new Exception(
+                    "Capturing a .xel file is not supported on Azure SQL Database (the event_file target needs blob storage).  Watch live without .xel capture, or use the ring buffer target.");
+            }
+
             // Capturing a .xel bolts an event_file target onto the live session; without it the session is target-less.
             var targetType = CaptureXel ? XETraceTargetType.EventFile : XETraceTargetType.None;
             var definition = BuildDefinition(targetType, scope);
@@ -482,9 +491,10 @@ namespace DBADash.Messaging
 
         /// <summary>
         /// Chooses the target.  <see cref="XETraceTargetType.None"/> means a target-less <b>live-streaming</b> trace.
-        /// Azure SQL Database can neither write a local event_file nor stream live, so it always uses the ring buffer;
-        /// an explicit event_file / live-stream request there is an error.  Off Azure, <see cref="XETraceTargetPreference.Auto"/>
-        /// and <see cref="XETraceTargetPreference.LiveStream"/> both resolve to live streaming.
+        /// Azure SQL Database can't write a local event_file (that target needs blob storage), so event_file is rejected
+        /// there; it can stream live and use the ring buffer, so <see cref="XETraceTargetPreference.Auto"/> and
+        /// <see cref="XETraceTargetPreference.LiveStream"/> resolve to live streaming just like on-prem.  Off Azure,
+        /// Auto and LiveStream both resolve to live streaming too.
         /// </summary>
         private static XETraceTargetType ResolveTarget(XETraceTargetPreference pref, ConnectionInfo info)
         {
@@ -494,20 +504,12 @@ namespace DBADash.Messaging
             {
                 throw new Exception($"Unsupported target preference '{pref}'.");
             }
-            if (info.IsAzureDB)
+            // Azure SQL Database has no local disk for the event_file target; everything else resolves as it does
+            // on-prem (live streaming now works on Azure SQL DB via sys.fn_MSxe_read_event_stream).
+            if (info.IsAzureDB && pref == XETraceTargetPreference.EventFile)
             {
-                if (pref == XETraceTargetPreference.EventFile)
-                {
-                    throw new Exception(
-                        "The event_file target is not supported on Azure SQL Database.  Use the ring buffer target.");
-                }
-                if (pref == XETraceTargetPreference.LiveStream)
-                {
-                    throw new Exception(
-                        "Live streaming is not available on Azure SQL Database.  Use the ring buffer target (or Auto).");
-                }
-                // Auto / RingBuffer -> ring buffer.
-                return XETraceTargetType.RingBuffer;
+                throw new Exception(
+                    "The event_file target is not supported on Azure SQL Database.  Use live streaming or the ring buffer target.");
             }
             return pref switch
             {
