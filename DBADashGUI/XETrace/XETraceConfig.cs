@@ -15,6 +15,14 @@ namespace DBADashGUI.XETrace
         /// <summary>Arbitrary extra events (beyond the RPC/Batch/Error shortcuts) chosen from the catalog.</summary>
         public List<XETraceEventDef> ExtraEvents { get; set; } = new();
 
+        /// <summary>
+        /// Every selected event (the built-in RPC/Batch/Error shortcuts plus <see cref="ExtraEvents"/>) as a typed
+        /// definition carrying its data columns from the catalog.  This is what the service builds the session DDL
+        /// from; the columns let it apply each data-column filter only to events that expose it (and the severity
+        /// floor only to events with a <c>severity</c> column).  Built by the GUI, which has the catalog.
+        /// </summary>
+        public List<XETraceEventDef> EventDefs { get; set; } = new();
+
         /// <summary>Global actions ("global fields") captured on every event.  Defaults to the standard set.</summary>
         public List<XEActionDef> GlobalActions { get; set; } = new(XETraceDefinition.DefaultGlobalActions);
 

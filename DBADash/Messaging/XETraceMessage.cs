@@ -41,12 +41,14 @@ namespace DBADash.Messaging
     {
         public string ConnectionID { get; set; }
 
-        public XETraceEventType Events { get; set; } = XETraceEventType.RpcCompleted | XETraceEventType.SqlBatchCompleted;
+        /// <summary>
+        /// The events to capture, each carrying its data columns (from the catalog).  The client resolves the columns
+        /// (including for the built-in RPC/Batch/Error shortcuts) so the service applies each data-column filter only to
+        /// events that expose it.  See <see cref="XETraceDefinition.Events"/>.
+        /// </summary>
+        public List<XETraceEventDef> Events { get; set; } = new();
 
         public List<XEFilter> Filters { get; set; } = new();
-
-        /// <summary>Arbitrary extra events (beyond the RPC/Batch/Error shortcuts), by name, from the catalog.</summary>
-        public List<XETraceEventDef> ExtraEvents { get; set; } = new();
 
         public XETraceTargetPreference RequestedTarget { get; set; } = XETraceTargetPreference.Auto;
 
@@ -466,9 +468,8 @@ namespace DBADash.Messaging
         private XETraceDefinition BuildDefinition(XETraceTargetType targetType, XESessionScope scope) => new()
         {
             SessionName = SessionName,
-            Events = Events,
+            Events = Events ?? new List<XETraceEventDef>(),
             Filters = Filters ?? new List<XEFilter>(),
-            ExtraEvents = ExtraEvents ?? new List<XETraceEventDef>(),
             TargetType = targetType,
             Scope = scope,
             ErrorSeverityFloor = ErrorSeverityFloor,

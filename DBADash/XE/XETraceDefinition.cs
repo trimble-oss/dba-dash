@@ -151,7 +151,12 @@ namespace DBADash.XE
         // Session name is service-generated, but still validated + bracket-escaped as defence in depth.
         public string SessionName { get; set; } = "DBADash_AdHoc";
 
-        public XETraceEventType Events { get; set; }
+        /// <summary>
+        /// The events to capture, each carrying its data columns (from the catalog) so a data-column filter is only
+        /// applied to events that actually expose that column, and the severity floor only to events with a
+        /// <c>severity</c> column.  De-duplicated by name; package and name are validated as identifiers before use.
+        /// </summary>
+        public IList<XETraceEventDef> Events { get; set; } = new List<XETraceEventDef>();
 
         public IList<XEFilter> Filters { get; set; } = new List<XEFilter>();
 
@@ -200,12 +205,6 @@ namespace DBADash.XE
         public IList<string> ExcludedAppNames { get; set; } = new List<string> { "DBADashXE" };
 
         /// <summary>
-        /// Arbitrary extra events to capture (beyond the <see cref="Events"/> shortcuts), by name.  Each carries the
-        /// data columns it exposes (from the catalog) so a data-column filter is only applied to events that have it.
-        /// </summary>
-        public IList<XETraceEventDef> ExtraEvents { get; set; } = new List<XETraceEventDef>();
-
-        /// <summary>
         /// Per-event customizable-column settings (the <c>SET</c> toggles), keyed by event name.  Applies to both the
         /// built-in shortcut events and the extra events.  Empty means every event keeps its server defaults.
         /// </summary>
@@ -219,12 +218,6 @@ namespace DBADash.XE
         // meant to admit ONLY [A-Za-z0-9_].  \z matches only the very end of the string, closing that gap.
         private static readonly Regex SessionNamePattern = new(@"\A[A-Za-z0-9_]{1,100}\z", RegexOptions.Compiled);
         private static readonly Regex IdentifierPattern = new(@"\A[A-Za-z0-9_]{1,128}\z", RegexOptions.Compiled);
-
-        // The data columns each built-in event exposes that we filter on - used to decide field applicability
-        // (a duration filter must not be applied to error_reported, which has no duration column).
-        private static readonly string[] CompletedFields =
-            { "duration", "cpu_time", "logical_reads", "physical_reads", "writes", "row_count" };
-        private static readonly string[] ErrorFields = { "severity", "error_number", "state" };
 
         /// <summary>Builds and returns the full <c>CREATE EVENT SESSION</c> statement.</summary>
         public string BuildCreateSessionSql()
@@ -245,19 +238,13 @@ namespace DBADash.XE
             var scope = Scope == XESessionScope.Server ? "ON SERVER" : "ON DATABASE";
             var name = BracketEscape(SessionName);
 
-            // Unify the built-in event shortcuts and the extra events into one list, de-duplicating by name.
+            // De-duplicate the requested events by name (a session can't ADD EVENT the same event twice).  Each event
+            // carries its own data columns from the catalog, so no built-in column list is needed here.
             var events = new List<XETraceEventDef>();
-            if (Events.HasFlag(XETraceEventType.RpcCompleted))
-                events.Add(new XETraceEventDef("sqlserver", "rpc_completed", CompletedFields));
-            if (Events.HasFlag(XETraceEventType.SqlBatchCompleted))
-                events.Add(new XETraceEventDef("sqlserver", "sql_batch_completed", CompletedFields));
-            if (Events.HasFlag(XETraceEventType.ErrorReported))
-                events.Add(new XETraceEventDef("sqlserver", "error_reported", ErrorFields));
-
-            var seen = new HashSet<string>(events.Select(e => e.Name), StringComparer.OrdinalIgnoreCase);
-            foreach (var extra in ExtraEvents ?? Enumerable.Empty<XETraceEventDef>())
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var evt in Events ?? Enumerable.Empty<XETraceEventDef>())
             {
-                if (extra?.Name != null && seen.Add(extra.Name)) events.Add(extra);
+                if (evt?.Name != null && seen.Add(evt.Name)) events.Add(evt);
             }
 
             if (events.Count == 0)
