@@ -19,7 +19,7 @@ namespace DBADash.Messaging
     /// (preferred) via <see cref="EventFileTraceReader"/> ordered newest-first; ring_buffer once via
     /// <see cref="WatchRingBufferReader"/> with no flush, keeping the newest slice.
     /// Only these two targets carry a readable event stream - histogram / pair_matching / etc. are rejected with a
-    /// clear message.  Gated on <see cref="CollectionConfig.AllowManageXE"/> and the per-session watch list (viewing
+    /// clear message.  Gated on <see cref="CollectionConfig.AllowViewXE"/> and the per-session watch list (viewing
     /// captured data is the same read sensitivity as watching).</para>
     /// </summary>
     public class XEViewTargetDataMessage : MessageBase
@@ -45,10 +45,10 @@ namespace DBADash.Messaging
         public override async Task<DataSet> Process(CollectionConfig cfg, Guid handle, CancellationToken cancellationToken)
         {
             ThrowIfExpired();
-            if (!cfg.AllowManageXE)
+            if (!cfg.AllowViewXE)
             {
                 throw new Exception(
-                    "Managing extended events is not enabled on the DBA Dash service.  Use the service configuration tool to enable.");
+                    "Viewing extended events is not enabled on the DBA Dash service.  Enable ad-hoc tracing or Manage XE in the service configuration tool.");
             }
             if (string.IsNullOrWhiteSpace(SessionName))
             {

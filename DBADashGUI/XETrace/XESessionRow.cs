@@ -130,11 +130,12 @@ namespace DBADashGUI.XETrace
         }
 
         /// <summary>
-        /// Applies the service's per-session policy: disables (and explains) the start/stop and watch buttons for a
-        /// session the collect agent isn't permitted to manage / watch, so the user isn't offered an action that would
-        /// only be rejected server-side.
+        /// Applies the effective policy: disables (and explains) the start/stop and watch buttons for a session the
+        /// user isn't permitted to manage / watch - whether because of the caller's role or the collect agent's
+        /// per-session policy - so the user isn't offered an action that would only be rejected.
+        /// <paramref name="manageDisabledReason"/> overrides the tooltip shown when start/stop is unavailable.
         /// </summary>
-        public void SetPolicy(bool canManage, bool canWatch)
+        public void SetPolicy(bool canManage, bool canWatch, string manageDisabledReason = null)
         {
             _canManage = canManage;
             _startStop.Image = canManage
@@ -143,7 +144,8 @@ namespace DBADashGUI.XETrace
             _startStop.Cursor = canManage ? Cursors.Hand : Cursors.Default;
             _toolTip.SetToolTip(_startStop, canManage
                 ? (IsRunning ? "Stop" : "Start")
-                : "This session is protected by the service configuration and can't be started or stopped here.");
+                : manageDisabledReason
+                  ?? "This session is protected by the service configuration and can't be started or stopped here.");
 
             // Viewing captured data is the same read as watching, so it's gated by the same per-session watch policy.
             _canWatch = canWatch;
