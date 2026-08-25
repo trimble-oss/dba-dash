@@ -12,7 +12,7 @@ AS
 SET NOCOUNT ON
 /* Called by the GUI (which always has a repository connection - the collecting service may not, e.g. S3/SQS relay
    topology) to open a trace session, mirroring how plan forcing is logged.  TargetType / GeneratedDDL are resolved
-   by the service and written back on completion (XETraceSession_Complete). */
+   by the service and written back by XETraceSession_Upd (early for the DDL/target, on completion for the rest). */
 
 /* Free any stale Running rows for this instance (a trace whose service stopped without completing) so a genuine
    new trace isn't blocked by the one-running-per-instance unique index.  Grace = duration + 5 min for cleanup. */

@@ -80,6 +80,16 @@ namespace DBADash.Messaging
         /// </summary>
         public int? ExpectedProgressCount { get; set; }
 
+        /// <summary>
+        /// Populated on the "trace running" progress reply of an ad-hoc XE trace.  Carries the service-generated
+        /// CREATE EVENT SESSION DDL and resolved target - both known the moment the session starts - so the GUI can
+        /// persist them straight away (while the repo row is still Running) rather than waiting for the completion
+        /// summary.  That completion can be lost to the Status guard when Stop force-cancels the row first, and never
+        /// arrives at all if the trace is abandoned (service killed, heartbeat lost) - cases where the audit DDL is
+        /// most useful.
+        /// </summary>
+        public XETraceStartedInfo XETraceStarted { get; set; }
+
         [JsonIgnore] public DataSet Data { get; set; }
 
         public string DataString
@@ -155,6 +165,19 @@ namespace DBADash.Messaging
             var json = Encoding.UTF8.GetString(compressedData.Decompress());
             return JsonConvert.DeserializeObject<ResponseMessage>(json);
         }
+    }
+
+    /// <summary>
+    /// Definition of an ad-hoc XE trace, echoed back on the "trace running" progress reply so the GUI can persist it
+    /// as soon as the session starts.  See <see cref="ResponseMessage.XETraceStarted"/>.
+    /// </summary>
+    public class XETraceStartedInfo
+    {
+        /// <summary>The exact CREATE EVENT SESSION statement the service generated and ran.</summary>
+        public string GeneratedDDL { get; set; }
+
+        /// <summary>Resolved target: 1 = event_file, 2 = ring_buffer; null for a target-less live trace.</summary>
+        public byte? TargetType { get; set; }
     }
 
     /// <summary>

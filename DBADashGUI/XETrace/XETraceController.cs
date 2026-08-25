@@ -146,6 +146,26 @@ namespace DBADashGUI.XETrace
                     onRunningConfirmed?.Invoke();
                 }
 
+                // The "trace running" reply carries the service-generated DDL and resolved target (both known the
+                // moment the session starts).  Persist them now, while the row is still Running - the completion
+                // summary that also carries them can be lost to the Status guard when Stop force-cancels the row
+                // first, or never arrive at all if the trace is abandoned.  Best-effort: the completion backfills as
+                // a fallback, and a failed audit write must not disrupt the running trace.
+                if (reply.XETraceStarted != null)
+                {
+                    try
+                    {
+                        await XETraceRepo.SetDefinitionAsync(sessionID, reply.XETraceStarted.GeneratedDDL,
+                            reply.XETraceStarted.TargetType);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Best-effort: the completion summary backfills the DDL/target, so a failure here isn't fatal -
+                        // just log it (we lose the early-persist durability if the trace is later abandoned).
+                        Serilog.Log.Warning(ex, "Failed to persist XE trace definition for session {sessionID}", sessionID);
+                    }
+                }
+
                 var table = reply.Data?.Tables.Count > 0 ? reply.Data.Tables[0] : null;
                 if (table == null || !table.Columns.Contains("event_type") || table.Rows.Count == 0) return;
                 // In a multi-instance run, stamp the source instance so the merged grid (and persisted history) can

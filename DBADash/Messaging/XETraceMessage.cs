@@ -208,7 +208,10 @@ namespace DBADash.Messaging
                 await ReportProgressAsync(new ResponseMessage
                 {
                     Type = ResponseMessage.ResponseTypes.Progress,
-                    Message = $"Trace running on {ConnectionID} ({targetType}) for up to {duration}s"
+                    Message = $"Trace running on {ConnectionID} ({targetType}) for up to {duration}s",
+                    // Persist the DDL/target now (row still Running) - the completion summary that also carries them can
+                    // be lost to the Status guard when Stop force-cancels the row first, or never arrive if abandoned.
+                    XETraceStarted = new XETraceStartedInfo { GeneratedDDL = ddl, TargetType = TargetTypeByte(targetType) }
                 });
 
                 reader = targetType == XETraceTargetType.EventFile
@@ -335,7 +338,14 @@ namespace DBADash.Messaging
                 await ReportProgressAsync(new ResponseMessage
                 {
                     Type = ResponseMessage.ResponseTypes.Progress,
-                    Message = $"Live trace running on {ConnectionID} for up to {duration}s"
+                    Message = $"Live trace running on {ConnectionID} for up to {duration}s",
+                    // A live trace is reported target-less ("Live") - matching the summary - even when a .xel capture
+                    // bolts on an event_file target, so persist a null target alongside the DDL.
+                    XETraceStarted = new XETraceStartedInfo
+                    {
+                        GeneratedDDL = ddl,
+                        TargetType = TargetTypeByte(XETraceTargetType.None)
+                    }
                 });
 
                 using var streamCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -580,6 +590,11 @@ namespace DBADash.Messaging
             }
             return drained;
         }
+
+        /// <summary>Maps a target to the repo TINYINT: 1 = event_file, 2 = ring_buffer, null for a target-less
+        /// (live) session - matching the column's semantics and the GUI's own mapping of the summary row.</summary>
+        private static byte? TargetTypeByte(XETraceTargetType targetType) =>
+            targetType == XETraceTargetType.None ? (byte?)null : (byte)targetType;
 
         private DataSet BuildSummary(XETraceTargetType targetType, int totalEvents, DateTime startUtc, DateTime endUtc,
             int duration, string ddl, bool cancelled, bool heartbeatLost)
