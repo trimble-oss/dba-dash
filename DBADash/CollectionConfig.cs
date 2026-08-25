@@ -134,13 +134,23 @@ namespace DBADash
 
         /// <summary>
         /// True when the Manage-XE feature is enabled at all (either start/stop or watch permits at least one session).
-        /// Gates the read-only <see cref="Messaging.XESessionListMessage"/> / <see cref="Messaging.XESessionScriptMessage"/>
-        /// and drives whether the tree node is offered.  The per-operation checks are <see cref="CanManageXESession"/>
-        /// and <see cref="CanWatchXESession"/>.
+        /// Gates start/stop of existing sessions (<see cref="Messaging.XESessionControlMessage"/>); the read-only
+        /// operations are gated by the broader <see cref="AllowViewXE"/>.  The per-operation checks are
+        /// <see cref="CanManageXESession"/> and <see cref="CanWatchXESession"/>.
         /// </summary>
         [JsonIgnore]
         public bool AllowManageXE =>
             !string.IsNullOrWhiteSpace(ManageXESessions) || !string.IsNullOrWhiteSpace(WatchXESessions);
+
+        /// <summary>
+        /// True when the existing XE sessions may be exposed read-only (list / script / watch / view captured data):
+        /// either the Manage-XE feature is enabled, or ad-hoc tracing (<see cref="AllowAdhocXE"/>) is - a user who can
+        /// start an ad-hoc trace could already capture the same data, so surfacing existing sessions read-only adds no
+        /// capability.  Start/stop of existing sessions stays gated on <see cref="AllowManageXE"/> /
+        /// <see cref="CanManageXESession"/>.
+        /// </summary>
+        [JsonIgnore]
+        public bool AllowViewXE => AllowManageXE || AllowAdhocXE;
 
         /// <summary>Legacy shim: older configs stored a bool; map <c>true</c> to the recommended defaults on load.</summary>
         [JsonProperty("AllowManageXE")]
@@ -160,9 +170,16 @@ namespace DBADash
         public bool CanManageXESession(string sessionName) =>
             XE.XESessionFilter.Parse(ManageXESessions).IsAllowed(sessionName);
 
-        /// <summary>True if <paramref name="sessionName"/> may be watched per <see cref="WatchXESessions"/>.</summary>
+        /// <summary>
+        /// True if <paramref name="sessionName"/> may be watched.  When an admin has configured
+        /// <see cref="WatchXESessions"/> that explicit list wins (including its denies).  When it's blank - Manage-XE
+        /// isn't configured - watching falls back to whether ad-hoc tracing is enabled, so an ad-hoc-only service can
+        /// still watch existing sessions (equivalent data is capturable via an ad-hoc trace anyway).
+        /// </summary>
         public bool CanWatchXESession(string sessionName) =>
-            XE.XESessionFilter.Parse(WatchXESessions).IsAllowed(sessionName);
+            string.IsNullOrWhiteSpace(WatchXESessions)
+                ? AllowAdhocXE
+                : XE.XESessionFilter.Parse(WatchXESessions).IsAllowed(sessionName);
 
         public string AllowedScripts { get; set; }
 

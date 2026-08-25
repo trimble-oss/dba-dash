@@ -16,7 +16,8 @@ namespace DBADash.Messaging
     /// <para><b>Non-destructive</b>: it only READS the session's target (event_file via
     /// <see cref="EventFileTraceReader"/> or ring_buffer via <see cref="WatchRingBufferReader"/>) - it never creates,
     /// drops, starts or stops the session.  Only sessions with an event_file or ring_buffer target can be watched;
-    /// other target types have no readable event stream.  Requires <see cref="CollectionConfig.AllowManageXE"/>.</para>
+    /// other target types have no readable event stream.  Requires <see cref="CollectionConfig.AllowViewXE"/> and the
+    /// per-session watch list.</para>
     /// </summary>
     public class XEWatchSessionMessage : MessageBase
     {
@@ -36,10 +37,10 @@ namespace DBADash.Messaging
         public override async Task<DataSet> Process(CollectionConfig cfg, Guid handle, CancellationToken cancellationToken)
         {
             ThrowIfExpired();
-            if (!cfg.AllowManageXE)
+            if (!cfg.AllowViewXE)
             {
                 throw new Exception(
-                    "Managing extended events is not enabled on the DBA Dash service.  Use the service configuration tool to enable.");
+                    "Viewing extended events is not enabled on the DBA Dash service.  Enable ad-hoc tracing or Manage XE in the service configuration tool.");
             }
             if (string.IsNullOrWhiteSpace(SessionName))
             {

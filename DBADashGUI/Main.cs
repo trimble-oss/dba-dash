@@ -143,6 +143,13 @@ namespace DBADashGUI
                             new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration),
                             new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks)
                         });
+                        // Extended Events is database-scoped for Azure SQL DB, so the node hangs off the individual
+                        // database rather than the (logical) Azure instance.  Same gating as regular instances.
+                        if (azureDBNode.Context.CanMessage && (DBADashUser.AllowManageXE || DBADashUser.AllowXETrace))
+                        {
+                            azureDBNode.Nodes.Add(new SQLTreeItem("Extended Events", SQLTreeItem.TreeType.ExtendedEvents)
+                            { InstanceID = azureDBNode.InstanceID });
+                        }
                         AzureNode.Nodes.Add(azureDBNode);
                         azureDBNode.AddDatabaseFolders();
                         azureDBNode.AddInstanceActionsContextMenu();
@@ -1112,9 +1119,11 @@ namespace DBADashGUI
             jobs.AddDummyNode();
             nodesToAdd.Add(jobs);
 
-            // Extended Events: list / start / stop / watch the instance's existing XE sessions.  Requires messaging
-            // and the ManageXE permission (managing arbitrary user sessions is gated separately from ad-hoc trace).
-            if (instanceNode.Context.CanMessage && DBADashUser.AllowManageXE)
+            // Extended Events: list / watch / view the instance's existing XE sessions, plus launch an ad-hoc trace.
+            // Requires messaging and either XE permission - ManageXE users can additionally start/stop existing
+            // sessions, XETrace-only users get read-only access (viewing/watching, which they could reproduce with
+            // their own ad-hoc trace anyway).  Start/stop stays gated on ManageXE inside the viewer.
+            if (instanceNode.Context.CanMessage && (DBADashUser.AllowManageXE || DBADashUser.AllowXETrace))
             {
                 nodesToAdd.Add(new SQLTreeItem("Extended Events", SQLTreeItem.TreeType.ExtendedEvents)
                 { InstanceID = instanceNode.InstanceID });

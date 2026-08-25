@@ -32,13 +32,16 @@ namespace DBADashGUI.XETrace
         public void SetContext(DBADashContext context)
         {
             _context = context;
-            var canManage = context is { InstanceID: > 0 } && context.CanMessage && DBADashUser.AllowManageXE;
-            _refreshButton.Enabled = canManage;
+            // Viewing the session list (and watching / viewing captured data) is offered to either XE role; start/stop
+            // of existing sessions is gated on ManageXE per-row in BuildRows.
+            var canView = context is { InstanceID: > 0 } && context.CanMessage
+                          && (DBADashUser.AllowManageXE || DBADashUser.AllowXETrace);
+            _refreshButton.Enabled = canView;
             _adhocButton.Visible = context is { InstanceID: > 0 } && context.CanMessage && DBADashUser.AllowXETrace;
-            if (!canManage)
+            if (!canView)
             {
                 ClearRows();
-                SetStatus("Managing extended events isn't enabled for you on this instance.", DashColors.Warning);
+                SetStatus("Extended events isn't enabled for you on this instance.", DashColors.Warning);
                 return;
             }
             _ = LoadSessionsAsync();
@@ -73,7 +76,12 @@ namespace DBADashGUI.XETrace
             {
                 var row = new XESessionRow();
                 row.Bind(dataRow);
-                row.SetPolicy(_context.CanManageXESession(row.SessionName), _context.CanWatchXESession(row.SessionName));
+                // Start/stop needs the ManageXE role in addition to the service's per-session policy.  Without the role
+                // the buttons are inert and explain why; watching/viewing stays available for XETrace-only users.
+                var userCanManage = DBADashUser.AllowManageXE;
+                row.SetPolicy(userCanManage && _context.CanManageXESession(row.SessionName),
+                    _context.CanWatchXESession(row.SessionName),
+                    userCanManage ? null : "You don't have permission to start or stop existing sessions.");
                 row.StartStopClicked += async (s, _) => await OnRowStartStop((XESessionRow)s);
                 row.WatchClicked += (s, _) => OnRowWatch((XESessionRow)s);
                 row.ViewDataClicked += (s, _) => OnRowViewData((XESessionRow)s);

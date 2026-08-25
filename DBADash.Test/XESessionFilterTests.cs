@@ -151,6 +151,32 @@ namespace DBADash.Test
         {
             var cfg = new CollectionConfig { ManageXESessions = null, WatchXESessions = null };
             Assert.IsFalse(cfg.AllowManageXE);
+            Assert.IsFalse(cfg.AllowViewXE); // no ad-hoc either -> nothing to view
+            Assert.IsFalse(cfg.CanWatchXESession("MyTrace"));
+        }
+
+        [TestMethod]
+        public void Config_adhoc_only_enables_read_only_view_and_watch()
+        {
+            // Manage-XE off (both lists blank) but ad-hoc tracing on: existing sessions are exposed read-only and
+            // watchable (the user could capture the same data with an ad-hoc trace), but never started/stopped.
+            var cfg = new CollectionConfig { ManageXESessions = null, WatchXESessions = null, AllowAdhocXE = true };
+            Assert.IsFalse(cfg.AllowManageXE);
+            Assert.IsTrue(cfg.AllowViewXE);
+            Assert.IsTrue(cfg.CanWatchXESession("system_health"));
+            Assert.IsTrue(cfg.CanWatchXESession("MyTrace"));
+            Assert.IsFalse(cfg.CanManageXESession("MyTrace")); // still no start/stop
+        }
+
+        [TestMethod]
+        public void Config_explicit_watch_list_wins_over_adhoc()
+        {
+            // When an admin has configured WatchXESessions, that explicit list (including its denies) is respected even
+            // with ad-hoc enabled - ad-hoc only supplies the fallback when no watch list is configured at all.
+            var cfg = new CollectionConfig { WatchXESessions = "*,-secret_session", AllowAdhocXE = true };
+            Assert.IsTrue(cfg.AllowViewXE);
+            Assert.IsTrue(cfg.CanWatchXESession("MyTrace"));
+            Assert.IsFalse(cfg.CanWatchXESession("secret_session"));
         }
     }
 }
