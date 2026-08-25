@@ -21,7 +21,7 @@ namespace DBADashGUI.XETrace
         /// <summary>Per-event customizable-column toggles (the <c>SET</c> options), keyed by event name.</summary>
         public Dictionary<string, List<XECustomization>> EventCustomizations { get; set; } = new();
 
-        /// <summary>Target preference; <see cref="XETraceTargetPreference.Auto"/> = live streaming (ring buffer on Azure SQL DB).</summary>
+        /// <summary>Target preference; <see cref="XETraceTargetPreference.Auto"/> = live streaming (including on Azure SQL DB).</summary>
         public XETraceTargetPreference Target { get; set; } = XETraceTargetPreference.Auto;
 
         public int MaxDurationSeconds { get; set; } = 300;

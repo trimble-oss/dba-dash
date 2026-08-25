@@ -181,9 +181,9 @@ namespace DBADashGUI.XETrace
         /// <summary>
         /// Enables "Capture .xel" for every target that can write one: the event_file target, and live streaming
         /// (Auto/LiveStream), where the service bolts an event_file target onto the live session.  The ring buffer
-        /// (memory) can't produce a .xel, and none of these are available on Azure SQL Database (no event_file, no live
-        /// streaming - Auto resolves to the ring buffer there).  Otherwise the option is disabled (and cleared) so the
-        /// user isn't offered a capture that would silently produce nothing.
+        /// (memory) can't produce a .xel, and neither can Azure SQL Database - it has no local disk for the event_file
+        /// target (even though it can now stream live).  Otherwise the option is disabled (and cleared) so the user
+        /// isn't offered a capture that would silently produce nothing.
         /// </summary>
         private void UpdateXelCaptureState()
         {
@@ -197,7 +197,8 @@ namespace DBADashGUI.XETrace
         {
             // A .xel comes from the event_file target.  Live streaming (Auto/LiveStream) can also capture one because
             // the service gives the live session an event_file target alongside the stream.  The ring buffer (memory)
-            // writes no file, and neither event_file nor live streaming is available on Azure SQL Database.
+            // writes no file, and Azure SQL Database has no local disk for an event_file - so no .xel there, even though
+            // live streaming itself works on Azure SQL DB.
             if (_context?.EngineEdition == DatabaseEngineEdition.SqlDatabase) return false;
             var target = cboTarget.SelectedItem is XETraceTargetPreference p ? p : XETraceTargetPreference.Auto;
             return target is XETraceTargetPreference.EventFile
