@@ -916,7 +916,7 @@
     <Build Include="dbo\User Defined Types\XETraceEvents.sql" />
     <Build Include="dbo\Stored Procedures\XETraceSession_Start.sql" />
     <Build Include="dbo\Stored Procedures\XETraceSession_AddEvents.sql" />
-    <Build Include="dbo\Stored Procedures\XETraceSession_Complete.sql" />
+    <Build Include="dbo\Stored Procedures\XETraceSession_Upd.sql" />
     <Build Include="dbo\Stored Procedures\XETraceSession_CancelRunning.sql" />
     <Build Include="dbo\Stored Procedures\XETraceSession_GetRunning.sql" />
     <Build Include="dbo\Stored Procedures\XETraceSession_Get.sql" />

@@ -79,11 +79,28 @@ namespace DBADashGUI.XETrace
             return tvp;
         }
 
+        /// <summary>
+        /// Records the service-generated DDL and resolved target on a still-Running session, as soon as the "trace
+        /// running" reply arrives - so the audit DDL is durable even if the trace is later force-cancelled (Stop) or
+        /// abandoned before its completion summary lands.  A no-op once the row is terminal.
+        /// </summary>
+        public static async Task SetDefinitionAsync(long sessionID, string generatedDDL, byte? targetType)
+        {
+            await using var cn = new SqlConnection(Common.ConnectionString);
+            // No @Status: a definition-only update that records the DDL / target without terminating the trace.
+            await using var cmd = new SqlCommand("dbo.XETraceSession_Upd", cn) { CommandType = CommandType.StoredProcedure };
+            cmd.Parameters.AddWithValue("@XETraceSessionID", sessionID);
+            cmd.Parameters.AddWithValue("@GeneratedDDL", (object)generatedDDL ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@TargetType", (object)targetType ?? DBNull.Value);
+            await cn.OpenAsync();
+            await cmd.ExecuteNonQueryAsync();
+        }
+
         public static async Task CompleteAsync(long sessionID, byte status, byte? targetType, string generatedDDL,
             byte[] xelData, string errorMessage)
         {
             await using var cn = new SqlConnection(Common.ConnectionString);
-            await using var cmd = new SqlCommand("dbo.XETraceSession_Complete", cn) { CommandType = CommandType.StoredProcedure };
+            await using var cmd = new SqlCommand("dbo.XETraceSession_Upd", cn) { CommandType = CommandType.StoredProcedure };
             cmd.Parameters.AddWithValue("@XETraceSessionID", sessionID);
             cmd.Parameters.AddWithValue("@Status", status);
             cmd.Parameters.AddWithValue("@TargetType", (object)targetType ?? DBNull.Value);
