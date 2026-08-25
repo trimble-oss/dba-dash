@@ -102,6 +102,9 @@ namespace DBADashGUI.XETrace
 
         private string _lastTemplateName;
 
+        // Explains the " *" event-field marker drawn in the filter field dropdown (see CboField_DrawItem).
+        private readonly ToolTip _fieldTip = new();
+
         private readonly System.Windows.Forms.Timer _runTimer = new() { Interval = 1000 };
         private DateTime _traceStartTime;
         private int _traceDurationSeconds;
@@ -148,14 +151,17 @@ namespace DBADashGUI.XETrace
 
             cboEvent.DropDownStyle = ComboBoxStyle.DropDownList;
             cboField.DropDownStyle = ComboBoxStyle.DropDownList;
+            _fieldTip.SetToolTip(cboField,
+                "* marks an event-specific field - it applies only to events that expose it.\r\n" +
+                "Fields without * are global and apply to every event.");
             cboOtherEvent.DropDownStyle = ComboBoxStyle.DropDownList;
 
             dgvFilters.AutoGenerateColumns = false;
             dgvFilters.Columns.Clear();
-            dgvFilters.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Event", DataPropertyName = "Event", Width = 160 });
-            dgvFilters.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Field", DataPropertyName = "Field", Width = 150 });
-            dgvFilters.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Comparison", DataPropertyName = "Comparison", Width = 120 });
-            dgvFilters.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Value", DataPropertyName = "Value", Width = 160 });
+            dgvFilters.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Applies To", DataPropertyName = "Event", Width = 210 });
+            dgvFilters.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Field", DataPropertyName = "Field", Width = 140 });
+            dgvFilters.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Comparison", DataPropertyName = "Comparison", Width = 110 });
+            dgvFilters.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Value", DataPropertyName = "Value", Width = 150 });
             dgvFilters.Columns.Add(new DataGridViewLinkColumn
             { Name = ColFilterDelete, HeaderText = "", Text = "Delete", UseColumnTextForLinkValue = true, Width = 90 });
 
@@ -241,6 +247,7 @@ namespace DBADashGUI.XETrace
 
             cboTarget.SelectedIndexChanged += (_, _) => UpdateXelCaptureState();
             cboEvent.SelectedIndexChanged += (_, _) => RefreshFilterFields();
+            cboField.Format += CboField_Format;
             bttnAddFilter.Click += (_, _) => AddFilter();
             dgvFilters.CellContentClick += DgvFilters_CellContentClick;
 
@@ -474,6 +481,7 @@ namespace DBADashGUI.XETrace
             RefreshFilterFields();
             PruneStaleCustomizations();
             RefreshEventsGrid();
+            RefreshFilterGrid(); // an all-events data-column filter's applicable-events list depends on the event set
         }
 
         // ---- Events grid -------------------------------------------------------------------------
@@ -608,6 +616,20 @@ namespace DBADashGUI.XETrace
             cboField.DisplayMember = nameof(XEFieldInfo.Name);
         }
 
+        /// <summary>
+        /// Suffixes an event-specific data column with " *" in the field combo (list and closed box) - a compact cue
+        /// that, unlike a global predicate source, it only applies to events that expose it (see the "* = event
+        /// field..." tooltip on the combo).  Global predicate sources are shown plain.  Purely cosmetic: the bound item
+        /// is still the <see cref="XEFieldInfo"/>, so filter creation is unaffected.
+        /// </summary>
+        private void CboField_Format(object sender, ListControlConvertEventArgs e)
+        {
+            if (e.ListItem is XEFieldInfo { IsAction: false } field)
+            {
+                e.Value = field.Name + " *";
+            }
+        }
+
         private List<XEFieldInfo> GetFieldsForScope(string scope)
         {
             // Global predicate sources apply to any event and are referenced as [pkg].[name].  They win on a name
@@ -619,17 +641,20 @@ namespace DBADashGUI.XETrace
                 byName[a.Name] = a;
             }
 
-            // For "(All events)" show global actions only - data columns vary per event.  For a specific event, also
-            // offer its data columns (unless shadowed by an action of the same name).
-            if (!string.IsNullOrEmpty(scope) && scope != AllEventsLabel)
+            // For a specific event, add its data columns (unless shadowed by a predicate source of the same name).
+            // For "(All events)", add the data columns exposed by the *selected* events too, so a common event field
+            // (e.g. duration on rpc_completed and sql_batch_completed) can be filtered once under "(All events)" and
+            // applied to every selected event that exposes it.  The builder skips it for events that don't have the
+            // column, so the union across the selected events - not the intersection - is the useful set to offer.
+            var eventScopes = scope == AllEventsLabel ? SelectedEventNames() : new[] { scope };
+            foreach (var eventName in eventScopes)
             {
-                var e = _catalog.FindEvent(scope);
-                if (e != null)
+                if (string.IsNullOrEmpty(eventName) || eventName == AllEventsLabel) continue;
+                var e = _catalog.FindEvent(eventName);
+                if (e == null) continue;
+                foreach (var f in e.Fields)
                 {
-                    foreach (var f in e.Fields)
-                    {
-                        if (!byName.ContainsKey(f.Name)) byName[f.Name] = f;
-                    }
+                    if (!byName.ContainsKey(f.Name)) byName[f.Name] = f;
                 }
             }
 
@@ -685,9 +710,39 @@ namespace DBADashGUI.XETrace
             dt.Columns.Add("Value");
             foreach (var f in _filters)
             {
-                dt.Rows.Add(f.EventName ?? AllEventsLabel, f.Field, f.Op.ToString(), f.Value);
+                dt.Rows.Add(FilterAppliesToText(f), f.Field, f.Op.ToString(), f.Value);
             }
             dgvFilters.DataSource = dt;
+        }
+
+        /// <summary>
+        /// The "Applies To" text for a filter row: a specific-event filter names its event (flagged "(not traced)" if
+        /// that event isn't currently selected); a global predicate source shows "(All events)"; and an all-events data
+        /// column shows "(All applicable): &lt;events&gt;" - the currently-matching events, prefixed to make clear the
+        /// filter is not pinned to that fixed list but will also cover any future event that exposes the column.  This
+        /// is recomputed whenever the event set changes; a data column matching no selected event is called out as a no-op.
+        /// </summary>
+        private string FilterAppliesToText(XEFilter f)
+        {
+            var selected = SelectedEventNames().ToList();
+
+            if (!string.IsNullOrEmpty(f.EventName))
+            {
+                var traced = selected.Any(n => string.Equals(n, f.EventName, StringComparison.OrdinalIgnoreCase));
+                return traced ? f.EventName : $"{f.EventName} (not traced)";
+            }
+
+            // All-events scope.  A global predicate source is valid on every event; a data column only on the selected
+            // events that expose it (the service skips it elsewhere, and applies it to any future event that has it).
+            if (f.IsAction) return AllEventsLabel;
+
+            var applicable = selected
+                .Where(name => _catalog.FindEvent(name)?.Fields
+                    .Any(x => string.Equals(x.Name, f.Field, StringComparison.OrdinalIgnoreCase)) == true)
+                .ToList();
+            return applicable.Count == 0
+                ? "No applicable events"
+                : $"(All applicable): {string.Join(", ", applicable)}";
         }
 
         // ---- Instances to trace ------------------------------------------------------------------
@@ -868,6 +923,7 @@ namespace DBADashGUI.XETrace
             {
                 Events = events,
                 ExtraEvents = _extraEvents.ToList(),
+                EventDefs = BuildEventDefs(),
                 Filters = _filters.ToList(),
                 GlobalActions = _globalActions.ToList(),
                 EventCustomizations = BuildEventCustomizations(),
@@ -905,12 +961,44 @@ namespace DBADashGUI.XETrace
             if (chkErrorReported.Checked) events |= XETraceEventType.ErrorReported;
         }
 
+        /// <summary>
+        /// Resolves every selected event (the built-in shortcuts and the extra events) to a typed definition carrying
+        /// its data columns from the catalog.  The service applies each data-column filter (and the severity floor)
+        /// only to events that expose the relevant column, so the built-ins resolve their columns from the catalog
+        /// exactly like the extra events do - there is no hard-coded per-event column list.
+        /// </summary>
+        private List<XETraceEventDef> BuildEventDefs()
+        {
+            var defs = new List<XETraceEventDef>();
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var name in SelectedEventNames())
+            {
+                if (!seen.Add(name)) continue;
+                var evt = _catalog.FindEvent(name);
+                var package = evt?.Package ?? "sqlserver";
+                var columns = evt?.Fields.Select(f => f.Name).Where(n => !string.IsNullOrEmpty(n))
+                              ?? Enumerable.Empty<string>();
+                defs.Add(new XETraceEventDef(package, name, columns));
+            }
+            return defs;
+        }
+
         private async Task StartAsync()
         {
             var config = BuildConfig();
-            if (config.Events == 0 && config.ExtraEvents.Count == 0)
+            if (config.EventDefs.Count == 0)
             {
                 SetStatus("Select at least one event", string.Empty, DashColors.Warning);
+                return;
+            }
+
+            // Every event carries its data columns from the catalog (the service applies data-column filters and the
+            // severity floor per the columns each event exposes).  If the catalog hasn't loaded the events would be
+            // sent with no columns, so refuse to start until it's available rather than run a mis-filtered trace.
+            if (_catalog.Events.Count == 0)
+            {
+                SetStatus("Extended events catalog is still loading.  Wait for it to finish, then start the trace.",
+                    string.Empty, DashColors.Warning);
                 return;
             }
 

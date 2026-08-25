@@ -115,9 +115,8 @@ namespace DBADashGUI.XETrace
             var message = new XETraceMessage
             {
                 ConnectionID = context.ConnectionID,
-                Events = config.Events,
+                Events = config.EventDefs,
                 Filters = config.Filters,
-                ExtraEvents = config.ExtraEvents,
                 GlobalActions = config.GlobalActions,
                 EventCustomizations = config.EventCustomizations,
                 RequestedTarget = config.Target,

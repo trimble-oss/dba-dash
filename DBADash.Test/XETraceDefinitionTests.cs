@@ -7,9 +7,20 @@ namespace DBADash.Test
     [TestClass]
     public class XETraceDefinitionTests
     {
+        // The data columns the completed / error events expose that we filter on.  The real GUI resolves these from
+        // the instance's XE catalog; the tests pin a representative set so the builder's per-event filter applicability
+        // (and the severity floor) can be exercised without a live catalog.
+        private static readonly string[] CompletedCols =
+            { "duration", "cpu_time", "logical_reads", "physical_reads", "writes", "row_count" };
+        private static readonly string[] ErrorCols = { "severity", "error_number", "state" };
+
+        private static XETraceEventDef RpcCompleted() => new("sqlserver", "rpc_completed", CompletedCols);
+        private static XETraceEventDef SqlBatchCompleted() => new("sqlserver", "sql_batch_completed", CompletedCols);
+        private static XETraceEventDef ErrorReported() => new("sqlserver", "error_reported", ErrorCols);
+
         private static XETraceDefinition NewDef() => new()
         {
-            Events = XETraceEventType.RpcCompleted | XETraceEventType.SqlBatchCompleted,
+            Events = new List<XETraceEventDef> { RpcCompleted(), SqlBatchCompleted() },
             TargetType = XETraceTargetType.RingBuffer
         };
 
@@ -26,7 +37,7 @@ namespace DBADash.Test
         private static XEFilter SessionId(XEFilterOp op, string v) =>
             new() { Field = "session_id", FieldPackage = "sqlserver", IsAction = true, IsNumeric = true, Op = op, Value = v };
 
-        // ---- Extra (arbitrary) events -----------------------------------------------------------
+        // ---- Events -----------------------------------------------------------------------------
 
         [TestMethod]
         public void TargetNone_EmitsNoTargetClause()
@@ -41,24 +52,28 @@ namespace DBADash.Test
         }
 
         [TestMethod]
-        public void ExtraEvents_AreEmitted()
+        public void ArbitraryEvents_AreEmitted()
         {
             var def = NewDef();
-            def.Events = 0;
-            def.ExtraEvents.Add(new XETraceEventDef("sqlserver", "module_end", new[] { "duration", "cpu_time" }));
+            def.Events = new List<XETraceEventDef>
+            {
+                new("sqlserver", "module_end", new[] { "duration", "cpu_time" })
+            };
 
             StringAssert.Contains(def.BuildCreateSessionSql(), "ADD EVENT sqlserver.module_end");
         }
 
         [TestMethod]
-        public void ExtraEvent_DataColumnFilter_AppliedOnlyWhenEventHasTheColumn()
+        public void DataColumnFilter_AppliedOnlyWhenEventHasTheColumn()
         {
             var def = NewDef();
-            def.Events = 0;
             def.Filters.Add(Duration(XEFilterOp.GreaterThan, "500"));
             // has duration -> filter applies; lacks duration -> filter skipped
-            def.ExtraEvents.Add(new XETraceEventDef("sqlserver", "module_end", new[] { "duration" }));
-            def.ExtraEvents.Add(new XETraceEventDef("sqlserver", "login", new[] { "is_cached" }));
+            def.Events = new List<XETraceEventDef>
+            {
+                new("sqlserver", "module_end", new[] { "duration" }),
+                new("sqlserver", "login", new[] { "is_cached" })
+            };
 
             var sql = def.BuildCreateSessionSql();
             var moduleIdx = sql.IndexOf("module_end", System.StringComparison.Ordinal);
@@ -70,19 +85,18 @@ namespace DBADash.Test
         }
 
         [TestMethod]
-        public void ExtraEvent_InvalidName_Throws()
+        public void Event_InvalidName_Throws()
         {
             var def = NewDef();
-            def.Events = 0;
-            def.ExtraEvents.Add(new XETraceEventDef("sqlserver", "evil; DROP", null));
+            def.Events = new List<XETraceEventDef> { new("sqlserver", "evil; DROP", null) };
             Assert.ThrowsExactly<System.ArgumentException>(() => def.BuildCreateSessionSql());
         }
 
         [TestMethod]
-        public void Build_NoEventsAndNoExtras_Throws()
+        public void Build_NoEvents_Throws()
         {
             var def = NewDef();
-            def.Events = 0;
+            def.Events.Clear();
             Assert.ThrowsExactly<System.ArgumentException>(() => def.BuildCreateSessionSql());
         }
 
@@ -148,10 +162,10 @@ namespace DBADash.Test
         // ---- Customizable columns (SET toggles) -------------------------------------------------
 
         [TestMethod]
-        public void Customizations_BuiltInEvent_EmitsSetBeforeAction()
+        public void Customizations_Event_EmitsSetBeforeAction()
         {
             var def = NewDef();
-            def.Events = XETraceEventType.RpcCompleted;
+            def.Events = new List<XETraceEventDef> { RpcCompleted() };
             def.EventCustomizations["rpc_completed"] = new List<XECustomization> { new("collect_statement", "0") };
 
             var sql = def.BuildCreateSessionSql();
@@ -165,11 +179,10 @@ namespace DBADash.Test
         }
 
         [TestMethod]
-        public void Customizations_ExtraEvent_IsEmitted()
+        public void Customizations_ArbitraryEvent_IsEmitted()
         {
             var def = NewDef();
-            def.Events = 0;
-            def.ExtraEvents.Add(new XETraceEventDef("sqlserver", "module_end", new[] { "duration" }));
+            def.Events = new List<XETraceEventDef> { new("sqlserver", "module_end", new[] { "duration" }) };
             def.EventCustomizations["module_end"] = new List<XECustomization> { new("collect_statement", "1") };
 
             StringAssert.Contains(def.BuildCreateSessionSql(), "SET collect_statement=(1)");
@@ -189,7 +202,7 @@ namespace DBADash.Test
         public void Customizations_InvalidName_Throws()
         {
             var def = NewDef();
-            def.Events = XETraceEventType.RpcCompleted;
+            def.Events = new List<XETraceEventDef> { RpcCompleted() };
             def.EventCustomizations["rpc_completed"] = new List<XECustomization> { new("evil; DROP", "1") };
             Assert.ThrowsExactly<System.ArgumentException>(() => def.BuildCreateSessionSql());
         }
@@ -198,7 +211,7 @@ namespace DBADash.Test
         public void Customizations_NonNumericValue_Throws()
         {
             var def = NewDef();
-            def.Events = XETraceEventType.RpcCompleted;
+            def.Events = new List<XETraceEventDef> { RpcCompleted() };
             def.EventCustomizations["rpc_completed"] = new List<XECustomization> { new("collect_statement", "yes'; DROP") };
             Assert.ThrowsExactly<System.ArgumentException>(() => def.BuildCreateSessionSql());
         }
@@ -209,8 +222,7 @@ namespace DBADash.Test
         public void Build_SelectedEvents_AreEmitted()
         {
             var def = NewDef();
-            def.Events = XETraceEventType.RpcCompleted | XETraceEventType.SqlBatchCompleted |
-                         XETraceEventType.ErrorReported;
+            def.Events = new List<XETraceEventDef> { RpcCompleted(), SqlBatchCompleted(), ErrorReported() };
 
             var sql = def.BuildCreateSessionSql();
 
@@ -223,13 +235,26 @@ namespace DBADash.Test
         public void Build_UnselectedEvent_IsNotEmitted()
         {
             var def = NewDef();
-            def.Events = XETraceEventType.RpcCompleted;
+            def.Events = new List<XETraceEventDef> { RpcCompleted() };
 
             var sql = def.BuildCreateSessionSql();
 
             StringAssert.Contains(sql, "sqlserver.rpc_completed");
             Assert.IsFalse(sql.Contains("sql_batch_completed"));
             Assert.IsFalse(sql.Contains("error_reported"));
+        }
+
+        [TestMethod]
+        public void Build_DuplicateEvents_AreDeDuplicated()
+        {
+            var def = NewDef();
+            def.Events = new List<XETraceEventDef> { RpcCompleted(), RpcCompleted() };
+
+            var sql = def.BuildCreateSessionSql();
+
+            var first = sql.IndexOf("ADD EVENT sqlserver.rpc_completed", System.StringComparison.Ordinal);
+            var second = sql.IndexOf("ADD EVENT sqlserver.rpc_completed", first + 1, System.StringComparison.Ordinal);
+            Assert.IsTrue(second == -1, "the same event must not be added twice");
         }
 
         [TestMethod]
@@ -297,6 +322,23 @@ namespace DBADash.Test
         }
 
         [TestMethod]
+        public void Filter_AllEventsDuration_AppliesToEveryCompletedEvent()
+        {
+            // An "(All events)" data-column filter (no EventName) on a common field must land on every selected event
+            // that exposes the column - the whole point of option 2's catalog-driven columns.
+            var def = NewDef(); // rpc_completed + sql_batch_completed, both expose duration
+            def.Filters.Add(Duration(XEFilterOp.GreaterThanOrEqual, "1000"));
+
+            var sql = def.BuildCreateSessionSql();
+            var rpcIdx = sql.IndexOf("rpc_completed", System.StringComparison.Ordinal);
+            var batchIdx = sql.IndexOf("sql_batch_completed", System.StringComparison.Ordinal);
+            var rpcBlock = rpcIdx < batchIdx ? sql.Substring(rpcIdx, batchIdx - rpcIdx) : sql.Substring(rpcIdx);
+            Assert.IsTrue(rpcBlock.Contains("[duration]>=(1000)"), "duration filter should apply to rpc_completed");
+            Assert.IsTrue(sql.Substring(batchIdx).Contains("[duration]>=(1000)"),
+                "duration filter should also apply to sql_batch_completed");
+        }
+
+        [TestMethod]
         public void Filter_StringEquality_ProducesEscapedLiteral()
         {
             var def = NewDef();
@@ -318,7 +360,7 @@ namespace DBADash.Test
         public void Filter_DataColumn_SkippedForEventWithoutTheColumn()
         {
             var def = NewDef();
-            def.Events = XETraceEventType.SqlBatchCompleted | XETraceEventType.ErrorReported;
+            def.Events = new List<XETraceEventDef> { SqlBatchCompleted(), ErrorReported() };
             def.Filters.Add(Duration(XEFilterOp.GreaterThan, "500"));
 
             var sql = def.BuildCreateSessionSql();
@@ -337,7 +379,7 @@ namespace DBADash.Test
         public void Filter_ScopedToSpecificEvent_OnlyAppliesToThatEvent()
         {
             var def = NewDef();
-            def.Events = XETraceEventType.RpcCompleted | XETraceEventType.SqlBatchCompleted;
+            def.Events = new List<XETraceEventDef> { RpcCompleted(), SqlBatchCompleted() };
             var f = AppName(XEFilterOp.Equal, "SQLCMD");
             f.EventName = "sql_batch_completed"; // scope to just batch
             def.Filters.Add(f);
@@ -355,7 +397,7 @@ namespace DBADash.Test
         public void ErrorReported_AppliesSeverityFloor()
         {
             var def = NewDef();
-            def.Events = XETraceEventType.ErrorReported;
+            def.Events = new List<XETraceEventDef> { ErrorReported() };
             def.ErrorSeverityFloor = 16;
 
             StringAssert.Contains(def.BuildCreateSessionSql(), "[severity]>=(16)");
@@ -392,8 +434,7 @@ namespace DBADash.Test
             // .NET's $ anchor also matches before a trailing \n, so an "^[A-Za-z0-9_]+$" allow-list would leak a
             // trailing newline into the identifier.  The builder must reject it (uses \A..\z).
             var def = NewDef();
-            def.Events = 0;
-            def.ExtraEvents.Add(new XETraceEventDef("sqlserver", "rpc_completed\n", null));
+            def.Events = new List<XETraceEventDef> { new("sqlserver", "rpc_completed\n", null) };
 
             Assert.ThrowsExactly<System.ArgumentException>(() => def.BuildCreateSessionSql());
         }
@@ -475,7 +516,7 @@ namespace DBADash.Test
         public void Validation_NoEventsSelected_Throws()
         {
             var def = NewDef();
-            def.Events = 0;
+            def.Events.Clear();
             Assert.ThrowsExactly<System.ArgumentException>(() => def.BuildCreateSessionSql());
         }
 
@@ -485,7 +526,7 @@ namespace DBADash.Test
         public void Validation_SeverityFloorOutOfRange_Throws(int floor)
         {
             var def = NewDef();
-            def.Events = XETraceEventType.ErrorReported;
+            def.Events = new List<XETraceEventDef> { ErrorReported() };
             def.ErrorSeverityFloor = floor;
             Assert.ThrowsExactly<System.ArgumentException>(() => def.BuildCreateSessionSql());
         }

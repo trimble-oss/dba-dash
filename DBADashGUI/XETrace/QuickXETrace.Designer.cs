@@ -160,8 +160,9 @@
             dgvFilters.EnableHeadersVisualStyles = false;
             dgvFilters.Location = new System.Drawing.Point(6, 88);
             dgvFilters.Name = "dgvFilters";
+            dgvFilters.RowHeadersVisible = false;
             dgvFilters.RowHeadersWidth = 51;
-            dgvFilters.Size = new System.Drawing.Size(709, 140);
+            dgvFilters.Size = new System.Drawing.Size(715, 140);
             dgvFilters.TabIndex = 9;
             // 
             // bttnAddFilter
@@ -226,6 +227,7 @@
             // 
             // cboField
             // 
+            cboField.DropDownWidth = 300;
             cboField.FormattingEnabled = true;
             cboField.Location = new System.Drawing.Point(163, 54);
             cboField.Name = "cboField";
