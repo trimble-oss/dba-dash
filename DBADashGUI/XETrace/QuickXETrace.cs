@@ -1072,6 +1072,7 @@ namespace DBADashGUI.XETrace
         private void RunTimer_Tick(object sender, EventArgs e)
         {
             if (IsDisposed || Disposing) { _runTimer.Stop(); return; }
+            if (_cancelling) return; // stopping - leave the frozen "Stopping..." label in place
             var elapsed = DateTime.UtcNow - _traceStartTime;
             var remaining = TimeSpan.FromSeconds(_traceDurationSeconds) - elapsed;
             lblTime.Text = $"Elapsed {FormatDuration(elapsed)}   |   Remaining {FormatDuration(remaining)}";
@@ -1088,21 +1089,30 @@ namespace DBADashGUI.XETrace
             if (_cancelling) return; // already stopping - ignore repeat clicks
             _cancelling = true;
             tsStopTrace.Enabled = false; // immediate feedback + prevent stacking clicks
-            SetStatus("Stop requested...", string.Empty, DashColors.Warning);
+            // Give immediate, honest feedback the moment Stop is clicked.  The trace doesn't flip to "stopped" until
+            // its own reply loop receives the terminal reply, which can lag - especially over an SQS relay, where a
+            // backlog of in-flight event batches must drain first.  Freeze the clock and show a "Stopping..." state
+            // (which AppendEventsAsync / RunTimer_Tick honour via _cancelling) so the UI doesn't keep painting
+            // "Trace running..." over this while that drain completes.
+            _runTimer.Stop();
+            SetStatus("Stopping...", string.Empty, DashColors.Warning);
+            lblTime.Text = "Stopping...";
             // Trip the token first - this is what actually ends the trace loop (for the event_file target the
             // reader reads the file, so dropping the session alone wouldn't stop it).  Then drop the session and
-            // free the repo lock as a guarantee.  Fan out to every instance being traced - a failure stopping one
-            // instance must not abort the stop/cleanup of the rest (they'd be left with orphaned sessions/locks).
-            var errors = new List<string>();
-            foreach (var rt in _runningTraces.ToList())
+            // free the repo lock as a guarantee.  Fan out to every instance being traced concurrently - a slow
+            // (SQS) round-trip to one instance must not delay stopping the rest, and a failure stopping one must
+            // not abort the stop/cleanup of the others (they'd be left with orphaned sessions/locks).
+            var results = await Task.WhenAll(_runningTraces.ToList().Select(async rt =>
             {
                 try
                 {
                     await XETraceController.CancelAsync(rt.Context, rt.MessageGroup, ControllerStatus);
                     await XETraceController.CleanupAsync(rt.Context, ControllerStatus);
+                    return null;
                 }
-                catch (Exception ex) { errors.Add($"{rt.Context.InstanceName}: {ex.Message}"); }
-            }
+                catch (Exception ex) { return $"{rt.Context.InstanceName}: {ex.Message}"; }
+            }));
+            var errors = results.Where(e => e != null).ToList();
             if (errors.Count > 0)
             {
                 SetStatus("Error stopping one or more traces.", string.Join("\r\n", errors), DashColors.Fail);
@@ -1139,7 +1149,13 @@ namespace DBADashGUI.XETrace
             if (InvokeRequired) return (Task)Invoke(new Func<Task>(() => AppendEventsAsync(generation, batch)));
             if (generation != _traceGeneration) return Task.CompletedTask; // re-check after marshalling to the UI thread
             _results.AppendEvents(batch);
-            SetStatus($"Trace running.  Collected {_results.RowCount} events.", string.Empty, DashColors.Information);
+            // While stopping, in-flight batches (e.g. an SQS backlog still arriving) are real captured events, so keep
+            // them and their count - but say we're stopping rather than repainting "Trace running..." over the
+            // "Stopping..." feedback.
+            SetStatus(_cancelling
+                    ? $"Stopping...  Collected {_results.RowCount} events."
+                    : $"Trace running.  Collected {_results.RowCount} events.",
+                string.Empty, _cancelling ? DashColors.Warning : DashColors.Information);
             return Task.CompletedTask;
         }
 

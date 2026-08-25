@@ -337,6 +337,10 @@ namespace DBADash.Messaging
                     await DestinationHandling.WriteS3Async(progress.Data, msg.CollectAgent.S3Path, progressFileName, Config);
                     progress.Data = null;
                 }
+                // Mark this as one of the messages counted in ExpectedProgressCount so the import agent counts it
+                // toward the total regardless of message type (XE batches carry no CollectionProgress).  Stamp and
+                // count together so the flag and the expected total can never drift.
+                progress.CountsTowardProgressTotal = true;
                 await AWSTools.SendSQSMessageAsync(Config, Convert.ToBase64String(progress.Serialize()),
                     DBADashAgentIdentifier, replyAgent, handle, replySQS, "REPLY", destinationConnectionHash);
                 Interlocked.Increment(ref progressCount);
@@ -501,7 +505,10 @@ namespace DBADash.Messaging
 
                 case ResponseMessage.ResponseTypes.Progress:
                     Log.Information("Message with handle {handle} is in progress on remote service. {message}", handle, responseMessage.Message);
-                    if (responseMessage.CollectionProgress != null)
+                    // Count any progress the remote counted in ExpectedProgressCount.  New remotes flag these
+                    // explicitly (CountsTowardProgressTotal); the CollectionProgress fallback keeps older remotes,
+                    // which only flagged per-instance collection updates, working.
+                    if (responseMessage.CountsTowardProgressTotal || responseMessage.CollectionProgress != null)
                     {
                         TrackProgressReceived(handle);
                     }

@@ -62,6 +62,17 @@ namespace DBADash.Messaging
         public CollectionProgress CollectionProgress { get; set; }
 
         /// <summary>
+        /// True on a Progress reply that the remote counted in <see cref="ExpectedProgressCount"/> - i.e. one
+        /// emitted via the message's progress reporter (a per-instance collection update, an XE event batch, ...),
+        /// as opposed to a relay-level ack like "Message Received".  The SQS import agent counts these to know when
+        /// all Progress messages have arrived, so it must recognise them for <b>any</b> message type - not just those
+        /// carrying a <see cref="CollectionProgress"/> payload (which XE traces don't).  Without this flag an XE
+        /// trace's batches went uncounted, so <see cref="DeferEndConversationAsync"/> always waited the full timeout
+        /// before ending the conversation, stalling the GUI's "stopped" state by that timeout.
+        /// </summary>
+        public bool CountsTowardProgressTotal { get; set; }
+
+        /// <summary>
         /// On a terminal reply (Success/Failure/Warning), the number of Progress messages that were
         /// sent before this one.  The SQS relay uses this to wait for all Progress messages to arrive
         /// before ending the Service Broker conversation, compensating for out-of-order SQS delivery.
