@@ -737,23 +737,47 @@ namespace DBADashGUI.XETrace
             if (_context is not { InstanceID: > 0 }) return;
             var existing = new HashSet<int>(clbInstances.Items.Cast<TraceInstance>().Select(t => t.InstanceID)) { _context.InstanceID };
             var candidates = CommonData.Instances.Rows.Cast<DataRow>()
-                .Select(r => (ID: Convert.ToInt32(r["InstanceID"]), Name: r["InstanceGroupName"] as string))
-                .Where(c => c.ID > 0 && !existing.Contains(c.ID) && !string.IsNullOrEmpty(c.Name))
-                .OrderBy(c => c.Name, StringComparer.OrdinalIgnoreCase)
+                .Select(ToInstanceCandidate)
+                .Where(c => c != null && !existing.Contains(c.InstanceID))
                 .ToList();
             if (candidates.Count == 0)
             {
                 SetStatus("No other instances available to add.", string.Empty, DashColors.Warning);
                 return;
             }
-            var picked = XEFieldPickerForm.Pick(this, "Add Instances to Trace",
-                candidates.Select(c => c.Name), Enumerable.Empty<string>());
-            if (picked == null) return;
-            foreach (var c in candidates.Where(c => picked.Contains(c.Name)))
+            var picked = XEInstancePickerForm.Pick(this, "Add Instances to Trace", candidates);
+            if (picked == null || picked.Count == 0) return;
+            var byId = candidates.ToDictionary(c => c.InstanceID);
+            foreach (var id in picked)
             {
-                AddInstanceItem(c.ID, c.Name, isAg: false, check: true);
+                if (byId.TryGetValue(id, out var c)) AddInstanceItem(id, c.ListLabel, isAg: false, check: true);
             }
             UpdateInstanceCount();
+        }
+
+        /// <summary>
+        /// Maps a CommonData.Instances row to a pickable candidate.  Each Azure SQL database is its own monitored
+        /// instance (its own InstanceID / ConnectionID) sharing a logical server, so Azure rows are exposed per-database
+        /// under their server; regular instances are a single leaf.  Returns null for rows with nothing to label.
+        /// </summary>
+        private static XEInstanceCandidate ToInstanceCandidate(DataRow r)
+        {
+            var id = Convert.ToInt32(r["InstanceID"]);
+            if (id <= 0) return null;
+            var isAzure = r["IsAzure"] != DBNull.Value && Convert.ToBoolean(r["IsAzure"]);
+            var server = r["Instance"] as string;
+            if (isAzure)
+            {
+                var db = r["AzureDBName"] as string;
+                if (string.IsNullOrEmpty(db) || string.IsNullOrEmpty(server)) return null;
+                // 'master' isn't a useful XE trace target on Azure DB - skip it so the picker only lists user databases.
+                if (string.Equals(db, "master", StringComparison.OrdinalIgnoreCase)) return null;
+                return new XEInstanceCandidate { InstanceID = id, IsAzure = true, ServerName = server, DatabaseName = db };
+            }
+            var name = r["InstanceGroupName"] as string ?? server;
+            return string.IsNullOrEmpty(name)
+                ? null
+                : new XEInstanceCandidate { InstanceID = id, IsAzure = false, DisplayName = name };
         }
 
         /// <summary>Adds an instance to the instances list (deduped by InstanceID) with the given checked state.</summary>
