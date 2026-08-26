@@ -123,6 +123,7 @@ namespace DBADashGUI.XETrace
                 MaxDurationSeconds = config.MaxDurationSeconds,
                 BatchIntervalSeconds = config.BatchIntervalSeconds,
                 ErrorSeverityFloor = config.ErrorSeverityFloor,
+                SampleN = config.SampleN,
                 CaptureXel = config.CaptureXel,
                 CollectAgent = context.CollectAgent,
                 ImportAgent = context.ImportAgent,

@@ -59,6 +59,9 @@ namespace DBADash.Messaging
         /// <summary>Minimum severity for error_reported (default 11 drops informational messages).</summary>
         public int ErrorSeverityFloor { get; set; } = 11;
 
+        /// <summary>Event sampling: capture ~1 in N events (0/1 = no sampling).  See <see cref="XETraceDefinition.SampleN"/>.</summary>
+        public int SampleN { get; set; }
+
         /// <summary>
         /// Global actions ("global fields") captured on every event.  Defaults to
         /// <see cref="XETraceDefinition.DefaultGlobalActions"/> so an older GUI that doesn't send them still gets the
@@ -186,6 +189,9 @@ namespace DBADash.Messaging
                     }
                     else
                     {
+                        // Persist the DDL before attempting CREATE, so a failure (e.g. a bad predicate comparator) still
+                        // records it to the session for troubleshooting.
+                        await ReportGeneratedDdlAsync(ddl, TargetTypeByte(targetType));
                         await ExecAsync(connectionString, DropIfExistsSql(scope), cancellationToken); // clear a stopped orphan
                         await ExecAsync(connectionString, ddl, cancellationToken);
                         // Capture the end of any leftover file BEFORE starting (the previous session is dropped, so
@@ -338,6 +344,9 @@ namespace DBADash.Messaging
                     }
                     else
                     {
+                        // Persist the DDL before attempting CREATE, so a failure (e.g. a bad predicate comparator) still
+                        // records it to the session for troubleshooting.  Live traces are reported target-less (None).
+                        await ReportGeneratedDdlAsync(ddl, TargetTypeByte(XETraceTargetType.None));
                         await ExecAsync(connectionString, DropIfExistsSql(scope), cancellationToken);
                         await ExecAsync(connectionString, ddl, cancellationToken);
                         await ExecAsync(connectionString, StateSql("START", scope), cancellationToken);
@@ -473,6 +482,7 @@ namespace DBADash.Messaging
             TargetType = targetType,
             Scope = scope,
             ErrorSeverityFloor = ErrorSeverityFloor,
+            SampleN = SampleN,
             GlobalActions = GlobalActions ?? new List<XEActionDef>(XETraceDefinition.DefaultGlobalActions),
             EventCustomizations = BuildCustomizationMap()
         };
@@ -777,12 +787,38 @@ END";
             return Convert.ToDateTime(await cmd.ExecuteScalarAsync(ct));
         }
 
+        /// <summary>
+        /// Reports the generated DDL to the client just before we try to create the session, so it is persisted to the
+        /// trace-session audit row (via SetDefinitionAsync) while the row is still Running.  If the CREATE then fails,
+        /// the DDL is already recorded - the completion's null GeneratedDDL COALESCEs and keeps it - so a failed trace's
+        /// DDL is available in history for troubleshooting, not just a successful one's.  A neutral message (no "running
+        /// on") so it doesn't flip the UI to "running" before the session actually starts.
+        /// </summary>
+        private Task ReportGeneratedDdlAsync(string ddl, byte? targetType) =>
+            ReportProgressAsync(new ResponseMessage
+            {
+                Type = ResponseMessage.ResponseTypes.Progress,
+                Message = $"Creating trace session on {ConnectionID}...",
+                XETraceStarted = new XETraceStartedInfo { GeneratedDDL = ddl, TargetType = targetType }
+            });
+
         private static async Task ExecAsync(string connectionString, string sql, CancellationToken ct)
         {
-            await using var cn = new SqlConnection(connectionString);
-            await using var cmd = new SqlCommand(sql, cn) { CommandType = CommandType.Text };
-            await cn.OpenAsync(ct);
-            await cmd.ExecuteNonQueryAsync(ct);
+            try
+            {
+                await using var cn = new SqlConnection(connectionString);
+                await using var cmd = new SqlCommand(sql, cn) { CommandType = CommandType.Text };
+                await cn.OpenAsync(ct);
+                await cmd.ExecuteNonQueryAsync(ct);
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException && !ct.IsCancellationRequested)
+            {
+                // Surface the failing statement alongside the error.  A raw SqlException (e.g. a missing or mis-packaged
+                // predicate comparator in a generated CREATE EVENT SESSION) doesn't say which SQL failed, so append it
+                // here - it then travels back to the client on the error reply, and into the service log, for
+                // troubleshooting.  The original exception is kept as the inner exception.
+                throw new Exception($"{ex.Message}\r\n\r\n--- Failing SQL ---\r\n{sql}", ex);
+            }
         }
     }
 }

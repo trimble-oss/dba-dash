@@ -31,23 +31,24 @@
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(QuickXETrace));
             cboEvent = new System.Windows.Forms.ComboBox();
             Filter = new DBADashGUI.Controls.IconGroupBox();
             dgvFilters = new DBADashGUI.CustomReports.DBADashDataGridView();
+            chkCaseSensitive = new System.Windows.Forms.CheckBox();
             bttnAddFilter = new System.Windows.Forms.Button();
             label1 = new System.Windows.Forms.Label();
             lblComparison = new System.Windows.Forms.Label();
             lblField = new System.Windows.Forms.Label();
             lblEvent = new System.Windows.Forms.Label();
+            cboUnit = new System.Windows.Forms.ComboBox();
             txtValue = new System.Windows.Forms.TextBox();
             cboComparison = new System.Windows.Forms.ComboBox();
             cboField = new System.Windows.Forms.ComboBox();
-            cboUnit = new System.Windows.Forms.ComboBox();
             groupBox1 = new DBADashGUI.Controls.IconGroupBox();
             lnkGlobalFields = new System.Windows.Forms.LinkLabel();
             dgvEvents = new DBADashGUI.CustomReports.DBADashDataGridView();
@@ -60,11 +61,14 @@
             chkBatchCompleted = new System.Windows.Forms.CheckBox();
             chkRPC = new System.Windows.Forms.CheckBox();
             grpConfig = new DBADashGUI.Controls.IconGroupBox();
-            maxDuration = new DBADashGUI.Pickers.DurationDropDown();
             checkBox4 = new System.Windows.Forms.CheckBox();
             label4 = new System.Windows.Forms.Label();
             lblTarget = new System.Windows.Forms.Label();
             cboTarget = new System.Windows.Forms.ComboBox();
+            lblSample = new System.Windows.Forms.Label();
+            txtSamplePercent = new System.Windows.Forms.TextBox();
+            lblSampleEffective = new System.Windows.Forms.Label();
+            maxDuration = new DBADashGUI.Pickers.DurationDropDown();
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             tsConfigure = new System.Windows.Forms.ToolStripButton();
             tsStartTrace = new System.Windows.Forms.ToolStripButton();
@@ -112,6 +116,7 @@
             // Filter
             // 
             Filter.Controls.Add(dgvFilters);
+            Filter.Controls.Add(chkCaseSensitive);
             Filter.Controls.Add(bttnAddFilter);
             Filter.Controls.Add(label1);
             Filter.Controls.Add(lblComparison);
@@ -134,30 +139,41 @@
             dgvFilters.AllowUserToAddRows = false;
             dgvFilters.AllowUserToOrderColumns = true;
             dgvFilters.BackgroundColor = System.Drawing.Color.FromArgb(241, 241, 246);
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 9F);
-            dataGridViewCellStyle1.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            dgvFilters.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle5.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle5.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle5.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
+            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgvFilters.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle5;
             dgvFilters.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 9F);
-            dataGridViewCellStyle2.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
-            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            dgvFilters.DefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle6.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle6.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle6.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
+            dataGridViewCellStyle6.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgvFilters.DefaultCellStyle = dataGridViewCellStyle6;
             dgvFilters.EnableHeadersVisualStyles = false;
-            dgvFilters.Location = new System.Drawing.Point(6, 88);
+            dgvFilters.Location = new System.Drawing.Point(6, 116);
             dgvFilters.Name = "dgvFilters";
             dgvFilters.RowHeadersVisible = false;
             dgvFilters.RowHeadersWidth = 51;
-            dgvFilters.Size = new System.Drawing.Size(715, 140);
+            dgvFilters.Size = new System.Drawing.Size(715, 112);
             dgvFilters.TabIndex = 9;
+            // 
+            // chkCaseSensitive
+            // 
+            chkCaseSensitive.AutoSize = true;
+            chkCaseSensitive.Location = new System.Drawing.Point(477, 88);
+            chkCaseSensitive.Name = "chkCaseSensitive";
+            chkCaseSensitive.Size = new System.Drawing.Size(122, 24);
+            chkCaseSensitive.TabIndex = 5;
+            chkCaseSensitive.Text = "Case sensitive";
+            chkCaseSensitive.UseVisualStyleBackColor = true;
+            chkCaseSensitive.Visible = false;
             // 
             // bttnAddFilter
             // 
@@ -204,6 +220,16 @@
             lblEvent.TabIndex = 4;
             lblEvent.Text = "Event";
             // 
+            // cboUnit
+            // 
+            cboUnit.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            cboUnit.FormattingEnabled = true;
+            cboUnit.Location = new System.Drawing.Point(551, 54);
+            cboUnit.Name = "cboUnit";
+            cboUnit.Size = new System.Drawing.Size(66, 28);
+            cboUnit.TabIndex = 4;
+            cboUnit.Visible = false;
+            // 
             // txtValue
             // 
             txtValue.Location = new System.Drawing.Point(477, 54);
@@ -227,19 +253,9 @@
             cboField.Name = "cboField";
             cboField.Size = new System.Drawing.Size(151, 28);
             cboField.TabIndex = 1;
-            //
-            // cboUnit
-            //
-            cboUnit.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            cboUnit.FormattingEnabled = true;
-            cboUnit.Location = new System.Drawing.Point(551, 54);
-            cboUnit.Name = "cboUnit";
-            cboUnit.Size = new System.Drawing.Size(66, 28);
-            cboUnit.TabIndex = 4;
-            cboUnit.Visible = false;
-            //
+            // 
             // groupBox1
-            //
+            // 
             groupBox1.Controls.Add(lnkGlobalFields);
             groupBox1.Controls.Add(dgvEvents);
             groupBox1.Controls.Add(label3);
@@ -273,23 +289,23 @@
             dgvEvents.AllowUserToDeleteRows = false;
             dgvEvents.AllowUserToOrderColumns = true;
             dgvEvents.BackgroundColor = System.Drawing.Color.FromArgb(241, 241, 246);
-            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle3.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle3.Font = new System.Drawing.Font("Segoe UI", 9F);
-            dataGridViewCellStyle3.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
-            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            dgvEvents.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle7.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle7.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle7.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
+            dataGridViewCellStyle7.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle7.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle7.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgvEvents.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle7;
             dgvEvents.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle4.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
-            dataGridViewCellStyle4.Font = new System.Drawing.Font("Segoe UI", 9F);
-            dataGridViewCellStyle4.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
-            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            dgvEvents.DefaultCellStyle = dataGridViewCellStyle4;
+            dataGridViewCellStyle8.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle8.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            dataGridViewCellStyle8.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle8.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle8.SelectionBackColor = System.Drawing.Color.FromArgb(211, 211, 216);
+            dataGridViewCellStyle8.SelectionForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle8.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgvEvents.DefaultCellStyle = dataGridViewCellStyle8;
             dgvEvents.EnableHeadersVisualStyles = false;
             dgvEvents.Location = new System.Drawing.Point(12, 125);
             dgvEvents.Name = "dgvEvents";
@@ -376,30 +392,20 @@
             // 
             // grpConfig
             // 
-            grpConfig.Controls.Add(maxDuration);
             grpConfig.Controls.Add(checkBox4);
             grpConfig.Controls.Add(label4);
             grpConfig.Controls.Add(lblTarget);
             grpConfig.Controls.Add(cboTarget);
+            grpConfig.Controls.Add(lblSample);
+            grpConfig.Controls.Add(txtSamplePercent);
+            grpConfig.Controls.Add(lblSampleEffective);
+            grpConfig.Controls.Add(maxDuration);
             grpConfig.Location = new System.Drawing.Point(12, 167);
             grpConfig.Name = "grpConfig";
             grpConfig.Size = new System.Drawing.Size(733, 127);
             grpConfig.TabIndex = 3;
             grpConfig.TabStop = false;
             grpConfig.Text = "XE Trace Configuration:";
-            // 
-            // maxDuration
-            // 
-            maxDuration.AllowDays = false;
-            maxDuration.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
-            maxDuration.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            maxDuration.IncludeSeconds = true;
-            maxDuration.Location = new System.Drawing.Point(341, 39);
-            maxDuration.MinimumSize = new System.Drawing.Size(380, 0);
-            maxDuration.Name = "maxDuration";
-            maxDuration.Size = new System.Drawing.Size(380, 34);
-            maxDuration.TabIndex = 10;
-            maxDuration.Value = new decimal(new int[] { 1, 0, 0, 0 });
             // 
             // checkBox4
             // 
@@ -436,6 +442,45 @@
             cboTarget.Name = "cboTarget";
             cboTarget.Size = new System.Drawing.Size(151, 28);
             cboTarget.TabIndex = 0;
+            // 
+            // lblSample
+            // 
+            lblSample.AutoSize = true;
+            lblSample.Location = new System.Drawing.Point(234, 76);
+            lblSample.Name = "lblSample";
+            lblSample.Size = new System.Drawing.Size(78, 20);
+            lblSample.TabIndex = 11;
+            lblSample.Text = "Sample %:";
+            // 
+            // txtSamplePercent
+            // 
+            txtSamplePercent.Location = new System.Drawing.Point(341, 72);
+            txtSamplePercent.Name = "txtSamplePercent";
+            txtSamplePercent.Size = new System.Drawing.Size(60, 27);
+            txtSamplePercent.TabIndex = 12;
+            toolTip1.SetToolTip(txtSamplePercent, "Optional: Sample a percentage of events");
+            // 
+            // lblSampleEffective
+            // 
+            lblSampleEffective.AutoSize = true;
+            lblSampleEffective.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            lblSampleEffective.Location = new System.Drawing.Point(407, 76);
+            lblSampleEffective.Name = "lblSampleEffective";
+            lblSampleEffective.Size = new System.Drawing.Size(0, 20);
+            lblSampleEffective.TabIndex = 13;
+            // 
+            // maxDuration
+            // 
+            maxDuration.AllowDays = false;
+            maxDuration.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            maxDuration.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            maxDuration.IncludeSeconds = true;
+            maxDuration.Location = new System.Drawing.Point(341, 39);
+            maxDuration.MinimumSize = new System.Drawing.Size(380, 0);
+            maxDuration.Name = "maxDuration";
+            maxDuration.Size = new System.Drawing.Size(380, 28);
+            maxDuration.TabIndex = 10;
+            maxDuration.Value = new decimal(new int[] { 1, 0, 0, 0 });
             // 
             // toolStrip1
             // 
@@ -678,6 +723,9 @@
         private DBADashGUI.Controls.IconGroupBox grpConfig;
         private System.Windows.Forms.Label lblTarget;
         private System.Windows.Forms.ComboBox cboTarget;
+        private System.Windows.Forms.Label lblSample;
+        private System.Windows.Forms.TextBox txtSamplePercent;
+        private System.Windows.Forms.Label lblSampleEffective;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.CheckBox checkBox4;
         private System.Windows.Forms.ToolStrip toolStrip1;
@@ -707,5 +755,6 @@
         private System.Windows.Forms.CheckedListBox clbInstances;
         private Pickers.DurationDropDown maxDuration;
         private System.Windows.Forms.ComboBox cboUnit;
+        private System.Windows.Forms.CheckBox chkCaseSensitive;
     }
 }

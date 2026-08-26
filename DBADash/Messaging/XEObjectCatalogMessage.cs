@@ -49,7 +49,13 @@ FROM sys.dm_xe_object_columns oc
 JOIN sys.dm_xe_packages p ON oc.object_package_guid = p.guid
 WHERE oc.column_type = 'customizable'
 AND EXISTS (SELECT 1 FROM sys.dm_xe_objects o
-            WHERE o.name = oc.object_name AND o.object_type = 'event' AND o.package_guid = oc.object_package_guid);";
+            WHERE o.name = oc.object_name AND o.object_type = 'event' AND o.package_guid = oc.object_package_guid);
+
+SELECT p.name AS package_name, o.name AS comparator_name
+FROM sys.dm_xe_objects o
+JOIN sys.dm_xe_packages p ON o.package_guid = p.guid
+WHERE o.object_type = 'pred_compare' AND (o.capabilities IS NULL OR (o.capabilities & 1) = 0)
+ORDER BY o.name;";
 
         public override async Task<DataSet> Process(CollectionConfig cfg, Guid handle, CancellationToken cancellationToken)
         {
@@ -89,6 +95,10 @@ AND EXISTS (SELECT 1 FROM sys.dm_xe_objects o
             if (ds.Tables.Count >= 5)
             {
                 ds.Tables[4].TableName = "Customizations"; // per-event customizable columns (SET toggles)
+            }
+            if (ds.Tables.Count >= 6)
+            {
+                ds.Tables[5].TableName = "Comparators"; // available predicate comparators (pred_compare), e.g. the case-sensitive equal_unicode_string
             }
             Log.Information("Returned XE catalog for {instance}: {events} events (handle {handle})",
                 ConnectionID, ds.Tables.Contains("Events") ? ds.Tables["Events"].Rows.Count : 0, handle);
