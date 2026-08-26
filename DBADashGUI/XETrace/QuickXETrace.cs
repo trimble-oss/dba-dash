@@ -643,6 +643,12 @@ namespace DBADashGUI.XETrace
             var isDuration = cboField.SelectedItem is XEFieldInfo f && XEDurationUnits.IsDurationField(f);
             cboUnit.Visible = isDuration;
             txtValue.Width = isDuration ? NarrowValueWidth : _valueBoxFullWidth;
+
+            // Reset the comparison to a sensible default for the newly selected field, so switching fields is
+            // predictable: equals is meaningless on a continuous microsecond value (duration/cpu_time) - the intent
+            // there is almost always "find slow/expensive queries" (>=) - while equals is the natural default for
+            // every other field.
+            cboComparison.SelectedItem = isDuration ? XEFilterOp.GreaterThanOrEqual : XEFilterOp.Equal;
         }
 
         /// <summary>
