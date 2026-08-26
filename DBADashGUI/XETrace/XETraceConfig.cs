@@ -38,6 +38,9 @@ namespace DBADashGUI.XETrace
 
         public int ErrorSeverityFloor { get; set; } = 11;
 
+        /// <summary>Event sampling: capture ~1 in N events (0/1 = no sampling).  Entered in the UI as a percentage.</summary>
+        public int SampleN { get; set; }
+
         /// <summary>Capture the native .xel file (event_file target only) for a Save-as-.xel download.</summary>
         public bool CaptureXel { get; set; }
 

@@ -47,7 +47,7 @@ namespace DBADash.Test
 
             var sql = def.BuildCreateSessionSql();
 
-            StringAssert.Contains(sql, "ADD EVENT sqlserver.rpc_completed"); // events still emitted
+            StringAssert.Contains(sql, "ADD EVENT [sqlserver].[rpc_completed]"); // events still emitted
             Assert.IsFalse(sql.Contains("ADD TARGET"), "a target-less (live) session must not emit an ADD TARGET clause");
         }
 
@@ -60,7 +60,7 @@ namespace DBADash.Test
                 new("sqlserver", "module_end", new[] { "duration", "cpu_time" })
             };
 
-            StringAssert.Contains(def.BuildCreateSessionSql(), "ADD EVENT sqlserver.module_end");
+            StringAssert.Contains(def.BuildCreateSessionSql(), "ADD EVENT [sqlserver].[module_end]");
         }
 
         [TestMethod]
@@ -77,7 +77,7 @@ namespace DBADash.Test
 
             var sql = def.BuildCreateSessionSql();
             var moduleIdx = sql.IndexOf("module_end", System.StringComparison.Ordinal);
-            var loginIdx = sql.IndexOf("sqlserver.login", System.StringComparison.Ordinal);
+            var loginIdx = sql.IndexOf("[sqlserver].[login]", System.StringComparison.Ordinal);
             Assert.IsTrue(sql.Substring(moduleIdx, loginIdx - moduleIdx).Contains("[duration]>(500)"),
                 "duration filter should apply to module_end");
             Assert.IsFalse(sql.Substring(loginIdx).Contains("[duration]"),
@@ -106,9 +106,9 @@ namespace DBADash.Test
         public void GlobalActions_DefaultSet_IsEmitted()
         {
             var sql = NewDef().BuildCreateSessionSql();
-            StringAssert.Contains(sql, "ACTION(sqlserver.client_app_name");
-            StringAssert.Contains(sql, "sqlserver.session_id");
-            StringAssert.Contains(sql, "sqlserver.context_info");
+            StringAssert.Contains(sql, "ACTION([sqlserver].[client_app_name]");
+            StringAssert.Contains(sql, "[sqlserver].[session_id]");
+            StringAssert.Contains(sql, "[sqlserver].[context_info]");
         }
 
         [TestMethod]
@@ -119,7 +119,7 @@ namespace DBADash.Test
 
             var sql = def.BuildCreateSessionSql();
 
-            StringAssert.Contains(sql, "ACTION(sqlserver.sql_text)");
+            StringAssert.Contains(sql, "ACTION([sqlserver].[sql_text])");
             Assert.IsFalse(sql.Contains("context_info"), "non-selected default actions must not be emitted");
         }
 
@@ -143,10 +143,10 @@ namespace DBADash.Test
 
             var sql = def.BuildCreateSessionSql();
 
-            var first = sql.IndexOf("sqlserver.session_id", System.StringComparison.Ordinal);
-            var second = sql.IndexOf("sqlserver.session_id", first + 1, System.StringComparison.Ordinal);
+            var first = sql.IndexOf("[sqlserver].[session_id]", System.StringComparison.Ordinal);
+            var second = sql.IndexOf("[sqlserver].[session_id]", first + 1, System.StringComparison.Ordinal);
             // The same action appears once per event block, but not twice within one ACTION(...) clause.
-            StringAssert.Contains(sql, "ACTION(sqlserver.session_id)");
+            StringAssert.Contains(sql, "ACTION([sqlserver].[session_id])");
             Assert.IsTrue(second == -1 || sql.IndexOf("ADD EVENT", first, System.StringComparison.Ordinal) < second,
                 "a duplicate action must not appear twice in the same ACTION clause");
         }
@@ -170,10 +170,10 @@ namespace DBADash.Test
 
             var sql = def.BuildCreateSessionSql();
 
-            StringAssert.Contains(sql, "SET collect_statement=(0)");
+            StringAssert.Contains(sql, "SET [collect_statement]=(0)");
             // SET must precede ACTION within the rpc_completed block.
             var rpc = sql.IndexOf("rpc_completed", System.StringComparison.Ordinal);
-            var set = sql.IndexOf("SET collect_statement", rpc, System.StringComparison.Ordinal);
+            var set = sql.IndexOf("SET [collect_statement]", rpc, System.StringComparison.Ordinal);
             var action = sql.IndexOf("ACTION(", rpc, System.StringComparison.Ordinal);
             Assert.IsTrue(set > 0 && set < action, "SET must appear before ACTION in the event block");
         }
@@ -185,7 +185,7 @@ namespace DBADash.Test
             def.Events = new List<XETraceEventDef> { new("sqlserver", "module_end", new[] { "duration" }) };
             def.EventCustomizations["module_end"] = new List<XECustomization> { new("collect_statement", "1") };
 
-            StringAssert.Contains(def.BuildCreateSessionSql(), "SET collect_statement=(1)");
+            StringAssert.Contains(def.BuildCreateSessionSql(), "SET [collect_statement]=(1)");
         }
 
         [TestMethod]
@@ -226,9 +226,9 @@ namespace DBADash.Test
 
             var sql = def.BuildCreateSessionSql();
 
-            StringAssert.Contains(sql, "ADD EVENT sqlserver.rpc_completed");
-            StringAssert.Contains(sql, "ADD EVENT sqlserver.sql_batch_completed");
-            StringAssert.Contains(sql, "ADD EVENT sqlserver.error_reported");
+            StringAssert.Contains(sql, "ADD EVENT [sqlserver].[rpc_completed]");
+            StringAssert.Contains(sql, "ADD EVENT [sqlserver].[sql_batch_completed]");
+            StringAssert.Contains(sql, "ADD EVENT [sqlserver].[error_reported]");
         }
 
         [TestMethod]
@@ -239,7 +239,7 @@ namespace DBADash.Test
 
             var sql = def.BuildCreateSessionSql();
 
-            StringAssert.Contains(sql, "sqlserver.rpc_completed");
+            StringAssert.Contains(sql, "[sqlserver].[rpc_completed]");
             Assert.IsFalse(sql.Contains("sql_batch_completed"));
             Assert.IsFalse(sql.Contains("error_reported"));
         }
@@ -252,8 +252,8 @@ namespace DBADash.Test
 
             var sql = def.BuildCreateSessionSql();
 
-            var first = sql.IndexOf("ADD EVENT sqlserver.rpc_completed", System.StringComparison.Ordinal);
-            var second = sql.IndexOf("ADD EVENT sqlserver.rpc_completed", first + 1, System.StringComparison.Ordinal);
+            var first = sql.IndexOf("ADD EVENT [sqlserver].[rpc_completed]", System.StringComparison.Ordinal);
+            var second = sql.IndexOf("ADD EVENT [sqlserver].[rpc_completed]", first + 1, System.StringComparison.Ordinal);
             Assert.IsTrue(second == -1, "the same event must not be added twice");
         }
 
@@ -354,6 +354,105 @@ namespace DBADash.Test
             def.Filters.Add(UserName(XEFilterOp.Like, "app_%"));
 
             StringAssert.Contains(def.BuildCreateSessionSql(), "[sqlserver].[username] LIKE N'app_%'");
+        }
+
+        [TestMethod]
+        public void Filter_CaseSensitiveEquality_ProducesComparatorFunction()
+        {
+            var def = NewDef();
+            var f = AppName(XEFilterOp.Equal, "SQLCMD");
+            f.CaseSensitive = true;
+            def.Filters.Add(f);
+
+            StringAssert.Contains(def.BuildCreateSessionSql(),
+                "[package0].[equal_unicode_string]([sqlserver].[client_app_name],N'SQLCMD')");
+        }
+
+        [TestMethod]
+        public void Filter_CaseSensitiveNotEqual_ProducesComparatorFunction()
+        {
+            var def = NewDef();
+            var f = AppName(XEFilterOp.NotEqual, "SQLCMD");
+            f.CaseSensitive = true;
+            def.Filters.Add(f);
+
+            StringAssert.Contains(def.BuildCreateSessionSql(),
+                "[package0].[not_equal_unicode_string]([sqlserver].[client_app_name],N'SQLCMD')");
+        }
+
+        [TestMethod]
+        public void Filter_CaseSensitiveLike_FallsBackToBareOperator()
+        {
+            // There is no case-sensitive LIKE comparator, so a CaseSensitive LIKE stays the (case-insensitive) bare form.
+            var def = NewDef();
+            var f = UserName(XEFilterOp.Like, "app%");
+            f.CaseSensitive = true;
+            def.Filters.Add(f);
+
+            var sql = def.BuildCreateSessionSql();
+            StringAssert.Contains(sql, "[sqlserver].[username] LIKE N'app%'");
+            Assert.IsFalse(sql.Contains("like_unicode_string"), "No case-sensitive LIKE comparator exists; must use bare LIKE.");
+        }
+
+        [TestMethod]
+        public void Filter_CaseSensitive_UsesComparatorPackageWhenSet()
+        {
+            var def = NewDef();
+            var f = AppName(XEFilterOp.Equal, "SQLCMD");
+            f.CaseSensitive = true;
+            f.ComparatorPackage = "sqlserver"; // resolved from the catalog rather than assumed to be package0
+            def.Filters.Add(f);
+
+            StringAssert.Contains(def.BuildCreateSessionSql(),
+                "[sqlserver].[equal_unicode_string]([sqlserver].[client_app_name],N'SQLCMD')");
+        }
+
+        [TestMethod]
+        public void Filter_DefaultString_UsesBareOperator()
+        {
+            var def = NewDef();
+            def.Filters.Add(AppName(XEFilterOp.Equal, "SQLCMD")); // CaseSensitive defaults to false
+
+            var sql = def.BuildCreateSessionSql();
+            StringAssert.Contains(sql, "[sqlserver].[client_app_name]=N'SQLCMD'");
+            Assert.IsFalse(sql.Contains("equal_unicode_string"), "Default (case-insensitive) match must use the bare operator.");
+        }
+
+        [TestMethod]
+        [DataRow(10.0, 10)]   // clean 1/N
+        [DataRow(25.0, 4)]
+        [DataRow(0.1, 1000)]  // decimals -> deep sampling
+        [DataRow(50.0, 2)]
+        [DataRow(100.0, 0)]   // every event -> no sampling
+        [DataRow(0.0, 0)]     // invalid
+        [DataRow(66.0, 2)]    // rounds to nearest achievable N
+        [DataRow(67.0, 0)]    // rounds to N=1 -> no sampling
+        public void SampleNFromPercent_RoundsToNearestDivisor(double percent, int expectedN)
+        {
+            Assert.AreEqual(expectedN, XETraceDefinition.SampleNFromPercent(percent));
+        }
+
+        [TestMethod]
+        public void Sampling_AppendsDividesByCounterTermLast()
+        {
+            var def = NewDef();
+            def.SampleN = 5;
+            def.Filters.Add(AppName(XEFilterOp.Equal, "SQLCMD"));
+
+            var sql = def.BuildCreateSessionSql();
+            StringAssert.Contains(sql, "[package0].[divides_by_uint64]([package0].[counter],(5))");
+            // The sampling term is last, after the app-name filter it should sample.
+            Assert.IsTrue(sql.IndexOf("client_app_name]=N'SQLCMD'", System.StringComparison.Ordinal) <
+                          sql.IndexOf("divides_by_uint64", System.StringComparison.Ordinal),
+                "Sampling term must come after the real filters.");
+        }
+
+        [TestMethod]
+        public void Sampling_NoTermWhenNotSampling()
+        {
+            var def = NewDef();
+            def.SampleN = 1; // 100% => no sampling
+            Assert.IsFalse(def.BuildCreateSessionSql().Contains("divides_by_uint64"));
         }
 
         [TestMethod]

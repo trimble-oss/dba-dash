@@ -70,6 +70,23 @@ namespace DBADash.XE
         /// <summary>true = numeric comparison; false = string comparison (escaped literal).</summary>
         public bool IsNumeric { get; set; }
 
+        /// <summary>
+        /// true = match with regard to case, using XE's case-sensitive comparators (<c>equal_unicode_string</c> /
+        /// <c>not_equal_unicode_string</c>) instead of the bare operator.  This is needed because the bare operators
+        /// (<c>=</c>/<c>&lt;&gt;</c>) bind to a case-<i>insensitive</i> default comparator regardless of the server
+        /// collation, so case-sensitive matching is only possible via the explicit comparator.  Only meaningful for
+        /// unicode string equality/inequality (there is no case-sensitive LIKE comparator); ignored elsewhere.  Defaults
+        /// to false, so the default remains the (case-insensitive) bare operator - the UI opts a filter in.
+        /// </summary>
+        public bool CaseSensitive { get; set; }
+
+        /// <summary>
+        /// The package that owns the case-sensitive comparator used when <see cref="CaseSensitive"/> is set (normally
+        /// "package0").  Resolved from the instance's catalog by the UI, because the owning package can vary by edition.
+        /// Null falls back to "package0".
+        /// </summary>
+        public string ComparatorPackage { get; set; }
+
         public XEFilterOp Op { get; set; }
         public string Value { get; set; }
     }
@@ -166,6 +183,13 @@ namespace DBADash.XE
 
         /// <summary>Minimum severity for <c>error_reported</c>.  Default 11 drops informational messages.</summary>
         public int ErrorSeverityFloor { get; set; } = 11;
+
+        /// <summary>
+        /// Event sampling: capture ~1 in <c>SampleN</c> events (via <c>package0.divides_by_uint64(package0.counter, N)</c>)
+        /// to cut the volume/overhead of high-frequency events.  0 or 1 means no sampling (every event captured).  The UI
+        /// enters this as a percentage; the value here is the resolved integer divisor.
+        /// </summary>
+        public int SampleN { get; set; }
 
         /// <summary>
         /// The default global actions (the "global fields") captured on every event.  Used when the request doesn't
@@ -286,7 +310,7 @@ namespace DBADash.XE
             }
             var fields = new HashSet<string>(evt.DataColumns ?? Enumerable.Empty<string>(), StringComparer.OrdinalIgnoreCase);
             var setClause = BuildSetClause(evt.Name);
-            return $"ADD EVENT {package}.{evt.Name}(\r\n\t\t{setClause}{actionClause}WHERE ({BuildPredicate(evt.Name, fields)}))";
+            return $"ADD EVENT {package.SqlQuoteName()}.{evt.Name.SqlQuoteName()}(\r\n\t\t{setClause}{actionClause}WHERE ({BuildPredicate(evt.Name, fields)}))";
         }
 
         /// <summary>
@@ -319,7 +343,7 @@ namespace DBADash.XE
                 }
                 if (seen.Add(setting.Name))
                 {
-                    parts.Add($"{setting.Name}=({value.ToString(CultureInfo.InvariantCulture)})");
+                    parts.Add($"{setting.Name.SqlQuoteName()}=({value.ToString(CultureInfo.InvariantCulture)})");
                 }
             }
             return parts.Count == 0 ? string.Empty : $"SET {string.Join(",", parts)}\r\n\t\t";
@@ -341,8 +365,9 @@ namespace DBADash.XE
                 {
                     throw new ArgumentException($"Invalid action: '{package}.{action?.Name}'.");
                 }
+                // Dedupe on the raw pkg.name; emit bracket-quoted (validated above, quoted here as a second layer).
                 var reference = $"{package}.{action.Name}";
-                if (seen.Add(reference)) refs.Add(reference);
+                if (seen.Add(reference)) refs.Add($"{package.SqlQuoteName()}.{action.Name.SqlQuoteName()}");
             }
             return refs.Count == 0 ? string.Empty : $"ACTION({string.Join(",", refs)})\r\n\t\t";
         }
@@ -374,6 +399,14 @@ namespace DBADash.XE
                 terms.Add($"[severity]>=({ErrorSeverityFloor.ToString(CultureInfo.InvariantCulture)})");
             }
 
+            // Sampling term last: capture ~1 in N events via the session counter.  Placed after the real filters so the
+            // counter (which increments per predicate evaluation and short-circuits) only advances for events that
+            // already matched - i.e. we sample the events of interest, not everything the server does.
+            if (SampleN >= 2)
+            {
+                terms.Add($"[package0].[divides_by_uint64]([package0].[counter],({SampleN.ToString(CultureInfo.InvariantCulture)}))");
+            }
+
             return string.Join(" AND ", terms);
         }
 
@@ -396,14 +429,16 @@ namespace DBADash.XE
             }
             if (!filter.IsAction)
             {
-                return $"[{filter.Field}]";
+                // Validated above; also bracket-quote at emission so the identifier is provably safe here even if the
+                // validation is ever weakened (defence in depth).
+                return filter.Field.SqlQuoteName();
             }
             var package = filter.FieldPackage ?? "sqlserver";
             if (!IdentifierPattern.IsMatch(package))
             {
                 throw new ArgumentException($"Invalid filter field package: '{package}'.");
             }
-            return $"[{package}].[{filter.Field}]";
+            return $"{package.SqlQuoteName()}.{filter.Field.SqlQuoteName()}";
         }
 
         private static string BuildFilterTerm(XEFilter filter)
@@ -423,14 +458,64 @@ namespace DBADash.XE
             }
 
             // String fields: only equality / inequality / LIKE.  Value escaped as an N'...' literal.
+            var literal = StringLiteral(filter.Value);
+
+            // Case-sensitive match: the bare operators (= <>) bind to a case-INsensitive default comparator regardless
+            // of the server collation, so a case-sensitive match must use the explicit comparator (equal_unicode_string
+            // / not_equal_unicode_string).  Only =/<> have a case-sensitive comparator (there is no plain
+            // like_unicode_string), so any other operator falls through to the bare (case-insensitive) form below.  The
+            // UI only offers this for unicode string =/<> whose comparator exists on the instance.
+            if (filter.CaseSensitive && CaseSensitiveUnicodeComparator(filter.Op) is { } comparator)
+            {
+                // Reference the comparator by its real package (the UI resolves it from the catalog); fall back to
+                // package0 (where these comparators live) if it wasn't supplied.
+                var comparatorPackage = filter.ComparatorPackage;
+                if (string.IsNullOrEmpty(comparatorPackage) || !IdentifierPattern.IsMatch(comparatorPackage))
+                {
+                    comparatorPackage = "package0";
+                }
+                // Validated above (comparator is a hard-coded name); bracket-quote at emission as a second layer.
+                return $"{comparatorPackage.SqlQuoteName()}.{comparator.SqlQuoteName()}({reference},{literal})";
+            }
+
             return filter.Op switch
             {
-                XEFilterOp.Equal => $"{reference}={StringLiteral(filter.Value)}",
-                XEFilterOp.NotEqual => $"{reference}<>{StringLiteral(filter.Value)}",
-                XEFilterOp.Like => $"{reference} LIKE {StringLiteral(filter.Value)}",
+                XEFilterOp.Equal => $"{reference}={literal}",
+                XEFilterOp.NotEqual => $"{reference}<>{literal}",
+                XEFilterOp.Like => $"{reference} LIKE {literal}",
                 _ => throw new ArgumentException($"Operator {filter.Op} is not valid for string field {filter.Field}.")
             };
         }
+
+        /// <summary>
+        /// The XE case-sensitive comparator (a <c>pred_compare</c>, normally in <c>package0</c>) for a unicode string
+        /// operator, or null if the operator has no case-sensitive form.  Only equality/inequality have one - there is
+        /// no plain <c>like_unicode_string</c> - so LIKE returns null and stays case-insensitive.  Shared by the builder
+        /// and the UI so the offered option and the generated DDL always agree, and so the UI can confirm the comparator
+        /// actually exists on the instance (see <see cref="XEObjectCatalog.SupportsComparator"/>) before offering it.
+        /// </summary>
+        public static string CaseSensitiveUnicodeComparator(XEFilterOp op) => op switch
+        {
+            XEFilterOp.Equal => "equal_unicode_string",
+            XEFilterOp.NotEqual => "not_equal_unicode_string",
+            _ => null
+        };
+
+        /// <summary>
+        /// Converts a sampling percentage to the integer divisor N for <c>divides_by_uint64(counter, N)</c>: N =
+        /// round(100 / percent).  XE can only sample in 1/N steps, so a percentage that isn't a clean 1/N is rounded to
+        /// the nearest achievable N.  Returns 0 (no sampling) for percent &le; 0, percent &ge; 100, or anything that
+        /// rounds to every event (N &lt; 2).
+        /// </summary>
+        public static int SampleNFromPercent(double percent)
+        {
+            if (percent <= 0 || percent >= 100) return 0;
+            var n = (int)System.Math.Round(100.0 / percent, System.MidpointRounding.AwayFromZero);
+            return n < 2 ? 0 : n;
+        }
+
+        /// <summary>The effective sampling percentage for a divisor N (100/N), or 100 when N means "no sampling".</summary>
+        public static double PercentFromSampleN(int n) => n >= 2 ? 100.0 / n : 100.0;
 
         private static string NumericOperator(XEFilterOp op) => op switch
         {

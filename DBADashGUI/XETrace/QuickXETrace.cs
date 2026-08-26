@@ -155,7 +155,7 @@ namespace DBADashGUI.XETrace
             // Target drives the mode: Auto/LiveStream = target-less live streaming; EventFile/RingBuffer = durable.
 
             cboComparison.DropDownStyle = ComboBoxStyle.DropDownList;
-            cboComparison.DataSource = Enum.GetValues(typeof(XEFilterOp));
+            cboComparison.DataSource = StringOps; // initial neutral set; reconfigured per field in UpdateFilterInputsForField
             UpdateComparisonHint();
 
             cboEvent.DropDownStyle = ComboBoxStyle.DropDownList;
@@ -196,8 +196,15 @@ namespace DBADashGUI.XETrace
             // Results view (shared with the Extended Events watch window) hosts the results + pivoted detail grids.
             splitContainer1.Panel2.Controls.Add(_results);
 
+            _fieldTip.SetToolTip(txtSamplePercent,
+                "Capture only a sample of the matching events, to cut volume and overhead on high-frequency events.\r\n" +
+                "Enter a percentage (decimals allowed, e.g. 10 or 0.1).  Leave blank to capture every event.\r\n" +
+                "XE samples in whole 1-in-N steps, so the effective rate shown may differ slightly from what you type.\r\n" +
+                "Sampling is applied after your filters, so it samples the matching events - not everything the server does.");
+
             UpdateGlobalFieldsLabel();
             UpdateXelCaptureState();
+            UpdateSampleAvailability(); // hidden until the catalog confirms the sampling objects exist
         }
 
         /// <summary>
@@ -227,6 +234,63 @@ namespace DBADashGUI.XETrace
                 or XETraceTargetPreference.Auto
                 or XETraceTargetPreference.LiveStream;
         }
+
+        // ---- Sampling ------------------------------------------------------------------------------
+
+        /// <summary>Whether the instance exposes the objects the sampling predicate needs (divides_by_uint64 + counter).</summary>
+        private bool SampleSupported() =>
+            _catalog.SupportsComparator("divides_by_uint64") &&
+            _catalog.PredSources.Any(p => string.Equals(p.Name, "counter", StringComparison.OrdinalIgnoreCase));
+
+        /// <summary>Shows the sampling controls only when the instance supports the sampling predicate.</summary>
+        private void UpdateSampleAvailability()
+        {
+            if (txtSamplePercent == null) return; // not yet created (early designer/init paths)
+            var supported = SampleSupported();
+            lblSample.Visible = supported;
+            txtSamplePercent.Visible = supported;
+            lblSampleEffective.Visible = supported;
+            if (!supported) txtSamplePercent.Clear();
+        }
+
+        /// <summary>
+        /// Blocks casual junk from the sample % box - allows digits, a single (culture) decimal separator, and control
+        /// keys.  Deliberately lightweight: paste and culture edge cases still get through, but the effective-rate label
+        /// and the Start-time check are the real validation, so this only needs to stop obvious mistyping.
+        /// </summary>
+        private void SamplePercent_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            var c = e.KeyChar;
+            if (char.IsControl(c) || char.IsDigit(c)) return;
+            var decimalSep = System.Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator;
+            // Allow one decimal separator only.
+            if (decimalSep.Length == 1 && c == decimalSep[0] && !txtSamplePercent.Text.Contains(decimalSep)) return;
+            e.Handled = true;
+        }
+
+        private bool TryGetSamplePercent(out double percent) =>
+            double.TryParse(txtSamplePercent.Text.Trim(), System.Globalization.NumberStyles.Float,
+                System.Globalization.CultureInfo.CurrentCulture, out percent);
+
+        /// <summary>Reflects the entered percentage back as the effective 1-in-N rate XE will actually apply.</summary>
+        private void UpdateSampleEffectiveLabel()
+        {
+            if (string.IsNullOrEmpty(txtSamplePercent.Text.Trim())) { lblSampleEffective.Text = string.Empty; return; }
+            if (!TryGetSamplePercent(out var pct) || pct <= 0 || pct > 100)
+            {
+                lblSampleEffective.Text = "Enter 1-100%";
+                return;
+            }
+            var n = XETraceDefinition.SampleNFromPercent(pct);
+            if (n < 2) { lblSampleEffective.Text = "All events (no sampling)"; return; }
+            var effective = XETraceDefinition.PercentFromSampleN(n);
+            var approx = Math.Abs(effective - pct) > 0.05 ? "≈ " : string.Empty; // "≈" when the % had to be rounded
+            lblSampleEffective.Text = $"{approx}1 in {n} events ({effective:0.###}%)";
+        }
+
+        /// <summary>The sampling divisor N for the current input (0 = no sampling / unsupported).</summary>
+        private int ComputeSampleN() =>
+            SampleSupported() && TryGetSamplePercent(out var pct) ? XETraceDefinition.SampleNFromPercent(pct) : 0;
 
         private const string ColEventName = "colEventName";
         private const string ColFields = "colFields";
@@ -262,9 +326,11 @@ namespace DBADashGUI.XETrace
             chkErrorReported.CheckedChanged += (_, _) => { if (!_loadingTemplate) RefreshFilterEvents(); };
 
             cboTarget.SelectedIndexChanged += (_, _) => UpdateXelCaptureState();
+            txtSamplePercent.TextChanged += (_, _) => UpdateSampleEffectiveLabel();
+            txtSamplePercent.KeyPress += SamplePercent_KeyPress;
             cboEvent.SelectedIndexChanged += (_, _) => RefreshFilterFields();
-            cboField.SelectedIndexChanged += (_, _) => UpdateValueUnitVisibility();
-            cboComparison.SelectedIndexChanged += (_, _) => UpdateComparisonHint();
+            cboField.SelectedIndexChanged += (_, _) => UpdateFilterInputsForField();
+            cboComparison.SelectedIndexChanged += (_, _) => { UpdateComparisonHint(); UpdateCaseSensitiveOption(); };
             cboComparison.Format += CboComparison_Format;
             cboField.Format += CboField_Format;
             bttnAddFilter.Click += (_, _) => AddFilter();
@@ -375,6 +441,7 @@ namespace DBADashGUI.XETrace
                     .ToList();
                 FilterEventList();
                 RefreshFilterEvents();
+                UpdateSampleAvailability(); // catalog now known - show sampling only if its XE objects exist
                 SetStatus($"Ready. {_allEvents.Count} events available.", string.Empty, DashColors.Information);
             }
             catch (Exception ex)
@@ -633,26 +700,72 @@ namespace DBADashGUI.XETrace
         {
             cboField.DataSource = GetFieldsForScope(cboEvent.SelectedItem as string);
             cboField.DisplayMember = nameof(XEFieldInfo.Name);
-            UpdateValueUnitVisibility();
+            UpdateFilterInputsForField();
         }
 
-        /// <summary>
-        /// Shows the unit selector (and narrows the value box) when the selected field is a microsecond duration field,
-        /// so its value is entered as a number + unit; otherwise the plain full-width value box is used.
-        /// </summary>
-        private void UpdateValueUnitVisibility()
+        // Operators offered per field type.  Numeric supports the ordering operators but not LIKE; string supports
+        // equality/inequality and LIKE (the ordering operators aren't valid for strings - see BuildFilterTerm).  This
+        // is what stops LIKE being offered on numeric fields (and the ordering ops on strings).
+        private static readonly XEFilterOp[] NumericOps =
         {
-            if (cboUnit == null) return; // not yet created (early designer/init paths)
-            var isDuration = cboField.SelectedItem is XEFieldInfo f && XEDurationUnits.IsDurationField(f);
+            XEFilterOp.Equal, XEFilterOp.NotEqual, XEFilterOp.GreaterThan, XEFilterOp.LessThan,
+            XEFilterOp.GreaterThanOrEqual, XEFilterOp.LessThanOrEqual
+        };
+
+        private static readonly XEFilterOp[] StringOps =
+        {
+            XEFilterOp.Equal, XEFilterOp.NotEqual, XEFilterOp.Like
+        };
+
+        /// <summary>
+        /// Reconfigures the filter input controls for the currently selected field: the operator list (numeric vs
+        /// string ops), the microsecond unit selector (duration fields), the case-insensitive option (unicode string
+        /// fields), and a predictable default operator.  Runs on every field (and event-scope) change.
+        /// </summary>
+        private void UpdateFilterInputsForField()
+        {
+            if (cboUnit == null) return; // controls not yet created (early designer/init paths)
+
+            var field = cboField.SelectedItem as XEFieldInfo;
+            var isNumeric = field?.IsNumeric == true;
+            var isDuration = field != null && XEDurationUnits.IsDurationField(field);
+
+            // Offer only the operators valid for the field's type.  Rebinding drops any op that isn't valid for the
+            // newly selected field (e.g. a LIKE left over from a string field when switching to a numeric one).
+            cboComparison.DataSource = isNumeric ? NumericOps : StringOps;
+
+            // Duration (microsecond) fields enter their value as a number + unit; other fields use the full-width box.
             cboUnit.Visible = isDuration;
             txtValue.Width = isDuration ? NarrowValueWidth : _valueBoxFullWidth;
 
-            // Reset the comparison to a sensible default for the newly selected field, so switching fields is
-            // predictable: equals is meaningless on a continuous microsecond value (duration/cpu_time) - the intent
-            // there is almost always "find slow/expensive queries" (>=) - while equals is the natural default for
-            // every other field.
+            // Case-sensitive matching is opt-in (the bare operators are case-insensitive by default), so default the
+            // checkbox off.  Its per-operator visibility is set by UpdateCaseSensitiveOption below.
+            chkCaseSensitive.Checked = false;
+
+            // Predictable default operator: duration/cpu_time -> >= (find slow/expensive queries); everything else ->
+            // equals.  Set after rebinding so the selection lands in the new list (this also fires the operator-changed
+            // handler, which refreshes the case-sensitive option and the LIKE hint for the new operator).
             cboComparison.SelectedItem = isDuration ? XEFilterOp.GreaterThanOrEqual : XEFilterOp.Equal;
+            UpdateCaseSensitiveOption(); // in case the operator selection didn't actually change
         }
+
+        /// <summary>
+        /// Shows the case-sensitive checkbox only when it applies: a unicode string field with an equality/inequality
+        /// operator (there is no case-sensitive LIKE comparator) whose case-sensitive comparator exists on the instance
+        /// (verified against the catalog's <c>pred_compare</c> list, so we never emit DDL for a comparator it lacks).
+        /// The bare operators are case-insensitive regardless of collation, so this is offered on every instance.
+        /// </summary>
+        private void UpdateCaseSensitiveOption()
+        {
+            if (chkCaseSensitive == null) return; // not yet created (early designer/init paths)
+            chkCaseSensitive.Visible = OfferCaseSensitive(cboField.SelectedItem as XEFieldInfo,
+                cboComparison.SelectedItem is XEFilterOp o ? o : XEFilterOp.Equal);
+        }
+
+        /// <summary>Whether the case-sensitive option applies for the given field + operator on the current instance.</summary>
+        private bool OfferCaseSensitive(XEFieldInfo field, XEFilterOp op) =>
+            field?.IsUnicodeString == true &&
+            _catalog.SupportsComparator(XETraceDefinition.CaseSensitiveUnicodeComparator(op));
 
         /// <summary>
         /// Shows a wildcard hint on the value box while LIKE is selected.  The filter emits a SQL LIKE predicate, so it
@@ -746,6 +859,15 @@ namespace DBADashGUI.XETrace
                 return;
             }
             var scope = cboEvent.SelectedItem as string;
+            var op = (XEFilterOp)cboComparison.SelectedItem;
+
+            // Case-sensitive only when the checkbox is ticked AND it genuinely applies: a unicode string =/<> whose
+            // case-sensitive comparator exists on the instance.  Recomputed here (rather than trusting the checkbox's
+            // Visible state) so a mismatch can never emit DDL for a missing comparator.  When it applies, capture the
+            // comparator's owning package from the catalog so the DDL references it correctly.
+            var comparator = XETraceDefinition.CaseSensitiveUnicodeComparator(op);
+            var caseSensitive = chkCaseSensitive.Checked && OfferCaseSensitive(field, op);
+
             _filters.Add(new XEFilter
             {
                 EventName = scope == AllEventsLabel ? null : scope,
@@ -753,7 +875,9 @@ namespace DBADashGUI.XETrace
                 FieldPackage = field.Package ?? "sqlserver",
                 IsAction = field.IsAction,
                 IsNumeric = field.IsNumeric,
-                Op = (XEFilterOp)cboComparison.SelectedItem,
+                CaseSensitive = caseSensitive,
+                ComparatorPackage = caseSensitive ? _catalog.ComparatorPackage(comparator) : null,
+                Op = op,
                 Value = value
             });
             RefreshFilterGrid();
@@ -798,10 +922,14 @@ namespace DBADashGUI.XETrace
             dt.Columns.Add("Value");
             foreach (var f in _filters)
             {
-                dt.Rows.Add(FilterAppliesToText(f), f.Field, f.Op.ToString(), FilterValueDisplay(f));
+                dt.Rows.Add(FilterAppliesToText(f), f.Field, FilterComparisonDisplay(f), FilterValueDisplay(f));
             }
             dgvFilters.DataSource = dt;
         }
+
+        /// <summary>Comparison column text - the operator, flagged "(case sensitive)" for a case-sensitive string match.</summary>
+        private static string FilterComparisonDisplay(XEFilter f) =>
+            f.CaseSensitive ? $"{f.Op} (case sensitive)" : f.Op.ToString();
 
         /// <summary>
         /// Display text for the Value column.  A microsecond duration value is shown in the friendliest whole unit
@@ -1024,6 +1152,7 @@ namespace DBADashGUI.XETrace
                 EventCustomizations = BuildEventCustomizations(),
                 Target = (XETraceTargetPreference)cboTarget.SelectedItem,
                 MaxDurationSeconds = seconds > 0 ? (int)seconds.Value : 300,
+                SampleN = ComputeSampleN(),
                 CaptureXel = checkBox4.Checked
             };
         }
@@ -1084,6 +1213,15 @@ namespace DBADashGUI.XETrace
             if (config.EventDefs.Count == 0)
             {
                 SetStatus("Select at least one event", string.Empty, DashColors.Warning);
+                return;
+            }
+
+            // A non-empty but invalid sampling percentage would otherwise be silently ignored (no sampling) - surface it.
+            if (txtSamplePercent.Visible && !string.IsNullOrWhiteSpace(txtSamplePercent.Text) &&
+                (!TryGetSamplePercent(out var samplePct) || samplePct <= 0 || samplePct > 100))
+            {
+                SetStatus("Enter a sampling percentage between 0 and 100, or clear it to capture every event.",
+                    string.Empty, DashColors.Warning);
                 return;
             }
 

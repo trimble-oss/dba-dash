@@ -30,6 +30,33 @@ namespace DBADash.XE
         public List<XEFieldInfo> Actions { get; set; } = new();
 
         /// <summary>
+        /// The predicate comparators (object_type = 'pred_compare') available on the instance, mapping comparator name
+        /// (e.g. <c>equal_unicode_string</c>) to its owning package.  The comparator set - and which package owns
+        /// it - varies by SQL Server version/edition (a database-scoped/Azure session in particular can differ), so the
+        /// UI checks this before offering an option that depends on a specific comparator and the DDL references the
+        /// comparator by its real package rather than assuming <c>package0</c>.  May be empty when collected by an older
+        /// service that didn't return the set - see <see cref="SupportsComparator"/>.
+        /// </summary>
+        public Dictionary<string, string> Comparators { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// Whether a comparator can be used on this instance - a strict membership test against the enumerated set.
+        /// It must be strict (not optimistic when the set is empty) because the package a comparator lives in isn't
+        /// fixed, so without the enumerated set we can't build a correct <c>[package].[comparator]</c> reference and
+        /// must not offer the dependent option.  An older service that doesn't return the set therefore won't offer it.
+        /// </summary>
+        public bool SupportsComparator(string name) =>
+            !string.IsNullOrEmpty(name) && Comparators.ContainsKey(name);
+
+        /// <summary>
+        /// The package owning a comparator, for the <c>[package].[comparator](...)</c> DDL reference.  Falls back to
+        /// <c>package0</c> only when the comparator isn't in the enumerated set; callers gate on
+        /// <see cref="SupportsComparator"/> first, so in practice the real package is always returned here.
+        /// </summary>
+        public string ComparatorPackage(string name) =>
+            name != null && Comparators.TryGetValue(name, out var pkg) && !string.IsNullOrEmpty(pkg) ? pkg : "package0";
+
+        /// <summary>
         /// Finds an event by name.  An event name can exist in more than one package (e.g. both
         /// <c>sqlserver.error_reported</c> and <c>xesvlpkg.error_reported</c>), so the <c>sqlserver</c> package is
         /// preferred - that's the one the ad-hoc trace built-ins and pickers mean.
@@ -94,6 +121,7 @@ namespace DBADash.XE
                     {
                         Name = r["field_name"] as string,
                         IsAction = false,
+                        TypeName = r["type_name"] as string,
                         IsNumeric = IsNumericType(r["type_name"] as string)
                     });
                 }
@@ -108,6 +136,7 @@ namespace DBADash.XE
                         Name = r["field_name"] as string,
                         Package = r["package_name"] as string,
                         IsAction = true, // referenced as [package].[name], same as an action reference
+                        TypeName = r["type_name"] as string,
                         IsNumeric = IsNumericType(r["type_name"] as string)
                     });
                 }
@@ -140,6 +169,15 @@ namespace DBADash.XE
                         IsAction = true,
                         IsNumeric = IsNumericType(r["type_name"] as string)
                     });
+                }
+            }
+
+            if (ds.Tables.Contains("Comparators"))
+            {
+                foreach (DataRow r in ds.Tables["Comparators"].Rows)
+                {
+                    var name = r["comparator_name"] as string;
+                    if (!string.IsNullOrEmpty(name)) catalog.Comparators[name] = r["package_name"] as string;
                 }
             }
 
@@ -195,6 +233,12 @@ namespace DBADash.XE
         /// <summary>true = global action (referenced as <c>[package].[name]</c>); false = event data column (<c>[name]</c>).</summary>
         public bool IsAction { get; set; }
         public bool IsNumeric { get; set; }
+
+        /// <summary>The XE type name (e.g. "unicode_string", "int64").  Drives the offer of case-insensitive matching.</summary>
+        public string TypeName { get; set; }
+
+        /// <summary>true for a unicode string field - the only fields we offer XE's case-insensitive comparators for.</summary>
+        public bool IsUnicodeString => string.Equals(TypeName, "unicode_string", StringComparison.OrdinalIgnoreCase);
 
         public override string ToString() => Name;
     }

@@ -58,6 +58,13 @@ namespace DBADash.Test
             cust.Rows.Add("sqlserver", "rpc_completed", "collect_statement", "boolean", "true");
             ds.Tables.Add(cust);
 
+            var comparators = new DataTable("Comparators");
+            comparators.Columns.Add("package_name");
+            comparators.Columns.Add("comparator_name");
+            comparators.Rows.Add("package0", "equal_unicode_string");
+            comparators.Rows.Add("package0", "not_equal_unicode_string");
+            ds.Tables.Add(comparators);
+
             return ds;
         }
 
@@ -86,6 +93,30 @@ namespace DBADash.Test
             Assert.AreEqual("collect_statement", collect.Name);
             Assert.IsTrue(collect.IsBoolean);
             Assert.IsTrue(collect.DefaultOn, "default_value 'true' should map to DefaultOn");
+        }
+
+        [TestMethod]
+        public void FromDataSet_ParsesComparators()
+        {
+            var catalog = XEObjectCatalog.FromDataSet(BuildDataSet());
+
+            Assert.IsTrue(catalog.SupportsComparator("equal_unicode_string"));
+            Assert.AreEqual("package0", catalog.ComparatorPackage("equal_unicode_string"));
+            // Not returned for this instance -> not supported (strict membership when the set is known).
+            Assert.IsFalse(catalog.SupportsComparator("like_unicode_string"));
+            // Unknown comparator falls back to package0 for the DDL reference.
+            Assert.AreEqual("package0", catalog.ComparatorPackage("no_such_comparator"));
+        }
+
+        [TestMethod]
+        public void SupportsComparator_UnknownSet_NotOffered()
+        {
+            // An older service returns no comparator set.  We can't know which package the comparator lives in, so the
+            // dependent option must not be offered.
+            var catalog = new XEObjectCatalog();
+            Assert.AreEqual(0, catalog.Comparators.Count);
+            Assert.IsFalse(catalog.SupportsComparator("equal_unicode_string"));
+            Assert.IsFalse(catalog.SupportsComparator(null));
         }
 
         [TestMethod]
