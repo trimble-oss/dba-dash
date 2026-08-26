@@ -17,8 +17,7 @@ namespace DBADash.Messaging
     {
         public string ConnectionID { get; set; }
 
-        // Server-scoped views; the database-scoped equivalents are used for Azure SQL DB.
-        private const string ServerSql = @"
+        private const string CatalogSql = @"
 SELECT p.name AS package_name, o.name AS event_name, o.description
 FROM sys.dm_xe_objects o
 JOIN sys.dm_xe_packages p ON o.package_guid = p.guid
@@ -52,11 +51,6 @@ WHERE oc.column_type = 'customizable'
 AND EXISTS (SELECT 1 FROM sys.dm_xe_objects o
             WHERE o.name = oc.object_name AND o.object_type = 'event' AND o.package_guid = oc.object_package_guid);";
 
-        private static string DatabaseSql => ServerSql
-            .Replace("sys.dm_xe_objects", "sys.dm_xe_database_objects")
-            .Replace("sys.dm_xe_packages", "sys.dm_xe_database_packages")
-            .Replace("sys.dm_xe_object_columns", "sys.dm_xe_database_object_columns");
-
         public override async Task<DataSet> Process(CollectionConfig cfg, Guid handle, CancellationToken cancellationToken)
         {
             ThrowIfExpired();
@@ -72,10 +66,9 @@ AND EXISTS (SELECT 1 FROM sys.dm_xe_objects o
                 throw new Exception($"Source connection '{ConnectionID}' not found.");
             }
             var connectionString = src.SourceConnection.ConnectionString;
-            var info = await ConnectionInfo.GetConnectionInfoAsync(connectionString);
 
             await using var cn = new SqlConnection(connectionString);
-            await using var cmd = new SqlCommand(info.IsAzureDB ? DatabaseSql : ServerSql, cn)
+            await using var cmd = new SqlCommand(CatalogSql, cn)
             { CommandType = CommandType.Text, CommandTimeout = Lifetime };
             await cn.OpenAsync(cancellationToken);
             var ds = new DataSet();
