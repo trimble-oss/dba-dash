@@ -156,6 +156,7 @@ namespace DBADashGUI.XETrace
 
             cboComparison.DropDownStyle = ComboBoxStyle.DropDownList;
             cboComparison.DataSource = Enum.GetValues(typeof(XEFilterOp));
+            UpdateComparisonHint();
 
             cboEvent.DropDownStyle = ComboBoxStyle.DropDownList;
             cboField.DropDownStyle = ComboBoxStyle.DropDownList;
@@ -263,6 +264,8 @@ namespace DBADashGUI.XETrace
             cboTarget.SelectedIndexChanged += (_, _) => UpdateXelCaptureState();
             cboEvent.SelectedIndexChanged += (_, _) => RefreshFilterFields();
             cboField.SelectedIndexChanged += (_, _) => UpdateValueUnitVisibility();
+            cboComparison.SelectedIndexChanged += (_, _) => UpdateComparisonHint();
+            cboComparison.Format += CboComparison_Format;
             cboField.Format += CboField_Format;
             bttnAddFilter.Click += (_, _) => AddFilter();
             dgvFilters.CellContentClick += DgvFilters_CellContentClick;
@@ -649,6 +652,35 @@ namespace DBADashGUI.XETrace
             // there is almost always "find slow/expensive queries" (>=) - while equals is the natural default for
             // every other field.
             cboComparison.SelectedItem = isDuration ? XEFilterOp.GreaterThanOrEqual : XEFilterOp.Equal;
+        }
+
+        /// <summary>
+        /// Shows a wildcard hint on the value box while LIKE is selected.  The filter emits a SQL LIKE predicate, so it
+        /// uses SQL wildcards (% and _) - not the * that Profiler / the SSMS Extended Events grid use - which users
+        /// routinely misremember.  The hint is cleared for every other operator (an exact value, no wildcards).
+        /// </summary>
+        private void UpdateComparisonHint()
+        {
+            var isLike = cboComparison.SelectedItem is XEFilterOp.Like;
+            _fieldTip.SetToolTip(txtValue, isLike
+                ? "LIKE wildcards:\r\n" +
+                  "  %  matches any sequence of characters (e.g. %report%)\r\n" +
+                  "  _  matches a single character (e.g. DBADas_)\r\n" +
+                  "[...] character ranges are not supported."
+                : string.Empty);
+        }
+
+        /// <summary>
+        /// Annotates the LIKE item in the comparison combo with its wildcard cue (Like -> "Like (% = wildcard)"), so the
+        /// hint is visible in the drop-down itself rather than only in the value box tooltip.  Purely cosmetic - the
+        /// bound item is still the <see cref="XEFilterOp"/>, so filter creation is unaffected.
+        /// </summary>
+        private static void CboComparison_Format(object sender, ListControlConvertEventArgs e)
+        {
+            if (e.ListItem is XEFilterOp.Like)
+            {
+                e.Value = "Like (% = wildcard)";
+            }
         }
 
         /// <summary>
