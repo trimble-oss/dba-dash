@@ -120,6 +120,14 @@ namespace DBADashGUI.XETrace
         private const int DefaultErrorSeverityThreshold = 11; // default for error_reported filter
         private const string RpcResetProc = "sp_reset_connection"; // connection-pool reset RPC, excluded by default
 
+        // XE stores duration/cpu_time in microseconds, which trips up users (Profiler shows milliseconds) and is
+        // tedious to type (10 seconds = 10000000).  For these fields the filter value is entered as a number + a unit
+        // (cboUnit) and converted to microseconds; the grid shows the value back in the friendliest matching unit.
+        // The unit logic is shared with the template load-time prompt - see XEDurationUnits.
+        // cboUnit itself is a designer control (see QuickXETrace.Designer.cs).
+        private int _valueBoxFullWidth; // txtValue width when no unit selector is shown (restored from the designer)
+        private const int NarrowValueWidth = 70; // txtValue width when the unit selector is shown beside it
+
         public QuickXETrace()
         {
             InitializeComponent();
@@ -155,6 +163,13 @@ namespace DBADashGUI.XETrace
                 "* marks an event-specific field - it applies only to events that expose it.\r\n" +
                 "Fields without * are global and apply to every event.");
             cboOtherEvent.DropDownStyle = ComboBoxStyle.DropDownList;
+
+            // Unit selector (designer control cboUnit) for microsecond duration fields (duration, cpu_time): shown beside
+            // the value box - narrowed to make room - so the user enters e.g. "10 sec" instead of the zeros in 10000000.
+            _valueBoxFullWidth = txtValue.Width;
+            cboUnit.DataSource = XEDurationUnits.BindingList();
+            cboUnit.DisplayMember = nameof(XEDurationUnits.Unit.Label);
+            cboUnit.SelectedIndex = XEDurationUnits.IndexOf(XEDurationUnits.DefaultUnit); // default to ms (Profiler unit)
 
             dgvFilters.AutoGenerateColumns = false;
             dgvFilters.Columns.Clear();
@@ -247,6 +262,7 @@ namespace DBADashGUI.XETrace
 
             cboTarget.SelectedIndexChanged += (_, _) => UpdateXelCaptureState();
             cboEvent.SelectedIndexChanged += (_, _) => RefreshFilterFields();
+            cboField.SelectedIndexChanged += (_, _) => UpdateValueUnitVisibility();
             cboField.Format += CboField_Format;
             bttnAddFilter.Click += (_, _) => AddFilter();
             dgvFilters.CellContentClick += DgvFilters_CellContentClick;
@@ -614,6 +630,19 @@ namespace DBADashGUI.XETrace
         {
             cboField.DataSource = GetFieldsForScope(cboEvent.SelectedItem as string);
             cboField.DisplayMember = nameof(XEFieldInfo.Name);
+            UpdateValueUnitVisibility();
+        }
+
+        /// <summary>
+        /// Shows the unit selector (and narrows the value box) when the selected field is a microsecond duration field,
+        /// so its value is entered as a number + unit; otherwise the plain full-width value box is used.
+        /// </summary>
+        private void UpdateValueUnitVisibility()
+        {
+            if (cboUnit == null) return; // not yet created (early designer/init paths)
+            var isDuration = cboField.SelectedItem is XEFieldInfo f && XEDurationUnits.IsDurationField(f);
+            cboUnit.Visible = isDuration;
+            txtValue.Width = isDuration ? NarrowValueWidth : _valueBoxFullWidth;
         }
 
         /// <summary>
@@ -673,6 +702,11 @@ namespace DBADashGUI.XETrace
                 SetStatus("Enter a filter value", string.Empty, DashColors.Warning);
                 return;
             }
+            if (!TryGetFilterValue(field, out var value, out var error))
+            {
+                SetStatus(error, string.Empty, DashColors.Warning);
+                return;
+            }
             var scope = cboEvent.SelectedItem as string;
             _filters.Add(new XEFilter
             {
@@ -682,10 +716,26 @@ namespace DBADashGUI.XETrace
                 IsAction = field.IsAction,
                 IsNumeric = field.IsNumeric,
                 Op = (XEFilterOp)cboComparison.SelectedItem,
-                Value = txtValue.Text.Trim()
+                Value = value
             });
             RefreshFilterGrid();
             txtValue.Clear();
+        }
+
+        /// <summary>
+        /// The value string to store on the filter.  For a microsecond duration field the value box holds a number and
+        /// <see cref="cboUnit"/> its unit, converted here to whole microseconds (the unit XE expects in the DDL); every
+        /// other field stores the trimmed text as typed.
+        /// </summary>
+        private bool TryGetFilterValue(XEFieldInfo field, out string value, out string error)
+        {
+            value = txtValue.Text.Trim();
+            error = string.Empty;
+
+            if (!XEDurationUnits.IsDurationField(field)) return true;
+
+            var unit = cboUnit.SelectedItem as XEDurationUnits.Unit;
+            return XEDurationUnits.TryToMicroseconds(value, unit, out value, out error);
         }
 
         private void DgvFilters_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -710,10 +760,17 @@ namespace DBADashGUI.XETrace
             dt.Columns.Add("Value");
             foreach (var f in _filters)
             {
-                dt.Rows.Add(FilterAppliesToText(f), f.Field, f.Op.ToString(), f.Value);
+                dt.Rows.Add(FilterAppliesToText(f), f.Field, f.Op.ToString(), FilterValueDisplay(f));
             }
             dgvFilters.DataSource = dt;
         }
+
+        /// <summary>
+        /// Display text for the Value column.  A microsecond duration value is shown in the friendliest whole unit
+        /// (e.g. 10000000 -> "10 sec"), with the raw microseconds appended for precision; other values show as stored.
+        /// </summary>
+        private static string FilterValueDisplay(XEFilter f) =>
+            XEDurationUnits.IsDurationField(f) ? XEDurationUnits.Humanize(f.Value) : f.Value;
 
         /// <summary>
         /// The "Applies To" text for a filter row: a specific-event filter names its event (flagged "(not traced)" if
@@ -917,7 +974,7 @@ namespace DBADashGUI.XETrace
         private XETraceConfig BuildConfig()
         {
             XETraceEventTypeFlags(out var events);
-            var seconds = (int)(numMaxRunHrs.Value * 3600 + numMaxRunMin.Value * 60 + numMaxRunSec.Value);
+            var seconds = maxDuration.TotalSeconds;
 
             return new XETraceConfig
             {
@@ -928,7 +985,7 @@ namespace DBADashGUI.XETrace
                 GlobalActions = _globalActions.ToList(),
                 EventCustomizations = BuildEventCustomizations(),
                 Target = (XETraceTargetPreference)cboTarget.SelectedItem,
-                MaxDurationSeconds = seconds > 0 ? seconds : 300,
+                MaxDurationSeconds = seconds > 0 ? (int)seconds.Value : 300,
                 CaptureXel = checkBox4.Checked
             };
         }
@@ -1595,7 +1652,8 @@ namespace DBADashGUI.XETrace
             if (promptItems.Count > 0)
             {
                 var prompts = promptItems
-                    .Select(p => (Label: PromptLabelFor(p), Default: p.Filter.Value ?? string.Empty))
+                    .Select(p => (Label: PromptLabelFor(p), Default: p.Filter.Value ?? string.Empty,
+                        IsDuration: XEDurationUnits.IsDurationField(p.Filter)))
                     .ToList();
                 var entered = XETemplatePromptForm.Prompt(this, t.Name, prompts);
                 if (entered == null) return; // cancelled - abandon the load
@@ -1669,16 +1727,8 @@ namespace DBADashGUI.XETrace
             return $"{ft.Filter.Field} ({scope} {ft.Filter.Op}):";
         }
 
-        private void SetDurationSeconds(int seconds)
-        {
-            if (seconds < 0) seconds = 0;
-            SetNum(numMaxRunHrs, seconds / 3600);
-            SetNum(numMaxRunMin, seconds % 3600 / 60);
-            SetNum(numMaxRunSec, seconds % 60);
-
-            static void SetNum(NumericUpDown num, int value) =>
-                num.Value = Math.Max(num.Minimum, Math.Min(num.Maximum, value));
-        }
+        private void SetDurationSeconds(int seconds) =>
+            maxDuration.TotalSeconds = Math.Max(0, seconds);
 
         // ---- State / status ----------------------------------------------------------------------
 

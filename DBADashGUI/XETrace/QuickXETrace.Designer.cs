@@ -47,6 +47,7 @@
             txtValue = new System.Windows.Forms.TextBox();
             cboComparison = new System.Windows.Forms.ComboBox();
             cboField = new System.Windows.Forms.ComboBox();
+            cboUnit = new System.Windows.Forms.ComboBox();
             groupBox1 = new DBADashGUI.Controls.IconGroupBox();
             lnkGlobalFields = new System.Windows.Forms.LinkLabel();
             dgvEvents = new DBADashGUI.CustomReports.DBADashDataGridView();
@@ -59,14 +60,9 @@
             chkBatchCompleted = new System.Windows.Forms.CheckBox();
             chkRPC = new System.Windows.Forms.CheckBox();
             grpConfig = new DBADashGUI.Controls.IconGroupBox();
+            maxDuration = new DBADashGUI.Pickers.DurationDropDown();
             checkBox4 = new System.Windows.Forms.CheckBox();
-            label7 = new System.Windows.Forms.Label();
-            label6 = new System.Windows.Forms.Label();
-            label5 = new System.Windows.Forms.Label();
-            numMaxRunSec = new System.Windows.Forms.NumericUpDown();
-            numMaxRunMin = new System.Windows.Forms.NumericUpDown();
             label4 = new System.Windows.Forms.Label();
-            numMaxRunHrs = new System.Windows.Forms.NumericUpDown();
             lblTarget = new System.Windows.Forms.Label();
             cboTarget = new System.Windows.Forms.ComboBox();
             toolStrip1 = new System.Windows.Forms.ToolStrip();
@@ -96,9 +92,6 @@
             groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvEvents).BeginInit();
             grpConfig.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)numMaxRunSec).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)numMaxRunMin).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)numMaxRunHrs).BeginInit();
             toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
@@ -124,6 +117,7 @@
             Filter.Controls.Add(lblComparison);
             Filter.Controls.Add(lblField);
             Filter.Controls.Add(lblEvent);
+            Filter.Controls.Add(cboUnit);
             Filter.Controls.Add(txtValue);
             Filter.Controls.Add(cboComparison);
             Filter.Controls.Add(cboField);
@@ -233,9 +227,19 @@
             cboField.Name = "cboField";
             cboField.Size = new System.Drawing.Size(151, 28);
             cboField.TabIndex = 1;
-            // 
+            //
+            // cboUnit
+            //
+            cboUnit.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            cboUnit.FormattingEnabled = true;
+            cboUnit.Location = new System.Drawing.Point(551, 54);
+            cboUnit.Name = "cboUnit";
+            cboUnit.Size = new System.Drawing.Size(66, 28);
+            cboUnit.TabIndex = 4;
+            cboUnit.Visible = false;
+            //
             // groupBox1
-            // 
+            //
             groupBox1.Controls.Add(lnkGlobalFields);
             groupBox1.Controls.Add(dgvEvents);
             groupBox1.Controls.Add(label3);
@@ -372,14 +376,9 @@
             // 
             // grpConfig
             // 
+            grpConfig.Controls.Add(maxDuration);
             grpConfig.Controls.Add(checkBox4);
-            grpConfig.Controls.Add(label7);
-            grpConfig.Controls.Add(label6);
-            grpConfig.Controls.Add(label5);
-            grpConfig.Controls.Add(numMaxRunSec);
-            grpConfig.Controls.Add(numMaxRunMin);
             grpConfig.Controls.Add(label4);
-            grpConfig.Controls.Add(numMaxRunHrs);
             grpConfig.Controls.Add(lblTarget);
             grpConfig.Controls.Add(cboTarget);
             grpConfig.Location = new System.Drawing.Point(12, 167);
@@ -388,6 +387,19 @@
             grpConfig.TabIndex = 3;
             grpConfig.TabStop = false;
             grpConfig.Text = "XE Trace Configuration:";
+            // 
+            // maxDuration
+            // 
+            maxDuration.AllowDays = false;
+            maxDuration.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            maxDuration.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            maxDuration.IncludeSeconds = true;
+            maxDuration.Location = new System.Drawing.Point(341, 39);
+            maxDuration.MinimumSize = new System.Drawing.Size(380, 0);
+            maxDuration.Name = "maxDuration";
+            maxDuration.Size = new System.Drawing.Size(380, 34);
+            maxDuration.TabIndex = 10;
+            maxDuration.Value = new decimal(new int[] { 1, 0, 0, 0 });
             // 
             // checkBox4
             // 
@@ -399,48 +411,6 @@
             checkBox4.Text = "Capture .xel";
             checkBox4.UseVisualStyleBackColor = true;
             // 
-            // label7
-            // 
-            label7.AutoSize = true;
-            label7.Location = new System.Drawing.Point(602, 42);
-            label7.Name = "label7";
-            label7.Size = new System.Drawing.Size(32, 20);
-            label7.TabIndex = 8;
-            label7.Text = "Sec";
-            // 
-            // label6
-            // 
-            label6.AutoSize = true;
-            label6.Location = new System.Drawing.Point(504, 42);
-            label6.Name = "label6";
-            label6.Size = new System.Drawing.Size(34, 20);
-            label6.TabIndex = 7;
-            label6.Text = "Min";
-            // 
-            // label5
-            // 
-            label5.AutoSize = true;
-            label5.Location = new System.Drawing.Point(409, 41);
-            label5.Name = "label5";
-            label5.Size = new System.Drawing.Size(31, 20);
-            label5.TabIndex = 6;
-            label5.Text = "Hrs";
-            // 
-            // numMaxRunSec
-            // 
-            numMaxRunSec.Location = new System.Drawing.Point(544, 39);
-            numMaxRunSec.Name = "numMaxRunSec";
-            numMaxRunSec.Size = new System.Drawing.Size(52, 27);
-            numMaxRunSec.TabIndex = 5;
-            // 
-            // numMaxRunMin
-            // 
-            numMaxRunMin.Location = new System.Drawing.Point(446, 39);
-            numMaxRunMin.Name = "numMaxRunMin";
-            numMaxRunMin.Size = new System.Drawing.Size(52, 27);
-            numMaxRunMin.TabIndex = 4;
-            numMaxRunMin.Value = new decimal(new int[] { 1, 0, 0, 0 });
-            // 
             // label4
             // 
             label4.AutoSize = true;
@@ -449,13 +419,6 @@
             label4.Size = new System.Drawing.Size(106, 20);
             label4.TabIndex = 3;
             label4.Text = "Max Run Time:";
-            // 
-            // numMaxRunHrs
-            // 
-            numMaxRunHrs.Location = new System.Drawing.Point(355, 39);
-            numMaxRunHrs.Name = "numMaxRunHrs";
-            numMaxRunHrs.Size = new System.Drawing.Size(52, 27);
-            numMaxRunHrs.TabIndex = 2;
             // 
             // lblTarget
             // 
@@ -677,9 +640,6 @@
             ((System.ComponentModel.ISupportInitialize)dgvEvents).EndInit();
             grpConfig.ResumeLayout(false);
             grpConfig.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)numMaxRunSec).EndInit();
-            ((System.ComponentModel.ISupportInitialize)numMaxRunMin).EndInit();
-            ((System.ComponentModel.ISupportInitialize)numMaxRunHrs).EndInit();
             toolStrip1.ResumeLayout(false);
             toolStrip1.PerformLayout();
             splitContainer1.Panel1.ResumeLayout(false);
@@ -718,13 +678,7 @@
         private DBADashGUI.Controls.IconGroupBox grpConfig;
         private System.Windows.Forms.Label lblTarget;
         private System.Windows.Forms.ComboBox cboTarget;
-        private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.NumericUpDown numMaxRunSec;
-        private System.Windows.Forms.NumericUpDown numMaxRunMin;
         private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.NumericUpDown numMaxRunHrs;
         private System.Windows.Forms.CheckBox checkBox4;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripButton tsStartTrace;
@@ -751,5 +705,7 @@
         private System.Windows.Forms.Button btnAddInstance;
         private System.Windows.Forms.Label lblInstanceCount;
         private System.Windows.Forms.CheckedListBox clbInstances;
+        private Pickers.DurationDropDown maxDuration;
+        private System.Windows.Forms.ComboBox cboUnit;
     }
 }
