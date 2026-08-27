@@ -4,7 +4,7 @@ using System.Windows.Forms;
 namespace DBADashGUI.XETrace
 {
     /// <summary>Opens the ad-hoc XE trace UI (<see cref="QuickXETrace"/>) in a window.  Shared by the Slow Queries
-    /// launcher and the Extended Events node so both offer the same "New Ad-hoc Trace" action.</summary>
+    /// launcher and the Extended Events node so both offer the same "New Ad-hoc XE Trace" action.</summary>
     internal static class XETraceLauncher
     {
         public static void LaunchAdhocTrace(IWin32Window owner, DBADashContext context)

@@ -10,7 +10,7 @@ namespace DBADashGUI.XETrace
     /// GUI-side orchestration for managing the <b>existing</b> XE sessions on a monitored instance: list them,
     /// start/stop one, and watch one live.  Sends the corresponding messages via
     /// <see cref="MessagingHelper.SendMessageAndProcessReply"/> and returns the results.  Nothing is persisted to the
-    /// repo (watching is transient viewing) - unlike the ad-hoc trace (<see cref="XETraceController"/>).
+    /// repo (watching is transient viewing) - unlike the ad-hoc XE trace (<see cref="XETraceController"/>).
     /// </summary>
     internal static class XESessionController
     {

@@ -11,7 +11,7 @@ namespace DBADashGUI.XETrace
     /// <summary>
     /// Reusable live-results view for extended-events streams (dynamic, per-event schema).  Shows a results grid with
     /// clickable SQL-text columns and an SSMS-style pivoted Field/Value detail grid for the selected row.  Batches are
-    /// merged in via <see cref="AppendEvents"/>.  Extracted from the ad-hoc trace UI so the Extended Events watch view
+    /// merged in via <see cref="AppendEvents"/>.  Extracted from the ad-hoc XE trace UI so the Extended Events watch view
     /// shares the same rendering.
     /// </summary>
     public sealed class XEResultsControl : UserControl

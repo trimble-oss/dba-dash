@@ -173,6 +173,10 @@ namespace DBADashGUI.XETrace
             cboUnit.SelectedIndex = XEDurationUnits.IndexOf(XEDurationUnits.DefaultUnit); // default to ms (Profiler unit)
 
             dgvFilters.AutoGenerateColumns = false;
+            // Read-only: the grid is rebuilt from _filters on every RefreshFilterGrid, so in-cell edits would be
+            // silently discarded (and never reach the running trace).  To change a filter the user deletes and re-adds
+            // it via the input controls above.  The Delete link column still works (CellContentClick fires regardless).
+            dgvFilters.ReadOnly = true;
             dgvFilters.Columns.Clear();
             dgvFilters.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Applies To", DataPropertyName = "Event", Width = 210 });
             dgvFilters.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Field", DataPropertyName = "Field", Width = 140 });
@@ -354,8 +358,8 @@ namespace DBADashGUI.XETrace
                 {
                     var extra = _runningTraces.Count > 1 ? $" (and {_runningTraces.Count - 1} other instance(s))" : string.Empty;
                     var answer = MessageBox.Show(this,
-                        $"A trace is running for {_context.InstanceName}{extra}.\r\n\r\nStop it and switch to {context?.InstanceName}?",
-                        "Ad-hoc Trace", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                        $"A XE trace is running for {_context.InstanceName}{extra}.\r\n\r\nStop it and switch to {context?.InstanceName}?",
+                        "Ad-hoc XE Trace", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                     if (answer != DialogResult.Yes)
                     {
                         // Keep the running trace and bounce the tree selection back to its instance (deferred so the
@@ -1354,7 +1358,7 @@ namespace DBADashGUI.XETrace
             var alreadyRunning = failures.FirstOrDefault(o =>
                 o.Message?.Contains("already running", StringComparison.OrdinalIgnoreCase) == true);
             if (alreadyRunning != null &&
-                MessageBox.Show(this, alreadyRunning.Message + "\r\n\r\nStop and clean it up now?", "Ad-hoc Trace",
+                MessageBox.Show(this, alreadyRunning.Message + "\r\n\r\nStop and clean it up now?", "Ad-hoc XE Trace",
                     MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
             {
                 await CleanupAsync(completedTraces);
@@ -1365,7 +1369,7 @@ namespace DBADashGUI.XETrace
                     ? failures[0].Message
                     : $"{failures.Count} of {outcomes.Length} traces did not complete successfully:\r\n\r\n" +
                       string.Join("\r\n", failures.Select(f => f.Message));
-                MessageBox.Show(this, msg, "Ad-hoc Trace", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show(this, msg, "Ad-hoc XE Trace", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
             else
             {

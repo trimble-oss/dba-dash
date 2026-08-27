@@ -101,7 +101,7 @@ namespace DBADash
         public string AdhocXEDirectory { get; set; }
 
         /// <summary>
-        /// Hard cap (seconds) on ad-hoc trace duration; a request longer than this is clamped down.  Traces longer
+        /// Hard cap (seconds) on ad-hoc XE trace duration; a request longer than this is clamped down.  Traces longer
         /// than <see cref="Messaging.XETraceHeartbeat.TimeoutSeconds"/> are kept alive by GUI heartbeats and
         /// stop themselves if the client goes away, so a large cap is safe (an abandoned trace won't run to the cap).
         /// </summary>
@@ -144,8 +144,8 @@ namespace DBADash
 
         /// <summary>
         /// True when the existing XE sessions may be exposed read-only (list / script / watch / view captured data):
-        /// either the Manage-XE feature is enabled, or ad-hoc tracing (<see cref="AllowAdhocXE"/>) is - a user who can
-        /// start an ad-hoc trace could already capture the same data, so surfacing existing sessions read-only adds no
+        /// either the Manage-XE feature is enabled, or ad-hoc XE tracing (<see cref="AllowAdhocXE"/>) is - a user who can
+        /// start an ad-hoc XE trace could already capture the same data, so surfacing existing sessions read-only adds no
         /// capability.  Start/stop of existing sessions stays gated on <see cref="AllowManageXE"/> /
         /// <see cref="CanManageXESession"/>.
         /// </summary>
@@ -173,8 +173,8 @@ namespace DBADash
         /// <summary>
         /// True if <paramref name="sessionName"/> may be watched.  When an admin has configured
         /// <see cref="WatchXESessions"/> that explicit list wins (including its denies).  When it's blank - Manage-XE
-        /// isn't configured - watching falls back to whether ad-hoc tracing is enabled, so an ad-hoc-only service can
-        /// still watch existing sessions (equivalent data is capturable via an ad-hoc trace anyway).
+        /// isn't configured - watching falls back to whether ad-hoc XE tracing is enabled, so an ad-hoc-only service can
+        /// still watch existing sessions (equivalent data is capturable via an ad-hoc XE trace anyway).
         /// </summary>
         public bool CanWatchXESession(string sessionName) =>
             string.IsNullOrWhiteSpace(WatchXESessions)

@@ -5,7 +5,7 @@ CREATE TABLE dbo.XETraceEvent(
     /* Event time (UTC).  Every XE event carries a non-nullable timestamp_utc (see sys.fn_xe_file_target_read_file),
        The table is partitioned by timestamp for efficient data removal. */
     timestamp DATETIME2(3) NOT NULL,
-    /* The ad-hoc trace schema is not fixed - different events expose different fields - so each event's shredded
+    /* The ad-hoc XE trace schema is not fixed - different events expose different fields - so each event's shredded
        fields are stored as a JSON object rather than fixed columns.  Query with JSON_VALUE / OPENJSON as needed. */
     Fields NVARCHAR(MAX) NULL,
     CONSTRAINT PK_XETraceEvent PRIMARY KEY CLUSTERED (XETraceSessionID ASC, XETraceEventID ASC, timestamp ASC)
