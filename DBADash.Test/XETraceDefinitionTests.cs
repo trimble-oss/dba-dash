@@ -493,11 +493,26 @@ namespace DBADash.Test
         }
 
         [TestMethod]
-        public void ErrorReported_AppliesSeverityFloor()
+        public void ErrorReported_NoSeverityFilter_AppliesNoSeverityFloor()
         {
+            // The severity floor is not enforced by the definition - it is only ever a removable user filter added by
+            // the GUI.  With no such filter, error_reported must capture every severity.
             var def = NewDef();
             def.Events = new List<XETraceEventDef> { ErrorReported() };
-            def.ErrorSeverityFloor = 16;
+
+            StringAssert.DoesNotMatch(def.BuildCreateSessionSql(), new System.Text.RegularExpressions.Regex(@"\[severity\]"));
+        }
+
+        [TestMethod]
+        public void ErrorReported_SeverityFilter_IsHonoured()
+        {
+            // A severity filter (as the GUI's removable default supplies) is applied like any other data-column filter.
+            var def = NewDef();
+            def.Events = new List<XETraceEventDef> { ErrorReported() };
+            def.Filters = new List<XEFilter>
+            {
+                new() { EventName = "error_reported", Field = "severity", IsAction = false, IsNumeric = true, Op = XEFilterOp.GreaterThanOrEqual, Value = "16" }
+            };
 
             StringAssert.Contains(def.BuildCreateSessionSql(), "[severity]>=(16)");
         }
@@ -616,17 +631,6 @@ namespace DBADash.Test
         {
             var def = NewDef();
             def.Events.Clear();
-            Assert.ThrowsExactly<System.ArgumentException>(() => def.BuildCreateSessionSql());
-        }
-
-        [TestMethod]
-        [DataRow(-1)]
-        [DataRow(26)]
-        public void Validation_SeverityFloorOutOfRange_Throws(int floor)
-        {
-            var def = NewDef();
-            def.Events = new List<XETraceEventDef> { ErrorReported() };
-            def.ErrorSeverityFloor = floor;
             Assert.ThrowsExactly<System.ArgumentException>(() => def.BuildCreateSessionSql());
         }
 

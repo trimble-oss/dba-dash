@@ -122,7 +122,6 @@ namespace DBADashGUI.XETrace
                 RequestedTarget = config.Target,
                 MaxDurationSeconds = config.MaxDurationSeconds,
                 BatchIntervalSeconds = config.BatchIntervalSeconds,
-                ErrorSeverityFloor = config.ErrorSeverityFloor,
                 SampleN = config.SampleN,
                 CaptureXel = config.CaptureXel,
                 CollectAgent = context.CollectAgent,
