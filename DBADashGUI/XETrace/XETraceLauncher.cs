@@ -1,4 +1,5 @@
 using DBADash.Messaging;
+using System;
 using System.Windows.Forms;
 
 namespace DBADashGUI.XETrace
@@ -57,6 +58,42 @@ namespace DBADashGUI.XETrace
             frm.Controls.Add(control);
             frm.Show(owner);
             control.ViewData(context, sessionName, maxEvents); // after Show so the control has a handle for async UI updates
+        }
+
+        /// <summary>
+        /// Opens a read-only viewer over the events already captured for a persisted ad-hoc trace session (or the whole
+        /// merged run when <paramref name="runGroupID"/> is set - the same grouping the QuickXETrace history uses).
+        /// Backs the Trace History report's "View Data" link.  Loads the stored events through
+        /// <see cref="XEStoredEvents.Expand"/> so the grid matches the live/history views exactly.
+        /// </summary>
+        public static void LaunchStoredData(IWin32Window owner, long sessionID, Guid? runGroupID, string title)
+        {
+            var control = new XEResultsControl { Dock = DockStyle.Fill };
+            var frm = new Form
+            {
+                Text = string.IsNullOrEmpty(title) ? "Trace Data" : $"Trace Data - {title}",
+                Width = 1200,
+                Height = 850,
+                StartPosition = FormStartPosition.CenterParent
+            };
+            frm.Controls.Add(control);
+            frm.Show(owner);
+            _ = LoadStoredDataAsync(control, sessionID, runGroupID);
+        }
+
+        private static async System.Threading.Tasks.Task LoadStoredDataAsync(XEResultsControl control, long sessionID, Guid? runGroupID)
+        {
+            try
+            {
+                var stored = runGroupID.HasValue
+                    ? await XETraceRepo.GetEventsByRunGroupAsync(runGroupID.Value)
+                    : await XETraceRepo.GetEventsAsync(sessionID);
+                control.LoadEvents(XEStoredEvents.Expand(stored));
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(control, ex.Message, "Trace Data", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
         }
     }
 }

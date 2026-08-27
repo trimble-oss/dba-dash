@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace DBADashGUI.XETrace
@@ -21,7 +22,6 @@ namespace DBADashGUI.XETrace
             await using var cmd = new SqlCommand("dbo.XETraceSession_Start", cn) { CommandType = CommandType.StoredProcedure };
             cmd.Parameters.AddWithValue("@InstanceID", instanceID);
             cmd.Parameters.AddWithValue("@MessageGroupID", messageGroup);
-            cmd.Parameters.AddWithValue("@RequestedBy", Environment.UserName);
             cmd.Parameters.AddWithValue("@EventTypes", eventTypes);
             cmd.Parameters.AddWithValue("@MaxDurationSeconds", maxDurationSeconds);
             cmd.Parameters.AddWithValue("@FiltersJson", (object)filtersJson ?? DBNull.Value);
@@ -122,6 +122,42 @@ namespace DBADashGUI.XETrace
             await cmd.ExecuteNonQueryAsync();
         }
 
+        /// <summary>
+        /// Soft-deletes a persisted trace (Trace History report's Delete link): removes the captured event data + .xel
+        /// but retains the session row (flagged deleted) for audit, until retention hard-deletes it.
+        /// </summary>
+        public static async Task DeleteAsync(long sessionID)
+        {
+            await using var cn = new SqlConnection(Common.ConnectionString);
+            await cn.OpenAsync();
+            await DeleteCoreAsync(cn, sessionID);
+        }
+
+        /// <summary>
+        /// Soft-deletes several traces (the report's bulk "Delete Selected" / "Delete All" actions) over a single
+        /// connection.  Each is deleted independently via <c>dbo.XETraceSession_Del</c>.
+        /// </summary>
+        public static async Task DeleteManyAsync(IEnumerable<long> sessionIDs)
+        {
+            var ids = sessionIDs?.ToList();
+            if (ids == null || ids.Count == 0) return;
+            await using var cn = new SqlConnection(Common.ConnectionString);
+            await cn.OpenAsync();
+            foreach (var id in ids)
+            {
+                await DeleteCoreAsync(cn, id);
+            }
+        }
+
+        /// <summary>Executes the soft-delete proc for one session on an already-open connection.  Ownership and the
+        /// DeletedBy audit value are enforced/captured server-side (SUSER_SNAME()), so no identity is passed.</summary>
+        private static async Task DeleteCoreAsync(SqlConnection cn, long sessionID)
+        {
+            await using var cmd = new SqlCommand("dbo.XETraceSession_Del", cn) { CommandType = CommandType.StoredProcedure };
+            cmd.Parameters.AddWithValue("@XETraceSessionID", sessionID);
+            await cmd.ExecuteNonQueryAsync();
+        }
+
         public static Task<DataTable> GetRunningAsync(IEnumerable<int> instanceIDs) =>
             FillAsync("dbo.XETraceSession_GetRunning", cmd =>
                 cmd.Parameters.AddWithValue("@InstanceIDs", instanceIDs.AsDataTable()));
@@ -134,6 +170,11 @@ namespace DBADashGUI.XETrace
         public static Task<DataTable> GetAgInstancesAsync(int instanceID) =>
             FillAsync("dbo.AvailabilityGroupInstances_Get", cmd => cmd.Parameters.AddWithValue("@InstanceID", instanceID));
 
+        /// <summary>
+        /// Recent trace history for the QuickXETrace dropdown.  The proc scopes results to the caller's own traces
+        /// server-side (RequestedBy = SUSER_SNAME()), so no requester needs to be passed - the full cross-user view
+        /// is the Trace History report.
+        /// </summary>
         public static Task<DataTable> GetHistoryAsync(IEnumerable<int> instanceIDs, int days) =>
             FillAsync("dbo.XETraceSession_Get", cmd =>
             {
