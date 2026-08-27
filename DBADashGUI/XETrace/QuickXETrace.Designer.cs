@@ -69,6 +69,8 @@
             txtSamplePercent = new System.Windows.Forms.TextBox();
             lblSampleEffective = new System.Windows.Forms.Label();
             maxDuration = new DBADashGUI.Pickers.DurationDropDown();
+            lblNotes = new System.Windows.Forms.Label();
+            txtNotes = new System.Windows.Forms.TextBox();
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             tsConfigure = new System.Windows.Forms.ToolStripButton();
             tsStartTrace = new System.Windows.Forms.ToolStripButton();
@@ -127,7 +129,7 @@
             Filter.Controls.Add(cboComparison);
             Filter.Controls.Add(cboField);
             Filter.Controls.Add(cboEvent);
-            Filter.Location = new System.Drawing.Point(12, 582);
+            Filter.Location = new System.Drawing.Point(12, 620);
             Filter.Name = "Filter";
             Filter.Size = new System.Drawing.Size(733, 243);
             Filter.TabIndex = 1;
@@ -266,7 +268,7 @@
             groupBox1.Controls.Add(chkErrorReported);
             groupBox1.Controls.Add(chkBatchCompleted);
             groupBox1.Controls.Add(chkRPC);
-            groupBox1.Location = new System.Drawing.Point(12, 300);
+            groupBox1.Location = new System.Drawing.Point(12, 338);
             groupBox1.Name = "groupBox1";
             groupBox1.Size = new System.Drawing.Size(733, 276);
             groupBox1.TabIndex = 2;
@@ -400,9 +402,11 @@
             grpConfig.Controls.Add(txtSamplePercent);
             grpConfig.Controls.Add(lblSampleEffective);
             grpConfig.Controls.Add(maxDuration);
+            grpConfig.Controls.Add(lblNotes);
+            grpConfig.Controls.Add(txtNotes);
             grpConfig.Location = new System.Drawing.Point(12, 167);
             grpConfig.Name = "grpConfig";
-            grpConfig.Size = new System.Drawing.Size(733, 127);
+            grpConfig.Size = new System.Drawing.Size(733, 165);
             grpConfig.TabIndex = 3;
             grpConfig.TabStop = false;
             grpConfig.Text = "XE Trace Configuration:";
@@ -481,7 +485,25 @@
             maxDuration.Size = new System.Drawing.Size(380, 28);
             maxDuration.TabIndex = 10;
             maxDuration.Value = new decimal(new int[] { 1, 0, 0, 0 });
-            // 
+            //
+            // lblNotes
+            //
+            lblNotes.AutoSize = true;
+            lblNotes.Location = new System.Drawing.Point(6, 109);
+            lblNotes.Name = "lblNotes";
+            lblNotes.Size = new System.Drawing.Size(52, 20);
+            lblNotes.TabIndex = 14;
+            lblNotes.Text = "Notes:";
+            //
+            // txtNotes
+            //
+            txtNotes.Location = new System.Drawing.Point(65, 106);
+            txtNotes.MaxLength = 1000;
+            txtNotes.Name = "txtNotes";
+            txtNotes.PlaceholderText = "Optional note, e.g. Capture for issue #1234";
+            txtNotes.Size = new System.Drawing.Size(656, 27);
+            txtNotes.TabIndex = 15;
+            //
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
@@ -726,6 +748,8 @@
         private System.Windows.Forms.Label lblSample;
         private System.Windows.Forms.TextBox txtSamplePercent;
         private System.Windows.Forms.Label lblSampleEffective;
+        private System.Windows.Forms.Label lblNotes;
+        private System.Windows.Forms.TextBox txtNotes;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.CheckBox checkBox4;
         private System.Windows.Forms.ToolStrip toolStrip1;

@@ -103,7 +103,7 @@ namespace DBADashGUI.XETrace
             try
             {
                 sessionID = await XETraceRepo.StartAsync(context.InstanceID, messageGroup, config.EventTypesCsv,
-                    config.MaxDurationSeconds, config.FiltersJson, runGroupID);
+                    config.MaxDurationSeconds, config.FiltersJson, runGroupID, config.Notes);
             }
             catch (Exception ex)
             {

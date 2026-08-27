@@ -16,7 +16,7 @@ namespace DBADashGUI.XETrace
     internal static class XETraceRepo
     {
         public static async Task<long> StartAsync(int instanceID, Guid messageGroup, string eventTypes,
-            int maxDurationSeconds, string filtersJson, Guid? runGroupID = null)
+            int maxDurationSeconds, string filtersJson, Guid? runGroupID = null, string notes = null)
         {
             await using var cn = new SqlConnection(Common.ConnectionString);
             await using var cmd = new SqlCommand("dbo.XETraceSession_Start", cn) { CommandType = CommandType.StoredProcedure };
@@ -26,6 +26,7 @@ namespace DBADashGUI.XETrace
             cmd.Parameters.AddWithValue("@MaxDurationSeconds", maxDurationSeconds);
             cmd.Parameters.AddWithValue("@FiltersJson", (object)filtersJson ?? DBNull.Value);
             cmd.Parameters.AddWithValue("@RunGroupID", (object)runGroupID ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@Notes", (object)notes ?? DBNull.Value);
             var pId = cmd.Parameters.Add("@XETraceSessionID", SqlDbType.BigInt);
             pId.Direction = ParameterDirection.Output;
             await cn.OpenAsync();
@@ -155,6 +156,21 @@ namespace DBADashGUI.XETrace
         {
             await using var cmd = new SqlCommand("dbo.XETraceSession_Del", cn) { CommandType = CommandType.StoredProcedure };
             cmd.Parameters.AddWithValue("@XETraceSessionID", sessionID);
+            await cmd.ExecuteNonQueryAsync();
+        }
+
+        /// <summary>
+        /// Sets/updates the free-text note on a persisted trace (Trace History report's editable Notes link).  A blank
+        /// note is stored as NULL.  Ownership is enforced server-side (<c>dbo.XETraceSession_Notes_Upd</c> rejects editing
+        /// another user's trace unless the caller is db_owner), matching the delete link.
+        /// </summary>
+        public static async Task UpdateNotesAsync(long sessionID, string notes)
+        {
+            await using var cn = new SqlConnection(Common.ConnectionString);
+            await using var cmd = new SqlCommand("dbo.XETraceSession_Notes_Upd", cn) { CommandType = CommandType.StoredProcedure };
+            cmd.Parameters.AddWithValue("@XETraceSessionID", sessionID);
+            cmd.Parameters.AddWithValue("@Notes", (object)notes ?? DBNull.Value);
+            await cn.OpenAsync();
             await cmd.ExecuteNonQueryAsync();
         }
 

@@ -36,6 +36,10 @@ SELECT  S.XETraceSessionID,
              END AS RunInstances,
         S.RequestedBy,
         S.EventTypes,
+        S.Notes, /* raw note - hidden; the editable Notes link edits this and NotesDisplay is what the cell shows */
+        /* The clickable Notes cell: the note itself, or a prompt to add one when it's blank (so an empty note is still
+           an obvious click target for adding text). */
+        ISNULL(NULLIF(LTRIM(RTRIM(S.Notes)), N''), N'(click to add a note)') AS NotesDisplay,
         S.StartTime,
         S.EndTime,
         S.MaxDurationSeconds,

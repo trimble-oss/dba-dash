@@ -923,6 +923,7 @@
     <Build Include="dbo\Stored Procedures\XETraceSession_Get.sql" />
     <Build Include="dbo\Stored Procedures\XETraceSessionReport_Get.sql" />
     <Build Include="dbo\Stored Procedures\XETraceSession_Del.sql" />
+    <Build Include="dbo\Stored Procedures\XETraceSession_Notes_Upd.sql" />
     <Build Include="dbo\Stored Procedures\XETraceEvents_GetByRunGroup.sql" />
     <Build Include="dbo\Stored Procedures\XETraceSession_GetXel.sql" />
     <Build Include="dbo\Stored Procedures\XETraceEvents_Get.sql" />

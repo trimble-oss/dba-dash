@@ -1179,7 +1179,8 @@ namespace DBADashGUI.XETrace
                 Target = (XETraceTargetPreference)cboTarget.SelectedItem,
                 MaxDurationSeconds = seconds > 0 ? (int)seconds.Value : 300,
                 SampleN = ComputeSampleN(),
-                CaptureXel = checkBox4.Checked
+                CaptureXel = checkBox4.Checked,
+                Notes = string.IsNullOrWhiteSpace(txtNotes.Text) ? null : txtNotes.Text.Trim()
             };
         }
 
@@ -1594,8 +1595,13 @@ namespace DBADashGUI.XETrace
                         ? (Guid)r["RunGroupID"]
                         : null;
                     var groupLabel = runGroup.HasValue ? "  [multi-instance]" : string.Empty;
-                    var text = $"{r["StartTime"]:g}  -  {r["EventTypes"]}  ({r["TotalEvents"]} events){groupLabel}";
-                    var item = new ToolStripMenuItem(text) { Tag = id };
+                    var note = r.Table.Columns.Contains("Notes") ? r["Notes"] as string : null;
+                    // Show a short note inline (truncated) with the full note as the item tooltip.
+                    var noteLabel = string.IsNullOrWhiteSpace(note)
+                        ? string.Empty
+                        : $"  -  {(note.Length > 40 ? note[..40] + "..." : note)}";
+                    var text = $"{r["StartTime"]:g}  -  {r["EventTypes"]}  ({r["TotalEvents"]} events){groupLabel}{noteLabel}";
+                    var item = new ToolStripMenuItem(text) { Tag = id, ToolTipText = note };
                     item.Click += async (_, _) => await LoadHistoryEventsAsync(id, runGroup);
                     tsHistory.DropDownItems.Add(item);
                 }
