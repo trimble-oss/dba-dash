@@ -2391,7 +2391,7 @@ namespace DBADashGUI.CustomReports
                 else if (sqlParams == null)
                     ResetStatusFilter();
                 // When a status filter is shown it drives the @Include* parameters, so the generic params button is redundant.
-                tsParams.Visible = Report.UserParams.Any() && Report.ShowStatusFilter != true;
+                tsParams.Visible = Report.UserParams.Any() && Report.ShowStatusFilter != true && !Report.HideParametersButton;
                 tsConfigure.Visible = Report.CanEditReport;
                 SetStatus(Report.Description, Report.Description, DBADashUser.SelectedTheme.ForegroundColor);
                 lblDescription.Visible = !string.IsNullOrEmpty(Report.Description);

@@ -238,7 +238,8 @@ namespace DBADashGUI
             DatabaseExtendedProperties,
             AIAssistant,
             ExtendedEvents,
-            AdhocTrace
+            AdhocTrace,
+            XETraceSessions
         }
 
         private static readonly List<Main.Tabs> InstanceOnlyTabs = new() { Main.Tabs.PerformanceSummary, Tabs.Metrics, Tabs.Waits, Tabs.Memory, Tabs.RunningQueries };
@@ -270,6 +271,7 @@ namespace DBADashGUI
         private AIAssistantControl aiAssistantControl;
         private TabPage tabExtendedEvents;
         private TabPage tabAdhocTrace;
+        private TabPage tabXETraceSessions;
 
         public Main(CommandLineOptions opts)
         {
@@ -349,6 +351,9 @@ namespace DBADashGUI
 
             tabAdhocTrace = new TabPage("Ad-hoc XE Trace") { Name = Tabs.AdhocTrace.TabName() };
             tabAdhocTrace.Controls.Add(new XETrace.QuickXETrace { Dock = DockStyle.Fill });
+
+            tabXETraceSessions = new TabPage("XE Trace History") { Name = Tabs.XETraceSessions.TabName() };
+            tabXETraceSessions.Controls.Add(new XETrace.XETraceSessionsView { Dock = DockStyle.Fill });
         }
 
         public TabPage GetCommunityToolsTabPage(ProcedureExecutionMessage.CommunityProcs proc)
@@ -1335,6 +1340,7 @@ namespace DBADashGUI
                 // on the service side is surfaced (disabled controls + a message) inside the tab, not hidden here.
                 if (DBADashUser.AllowManageXE || DBADashUser.AllowWatchXE) allowedTabs.Add(tabExtendedEvents);
                 if (DBADashUser.AllowAdhocXE) allowedTabs.Add(tabAdhocTrace);
+                if (DBADashUser.AllowAdhocXE) allowedTabs.Add(tabXETraceSessions);
             }
             else if (n.Type == SQLTreeItem.TreeType.DBAChecks)
             {
@@ -2052,7 +2058,7 @@ namespace DBADashGUI
                             selectedNode = nInstance.FindChildOfType(SQLTreeItem.TreeType.AgentJobs);
                             break;
 
-                        case Tabs.ExtendedEvents or Tabs.AdhocTrace:
+                        case Tabs.ExtendedEvents or Tabs.AdhocTrace or Tabs.XETraceSessions:
                             selectedNode.Expand();
                             selectedNode = nInstance.FindChildOfType(SQLTreeItem.TreeType.ExtendedEvents);
                             break;

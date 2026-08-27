@@ -105,6 +105,14 @@ namespace DBADashGUI.CustomReports
         /// </summary>
         public bool ShowStatusFilter { get; set; }
 
+        /// <summary>
+        /// When true the generic "Parameters" toolbar button is hidden.  Use for reports whose user parameters are all
+        /// driven by dedicated toolbar controls (menu-bar pickers, or a control added by a derived view), so the generic
+        /// editor would be redundant or misleading - e.g. a view that supplies a parameter itself in
+        /// <see cref="CustomReportView.OnBeforeRefresh"/> and doesn't want the user editing it directly.
+        /// </summary>
+        public bool HideParametersButton { get; set; }
+
         private bool _tableVisible = true;
 
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Include)]

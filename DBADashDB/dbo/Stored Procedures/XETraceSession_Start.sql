@@ -1,7 +1,6 @@
 CREATE PROC dbo.XETraceSession_Start(
     @InstanceID INT,
     @MessageGroupID UNIQUEIDENTIFIER,
-    @RequestedBy NVARCHAR(256),
     @EventTypes VARCHAR(MAX),
     @MaxDurationSeconds INT,
     @FiltersJson NVARCHAR(MAX) = NULL,
@@ -25,9 +24,11 @@ AND Status = 0
 AND StartTime < DATEADD(SECOND, -(MaxDurationSeconds + 300), GETUTCDATE())
 
 BEGIN TRY
+    /* RequestedBy is captured here from the connected login (SUSER_SNAME()) - the authoritative, non-forgeable owner
+       used by the delete/history authorization checks - rather than trusting a value from the caller. */
     INSERT INTO dbo.XETraceSession(InstanceID, MessageGroupID, RequestedBy, EventTypes, MaxDurationSeconds,
         FiltersJson, RunGroupID, Status)
-    VALUES(@InstanceID, @MessageGroupID, @RequestedBy, @EventTypes, @MaxDurationSeconds, @FiltersJson, @RunGroupID, 0)
+    VALUES(@InstanceID, @MessageGroupID, SUSER_SNAME(), @EventTypes, @MaxDurationSeconds, @FiltersJson, @RunGroupID, 0)
 
     SET @XETraceSessionID = SCOPE_IDENTITY()
 END TRY

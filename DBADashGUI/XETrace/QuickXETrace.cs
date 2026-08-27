@@ -5,8 +5,6 @@ using DBADashGUI.Messaging;
 using DBADashGUI.SchemaCompare;
 using DBADashGUI.Theme;
 using Microsoft.SqlServer.Management.Common;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -1572,6 +1570,15 @@ namespace DBADashGUI.XETrace
         {
             tsHistory.DropDownItems.Clear();
             if (_context is not { InstanceID: > 0 }) return;
+
+            // Shortcut to the full "Trace History" report (all traces, with view/DDL/delete actions).
+            var viewAll = new ToolStripMenuItem("View all trace history...");
+            viewAll.Click += (_, _) => Main.MainFormInstance?.Instance_Selected(this,
+                new Main.InstanceSelectedEventArgs
+                { InstanceID = _context.InstanceID, Tab = Main.Tabs.XETraceSessions, SearchFromRoot = true });
+            tsHistory.DropDownItems.Add(viewAll);
+            tsHistory.DropDownItems.Add(new ToolStripSeparator());
+
             try
             {
                 var dt = await XETraceRepo.GetHistoryAsync(new[] { _context.InstanceID }, 7);
@@ -1609,7 +1616,7 @@ namespace DBADashGUI.XETrace
                     ? await XETraceRepo.GetEventsByRunGroupAsync(runGroupID.Value)
                     : await XETraceRepo.GetEventsAsync(sessionID);
                 _xelData = null;
-                _results.LoadEvents(ExpandStoredEvents(stored));
+                _results.LoadEvents(XEStoredEvents.Expand(stored));
                 // Remember what's shown so switching back to this instance re-loads the same snapshot (the whole merged
                 // grid when it's a multi-instance run).
                 _loadedSnapshot = new HistorySnapshot(sessionID, runGroupID);
@@ -1618,94 +1625,6 @@ namespace DBADashGUI.XETrace
             catch (Exception ex)
             {
                 SetStatus(ex.Message, ex.ToString(), DashColors.Fail);
-            }
-        }
-
-        // Rebuilds a display table from the stored (event_type, timestamp, Fields JSON) rows - the union of JSON keys
-        // becomes the columns.  The column type is inferred from the JSON token types (integer/float -> numeric) so
-        // numeric fields like duration/cpu_time/reads come back typed - otherwise the grid's Group By disables
-        // Sum/Sum %/Avg because a string column isn't numeric.
-        private static DataTable ExpandStoredEvents(DataTable stored)
-        {
-            // Pass 1: parse each row's Fields JSON once and infer a column type per field across all rows.
-            var parsed = new List<(DataRow Source, JObject Fields)>();
-            var fieldTypes = new Dictionary<string, Type>(StringComparer.Ordinal);
-            var order = new List<string>();
-
-            foreach (DataRow r in stored.Rows)
-            {
-                JObject fields = null;
-                if (r["Fields"] != DBNull.Value && r["Fields"] is string json && json.Length > 0)
-                {
-                    fields = JObject.Parse(json);
-                    foreach (var p in fields.Properties())
-                    {
-                        if (!fieldTypes.ContainsKey(p.Name)) { fieldTypes[p.Name] = null; order.Add(p.Name); }
-                        fieldTypes[p.Name] = MergeJsonType(fieldTypes[p.Name], p.Value);
-                    }
-                }
-                parsed.Add((r, fields));
-            }
-
-            // Pass 2: build the typed table and fill it.
-            var dt = new DataTable();
-            dt.Columns.Add("event_type", typeof(string));
-            dt.Columns.Add("timestamp", typeof(DateTime));
-            foreach (var name in order)
-            {
-                dt.Columns.Add(name, fieldTypes[name] ?? typeof(string));
-            }
-
-            foreach (var (source, fields) in parsed)
-            {
-                var row = dt.NewRow();
-                row["event_type"] = source["event_type"];
-                if (source["timestamp"] != DBNull.Value) row["timestamp"] = source["timestamp"];
-                if (fields != null)
-                {
-                    foreach (var p in fields.Properties())
-                    {
-                        row[p.Name] = ConvertJsonValue(p.Value, dt.Columns[p.Name].DataType);
-                    }
-                }
-                dt.Rows.Add(row);
-            }
-            return dt;
-        }
-
-        /// <summary>Widens the running inferred type for a field as more JSON values are seen (null = not yet known).</summary>
-        private static Type MergeJsonType(Type existing, JToken token)
-        {
-            var candidate = token?.Type switch
-            {
-                JTokenType.Integer => typeof(long),
-                JTokenType.Float => typeof(double),
-                JTokenType.Null or JTokenType.None => null, // null values don't constrain the type
-                _ => typeof(string)
-            };
-            if (candidate == null) return existing;
-            if (existing == null || existing == candidate) return candidate;
-            // long + double both seen -> use double; anything else mixed -> fall back to string
-            if ((existing == typeof(long) || existing == typeof(double)) &&
-                (candidate == typeof(long) || candidate == typeof(double)))
-            {
-                return typeof(double);
-            }
-            return typeof(string);
-        }
-
-        private static object ConvertJsonValue(JToken token, Type type)
-        {
-            if (token == null || token.Type == JTokenType.Null) return DBNull.Value;
-            try
-            {
-                if (type == typeof(long)) return token.Value<long>();
-                if (type == typeof(double)) return token.Value<double>();
-                return token.ToString();
-            }
-            catch
-            {
-                return DBNull.Value; // shouldn't happen (type was inferred to fit) - be defensive
             }
         }
 
