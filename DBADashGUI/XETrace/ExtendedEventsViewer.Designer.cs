@@ -61,7 +61,7 @@ namespace DBADashGUI.XETrace
             _adhocButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             _adhocButton.Name = "_adhocButton";
             _adhocButton.Size = new System.Drawing.Size(144, 24);
-            _adhocButton.Text = "New Ad-hoc Trace...";
+            _adhocButton.Text = "New Ad-hoc XE Trace...";
             //
             // _list
             //

@@ -59,7 +59,7 @@ namespace DBADash.XE
         /// <summary>
         /// Finds an event by name.  An event name can exist in more than one package (e.g. both
         /// <c>sqlserver.error_reported</c> and <c>xesvlpkg.error_reported</c>), so the <c>sqlserver</c> package is
-        /// preferred - that's the one the ad-hoc trace built-ins and pickers mean.
+        /// preferred - that's the one the ad-hoc XE trace built-ins and pickers mean.
         /// </summary>
         public XEEventInfo FindEvent(string name) =>
             Events.FirstOrDefault(e => string.Equals(e.Name, name, StringComparison.OrdinalIgnoreCase) &&

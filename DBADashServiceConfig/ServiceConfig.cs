@@ -113,7 +113,7 @@ namespace DBADashServiceConfig
         }
 
         /// <summary>
-        /// The XE max-duration cap applies to both ad-hoc traces and watching existing sessions, so the control is
+        /// The XE max-duration cap applies to both ad-hoc XE traces and watching existing sessions, so the control is
         /// editable whenever either capability is enabled.
         /// </summary>
         private void UpdateXEMaxDurationEnabled()

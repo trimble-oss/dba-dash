@@ -159,7 +159,7 @@ namespace DBADash.Test
         public void Config_adhoc_only_enables_read_only_view_and_watch()
         {
             // Manage-XE off (both lists blank) but ad-hoc tracing on: existing sessions are exposed read-only and
-            // watchable (the user could capture the same data with an ad-hoc trace), but never started/stopped.
+            // watchable (the user could capture the same data with an ad-hoc XE trace), but never started/stopped.
             var cfg = new CollectionConfig { ManageXESessions = null, WatchXESessions = null, AllowAdhocXE = true };
             Assert.IsFalse(cfg.AllowManageXE);
             Assert.IsTrue(cfg.AllowViewXE);

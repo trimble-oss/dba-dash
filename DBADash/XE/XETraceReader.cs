@@ -97,7 +97,7 @@ namespace DBADash.XE
 
     /// <summary>
     /// Shreds XE event XML into a <see cref="DataTable"/> whose columns are built <b>dynamically</b> from whatever
-    /// data/action fields each event carries.  The ad-hoc trace schema is not fixed - different events
+    /// data/action fields each event carries.  The ad-hoc XE trace schema is not fixed - different events
     /// (rpc_completed, error_reported, *_statement_completed, compilation, showplan, ...) expose different fields,
     /// and all of them are captured as columns without a predefined schema.  Fields in <see cref="NumericFields"/>
     /// are typed numeric (so the grid sorts them as numbers); everything else is a string, including context_info
@@ -208,7 +208,7 @@ namespace DBADash.XE
         }
     }
 
-    /// <summary>Reads batches of events from a running ad-hoc trace.  One implementation per target type.</summary>
+    /// <summary>Reads batches of events from a running ad-hoc XE trace.  One implementation per target type.</summary>
     public interface IXETraceReader
     {
         /// <summary>Reads the events captured since the previous call.  Returns an empty (schema-only) table when none.</summary>

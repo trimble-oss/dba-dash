@@ -11,7 +11,7 @@ namespace DBADashGUI.XETrace
     /// <summary>
     /// Lists the <b>existing</b> extended-events sessions on a monitored instance as a scrolling list of
     /// <see cref="XESessionRow"/> controls, each offering start / stop / watch and a link to the session DDL, plus a
-    /// shortcut to launch a new ad-hoc trace.  Session listing, control and scripting go through
+    /// shortcut to launch a new ad-hoc XE trace.  Session listing, control and scripting go through
     /// <see cref="XESessionController"/>; watching opens an <see cref="XEWatchControl"/>.  Shown from the instance's
     /// "Extended Events" tree node.
     /// </summary>

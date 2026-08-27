@@ -26,7 +26,7 @@ namespace DBADashGUI
 
         // Launches an ad-hoc XE trace for the current instance.  Added in code (gated on the XETrace role) rather
         // than the designer so it only appears for permitted users at instance level.
-        private readonly ToolStripButton adhocTraceButton = new("Ad-hoc Trace...") { Visible = false, Alignment = ToolStripItemAlignment.Right };
+        private readonly ToolStripButton adhocTraceButton = new("Ad-hoc XE Trace...") { Visible = false, Alignment = ToolStripItemAlignment.Right };
 
         private void AdhocTrace_Click(object sender, EventArgs e)
         {

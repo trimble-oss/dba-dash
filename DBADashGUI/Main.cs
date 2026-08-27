@@ -347,7 +347,7 @@ namespace DBADashGUI
             tabExtendedEvents = new TabPage("Extended Events") { Name = Tabs.ExtendedEvents.TabName() };
             tabExtendedEvents.Controls.Add(new XETrace.ExtendedEventsViewer { Dock = DockStyle.Fill });
 
-            tabAdhocTrace = new TabPage("Ad-hoc Trace") { Name = Tabs.AdhocTrace.TabName() };
+            tabAdhocTrace = new TabPage("Ad-hoc XE Trace") { Name = Tabs.AdhocTrace.TabName() };
             tabAdhocTrace.Controls.Add(new XETrace.QuickXETrace { Dock = DockStyle.Fill });
         }
 
@@ -1119,10 +1119,10 @@ namespace DBADashGUI
             jobs.AddDummyNode();
             nodesToAdd.Add(jobs);
 
-            // Extended Events: list / watch / view the instance's existing XE sessions, plus launch an ad-hoc trace.
+            // Extended Events: list / watch / view the instance's existing XE sessions, plus launch an ad-hoc XE trace.
             // Requires messaging and either XE permission - ManageXE users can additionally start/stop existing
             // sessions, XETrace-only users get read-only access (viewing/watching, which they could reproduce with
-            // their own ad-hoc trace anyway).  Start/stop stays gated on ManageXE inside the viewer.
+            // their own ad-hoc XE trace anyway).  Start/stop stays gated on ManageXE inside the viewer.
             if (instanceNode.Context.CanMessage && (DBADashUser.AllowManageXE || DBADashUser.AllowXETrace))
             {
                 nodesToAdd.Add(new SQLTreeItem("Extended Events", SQLTreeItem.TreeType.ExtendedEvents)

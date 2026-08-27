@@ -175,7 +175,7 @@ namespace DBADash.Messaging
                     if (running && !Reclaim)
                     {
                         throw new Exception(
-                            $"A trace is already running on this instance ({ConnectionID}).  Only one ad-hoc trace per instance is allowed.");
+                            $"A XE trace is already running on this instance ({ConnectionID}).  Only one ad-hoc XE trace per instance is allowed.");
                     }
 
                     if (running)
@@ -332,7 +332,7 @@ namespace DBADash.Messaging
                     if (running && !Reclaim)
                     {
                         throw new Exception(
-                            $"A trace is already running on this instance ({ConnectionID}).  Only one ad-hoc trace per instance is allowed.");
+                            $"A XE trace is already running on this instance ({ConnectionID}).  Only one ad-hoc XE trace per instance is allowed.");
                     }
                     if (running)
                     {

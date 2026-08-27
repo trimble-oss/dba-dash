@@ -6,7 +6,7 @@ namespace DBADashGUI.XETrace
 {
     /// <summary>
     /// A small modal warning dialog with Continue/Cancel and an optional "Don't show this again" checkbox.
-    /// Used for the ad-hoc trace pre-flight warnings (first-run cost warning, many-instances warning).
+    /// Used for the ad-hoc XE trace pre-flight warnings (first-run cost warning, many-instances warning).
     /// </summary>
     internal static class XEWarningForm
     {

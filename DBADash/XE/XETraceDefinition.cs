@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 
 namespace DBADash.XE
 {
-    /// <summary>The events an ad-hoc trace can capture.  Flags so several can be combined.</summary>
+    /// <summary>The events an ad-hoc XE trace can capture.  Flags so several can be combined.</summary>
     [Flags]
     public enum XETraceEventType
     {

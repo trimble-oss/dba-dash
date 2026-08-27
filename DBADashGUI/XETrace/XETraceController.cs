@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace DBADashGUI.XETrace
 {
     /// <summary>
-    /// Orchestrates an ad-hoc trace from the GUI: opens the repo session, sends the <see cref="XETraceMessage"/> to
+    /// Orchestrates an ad-hoc XE trace from the GUI: opens the repo session, sends the <see cref="XETraceMessage"/> to
     /// the service, persists each streamed batch to the repo and reports it to the UI, then records completion.
     /// The service never touches the repo (relay-safe) - this is the GUI-side counterpart, modelled on
     /// <see cref="MessagingHelper.ForceQueryPlan"/>.
