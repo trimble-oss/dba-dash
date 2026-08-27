@@ -56,9 +56,6 @@ namespace DBADash.Messaging
 
         public int BatchIntervalSeconds { get; set; } = 5;
 
-        /// <summary>Minimum severity for error_reported (default 11 drops informational messages).</summary>
-        public int ErrorSeverityFloor { get; set; } = 11;
-
         /// <summary>Event sampling: capture ~1 in N events (0/1 = no sampling).  See <see cref="XETraceDefinition.SampleN"/>.</summary>
         public int SampleN { get; set; }
 
@@ -481,7 +478,6 @@ namespace DBADash.Messaging
             Filters = Filters ?? new List<XEFilter>(),
             TargetType = targetType,
             Scope = scope,
-            ErrorSeverityFloor = ErrorSeverityFloor,
             SampleN = SampleN,
             GlobalActions = GlobalActions ?? new List<XEActionDef>(XETraceDefinition.DefaultGlobalActions),
             EventCustomizations = BuildCustomizationMap()

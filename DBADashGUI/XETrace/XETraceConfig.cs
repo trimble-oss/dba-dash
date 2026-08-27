@@ -36,8 +36,6 @@ namespace DBADashGUI.XETrace
 
         public int BatchIntervalSeconds { get; set; } = 5;
 
-        public int ErrorSeverityFloor { get; set; } = 11;
-
         /// <summary>Event sampling: capture ~1 in N events (0/1 = no sampling).  Entered in the UI as a percentage.</summary>
         public int SampleN { get; set; }
 

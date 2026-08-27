@@ -181,9 +181,6 @@ namespace DBADash.XE
 
         public XESessionScope Scope { get; set; } = XESessionScope.Server;
 
-        /// <summary>Minimum severity for <c>error_reported</c>.  Default 11 drops informational messages.</summary>
-        public int ErrorSeverityFloor { get; set; } = 11;
-
         /// <summary>
         /// Event sampling: capture ~1 in <c>SampleN</c> events (via <c>package0.divides_by_uint64(package0.counter, N)</c>)
         /// to cut the volume/overhead of high-frequency events.  0 or 1 means no sampling (every event captured).  The UI
@@ -236,7 +233,6 @@ namespace DBADash.XE
             new Dictionary<string, IList<XECustomization>>(StringComparer.OrdinalIgnoreCase);
 
         private const int MaxStringValueLength = 256;
-        private const int MaxSeverity = 25;
         // NB: anchor with \A...\z, NOT ^...$.  In .NET, $ also matches immediately BEFORE a trailing \n, so
         // "^[A-Za-z0-9_]+$" would accept an identifier with one trailing newline - a leak in an allow-list that is
         // meant to admit ONLY [A-Za-z0-9_].  \z matches only the very end of the string, closing that gap.
@@ -249,10 +245,6 @@ namespace DBADash.XE
             if (!SessionNamePattern.IsMatch(SessionName ?? string.Empty))
             {
                 throw new ArgumentException($"Invalid session name: '{SessionName}'.");
-            }
-            if (ErrorSeverityFloor < 0 || ErrorSeverityFloor > MaxSeverity)
-            {
-                throw new ArgumentException($"ErrorSeverityFloor must be between 0 and {MaxSeverity}.");
             }
             if (TargetType == XETraceTargetType.EventFile && string.IsNullOrWhiteSpace(FileName))
             {
@@ -373,10 +365,11 @@ namespace DBADash.XE
         }
 
         /// <summary>
-        /// Builds the WHERE predicate for one event.  Terms are ANDed: the always-on excluded-app-name guards, the
+        /// Builds the WHERE predicate for one event.  Terms are ANDed: the always-on excluded-app-name guards and the
         /// applicable user filters (scoped by <see cref="XEFilter.EventName"/>; an all-events data-column filter is
-        /// skipped for events that don't expose that column), and a severity floor for events that expose
-        /// <c>severity</c>.  There is always at least one excluded app name, so the predicate is never empty.
+        /// skipped for events that don't expose that column).  There is always at least one excluded app name, so the
+        /// predicate is never empty.  The default <c>error_reported</c> severity floor is just a normal (removable)
+        /// user filter added by the GUI - it is not enforced here.
         /// </summary>
         private string BuildPredicate(string eventName, ISet<string> availableDataColumns)
         {
@@ -391,12 +384,6 @@ namespace DBADash.XE
             {
                 if (!FilterAppliesTo(filter, eventName, availableDataColumns)) continue;
                 terms.Add(BuildFilterTerm(filter));
-            }
-
-            // Events exposing severity (e.g. error_reported) get the floor (validated integer, safe to inline).
-            if (availableDataColumns.Contains("severity"))
-            {
-                terms.Add($"[severity]>=({ErrorSeverityFloor.ToString(CultureInfo.InvariantCulture)})");
             }
 
             // Sampling term last: capture ~1 in N events via the session counter.  Placed after the real filters so the
