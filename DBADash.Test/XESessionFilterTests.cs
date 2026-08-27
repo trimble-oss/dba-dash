@@ -138,12 +138,21 @@ namespace DBADash.Test
         }
 
         [TestMethod]
-        public void Config_watch_only_disables_start_stop_but_keeps_feature_on()
+        public void Config_manage_and_watch_are_independent()
         {
+            // Watch on, manage off: watching offered, but no start/stop.
             var cfg = new CollectionConfig { ManageXESessions = "", WatchXESessions = "*" };
-            Assert.IsTrue(cfg.AllowManageXE); // feature on -> list/script/watch offered
-            Assert.IsFalse(cfg.CanManageXESession("MyTrace")); // but no start/stop
+            Assert.IsFalse(cfg.AllowManageXE); // manage list blank -> start/stop disabled
+            Assert.IsTrue(cfg.AllowWatchXE);
+            Assert.IsFalse(cfg.CanManageXESession("MyTrace"));
             Assert.IsTrue(cfg.CanWatchXESession("MyTrace"));
+
+            // Manage on, watch off: start/stop offered, but no watching/viewing.
+            cfg = new CollectionConfig { ManageXESessions = "*", WatchXESessions = "" };
+            Assert.IsTrue(cfg.AllowManageXE);
+            Assert.IsFalse(cfg.AllowWatchXE); // watch list blank -> watching disabled
+            Assert.IsTrue(cfg.CanManageXESession("MyTrace"));
+            Assert.IsFalse(cfg.CanWatchXESession("MyTrace"));
         }
 
         [TestMethod]
@@ -151,30 +160,28 @@ namespace DBADash.Test
         {
             var cfg = new CollectionConfig { ManageXESessions = null, WatchXESessions = null };
             Assert.IsFalse(cfg.AllowManageXE);
-            Assert.IsFalse(cfg.AllowViewXE); // no ad-hoc either -> nothing to view
+            Assert.IsFalse(cfg.AllowWatchXE);
             Assert.IsFalse(cfg.CanWatchXESession("MyTrace"));
         }
 
         [TestMethod]
-        public void Config_adhoc_only_enables_read_only_view_and_watch()
+        public void Config_adhoc_does_not_enable_watch()
         {
-            // Manage-XE off (both lists blank) but ad-hoc tracing on: existing sessions are exposed read-only and
-            // watchable (the user could capture the same data with an ad-hoc XE trace), but never started/stopped.
+            // Ad-hoc tracing is fully independent of watching: with the watch list blank, existing sessions can't be
+            // watched or viewed regardless of ad-hoc, and start/stop stays off too.
             var cfg = new CollectionConfig { ManageXESessions = null, WatchXESessions = null, AllowAdhocXE = true };
             Assert.IsFalse(cfg.AllowManageXE);
-            Assert.IsTrue(cfg.AllowViewXE);
-            Assert.IsTrue(cfg.CanWatchXESession("system_health"));
-            Assert.IsTrue(cfg.CanWatchXESession("MyTrace"));
-            Assert.IsFalse(cfg.CanManageXESession("MyTrace")); // still no start/stop
+            Assert.IsFalse(cfg.AllowWatchXE);
+            Assert.IsFalse(cfg.CanWatchXESession("system_health"));
+            Assert.IsFalse(cfg.CanWatchXESession("MyTrace"));
+            Assert.IsFalse(cfg.CanManageXESession("MyTrace"));
         }
 
         [TestMethod]
-        public void Config_explicit_watch_list_wins_over_adhoc()
+        public void Config_watch_list_denies_are_respected()
         {
-            // When an admin has configured WatchXESessions, that explicit list (including its denies) is respected even
-            // with ad-hoc enabled - ad-hoc only supplies the fallback when no watch list is configured at all.
-            var cfg = new CollectionConfig { WatchXESessions = "*,-secret_session", AllowAdhocXE = true };
-            Assert.IsTrue(cfg.AllowViewXE);
+            var cfg = new CollectionConfig { WatchXESessions = "*,-secret_session" };
+            Assert.IsTrue(cfg.AllowWatchXE);
             Assert.IsTrue(cfg.CanWatchXESession("MyTrace"));
             Assert.IsFalse(cfg.CanWatchXESession("secret_session"));
         }

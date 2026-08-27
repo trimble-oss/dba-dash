@@ -32,16 +32,43 @@ namespace DBADashGUI.XETrace
         public void SetContext(DBADashContext context)
         {
             _context = context;
-            // Viewing the session list (and watching / viewing captured data) is offered to either XE role; start/stop
-            // of existing sessions is gated on ManageXE per-row in BuildRows.
-            var canView = context is { InstanceID: > 0 } && context.CanMessage
-                          && (DBADashUser.AllowManageXE || DBADashUser.AllowXETrace);
-            _refreshButton.Enabled = canView;
-            _adhocButton.Visible = context is { InstanceID: > 0 } && context.CanMessage && DBADashUser.AllowXETrace;
-            if (!canView)
+            var validInstance = context is { InstanceID: > 0 } && context.CanMessage;
+
+            // The session list is shown to Manage-XE or Watch-XE users (a manage-only user needs it to start/stop);
+            // watching / viewing captured data is gated on Watch-XE and start/stop on Manage-XE per-row in BuildRows.
+            var hasViewRole = DBADashUser.AllowManageXE || DBADashUser.AllowWatchXE;
+            var serviceCanView = context.CanViewXESessions;
+            _refreshButton.Enabled = validInstance && hasViewRole && serviceCanView;
+
+            // Ad-hoc trace needs the AdhocXE role AND the service to have ad-hoc tracing enabled.  For a user who holds
+            // the role we keep the button visible but disable it (with an explanation) when the service has ad-hoc off,
+            // rather than hiding it - so it's clear the action exists but is turned off server-side.  ToolStripButtons
+            // show their ToolTipText even while disabled.
+            var userMayAdhoc = validInstance && DBADashUser.AllowAdhocXE;
+            var adhocEnabled = userMayAdhoc && context.CanRunAdhocXE;
+            _adhocButton.Visible = userMayAdhoc;
+            _adhocButton.Enabled = adhocEnabled;
+            _adhocButton.ToolTipText = adhocEnabled
+                ? "Configure and start a new ad-hoc extended-events trace."
+                : "Ad-hoc XE tracing is disabled on the DBA Dash service for this instance.";
+
+            if (!validInstance || !hasViewRole)
             {
                 ClearRows();
-                SetStatus("Extended events isn't enabled for you on this instance.", DashColors.Warning);
+                // No manage/watch permission for the session list.  If ad-hoc is available, point the user to it;
+                // otherwise nothing here is usable.
+                SetStatus(adhocEnabled
+                    ? "Viewing existing sessions isn't enabled for you - use 'New Ad-hoc XE Trace' to capture events."
+                    : "Extended events isn't enabled for you on this instance.", DashColors.Warning);
+                return;
+            }
+            if (!serviceCanView)
+            {
+                // The service has Manage-XE and Watch-XE both disabled, so it would reject a list request - show the
+                // reason directly instead of making the round-trip to the service to be told the same thing.
+                ClearRows();
+                SetStatus("Viewing extended events is not enabled on the DBA Dash service.  " +
+                          "Enable Manage XE or Watch XE in the service configuration tool.", DashColors.Fail);
                 return;
             }
             _ = LoadSessionsAsync();
@@ -53,14 +80,14 @@ namespace DBADashGUI.XETrace
             SetStatus("Loading sessions...", DashColors.Information);
             try
             {
-                var dt = await XESessionController.ListSessionsAsync(_context, ControllerStatus);
-                if (dt == null)
+                var outcome = await XESessionController.ListSessionsAsync(_context, ControllerStatus);
+                if (!outcome.Ok)
                 {
-                    SetStatus("No response from the service.", DashColors.Fail);
+                    SetStatus(outcome.Message ?? "No response from the service.", DashColors.Fail);
                     return;
                 }
-                BuildRows(dt);
-                SetStatus($"{dt.Rows.Count} session(s).", DashColors.Information);
+                BuildRows(outcome.Sessions);
+                SetStatus($"{outcome.Sessions.Rows.Count} session(s).", DashColors.Information);
             }
             catch (Exception ex)
             {
@@ -76,12 +103,14 @@ namespace DBADashGUI.XETrace
             {
                 var row = new XESessionRow();
                 row.Bind(dataRow);
-                // Start/stop needs the ManageXE role in addition to the service's per-session policy.  Without the role
-                // the buttons are inert and explain why; watching/viewing stays available for XETrace-only users.
+                // Start/stop needs the ManageXE role; watching/viewing needs the WatchXE role - each in addition to the
+                // service's per-session policy.  Without the role the relevant buttons are inert and explain why.
                 var userCanManage = DBADashUser.AllowManageXE;
+                var userCanWatch = DBADashUser.AllowWatchXE;
                 row.SetPolicy(userCanManage && _context.CanManageXESession(row.SessionName),
-                    _context.CanWatchXESession(row.SessionName),
-                    userCanManage ? null : "You don't have permission to start or stop existing sessions.");
+                    userCanWatch && _context.CanWatchXESession(row.SessionName),
+                    userCanManage ? null : "You don't have permission to start or stop existing sessions.",
+                    userCanWatch ? null : "You don't have permission to watch or view existing sessions.");
                 row.StartStopClicked += async (s, _) => await OnRowStartStop((XESessionRow)s);
                 row.WatchClicked += (s, _) => OnRowWatch((XESessionRow)s);
                 row.ViewDataClicked += (s, _) => OnRowViewData((XESessionRow)s);

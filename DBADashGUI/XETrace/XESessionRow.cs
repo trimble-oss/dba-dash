@@ -133,9 +133,11 @@ namespace DBADashGUI.XETrace
         /// Applies the effective policy: disables (and explains) the start/stop and watch buttons for a session the
         /// user isn't permitted to manage / watch - whether because of the caller's role or the collect agent's
         /// per-session policy - so the user isn't offered an action that would only be rejected.
-        /// <paramref name="manageDisabledReason"/> overrides the tooltip shown when start/stop is unavailable.
+        /// <paramref name="manageDisabledReason"/> / <paramref name="watchDisabledReason"/> override the tooltips shown
+        /// when start/stop / watch is unavailable (e.g. the caller lacks the role vs. the service's per-session policy).
         /// </summary>
-        public void SetPolicy(bool canManage, bool canWatch, string manageDisabledReason = null)
+        public void SetPolicy(bool canManage, bool canWatch, string manageDisabledReason = null,
+            string watchDisabledReason = null)
         {
             _canManage = canManage;
             _startStop.Image = canManage
@@ -153,13 +155,15 @@ namespace DBADashGUI.XETrace
             _watch.Cursor = canWatch ? Cursors.Hand : Cursors.Default;
             _toolTip.SetToolTip(_watch, canWatch
                 ? "Watch"
-                : "Watching this session isn't permitted by the service configuration.");
+                : watchDisabledReason
+                  ?? "Watching this session isn't permitted by the service configuration.");
 
             _viewData.Image = canWatch ? ViewIcon : ViewIconFaded;
             _viewData.Cursor = canWatch ? Cursors.Hand : Cursors.Default;
             _toolTip.SetToolTip(_viewData, canWatch
                 ? "View captured data"
-                : "Viewing this session's data isn't permitted by the service configuration.");
+                : watchDisabledReason
+                  ?? "Viewing this session's data isn't permitted by the service configuration.");
         }
 
         /// <summary>The target must carry an event stream to view - only event_file and ring_buffer qualify.</summary>

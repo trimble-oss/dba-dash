@@ -12,7 +12,8 @@ namespace DBADash.Messaging
 {
     /// <summary>
     /// Returns the <c>CREATE EVENT SESSION</c> DDL for an <b>existing</b> extended-events session on a monitored
-    /// instance, so the GUI can show a session's definition.  Read-only.  Requires <see cref="CollectionConfig.AllowViewXE"/>.
+    /// instance, so the GUI can show a session's definition.  Read-only.  Requires <see cref="CollectionConfig.AllowWatchXE"/>
+    /// and the per-session watch list (scripting a definition is treated as the same read sensitivity as watching).
     ///
     /// <para>Uses SMO's XEvent management API (<see cref="XEStore"/> / <see cref="DatabaseXEStore"/>) to script the
     /// session, which produces the exact, SSMS-equivalent DDL (field quoting, predicates, targets and WITH options are
@@ -28,14 +29,20 @@ namespace DBADash.Messaging
         public override async Task<DataSet> Process(CollectionConfig cfg, Guid handle, CancellationToken cancellationToken)
         {
             ThrowIfExpired();
-            if (!cfg.AllowViewXE)
+            if (!cfg.AllowWatchXE)
             {
                 throw new Exception(
-                    "Viewing extended events is not enabled on the DBA Dash service.  Enable ad-hoc tracing or Manage XE in the service configuration tool.");
+                    "Viewing extended events is not enabled on the DBA Dash service.  Enable Watch XE in the service configuration tool.");
             }
             if (string.IsNullOrWhiteSpace(SessionName))
             {
                 throw new Exception("No session name was supplied.");
+            }
+            if (!cfg.CanWatchXESession(SessionName))
+            {
+                throw new Exception(
+                    $"Viewing the extended-events session '{SessionName}' is not permitted by the DBA Dash service's " +
+                    "watchable-sessions list.");
             }
 
             var src = await cfg.GetSourceConnectionAsync(ConnectionID);

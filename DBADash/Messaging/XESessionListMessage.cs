@@ -10,7 +10,8 @@ namespace DBADash.Messaging
     /// <summary>
     /// Lists the <b>existing</b> extended-events sessions defined on a monitored instance, with their running state,
     /// target types and event count - so the GUI's Extended Events node can show them and offer start/stop/watch.
-    /// Read-only.  Requires <see cref="CollectionConfig.AllowViewXE"/>.  Scope-aware: server-scoped views on-prem /
+    /// Read-only.  Requires <see cref="CollectionConfig.AllowManageXE"/> or <see cref="CollectionConfig.AllowWatchXE"/>
+    /// (a manage-only user still needs to enumerate sessions to start/stop them).  Scope-aware: server-scoped views on-prem /
     /// Managed Instance, database-scoped views for Azure SQL Database.
     /// </summary>
     public class XESessionListMessage : MessageBase
@@ -39,10 +40,10 @@ ORDER BY s.name;";
         public override async Task<DataSet> Process(CollectionConfig cfg, Guid handle, CancellationToken cancellationToken)
         {
             ThrowIfExpired();
-            if (!cfg.AllowViewXE)
+            if (!cfg.AllowManageXE && !cfg.AllowWatchXE)
             {
                 throw new Exception(
-                    "Viewing extended events is not enabled on the DBA Dash service.  Enable ad-hoc tracing or Manage XE in the service configuration tool.");
+                    "Viewing extended events is not enabled on the DBA Dash service.  Enable Manage XE or Watch XE in the service configuration tool.");
             }
 
             var src = await cfg.GetSourceConnectionAsync(ConnectionID);

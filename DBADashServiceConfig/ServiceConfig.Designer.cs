@@ -76,10 +76,17 @@ namespace DBADashServiceConfig
             lnkAutoUpgradeDB = new System.Windows.Forms.LinkLabel();
             lnkDeployDatabase = new System.Windows.Forms.LinkLabel();
             chkAllowAdhocXE = new System.Windows.Forms.CheckBox();
-            chkAllowManageXE = new System.Windows.Forms.CheckBox();
+            txtManageXESessions = new System.Windows.Forms.TextBox();
+            txtWatchXESessions = new System.Windows.Forms.TextBox();
             chkAllowPlanForcing = new System.Windows.Forms.CheckBox();
             chkAllowKillSession = new System.Windows.Forms.CheckBox();
             chkEnableMessaging = new System.Windows.Forms.CheckBox();
+            labelManageXE = new System.Windows.Forms.Label();
+            lnkManageXEAll = new System.Windows.Forms.LinkLabel();
+            lnkManageXENone = new System.Windows.Forms.LinkLabel();
+            labelWatchXE = new System.Windows.Forms.Label();
+            lnkWatchXEAll = new System.Windows.Forms.LinkLabel();
+            lnkWatchXENone = new System.Windows.Forms.LinkLabel();
             picConfigFileAccess = new System.Windows.Forms.PictureBox();
             lblConfigFileAccess = new System.Windows.Forms.Label();
             pnlBottom = new System.Windows.Forms.Panel();
@@ -125,9 +132,7 @@ namespace DBADashServiceConfig
             numAzureScanInterval = new System.Windows.Forms.NumericUpDown();
             label11 = new System.Windows.Forms.Label();
             label10 = new System.Windows.Forms.Label();
-            groupBox6 = new System.Windows.Forms.GroupBox();
-            xeMaxDuration = new DBADashGUI.Pickers.DurationDropDown();
-            label25 = new System.Windows.Forms.Label();
+            grpMessaging = new System.Windows.Forms.GroupBox();
             label22 = new System.Windows.Forms.Label();
             txtAllowedCustomProcs = new System.Windows.Forms.TextBox();
             lnkAllowNoJobs = new System.Windows.Forms.LinkLabel();
@@ -141,6 +146,8 @@ namespace DBADashServiceConfig
             label8 = new System.Windows.Forms.Label();
             label6 = new System.Windows.Forms.Label();
             txtSQS = new System.Windows.Forms.TextBox();
+            xeMaxDuration = new DBADashGUI.Pickers.DurationDropDown();
+            label25 = new System.Windows.Forms.Label();
             label4 = new System.Windows.Forms.Label();
             tabSource = new System.Windows.Forms.TabPage();
             groupBox2 = new System.Windows.Forms.GroupBox();
@@ -203,6 +210,7 @@ namespace DBADashServiceConfig
             txtDestination = new System.Windows.Forms.TextBox();
             tab1 = new ThemedTabControl();
             tabMessaging = new System.Windows.Forms.TabPage();
+            grpXE = new System.Windows.Forms.GroupBox();
             ((System.ComponentModel.ISupportInitialize)errorProvider1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox3).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
@@ -224,7 +232,7 @@ namespace DBADashServiceConfig
             ((System.ComponentModel.ISupportInitialize)numIdentityCollectionThreshold).BeginInit();
             groupBox4.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)numAzureScanInterval).BeginInit();
-            groupBox6.SuspendLayout();
+            grpMessaging.SuspendLayout();
             tabSource.SuspendLayout();
             groupBox2.SuspendLayout();
             tabSrcOptions.SuspendLayout();
@@ -241,6 +249,7 @@ namespace DBADashServiceConfig
             grpService.SuspendLayout();
             tab1.SuspendLayout();
             tabMessaging.SuspendLayout();
+            grpXE.SuspendLayout();
             SuspendLayout();
             // 
             // errorProvider1
@@ -387,7 +396,7 @@ namespace DBADashServiceConfig
             chkDualSession.Size = new System.Drawing.Size(139, 24);
             chkDualSession.TabIndex = 17;
             chkDualSession.Text = "Use dual session";
-            toolTip1.SetToolTip(chkDualSession, "Uses overlapping event sessions to try to capture events that occur during the breif period where the session is stopped to flush the ring buffer.");
+            toolTip1.SetToolTip(chkDualSession, "Uses overlapping event sessions to try to capture events that occur during the brief period where the session is stopped to flush the ring buffer.");
             chkDualSession.UseVisualStyleBackColor = true;
             // 
             // bttnConnectSource
@@ -596,7 +605,7 @@ namespace DBADashServiceConfig
             // label21
             // 
             label21.AutoSize = true;
-            label21.Location = new System.Drawing.Point(18, 203);
+            label21.Location = new System.Drawing.Point(18, 160);
             label21.Name = "label21";
             label21.Size = new System.Drawing.Size(159, 20);
             label21.TabIndex = 12;
@@ -726,7 +735,7 @@ namespace DBADashServiceConfig
             // chkAllowAdhocXE
             // 
             chkAllowAdhocXE.AutoSize = true;
-            chkAllowAdhocXE.Location = new System.Drawing.Point(426, 39);
+            chkAllowAdhocXE.Location = new System.Drawing.Point(18, 26);
             chkAllowAdhocXE.Name = "chkAllowAdhocXE";
             chkAllowAdhocXE.Size = new System.Drawing.Size(143, 24);
             chkAllowAdhocXE.TabIndex = 19;
@@ -734,21 +743,28 @@ namespace DBADashServiceConfig
             toolTip1.SetToolTip(chkAllowAdhocXE, "Allow access to configure and run an ad-hoc XE session via the messaging feature");
             chkAllowAdhocXE.UseVisualStyleBackColor = true;
             // 
-            // chkAllowManageXE
+            // txtManageXESessions
             // 
-            chkAllowManageXE.AutoSize = true;
-            chkAllowManageXE.Location = new System.Drawing.Point(247, 39);
-            chkAllowManageXE.Name = "chkAllowManageXE";
-            chkAllowManageXE.Size = new System.Drawing.Size(148, 24);
-            chkAllowManageXE.TabIndex = 18;
-            chkAllowManageXE.Text = "Allow Manage XE";
-            toolTip1.SetToolTip(chkAllowManageXE, "Allow start/stop/watch of existing extended event sessions via the messaging feature. Ticking applies safe defaults (all sessions except system_health / AlwaysOn_health / telemetry_xevents may be started or stopped; any session may be watched). Fine-tune which sessions are manageable/watchable via the ManageXESessions / WatchXESessions values in the JSON config (e.g. *,-system_health).");
-            chkAllowManageXE.UseVisualStyleBackColor = true;
+            txtManageXESessions.Location = new System.Drawing.Point(247, 101);
+            txtManageXESessions.Name = "txtManageXESessions";
+            txtManageXESessions.Size = new System.Drawing.Size(370, 27);
+            txtManageXESessions.TabIndex = 31;
+            toolTip1.SetToolTip(txtManageXESessions, "Comma-separated list of existing extended event sessions that may be started/stopped via the messaging feature (XESessionFilter syntax: * = all, -name = deny, deny wins). Blank disables start/stop.");
+            txtManageXESessions.TextChanged += ManageXESessions_TextChanged;
+            // 
+            // txtWatchXESessions
+            // 
+            txtWatchXESessions.Location = new System.Drawing.Point(247, 134);
+            txtWatchXESessions.Name = "txtWatchXESessions";
+            txtWatchXESessions.Size = new System.Drawing.Size(370, 27);
+            txtWatchXESessions.TabIndex = 35;
+            toolTip1.SetToolTip(txtWatchXESessions, resources.GetString("txtWatchXESessions.ToolTip"));
+            txtWatchXESessions.TextChanged += WatchXESessions_TextChanged;
             // 
             // chkAllowPlanForcing
             // 
             chkAllowPlanForcing.AutoSize = true;
-            chkAllowPlanForcing.Location = new System.Drawing.Point(18, 69);
+            chkAllowPlanForcing.Location = new System.Drawing.Point(18, 26);
             chkAllowPlanForcing.Name = "chkAllowPlanForcing";
             chkAllowPlanForcing.Size = new System.Drawing.Size(154, 24);
             chkAllowPlanForcing.TabIndex = 5;
@@ -760,7 +776,7 @@ namespace DBADashServiceConfig
             // chkAllowKillSession
             // 
             chkAllowKillSession.AutoSize = true;
-            chkAllowKillSession.Location = new System.Drawing.Point(247, 68);
+            chkAllowKillSession.Location = new System.Drawing.Point(247, 25);
             chkAllowKillSession.Name = "chkAllowKillSession";
             chkAllowKillSession.Size = new System.Drawing.Size(147, 24);
             chkAllowKillSession.TabIndex = 6;
@@ -774,7 +790,7 @@ namespace DBADashServiceConfig
             chkEnableMessaging.AutoSize = true;
             chkEnableMessaging.Checked = true;
             chkEnableMessaging.CheckState = System.Windows.Forms.CheckState.Checked;
-            chkEnableMessaging.Location = new System.Drawing.Point(18, 39);
+            chkEnableMessaging.Location = new System.Drawing.Point(26, 18);
             chkEnableMessaging.Name = "chkEnableMessaging";
             chkEnableMessaging.Size = new System.Drawing.Size(185, 24);
             chkEnableMessaging.TabIndex = 0;
@@ -782,6 +798,68 @@ namespace DBADashServiceConfig
             toolTip1.SetToolTip(chkEnableMessaging, "Uncheck to disable all messaging related features. ");
             chkEnableMessaging.UseVisualStyleBackColor = true;
             chkEnableMessaging.CheckedChanged += ChkEnableMessaging_CheckedChanged;
+            // 
+            // labelManageXE
+            // 
+            labelManageXE.AutoSize = true;
+            labelManageXE.Location = new System.Drawing.Point(18, 104);
+            labelManageXE.Name = "labelManageXE";
+            labelManageXE.Size = new System.Drawing.Size(141, 20);
+            labelManageXE.TabIndex = 30;
+            labelManageXE.Text = "Manage XE sessions";
+            // 
+            // lnkManageXEAll
+            // 
+            lnkManageXEAll.AutoSize = true;
+            lnkManageXEAll.Location = new System.Drawing.Point(626, 104);
+            lnkManageXEAll.Name = "lnkManageXEAll";
+            lnkManageXEAll.Size = new System.Drawing.Size(160, 20);
+            lnkManageXEAll.TabIndex = 32;
+            lnkManageXEAll.TabStop = true;
+            lnkManageXEAll.Text = "ALL (excluding system)";
+            lnkManageXEAll.LinkClicked += lnkManageXEAll_LinkClicked;
+            // 
+            // lnkManageXENone
+            // 
+            lnkManageXENone.AutoSize = true;
+            lnkManageXENone.Location = new System.Drawing.Point(791, 104);
+            lnkManageXENone.Name = "lnkManageXENone";
+            lnkManageXENone.Size = new System.Drawing.Size(50, 20);
+            lnkManageXENone.TabIndex = 33;
+            lnkManageXENone.TabStop = true;
+            lnkManageXENone.Text = "NONE";
+            lnkManageXENone.LinkClicked += lnkManageXENone_LinkClicked;
+            // 
+            // labelWatchXE
+            // 
+            labelWatchXE.AutoSize = true;
+            labelWatchXE.Location = new System.Drawing.Point(18, 137);
+            labelWatchXE.Name = "labelWatchXE";
+            labelWatchXE.Size = new System.Drawing.Size(128, 20);
+            labelWatchXE.TabIndex = 34;
+            labelWatchXE.Text = "Watch XE sessions";
+            // 
+            // lnkWatchXEAll
+            // 
+            lnkWatchXEAll.AutoSize = true;
+            lnkWatchXEAll.Location = new System.Drawing.Point(626, 137);
+            lnkWatchXEAll.Name = "lnkWatchXEAll";
+            lnkWatchXEAll.Size = new System.Drawing.Size(33, 20);
+            lnkWatchXEAll.TabIndex = 36;
+            lnkWatchXEAll.TabStop = true;
+            lnkWatchXEAll.Text = "ALL";
+            lnkWatchXEAll.LinkClicked += lnkWatchXEAll_LinkClicked;
+            // 
+            // lnkWatchXENone
+            // 
+            lnkWatchXENone.AutoSize = true;
+            lnkWatchXENone.Location = new System.Drawing.Point(665, 137);
+            lnkWatchXENone.Name = "lnkWatchXENone";
+            lnkWatchXENone.Size = new System.Drawing.Size(50, 20);
+            lnkWatchXENone.TabIndex = 37;
+            lnkWatchXENone.TabStop = true;
+            lnkWatchXENone.Text = "NONE";
+            lnkWatchXENone.LinkClicked += lnkWatchXENone_LinkClicked;
             // 
             // picConfigFileAccess
             // 
@@ -1309,60 +1387,35 @@ namespace DBADashServiceConfig
             label10.TabIndex = 24;
             label10.Text = resources.GetString("label10.Text");
             // 
-            // groupBox6
+            // grpMessaging
             // 
-            groupBox6.Controls.Add(xeMaxDuration);
-            groupBox6.Controls.Add(label25);
-            groupBox6.Controls.Add(chkAllowAdhocXE);
-            groupBox6.Controls.Add(chkAllowManageXE);
-            groupBox6.Controls.Add(label22);
-            groupBox6.Controls.Add(txtAllowedCustomProcs);
-            groupBox6.Controls.Add(lnkAllowNoJobs);
-            groupBox6.Controls.Add(lnkAllowAllJobs);
-            groupBox6.Controls.Add(txtAllowedJobs);
-            groupBox6.Controls.Add(label21);
-            groupBox6.Controls.Add(lnkAllowExplicit);
-            groupBox6.Controls.Add(lnkAllowNone);
-            groupBox6.Controls.Add(lnkAllowAll);
-            groupBox6.Controls.Add(label18);
-            groupBox6.Controls.Add(txtAllowScripts);
-            groupBox6.Controls.Add(chkAllowPlanForcing);
-            groupBox6.Controls.Add(chkAllowKillSession);
-            groupBox6.Controls.Add(label8);
-            groupBox6.Controls.Add(label6);
-            groupBox6.Controls.Add(txtSQS);
-            groupBox6.Controls.Add(label4);
-            groupBox6.Controls.Add(chkEnableMessaging);
-            groupBox6.Location = new System.Drawing.Point(8, 6);
-            groupBox6.Name = "groupBox6";
-            groupBox6.Size = new System.Drawing.Size(1112, 301);
-            groupBox6.TabIndex = 39;
-            groupBox6.TabStop = false;
-            groupBox6.Text = "Messaging";
-            // 
-            // xeMaxDuration
-            // 
-            xeMaxDuration.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
-            xeMaxDuration.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            xeMaxDuration.IncludeSeconds = true;
-            xeMaxDuration.Location = new System.Drawing.Point(247, 233);
-            xeMaxDuration.Name = "xeMaxDuration";
-            xeMaxDuration.Size = new System.Drawing.Size(370, 34);
-            xeMaxDuration.TabIndex = 22;
-            // 
-            // label25
-            // 
-            label25.AutoSize = true;
-            label25.Location = new System.Drawing.Point(18, 235);
-            label25.Name = "label25";
-            label25.Size = new System.Drawing.Size(157, 20);
-            label25.TabIndex = 21;
-            label25.Text = "XE Trace max duration";
+            grpMessaging.Controls.Add(label22);
+            grpMessaging.Controls.Add(txtAllowedCustomProcs);
+            grpMessaging.Controls.Add(lnkAllowNoJobs);
+            grpMessaging.Controls.Add(lnkAllowAllJobs);
+            grpMessaging.Controls.Add(txtAllowedJobs);
+            grpMessaging.Controls.Add(label21);
+            grpMessaging.Controls.Add(lnkAllowExplicit);
+            grpMessaging.Controls.Add(lnkAllowNone);
+            grpMessaging.Controls.Add(lnkAllowAll);
+            grpMessaging.Controls.Add(label18);
+            grpMessaging.Controls.Add(txtAllowScripts);
+            grpMessaging.Controls.Add(chkAllowPlanForcing);
+            grpMessaging.Controls.Add(chkAllowKillSession);
+            grpMessaging.Controls.Add(label8);
+            grpMessaging.Controls.Add(label6);
+            grpMessaging.Controls.Add(txtSQS);
+            grpMessaging.Location = new System.Drawing.Point(11, 75);
+            grpMessaging.Name = "grpMessaging";
+            grpMessaging.Size = new System.Drawing.Size(1112, 203);
+            grpMessaging.TabIndex = 39;
+            grpMessaging.TabStop = false;
+            grpMessaging.Text = "General";
             // 
             // label22
             // 
             label22.AutoSize = true;
-            label22.Location = new System.Drawing.Point(18, 170);
+            label22.Location = new System.Drawing.Point(18, 127);
             label22.Name = "label22";
             label22.Size = new System.Drawing.Size(195, 20);
             label22.TabIndex = 17;
@@ -1370,16 +1423,17 @@ namespace DBADashServiceConfig
             // 
             // txtAllowedCustomProcs
             // 
-            txtAllowedCustomProcs.Location = new System.Drawing.Point(247, 167);
+            txtAllowedCustomProcs.Location = new System.Drawing.Point(247, 124);
             txtAllowedCustomProcs.Name = "txtAllowedCustomProcs";
             txtAllowedCustomProcs.Size = new System.Drawing.Size(370, 27);
             txtAllowedCustomProcs.TabIndex = 16;
+            toolTip1.SetToolTip(txtAllowedCustomProcs, "Comma-separated list of your own custom stored procedures to allow (execute on demand).  Each procedure must be listed explicitly (schema.proc or proc) - wildcards and * (all) are NOT supported.  Blank = None.");
             txtAllowedCustomProcs.TextChanged += AllowedCustomProcs_TextChanged;
             // 
             // lnkAllowNoJobs
             // 
             lnkAllowNoJobs.AutoSize = true;
-            lnkAllowNoJobs.Location = new System.Drawing.Point(665, 203);
+            lnkAllowNoJobs.Location = new System.Drawing.Point(665, 160);
             lnkAllowNoJobs.Name = "lnkAllowNoJobs";
             lnkAllowNoJobs.Size = new System.Drawing.Size(50, 20);
             lnkAllowNoJobs.TabIndex = 15;
@@ -1390,7 +1444,7 @@ namespace DBADashServiceConfig
             // lnkAllowAllJobs
             // 
             lnkAllowAllJobs.AutoSize = true;
-            lnkAllowAllJobs.Location = new System.Drawing.Point(626, 203);
+            lnkAllowAllJobs.Location = new System.Drawing.Point(626, 160);
             lnkAllowAllJobs.Name = "lnkAllowAllJobs";
             lnkAllowAllJobs.Size = new System.Drawing.Size(33, 20);
             lnkAllowAllJobs.TabIndex = 14;
@@ -1400,16 +1454,17 @@ namespace DBADashServiceConfig
             // 
             // txtAllowedJobs
             // 
-            txtAllowedJobs.Location = new System.Drawing.Point(247, 200);
+            txtAllowedJobs.Location = new System.Drawing.Point(247, 157);
             txtAllowedJobs.Name = "txtAllowedJobs";
             txtAllowedJobs.Size = new System.Drawing.Size(370, 27);
             txtAllowedJobs.TabIndex = 13;
+            toolTip1.SetToolTip(txtAllowedJobs, "Comma-separated list of allowed agent jobs, categories or job IDs.  Prefix with \"-\" to deny (deny wins).  Use \"*\" or \"%\" as wildcard characters.  Blank = None.");
             txtAllowedJobs.TextChanged += AllowedJobs_TextChanged;
             // 
             // lnkAllowExplicit
             // 
             lnkAllowExplicit.AutoSize = true;
-            lnkAllowExplicit.Location = new System.Drawing.Point(721, 141);
+            lnkAllowExplicit.Location = new System.Drawing.Point(721, 98);
             lnkAllowExplicit.Name = "lnkAllowExplicit";
             lnkAllowExplicit.Size = new System.Drawing.Size(95, 20);
             lnkAllowExplicit.TabIndex = 11;
@@ -1420,7 +1475,7 @@ namespace DBADashServiceConfig
             // lnkAllowNone
             // 
             lnkAllowNone.AutoSize = true;
-            lnkAllowNone.Location = new System.Drawing.Point(665, 141);
+            lnkAllowNone.Location = new System.Drawing.Point(665, 98);
             lnkAllowNone.Name = "lnkAllowNone";
             lnkAllowNone.Size = new System.Drawing.Size(50, 20);
             lnkAllowNone.TabIndex = 10;
@@ -1431,7 +1486,7 @@ namespace DBADashServiceConfig
             // lnkAllowAll
             // 
             lnkAllowAll.AutoSize = true;
-            lnkAllowAll.Location = new System.Drawing.Point(626, 141);
+            lnkAllowAll.Location = new System.Drawing.Point(626, 98);
             lnkAllowAll.Name = "lnkAllowAll";
             lnkAllowAll.Size = new System.Drawing.Size(33, 20);
             lnkAllowAll.TabIndex = 9;
@@ -1442,7 +1497,7 @@ namespace DBADashServiceConfig
             // label18
             // 
             label18.AutoSize = true;
-            label18.Location = new System.Drawing.Point(18, 137);
+            label18.Location = new System.Drawing.Point(18, 94);
             label18.Name = "label18";
             label18.Size = new System.Drawing.Size(221, 20);
             label18.TabIndex = 8;
@@ -1450,16 +1505,17 @@ namespace DBADashServiceConfig
             // 
             // txtAllowScripts
             // 
-            txtAllowScripts.Location = new System.Drawing.Point(247, 134);
+            txtAllowScripts.Location = new System.Drawing.Point(247, 91);
             txtAllowScripts.Name = "txtAllowScripts";
             txtAllowScripts.Size = new System.Drawing.Size(370, 27);
             txtAllowScripts.TabIndex = 7;
+            toolTip1.SetToolTip(txtAllowScripts, "Comma-separated list of community stored procedures to allow (execute on demand).  Blank = None.  * = All (grants access to the full curated list of supported community procedures, not arbitrary procedures).");
             txtAllowScripts.TextChanged += TxtAllowScripts_TextChanged;
             // 
             // label8
             // 
             label8.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic);
-            label8.Location = new System.Drawing.Point(623, 93);
+            label8.Location = new System.Drawing.Point(623, 50);
             label8.Name = "label8";
             label8.Size = new System.Drawing.Size(466, 45);
             label8.TabIndex = 4;
@@ -1468,7 +1524,7 @@ namespace DBADashServiceConfig
             // label6
             // 
             label6.AutoSize = true;
-            label6.Location = new System.Drawing.Point(18, 104);
+            label6.Location = new System.Drawing.Point(18, 61);
             label6.Name = "label6";
             label6.Size = new System.Drawing.Size(62, 20);
             label6.TabIndex = 3;
@@ -1476,21 +1532,42 @@ namespace DBADashServiceConfig
             // 
             // txtSQS
             // 
-            txtSQS.Location = new System.Drawing.Point(247, 101);
+            txtSQS.Location = new System.Drawing.Point(247, 58);
             txtSQS.Name = "txtSQS";
             txtSQS.Size = new System.Drawing.Size(370, 27);
             txtSQS.TabIndex = 2;
             txtSQS.Validating += TxtSQS_Validating;
             txtSQS.Validated += TxtSQS_Validated;
             // 
+            // xeMaxDuration
+            // 
+            xeMaxDuration.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            xeMaxDuration.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            xeMaxDuration.IncludeSeconds = true;
+            xeMaxDuration.Location = new System.Drawing.Point(247, 61);
+            xeMaxDuration.MinimumSize = new System.Drawing.Size(387, 0);
+            xeMaxDuration.Name = "xeMaxDuration";
+            xeMaxDuration.Size = new System.Drawing.Size(387, 34);
+            xeMaxDuration.TabIndex = 22;
+            toolTip1.SetToolTip(xeMaxDuration, "Maximum duration allowed for an ad-hoc XE trace, preventing long running extended events.");
+            // 
+            // label25
+            // 
+            label25.AutoSize = true;
+            label25.Location = new System.Drawing.Point(18, 63);
+            label25.Name = "label25";
+            label25.Size = new System.Drawing.Size(157, 20);
+            label25.TabIndex = 21;
+            label25.Text = "XE Trace max duration";
+            // 
             // label4
             // 
             label4.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic);
-            label4.Location = new System.Drawing.Point(623, 39);
+            label4.Location = new System.Drawing.Point(217, 19);
             label4.Name = "label4";
-            label4.Size = new System.Drawing.Size(466, 53);
+            label4.Size = new System.Drawing.Size(906, 53);
             label4.TabIndex = 1;
-            label4.Text = "Allow the GUI to send messages to this service via the service broker.  e.g. To trigger collections to run on demand.";
+            label4.Text = "Allow the GUI to send messages to this service via the service broker.  Required for any messaging related feature.\r\n e.g. To trigger collections to run on demand.";
             // 
             // tabSource
             // 
@@ -2235,7 +2312,10 @@ namespace DBADashServiceConfig
             // 
             // tabMessaging
             // 
-            tabMessaging.Controls.Add(groupBox6);
+            tabMessaging.Controls.Add(grpXE);
+            tabMessaging.Controls.Add(grpMessaging);
+            tabMessaging.Controls.Add(chkEnableMessaging);
+            tabMessaging.Controls.Add(label4);
             tabMessaging.Location = new System.Drawing.Point(4, 39);
             tabMessaging.Name = "tabMessaging";
             tabMessaging.Padding = new System.Windows.Forms.Padding(3);
@@ -2243,6 +2323,26 @@ namespace DBADashServiceConfig
             tabMessaging.TabIndex = 7;
             tabMessaging.Text = "Messaging";
             tabMessaging.UseVisualStyleBackColor = true;
+            // 
+            // grpXE
+            // 
+            grpXE.Controls.Add(chkAllowAdhocXE);
+            grpXE.Controls.Add(xeMaxDuration);
+            grpXE.Controls.Add(label25);
+            grpXE.Controls.Add(lnkWatchXENone);
+            grpXE.Controls.Add(lnkWatchXEAll);
+            grpXE.Controls.Add(labelManageXE);
+            grpXE.Controls.Add(txtWatchXESessions);
+            grpXE.Controls.Add(txtManageXESessions);
+            grpXE.Controls.Add(labelWatchXE);
+            grpXE.Controls.Add(lnkManageXEAll);
+            grpXE.Controls.Add(lnkManageXENone);
+            grpXE.Location = new System.Drawing.Point(9, 284);
+            grpXE.Name = "grpXE";
+            grpXE.Size = new System.Drawing.Size(1114, 194);
+            grpXE.TabIndex = 40;
+            grpXE.TabStop = false;
+            grpXE.Text = "Extended Events";
             // 
             // ServiceConfig
             // 
@@ -2286,8 +2386,8 @@ namespace DBADashServiceConfig
             groupBox4.ResumeLayout(false);
             groupBox4.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)numAzureScanInterval).EndInit();
-            groupBox6.ResumeLayout(false);
-            groupBox6.PerformLayout();
+            grpMessaging.ResumeLayout(false);
+            grpMessaging.PerformLayout();
             tabSource.ResumeLayout(false);
             groupBox2.ResumeLayout(false);
             tabSrcOptions.ResumeLayout(false);
@@ -2312,6 +2412,9 @@ namespace DBADashServiceConfig
             grpService.PerformLayout();
             tab1.ResumeLayout(false);
             tabMessaging.ResumeLayout(false);
+            tabMessaging.PerformLayout();
+            grpXE.ResumeLayout(false);
+            grpXE.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -2415,7 +2518,7 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.Label lblConfigFileRetention;
         private System.Windows.Forms.Button bttnCustomCollections;
         private System.Windows.Forms.Button bttnCustomCollectionsNew;
-        private System.Windows.Forms.GroupBox groupBox6;
+        private System.Windows.Forms.GroupBox grpMessaging;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.CheckBox chkEnableMessaging;
         private System.Windows.Forms.Label lblServerNameWarning;
@@ -2483,9 +2586,17 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.LinkLabel lnkAutoUpgradeDB;
         private System.Windows.Forms.LinkLabel lnkDeployDatabase;
         private System.Windows.Forms.CheckBox chkAllowAdhocXE;
-        private System.Windows.Forms.CheckBox chkAllowManageXE;
+        private System.Windows.Forms.Label labelManageXE;
+        private System.Windows.Forms.TextBox txtManageXESessions;
+        private System.Windows.Forms.LinkLabel lnkManageXEAll;
+        private System.Windows.Forms.LinkLabel lnkManageXENone;
+        private System.Windows.Forms.Label labelWatchXE;
+        private System.Windows.Forms.TextBox txtWatchXESessions;
+        private System.Windows.Forms.LinkLabel lnkWatchXEAll;
+        private System.Windows.Forms.LinkLabel lnkWatchXENone;
         private System.Windows.Forms.Label label25;
         private DBADashGUI.Pickers.DurationDropDown xeMaxDuration;
+        private System.Windows.Forms.GroupBox grpXE;
     }
 }
 

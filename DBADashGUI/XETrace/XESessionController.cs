@@ -31,14 +31,23 @@ namespace DBADashGUI.XETrace
         /// </summary>
         public sealed record XEControlOutcome(bool Ok, bool? Running, string Message);
 
+        /// <summary>
+        /// Outcome of a session-list request.  <paramref name="Ok"/> is true only when the service replied Success;
+        /// <paramref name="Sessions"/> carries the rows in that case, and <paramref name="Message"/> the reason it
+        /// couldn't be listed otherwise (e.g. the service has viewing disabled) so the caller can show it instead of a
+        /// generic "no response".
+        /// </summary>
+        public sealed record XEListOutcome(bool Ok, DataTable Sessions, string Message);
+
         /// <summary>Lists the instance's existing XE sessions (name, running state, targets, event count).</summary>
-        public static async Task<DataTable> ListSessionsAsync(DBADashContext context,
+        public static async Task<XEListOutcome> ListSessionsAsync(DBADashContext context,
             MessagingHelper.SetStatusDelegate setStatus)
         {
             if (context.ImportAgentID == null)
             {
+                const string noAgent = "No Import Agent is configured for this instance, so the request can't be sent.";
                 setStatus("No Import Agent", string.Empty, DashColors.Fail);
-                return null;
+                return new XEListOutcome(false, null, noAgent);
             }
             var message = new XESessionListMessage
             {
@@ -49,16 +58,37 @@ namespace DBADashGUI.XETrace
             };
 
             DataTable result = null;
+            var terminal = false;
+            var ok = false;
+            string outcomeMessage = null;
             await MessagingHelper.SendMessageAndProcessReply(message, (int)context.ImportAgentID, setStatus,
                 (reply, group, status) =>
                 {
-                    if (reply.Type == ResponseMessage.ResponseTypes.Success && reply.Data?.Tables.Count > 0)
+                    switch (reply.Type)
                     {
-                        result = reply.Data.Tables[0];
+                        case ResponseMessage.ResponseTypes.Success:
+                            terminal = true;
+                            ok = true;
+                            if (reply.Data?.Tables.Count > 0) result = reply.Data.Tables[0];
+                            break;
+
+                        case ResponseMessage.ResponseTypes.Failure:
+                        case ResponseMessage.ResponseTypes.Warning:
+                            terminal = true;
+                            ok = false;
+                            outcomeMessage = reply.Message;
+                            break;
                     }
                     return Task.CompletedTask;
                 }, Guid.NewGuid());
-            return result;
+
+            if (!terminal)
+            {
+                outcomeMessage = "The request ended without a result from the service.  The service may be running an " +
+                                 "older version, extended events may be disabled on it, or it may not be running.";
+                return new XEListOutcome(false, null, outcomeMessage);
+            }
+            return new XEListOutcome(ok, result, outcomeMessage);
         }
 
         /// <summary>

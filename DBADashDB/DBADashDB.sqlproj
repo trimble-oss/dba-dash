@@ -909,7 +909,8 @@
     <Build Include="dbo\Stored Procedures\QueryPlan_Get.sql" />
     <Build Include="Security\AllowJobExecution.sql" />
     <Build Include="Security\AllowKillSession.sql" />
-    <Build Include="Security\XETrace.sql" />
+    <Build Include="Security\AdhocXE.sql" />
+    <Build Include="Security\WatchXE.sql" />
     <Build Include="Security\ManageXE.sql" />
     <Build Include="dbo\Tables\XETraceSession.sql" />
     <Build Include="dbo\Tables\XETraceEvent.sql" />
