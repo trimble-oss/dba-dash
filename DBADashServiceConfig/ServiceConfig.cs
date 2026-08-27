@@ -55,30 +55,6 @@ namespace DBADashServiceConfig
                 SetJson();
             };
 
-            chkAllowManageXE.CheckedChanged += (_, _) =>
-            {
-                if (IsSetFromJson) return;
-                // AllowManageXE is now derived from the ManageXESessions / WatchXESessions allow-lists.  Ticking the box
-                // seeds the recommended defaults (all sessions except the built-in health/telemetry ones may be
-                // started/stopped; any session may be watched) when no pattern is set yet; unticking clears both so the
-                // feature is fully disabled.  The per-session patterns can be fine-tuned in the JSON config.
-                if (chkAllowManageXE.Checked)
-                {
-                    if (!collectionConfig.AllowManageXE)
-                    {
-                        collectionConfig.ManageXESessions = CollectionConfig.DefaultManageXESessions;
-                        collectionConfig.WatchXESessions = CollectionConfig.DefaultWatchXESessions;
-                    }
-                }
-                else
-                {
-                    collectionConfig.ManageXESessions = null;
-                    collectionConfig.WatchXESessions = null;
-                }
-                UpdateXEMaxDurationEnabled();
-                SetJson();
-            };
-
             // Wire up XE max duration control (expects a DurationDropDown named xeMaxDuration in the designer)
             try
             {
@@ -114,13 +90,14 @@ namespace DBADashServiceConfig
 
         /// <summary>
         /// The XE max-duration cap applies to both ad-hoc XE traces and watching existing sessions, so the control is
-        /// editable whenever either capability is enabled.
+        /// editable whenever ad-hoc tracing or the watch-sessions list is enabled.
         /// </summary>
         private void UpdateXEMaxDurationEnabled()
         {
             if (xeMaxDuration != null)
             {
-                xeMaxDuration.Enabled = chkAllowAdhocXE.Checked || chkAllowManageXE.Checked;
+                xeMaxDuration.Enabled = chkAllowAdhocXE.Checked
+                                        || !string.IsNullOrWhiteSpace(txtWatchXESessions.Text);
             }
         }
 
@@ -1076,7 +1053,8 @@ namespace DBADashServiceConfig
                 chkAllowPlanForcing.Checked = collectionConfig.AllowPlanForcing;
                 chkAllowKillSession.Checked = collectionConfig.AllowKillSession;
                 chkAllowAdhocXE.Checked = collectionConfig.AllowAdhocXE;
-                chkAllowManageXE.Checked = collectionConfig.AllowManageXE;
+                txtManageXESessions.Text = collectionConfig.ManageXESessions;
+                txtWatchXESessions.Text = collectionConfig.WatchXESessions;
                 // DurationDropDown.Value is in minutes; AdhocXEMaxDurationSeconds is stored in seconds.
                 xeMaxDuration.Value = collectionConfig.AdhocXEMaxDurationSeconds / 60m;
                 UpdateXEMaxDurationEnabled();
@@ -1109,6 +1087,8 @@ namespace DBADashServiceConfig
                 chkLowPriorityMaxThreadPct.Enabled = chkQueueBasedScheduling.CheckState != CheckState.Unchecked;
                 chkLowPriorityMaxThreadPct.Checked = collectionConfig.LowPriorityQueueMaxThreadPercentage.HasValue;
                 numLowMaxThreadPct.Value = Convert.ToInt32(collectionConfig.GetLowPriorityQueueMaxThreadPercentage() * 100);
+                grpMessaging.Enabled = collectionConfig.EnableMessaging;
+                grpXE.Enabled = collectionConfig.EnableMessaging;
                 string upgradeCheckSchedule;
                 try
                 {
@@ -2518,6 +2498,8 @@ namespace DBADashServiceConfig
         {
             if (IsSetFromJson) return;
             collectionConfig.EnableMessaging = chkEnableMessaging.Checked;
+            grpMessaging.Enabled = chkEnableMessaging.Checked;
+            grpXE.Enabled = chkEnableMessaging.Checked;
             SetJson();
 
             if (chkEnableMessaging.Checked && collectionConfig.SourceConnections.Exists(src =>
@@ -2759,6 +2741,41 @@ namespace DBADashServiceConfig
         private void TxtAllowScripts_TextChanged(object sender, EventArgs e)
         {
             collectionConfig.AllowedScripts = txtAllowScripts.Text;
+        }
+
+        // Manage XE sessions: which existing sessions may be started/stopped.  "ALL (excluding system)" seeds the
+        // default that protects the built-in health/telemetry sessions from being stopped.
+        private void lnkManageXEAll_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            txtManageXESessions.Text = CollectionConfig.DefaultManageXESessions;
+        }
+
+        private void lnkManageXENone_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            txtManageXESessions.Text = string.Empty;
+        }
+
+        private void ManageXESessions_TextChanged(object sender, EventArgs e)
+        {
+            collectionConfig.ManageXESessions = txtManageXESessions.Text;
+        }
+
+        // Watch XE sessions: which existing sessions may be watched / viewed.  Governs watching independently of
+        // manage and ad-hoc tracing.
+        private void lnkWatchXEAll_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            txtWatchXESessions.Text = CollectionConfig.DefaultWatchXESessions;
+        }
+
+        private void lnkWatchXENone_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            txtWatchXESessions.Text = string.Empty;
+        }
+
+        private void WatchXESessions_TextChanged(object sender, EventArgs e)
+        {
+            collectionConfig.WatchXESessions = txtWatchXESessions.Text;
+            UpdateXEMaxDurationEnabled();
         }
 
         private void ChkProcessNotifications_CheckedChanged(object sender, EventArgs e)

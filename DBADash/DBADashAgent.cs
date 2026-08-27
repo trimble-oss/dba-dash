@@ -23,6 +23,13 @@ namespace DBADash
         public bool PlanForcingEnabled { get; set; }
 
         /// <summary>
+        /// Whether ad-hoc XE tracing is enabled on the service (<see cref="CollectionConfig.AllowAdhocXE"/>).  Advertised
+        /// so the GUI can hide the ad-hoc trace action / explain it up-front, rather than only finding out when the
+        /// service rejects an <see cref="Messaging.XETraceMessage"/>.
+        /// </summary>
+        public bool AdhocXEEnabled { get; set; }
+
+        /// <summary>
         /// Hard cap (seconds) the service applies to ad-hoc XE trace / watch durations (<see
         /// cref="CollectionConfig.AdhocXEMaxDurationSeconds"/>).  Surfaced to the GUI (via the DBADashAgent row) so it
         /// can warn about / clamp a requested duration up-front rather than relying solely on the server-side clamp.
@@ -58,20 +65,21 @@ namespace DBADash
 
         // Comma-separated allow/deny lists (XESessionFilter syntax) advertised so the GUI can gray out sessions it may
         // not start/stop or watch, instead of only finding out when the service rejects the request.  Null = the agent
-        // hasn't reported a policy (older service) - see XEPolicyReported; empty is canonicalised to null (as for the
-        // Allowed* CSVs) to keep the cache key / Upd payload stable across the two agent-construction paths.
+        // hasn't reported a policy (older service) - see XEPolicyReported; blank/whitespace is canonicalised to null
+        // (matching CollectionConfig.AllowManageXE/AllowWatchXE, which treat whitespace as disabled) to keep the cache
+        // key / Upd payload stable across the two agent-construction paths.
         private string _manageXESessions;
         public string ManageXESessions
         {
             get => _manageXESessions;
-            set => _manageXESessions = string.IsNullOrEmpty(value) ? null : value;
+            set => _manageXESessions = string.IsNullOrWhiteSpace(value) ? null : value;
         }
 
         private string _watchXESessions;
         public string WatchXESessions
         {
             get => _watchXESessions;
-            set => _watchXESessions = string.IsNullOrEmpty(value) ? null : value;
+            set => _watchXESessions = string.IsNullOrWhiteSpace(value) ? null : value;
         }
 
         /// <summary>
@@ -80,6 +88,12 @@ namespace DBADash
         /// through and relies on the service-side check (which always enforces regardless).
         /// </summary>
         public bool XEPolicyReported => _manageXESessions != null || _watchXESessions != null;
+
+        /// <summary>True when the service permits start/stop of at least one existing session (its ManageXESessions list is non-empty).</summary>
+        public bool AllowManageXE => _manageXESessions != null;
+
+        /// <summary>True when the service permits watching/viewing at least one existing session (its WatchXESessions list is non-empty).</summary>
+        public bool AllowWatchXE => _watchXESessions != null;
 
         /// <summary>True if <paramref name="sessionName"/> may be started/stopped (allows the attempt when no policy is reported).</summary>
         public bool CanManageXESession(string sessionName) =>
@@ -122,7 +136,7 @@ namespace DBADash
             int agentID;
             var cacheKey =
                 // Caching takes all properties into account + connection string (as we could be writing to multiple repositories and the agent could have different IDs for each).  Base off MD5 hash which should be sufficient for this use case.
-                Convert.ToBase64String(MD5.HashData(System.Text.Encoding.UTF8.GetBytes(string.Join('|', connectionString, AgentServiceName, AgentVersion, AgentHostName, AgentPath, ServiceSQSQueueUrl, MessagingEnabled, KillSessionEnabled, PlanForcingEnabled, AdhocXEMaxDurationSeconds, S3Path, AllowedScriptsCSV, AllowedCustomProcsCSV, ManageXESessions, WatchXESessions))));
+                Convert.ToBase64String(MD5.HashData(System.Text.Encoding.UTF8.GetBytes(string.Join('|', connectionString, AgentServiceName, AgentVersion, AgentHostName, AgentPath, ServiceSQSQueueUrl, MessagingEnabled, KillSessionEnabled, PlanForcingEnabled, AdhocXEMaxDurationSeconds, S3Path, AllowedScriptsCSV, AllowedCustomProcsCSV, ManageXESessions, WatchXESessions, AdhocXEEnabled))));
             if (cache.Contains(cacheKey))
             {
                 agentID = (int)cache[cacheKey];
@@ -206,7 +220,8 @@ namespace DBADash
                 AllowedScriptsCSV = cfg.AllowedScripts,
                 AllowedCustomProcsCSV = cfg.AllowedCustomProcs,
                 ManageXESessions = cfg.ManageXESessions,
-                WatchXESessions = cfg.WatchXESessions
+                WatchXESessions = cfg.WatchXESessions,
+                AdhocXEEnabled = cfg.AllowAdhocXE
             };
         }
 
@@ -238,7 +253,8 @@ namespace DBADash
                     AllowedScriptsCSV = allowedScripts,
                     AllowedCustomProcsCSV = allowedCustomProcs,
                     ManageXESessions = rdr["ManageXESessions"] == DBNull.Value ? null : rdr["ManageXESessions"].ToString(),
-                    WatchXESessions = rdr["WatchXESessions"] == DBNull.Value ? null : rdr["WatchXESessions"].ToString()
+                    WatchXESessions = rdr["WatchXESessions"] == DBNull.Value ? null : rdr["WatchXESessions"].ToString(),
+                    AdhocXEEnabled = rdr["AdhocXEEnabled"] != DBNull.Value && (bool)rdr["AdhocXEEnabled"]
                 };
             }
             else
@@ -271,6 +287,7 @@ namespace DBADash
             cmd.Parameters.AddWithValue("AllowedCustomProcs", AllowedCustomProcsCSV);
             cmd.Parameters.AddWithValue("ManageXESessions", (object)ManageXESessions ?? DBNull.Value);
             cmd.Parameters.AddWithValue("WatchXESessions", (object)WatchXESessions ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("AdhocXEEnabled", AdhocXEEnabled);
             pAgentID.Direction = System.Data.ParameterDirection.Output;
             cmd.ExecuteNonQuery();
             return (int)pAgentID.Value;

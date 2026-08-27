@@ -145,7 +145,7 @@ namespace DBADashGUI
                         });
                         // Extended Events is database-scoped for Azure SQL DB, so the node hangs off the individual
                         // database rather than the (logical) Azure instance.  Same gating as regular instances.
-                        if (azureDBNode.Context.CanMessage && (DBADashUser.AllowManageXE || DBADashUser.AllowXETrace))
+                        if (azureDBNode.Context.CanMessage && (DBADashUser.AllowManageXE || DBADashUser.AllowWatchXE || DBADashUser.AllowAdhocXE))
                         {
                             azureDBNode.Nodes.Add(new SQLTreeItem("Extended Events", SQLTreeItem.TreeType.ExtendedEvents)
                             { InstanceID = azureDBNode.InstanceID });
@@ -1067,6 +1067,17 @@ namespace DBADashGUI
 
                 // Reload custom report definitions so new/edited reports appear without restarting.
                 customReports = CustomReports.CustomReports.GetCustomReports(true);
+
+                // Re-read the user's role membership so repository-DB permission changes (the XE roles, admin, custom
+                // tools, etc.) are picked up on a refresh without restarting the app or reconnecting to the repo.
+                try
+                {
+                    await DBADashUser.GetUserAsync(token);
+                }
+                catch (Exception ex)
+                {
+                    Common.ShowExceptionDialog(ex, "Error refreshing user permissions");
+                }
             }
 
             // Build tree using shared helper
@@ -1120,10 +1131,10 @@ namespace DBADashGUI
             nodesToAdd.Add(jobs);
 
             // Extended Events: list / watch / view the instance's existing XE sessions, plus launch an ad-hoc XE trace.
-            // Requires messaging and either XE permission - ManageXE users can additionally start/stop existing
-            // sessions, XETrace-only users get read-only access (viewing/watching, which they could reproduce with
-            // their own ad-hoc XE trace anyway).  Start/stop stays gated on ManageXE inside the viewer.
-            if (instanceNode.Context.CanMessage && (DBADashUser.AllowManageXE || DBADashUser.AllowXETrace))
+            // Requires messaging and at least one XE permission - ManageXE users can start/stop existing sessions,
+            // WatchXE users get read-only access (watching/viewing), AdhocXE users can launch an ad-hoc trace.  The
+            // per-capability gating is applied inside the viewer.
+            if (instanceNode.Context.CanMessage && (DBADashUser.AllowManageXE || DBADashUser.AllowWatchXE || DBADashUser.AllowAdhocXE))
             {
                 nodesToAdd.Add(new SQLTreeItem("Extended Events", SQLTreeItem.TreeType.ExtendedEvents)
                 { InstanceID = instanceNode.InstanceID });
@@ -1319,8 +1330,11 @@ namespace DBADashGUI
             }
             else if (n.Type == SQLTreeItem.TreeType.ExtendedEvents)
             {
-                allowedTabs.Add(tabExtendedEvents);
-                allowedTabs.Add(tabAdhocTrace);
+                // Each tab is gated on the user's repository-DB role: the session viewer for Manage/Watch XE, the ad-hoc
+                // trace tab for Adhoc XE.  A user without the role never sees that tab; whether the capability is enabled
+                // on the service side is surfaced (disabled controls + a message) inside the tab, not hidden here.
+                if (DBADashUser.AllowManageXE || DBADashUser.AllowWatchXE) allowedTabs.Add(tabExtendedEvents);
+                if (DBADashUser.AllowAdhocXE) allowedTabs.Add(tabAdhocTrace);
             }
             else if (n.Type == SQLTreeItem.TreeType.DBAChecks)
             {

@@ -267,6 +267,21 @@ namespace DBADashGUI
         public bool CanWatchXESession(string sessionName) =>
             CanMessage && CollectAgent is { } a && a.CanWatchXESession(sessionName);
 
+        /// <summary>
+        /// True when the collect agent's service has ad-hoc XE tracing enabled (advertised via the DBADashAgent row).
+        /// Reflects only the service-side capability; the user must also hold the AdhocXE permission
+        /// (<see cref="DBADashUser.AllowAdhocXE"/>).  A service that doesn't advertise it (older build) reports false.
+        /// </summary>
+        public bool CanRunAdhocXE => CanMessage && CollectAgent is { AdhocXEEnabled: true };
+
+        /// <summary>
+        /// True when the collect agent's service can expose existing XE sessions read-only (its Manage-XE or Watch-XE
+        /// list permits at least one session).  Lets the GUI avoid the list round-trip - and show the service's
+        /// "not enabled" reason directly - when neither is configured (the service would reject the list request).
+        /// </summary>
+        public bool CanViewXESessions =>
+            CanMessage && CollectAgent is { } a && (a.AllowManageXE || a.AllowWatchXE);
+
         public bool IsReportAllowed(DirectExecutionReport rpt)
         {
             if (rpt is SystemDirectExecutionReport srpt)

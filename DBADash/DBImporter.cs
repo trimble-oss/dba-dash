@@ -779,7 +779,8 @@ namespace DBADash
                 AllowedScriptsCSV = row.Table.Columns.Contains("AllowedScripts") && row["AllowedScripts"] != DBNull.Value ? (string)row["AllowedScripts"] : string.Empty,
                 AllowedCustomProcsCSV = row.Table.Columns.Contains("AllowedCustomProcs") && row["AllowedCustomProcs"] != DBNull.Value ? (string)row["AllowedCustomProcs"] : string.Empty,
                 ManageXESessions = row.Table.Columns.Contains("ManageXESessions") && row["ManageXESessions"] != DBNull.Value ? (string)row["ManageXESessions"] : null,
-                WatchXESessions = row.Table.Columns.Contains("WatchXESessions") && row["WatchXESessions"] != DBNull.Value ? (string)row["WatchXESessions"] : null
+                WatchXESessions = row.Table.Columns.Contains("WatchXESessions") && row["WatchXESessions"] != DBNull.Value ? (string)row["WatchXESessions"] : null,
+                AdhocXEEnabled = row.Table.Columns.Contains("AdhocXEEnabled") && row["AdhocXEEnabled"] != DBNull.Value && (bool)row["AdhocXEEnabled"]
             };
         }
 

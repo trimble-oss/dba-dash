@@ -156,6 +156,9 @@ Source can also be a folder or a S3 bucket to import data from remote DBA Dash a
 
 You can also click "Scan Now" to persist any new connections to the config file. </value>
   </data>
+  <data name="txtWatchXESessions.ToolTip" xml:space="preserve">
+    <value>Comma-separated list of existing extended event sessions that may be watched / viewed via the messaging feature (XESessionFilter syntax: * = all, -name = deny, deny wins). Blank disables watching. Governs watching independently of Manage XE and Ad-hoc XE.</value>
+  </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>

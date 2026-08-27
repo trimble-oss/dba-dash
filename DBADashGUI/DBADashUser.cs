@@ -34,9 +34,11 @@ namespace DBADashGUI
 
         public static bool AllowKillSession;
 
-        public static bool AllowXETrace;
+        public static bool AllowAdhocXE;
 
         public static bool AllowManageXE;
+
+        public static bool AllowWatchXE;
 
         public static TimeZoneInfo UserTimeZone = TimeZoneInfo.Local;
 
@@ -156,8 +158,9 @@ namespace DBADashGUI
                 IsAdmin = (bool)pIsAdmin.Value;
                 CommunityScripts = (IsInRole("CommunityScripts") && AllowMessaging) || IsAdmin;
                 CustomTools = (IsInRole("CustomTools") && AllowMessaging) || IsAdmin;
-                AllowXETrace = (IsInRole("XETrace") && AllowMessaging) || IsAdmin;
+                AllowAdhocXE = (IsInRole("AdhocXE") && AllowMessaging) || IsAdmin;
                 AllowManageXE = (IsInRole("ManageXE") && AllowMessaging) || IsAdmin;
+                AllowWatchXE = (IsInRole("WatchXE") && AllowMessaging) || IsAdmin;
                 if (pTZ.Value != DBNull.Value)
                 {
                     var tzID = (string)pTZ.Value;

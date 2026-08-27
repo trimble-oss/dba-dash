@@ -16,6 +16,7 @@ GRANT SELECT ON SCHEMA::Alert TO App;
 GRANT SELECT ON SCHEMA::Alert TO AppReadOnly
 GRANT EXECUTE ON SCHEMA::AI TO AIService;
 GRANT EXECUTE ON OBJECT::AI.ServiceConfig_Get TO AIUser;
+GRANT EXEC ON TYPE::[dbo].[XETraceEvents] TO [AdhocXE]
 
 DECLARE @ProductMajorVersion INT = TRY_CAST(SERVERPROPERTY('ProductMajorVersion') AS INT);
 IF ISNULL(@ProductMajorVersion, 0) >= 16
@@ -51,6 +52,12 @@ WITH Grants AS (
 		FROM sys.objects
 		WHERE type = 'IF'
 		AND SCHEMA_NAME(schema_id) = 'dbo'
+		UNION ALL
+		SELECT CONCAT('GRANT EXECUTE ON ',QUOTENAME(SCHEMA_NAME(schema_id)),'.',QUOTENAME(name),' TO [AdhocXE]')
+		FROM sys.objects
+		WHERE type = 'P'
+		AND SCHEMA_NAME(schema_id) = 'dbo'
+		AND name LIKE 'XETrace%'
 )
 SELECT @GrantAppReadOnlySQL =
 	(SELECT '

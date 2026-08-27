@@ -49,6 +49,12 @@ namespace DBADashGUI.XETrace
         private bool _cancelling;
         private bool _isRunning;
 
+        // False when the current instance's DBA Dash service has ad-hoc XE tracing disabled: the tab stays visible (the
+        // user holds the AdhocXE role) but the config + start controls are disabled with an explanation, rather than
+        // letting a trace be built that the service would only reject on start.  Defaults true so construction-time state
+        // matches the old behaviour until SetContext resolves the real capability.
+        private bool _adhocServiceAvailable = true;
+
         // One entry per instance currently being traced (the current context instance plus any AG replicas / manually
         // added instances).  A single-instance run holds exactly one.  Each trace has its own conversation group and
         // repo session; a multi-instance run shares one RunGroupID so its sessions reload together in history.
@@ -394,10 +400,28 @@ namespace DBADashGUI.XETrace
             }
 
             _context = context;
+
+            // The service may have ad-hoc XE tracing disabled for this instance.  Keep the tab (the user holds the
+            // AdhocXE role) but disable the config + start controls and explain, instead of loading the catalog and
+            // letting a trace be built that would only be rejected on start.
+            _adhocServiceAvailable = context is { InstanceID: > 0 } && context.CanRunAdhocXE;
+            if (!_adhocServiceAvailable)
+            {
+                if (switchingInstance) ResetInstances();
+                SetRunningState(false); // applies the disabled state (config + start off)
+                tsStartTrace.ToolTipText =
+                    "Ad-hoc XE tracing is disabled on the DBA Dash service for this instance.";
+                SetStatus("Ad-hoc XE tracing is disabled on the DBA Dash service for this instance.", string.Empty,
+                    DashColors.Fail);
+                return;
+            }
+            tsStartTrace.ToolTipText = null;
+
             // Reset the instance list on a switch (the AG/added instances belonged to the previous instance); otherwise
             // just make sure the current instance is seeded (first load, or re-selecting the same instance).
             if (switchingInstance) ResetInstances();
             else EnsureCurrentInstanceSeeded();
+            SetRunningState(_isRunning); // re-enable config controls when returning from a disabled instance
             UpdateXelCaptureState(); // engine edition is now known (in-memory), so Auto+Azure DB can disable xel capture
             _ = LoadCatalogAsync();
 
@@ -1916,9 +1940,11 @@ namespace DBADashGUI.XETrace
         {
             if (InvokeRequired) { Invoke(new Action(() => SetRunningState(running))); return; }
             _isRunning = running;
-            tsStartTrace.Enabled = !running;
+            // The config + start controls are usable only when not running AND the service has ad-hoc tracing enabled.
+            var configurable = !running && _adhocServiceAvailable;
+            tsStartTrace.Enabled = configurable;
             tsStopTrace.Enabled = running;
-            grpConfig.Enabled = groupBox1.Enabled = Filter.Enabled = grpInstances.Enabled = !running;
+            grpConfig.Enabled = groupBox1.Enabled = Filter.Enabled = grpInstances.Enabled = configurable;
 
             if (running)
             {

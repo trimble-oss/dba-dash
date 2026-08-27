@@ -334,7 +334,14 @@ namespace DBADashGUI
             resourcePoolToolStripMenuItem.Visible = _context.HasResourceGovernorWorkloadGroups;
             resourcePoolFilterToolStripMenuItem.Visible = _context.HasResourceGovernorWorkloadGroups;
             workloadGroupFilterToolStripMenuItem.Visible = _context.HasResourceGovernorWorkloadGroups;
-            adhocTraceButton.Visible = CurrentContext.InstanceID > 0 && DBADashUser.AllowXETrace && CurrentContext.CanMessage;
+            // Keep the button visible for a user who holds the AdhocXE role, but disable it (with an explanation) when
+            // the service has ad-hoc tracing off, rather than hiding it.  ToolStripButtons show ToolTipText while disabled.
+            var userMayAdhoc = CurrentContext.InstanceID > 0 && DBADashUser.AllowAdhocXE;
+            adhocTraceButton.Visible = userMayAdhoc;
+            adhocTraceButton.Enabled = userMayAdhoc && CurrentContext.CanRunAdhocXE;
+            adhocTraceButton.ToolTipText = adhocTraceButton.Enabled
+                ? "Configure and start a new ad-hoc extended-events trace."
+                : "Ad-hoc XE tracing is disabled on the DBA Dash service for this instance.";
             ResetFilters();
             RefreshData();
         }
