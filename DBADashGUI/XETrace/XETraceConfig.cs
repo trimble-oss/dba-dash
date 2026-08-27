@@ -42,6 +42,10 @@ namespace DBADashGUI.XETrace
         /// <summary>Capture the native .xel file (event_file target only) for a Save-as-.xel download.</summary>
         public bool CaptureXel { get; set; }
 
+        /// <summary>Optional free-text note the user attached to the trace (e.g. "Capture for issue #1234"), stored on
+        /// the session for display in history.  Null/blank when the user left it empty.</summary>
+        public string Notes { get; set; }
+
         /// <summary>Comma-separated event names for the audit column (e.g. "RpcCompleted, module_end").</summary>
         public string EventTypesCsv
         {

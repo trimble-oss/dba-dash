@@ -5,6 +5,56 @@ using System.Windows.Forms;
 namespace DBADashGUI.XETrace
 {
     /// <summary>
+    /// Editable "Notes" link for the Trace History report: prompts for the row's free-text note (e.g. "Capture for
+    /// issue #1234"), saves it, and refreshes the report.  The cell shows <c>NotesDisplay</c> (the note, or a prompt
+    /// to add one) while the raw value being edited comes from the hidden <c>Notes</c> column.  Ownership is enforced
+    /// server-side (<c>dbo.XETraceSession_Notes_Upd</c> rejects editing another user's trace unless the caller is
+    /// db_owner); the client also only ever shows non-admins their own sessions, so a visible row is safe here.
+    /// </summary>
+    internal class XETraceEditNotesLinkColumnInfo : LinkColumnInfo
+    {
+        private const int MaxNotesLength = 1000; // matches dbo.XETraceSession.Notes NVARCHAR(1000)
+
+        public string SessionIdColumn { get; set; } = "XETraceSessionID";
+        public string NotesColumn { get; set; } = "Notes";
+
+        public override void Navigate(DBADashContext context, DataGridViewRow row, int selectedTableIndex, ContainerControl sender)
+        {
+            var sessionVal = row.Cells[SessionIdColumn].Value.DBNullToNull();
+            if (sessionVal == null) return;
+            var sessionId = Convert.ToInt64(sessionVal);
+
+            var current = row.DataGridView.Columns.Contains(NotesColumn)
+                ? row.Cells[NotesColumn].Value.DBNullToNull() as string ?? string.Empty
+                : string.Empty;
+
+            var note = current;
+            if (DBADashSharedGUI.CommonShared.ShowInputDialog(ref note, "Trace Notes",
+                    description: $"Note for trace session {sessionId} (max {MaxNotesLength} characters):") != DialogResult.OK)
+            {
+                return;
+            }
+            if (note != null && note.Length > MaxNotesLength) note = note[..MaxNotesLength];
+            if (string.Equals((note ?? string.Empty).Trim(), current.Trim(), StringComparison.Ordinal)) return; // unchanged
+
+            _ = SaveAsync(sessionId, note, sender);
+        }
+
+        private static async System.Threading.Tasks.Task SaveAsync(long sessionId, string note, ContainerControl sender)
+        {
+            try
+            {
+                await XETraceRepo.UpdateNotesAsync(sessionId, note);
+                (sender as CustomReportView)?.RefreshData();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(sender, ex.Message, "Trace Notes", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+    }
+
+    /// <summary>
     /// "View Data" link for the Trace History report: opens a read-only viewer over the events already captured for
     /// the row's trace session (or the whole merged run when the row carries a RunGroupID).
     /// </summary>

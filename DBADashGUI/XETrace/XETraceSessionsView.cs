@@ -248,6 +248,15 @@ namespace DBADashGUI.XETrace
                         ["RunInstances"] = new() { Alias = "Trace Instances", Description = "For a multi-instance run, all instances traced together (blank for a single-instance trace)" },
                         ["RequestedBy"] = new() { Alias = "Requested By", Description = "The user who ran the trace" },
                         ["EventTypes"] = new() { Alias = "Events", Description = "Events captured by the trace" },
+                        // The clickable Notes cell shows NotesDisplay (the note, or a prompt to add one); the raw Notes
+                        // column is hidden and is what the edit link reads/writes.
+                        ["NotesDisplay"] = new()
+                        {
+                            Alias = "Notes",
+                            Description = "Free-text note for this trace (e.g. \"Capture for issue #1234\").  Click to add or edit (your own traces, or any if admin).",
+                            Link = new XETraceEditNotesLinkColumnInfo()
+                        },
+                        ["Notes"] = Hidden(),
                         ["StatusDescription"] = new()
                         {
                             Alias = "Status",
