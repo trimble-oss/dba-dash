@@ -262,8 +262,8 @@ namespace DBADashGUI.XETrace
                             Alias = "Status",
                             Highlighting = new CellHighlightingRuleSet("StatusColor") { IsStatusColumn = true }
                         },
-                        ["StartTime"] = new() { Alias = "Start Time", Description = "Time the trace started (UTC)" },
-                        ["EndTime"] = new() { Alias = "End Time", Description = "Time the trace ended (UTC)" },
+                        ["StartTime"] = new() { Alias = "Start Time", Description = "Time the trace started (local time)" },
+                        ["EndTime"] = new() { Alias = "End Time", Description = "Time the trace ended (local time)" },
                         ["MaxDurationSeconds"] = new() { Alias = "Max Duration (s)", FormatString = "N0" },
                         ["TotalEvents"] = new() { Alias = "Events Captured", FormatString = "N0" },
                         ["TargetTypeDescription"] = new() { Alias = "Target", Description = "Resolved trace target" },

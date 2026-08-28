@@ -1697,7 +1697,10 @@ namespace DBADashGUI.XETrace
                     var noteLabel = string.IsNullOrWhiteSpace(note)
                         ? string.Empty
                         : $"  -  {(note.Length > 40 ? note[..40] + "..." : note)}";
-                    var text = $"{r["StartTime"]:g}  -  {r["EventTypes"]}  ({r["TotalEvents"]} events){groupLabel}{noteLabel}";
+                    // StartTime is stored UTC.  Convert to the app time zone so the dropdown matches the Trace History
+                    // report (which converts datetime columns to local time), rather than showing raw UTC.
+                    var startTime = Convert.ToDateTime(r["StartTime"]).ToAppTimeZone();
+                    var text = $"{startTime:g}  -  {r["EventTypes"]}  ({r["TotalEvents"]} events){groupLabel}{noteLabel}";
                     var item = new ToolStripMenuItem(text) { Tag = id, ToolTipText = note };
                     item.Click += async (_, _) => await LoadHistoryEventsAsync(id, runGroup);
                     tsHistory.DropDownItems.Add(item);
