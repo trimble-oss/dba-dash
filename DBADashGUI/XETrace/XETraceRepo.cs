@@ -19,7 +19,7 @@ namespace DBADashGUI.XETrace
             int maxDurationSeconds, string filtersJson, Guid? runGroupID = null, string notes = null)
         {
             await using var cn = new SqlConnection(Common.ConnectionString);
-            await using var cmd = new SqlCommand("dbo.XETraceSession_Start", cn) { CommandType = CommandType.StoredProcedure };
+            await using var cmd = new SqlCommand("XE.XETraceSession_Start", cn) { CommandType = CommandType.StoredProcedure };
             cmd.Parameters.AddWithValue("@InstanceID", instanceID);
             cmd.Parameters.AddWithValue("@MessageGroupID", messageGroup);
             cmd.Parameters.AddWithValue("@EventTypes", eventTypes);
@@ -39,11 +39,11 @@ namespace DBADashGUI.XETrace
             if (events == null || events.Rows.Count == 0) return;
             var tvp = BuildEventTvp(events);
             await using var cn = new SqlConnection(Common.ConnectionString);
-            await using var cmd = new SqlCommand("dbo.XETraceSession_AddEvents", cn) { CommandType = CommandType.StoredProcedure };
+            await using var cmd = new SqlCommand("XE.XETraceSession_AddEvents", cn) { CommandType = CommandType.StoredProcedure };
             cmd.Parameters.AddWithValue("@XETraceSessionID", sessionID);
             var p = cmd.Parameters.AddWithValue("@Events", tvp);
             p.SqlDbType = SqlDbType.Structured;
-            p.TypeName = "dbo.XETraceEvents";
+            p.TypeName = "XE.XETraceEvents";
             await cn.OpenAsync();
             await cmd.ExecuteNonQueryAsync();
         }
@@ -89,7 +89,7 @@ namespace DBADashGUI.XETrace
         {
             await using var cn = new SqlConnection(Common.ConnectionString);
             // No @Status: a definition-only update that records the DDL / target without terminating the trace.
-            await using var cmd = new SqlCommand("dbo.XETraceSession_Upd", cn) { CommandType = CommandType.StoredProcedure };
+            await using var cmd = new SqlCommand("XE.XETraceSession_Upd", cn) { CommandType = CommandType.StoredProcedure };
             cmd.Parameters.AddWithValue("@XETraceSessionID", sessionID);
             cmd.Parameters.AddWithValue("@GeneratedDDL", (object)generatedDDL ?? DBNull.Value);
             cmd.Parameters.AddWithValue("@TargetType", (object)targetType ?? DBNull.Value);
@@ -101,7 +101,7 @@ namespace DBADashGUI.XETrace
             byte[] xelData, string errorMessage)
         {
             await using var cn = new SqlConnection(Common.ConnectionString);
-            await using var cmd = new SqlCommand("dbo.XETraceSession_Upd", cn) { CommandType = CommandType.StoredProcedure };
+            await using var cmd = new SqlCommand("XE.XETraceSession_Upd", cn) { CommandType = CommandType.StoredProcedure };
             cmd.Parameters.AddWithValue("@XETraceSessionID", sessionID);
             cmd.Parameters.AddWithValue("@Status", status);
             cmd.Parameters.AddWithValue("@TargetType", (object)targetType ?? DBNull.Value);
@@ -117,7 +117,7 @@ namespace DBADashGUI.XETrace
         public static async Task CancelRunningAsync(int instanceID)
         {
             await using var cn = new SqlConnection(Common.ConnectionString);
-            await using var cmd = new SqlCommand("dbo.XETraceSession_CancelRunning", cn) { CommandType = CommandType.StoredProcedure };
+            await using var cmd = new SqlCommand("XE.XETraceSession_CancelRunning", cn) { CommandType = CommandType.StoredProcedure };
             cmd.Parameters.AddWithValue("@InstanceID", instanceID);
             await cn.OpenAsync();
             await cmd.ExecuteNonQueryAsync();
@@ -136,7 +136,7 @@ namespace DBADashGUI.XETrace
 
         /// <summary>
         /// Soft-deletes several traces (the report's bulk "Delete Selected" / "Delete All" actions) over a single
-        /// connection.  Each is deleted independently via <c>dbo.XETraceSession_Del</c>.
+        /// connection.  Each is deleted independently via <c>XE.XETraceSession_Del</c>.
         /// </summary>
         public static async Task DeleteManyAsync(IEnumerable<long> sessionIDs)
         {
@@ -154,20 +154,20 @@ namespace DBADashGUI.XETrace
         /// DeletedBy audit value are enforced/captured server-side (SUSER_SNAME()), so no identity is passed.</summary>
         private static async Task DeleteCoreAsync(SqlConnection cn, long sessionID)
         {
-            await using var cmd = new SqlCommand("dbo.XETraceSession_Del", cn) { CommandType = CommandType.StoredProcedure };
+            await using var cmd = new SqlCommand("XE.XETraceSession_Del", cn) { CommandType = CommandType.StoredProcedure };
             cmd.Parameters.AddWithValue("@XETraceSessionID", sessionID);
             await cmd.ExecuteNonQueryAsync();
         }
 
         /// <summary>
         /// Sets/updates the free-text note on a persisted trace (Trace History report's editable Notes link).  A blank
-        /// note is stored as NULL.  Ownership is enforced server-side (<c>dbo.XETraceSession_Notes_Upd</c> rejects editing
+        /// note is stored as NULL.  Ownership is enforced server-side (<c>XE.XETraceSession_Notes_Upd</c> rejects editing
         /// another user's trace unless the caller is db_owner), matching the delete link.
         /// </summary>
         public static async Task UpdateNotesAsync(long sessionID, string notes)
         {
             await using var cn = new SqlConnection(Common.ConnectionString);
-            await using var cmd = new SqlCommand("dbo.XETraceSession_Notes_Upd", cn) { CommandType = CommandType.StoredProcedure };
+            await using var cmd = new SqlCommand("XE.XETraceSession_Notes_Upd", cn) { CommandType = CommandType.StoredProcedure };
             cmd.Parameters.AddWithValue("@XETraceSessionID", sessionID);
             cmd.Parameters.AddWithValue("@Notes", (object)notes ?? DBNull.Value);
             await cn.OpenAsync();
@@ -175,7 +175,7 @@ namespace DBADashGUI.XETrace
         }
 
         public static Task<DataTable> GetRunningAsync(IEnumerable<int> instanceIDs) =>
-            FillAsync("dbo.XETraceSession_GetRunning", cmd =>
+            FillAsync("XE.XETraceSession_GetRunning", cmd =>
                 cmd.Parameters.AddWithValue("@InstanceIDs", instanceIDs.AsDataTable()));
 
         /// <summary>
@@ -192,26 +192,26 @@ namespace DBADashGUI.XETrace
         /// is the Trace History report.
         /// </summary>
         public static Task<DataTable> GetHistoryAsync(IEnumerable<int> instanceIDs, int days) =>
-            FillAsync("dbo.XETraceSession_Get", cmd =>
+            FillAsync("XE.XETraceSession_Get", cmd =>
             {
                 cmd.Parameters.AddWithValue("@InstanceIDs", instanceIDs.AsDataTable());
                 cmd.Parameters.AddWithValue("@Days", days);
             });
 
         public static Task<DataTable> GetEventsAsync(long sessionID) =>
-            FillAsync("dbo.XETraceEvents_Get", cmd => cmd.Parameters.AddWithValue("@XETraceSessionID", sessionID));
+            FillAsync("XE.XETraceEvents_Get", cmd => cmd.Parameters.AddWithValue("@XETraceSessionID", sessionID));
 
         /// <summary>
         /// Returns the merged events of every per-instance session of a multi-instance run (each event's source
         /// instance is carried inside its Fields JSON), in time order.  Used to reload an AG-wide trace as one grid.
         /// </summary>
         public static Task<DataTable> GetEventsByRunGroupAsync(Guid runGroupID) =>
-            FillAsync("dbo.XETraceEvents_GetByRunGroup", cmd => cmd.Parameters.AddWithValue("@RunGroupID", runGroupID));
+            FillAsync("XE.XETraceEvents_GetByRunGroup", cmd => cmd.Parameters.AddWithValue("@RunGroupID", runGroupID));
 
         public static async Task<byte[]> GetXelAsync(long sessionID)
         {
             await using var cn = new SqlConnection(Common.ConnectionString);
-            await using var cmd = new SqlCommand("dbo.XETraceSession_GetXel", cn) { CommandType = CommandType.StoredProcedure };
+            await using var cmd = new SqlCommand("XE.XETraceSession_GetXel", cn) { CommandType = CommandType.StoredProcedure };
             cmd.Parameters.AddWithValue("@XETraceSessionID", sessionID);
             await cn.OpenAsync();
             var result = await cmd.ExecuteScalarAsync();

@@ -1,14 +1,14 @@
-CREATE PROC dbo.XETraceSession_AddEvents(
+CREATE PROC XE.XETraceSession_AddEvents(
     @XETraceSessionID BIGINT,
-    @Events dbo.XETraceEvents READONLY
+    @Events XE.XETraceEvents READONLY
 )
 AS
 SET NOCOUNT ON
 
-INSERT INTO dbo.XETraceEvent(XETraceSessionID, event_type, timestamp, Fields)
+INSERT INTO XE.XETraceEvent(XETraceSessionID, event_type, timestamp, Fields)
 SELECT @XETraceSessionID, event_type, timestamp, Fields
 FROM @Events
 
-UPDATE dbo.XETraceSession
+UPDATE XE.XETraceSession
     SET TotalEvents = TotalEvents + (SELECT COUNT(*) FROM @Events)
 WHERE XETraceSessionID = @XETraceSessionID

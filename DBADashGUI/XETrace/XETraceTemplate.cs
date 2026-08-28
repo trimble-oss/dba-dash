@@ -64,7 +64,7 @@ namespace DBADashGUI.XETrace
         public string PromptText { get; set; }
     }
 
-    /// <summary>Reads / writes <see cref="XETraceTemplate"/> rows via the DBADash.XETraceTemplate_* procs.</summary>
+    /// <summary>Reads / writes <see cref="XETraceTemplate"/> rows via the XE.XETraceTemplate_* procs.</summary>
     internal static class XETraceTemplateStore
     {
         /// <summary>Loads the templates for a user (pass <see cref="DBADashUser.SystemUserID"/> for the global set).</summary>
@@ -72,7 +72,7 @@ namespace DBADashGUI.XETrace
         {
             var result = new List<XETraceTemplate>();
             using var cn = new SqlConnection(Common.ConnectionString);
-            using var cmd = new SqlCommand("DBADash.XETraceTemplate_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var cmd = new SqlCommand("XE.XETraceTemplate_Get", cn) { CommandType = CommandType.StoredProcedure };
             cn.Open();
             cmd.Parameters.AddWithValue("UserID", userID);
             using var rdr = cmd.ExecuteReader();
@@ -98,7 +98,7 @@ namespace DBADashGUI.XETrace
         {
             GuardGlobal(userID);
             using var cn = new SqlConnection(Common.ConnectionString);
-            using var cmd = new SqlCommand("DBADash.XETraceTemplate_Upd", cn) { CommandType = CommandType.StoredProcedure };
+            using var cmd = new SqlCommand("XE.XETraceTemplate_Upd", cn) { CommandType = CommandType.StoredProcedure };
             cn.Open();
             cmd.Parameters.AddWithValue("UserID", userID);
             cmd.Parameters.AddWithValue("Name", template.Name);
@@ -110,7 +110,7 @@ namespace DBADashGUI.XETrace
         {
             GuardGlobal(userID);
             using var cn = new SqlConnection(Common.ConnectionString);
-            using var cmd = new SqlCommand("DBADash.XETraceTemplate_Del", cn) { CommandType = CommandType.StoredProcedure };
+            using var cmd = new SqlCommand("XE.XETraceTemplate_Del", cn) { CommandType = CommandType.StoredProcedure };
             cn.Open();
             cmd.Parameters.AddWithValue("UserID", userID);
             cmd.Parameters.AddWithValue("Name", name);

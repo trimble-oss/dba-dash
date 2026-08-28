@@ -16,7 +16,7 @@ namespace DBADashGUI.XETrace
     /// </summary>
     internal static class XETraceController
     {
-        // dbo.XETraceSession.Status values.
+        // XE.XETraceSession.Status values.
         private const byte StatusCompleted = 1;
         private const byte StatusCancelled = 2;
         private const byte StatusError = 3;

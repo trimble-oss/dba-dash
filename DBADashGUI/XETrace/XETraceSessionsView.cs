@@ -7,7 +7,7 @@ using System.Windows.Forms;
 namespace DBADashGUI.XETrace
 {
     /// <summary>
-    /// "Trace History" system report - lists persisted ad-hoc XE trace sessions (<c>dbo.XETraceSession</c>) for the
+    /// "Trace History" system report - lists persisted ad-hoc XE trace sessions (<c>XE.XETraceSession</c>) for the
     /// instances in context, with per-row links to view the generated DDL, view the captured data and delete the
     /// trace.  Requires the AdhocXE role (<see cref="CustomReport.ReportVisibilityRole"/>).
     ///
@@ -230,7 +230,7 @@ namespace DBADashGUI.XETrace
             Description = "History of ad-hoc Extended Events traces - view the generated DDL, view the captured data, or delete a trace.",
             SchemaName = "dbo",
             ProcedureName = "XETraceSessionReport_Get",
-            QualifiedProcedureName = "dbo.XETraceSessionReport_Get",
+            QualifiedProcedureName = "XE.XETraceSessionReport_Get",
             ReportVisibilityRole = "AdhocXE",
             CanEditReport = false,
             // @AllUsers is driven by the requester combo and @Days by a menu-bar picker, so the generic Parameters

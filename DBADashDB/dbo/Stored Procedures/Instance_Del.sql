@@ -528,15 +528,15 @@ BEGIN
 	WHERE InstanceID = @InstanceID
 
 	DELETE E
-	FROM dbo.XETraceEvent E
+	FROM XE.XETraceEvent E
 	WHERE EXISTS(
 				SELECT 1
-				FROM dbo.XETraceSession S
+				FROM XE.XETraceSession S
 				WHERE S.InstanceID = @InstanceID
 				AND S.XETraceSessionID = E.XETraceSessionID
 				)
 
-	DELETE dbo.XETraceSession
+	DELETE XE.XETraceSession
 	WHERE InstanceID = @InstanceID
 
 	IF EXISTS(SELECT 1

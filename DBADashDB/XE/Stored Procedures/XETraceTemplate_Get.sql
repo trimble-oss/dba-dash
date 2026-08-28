@@ -1,9 +1,9 @@
-CREATE PROC DBADash.XETraceTemplate_Get(
+CREATE PROC XE.XETraceTemplate_Get(
 	@UserID INT
 )
 AS
 SELECT	Name,
 		Definition
-FROM DBADash.XETraceTemplate
+FROM XE.XETraceTemplate
 WHERE UserID = @UserID
 ORDER BY Name

@@ -1,16 +1,16 @@
-CREATE PROC DBADash.XETraceTemplate_Upd(
+CREATE PROC XE.XETraceTemplate_Upd(
 	@UserID INT,
 	@Name NVARCHAR(128),
 	@Definition NVARCHAR(MAX)
 )
 AS
 IF EXISTS(	SELECT 1
-			FROM DBADash.XETraceTemplate
+			FROM XE.XETraceTemplate
 			WHERE UserID = @UserID
 			AND Name = @Name
 		)
 BEGIN
-	UPDATE DBADash.XETraceTemplate
+	UPDATE XE.XETraceTemplate
 		SET Definition = @Definition,
 			ModifiedDate = SYSUTCDATETIME()
 	WHERE UserID = @UserID
@@ -18,7 +18,7 @@ BEGIN
 END
 ELSE
 BEGIN
-	INSERT INTO DBADash.XETraceTemplate(
+	INSERT INTO XE.XETraceTemplate(
 			UserID,
 			Name,
 			Definition

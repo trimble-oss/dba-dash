@@ -16,7 +16,11 @@ GRANT SELECT ON SCHEMA::Alert TO App;
 GRANT SELECT ON SCHEMA::Alert TO AppReadOnly
 GRANT EXECUTE ON SCHEMA::AI TO AIService;
 GRANT EXECUTE ON OBJECT::AI.ServiceConfig_Get TO AIUser;
-GRANT EXEC ON TYPE::[dbo].[XETraceEvents] TO [AdhocXE]
+/* Ad-hoc XE lives in its own schema so the captured event/session tables aren't exposed by the broad
+   GRANT SELECT ON SCHEMA::dbo TO App.  AdhocXE members get EXECUTE on the XE procs only (no SELECT on the
+   underlying tables); the procs reach those tables via ownership chaining (XE and dbo are both owned by dbo).
+   EXECUTE on the schema also covers the XETraceEvents table type used by XETraceSession_AddEvents. */
+GRANT EXECUTE ON SCHEMA::XE TO [AdhocXE]
 
 DECLARE @ProductMajorVersion INT = TRY_CAST(SERVERPROPERTY('ProductMajorVersion') AS INT);
 IF ISNULL(@ProductMajorVersion, 0) >= 16
@@ -52,12 +56,6 @@ WITH Grants AS (
 		FROM sys.objects
 		WHERE type = 'IF'
 		AND SCHEMA_NAME(schema_id) = 'dbo'
-		UNION ALL
-		SELECT CONCAT('GRANT EXECUTE ON ',QUOTENAME(SCHEMA_NAME(schema_id)),'.',QUOTENAME(name),' TO [AdhocXE]')
-		FROM sys.objects
-		WHERE type = 'P'
-		AND SCHEMA_NAME(schema_id) = 'dbo'
-		AND name LIKE 'XETrace%'
 )
 SELECT @GrantAppReadOnlySQL =
 	(SELECT '
@@ -1224,8 +1222,8 @@ FROM (VALUES('dbo','ObjectExecutionStats',120),
 				('dbo','RunningQueriesCursors',30),
 				('dbo','ResourceGovernorWorkloadGroupsMetrics',90),
 				('dbo','ResourceGovernorResourcePoolsMetrics',90),
-				('dbo','XETraceSession',30),
-				('dbo','XETraceEvent',30)
+				('XE','XETraceSession',30),
+				('XE','XETraceEvent',30)
 				) AS t(SchemaName,TableName,RetentionDays)
 WHERE NOT EXISTS(SELECT 1
 				FROM dbo.DataRetention DR

@@ -1,4 +1,4 @@
-CREATE TABLE dbo.XETraceEvent(
+CREATE TABLE XE.XETraceEvent(
     XETraceEventID BIGINT IDENTITY(1,1) NOT NULL,
     XETraceSessionID BIGINT NOT NULL,
     event_type sysname NOT NULL,
@@ -11,5 +11,5 @@ CREATE TABLE dbo.XETraceEvent(
     CONSTRAINT PK_XETraceEvent PRIMARY KEY CLUSTERED (XETraceSessionID ASC, XETraceEventID ASC, timestamp ASC)
         WITH (DATA_COMPRESSION = PAGE) ON [PS_XETraceEvent] (timestamp),
     CONSTRAINT FK_XETraceEvent_XETraceSession FOREIGN KEY (XETraceSessionID)
-        REFERENCES dbo.XETraceSession (XETraceSessionID)
+        REFERENCES XE.XETraceSession (XETraceSessionID)
 ) ON [PS_XETraceEvent] (timestamp);

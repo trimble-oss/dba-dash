@@ -1,4 +1,4 @@
-CREATE PROC dbo.XETraceSessionReport_Get(
+CREATE PROC XE.XETraceSessionReport_Get(
     @InstanceIDs IDs READONLY,
     @Days INT = 7,
     @AllUsers BIT = 0, /* 1 = show all users' traces (admin-only "All users" toggle); 0 = only the caller's own */
@@ -27,7 +27,7 @@ SELECT  S.XETraceSessionID,
            was part of an AG-wide / multi-instance trace and which replicas participated.  NULL for a single run. */
         CASE WHEN S.RunGroupID IS NULL THEN NULL
              ELSE STUFF((SELECT ', ' + I2.InstanceGroupName
-                         FROM dbo.XETraceSession S2
+                         FROM XE.XETraceSession S2
                          JOIN dbo.Instances I2 ON S2.InstanceID = I2.InstanceID
                          WHERE S2.RunGroupID = S.RunGroupID
                          AND (@IncludeDeleted = 1 OR S2.DeletedDate IS NULL) /* match the row visibility of the outer query */
@@ -67,7 +67,7 @@ SELECT  S.XETraceSessionID,
         ISNULL(S.GeneratedDDL, '-- No DDL was recorded for this trace.') AS GeneratedDDL,
         /* Link text for the .xel download - only rows that captured a file get a clickable link (NULL renders blank). */
         CASE WHEN S.XelData IS NULL THEN NULL ELSE 'Download .xel' END AS Xel
-FROM dbo.XETraceSession S
+FROM XE.XETraceSession S
 JOIN dbo.Instances I ON S.InstanceID = I.InstanceID
 WHERE EXISTS(SELECT 1 FROM @InstanceIDs T WHERE T.ID = S.InstanceID)
 AND S.StartTime >= DATEADD(DAY, -@Days, SYSUTCDATETIME())

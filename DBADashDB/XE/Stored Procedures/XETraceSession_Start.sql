@@ -1,4 +1,4 @@
-CREATE PROC dbo.XETraceSession_Start(
+CREATE PROC XE.XETraceSession_Start(
     @InstanceID INT,
     @MessageGroupID UNIQUEIDENTIFIER,
     @EventTypes VARCHAR(MAX),
@@ -16,7 +16,7 @@ SET NOCOUNT ON
 
 /* Free any stale Running rows for this instance (a trace whose service stopped without completing) so a genuine
    new trace isn't blocked by the one-running-per-instance unique index.  Grace = duration + 5 min for cleanup. */
-UPDATE dbo.XETraceSession
+UPDATE XE.XETraceSession
     SET Status = 3,
         EndTime = SYSUTCDATETIME(),
         ErrorMessage = ISNULL(ErrorMessage, 'Trace did not complete (service stopped or superseded).')
@@ -27,7 +27,7 @@ AND StartTime < DATEADD(SECOND, -(MaxDurationSeconds + 300), GETUTCDATE())
 BEGIN TRY
     /* RequestedBy is captured here from the connected login (SUSER_SNAME()) - the authoritative, non-forgeable owner
        used by the delete/history authorization checks - rather than trusting a value from the caller. */
-    INSERT INTO dbo.XETraceSession(InstanceID, MessageGroupID, RequestedBy, EventTypes, MaxDurationSeconds,
+    INSERT INTO XE.XETraceSession(InstanceID, MessageGroupID, RequestedBy, EventTypes, MaxDurationSeconds,
         FiltersJson, RunGroupID, Notes, Status)
     VALUES(@InstanceID, @MessageGroupID, SUSER_SNAME(), @EventTypes, @MaxDurationSeconds, @FiltersJson, @RunGroupID,
         NULLIF(LTRIM(RTRIM(@Notes)), N''), 0)

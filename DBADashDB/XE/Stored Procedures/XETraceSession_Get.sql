@@ -1,4 +1,4 @@
-CREATE PROC dbo.XETraceSession_Get(
+CREATE PROC XE.XETraceSession_Get(
     @InstanceIDs IDs READONLY,
     @Days INT = 7
 )
@@ -23,7 +23,7 @@ SELECT  S.XETraceSessionID,
         S.RunGroupID,
         S.ErrorMessage,
         CAST(CASE WHEN S.XelData IS NULL THEN 0 ELSE 1 END AS BIT) AS HasXel
-FROM dbo.XETraceSession S
+FROM XE.XETraceSession S
 JOIN dbo.Instances I ON S.InstanceID = I.InstanceID
 WHERE EXISTS(SELECT 1 FROM @InstanceIDs T WHERE T.ID = S.InstanceID)
 AND S.StartTime >= DATEADD(DAY, -@Days, SYSUTCDATETIME())
