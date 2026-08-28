@@ -1,4 +1,4 @@
-CREATE PROC dbo.XETraceSession_Upd(
+CREATE PROC XE.XETraceSession_Upd(
     @XETraceSessionID BIGINT,
     @Status TINYINT = NULL, /* NULL = definition-only update (trace still running); else terminal: 1 Completed, 2 Cancelled, 3 Error */
     @TargetType TINYINT = NULL, /* resolved target echoed back by the service (1 event_file, 2 ring_buffer) */
@@ -18,7 +18,7 @@ SET NOCOUNT ON
    XETraceSession_CancelRunning during a Stop/cleanup) can't overwrite that terminal status or its EndTime/ErrorMessage.
    The audit values (TargetType / GeneratedDDL / XelData) are set-once and only known now, so they're backfilled
    regardless of status; COALESCE keeps any value already present. */
-UPDATE dbo.XETraceSession
+UPDATE XE.XETraceSession
     SET Status = CASE WHEN Status = 0 AND @Status IS NOT NULL THEN @Status ELSE Status END,
         EndTime = CASE WHEN Status = 0 AND @Status IS NOT NULL THEN SYSUTCDATETIME() ELSE EndTime END,
         ErrorMessage = CASE WHEN Status = 0 AND @Status IS NOT NULL THEN COALESCE(@ErrorMessage, ErrorMessage) ELSE ErrorMessage END,

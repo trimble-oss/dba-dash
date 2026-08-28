@@ -1,8 +1,8 @@
-CREATE PROC DBADash.XETraceTemplate_Del(
+CREATE PROC XE.XETraceTemplate_Del(
 	@UserID INT,
 	@Name NVARCHAR(128)
 )
 AS
-DELETE DBADash.XETraceTemplate
+DELETE XE.XETraceTemplate
 WHERE UserID = @UserID
 AND Name = @Name

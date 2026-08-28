@@ -7,11 +7,11 @@ SET NOCOUNT ON
 DECLARE @RetentionDays INT
 SELECT @RetentionDays = ISNULL((SELECT RetentionDays
                                 FROM dbo.DataRetention
-                                WHERE TableName = 'XETraceSession' AND SchemaName = 'dbo'), 30)
+                                WHERE TableName = 'XETraceSession' AND SchemaName = 'XE'), 30)
 
 /* Backstop for stale Running rows (service stopped without completing) - fail them so they can be purged and no
    longer block new traces.  XETraceSession_Start also does this per-instance at start time. */
-UPDATE dbo.XETraceSession
+UPDATE XE.XETraceSession
     SET Status = 3,
         EndTime = SYSUTCDATETIME(),
         ErrorMessage = ISNULL(ErrorMessage, 'Trace did not complete (service stopped).')
@@ -25,9 +25,9 @@ AND StartTime < DATEADD(SECOND, -(MaxDurationSeconds + 300), GETUTCDATE())
 WHILE (1 = 1)
 BEGIN
     DELETE TOP(@BatchSize) E
-    FROM dbo.XETraceEvent E
+    FROM XE.XETraceEvent E
     WHERE EXISTS(SELECT 1
-                 FROM dbo.XETraceSession S
+                 FROM XE.XETraceSession S
                  WHERE S.XETraceSessionID = E.XETraceSessionID
                  AND S.Status <> 0 /* never a running trace */
                  AND ISNULL(S.EndTime, S.StartTime) < DATEADD(DAY, -@RetentionDays, GETUTCDATE()))
@@ -39,12 +39,12 @@ END
 WHILE (1 = 1)
 BEGIN
     DELETE TOP(@BatchSize)
-    FROM dbo.XETraceSession
+    FROM XE.XETraceSession
     WHERE Status <> 0 /* never a running trace */
     AND ISNULL(EndTime, StartTime) < DATEADD(DAY, -@RetentionDays, GETUTCDATE())
     AND NOT EXISTS(SELECT 1
-                   FROM dbo.XETraceEvent E
-                   WHERE E.XETraceSessionID = dbo.XETraceSession.XETraceSessionID)
+                   FROM XE.XETraceEvent E
+                   WHERE E.XETraceSessionID = XE.XETraceSession.XETraceSessionID)
 
     IF @@ROWCOUNT = 0
         BREAK

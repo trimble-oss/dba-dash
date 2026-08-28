@@ -1,4 +1,4 @@
-CREATE TABLE dbo.XETraceSession(
+CREATE TABLE XE.XETraceSession(
     XETraceSessionID BIGINT IDENTITY(1,1) NOT NULL CONSTRAINT PK_XETraceSession PRIMARY KEY,
     InstanceID INT NOT NULL,
     MessageGroupID UNIQUEIDENTIFIER NOT NULL, /* = the message Id, used to correlate a cancellation request */
@@ -28,12 +28,12 @@ CREATE TABLE dbo.XETraceSession(
 GO
 /* Enforce one running (Status = 0) trace per instance.  Second guard behind the source-instance session check. */
 CREATE UNIQUE INDEX UQ_XETraceSession_OneRunningPerInstance
-    ON dbo.XETraceSession(InstanceID) WHERE Status = 0;
+    ON XE.XETraceSession(InstanceID) WHERE Status = 0;
 GO
 CREATE NONCLUSTERED INDEX IX_XETraceSession_InstanceID_StartTime
-    ON dbo.XETraceSession(InstanceID, StartTime DESC)
+    ON XE.XETraceSession(InstanceID, StartTime DESC)
 GO
 /* Reload every per-instance session of a multi-instance run together (history grouping). */
 CREATE NONCLUSTERED INDEX IX_XETraceSession_RunGroupID
-    ON dbo.XETraceSession(RunGroupID) WHERE RunGroupID IS NOT NULL
+    ON XE.XETraceSession(RunGroupID) WHERE RunGroupID IS NOT NULL
 GO

@@ -1,4 +1,4 @@
-CREATE PROC dbo.XETraceSession_GetRunning(
+CREATE PROC XE.XETraceSession_GetRunning(
     @InstanceIDs IDs READONLY
 )
 AS
@@ -13,7 +13,7 @@ SELECT  S.XETraceSessionID,
         S.MaxDurationSeconds,
         S.TotalEvents,
         S.MessageGroupID
-FROM dbo.XETraceSession S
+FROM XE.XETraceSession S
 JOIN dbo.Instances I ON S.InstanceID = I.InstanceID
 WHERE S.Status = 0
 AND EXISTS(SELECT 1 FROM @InstanceIDs T WHERE T.ID = S.InstanceID)

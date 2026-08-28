@@ -1,4 +1,4 @@
-CREATE PROC dbo.XETraceSession_Del(
+CREATE PROC XE.XETraceSession_Del(
     @XETraceSessionID BIGINT
 )
 AS
@@ -17,7 +17,7 @@ SET XACT_ABORT ON;
 
 /* Non-admins may only delete traces started under their own login (RequestedBy, captured server-side at start). */
 IF IS_ROLEMEMBER('db_owner') = 0
-    AND NOT EXISTS(SELECT 1 FROM dbo.XETraceSession
+    AND NOT EXISTS(SELECT 1 FROM XE.XETraceSession
                    WHERE XETraceSessionID = @XETraceSessionID
                    AND RequestedBy = SUSER_SNAME())
 BEGIN
@@ -29,13 +29,13 @@ END
    (data intact, not flagged deleted). */
 BEGIN TRAN;
 
-/* Remove the captured event data (there is no FK cascade from XETraceEvent - see dbo.XETraceEvent). */
-DELETE FROM dbo.XETraceEvent
+/* Remove the captured event data (there is no FK cascade from XETraceEvent - see XE.XETraceEvent). */
+DELETE FROM XE.XETraceEvent
 WHERE XETraceSessionID = @XETraceSessionID;
 
 /* Retain the session row for audit, but clear the captured .xel and record the deletion.  TotalEvents is left intact
    on purpose - it's useful to know a deleted trace had captured e.g. 1M rows. */
-UPDATE dbo.XETraceSession
+UPDATE XE.XETraceSession
     SET XelData = NULL,
         DeletedDate = SYSUTCDATETIME(),
         DeletedBy = SUSER_SNAME()

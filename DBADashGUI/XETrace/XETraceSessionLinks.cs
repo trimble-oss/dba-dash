@@ -8,12 +8,12 @@ namespace DBADashGUI.XETrace
     /// Editable "Notes" link for the Trace History report: prompts for the row's free-text note (e.g. "Capture for
     /// issue #1234"), saves it, and refreshes the report.  The cell shows <c>NotesDisplay</c> (the note, or a prompt
     /// to add one) while the raw value being edited comes from the hidden <c>Notes</c> column.  Ownership is enforced
-    /// server-side (<c>dbo.XETraceSession_Notes_Upd</c> rejects editing another user's trace unless the caller is
+    /// server-side (<c>XE.XETraceSession_Notes_Upd</c> rejects editing another user's trace unless the caller is
     /// db_owner); the client also only ever shows non-admins their own sessions, so a visible row is safe here.
     /// </summary>
     internal class XETraceEditNotesLinkColumnInfo : LinkColumnInfo
     {
-        private const int MaxNotesLength = 1000; // matches dbo.XETraceSession.Notes NVARCHAR(1000)
+        private const int MaxNotesLength = 1000; // matches XE.XETraceSession.Notes NVARCHAR(1000)
 
         public string SessionIdColumn { get; set; } = "XETraceSessionID";
         public string NotesColumn { get; set; } = "Notes";
@@ -139,7 +139,7 @@ namespace DBADashGUI.XETrace
     /// <summary>
     /// "Delete" link for the Trace History report: soft-deletes the row's trace (after confirmation) - the captured
     /// events and .xel are removed but the session record is retained for audit - then refreshes the report.  Ownership
-    /// is enforced server-side (<c>dbo.XETraceSession_Del</c> rejects deleting another user's trace unless the caller is
+    /// is enforced server-side (<c>XE.XETraceSession_Del</c> rejects deleting another user's trace unless the caller is
     /// db_owner); the client also only ever shows non-admins their own sessions, so a visible row is always safe here.
     /// </summary>
     internal class XETraceDeleteLinkColumnInfo : LinkColumnInfo
