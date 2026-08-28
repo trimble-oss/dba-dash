@@ -145,7 +145,7 @@ namespace DBADashGUI
                         });
                         // Extended Events is database-scoped for Azure SQL DB, so the node hangs off the individual
                         // database rather than the (logical) Azure instance.  Same gating as regular instances.
-                        if (azureDBNode.Context.CanMessage && (DBADashUser.AllowManageXE || DBADashUser.AllowWatchXE || DBADashUser.AllowAdhocXE))
+                        if (azureDBNode.Context.IsXESupported && azureDBNode.Context.CanMessage && (DBADashUser.AllowManageXE || DBADashUser.AllowWatchXE || DBADashUser.AllowAdhocXE))
                         {
                             azureDBNode.Nodes.Add(new SQLTreeItem("Extended Events", SQLTreeItem.TreeType.ExtendedEvents)
                             { InstanceID = azureDBNode.InstanceID });
@@ -1139,7 +1139,7 @@ namespace DBADashGUI
             // Requires messaging and at least one XE permission - ManageXE users can start/stop existing sessions,
             // WatchXE users get read-only access (watching/viewing), AdhocXE users can launch an ad-hoc trace.  The
             // per-capability gating is applied inside the viewer.
-            if (instanceNode.Context.CanMessage && (DBADashUser.AllowManageXE || DBADashUser.AllowWatchXE || DBADashUser.AllowAdhocXE))
+            if (instanceNode.Context.IsXESupported && instanceNode.Context.CanMessage && (DBADashUser.AllowManageXE || DBADashUser.AllowWatchXE || DBADashUser.AllowAdhocXE))
             {
                 nodesToAdd.Add(new SQLTreeItem("Extended Events", SQLTreeItem.TreeType.ExtendedEvents)
                 { InstanceID = instanceNode.InstanceID });
