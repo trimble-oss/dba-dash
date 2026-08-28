@@ -24,6 +24,7 @@ namespace DBADashGUI.XETrace
             InitializeComponent();
 
             _refreshButton.Click += async (_, _) => await LoadSessionsAsync();
+            _openFileButton.Click += (_, _) => XETraceLauncher.LaunchFileViewer(this);
             _adhocButton.Click += (_, _) => XETraceLauncher.LaunchAdhocTrace(this, _context);
 
             this.ApplyTheme();

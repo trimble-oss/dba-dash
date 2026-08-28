@@ -30,6 +30,7 @@ namespace DBADashGUI.XETrace
         {
             _toolbar = new System.Windows.Forms.ToolStrip();
             _refreshButton = new System.Windows.Forms.ToolStripButton();
+            _openFileButton = new System.Windows.Forms.ToolStripButton();
             _adhocButton = new System.Windows.Forms.ToolStripButton();
             _list = new System.Windows.Forms.FlowLayoutPanel();
             _statusStrip = new System.Windows.Forms.StatusStrip();
@@ -42,7 +43,7 @@ namespace DBADashGUI.XETrace
             // 
             _toolbar.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
             _toolbar.ImageScalingSize = new System.Drawing.Size(20, 20);
-            _toolbar.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { _refreshButton, _adhocButton });
+            _toolbar.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { _refreshButton, _openFileButton, _adhocButton });
             _toolbar.Location = new System.Drawing.Point(0, 0);
             _toolbar.Name = "_toolbar";
             _toolbar.Size = new System.Drawing.Size(1263, 27);
@@ -54,7 +55,15 @@ namespace DBADashGUI.XETrace
             _refreshButton.Name = "_refreshButton";
             _refreshButton.Size = new System.Drawing.Size(82, 24);
             _refreshButton.Text = "Refresh";
-            // 
+            //
+            // _openFileButton
+            //
+            _openFileButton.Image = Properties.Resources.FolderOpened_16x;
+            _openFileButton.Name = "_openFileButton";
+            _openFileButton.Size = new System.Drawing.Size(82, 24);
+            _openFileButton.Text = "Open File...";
+            _openFileButton.ToolTipText = "Open a saved .xel file, or a DBA Dash JSON/XML trace file, in a viewer.";
+            //
             // _adhocButton
             // 
             _adhocButton.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
@@ -109,6 +118,7 @@ namespace DBADashGUI.XETrace
 
         private System.Windows.Forms.ToolStrip _toolbar;
         private System.Windows.Forms.ToolStripButton _refreshButton;
+        private System.Windows.Forms.ToolStripButton _openFileButton;
         private System.Windows.Forms.ToolStripButton _adhocButton;
         private System.Windows.Forms.FlowLayoutPanel _list;
         private System.Windows.Forms.StatusStrip _statusStrip;
