@@ -8,6 +8,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -56,6 +57,27 @@ namespace DBADashGUI.CustomReports
 
         private ToolStripMenuItem GetExportToExcelMenuItem() => new("Export Excel", Properties.Resources.excel16x16,
             (_, _) => ExportToExcel());
+
+        private ToolStripMenuItem GetExportToFileMenuItem()
+        {
+            var menuItem = new ToolStripMenuItem("Export File", Properties.Resources.Save_16x)
+            { ToolTipText = "Save the grid data to a JSON or XML file that can be re-opened" };
+            menuItem.DropDownItems.AddRange(new ToolStripItem[]
+            {
+                // Re-loadable data formats (round-trip back into a grid via the XE file viewer).
+                new ToolStripMenuItem("As JSON", Properties.Resources.JsonFile, (_, _) => ExportToFile(GridSerializer.JsonExtension)),
+                new ToolStripMenuItem("As Compressed JSON", Properties.Resources.zippedFile, (_, _) => ExportToFile(GridSerializer.CompressedJsonExtension)),
+                new ToolStripMenuItem("As XML", Properties.Resources.XmlFile, (_, _) => ExportToFile(GridSerializer.XmlExtension)),
+                new ToolStripMenuItem("As Compressed XML", Properties.Resources.zippedFile, (_, _) => ExportToFile(GridSerializer.CompressedXmlExtension)),
+                new ToolStripSeparator(),
+                // Presentational formats (export only - the same content the Copy / Script actions produce).
+                new ToolStripMenuItem("As SQL (INSERT)", Properties.Resources.SQLScript_16x,
+                    (_, _) => ExportTextToFile(() => ScriptTable(false, true, "#DBADashGrid"), ".sql", "SQL script")),
+                new ToolStripMenuItem("As Markdown", Properties.Resources.MarkdownFile,
+                    (_, _) => ExportTextToFile(() => ConvertToMarkdown(true), ".md", "Markdown"))
+            });
+            return menuItem;
+        }
 
         private ToolStripMenuItem GetCopyAsMarkdownMenuItem()
         {
@@ -231,6 +253,7 @@ namespace DBADashGUI.CustomReports
                 {
                     copy,
                     GetExportToExcelMenuItem(),
+                    GetExportToFileMenuItem(),
                     saveTable,
                     new ToolStripSeparator(),
                     GetColumnsMenuItem(),
@@ -338,6 +361,7 @@ namespace DBADashGUI.CustomReports
                 {
                     copy,
                     GetExportToExcelMenuItem(),
+                    GetExportToFileMenuItem(),
                     saveTable,
                     new ToolStripSeparator(),
                     transpose,
@@ -1275,6 +1299,77 @@ namespace DBADashGUI.CustomReports
                 return;
             }
             Common.PromptSaveDataGridView(this);
+        }
+
+        /// <summary>
+        /// Guards an export action: shows a warning and returns false when the grid has no visible columns to export.
+        /// </summary>
+        private bool HasExportableColumns()
+        {
+            if (Columns.Cast<DataGridViewColumn>().Any(c => c.Visible)) return true;
+            MessageBox.Show("No data to export", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return false;
+        }
+
+        /// <summary>
+        /// The default file name for an export, based on <see cref="ResultSetName"/> with invalid file-name characters
+        /// replaced by underscores and a timestamp suffix to keep successive exports unique.
+        /// </summary>
+        private string GetExportDefaultFileName()
+        {
+            var defaultName = string.IsNullOrEmpty(ResultSetName) ? "GridExport" : ResultSetName;
+            foreach (var c in Path.GetInvalidFileNameChars()) defaultName = defaultName.Replace(c, '_');
+            return $"{defaultName}_{DateTime.Now:yyyyMMddHHmmss}";
+        }
+
+        /// <summary>
+        /// Exports the grid's underlying data to a DBA Dash-native file (JSON or XML) via <see cref="GridSerializer"/>.
+        /// The XML form preserves column types (loss-less); the JSON form is compact and human-readable.  Files can be
+        /// re-opened with the XE trace file viewer.
+        /// </summary>
+        private void ExportToFile(string extension)
+        {
+            if (!HasExportableColumns()) return;
+            using var dlg = new SaveFileDialog
+            {
+                Filter = GridSerializer.SaveFilter,
+                FilterIndex = GridSerializer.SaveFilterIndex(extension),
+                FileName = GetExportDefaultFileName() + extension
+            };
+            if (dlg.ShowDialog() != DialogResult.OK) return;
+            try
+            {
+                GridSerializer.SaveDataTable(GetDataTableForExport(false), dlg.FileName);
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex, "Error exporting grid");
+            }
+        }
+
+        /// <summary>
+        /// Exports the grid to a text file (e.g. a .sql INSERT script or a .md markdown table) using the same generators
+        /// as the Script / Copy-as-Markdown actions - only the destination differs (a file rather than the code window
+        /// or clipboard).  <paramref name="generate"/> is invoked after the user picks a file so nothing is produced on
+        /// cancel.
+        /// </summary>
+        private void ExportTextToFile(Func<string> generate, string extension, string filterLabel)
+        {
+            if (!HasExportableColumns()) return;
+            using var dlg = new SaveFileDialog
+            {
+                Filter = $"{filterLabel} (*{extension})|*{extension}",
+                FileName = GetExportDefaultFileName() + extension
+            };
+            if (dlg.ShowDialog() != DialogResult.OK) return;
+            try
+            {
+                File.WriteAllText(dlg.FileName, generate());
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex, "Error exporting grid");
+            }
         }
 
         public void CopyGrid()

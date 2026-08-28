@@ -61,6 +61,26 @@ namespace DBADashGUI.XETrace
         }
 
         /// <summary>
+        /// Opens the standalone XE file viewer.  With no <paramref name="path"/> it prompts for a file immediately;
+        /// pass a path to open it directly.  Handles native <c>.xel</c> files and DBA Dash-native JSON/XML saves - it
+        /// needs no monitored instance, so it's available even without an instance context.
+        /// </summary>
+        public static void LaunchFileViewer(IWin32Window owner, string path = null)
+        {
+            var control = new XEFileViewerControl { Dock = DockStyle.Fill };
+            var frm = new Form
+            {
+                Text = "View XE File",
+                Width = 1200,
+                Height = 850,
+                StartPosition = FormStartPosition.CenterParent
+            };
+            frm.Controls.Add(control);
+            frm.Show(owner);
+            _ = control.OpenAsync(path); // after Show so the control has a handle for async UI updates
+        }
+
+        /// <summary>
         /// Opens a read-only viewer over the events already captured for a persisted ad-hoc trace session (or the whole
         /// merged run when <paramref name="runGroupID"/> is set - the same grouping the QuickXETrace history uses).
         /// Backs the Trace History report's "View Data" link.  Loads the stored events through

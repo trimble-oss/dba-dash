@@ -87,6 +87,10 @@ namespace DBADashGUI.XETrace
         /// <summary>Total events currently shown.</summary>
         public int RowCount => _events?.Rows.Count ?? 0;
 
+        /// <summary>The events currently shown (as displayed, i.e. timestamps already in the app time zone), or null.
+        /// Exposed so hosts can save the grid contents to a file.</summary>
+        public DataTable CurrentEvents => _events;
+
         /// <summary>Merges a batch of events (varying schema) into the grid, rebinding when new columns appear.</summary>
         public void AppendEvents(DataTable batch)
         {
@@ -110,12 +114,17 @@ namespace DBADashGUI.XETrace
             }
         }
 
-        /// <summary>Replaces the grid contents with a complete table (e.g. a loaded history).</summary>
-        public void LoadEvents(DataTable events)
+        /// <summary>
+        /// Replaces the grid contents with a complete table (e.g. a loaded history or file).
+        /// <paramref name="convertTimestampToLocal"/> is true when the source holds UTC timestamps (live/history/.xel);
+        /// pass false for a DBA Dash-native file whose timestamps are already in the app time zone, otherwise the
+        /// conversion would be applied a second time and shift them.
+        /// </summary>
+        public void LoadEvents(DataTable events, bool convertTimestampToLocal = true)
         {
             Clear();
             _events = events?.Copy();
-            ConvertTimestampToLocal(_events);
+            if (convertTimestampToLocal) ConvertTimestampToLocal(_events);
             _dgvXE.DataSource = _events?.DefaultView;
         }
 

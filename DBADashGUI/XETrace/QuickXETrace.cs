@@ -44,6 +44,13 @@ namespace DBADashGUI.XETrace
         private readonly List<XEActionDef> _globalActions = new(XETraceDefinition.DefaultGlobalActions);
 
         private readonly XEResultsControl _results = new() { Dock = DockStyle.Fill };
+
+        // Save-events-to-file menu items, added to the tsSave dropdown at runtime (see WireEvents).
+        private ToolStripMenuItem _saveEventsJsonMenuItem;
+        private ToolStripMenuItem _saveEventsJsonGzMenuItem;
+        private ToolStripMenuItem _saveEventsXmlMenuItem;
+        private ToolStripMenuItem _saveEventsXmlGzMenuItem;
+
         private bool _cancelling;
         private bool _isRunning;
 
@@ -313,6 +320,23 @@ namespace DBADashGUI.XETrace
             toolStripButton1.Click += (_, _) => ClearGrid();
             savexelToolStripMenuItem.Click += (_, _) => SaveXel();
             tsHistory.DropDownOpening += async (_, _) => await LoadHistoryMenuAsync();
+
+            // Save the events currently in the grid to a DBA Dash-native file (works for any target, including ring
+            // buffer / Azure SQL DB where no .xel exists).  Inserted just after "Save *.xel".
+            _saveEventsJsonMenuItem = new ToolStripMenuItem("Save Events as JSON...", null,
+                (_, _) => SaveEventsToFile(GridSerializer.JsonExtension));
+            _saveEventsJsonGzMenuItem = new ToolStripMenuItem("Save Events as Compressed JSON...", null,
+                (_, _) => SaveEventsToFile(GridSerializer.CompressedJsonExtension));
+            _saveEventsXmlMenuItem = new ToolStripMenuItem("Save Events as XML...", null,
+                (_, _) => SaveEventsToFile(GridSerializer.XmlExtension));
+            _saveEventsXmlGzMenuItem = new ToolStripMenuItem("Save Events as Compressed XML...", null,
+                (_, _) => SaveEventsToFile(GridSerializer.CompressedXmlExtension));
+            var xelIndex = tsSave.DropDownItems.IndexOf(savexelToolStripMenuItem);
+            tsSave.DropDownItems.Insert(xelIndex + 1, _saveEventsXmlGzMenuItem);
+            tsSave.DropDownItems.Insert(xelIndex + 1, _saveEventsXmlMenuItem);
+            tsSave.DropDownItems.Insert(xelIndex + 1, _saveEventsJsonGzMenuItem);
+            tsSave.DropDownItems.Insert(xelIndex + 1, _saveEventsJsonMenuItem);
+
             // Only offer "Save *.xel" when a .xel was actually captured (needs 'Capture .xel' + an event_file run).
             tsSave.DropDownOpening += (_, _) =>
             {
@@ -321,6 +345,13 @@ namespace DBADashGUI.XETrace
                 savexelToolStripMenuItem.ToolTipText = haveXel
                     ? string.Empty
                     : "No .xel captured. Enable 'Capture .xel' before running the trace.";
+                var haveEvents = _results.RowCount > 0;
+                var noEventsTip = haveEvents ? string.Empty : "No events in the grid to save.";
+                foreach (var item in new[] { _saveEventsJsonMenuItem, _saveEventsJsonGzMenuItem, _saveEventsXmlMenuItem, _saveEventsXmlGzMenuItem })
+                {
+                    item.Enabled = haveEvents;
+                    item.ToolTipText = noEventsTip;
+                }
             };
             saveTemplateToolStripMenuItem.Click += (_, _) => SaveTemplate();
             tsTemplates.DropDownOpening += (_, _) => LoadTemplatesMenu();
@@ -1565,11 +1596,77 @@ namespace DBADashGUI.XETrace
             SetStatus($"Saved .xel to {dlg.FileName}", string.Empty, DashColors.Success);
         }
 
+        /// <summary>
+        /// Saves the events currently in the grid to a DBA Dash-native file (JSON or XML).  Unlike "Save *.xel" this
+        /// works for every target - ring buffer / Azure SQL DB included - since it serializes the shredded grid rather
+        /// than a captured event_file.  Re-open with the XE file viewer.
+        /// </summary>
+        private void SaveEventsToFile(string extension)
+        {
+            var events = _results.CurrentEvents;
+            if (events is not { Rows.Count: > 0 })
+            {
+                SetStatus("No events in the grid to save", string.Empty, DashColors.Warning);
+                return;
+            }
+            using var dlg = new SaveFileDialog
+            {
+                Filter = GridSerializer.SaveFilter,
+                FilterIndex = GridSerializer.SaveFilterIndex(extension),
+                FileName = "DBADashTrace" + extension
+            };
+            if (dlg.ShowDialog(this) != DialogResult.OK) return;
+            try
+            {
+                GridSerializer.SaveDataTable(events, dlg.FileName);
+                SetStatus($"Saved {events.Rows.Count:N0} event(s) to {dlg.FileName}", string.Empty, DashColors.Success);
+            }
+            catch (Exception ex)
+            {
+                SetStatus(ex.Message, ex.ToString(), DashColors.Fail);
+                MessageBox.Show(this, ex.Message, "Save events", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        /// <summary>Loads a .xel or DBA Dash-native (JSON/XML) trace file from disk into the ad-hoc grid.</summary>
+        private async Task OpenTraceFileAsync()
+        {
+            string path;
+            using (var dlg = new OpenFileDialog { Filter = XEFileLoader.OpenFilter })
+            {
+                if (dlg.ShowDialog(this) != DialogResult.OK) return;
+                path = dlg.FileName;
+            }
+            SetStatus($"Loading {Path.GetFileName(path)}...", string.Empty, DashColors.Information);
+            try
+            {
+                var result = await XEFileLoader.LoadAsync(path);
+                // The grid no longer reflects a live capture or a DB history snapshot.
+                _xelData = null;
+                _loadedSnapshot = null;
+                _results.LoadEvents(result.Table, convertTimestampToLocal: result.TimestampsAreUtc);
+                SetStatus($"Loaded {_results.RowCount:N0} event(s) from {Path.GetFileName(path)}", string.Empty,
+                    _results.RowCount > 0 ? DashColors.Success : DashColors.Warning);
+            }
+            catch (Exception ex)
+            {
+                SetStatus(ex.Message, ex.ToString(), DashColors.Fail);
+                MessageBox.Show(this, ex.Message, "Open trace file", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
         // ---- History -----------------------------------------------------------------------------
 
         private async Task LoadHistoryMenuAsync()
         {
             tsHistory.DropDownItems.Clear();
+
+            // Open a trace file from disk (.xel or DBA Dash JSON/XML) - available regardless of instance context.
+            var openFile = new ToolStripMenuItem("Open trace file...", Properties.Resources.FolderOpened_16x);
+            openFile.Click += async (_, _) => await OpenTraceFileAsync();
+            tsHistory.DropDownItems.Add(openFile);
+            tsHistory.DropDownItems.Add(new ToolStripSeparator());
+
             if (_context is not { InstanceID: > 0 }) return;
 
             // Shortcut to the full "Trace History" report (all traces, with view/DDL/delete actions).
