@@ -213,6 +213,12 @@ namespace DBADashGUI
 
         public bool InstanceSupportsQueryStore => ProductVersion != null && (ProductVersion.Major >= 13 || IsAzure);
 
+        /// <summary>
+        /// True when Extended Events are supported for this instance.  Azure is always supported; otherwise
+        /// we defer to <see cref="ConnectionInfo.GetXESupported(int)"/> which gates on the SQL major version.
+        /// </summary>
+        public bool IsXESupported => IsAzure || (ProductVersion != null && ConnectionInfo.GetXESupported(ProductVersion.Major));
+
         public bool CanMessage
         {
             get
