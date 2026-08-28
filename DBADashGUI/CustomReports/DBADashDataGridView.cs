@@ -10,6 +10,7 @@ using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -74,7 +75,9 @@ namespace DBADashGUI.CustomReports
                 new ToolStripMenuItem("As SQL (INSERT)", Properties.Resources.SQLScript_16x,
                     (_, _) => ExportTextToFile(() => ScriptTable(false, true, "#DBADashGrid"), ".sql", "SQL script")),
                 new ToolStripMenuItem("As Markdown", Properties.Resources.MarkdownFile,
-                    (_, _) => ExportTextToFile(() => ConvertToMarkdown(true), ".md", "Markdown"))
+                    (_, _) => ExportTextToFile(() => ConvertToMarkdown(true), ".md", "Markdown")),
+                new ToolStripMenuItem("As HTML", Properties.Resources.WebURL_16x,
+                    (_, _) => ExportTextToFile(ConvertToHtml, ".html", "HTML"))
             });
             return menuItem;
         }
@@ -2038,6 +2041,118 @@ GO
 
             return sb.ToString();
         }
+
+        /// <summary>
+        /// Converts the grid to a self-contained HTML document that preserves what the user currently sees:
+        /// the active theme's colours and any cell-highlighting rules (read from each cell's <see cref="DataGridViewCell.InheritedStyle"/>),
+        /// the visible/ordered columns and the current sort/filter (visible rows only).  WYSIWYG - export only.
+        /// Distinct cell styles are emitted once as CSS classes and referenced by cells to keep the file compact.
+        /// </summary>
+        /// <returns>HTML document text</returns>
+        public string ConvertToHtml()
+        {
+            var visibleColumns = Columns.Cast<DataGridViewColumn>().Where(c => c.Visible)
+                .OrderBy(c => c.DisplayIndex).ToList();
+
+            // Registry of distinct CSS rule bodies -> generated class name, so identical cell styles share one class.
+            var classNames = new Dictionary<string, string>();
+            string ClassFor(string css)
+            {
+                if (string.IsNullOrEmpty(css)) return null;
+                if (!classNames.TryGetValue(css, out var name))
+                {
+                    name = "c" + classNames.Count;
+                    classNames.Add(css, name);
+                }
+                return name;
+            }
+
+            // Header cells all share the theme's column-header colours, so they resolve to a single class.
+            var headerStyle = ColumnHeadersDefaultCellStyle;
+            var headerClass = ClassFor(BuildCellCss(ToHtmlColor(headerStyle.BackColor), ToHtmlColor(headerStyle.ForeColor),
+                null, bold: false, italic: false));
+
+            // First pass: build the table body and collect the classes each cell needs.
+            var body = new StringBuilder();
+            body.Append("<thead><tr>");
+            foreach (var column in visibleColumns)
+            {
+                var headerText = WebUtility.HtmlEncode(column.HeaderText).Replace("\n", "<br>");
+                body.Append(headerClass != null ? $"<th class=\"{headerClass}\">{headerText}</th>" : $"<th>{headerText}</th>");
+            }
+            body.AppendLine("</tr></thead>");
+
+            body.Append("<tbody>");
+            foreach (DataGridViewRow row in Rows)
+            {
+                if (row.IsNewRow || !row.Visible) continue;
+
+                body.Append("<tr>");
+                foreach (var column in visibleColumns)
+                {
+                    var cell = row.Cells[column.Index];
+                    var style = cell.InheritedStyle;
+                    var css = BuildCellCss(ToHtmlColor(style.BackColor), ToHtmlColor(style.ForeColor),
+                        ToHtmlAlign(style.Alignment), style.Font is { Bold: true }, style.Font is { Italic: true });
+                    var cls = ClassFor(css);
+
+                    var text = WebUtility.HtmlEncode(cell.FormattedValue?.ToString() ?? string.Empty)
+                        .Replace("\r\n", "<br>").Replace("\n", "<br>");
+                    body.Append(cls != null ? $"<td class=\"{cls}\">{text}</td>" : $"<td>{text}</td>");
+                }
+                body.AppendLine("</tr>");
+            }
+            body.AppendLine("</tbody>");
+
+            // Second pass: assemble the document, emitting the collected classes into the <style> block.
+            var sb = new StringBuilder();
+            sb.AppendLine("<!DOCTYPE html>");
+            sb.AppendLine("<html><head><meta charset=\"utf-8\">");
+            var title = WebUtility.HtmlEncode(string.IsNullOrEmpty(ResultSetName) ? "Grid Export" : ResultSetName);
+            sb.AppendLine($"<title>{title}</title>");
+            sb.AppendLine("<style>");
+            sb.AppendLine("body{font-family:Segoe UI,Arial,sans-serif;font-size:12px;margin:8px;}");
+            // Page background/foreground follow the grid's theme so the table sits on a matching backdrop.
+            var pageBack = ToHtmlColor(BackgroundColor);
+            var pageFore = ToHtmlColor(DefaultCellStyle.ForeColor);
+            if (pageBack != null) sb.AppendLine($"body{{background-color:{pageBack};}}");
+            if (pageFore != null) sb.AppendLine($"body{{color:{pageFore};}}");
+            sb.AppendLine("table{border-collapse:collapse;}");
+            sb.AppendLine("th,td{border:1px solid #999;padding:2px 6px;white-space:nowrap;}");
+            foreach (var (css, name) in classNames)
+            {
+                sb.AppendLine($".{name}{{{css}}}");
+            }
+            sb.AppendLine("</style></head><body>");
+            sb.AppendLine("<table>");
+            sb.Append(body);
+            sb.AppendLine("</table></body></html>");
+
+            return sb.ToString();
+        }
+
+        /// <summary>Builds a CSS rule body (declarations only) for a cell from its resolved style attributes.</summary>
+        private static string BuildCellCss(string backColor, string foreColor, string textAlign, bool bold, bool italic)
+        {
+            var css = new StringBuilder();
+            if (backColor != null) css.Append($"background-color:{backColor};");
+            if (foreColor != null) css.Append($"color:{foreColor};");
+            if (textAlign != null && textAlign != "left") css.Append($"text-align:{textAlign};");
+            if (bold) css.Append("font-weight:bold;");
+            if (italic) css.Append("font-style:italic;");
+            return css.ToString();
+        }
+
+        /// <summary>Converts a <see cref="Color"/> to an HTML colour string, or null when the colour is unset.</summary>
+        private static string ToHtmlColor(Color color) => color.IsEmpty ? null : ColorTranslator.ToHtml(color);
+
+        /// <summary>Maps a cell content alignment to the equivalent CSS text-align value.</summary>
+        private static string ToHtmlAlign(DataGridViewContentAlignment alignment) => alignment switch
+        {
+            DataGridViewContentAlignment.TopRight or DataGridViewContentAlignment.MiddleRight or DataGridViewContentAlignment.BottomRight => "right",
+            DataGridViewContentAlignment.TopCenter or DataGridViewContentAlignment.MiddleCenter or DataGridViewContentAlignment.BottomCenter => "center",
+            _ => "left"
+        };
 
         /// <summary>
         /// Gets a clean cell value properly formatted for Markdown
