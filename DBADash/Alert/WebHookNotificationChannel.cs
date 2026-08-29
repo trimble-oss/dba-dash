@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace DBADash.Alert
@@ -18,6 +16,13 @@ namespace DBADash.Alert
         [Description("Json message template (Leave blank to use default template).  Available parameters to replace: {title}, {text}, {instance}, {connectionid}, {instanceandconnectionid}, {threadkey}, {icon}, {emoji}")]
         [Category("Webhook Config")]
         public JsonString MessageTemplate { get; set; }
+
+        [DisplayName("Headers")]
+        [Description("Optional custom HTTP headers to send with the webhook request (e.g. Authorization). Header values support the same placeholders as the message template (e.g. {Now} for a send-time timestamp, {PriorityBucket}). Values are stored encrypted with the channel configuration.")]
+        [Category("Webhook Config")]
+        // Must be a non-null instance: the PropertyGrid's collection editor mutates the list in
+        // place, and when the property is null it has no IList to write to, so edits are discarded.
+        public List<WebhookHeader> Headers { get; set; } = new();
 
         private const string GoogleChatCardTemplate = @"{
     ""thread"":  {
@@ -166,6 +171,18 @@ namespace DBADash.Alert
 
         public override string EscapeText(string text) => EscapeTextJson(text);
 
+        /// <summary>
+        /// Applies placeholder replacement to header names and values. Header values are
+        /// not JSON, so replacement is done raw (identity escaping) rather than JSON-escaped.
+        /// </summary>
+        private IEnumerable<WebhookHeader> ResolveHeaders(Alert alert)
+        {
+            if (Headers == null) return null;
+            return Headers.Where(h => h != null).Select(h => new WebhookHeader(
+                ReplacePlaceholders(alert, h.Name ?? string.Empty, s => s),
+                ReplacePlaceholders(alert, h.Value ?? string.Empty, s => s)));
+        }
+
         protected override async Task InternalSendNotificationAsync(Alert alert, string connectionString)
         {
             var url = WebhookUrl;
@@ -174,10 +191,8 @@ namespace DBADash.Alert
                 url += GoogleWebhookReplyOption;
             }
 
-            using var client = new HttpClient();
             var payload = ReplacePlaceholders(alert, Template);
-            var content = new StringContent(payload, Encoding.UTF8, "application/json");
-            var response = await client.PostAsync(url, content);
+            using var response = await WebhookSender.PostJsonAsync(url, payload, ResolveHeaders(alert));
             response.EnsureSuccessStatusCode();
         }
 

@@ -90,6 +90,22 @@ namespace DBADash.Alert
 
         public bool IsAcknowledged { get; set; }
 
+        /// <summary>
+        /// The alert priority mapped onto coarse severity buckets
+        /// (CRITICAL / HIGH / MEDIUM / LOW / MINIMAL). Used by channels and
+        /// message templates that expect a small, fixed set of severities.
+        /// </summary>
+        public string PriorityBucket => GetPriorityBucket(Priority);
+
+        public static string GetPriorityBucket(Priorities priority) => (short)priority switch
+        {
+            0 => "CRITICAL",
+            >= 1 and <= 10 => "HIGH",
+            >= 11 and <= 20 => "MEDIUM",
+            >= 21 and <= 30 => "LOW",
+            _ => "MINIMAL"
+        };
+
         public string GetEmoji()
         {
             if (IsResolved)
@@ -135,15 +151,17 @@ namespace DBADash.Alert
 
         public static Alert GetTestAlert()
         {
+            var machineName = Environment.MachineName;
             return new Alert()
             {
                 AlertID = -1,
-                AlertName = "DBADASH_TEST_ALERT",
+                AlertName = "DBA Dash Test Alert",
                 Priority = Priorities.Information1,
-                TriggerDate = DateTime.Now,
-                Message = "Test Alert",
-                ConnectionID = Environment.MachineName,
-                AlertType = "Demo"
+                TriggerDate = DateTime.UtcNow,
+                Message = "This is a test notification from DBA Dash. If you are receiving this message, your notification channel is working correctly. This message can be safely ignored.",
+                ConnectionID = machineName,
+                InstanceDisplayName = machineName,
+                AlertType = "Test"
             };
         }
 

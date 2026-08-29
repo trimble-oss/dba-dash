@@ -2009,7 +2009,8 @@ USING (VALUES
 	(1,N'Webhook'),
 	(2,N'Email'),
 	(3,N'Slack'),
-	(4,N'PagerDuty')
+	(4,N'PagerDuty'),
+	(5,N'AzureDevOps')
 ) AS [Source]([NotificationChannelTypeID],[NotificationChannelType])
 ON ([Target].[NotificationChannelTypeID] = [Source].[NotificationChannelTypeID])
 WHEN MATCHED AND (
