@@ -29,7 +29,8 @@ namespace DBADashGUI.DBADashAlerts
             Webhook = 1,
             Email = 2,
             Slack = 3,
-            PagerDuty = 4
+            PagerDuty = 4,
+            AzureDevOps = 5
         }
 
         [JsonIgnore]
@@ -274,6 +275,7 @@ namespace DBADashGUI.DBADashAlerts
                     NotificationChannelTypes.Email => JsonConvert.DeserializeObject<EmailNotificationChannel>(channelDetails),
                     NotificationChannelTypes.Slack => JsonConvert.DeserializeObject<SlackNotificationChannel>(channelDetails),
                     NotificationChannelTypes.PagerDuty => JsonConvert.DeserializeObject<PagerDutyNotificationChannel>(channelDetails),
+                    NotificationChannelTypes.AzureDevOps => JsonConvert.DeserializeObject<AzureDevOpsNotificationChannel>(channelDetails),
                     _ => throw new NotImplementedException($"Channel type {channelType} hasn't been implemented.")
                 };
 
@@ -302,6 +304,7 @@ namespace DBADashGUI.DBADashAlerts
                 NotificationChannelTypes.Email => new EmailNotificationChannel(),
                 NotificationChannelTypes.Slack => new SlackNotificationChannel(),
                 NotificationChannelTypes.PagerDuty => new PagerDutyNotificationChannel(),
+                NotificationChannelTypes.AzureDevOps => new AzureDevOpsNotificationChannel(),
                 _ => throw new NotImplementedException($"Channel type {type} hasn't been implemented.")
             };
         }
@@ -393,30 +396,47 @@ namespace DBADashGUI.DBADashAlerts
             "{Emoji}",
             "{ThreadKey}",
             "{Priority}",
-            "{TriggerDate}"
+            "{PriorityBucket}",
+            "{TriggerDate}",
+            "{Now}"
         };
 
-        public string ReplacePlaceholders(Alert alert, string template)
+        public string ReplacePlaceholders(Alert alert, string template) =>
+            ReplacePlaceholders(alert, template, EscapeText);
+
+        /// <summary>
+        /// Replaces the supported placeholders in <paramref name="template"/>.
+        /// The <paramref name="escape"/> function is applied to each replacement value;
+        /// pass the identity function (e.g. for HTTP header values) when the output is
+        /// not JSON and must not be escaped.
+        /// </summary>
+        public string ReplacePlaceholders(Alert alert, string template, Func<string, string> escape)
         {
-            var result = template.Replace("{Title}", EscapeText($"{alert.AlertName}[{alert.Status}]"), StringComparison.InvariantCultureIgnoreCase)
-                .Replace("{ConnectionID}", EscapeText(alert.ConnectionID), StringComparison.InvariantCultureIgnoreCase)
-                .Replace("{Instance}", EscapeText(alert.InstanceDisplayName), StringComparison.InvariantCultureIgnoreCase)
-                .Replace("{InstanceAndConnectionID}", EscapeText(alert.InstanceDisplayNameAndConnectionID), StringComparison.InvariantCultureIgnoreCase)
-                .Replace("{AlertKey}", EscapeText(alert.AlertName), StringComparison.InvariantCultureIgnoreCase)
-                .Replace("{Action}", EscapeText(alert.Action), StringComparison.InvariantCultureIgnoreCase)
-                .Replace("{Text}", EscapeText(alert.Message), StringComparison.InvariantCultureIgnoreCase)
+            escape ??= s => s;
+            var result = template.Replace("{Title}", escape($"{alert.AlertName}[{alert.Status}]"), StringComparison.InvariantCultureIgnoreCase)
+                .Replace("{ConnectionID}", escape(alert.ConnectionID), StringComparison.InvariantCultureIgnoreCase)
+                .Replace("{Instance}", escape(alert.InstanceDisplayName), StringComparison.InvariantCultureIgnoreCase)
+                .Replace("{InstanceAndConnectionID}", escape(alert.InstanceDisplayNameAndConnectionID), StringComparison.InvariantCultureIgnoreCase)
+                .Replace("{AlertKey}", escape(alert.AlertName), StringComparison.InvariantCultureIgnoreCase)
+                .Replace("{Action}", escape(alert.Action), StringComparison.InvariantCultureIgnoreCase)
+                .Replace("{Text}", escape(alert.Message), StringComparison.InvariantCultureIgnoreCase)
                 .Replace("{Icon}", alert.GetIcon(), StringComparison.InvariantCultureIgnoreCase)
                 .Replace("{IconUrl}", alert.GetIconUrl(), StringComparison.InvariantCultureIgnoreCase)
                 .Replace("{Emoji}", alert.GetEmoji(), StringComparison.InvariantCultureIgnoreCase)
-                .Replace("{ThreadKey}", EscapeText(alert.ThreadKey), StringComparison.InvariantCultureIgnoreCase)
-                .Replace("{Priority}", EscapeText(alert.Priority.ToString()), StringComparison.InvariantCultureIgnoreCase);
+                .Replace("{ThreadKey}", escape(alert.ThreadKey), StringComparison.InvariantCultureIgnoreCase)
+                // {PriorityBucket} must be replaced before {Priority} would be a prefix match; the
+                // trailing brace makes them distinct, but replacing the longer token first is safest.
+                .Replace("{PriorityBucket}", escape(alert.PriorityBucket), StringComparison.InvariantCultureIgnoreCase)
+                .Replace("{Priority}", escape(alert.Priority.ToString()), StringComparison.InvariantCultureIgnoreCase);
 
-            result = ReplaceDate(alert.TriggerDate.ToUtcDateTimeOffset(), result, "{TriggerDate}");
+            result = ReplaceDate(alert.TriggerDate.ToUtcDateTimeOffset(), result, "{TriggerDate}", escape);
+            result = ReplaceDate(DateTimeOffset.UtcNow, result, "{Now}", escape);
             return result;
         }
 
-        private string ReplaceDate(DateTimeOffset offsetDate, string text, string placeholder)
+        private string ReplaceDate(DateTimeOffset offsetDate, string text, string placeholder, Func<string, string> escape)
         {
+            escape ??= s => s;
             // Extract placeholder name without braces (e.g., "TriggerDate" from "{TriggerDate}")
             var placeholderName = placeholder.Trim('{', '}');
 
@@ -435,7 +455,7 @@ namespace DBADashGUI.DBADashAlerts
                 {
                     var timeZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
                     var convertedTime = TimeZoneInfo.ConvertTime(offsetDate, timeZone);
-                    return EscapeText(convertedTime.ToStandardString());
+                    return escape(convertedTime.ToStandardString());
                 }
                 catch (Exception ex)
                 {
@@ -446,7 +466,7 @@ namespace DBADashGUI.DBADashAlerts
             }, RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
             // Handle default date (UTC)
-            result = result.Replace(placeholder, EscapeText(offsetDate.ToStandardString()), StringComparison.InvariantCultureIgnoreCase);
+            result = result.Replace(placeholder, escape(offsetDate.ToStandardString()), StringComparison.InvariantCultureIgnoreCase);
 
             return result;
         }

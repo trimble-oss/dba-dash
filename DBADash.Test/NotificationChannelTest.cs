@@ -138,6 +138,80 @@ namespace DBADashConfig.Test
         }
 
         [TestMethod]
+        public void TestPriorityBucketPlaceholder()
+        {
+            // Arrange
+            var testAlert = CreateTestAlert(priority: Alert.Priorities.Critical);
+            var emailChannel = new EmailNotificationChannel { ChannelName = DefaultChannelName };
+
+            // Act
+            var result = emailChannel.ReplacePlaceholders(testAlert, "Bucket: {PriorityBucket}");
+
+            // Assert
+            Assert.AreEqual("Bucket: CRITICAL", result);
+        }
+
+        [TestMethod]
+        public void TestPriorityBucketAndPriorityPlaceholdersDoNotCollide()
+        {
+            // {PriorityBucket} must be replaced before {Priority} so it is not partially matched.
+            var testAlert = CreateTestAlert(priority: Alert.Priorities.Medium1);
+            var emailChannel = new EmailNotificationChannel { ChannelName = DefaultChannelName };
+
+            var result = emailChannel.ReplacePlaceholders(testAlert, "{PriorityBucket}/{Priority}");
+
+            Assert.AreEqual($"{testAlert.PriorityBucket}/{testAlert.Priority}", result);
+        }
+
+        [TestMethod]
+        public void TestNowPlaceholderIsReplaced()
+        {
+            // Arrange
+            var testAlert = CreateTestAlert();
+            var emailChannel = new EmailNotificationChannel { ChannelName = DefaultChannelName };
+
+            var before = DateTimeOffset.UtcNow;
+            // Act
+            var result = emailChannel.ReplacePlaceholders(testAlert, "{Now}");
+            var after = DateTimeOffset.UtcNow;
+
+            // Assert - placeholder is replaced with a standard-format timestamp within the call window.
+            Assert.IsFalse(result.Contains("{Now}", StringComparison.OrdinalIgnoreCase), "{Now} should be replaced");
+            Assert.IsTrue(result == before.ToStandardString() || result == after.ToStandardString(),
+                $"Expected {{Now}} to render current UTC time between {before.ToStandardString()} and {after.ToStandardString()}, got {result}");
+        }
+
+        [TestMethod]
+        public void TestNowPlaceholderWithTimeZone()
+        {
+            // Arrange
+            var testAlert = CreateTestAlert();
+            var emailChannel = new EmailNotificationChannel { ChannelName = DefaultChannelName };
+
+            var timeZone = TimeZoneInfo.FindSystemTimeZoneById("America/New_York");
+            var before = TimeZoneInfo.ConvertTime(DateTimeOffset.UtcNow, timeZone);
+            // Act
+            var result = emailChannel.ReplacePlaceholders(testAlert, "{Now:America/New_York}");
+            var after = TimeZoneInfo.ConvertTime(DateTimeOffset.UtcNow, timeZone);
+
+            // Assert
+            Assert.IsFalse(result.Contains("{Now", StringComparison.OrdinalIgnoreCase), "{Now:tz} should be replaced");
+            Assert.IsTrue(result == before.ToStandardString() || result == after.ToStandardString(),
+                $"Expected {{Now:America/New_York}} to render converted time, got {result}");
+        }
+
+        [TestMethod]
+        public void TestNewPlaceholdersInPlaceholdersList()
+        {
+            var emailChannel = new EmailNotificationChannel { ChannelName = DefaultChannelName };
+
+            var placeholders = emailChannel.Placeholders;
+
+            Assert.Contains("{PriorityBucket}", placeholders, "Placeholders list should contain {PriorityBucket}");
+            Assert.Contains("{Now}", placeholders, "Placeholders list should contain {Now}");
+        }
+
+        [TestMethod]
         public void GetEmailMessageTemplate_ReturnsHtmlTemplate()
         {
             // Ensure the HTML email template is accessible via the EmailNotificationChannel's default HTML property
