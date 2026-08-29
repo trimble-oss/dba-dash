@@ -13,6 +13,7 @@ DECLARE @IsAdmin BIT = IS_ROLEMEMBER('db_owner');
 SELECT  E.XETraceEventID,
         E.event_type,
         E.timestamp,
+        S.InstanceID,
         E.Fields
 FROM XE.XETraceEvent E
 JOIN XE.XETraceSession S ON S.XETraceSessionID = E.XETraceSessionID

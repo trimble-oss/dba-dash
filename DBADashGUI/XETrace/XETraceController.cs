@@ -78,7 +78,12 @@ namespace DBADashGUI.XETrace
         /// be used to cancel the trace (see <see cref="CancelAsync"/>).  Returns the repo session id, or null if the
         /// session couldn't be opened (e.g. one already running for the instance).
         /// </summary>
-        /// <summary>Column added to each event batch to identify its source instance in a multi-instance run.</summary>
+        /// <summary>
+        /// Grid column that identifies an event's source instance in a multi-instance run.  This is not persisted into
+        /// the event JSON - the source instance is the session's own InstanceID (see <c>XE.XETraceSession</c>).  The GUI
+        /// stamps it on live batches (from the trace's InstanceID) and resolves it from the session row on history
+        /// reload (see <c>XEStoredEvents.Expand</c>), so both paths label instances identically.
+        /// </summary>
         public const string InstanceColumn = "Instance";
 
         public static async Task<XETraceOutcome> RunTraceAsync(
@@ -89,7 +94,6 @@ namespace DBADashGUI.XETrace
             Func<DataTable, Task> onBatch,
             Action<DataRow> onSummary,
             Guid? runGroupID = null,
-            bool tagInstance = false,
             Action onRunningConfirmed = null)
         {
             if (context.ImportAgentID == null)
@@ -167,9 +171,6 @@ namespace DBADashGUI.XETrace
 
                 var table = reply.Data?.Tables.Count > 0 ? reply.Data.Tables[0] : null;
                 if (table == null || !table.Columns.Contains("event_type") || table.Rows.Count == 0) return;
-                // In a multi-instance run, stamp the source instance so the merged grid (and persisted history) can
-                // tell which replica each event came from.  Single-instance runs leave the schema untouched.
-                if (tagInstance) StampInstanceColumn(table, context.InstanceName);
                 await XETraceRepo.AddEventsAsync(sessionID, table);
                 await onBatch(table);
             }
@@ -235,19 +236,6 @@ namespace DBADashGUI.XETrace
             }
 
             return new XETraceOutcome(ok, cancelled, outcomeMessage, sessionID);
-        }
-
-        /// <summary>Adds/sets the <see cref="InstanceColumn"/> on every row of a batch to identify its source instance.</summary>
-        private static void StampInstanceColumn(DataTable table, string instanceName)
-        {
-            if (!table.Columns.Contains(InstanceColumn))
-            {
-                table.Columns.Add(InstanceColumn, typeof(string));
-            }
-            foreach (DataRow row in table.Rows)
-            {
-                row[InstanceColumn] = instanceName ?? string.Empty;
-            }
         }
 
         private static async Task SafeCompleteAsync(long sessionID, string errorMessage)

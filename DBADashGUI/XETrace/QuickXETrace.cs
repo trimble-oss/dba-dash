@@ -1072,7 +1072,7 @@ namespace DBADashGUI.XETrace
             if (_context is not { InstanceID: > 0 }) return;
             var existing = new HashSet<int>(clbInstances.Items.Cast<TraceInstance>().Select(t => t.InstanceID)) { _context.InstanceID };
             var candidates = CommonData.Instances.Rows.Cast<DataRow>()
-                .Select(ToInstanceCandidate)
+                .Select(XEInstanceLabels.ToCandidate)
                 .Where(c => c != null && !existing.Contains(c.InstanceID))
                 .ToList();
             if (candidates.Count == 0)
@@ -1088,31 +1088,6 @@ namespace DBADashGUI.XETrace
                 if (byId.TryGetValue(id, out var c)) AddInstanceItem(id, c.ListLabel, isAg: false, check: true);
             }
             UpdateInstanceCount();
-        }
-
-        /// <summary>
-        /// Maps a CommonData.Instances row to a pickable candidate.  Each Azure SQL database is its own monitored
-        /// instance (its own InstanceID / ConnectionID) sharing a logical server, so Azure rows are exposed per-database
-        /// under their server; regular instances are a single leaf.  Returns null for rows with nothing to label.
-        /// </summary>
-        private static XEInstanceCandidate ToInstanceCandidate(DataRow r)
-        {
-            var id = Convert.ToInt32(r["InstanceID"]);
-            if (id <= 0) return null;
-            var isAzure = r["IsAzure"] != DBNull.Value && Convert.ToBoolean(r["IsAzure"]);
-            var server = r["Instance"] as string;
-            if (isAzure)
-            {
-                var db = r["AzureDBName"] as string;
-                if (string.IsNullOrEmpty(db) || string.IsNullOrEmpty(server)) return null;
-                // 'master' isn't a useful XE trace target on Azure DB - skip it so the picker only lists user databases.
-                if (string.Equals(db, "master", StringComparison.OrdinalIgnoreCase)) return null;
-                return new XEInstanceCandidate { InstanceID = id, IsAzure = true, ServerName = server, DatabaseName = db };
-            }
-            var name = r["InstanceGroupName"] as string ?? server;
-            return string.IsNullOrEmpty(name)
-                ? null
-                : new XEInstanceCandidate { InstanceID = id, IsAzure = false, DisplayName = name };
         }
 
         /// <summary>Adds an instance to the instances list (deduped by InstanceID) with the given checked state.</summary>
@@ -1163,7 +1138,7 @@ namespace DBADashGUI.XETrace
                 if (clbInstances.Items[i] is TraceInstance { IsCurrent: true }) clbInstances.Items.RemoveAt(i);
             }
             clbInstances.Items.Insert(0, new TraceInstance
-            { InstanceID = _context.InstanceID, Name = _context.InstanceName, IsCurrent = true });
+            { InstanceID = _context.InstanceID, Name = XEInstanceLabels.Resolve(_context.InstanceID, _context.InstanceName), IsCurrent = true });
             clbInstances.SetItemChecked(0, true);
             UpdateInstanceCount();
         }
@@ -1441,10 +1416,14 @@ namespace DBADashGUI.XETrace
             try
             {
                 var capturesXel = !tagInstance; // single-instance run only - a multi-instance .xel would be per-instance
+                // In a multi-instance run, tag each live batch with its source instance (resolved from the trace's own
+                // InstanceID) so the merged grid can tell replicas apart.  History reload derives this from the session
+                // row instead (see XEStoredEvents.Expand), so it isn't persisted into the event JSON.
+                var instanceLabel = tagInstance ? XEInstanceLabels.Resolve(rt.Context.InstanceID, rt.Context.InstanceName) : null;
                 var outcome = await XETraceController.RunTraceAsync(rt.Context, config, rt.MessageGroup, ControllerStatus,
-                    batch => AppendEventsAsync(generation, batch),
+                    batch => AppendEventsAsync(generation, batch, instanceLabel),
                     summary => OnSummary(generation, summary, capturesXel),
-                    runGroupID, tagInstance,
+                    runGroupID,
                     onRunningConfirmed: () => OnTraceConfirmedRunning(generation, instanceCount));
                 rt.SessionID = outcome?.SessionID;
                 return outcome ?? new XETraceController.XETraceOutcome(false, false,
@@ -1547,11 +1526,12 @@ namespace DBADashGUI.XETrace
 
         // ---- Live grid ---------------------------------------------------------------------------
 
-        private Task AppendEventsAsync(int generation, DataTable batch)
+        private Task AppendEventsAsync(int generation, DataTable batch, string instanceLabel = null)
         {
             if (generation != _traceGeneration) return Task.CompletedTask; // stale trace (switched/reset) - drop the batch
-            if (InvokeRequired) return (Task)Invoke(new Func<Task>(() => AppendEventsAsync(generation, batch)));
+            if (InvokeRequired) return (Task)Invoke(new Func<Task>(() => AppendEventsAsync(generation, batch, instanceLabel)));
             if (generation != _traceGeneration) return Task.CompletedTask; // re-check after marshalling to the UI thread
+            if (instanceLabel != null) StampInstance(batch, instanceLabel);
             _results.AppendEvents(batch);
             // While stopping, in-flight batches (e.g. an SQS backlog still arriving) are real captured events, so keep
             // them and their count - but say we're stopping rather than repainting "Trace running..." over the
@@ -1561,6 +1541,20 @@ namespace DBADashGUI.XETrace
                     : $"Trace running.  Collected {_results.RowCount} events.",
                 string.Empty, _cancelling ? DashColors.Warning : DashColors.Information);
             return Task.CompletedTask;
+        }
+
+        /// <summary>Stamps the source-instance column on every row of a live batch (multi-instance run only).</summary>
+        private static void StampInstance(DataTable batch, string instanceLabel)
+        {
+            if (batch == null) return;
+            if (!batch.Columns.Contains(XETraceController.InstanceColumn))
+            {
+                batch.Columns.Add(XETraceController.InstanceColumn, typeof(string));
+            }
+            foreach (DataRow row in batch.Rows)
+            {
+                row[XETraceController.InstanceColumn] = instanceLabel ?? string.Empty;
+            }
         }
 
         private void OnSummary(int generation, DataRow summary, bool capturesXel)

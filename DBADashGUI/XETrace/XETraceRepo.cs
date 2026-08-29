@@ -202,8 +202,9 @@ namespace DBADashGUI.XETrace
             FillAsync("XE.XETraceEvents_Get", cmd => cmd.Parameters.AddWithValue("@XETraceSessionID", sessionID));
 
         /// <summary>
-        /// Returns the merged events of every per-instance session of a multi-instance run (each event's source
-        /// instance is carried inside its Fields JSON), in time order.  Used to reload an AG-wide trace as one grid.
+        /// Returns the merged events of every per-instance session of a multi-instance run (each event carries its
+        /// session's InstanceID; the caller resolves the label - see XEStoredEvents.Expand), in time order.  Used to
+        /// reload an AG-wide trace as one grid.
         /// </summary>
         public static Task<DataTable> GetEventsByRunGroupAsync(Guid runGroupID) =>
             FillAsync("XE.XETraceEvents_GetByRunGroup", cmd => cmd.Parameters.AddWithValue("@RunGroupID", runGroupID));
