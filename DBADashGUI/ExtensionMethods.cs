@@ -291,8 +291,13 @@ namespace DBADashGUI
 
         public static void ApplyVisibility(this DataGridViewColumnCollection columns, List<ISelectable> selectables)
         {
-            var columnDict = columns.Cast<DataGridViewColumn>()
-                .ToDictionary(c => c.HeaderText, c => c);
+            // Columns are keyed by HeaderText, which is not guaranteed unique (e.g. a visible column aliased to the
+            // same header as a hidden backing column).  Keep the first occurrence rather than throwing on duplicates.
+            var columnDict = new Dictionary<string, DataGridViewColumn>();
+            foreach (var c in columns.Cast<DataGridViewColumn>())
+            {
+                columnDict.TryAdd(c.HeaderText, c);
+            }
 
             foreach (var selectable in selectables)
             {

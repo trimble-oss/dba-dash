@@ -92,6 +92,13 @@ namespace DBADashGUI.XETrace
         // Guards the AG checkbox handler while we set it programmatically (context switch / template load).
         private bool _loadingInstances;
 
+        // At a root / instance-group node the tab has no single "current instance": the instance selector is populated
+        // from the group's instances (all unchecked - the user picks which to trace).  Group nodes all report InstanceID
+        // 0, so we track the group's instance set here to know when to re-sync the selector (switching between two groups).
+        private HashSet<int> _lastGroupScope;
+
+        private bool IsGroupMode => _context is { InstanceID: <= 0 };
+
         // Bumped on every trace start and whenever a running trace is stopped to switch instances.  Batch and summary
         // callbacks capture the generation they were started with and drop themselves if it no longer matches, so a
         // cancelled trace's in-flight events can't leak into a freshly cleared grid.
@@ -386,7 +393,13 @@ namespace DBADashGUI.XETrace
             // As a context-following tab this is re-invoked whenever the tree selection changes.  A stopped/history
             // grid holds nothing that needs protecting (the events live in the DB), so only a *running* trace prompts.
             // We remember which history snapshot each instance was showing so switching back can re-load it.
-            var switchingInstance = _context is { InstanceID: > 0 } && context?.InstanceID != _context.InstanceID;
+            // A switch is any change of node identity - or leaving a running (possibly group) trace.  Group nodes all
+            // report InstanceID 0, so also treat a change of the group's instance set as a switch (handled below).
+            // Dropping from a group (InstanceID 0) down to an instance is also a switch, so the group-level picks are
+            // cleared and the instance seeds only its own current instance (otherwise the root selection leaks down).
+            var leavingGroupForInstance = _context is { InstanceID: <= 0 } && context is { InstanceID: > 0 };
+            var switchingInstance = _context != null && context?.InstanceID != _context.InstanceID &&
+                                    (_context.InstanceID > 0 || _isRunning || leavingGroupForInstance);
             if (switchingInstance)
             {
                 if (_isRunning)
@@ -433,7 +446,9 @@ namespace DBADashGUI.XETrace
             // The service may have ad-hoc XE tracing disabled for this instance.  Keep the tab (the user holds the
             // AdhocXE role) but disable the config + start controls and explain, instead of loading the catalog and
             // letting a trace be built that would only be rejected on start.
-            _adhocServiceAvailable = context is { InstanceID: > 0 } && context.CanRunAdhocXE;
+            // At group level availability is per-instance (checked when the trace fans out / rejected per instance), so
+            // the tab is available; at instance level it follows the collect agent's advertised capability.
+            _adhocServiceAvailable = IsGroupMode || (context is { InstanceID: > 0 } && context.CanRunAdhocXE);
             if (!_adhocServiceAvailable)
             {
                 if (switchingInstance) ResetInstances();
@@ -446,10 +461,17 @@ namespace DBADashGUI.XETrace
             }
             tsStartTrace.ToolTipText = null;
 
-            // Reset the instance list on a switch (the AG/added instances belonged to the previous instance); otherwise
-            // just make sure the current instance is seeded (first load, or re-selecting the same instance).
+            // Instance selector: at instance level seed the mandatory current instance; at group level sync the list to
+            // the group's instances (all unchecked - the user picks which to trace).  A switch resets first.
             if (switchingInstance) ResetInstances();
+            if (IsGroupMode) ResetGroupInstancesOnScopeChange();
             else EnsureCurrentInstanceSeeded();
+
+            // AG-replica resolution and the inline history dropdown both need a single current instance, so they're only
+            // meaningful at instance level; at group level use the "XE Trace History" tab for history.
+            chkIncludeAg.Enabled = !IsGroupMode;
+            tsHistory.Enabled = !IsGroupMode;
+
             SetRunningState(_isRunning); // re-enable config controls when returning from a disabled instance
             UpdateXelCaptureState(); // engine edition is now known (in-memory), so Auto+Azure DB can disable xel capture
             _ = LoadCatalogAsync();
@@ -484,11 +506,15 @@ namespace DBADashGUI.XETrace
 
         private async Task LoadCatalogAsync()
         {
-            if (_context is not { InstanceID: > 0 }) return;
+            // At instance level use the current instance; at group level use a representative instance from the group so
+            // the event/field pickers are populated (the trace definition is validated per instance on the service, so an
+            // event a specific instance's version doesn't support is rejected there).
+            var catalogContext = _context is { InstanceID: > 0 } ? _context : RepresentativeInstanceContext();
+            if (catalogContext == null) return;
             SetStatus("Loading extended events catalog...", string.Empty, DashColors.Information);
             try
             {
-                _catalog = await XETraceController.GetCatalogAsync(_context, ControllerStatus);
+                _catalog = await XETraceController.GetCatalogAsync(catalogContext, ControllerStatus);
                 // An event name can exist in several packages (e.g. error_reported in sqlserver and xesvlpkg); show
                 // one entry per name, preferring the sqlserver package (the one the trace built-ins/pickers mean).
                 _allEvents = _catalog.Events
@@ -1069,11 +1095,21 @@ namespace DBADashGUI.XETrace
 
         private void AddInstancesViaPicker()
         {
-            if (_context is not { InstanceID: > 0 }) return;
-            var existing = new HashSet<int>(clbInstances.Items.Cast<TraceInstance>().Select(t => t.InstanceID)) { _context.InstanceID };
+            if (_context == null) return;
+            var existing = new HashSet<int>(clbInstances.Items.Cast<TraceInstance>().Select(t => t.InstanceID));
+            if (_context is { InstanceID: > 0 }) existing.Add(_context.InstanceID);
+            // At group level, offer only the instances in this node's scope (the tag group / all at root); at instance
+            // level offer every monitored instance (so AG replicas / any cross-instance can be added).  Only offer
+            // instances that actually support Extended Events - an older-version instance can't be traced and would also
+            // fail the catalog load if it happened to be the first (representative) one added.
+            var scope = IsGroupMode ? _context.InstanceIDs : null;
             var candidates = CommonData.Instances.Rows.Cast<DataRow>()
                 .Select(XEInstanceLabels.ToCandidate)
-                .Where(c => c != null && !existing.Contains(c.InstanceID))
+                .Where(c => c != null && !existing.Contains(c.InstanceID) && (scope == null || scope.Contains(c.InstanceID))
+                            && BuildContextForInstance(c.InstanceID, c.ListLabel).IsXESupported)
+                // When grouping by tag, an instance in more than one tag group appears once per group in
+                // CommonData.Instances, so collapse to one candidate per instance to avoid duplicate picker entries.
+                .DistinctBy(c => c.InstanceID)
                 .ToList();
             if (candidates.Count == 0)
             {
@@ -1088,6 +1124,10 @@ namespace DBADashGUI.XETrace
                 if (byId.TryGetValue(id, out var c)) AddInstanceItem(id, c.ListLabel, isAg: false, check: true);
             }
             UpdateInstanceCount();
+
+            // Group level has no "current instance" to load the events catalog from, so load it from the first added
+            // instance once we have one (the config pickers need it, and Start refuses until it's available).
+            if (IsGroupMode && _catalog.Events.Count == 0) _ = LoadCatalogAsync();
         }
 
         /// <summary>Adds an instance to the instances list (deduped by InstanceID) with the given checked state.</summary>
@@ -1101,8 +1141,27 @@ namespace DBADashGUI.XETrace
 
         private void UpdateInstanceCount()
         {
-            var n = Math.Max(1, clbInstances.CheckedItems.Count); // the current instance is always checked
-            lblInstanceCount.Text = $"Tracing {n} instance{(n == 1 ? string.Empty : "s")}";
+            // Instance level always has the (mandatory) current instance checked; group level can have none selected.
+            var n = clbInstances.CheckedItems.Count;
+            lblInstanceCount.Text = n == 0
+                ? "No instances selected"
+                : $"Tracing {n} instance{(n == 1 ? string.Empty : "s")}";
+        }
+
+        /// <summary>
+        /// Group level only: the instance selector starts empty and the user adds instances through the "Add instance"
+        /// picker (better than scrolling a listbox pre-filled with a whole group / the entire estate).  We only clear it
+        /// when the group's instance set actually changes (switching between two groups); re-selecting the same group
+        /// node keeps the user's picks, so the frequent context-following SetContext calls don't wipe the selection.
+        /// </summary>
+        private void ResetGroupInstancesOnScopeChange()
+        {
+            var scope = _context?.InstanceIDs ?? new HashSet<int>();
+            if (_lastGroupScope != null && _lastGroupScope.SetEquals(scope)) return; // same group - keep current selection
+            _lastGroupScope = new HashSet<int>(scope);
+            _loadingInstances = true;
+            try { clbInstances.Items.Clear(); } finally { _loadingInstances = false; }
+            UpdateInstanceCount();
         }
 
         /// <summary>The current instance is mandatory - block any attempt to uncheck its (IsCurrent) list item.</summary>
@@ -1116,13 +1175,15 @@ namespace DBADashGUI.XETrace
             BeginInvoke(new Action(UpdateInstanceCount));
         }
 
-        /// <summary>Resets the instance selection to just the (mandatory) current instance - used when it changes.</summary>
+        /// <summary>Resets the instance selection when the node changes - to the current instance, or (group level) empty
+        /// so the group's instances re-sync from scratch on the incoming node.</summary>
         private void ResetInstances()
         {
             _loadingInstances = true;
             try { chkIncludeAg.Checked = false; } finally { _loadingInstances = false; }
             clbInstances.Items.Clear();
-            EnsureCurrentInstanceSeeded();
+            _lastGroupScope = null; // force a fresh group sync (or none) for the incoming node
+            if (!IsGroupMode) EnsureCurrentInstanceSeeded();
             UpdateInstanceCount();
         }
 
@@ -1156,7 +1217,9 @@ namespace DBADashGUI.XETrace
                     ? _context
                     : BuildContextForInstance(item.InstanceID, item.Name));
             }
-            if (list.Count == 0) list.Add(_context); // safety - the current instance is always seeded + checked
+            // Instance level always has the current instance checked; group level can legitimately have none selected
+            // (Start is gated on there being at least one - see StartAsync).
+            if (list.Count == 0 && _context is { InstanceID: > 0 }) list.Add(_context);
             return list.GroupBy(c => c.InstanceID).Select(g => g.First()).ToList();
         }
 
@@ -1166,6 +1229,14 @@ namespace DBADashGUI.XETrace
             InstanceName = name,
             RegularInstanceIDsWithHidden = new HashSet<int> { instanceId }
         };
+
+        /// <summary>Group level: an instance to load the catalog from - the first checked, else the first listed.</summary>
+        private DBADashContext RepresentativeInstanceContext()
+        {
+            var item = clbInstances.CheckedItems.Cast<TraceInstance>().FirstOrDefault()
+                       ?? clbInstances.Items.Cast<TraceInstance>().FirstOrDefault();
+            return item == null ? null : BuildContextForInstance(item.InstanceID, item.Name);
+        }
 
         // ---- Run / stop --------------------------------------------------------------------------
 
@@ -1258,17 +1329,29 @@ namespace DBADashGUI.XETrace
                 return;
             }
 
-            // Every event carries its data columns from the catalog (the service applies data-column filters and the
-            // severity floor per the columns each event exposes).  If the catalog hasn't loaded the events would be
-            // sent with no columns, so refuse to start until it's available rather than run a mis-filtered trace.
-            if (_catalog.Events.Count == 0)
+            var instances = EffectiveInstanceContexts();
+            if (instances.Count == 0)
             {
-                SetStatus("Extended events catalog is still loading.  Wait for it to finish, then start the trace.",
-                    string.Empty, DashColors.Warning);
+                // Group level with nothing ticked - there's no instance to trace.
+                SetStatus("Select at least one instance to trace.", string.Empty, DashColors.Warning);
                 return;
             }
 
-            var instances = EffectiveInstanceContexts();
+            // Every event carries its data columns from the catalog (the service applies data-column filters and the
+            // severity floor per the columns each event exposes).  If the catalog hasn't loaded the events would be
+            // sent with no columns, so refuse to start until it's available.  At group level there's no current instance
+            // to load it from until instances are added, so load it now (from a selected instance) rather than getting
+            // stuck telling the user to wait for a load that was never started.
+            if (_catalog.Events.Count == 0)
+            {
+                await LoadCatalogAsync();
+                if (_catalog.Events.Count == 0)
+                {
+                    SetStatus("Couldn't load the Extended Events catalog.  Check the selected instance(s) support " +
+                              "Extended Events, then try again.", string.Empty, DashColors.Warning);
+                    return;
+                }
+            }
 
             // First-run cost warning.  XE traces add overhead to the monitored instance; make sure the user understands
             // that once, before they build the habit.  Suppressible ("Don't show this again") via a user setting.

@@ -265,7 +265,16 @@ namespace DBADashGUI.XETrace
                         ["StartTime"] = new() { Alias = "Start Time", Description = "Time the trace started (local time)" },
                         ["EndTime"] = new() { Alias = "End Time", Description = "Time the trace ended (local time)" },
                         ["MaxDurationSeconds"] = new() { Alias = "Max Duration (s)", FormatString = "N0" },
-                        ["TotalEvents"] = new() { Alias = "Events Captured", FormatString = "N0" },
+                        ["TotalEvents"] = new()
+                        {
+                            Alias = "Events Captured",
+                            FormatString = "N0",
+                            // For a multi-instance trace this is the count for this instance only (each replica is a
+                            // separate row); "View Data" opens the whole merged run.  Click to view just this instance's
+                            // captured events.
+                            Description = "Number of events captured.  For a multi-instance trace this is the count for this instance only (each instance is a separate row) - click to view just this instance's captured events.  \"View Data\" opens the whole merged run.",
+                            Link = new XETraceStoredDataLinkColumnInfo { ScopeToSession = true }
+                        },
                         ["TargetTypeDescription"] = new() { Alias = "Target", Description = "Resolved trace target" },
                         ["Xel"] = new()
                         {
@@ -291,7 +300,7 @@ namespace DBADashGUI.XETrace
                         {
                             Alias = "View Data",
                             Description = "View the events captured by this trace",
-                            Link = new XETraceViewDataLinkColumnInfo()
+                            Link = new XETraceStoredDataLinkColumnInfo()
                         },
                         ["Delete"] = new()
                         {

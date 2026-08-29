@@ -65,6 +65,7 @@ namespace DBADashGUI
             var jobs = new SQLTreeItem("Jobs", SQLTreeItem.TreeType.AgentJobs);
 
             root.Nodes.AddRange(new TreeNode[] { changes, checks, hadr, storage, jobs });
+            AddMultiInstanceXENode(root);
 
             root.AddReportsFolder(reports?.RootLevelReports);
 
@@ -98,6 +99,7 @@ namespace DBADashGUI
                         {
                             parentNode.Nodes.Remove(hadrGrp);
                         }
+                        AddMultiInstanceXENode(parentNode);
                         parentNode.AddReportsFolder(reports?.RootLevelReports);
                         root.Nodes.Add(parentNode);
                         currentTagGroup = tagGroup;
@@ -239,7 +241,8 @@ namespace DBADashGUI
             AIAssistant,
             ExtendedEvents,
             AdhocTrace,
-            XETraceSessions
+            XETraceSessions,
+            MultiInstanceXE
         }
 
         private static readonly List<Main.Tabs> InstanceOnlyTabs = new() { Main.Tabs.PerformanceSummary, Tabs.Metrics, Tabs.Waits, Tabs.Memory, Tabs.RunningQueries };
@@ -272,6 +275,7 @@ namespace DBADashGUI
         private TabPage tabExtendedEvents;
         private TabPage tabAdhocTrace;
         private TabPage tabXETraceSessions;
+        private TabPage tabMultiInstanceXE;
 
         public Main(CommandLineOptions opts)
         {
@@ -354,6 +358,9 @@ namespace DBADashGUI
 
             tabXETraceSessions = new TabPage("XE Trace History") { Name = Tabs.XETraceSessions.TabName() };
             tabXETraceSessions.Controls.Add(new XETrace.XETraceSessionsView { Dock = DockStyle.Fill });
+
+            tabMultiInstanceXE = new TabPage("Running Sessions") { Name = Tabs.MultiInstanceXE.TabName() };
+            tabMultiInstanceXE.Controls.Add(new XETrace.MultiInstanceXEView { Dock = DockStyle.Fill });
         }
 
         public TabPage GetCommunityToolsTabPage(ProcedureExecutionMessage.CommunityProcs proc)
@@ -1114,6 +1121,19 @@ namespace DBADashGUI
             }
         }
 
+        /// <summary>
+        /// Adds the higher-level "Extended Events" node to a root / instance-group node.  Unlike the per-instance node
+        /// (added in <see cref="ExpandInstance"/>), this one aggregates across every instance in the node's context: the
+        /// running XE sessions (<see cref="XETrace.MultiInstanceXEView"/>, needs Manage/Watch XE) and the ad-hoc XE trace
+        /// history (<see cref="XETrace.XETraceSessionsView"/>, needs Adhoc XE).  Shown if the user has any of those rights;
+        /// per-instance capability / messaging availability is resolved when the views load.
+        /// </summary>
+        private static void AddMultiInstanceXENode(SQLTreeItem parentNode)
+        {
+            if (!DBADashUser.AllowManageXE && !DBADashUser.AllowWatchXE && !DBADashUser.AllowAdhocXE) return;
+            parentNode.Nodes.Add(new SQLTreeItem("Extended Events", SQLTreeItem.TreeType.ExtendedEvents));
+        }
+
         private void ExpandInstance(SQLTreeItem instanceNode)
         {
             List<TreeNode> nodesToAdd = new();
@@ -1335,12 +1355,31 @@ namespace DBADashGUI
             }
             else if (n.Type == SQLTreeItem.TreeType.ExtendedEvents)
             {
-                // Each tab is gated on the user's repository-DB role: the session viewer for Manage/Watch XE, the ad-hoc
-                // trace tab for Adhoc XE.  A user without the role never sees that tab; whether the capability is enabled
-                // on the service side is surfaced (disabled controls + a message) inside the tab, not hidden here.
-                if (DBADashUser.AllowManageXE || DBADashUser.AllowWatchXE) allowedTabs.Add(tabExtendedEvents);
-                if (DBADashUser.AllowAdhocXE) allowedTabs.Add(tabAdhocTrace);
-                if (DBADashUser.AllowAdhocXE) allowedTabs.Add(tabXETraceSessions);
+                // The same node type serves two levels (mirrors the AgentJobs branch): at root / instance-group level it
+                // shows the multi-instance running-sessions grid; at instance level it shows the per-instance viewer,
+                // ad-hoc trace and trace history.  Each tab is gated on the user's repository-DB role - a user without
+                // the role never sees that tab; whether the capability is enabled on the service side is surfaced
+                // (disabled controls + a message) inside the tab, not hidden here.
+                if (parent.Type is SQLTreeItem.TreeType.DBADashRoot or SQLTreeItem.TreeType.InstanceFolder)
+                {
+                    // The ad-hoc trace tab works at group level too - QuickXETrace lets the user pick which instances in
+                    // the group to trace (see its "Instances to Trace" selector); nothing is pre-selected here.
+                    if (DBADashUser.AllowAdhocXE)
+                    {
+                        allowedTabs.Add(tabAdhocTrace);
+                        allowedTabs.Add(tabXETraceSessions);
+                    }
+                    if (DBADashUser.AllowManageXE || DBADashUser.AllowWatchXE) allowedTabs.Add(tabMultiInstanceXE);
+                }
+                else
+                {
+                    if (DBADashUser.AllowManageXE || DBADashUser.AllowWatchXE) allowedTabs.Add(tabExtendedEvents);
+                    if (DBADashUser.AllowAdhocXE)
+                    {
+                        allowedTabs.Add(tabAdhocTrace);
+                        allowedTabs.Add(tabXETraceSessions);
+                    }
+                }
             }
             else if (n.Type == SQLTreeItem.TreeType.DBAChecks)
             {
@@ -1485,7 +1524,7 @@ namespace DBADashGUI
             }
 
             // AI Assistant tab - show only at root level (no tree context is used)
-            if (n.Type is SQLTreeItem.TreeType.DBADashRoot 
+            if (n.Type is SQLTreeItem.TreeType.DBADashRoot
                 && aiAssistantControl?.IsServiceAvailable == true
                 && (DBADashUser.IsAdmin || DBADashUser.IsInRole("AIUser")))
             {
@@ -3041,6 +3080,7 @@ namespace DBADashGUI
                 }
             }
         }
+
         void IThemedControl.ApplyTheme(BaseTheme theme)
         {
             Controls.ApplyTheme(theme);
