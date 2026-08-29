@@ -2,6 +2,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 
 namespace DBADashGUI.XETrace
 {
@@ -17,7 +18,17 @@ namespace DBADashGUI.XETrace
     {
         public static DataTable Expand(DataTable stored)
         {
-            // Pass 1: parse each row's Fields JSON once and infer a column type per field across all rows.
+            // The source instance is carried by the session's InstanceID (returned per event), not stored in the event
+            // JSON.  When a run spans more than one instance, resolve a display label per event and surface it as a
+            // left-most "Instance" column so the merged grid can tell them apart (single-instance runs stay unchanged).
+            var hasInstanceId = stored.Columns.Contains("InstanceID");
+            var multiInstance = hasInstanceId &&
+                stored.Rows.Cast<DataRow>().Select(r => r["InstanceID"]).Where(v => v != DBNull.Value)
+                    .Select(Convert.ToInt32).Distinct().Take(2).Count() > 1;
+            var instanceLabels = new Dictionary<int, string>();
+
+            // Pass 1: parse each row's Fields JSON once and infer a column type per field across all rows.  A legacy
+            // "Instance" key (stamped into the JSON by an older build) is ignored - the InstanceID-derived column wins.
             var parsed = new List<(DataRow Source, JObject Fields)>();
             var fieldTypes = new Dictionary<string, Type>(StringComparer.Ordinal);
             var order = new List<string>();
@@ -30,6 +41,7 @@ namespace DBADashGUI.XETrace
                     fields = JObject.Parse(json);
                     foreach (var p in fields.Properties())
                     {
+                        if (string.Equals(p.Name, XETraceController.InstanceColumn, StringComparison.Ordinal)) continue;
                         if (!fieldTypes.ContainsKey(p.Name)) { fieldTypes[p.Name] = null; order.Add(p.Name); }
                         fieldTypes[p.Name] = MergeJsonType(fieldTypes[p.Name], p.Value);
                     }
@@ -41,6 +53,7 @@ namespace DBADashGUI.XETrace
             var dt = new DataTable();
             dt.Columns.Add("event_type", typeof(string));
             dt.Columns.Add("timestamp", typeof(DateTime));
+            if (multiInstance) dt.Columns.Add(XETraceController.InstanceColumn, typeof(string));
             foreach (var name in order)
             {
                 dt.Columns.Add(name, fieldTypes[name] ?? typeof(string));
@@ -51,10 +64,21 @@ namespace DBADashGUI.XETrace
                 var row = dt.NewRow();
                 row["event_type"] = source["event_type"];
                 if (source["timestamp"] != DBNull.Value) row["timestamp"] = source["timestamp"];
+                if (multiInstance && source["InstanceID"] != DBNull.Value)
+                {
+                    var id = Convert.ToInt32(source["InstanceID"]);
+                    if (!instanceLabels.TryGetValue(id, out var label))
+                    {
+                        label = XEInstanceLabels.Resolve(id, id.ToString());
+                        instanceLabels[id] = label;
+                    }
+                    row[XETraceController.InstanceColumn] = label;
+                }
                 if (fields != null)
                 {
                     foreach (var p in fields.Properties())
                     {
+                        if (string.Equals(p.Name, XETraceController.InstanceColumn, StringComparison.Ordinal)) continue;
                         row[p.Name] = ConvertJsonValue(p.Value, dt.Columns[p.Name].DataType);
                     }
                 }
