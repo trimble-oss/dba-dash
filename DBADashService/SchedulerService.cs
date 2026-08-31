@@ -235,6 +235,10 @@ namespace DBADashService
                     Log.Information("All source connections are online");
                 }
                 backgroundTasks.Add(Task.Run(() => OfflineInstances.ManageOfflineInstances(config, backgroundTasksCts.Token), backgroundTasksCts.Token));
+
+                // Sweep any ad-hoc XE session orphaned by a prior hard crash.  Run in the background so it doesn't delay
+                // scheduling; it needs the offline check above to have completed so offline instances are skipped.
+                backgroundTasks.Add(Task.Run(() => RemoveAdhocXESessionsAsync(backgroundTasksCts.Token), backgroundTasksCts.Token));
             }
             catch (Exception ex)
             {
@@ -1011,6 +1015,54 @@ namespace DBADashService
                 catch (Exception ex)
                 {
                     Log.Logger.Error(ex, "Error Stop/Remove DBADash event sessions for {connection}", src.SourceConnection.ConnectionForPrint);
+                }
+            }
+        }
+
+        /// <summary>
+        /// On service startup, drops any leftover ad-hoc XE session left behind by a hard crash (or an instance that was
+        /// unreachable at cleanup).  A running ad-hoc trace normally drops itself, so this only clears true orphans - the
+        /// slow-query sessions have no equivalent because their collection cycle reconciles them each run.  Only runs when
+        /// the ad-hoc XE feature is enabled; errors are logged and never block startup.
+        /// </summary>
+        private async Task RemoveAdhocXESessionsAsync(CancellationToken cancellationToken)
+        {
+            if (!config.AllowAdhocXE) return;
+            Log.Information("Remove ad-hoc XE sessions started");
+            var options = new ParallelOptions()
+            {
+                MaxDegreeOfParallelism = 30,
+                CancellationToken = cancellationToken
+            };
+            await Parallel.ForEachAsync(config.SourceConnections, options, async (src, ct) =>
+            {
+                await RemoveAdhocXESessionAsync(src, ct);
+            });
+            Log.Information("Remove ad-hoc XE sessions completed");
+        }
+
+        private async Task RemoveAdhocXESessionAsync(DBADashSource src, CancellationToken cancellationToken)
+        {
+            if (src.SourceConnection.Type == ConnectionType.SQL && !OfflineInstances.IsOffline(src))
+            {
+                try
+                {
+                    if (src.SourceConnection.ConnectionInfo.IsXESupported)
+                    {
+                        var collector = await DBCollector.CreateAsync(src, config.ServiceName);
+                        if (await collector.RemoveAdhocXESessionAsync(cancellationToken))
+                        {
+                            Log.Logger.Information("Removed leftover ad-hoc XE session for {connection}", src.SourceConnection.ConnectionForPrint);
+                        }
+                    }
+                }
+                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                {
+                    // Service is shutting down - stop cleanly without logging as an error.
+                }
+                catch (Exception ex)
+                {
+                    Log.Logger.Error(ex, "Error removing leftover ad-hoc XE session for {connection}", src.SourceConnection.ConnectionForPrint);
                 }
             }
         }
