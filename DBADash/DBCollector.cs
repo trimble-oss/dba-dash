@@ -567,6 +567,31 @@ namespace DBADash
         }
 
         /// <summary>
+        /// Drops any leftover ad-hoc XE session (<see cref="Messaging.XETraceMessage.SessionName"/>) on the instance.
+        /// An ad-hoc trace normally drops itself in a finally block (or self-terminates on heartbeat loss), but a hard
+        /// service crash - or the instance being unreachable at cleanup - can leave the session running with no
+        /// consumer.  Unlike the slow-query sessions, nothing reconciles it periodically, so this is swept on service
+        /// startup.  Always a DROP (never STOP-and-keep): ad-hoc traces are transient and, after a restart, there is no
+        /// heartbeat or in-memory tracking, so a surviving session is by definition orphaned.  Covers both server-scoped
+        /// (on-prem / MI) and database-scoped (Azure SQL DB) sessions.  The session name is a fixed, validated constant,
+        /// so it is safe to inline.  Returns true only when a session actually existed and was dropped, so the caller
+        /// can log the (rare) real cleanup without a misleading message on every startup.
+        /// </summary>
+        public async Task<bool> RemoveAdhocXESessionAsync(CancellationToken cancellationToken = default)
+        {
+            if (!IsXESupported) return false;
+            var scope = IsAzureDB ? "ON DATABASE" : "ON SERVER";
+            var catalog = IsAzureDB ? "sys.database_event_sessions" : "sys.server_event_sessions";
+            var sql = $"IF EXISTS(SELECT 1 FROM {catalog} WHERE name = N'{Messaging.XETraceMessage.SessionName}') " +
+                      $"BEGIN DROP EVENT SESSION [{Messaging.XETraceMessage.SessionName}] {scope}; SELECT CAST(1 AS bit); END " +
+                      $"ELSE SELECT CAST(0 AS bit);";
+            await using var cn = new SqlConnection(ConnectionString);
+            await using var cmd = new SqlCommand(sql, cn);
+            await cn.OpenAsync(cancellationToken);
+            return Convert.ToBoolean(await cmd.ExecuteScalarAsync(cancellationToken));
+        }
+
+        /// <summary>
         /// Add Metadata relating to the DBA Dash service used for collection.
         /// </summary>
         public static void AddDBADashServiceMetadata(ref DataTable dt)
