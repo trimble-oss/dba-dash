@@ -1,4 +1,4 @@
-﻿using DBADash;
+using DBADash;
 using DBADashGUI.SchemaCompare;
 using DBADashGUI.Theme;
 using Microsoft.Data.SqlClient;
@@ -171,6 +171,10 @@ namespace DBADashGUI.CustomReports
 
         private bool _disposed = false;
 
+        // True when the grid has been filtered to a single Group By group via <see cref="FilterToGroup"/>
+        // (row-visibility based, so it works whether or not the grid is bound to a DataView).
+        private bool _groupDrillFilterActive;
+
         public DBADashDataGridView()
         {
             CellFormatting += DBADashDataGridView_CellFormatting;
@@ -277,7 +281,7 @@ namespace DBADashGUI.CustomReports
             ColumnContextMenuOpening += (sender, e) =>
             {
                 var isDataView = DataSource is DataView;
-                clearFilter.Enabled = HasFilter || (!isDataView);
+                clearFilter.Enabled = HasFilter || _groupDrillFilterActive || (!isDataView);
                 editFilter.Visible = isDataView;
                 saveTable.DropDownItems[0].Enabled = DataSource is DataTable or DataView;
                 hideColumn.Visible = ClickedColumnIndex >= 0;
@@ -406,7 +410,7 @@ namespace DBADashGUI.CustomReports
                 notInFilter.Visible = inFilterSupported;
                 filterLike.Visible = likeFilterSupported;
                 filterNotLike.Visible = likeFilterSupported;
-                cellClearFilterMenuItem.Enabled = HasFilter || (!isDataView);
+                cellClearFilterMenuItem.Enabled = HasFilter || _groupDrillFilterActive || (!isDataView);
                 filterByValue.Visible = columnFilterSupported;
                 excludeValue.Visible = columnFilterSupported;
                 editFilter.Visible = isDataView;
@@ -656,6 +660,23 @@ namespace DBADashGUI.CustomReports
                         .DefaultIfEmpty(0m)
                         .Sum());
 
+            // For each group-key column, map every FORMATTED key value to the DISTINCT underlying values that render to
+            // it across the whole (filtered) row set, so the drill-through can build a RowFilter on the source grid.
+            // The group key is the FORMATTED value, so one formatted value can span several underlying values (e.g. a
+            // date-only display over full timestamps) - and, for a single-column drill, those underlying values can be
+            // spread across several groups.  Mapping over ALL rows (not just the clicked group) means a single-column
+            // drill matches every row sharing the formatted value; an IN list over the whole set reproduces it exactly.
+            var keyColumnUnderlyingValues = groupKeys
+                .Select(k => rows
+                    .GroupBy(r =>
+                    {
+                        var cell = r.Cells[k.ColumnIndex];
+                        var value = cell.OwningColumn?.ValueType == typeof(string) ? cell.Value : cell.FormattedValue;
+                        return value?.ToString() ?? string.Empty;
+                    }, keyComparer)
+                    .ToDictionary(g => g.Key, g => g.Select(r => r.Cells[k.ColumnIndex].Value).Distinct().ToArray(), keyComparer))
+                .ToArray();
+
             foreach (var group in groups)
             {
                 var row = dt.NewRow();
@@ -764,8 +785,83 @@ namespace DBADashGUI.CustomReports
                 AllowUserToDeleteRows = false,
                 ReadOnly = true,
                 RowHeadersVisible = false,
-                DataSource = dt.DefaultView
+                AutoGenerateColumns = false,
+                ResultSetName = ResultSetName
             };
+
+            // The Count column (when present) sits immediately after the group-key columns.
+            var countColumnIndex = includeCount ? groupKeys.Count : -1;
+
+            // Build the columns manually so the Group By key columns - and the Count column - can be rendered as
+            // clickable links that drill back to the source grid.  A group-key link filters the source by that one
+            // column's value; the Count link filters to the whole group (all group-key columns combined).  The
+            // remaining (aggregate) columns are plain text columns.
+            for (var i = 0; i < dt.Columns.Count; i++)
+            {
+                var dtCol = dt.Columns[i];
+                var isKeyColumn = i < groupKeys.Count;
+                var isCountColumn = i == countColumnIndex;
+                DataGridViewColumn gridCol = isKeyColumn || isCountColumn
+                    ? new DataGridViewLinkColumn
+                    {
+                        TrackVisitedState = false,
+                        ToolTipText = isCountColumn
+                            ? "Click to filter the source grid to the rows in this group"
+                            : "Click to filter the source grid by this value"
+                    }
+                    : new DataGridViewTextBoxColumn();
+                gridCol.Name = dtCol.ColumnName;
+                gridCol.HeaderText = dtCol.ColumnName;
+                gridCol.DataPropertyName = dtCol.ColumnName;
+                gridCol.ValueType = dtCol.DataType;
+                gridCol.SortMode = DataGridViewColumnSortMode.Automatic;
+                resultGrid.Columns.Add(gridCol);
+            }
+            resultGrid.DataSource = dt.DefaultView;
+
+            // Wire the drill-through.  The source grid is captured directly - the result grid is never
+            // re-parented/copied.  A group-key link filters the source by that one column; the Count link filters
+            // to the whole group.  The underlying key values (captured above) let this be expressed as a RowFilter.
+            var sourceGrid = this;
+            var keyColumnIndexes = groupKeys.Select(k => k.ColumnIndex).ToArray();
+            var keyColumnNames = groupKeys.Select(k => Columns[k.ColumnIndex].DataPropertyName).ToArray();
+            // Preserve whatever filter was active when the group was produced - the group counts were computed over
+            // exactly that filtered set, so the drill ANDs onto it rather than replacing it.
+            var baseFilter = RowFilter;
+            // baseVisibleRows is only consulted by the row-visibility fallback in FilterToGroup.  Capturing it when the
+            // RowFilter path will be taken would needlessly pin every source row in this closure for the result grid's
+            // lifetime, so only capture it when the fallback can actually run.
+            var canUseRowFilter = DataSource is DataView && keyColumnNames.All(n => !string.IsNullOrEmpty(n));
+            var baseVisibleRows = canUseRowFilter ? null : rows.ToHashSet();
+            resultGrid.CellContentClick += (_, e) =>
+            {
+                if (e.RowIndex < 0 || e.ColumnIndex < 0 || sourceGrid.IsDisposed) return;
+                var gridRow = resultGrid.Rows[e.RowIndex];
+
+                GroupFilterKey Key(int j)
+                {
+                    var formatted = gridRow.Cells[j].Value?.ToString() ?? string.Empty;
+                    var underlying = keyColumnUnderlyingValues[j].TryGetValue(formatted, out var u) ? u : Array.Empty<object>();
+                    return new(keyColumnIndexes[j], keyColumnNames[j], underlying, formatted);
+                }
+
+                List<GroupFilterKey> keys;
+                if (e.ColumnIndex < keyColumnIndexes.Length)
+                {
+                    keys = new List<GroupFilterKey> { Key(e.ColumnIndex) }; // single clicked column
+                }
+                else if (e.ColumnIndex == countColumnIndex)
+                {
+                    keys = Enumerable.Range(0, keyColumnIndexes.Length).Select(Key).ToList(); // whole group
+                }
+                else
+                {
+                    return;
+                }
+                sourceGrid.FilterToGroup(keys, baseFilter, baseVisibleRows);
+                sourceGrid.FindForm()?.Activate();
+            };
+
             resultGrid.DataBindingComplete += (_, _) =>
              {
                  // --- Format Aggregate Columns dynamically after binding the DataSource ---
@@ -845,6 +941,90 @@ namespace DBADashGUI.CustomReports
                     return x.Values.Length.CompareTo(y.Values.Length);
                 }
             }
+        }
+
+        /// <summary>
+        /// Identifies one group-key column for a drill-through: the source column (by index and bound name), the set of
+        /// distinct underlying values that map into the group (used to build an IN filter), and the formatted key string
+        /// (used for the row-visibility fallback).  The value set - rather than a single value - is required because a
+        /// group is keyed on the formatted value, so several underlying values can share one group.
+        /// </summary>
+        public readonly record struct GroupFilterKey(int ColumnIndex, string ColumnName, object[] UnderlyingValues, string FormattedKey);
+
+        /// <summary>
+        /// Filters this grid to the rows identified by the supplied Group By keys.  When the grid is bound to a
+        /// DataView and every key has a bound column name, the drill is expressed as a DataView RowFilter so the
+        /// grid's row counts update and the standard Clear Filters action removes it.  Otherwise (unbound grid, or a
+        /// column without a data property) it falls back to toggling row visibility, matching the same formatted-value
+        /// semantics used to build the groups.  Use <see cref="ClearFilter"/> to restore all rows.
+        /// </summary>
+        /// <param name="keys">The group-key columns/values to drill into.</param>
+        /// <param name="baseFilter">The RowFilter that was active when the group was produced.  The drill is AND'd
+        /// onto it (rather than replacing it) so the drilled rows match the group's counts.</param>
+        /// <param name="baseVisibleRows">For the row-visibility fallback, the rows that were visible when the group
+        /// was produced.  Rows outside this set stay hidden so the base filter is preserved.</param>
+        public void FilterToGroup(IReadOnlyList<GroupFilterKey> keys, string baseFilter = null,
+            IReadOnlyCollection<DataGridViewRow> baseVisibleRows = null)
+        {
+            if (keys == null || keys.Count == 0) return;
+            try
+            {
+                if (DataSource is DataView && keys.All(k => !string.IsNullOrEmpty(k.ColumnName)))
+                {
+                    var drillFilter = string.Join(Environment.NewLine + " AND ",
+                        keys.Select(k => FormatInFilterExpression(k.ColumnName, k.UnderlyingValues)));
+                    SetFilter(CombineFilters(baseFilter, drillFilter));
+                    return;
+                }
+
+                // Fallback: toggle row visibility.  Clearing the current cell avoids "Row associated with the
+                // currency manager's position cannot be made invisible" on a data-bound grid.
+                CurrentCell = null;
+                foreach (var row in Rows.Cast<DataGridViewRow>())
+                {
+                    if (row.IsNewRow) continue;
+                    row.Visible = (baseVisibleRows == null || baseVisibleRows.Contains(row)) && keys.All(k =>
+                    {
+                        if (k.ColumnIndex < 0 || k.ColumnIndex >= Columns.Count) return false;
+                        var cell = row.Cells[k.ColumnIndex];
+                        var value = cell.OwningColumn?.ValueType == typeof(string) ? cell.Value : cell.FormattedValue;
+                        return string.Equals(value?.ToString() ?? string.Empty, k.FormattedKey, StringComparison.Ordinal);
+                    });
+                }
+                _groupDrillFilterActive = true;
+                GridFilterChanged?.Invoke(this, EventArgs.Empty);
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex, "Error filtering to group");
+            }
+        }
+
+        /// <summary>Combines two DataView RowFilter expressions with AND, parenthesising each so operator precedence
+        /// is preserved.  Either side may be null/empty.</summary>
+        private static string CombineFilters(string baseFilter, string additionalFilter)
+        {
+            if (string.IsNullOrEmpty(baseFilter)) return additionalFilter;
+            if (string.IsNullOrEmpty(additionalFilter)) return baseFilter;
+            return $"({baseFilter}){Environment.NewLine} AND ({additionalFilter})";
+        }
+
+        /// <summary>Builds a DataView RowFilter expression matching a column against a set of values
+        /// (<c>[col] IN (...)</c>, or <c>NOT IN</c> when <paramref name="isNotIn"/> is set), with correct NULL
+        /// handling: <c>IN</c> never matches NULL, so <c>[col] IS NULL</c> is OR'd in when the set contains a
+        /// null/DBNull; <c>NOT IN</c> also drops NULLs, so it is OR'd in when the set does NOT contain a null.  With no
+        /// non-null values the expression collapses to <c>[col] IS NULL</c> / <c>[col] IS NOT NULL</c>.  Shared by the
+        /// column IN/NOT IN filters and the Group By drill-through (a group key is a formatted value that can span
+        /// several underlying values, so the whole set is matched to reproduce the group).</summary>
+        private static string FormatInFilterExpression(string colName, IEnumerable<object> values, bool isNotIn = false)
+        {
+            var esc = EscapeColumnName(colName);
+            var list = (values ?? Enumerable.Empty<object>()).ToList();
+            var nonNull = list.Where(v => v.DBNullToNull() is not null).Select(GetFormattedValue).Distinct().ToList();
+            var hasNull = list.Any(v => v.DBNullToNull() is null);
+            if (nonNull.Count == 0) return isNotIn ? $"{esc} IS NOT NULL" : $"{esc} IS NULL";
+            var inExpr = $"{esc} {(isNotIn ? "NOT IN" : "IN")} ({string.Join(",", nonNull)})";
+            return (isNotIn ? !hasNull : hasNull) ? $"({esc} IS NULL OR {inExpr})" : inExpr;
         }
 
         // =====================================================================
@@ -1164,20 +1344,9 @@ namespace DBADashGUI.CustomReports
 
         private void InFilter(bool isNotIn = false)
         {
-            var colName = EscapeColumnName(SelectedColumnName);
-            var list = string.Join(',',
-                SelectedCells.Cast<DataGridViewCell>().Where(cell => cell.Value != DBNull.Value)
-                    .Select(cell => GetFormattedValue(cell.Value)).Distinct());
-            var hasNull = SelectedCells.Cast<DataGridViewCell>().Any(cell => cell.Value == DBNull.Value);
-            var operatorSymbol = isNotIn ? "NOT IN" : "IN";
-            var filter = string.IsNullOrEmpty(RowFilter) ? RowFilter : RowFilter + Environment.NewLine + " AND ";
-
-            if ((hasNull && !isNotIn) ||
-                (isNotIn && !hasNull)) // Include NULL if null value is in the list for IN filter or include NULL if it's not in the list for NOT IN filter.
-                filter += $"({colName} IS NULL OR {colName} {operatorSymbol}({list}))";
-            else
-                filter += $"{colName} {operatorSymbol}({list})";
-
+            var expr = FormatInFilterExpression(SelectedColumnName,
+                SelectedCells.Cast<DataGridViewCell>().Select(cell => cell.Value), isNotIn);
+            var filter = string.IsNullOrEmpty(RowFilter) ? expr : RowFilter + Environment.NewLine + " AND " + expr;
             SetFilter(filter);
         }
 
@@ -1192,9 +1361,13 @@ namespace DBADashGUI.CustomReports
 
         private void UpdateClearFilter(ToolStripItem item)
         {
-            item.Enabled = !string.IsNullOrEmpty(RowFilter);
+            // A row-visibility group drill hides rows without a DataView RowFilter, so include it here (mirroring the
+            // context-menu Clear Filter items) otherwise the toolbar button would stay disabled with a drill active.
+            item.Enabled = !string.IsNullOrEmpty(RowFilter) || _groupDrillFilterActive;
             item.Font = new Font(item.Font, item.Enabled ? FontStyle.Bold : FontStyle.Regular);
-            item.ToolTipText = item.Enabled ? RowFilter : "No Filter Applied";
+            item.ToolTipText = string.IsNullOrEmpty(RowFilter)
+                ? (_groupDrillFilterActive ? "Filtered to Group" : "No Filter Applied")
+                : RowFilter;
         }
 
         private void PromptFilter()
@@ -1461,6 +1634,8 @@ namespace DBADashGUI.CustomReports
         public void SetFilter(string filter)
         {
             if (DataSource is not DataView dv) return;
+            // Applying a DataView filter rebinds the rows, superseding any row-visibility group drill.
+            _groupDrillFilterActive = false;
             var previousFilter = dv.RowFilter;
             try
             {
@@ -1477,13 +1652,19 @@ namespace DBADashGUI.CustomReports
 
         public void ClearFilter()
         {
+            var hadGroupDrill = _groupDrillFilterActive;
+            _groupDrillFilterActive = false;
             if (DataSource is DataView)
             {
+                // SetFilter rebinds the rows, restoring visibility; also explicitly restore visibility in case a
+                // group drill hid rows without a DataView filter being present.
+                if (hadGroupDrill) SetAllRowsVisible();
                 SetFilter(string.Empty);
             }
             else
             {
                 SetAllRowsVisible();
+                GridFilterChanged?.Invoke(this, EventArgs.Empty);
             }
         }
 
