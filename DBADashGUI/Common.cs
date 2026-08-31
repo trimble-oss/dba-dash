@@ -1,5 +1,6 @@
 ﻿using ClosedXML.Excel;
 using DBADash;
+using Humanizer;
 using DBADashGUI.CustomReports;
 using DBADashGUI.Performance;
 using Microsoft.Data.SqlClient;
@@ -779,40 +780,76 @@ namespace DBADashGUI
             }
         }
 
+        private const string ContextInfoDisplayAsMenuName = "ContextInfoDisplayAs";
+
+        /// <summary>
+        /// Build the shared "Display As" context menu (plus its separator) for a context_info column and insert it at the top of the grid's
+        /// cell context menu. <paramref name="onStyleChanged"/> is invoked after the selected display style changes so the caller can re-render.
+        /// </summary>
+        private static ToolStripMenuItem BuildContextInfoDisplayAsMenu(DBADashDataGridView dgv, Action onStyleChanged, out ToolStripSeparator separator)
+        {
+            var mnuDisplayAs = new ToolStripMenuItem("Display As") { Name = ContextInfoDisplayAsMenuName };
+            separator = new ToolStripSeparator();
+            foreach (var value in Enum.GetValues<Common.ContextInfoDisplayStyles>())
+            {
+                var itm = new ToolStripMenuItem(value.ToString())
+                { Tag = value, Checked = value == Common.ContextInfoDisplayStyle };
+                itm.Click += (_sender, _e) =>
+                {
+                    Common.ContextInfoDisplayStyle = (Common.ContextInfoDisplayStyles)(((ToolStripMenuItem)_sender)!).Tag!;
+                    foreach (var child in mnuDisplayAs.DropDownItems.OfType<ToolStripMenuItem>())
+                    {
+                        child.Checked = (Common.ContextInfoDisplayStyles)child.Tag! == Common.ContextInfoDisplayStyle;
+                    }
+
+                    onStyleChanged();
+                };
+                mnuDisplayAs.DropDownItems.Add(itm);
+            }
+            dgv.CellContextMenu.Items.Insert(0, mnuDisplayAs);
+            dgv.CellContextMenu.Items.Insert(1, separator);
+            return mnuDisplayAs;
+        }
+
         public static void AddContextInfoDisplayAsMenu(DBADashDataGridView dgv, string colName)
         {
-            const string name = "ContextInfoDisplayAs";
-            var mnuDisplayAs = dgv.CellContextMenu.Items.OfType<ToolStripMenuItem>().FirstOrDefault(itm => itm.Name == name);
-            if (mnuDisplayAs != null) return;
+            if (dgv.CellContextMenu.Items.OfType<ToolStripMenuItem>().Any(itm => itm.Name == ContextInfoDisplayAsMenuName)) return;
+            var mnuDisplayAs = BuildContextInfoDisplayAsMenu(dgv, () =>
             {
-                mnuDisplayAs = new ToolStripMenuItem("Display As") { Name = name };
-                var mnuSep = new ToolStripSeparator();
-                foreach (var value in Enum.GetValues<Common.ContextInfoDisplayStyles>())
-                {
-                    var itm = new ToolStripMenuItem(value.ToString())
-                    { Tag = value, Checked = value == Common.ContextInfoDisplayStyle };
-                    itm.Click += (_sender, _e) =>
-                    {
-                        Common.ContextInfoDisplayStyle = (Common.ContextInfoDisplayStyles)(((ToolStripMenuItem)_sender)!).Tag!;
-                        foreach (var itm in mnuDisplayAs.DropDownItems.OfType<ToolStripMenuItem>())
-                        {
-                            itm.Checked = (Common.ContextInfoDisplayStyles)itm.Tag! == Common.ContextInfoDisplayStyle;
-                        }
+                var dt = ((DataView)dgv.DataSource).Table;
+                Common.ReplaceBinaryContextInfoColumn(ref dt, true);
+            }, out var mnuSep);
+            dgv.CellContextMenuOpening += (sender, e) =>
+            {
+                mnuDisplayAs.Visible = dgv.Columns[e.ColumnIndex].Name == colName;
+                mnuSep.Visible = dgv.Columns[e.ColumnIndex].Name == colName;
+            };
+        }
 
-                        var dt = ((DataView)dgv.DataSource).Table;
-
-                        Common.ReplaceBinaryContextInfoColumn(ref dt, true);
-                    };
-                    mnuDisplayAs.DropDownItems.Add(itm);
-                }
-                dgv.CellContextMenu.Items.Insert(0, mnuDisplayAs);
-                dgv.CellContextMenu.Items.Insert(1, mnuSep);
-                dgv.CellContextMenuOpening += (sender, e) =>
-                {
-                    mnuDisplayAs.Visible = dgv.Columns[e.ColumnIndex].Name == colName;
-                    mnuSep.Visible = dgv.Columns[e.ColumnIndex].Name == colName;
-                };
-            }
+        /// <summary>
+        /// Adds the context_info "Display As" menu to a pivoted (Attribute/Value) grid, where context_info appears as a row rather than a column.
+        /// <paramref name="sourceWithBin"/> must still contain the context_info_bin column so the value can be re-converted; <paramref name="refresh"/>
+        /// is called to re-render the grid after the display style changes.
+        /// </summary>
+        public static void AddContextInfoDisplayAsMenuForPivot(DBADashDataGridView dgv, DataTable sourceWithBin, Action refresh)
+        {
+            if (dgv.CellContextMenu.Items.OfType<ToolStripMenuItem>().Any(itm => itm.Name == ContextInfoDisplayAsMenuName)) return;
+            if (!sourceWithBin.Columns.Contains("context_info_bin")) return; // No binary context_info present - nothing to re-convert
+            var contextInfoAttribute = "context_info".Titleize();
+            var mnuDisplayAs = BuildContextInfoDisplayAsMenu(dgv, () =>
+            {
+                Common.ReplaceBinaryContextInfoColumn(ref sourceWithBin, true);
+                refresh();
+            }, out var mnuSep);
+            dgv.CellContextMenuOpening += (sender, e) =>
+            {
+                var isContextInfoRow = e.RowIndex >= 0 && e.RowIndex < dgv.Rows.Count
+                    && dgv.Rows[e.RowIndex].DataBoundItem is DataRowView drv
+                    && drv.Row.Table.Columns.Contains("Attribute")
+                    && string.Equals(Convert.ToString(drv["Attribute"]), contextInfoAttribute, StringComparison.Ordinal);
+                mnuDisplayAs.Visible = isContextInfoRow;
+                mnuSep.Visible = isContextInfoRow;
+            };
         }
 
         // Very simple grid diff tool.  Relies on rows being in order.
