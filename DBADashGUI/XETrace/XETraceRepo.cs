@@ -198,16 +198,24 @@ namespace DBADashGUI.XETrace
                 cmd.Parameters.AddWithValue("@Days", days);
             });
 
-        public static Task<DataTable> GetEventsAsync(long sessionID) =>
-            FillAsync("XE.XETraceEvents_Get", cmd => cmd.Parameters.AddWithValue("@XETraceSessionID", sessionID));
+        /// <summary>
+        /// Loads all events of a single trace session, already shredded into the typed display table (see
+        /// <see cref="XEStoredEvents.BuildFromReader"/>).  Streams the reader straight into the table rather than
+        /// materializing a throwaway table of JSON strings first.  <paramref name="convertTimestampToLocal"/> converts
+        /// the UTC timestamp to the app time zone inline.
+        /// </summary>
+        public static Task<DataTable> GetExpandedEventsAsync(long sessionID, bool convertTimestampToLocal) =>
+            ReadExpandedAsync("XE.XETraceEvents_Get",
+                cmd => cmd.Parameters.AddWithValue("@XETraceSessionID", sessionID), convertTimestampToLocal);
 
         /// <summary>
         /// Returns the merged events of every per-instance session of a multi-instance run (each event carries its
-        /// session's InstanceID; the caller resolves the label - see XEStoredEvents.Expand), in time order.  Used to
-        /// reload an AG-wide trace as one grid.
+        /// session's InstanceID; the caller resolves the label - see XEStoredEvents), in time order, already shredded
+        /// into the typed display table.  Used to reload an AG-wide trace as one grid.
         /// </summary>
-        public static Task<DataTable> GetEventsByRunGroupAsync(Guid runGroupID) =>
-            FillAsync("XE.XETraceEvents_GetByRunGroup", cmd => cmd.Parameters.AddWithValue("@RunGroupID", runGroupID));
+        public static Task<DataTable> GetExpandedEventsByRunGroupAsync(Guid runGroupID, bool convertTimestampToLocal) =>
+            ReadExpandedAsync("XE.XETraceEvents_GetByRunGroup",
+                cmd => cmd.Parameters.AddWithValue("@RunGroupID", runGroupID), convertTimestampToLocal);
 
         public static async Task<byte[]> GetXelAsync(long sessionID)
         {
@@ -230,5 +238,23 @@ namespace DBADashGUI.XETrace
             da.Fill(dt);
             return dt;
         }
+
+        /// <summary>
+        /// Executes an events proc and shreds the reader straight into the typed display table.  Runs the whole
+        /// read+build synchronously on a background thread (via <see cref="Task.Run(Action)"/>): the callers are on the
+        /// UI thread, and an async per-row read would marshal all ~85K continuations back onto the UI message pump -
+        /// far slower than one background pass with synchronous <c>Read()</c>.
+        /// </summary>
+        private static Task<DataTable> ReadExpandedAsync(string procName, Action<SqlCommand> addParams,
+            bool convertTimestampToLocal) =>
+            Task.Run(() =>
+            {
+                using var cn = new SqlConnection(Common.ConnectionString);
+                using var cmd = new SqlCommand(procName, cn) { CommandType = CommandType.StoredProcedure };
+                addParams(cmd);
+                cn.Open();
+                using var reader = cmd.ExecuteReader();
+                return XEStoredEvents.BuildFromReader(reader, convertTimestampToLocal);
+            });
     }
 }

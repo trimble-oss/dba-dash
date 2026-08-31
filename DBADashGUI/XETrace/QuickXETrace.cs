@@ -1721,7 +1721,7 @@ namespace DBADashGUI.XETrace
                 // The grid no longer reflects a live capture or a DB history snapshot.
                 _xelData = null;
                 _loadedSnapshot = null;
-                _results.LoadEvents(result.Table, convertTimestampToLocal: result.TimestampsAreUtc);
+                _results.LoadEvents(result.Table, convertTimestampToLocal: result.TimestampsAreUtc, takeOwnership: true);
                 SetStatus($"Loaded {_results.RowCount:N0} event(s) from {Path.GetFileName(path)}", string.Empty,
                     _results.RowCount > 0 ? DashColors.Success : DashColors.Warning);
             }
@@ -1794,12 +1794,13 @@ namespace DBADashGUI.XETrace
             try
             {
                 // A multi-instance run reloads every replica's events together (merged, in time order); a single run
-                // loads just its one session.
-                var stored = runGroupID.HasValue
-                    ? await XETraceRepo.GetEventsByRunGroupAsync(runGroupID.Value)
-                    : await XETraceRepo.GetEventsAsync(sessionID);
+                // loads just its one session.  Stored timestamps are UTC and converted to app time zone during the
+                // build, so LoadEvents must not convert again.
+                var expanded = runGroupID.HasValue
+                    ? await XETraceRepo.GetExpandedEventsByRunGroupAsync(runGroupID.Value, convertTimestampToLocal: true)
+                    : await XETraceRepo.GetExpandedEventsAsync(sessionID, convertTimestampToLocal: true);
                 _xelData = null;
-                _results.LoadEvents(XEStoredEvents.Expand(stored));
+                _results.LoadEvents(expanded, convertTimestampToLocal: false, takeOwnership: true);
                 // Remember what's shown so switching back to this instance re-loads the same snapshot (the whole merged
                 // grid when it's a multi-instance run).
                 _loadedSnapshot = new HistorySnapshot(sessionID, runGroupID);

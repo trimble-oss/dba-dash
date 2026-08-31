@@ -84,7 +84,7 @@ namespace DBADashGUI.XETrace
                     SetStatus($"No events in {Path.GetFileName(path)}.", DashColors.Warning);
                     return;
                 }
-                _results.LoadEvents(result.Table, convertTimestampToLocal: result.TimestampsAreUtc);
+                _results.LoadEvents(result.Table, convertTimestampToLocal: result.TimestampsAreUtc, takeOwnership: true);
                 UpdateButtons();
                 SetStatus($"{_results.RowCount:N0} event(s) loaded from {Path.GetFileName(path)}.", DashColors.Success);
             }

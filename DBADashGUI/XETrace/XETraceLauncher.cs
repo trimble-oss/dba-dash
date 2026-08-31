@@ -84,7 +84,7 @@ namespace DBADashGUI.XETrace
         /// Opens a read-only viewer over the events already captured for a persisted ad-hoc trace session (or the whole
         /// merged run when <paramref name="runGroupID"/> is set - the same grouping the QuickXETrace history uses).
         /// Backs the Trace History report's "View Data" link.  Loads the stored events through
-        /// <see cref="XEStoredEvents.Expand"/> so the grid matches the live/history views exactly.
+        /// <see cref="XEStoredEvents.BuildFromReader"/> so the grid matches the live/history views exactly.
         /// </summary>
         public static void LaunchStoredData(IWin32Window owner, long sessionID, Guid? runGroupID, string title)
         {
@@ -105,10 +105,12 @@ namespace DBADashGUI.XETrace
         {
             try
             {
-                var stored = runGroupID.HasValue
-                    ? await XETraceRepo.GetEventsByRunGroupAsync(runGroupID.Value)
-                    : await XETraceRepo.GetEventsAsync(sessionID);
-                control.LoadEvents(XEStoredEvents.Expand(stored));
+                // Stored timestamps are UTC and converted to app time zone during the build, so LoadEvents must not
+                // convert again.
+                var expanded = runGroupID.HasValue
+                    ? await XETraceRepo.GetExpandedEventsByRunGroupAsync(runGroupID.Value, convertTimestampToLocal: true)
+                    : await XETraceRepo.GetExpandedEventsAsync(sessionID, convertTimestampToLocal: true);
+                control.LoadEvents(expanded, convertTimestampToLocal: false, takeOwnership: true);
             }
             catch (Exception ex)
             {

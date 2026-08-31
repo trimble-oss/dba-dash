@@ -119,13 +119,33 @@ namespace DBADashGUI.XETrace
         /// <paramref name="convertTimestampToLocal"/> is true when the source holds UTC timestamps (live/history/.xel);
         /// pass false for a DBA Dash-native file whose timestamps are already in the app time zone, otherwise the
         /// conversion would be applied a second time and shift them.
+        /// <paramref name="takeOwnership"/> lets a caller that just built a throw-away table (e.g.
+        /// <see cref="XEStoredEvents.BuildFromReader"/> output, a freshly loaded file) hand it over without the defensive
+        /// <see cref="DataTable.Copy"/> - a full clone of every row that matters on large (~85K-row) history/file loads.
+        /// Only pass true for a standalone table with no other owner (not one still parented by a DataSet).
         /// </summary>
-        public void LoadEvents(DataTable events, bool convertTimestampToLocal = true)
+        public void LoadEvents(DataTable events, bool convertTimestampToLocal = true, bool takeOwnership = false)
         {
             Clear();
-            _events = events?.Copy();
+            _events = takeOwnership ? events : events?.Copy();
             if (convertTimestampToLocal) ConvertTimestampToLocal(_events);
-            _dgvXE.DataSource = _events?.DefaultView;
+            if (_events == null)
+            {
+                _dgvXE.DataSource = null;
+                return;
+            }
+
+            // Prepare the columns against an empty (schema-only) view first, then bind the full data.  LinkifyColumns
+            // swaps text columns for link columns (RemoveAt/Insert) - a structural change that forces a full re-layout
+            // of the bound grid, which is very expensive once it already holds ~85K rows (measured ~4.8s).  Doing that
+            // surgery on 0 rows and then binding the real data with AutoGenerateColumns off (so the prepared columns
+            // are reused, not regenerated) turns a ~5s bind into ~0.4s.  The DataBindingComplete handler runs
+            // LinkifyColumns/PinInstanceColumn on each bind; on the full bind they're no-ops (columns already links).
+            _dgvXE.AutoGenerateColumns = true;
+            _dgvXE.DataSource = _events.Clone().DefaultView; // schema only -> columns generated + linkified cheaply
+            _dgvXE.AutoGenerateColumns = false;
+            _dgvXE.DataSource = _events.DefaultView;          // full data reuses the prepared columns (single cheap bind)
+            _dgvXE.AutoGenerateColumns = true;                // restore for the live-append path, which relies on it
         }
 
         /// <summary>
