@@ -82,7 +82,7 @@ namespace DBADashGUI.XETrace
         /// Grid column that identifies an event's source instance in a multi-instance run.  This is not persisted into
         /// the event JSON - the source instance is the session's own InstanceID (see <c>XE.XETraceSession</c>).  The GUI
         /// stamps it on live batches (from the trace's InstanceID) and resolves it from the session row on history
-        /// reload (see <c>XEStoredEvents.Expand</c>), so both paths label instances identically.
+        /// reload (see <c>XEStoredEvents.BuildFromReader</c>), so both paths label instances identically.
         /// </summary>
         public const string InstanceColumn = "Instance";
 
