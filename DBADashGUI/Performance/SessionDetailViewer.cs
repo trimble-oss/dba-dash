@@ -1794,6 +1794,7 @@ DBCC FREEPROCCACHE({planHandle});";
             dt.Columns.Remove("text");
             if (dt.Columns.Contains("InstanceID")) dt.Columns.Remove("InstanceID");
             if (dt.Columns.Contains("DatabaseID")) dt.Columns.Remove("DatabaseID");
+            Common.ReplaceBinaryContextInfoColumn(ref dt); // Convert binary context_info to a readable string (otherwise it pivots as "System.Byte[]"). Keeps context_info_bin so the "Display As" menu can re-convert.
 
             var split = new SplitContainer { Dock = DockStyle.Fill, Orientation = Orientation.Vertical };
             page.Controls.Add(split);
@@ -1801,6 +1802,7 @@ DBCC FREEPROCCACHE({planHandle});";
             var dgv = NewGrid();
             dgv.AutoGenerateColumns = true;
             dgv.DataSource = PivotSingleRow(dt);
+            Common.AddContextInfoDisplayAsMenuForPivot(dgv, dt, () => dgv.DataSource = PivotSingleRow(dt));
             dgv.Dock = DockStyle.Fill;
             split.Panel2.Controls.Add(dgv);
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
@@ -2268,6 +2270,7 @@ DBCC FREEPROCCACHE({planHandle});";
             var row = source.Rows[0];
             foreach (DataColumn col in source.Columns)
             {
+                if (col.ColumnName == "context_info_bin") continue; // Raw binary - shown via the converted context_info column instead
                 pivot.Rows.Add(col.ColumnName.Titleize(),
                     row[col] == DBNull.Value ? string.Empty : Convert.ToString(row[col]));
             }
