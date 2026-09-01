@@ -34,6 +34,14 @@ namespace DBADashGUI.XETrace
         private readonly ToolStrip _toolStrip = new() { GripStyle = ToolStripGripStyle.Hidden };
         private readonly ToolStripButton _tsRefresh = new("Refresh") { DisplayStyle = ToolStripItemDisplayStyle.ImageAndText, Image = Properties.Resources.ProjectSystemModelRefresh_16x, ToolTipText = "Queries each monitored instance for XE sessions" };
 
+        private readonly ToolStripButton _tsCancel = new("Cancel")
+        {
+            DisplayStyle = ToolStripItemDisplayStyle.ImageAndText,
+            Image = Properties.Resources.StatusAnnotations_Stop_32xLG_color,
+            Enabled = false,
+            ToolTipText = "Cancel the in-progress refresh."
+        };
+
         private readonly ToolStripDropDownButton _tsFilter = new("Filter")
         {
             DisplayStyle = ToolStripItemDisplayStyle.Image,
@@ -118,6 +126,15 @@ namespace DBADashGUI.XETrace
         private DateTime? _lastRefreshTime;
         private readonly List<string> _problems = new();
 
+        // Coalesces the per-reply grid rebuild + status render.  At estate scale (the root-level "Running Sessions" node
+        // fans out to every instance) replies land in a rapid stream, and rebuilding + rebinding the whole grid on each
+        // one saturates the UI thread and freezes the window.  Instead each reply just marks the UI dirty and this timer
+        // flushes at most a few times a second, with a guaranteed final flush when the run completes.
+        private readonly System.Windows.Forms.Timer _uiFlushTimer = new() { Interval = 250 };
+
+        private bool _uiDirty;
+        private bool _cancelRequested;
+
         public MultiInstanceXEView()
         {
             _tsFilter.DropDownItems.AddRange(new ToolStripItem[]
@@ -126,7 +143,7 @@ namespace DBADashGUI.XETrace
             });
             _toolStrip.Items.AddRange(new ToolStripItem[]
             {
-                _tsRefresh, _tsCopy, _tsExcel, _tsFilter, _tsClearFilter, new ToolStripSeparator(),
+                _tsRefresh, _tsCancel, _tsCopy, _tsExcel, _tsFilter, _tsClearFilter, new ToolStripSeparator(),
             });
             _statusStrip.Items.Add(_status);
 
@@ -136,6 +153,7 @@ namespace DBADashGUI.XETrace
             Controls.Add(_toolStrip);
 
             _tsRefresh.Click += (_, _) => RefreshData();
+            _tsCancel.Click += (_, _) => CancelRefresh();
             _tsRunningOnly.CheckedChanged += (_, _) => { RebuildGrid(); RenderStatus(); };
             _tsExcludeSystemHealth.CheckedChanged += (_, _) => { RebuildGrid(); RenderStatus(); };
             _tsExcludeTelemetry.CheckedChanged += (_, _) => { RebuildGrid(); RenderStatus(); };
@@ -146,6 +164,7 @@ namespace DBADashGUI.XETrace
             _grid.DataBindingComplete += Grid_DataBindingComplete;
             _grid.CellContentClick += Grid_CellContentClick;
             _grid.RegisterClearFilter(_tsClearFilter);
+            _uiFlushTimer.Tick += (_, _) => FlushUi();
 
             BuildColumns();
             _grid.DataSource = _sessions.DefaultView;
@@ -261,7 +280,9 @@ namespace DBADashGUI.XETrace
             }
 
             _refreshRunning = true;
+            _cancelRequested = false;
             _tsRefresh.Enabled = false;
+            _tsCancel.Enabled = true;
             RenderStatus();
 
             string error = null;
@@ -274,7 +295,6 @@ namespace DBADashGUI.XETrace
                     {
                         ReplaceInstanceRows(result.InstanceID, rows);
                         _collected++;
-                        RebuildGrid();
                     }
                     else if (result.Offline)
                     {
@@ -290,7 +310,9 @@ namespace DBADashGUI.XETrace
                         _failed++;
                         _problems.Add($"{result.Label}: {result.Message}");
                     }
-                    RenderStatus();
+                    // Coalesced: the grid rebuild + status render happen on the flush timer, not once per reply, so a
+                    // large fan-out doesn't freeze the UI thread with a rebuild/rebind storm.
+                    RequestUiUpdate();
                     return Task.CompletedTask;
                 }, cts.Token);
 
@@ -313,6 +335,12 @@ namespace DBADashGUI.XETrace
                 {
                     _refreshRunning = false;
                     _tsRefresh.Enabled = true;
+                    _tsCancel.Enabled = false;
+                    // Stop coalescing and apply the final state directly, so the last replies (which may have landed
+                    // after the last timer tick) are reflected exactly.
+                    _uiFlushTimer.Stop();
+                    _uiDirty = false;
+                    RebuildGrid();
                     if (error != null)
                     {
                         _status.Text = error;
@@ -321,6 +349,7 @@ namespace DBADashGUI.XETrace
                     else
                     {
                         RenderStatus();
+                        if (_cancelRequested) _status.Text += " · cancelled";
                     }
                     // This run still owns _cts - clear it so the next refresh's _cts?.Cancel() doesn't hit the CTS we're
                     // about to dispose (which would throw ObjectDisposedException).
@@ -330,6 +359,40 @@ namespace DBADashGUI.XETrace
                 // Everything is UI-thread affine, so a superseded run reaching this point can't race the owning run.
                 cts.Dispose();
             }
+        }
+
+        /// <summary>
+        /// Explicitly cancels the in-progress refresh.  Cancellation is threaded down to the per-instance broker receive,
+        /// so any in-flight WAITFOR (RECEIVE ...) is aborted and its pooled connection freed promptly rather than after
+        /// the full message lifetime.  The owning run's finally clause re-renders the (partial) grid + status.
+        /// </summary>
+        private void CancelRefresh()
+        {
+            if (!_refreshRunning) return;
+            _cancelRequested = true;
+            _tsCancel.Enabled = false;
+            // Stop coalescing and drop any pending dirty flag so a queued flush tick can't overwrite the "Cancelling..."
+            // feedback while cancellation unwinds.  The owning run's finally clause does the final rebuild + status.
+            _uiFlushTimer.Stop();
+            _uiDirty = false;
+            _status.Text = "Cancelling...";
+            _cts?.Cancel();
+        }
+
+        /// <summary>Marks the grid/status as needing a refresh and ensures the coalescing flush timer is running.</summary>
+        private void RequestUiUpdate()
+        {
+            _uiDirty = true;
+            if (!_uiFlushTimer.Enabled) _uiFlushTimer.Start();
+        }
+
+        /// <summary>Applies a pending coalesced update (rebuild the grid projection + re-render the status), if any.</summary>
+        private void FlushUi()
+        {
+            if (!_uiDirty) return;
+            _uiDirty = false;
+            RebuildGrid();
+            RenderStatus();
         }
 
         /// <summary>
@@ -599,5 +662,16 @@ namespace DBADashGUI.XETrace
         }
 
         private static string Plural(int n) => n == 1 ? string.Empty : "s";
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _cts?.Cancel();
+                _uiFlushTimer.Stop();
+                _uiFlushTimer.Dispose();
+            }
+            base.Dispose(disposing);
+        }
     }
 }

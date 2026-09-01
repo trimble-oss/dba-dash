@@ -4,6 +4,7 @@ using Microsoft.Data.SqlClient;
 using System;
 using System.Data;
 using System.Drawing;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -41,7 +42,7 @@ namespace DBADashGUI.Messaging
         /// </summary>
         public static async Task SendMessageAndProcessReply(MessageBase message, int importAgentID,
             SetStatusDelegate setStatus, MessageCompletedDelegate processCompleted, Guid messageGroup,
-            MessageResponseDelegate onProgress = null)
+            MessageResponseDelegate onProgress = null, CancellationToken cancellationToken = default)
         {
             message.Id = messageGroup;
 
@@ -49,7 +50,11 @@ namespace DBADashGUI.Messaging
             {
                 await MessageProcessing.SendMessageToService(message.Serialize(), importAgentID,
                     messageGroup,
-                    Common.ConnectionString, message.Lifetime);
+                    Common.ConnectionString, message.Lifetime, cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                throw; // Cancelled (e.g. a superseded / explicitly cancelled refresh) - let the caller drop it silently.
             }
             catch (Exception ex)
             {
@@ -63,7 +68,11 @@ namespace DBADashGUI.Messaging
                 ResponseMessage reply;
                 try
                 {
-                    reply = await CollectionMessaging.ReceiveReply(messageGroup, message.Lifetime * 1000);
+                    reply = await CollectionMessaging.ReceiveReply(messageGroup, message.Lifetime * 1000, cancellationToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    throw; // As above - cancellation aborts the WAITFOR RECEIVE; propagate rather than showing an error.
                 }
                 catch (Exception ex)
                 {
