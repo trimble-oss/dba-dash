@@ -49,7 +49,9 @@ namespace DBADashGUI.Pickers
             {
                 // The designer lays out the control with the "Not set" checkbox at the
                 // top and the entry boxes below it. When null isn't allowed we hide the
-                // checkbox and shift the boxes up to reclaim the space.
+                // checkbox and shift the boxes up to reclaim the space. This sets the
+                // initial (design-scale) layout; LayoutHorizontal re-normalises the
+                // vertical position at runtime once the control has been DPI-scaled.
                 const int shift = 28;
                 chkNotSet.Visible = false;
                 // include seconds controls when shifting up to keep all inputs aligned on the same Y plane
@@ -126,6 +128,23 @@ namespace DBADashGUI.Pickers
             }
         }
 
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            // The constructor lays the boxes out using design-DPI (96) child sizes. By the time
+            // the control is shown it has been scaled to the current DPI and the AutoSize labels
+            // have re-measured (often a shade wider), so re-run the layout to size the control to
+            // its final content - otherwise the right-most label is clipped on scaled sessions.
+            LayoutHorizontal();
+        }
+
+        protected override void OnFontChanged(EventArgs e)
+        {
+            base.OnFontChanged(e);
+            // A DPI change re-scales the font; re-flow so widths track the new label sizes.
+            LayoutHorizontal();
+        }
+
         private void UpdateSecondsVisibility()
         {
             if (numSeconds != null)
@@ -144,15 +163,16 @@ namespace DBADashGUI.Pickers
         /// <summary>
         /// Positions the day / hour / minute (/ second) boxes left-to-right, skipping the hidden ones
         /// (days when <see cref="AllowDays"/> is false, seconds when <see cref="IncludeSeconds"/> is false),
-        /// and sizes the control to fit. Only horizontal position is set; the vertical layout established
-        /// by the designer (and the "Not set" shift) is preserved.
+        /// and sizes the control to fit. In the inline use it also normalises the vertical position (see below).
         /// </summary>
         private void LayoutHorizontal()
         {
             try
             {
-                const int numToLabelGap = 2;
-                const int groupGap = 8;
+                // Gaps are authored in logical (96 DPI) units; scale them so spacing holds up
+                // on high-DPI / scaled (e.g. RDP) sessions instead of staying fixed in pixels.
+                var numToLabelGap = LogicalToDeviceUnits(2);
+                var groupGap = LogicalToDeviceUnits(8);
                 var x = 0;
 
                 void Place(NumericUpDown num, Label lbl)
@@ -167,15 +187,45 @@ namespace DBADashGUI.Pickers
                 Place(numMinutes, lblMinutes);
                 if (IncludeSeconds && numSeconds != null)
                 {
-                    // Seconds may not have shared the "Not set" shift (IncludeSeconds can be set after
-                    // construction), so re-align their row with minutes before placing them.
-                    numSeconds.Top = numMinutes.Top;
-                    lblSeconds.Top = lblMinutes.Top;
                     Place(numSeconds, lblSeconds);
                 }
 
-                MinimumSize = new Size(x, 0);
+                // Vertical normalisation for the inline use (no "Not set" checkbox). A NumericUpDown cannot
+                // shrink below its PreferredHeight, so when the form runs below its design scale (100%, or
+                // Azure Bastion web RDP, versus the 125% the layout was authored at) AutoScaleMode.Font
+                // budgets each box shorter than it can actually be and pushes its Top negative to keep it
+                // "centered" - clipping the top border and up-spin arrow. Pin the row back to Top = 0 (where
+                // it sits at design scale, aligned with the external row label) and grow the control to fit
+                // the boxes' real height so nothing is clipped.
+                if (!chkNotSet.Visible)
+                {
+                    var labelOffset = LogicalToDeviceUnits(4);   // labels sit slightly below the boxes (baseline)
+                    foreach (var num in new[] { numDays, numHours, numMinutes, numSeconds })
+                    {
+                        if (num != null) num.Top = 0;
+                    }
+                    foreach (var lbl in new[] { lblDays, lblHours, lblMinutes, lblSeconds })
+                    {
+                        if (lbl != null) lbl.Top = labelOffset;
+                    }
+                }
+                else if (IncludeSeconds && numSeconds != null)
+                {
+                    // Drop-down use: keep seconds aligned with the minutes row (which sits below the checkbox).
+                    numSeconds.Top = numMinutes.Top;
+                    lblSeconds.Top = lblMinutes.Top;
+                }
+
+                var contentBottom = 0;
+                foreach (Control c in Controls)
+                {
+                    if (c.Visible && c.Bottom > contentBottom) contentBottom = c.Bottom;
+                }
+                var requiredHeight = contentBottom + LogicalToDeviceUnits(2);
+
+                MinimumSize = new Size(x, requiredHeight);
                 if (Width != x) Width = x;
+                if (Height < requiredHeight) Height = requiredHeight;
             }
             catch
             {
