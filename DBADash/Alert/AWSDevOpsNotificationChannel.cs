@@ -10,31 +10,31 @@ using System.Threading.Tasks;
 namespace DBADash.Alert
 {
     /// <summary>
-    /// First-class channel for the Azure DevOps Agent incident webhook.
+    /// First-class channel for the AWS DevOps Agent incident webhook.
     /// A thin, easy-to-configure wrapper over the generic webhook transport
     /// (<see cref="WebhookSender"/>): the user supplies just the webhook URL and
     /// API key, and this channel maps the DBA Dash alert to the DevOps Agent
     /// incident schema and adds the required authentication headers.
     /// </summary>
-    public class AzureDevOpsNotificationChannel : NotificationChannelBase
+    public class AWSDevOpsNotificationChannel : NotificationChannelBase
     {
-        public override NotificationChannelTypes NotificationChannelType => NotificationChannelTypes.AzureDevOps;
+        public override NotificationChannelTypes NotificationChannelType => NotificationChannelTypes.AWSDevOps;
 
         public override bool IncludeNotificationCountInMessage => false;
 
-        [Category("Azure DevOps Agent Config")]
+        [Category("AWS DevOps Agent Config")]
         [DisplayName("Webhook Url")]
         [Description("The generic webhook URL provided by the DevOps Agent integration.")]
         [PasswordPropertyText(true)]
         public string WebhookUrl { get; set; }
 
-        [Category("Azure DevOps Agent Config")]
+        [Category("AWS DevOps Agent Config")]
         [DisplayName("API Key")]
         [Description("The API key / secret provided by the DevOps Agent integration. Sent as an 'Authorization: Bearer' header and stored encrypted with the channel configuration.")]
         [PasswordPropertyText(true)]
         public string ApiKey { get; set; }
 
-        [Category("Azure DevOps Agent Config")]
+        [Category("AWS DevOps Agent Config")]
         [DisplayName("Service (optional)")]
         [Description("Value for the incident 'service' field. Leave blank to use the monitored instance display name.")]
         public string Service { get; set; }
@@ -42,7 +42,7 @@ namespace DBADash.Alert
         protected override async Task InternalSendNotificationAsync(Alert alert, string connectionString)
         {
             if (string.IsNullOrEmpty(WebhookUrl))
-                throw new InvalidOperationException("Webhook Url is not configured for the Azure DevOps notification channel.");
+                throw new InvalidOperationException("Webhook Url is not configured for the AWS DevOps notification channel.");
 
             var eventTimestamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture);
 
@@ -87,7 +87,7 @@ namespace DBADash.Alert
             if (!response.IsSuccessStatusCode)
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
-                throw new Exception($"Failed to send notification to Azure DevOps Agent. Status: {response.StatusCode}. Response: {responseContent}");
+                throw new Exception($"Failed to send notification to AWS DevOps Agent. Status: {response.StatusCode}. Response: {responseContent}");
             }
         }
 

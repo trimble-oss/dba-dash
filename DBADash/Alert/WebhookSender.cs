@@ -42,7 +42,7 @@ namespace DBADash.Alert
 
     /// <summary>
     /// Shared transport used by the generic webhook channel and the channels that
-    /// wrap it (e.g. Azure DevOps). Posts a JSON payload and applies any custom
+    /// wrap it (e.g. AWS DevOps). Posts a JSON payload and applies any custom
     /// headers, handling the request/content header split transparently.
     /// </summary>
     public static class WebhookSender
