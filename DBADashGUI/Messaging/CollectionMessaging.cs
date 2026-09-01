@@ -234,16 +234,19 @@ namespace DBADashGUI.Messaging
             }
         }
 
-        private static async Task<BrokerResponse> ReceiveReplyFromServiceBroker(Guid group, int timeout)
+        private static async Task<BrokerResponse> ReceiveReplyFromServiceBroker(Guid group, int timeout,
+            CancellationToken cancellationToken = default)
         {
             await using var cn = new SqlConnection(Common.ConnectionString);
             await using var cmd = new SqlCommand("Messaging.ReceiveReplyFromServiceToGUI", cn)
             { CommandType = CommandType.StoredProcedure, CommandTimeout = 0 };
             cmd.Parameters.AddWithValue("@ConversationGroupID", group);
             cmd.Parameters.AddWithValue("@Timeout", timeout);
-            await cn.OpenAsync();
-            await using var rdr = await cmd.ExecuteReaderAsync();
-            if (!rdr.Read()) throw new Exception("No results");
+            await cn.OpenAsync(cancellationToken);
+            // Passing the token to ExecuteReaderAsync sends an attention to SQL Server on cancel, aborting the
+            // WAITFOR (RECEIVE ...) and freeing this pooled connection promptly rather than after the full timeout.
+            await using var rdr = await cmd.ExecuteReaderAsync(cancellationToken);
+            if (!await rdr.ReadAsync(cancellationToken)) throw new Exception("No results");
             return new BrokerResponse()
             {
                 Handle = (Guid)rdr["conversation_handle"],
@@ -252,9 +255,10 @@ namespace DBADashGUI.Messaging
             };
         }
 
-        public static async Task<ResponseMessage> ReceiveReply(Guid group, int timeout)
+        public static async Task<ResponseMessage> ReceiveReply(Guid group, int timeout,
+            CancellationToken cancellationToken = default)
         {
-            var reply = await ReceiveReplyFromServiceBroker(group, timeout);
+            var reply = await ReceiveReplyFromServiceBroker(group, timeout, cancellationToken);
             var message = string.Empty;
             switch (reply.Type)
             {

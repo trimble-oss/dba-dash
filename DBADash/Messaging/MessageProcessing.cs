@@ -325,18 +325,18 @@ namespace DBADash.Messaging
             await cmd.ExecuteNonQueryAsync();
         }
 
-        public static async Task SendMessageToService(byte[] payload, int agentID, Guid messageGroup, string connectionString, int LifeTime)
+        public static async Task SendMessageToService(byte[] payload, int agentID, Guid messageGroup, string connectionString, int LifeTime, CancellationToken cancellationToken = default)
         {
             await using var cn = new SqlConnection(connectionString);
             await using var cmd = new SqlCommand("Messaging.SendMessageFromGUIToService", cn) { CommandType = CommandType.StoredProcedure };
-            await cn.OpenAsync();
+            await cn.OpenAsync(cancellationToken);
             cmd.Parameters.AddWithValue("@Payload", payload);
             var handle = Guid.NewGuid();
             cmd.Parameters.AddWithValue("@InitDlgHandle", handle);
             cmd.Parameters.AddWithValue("@ConversationGroup", messageGroup);
             cmd.Parameters.AddWithValue("@DBADashAgentID", agentID);
             cmd.Parameters.AddWithValue("@Lifetime", LifeTime);
-            await cmd.ExecuteNonQueryAsync();
+            await cmd.ExecuteNonQueryAsync(cancellationToken);
         }
     }
 }

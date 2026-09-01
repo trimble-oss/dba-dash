@@ -47,7 +47,7 @@ namespace DBADashGUI.XETrace
 
         /// <summary>Lists the instance's existing XE sessions (name, running state, targets, event count).</summary>
         public static async Task<XEListOutcome> ListSessionsAsync(DBADashContext context,
-            MessagingHelper.SetStatusDelegate setStatus)
+            MessagingHelper.SetStatusDelegate setStatus, CancellationToken cancellationToken = default)
         {
             if (context.ImportAgentID == null)
             {
@@ -86,7 +86,7 @@ namespace DBADashGUI.XETrace
                             break;
                     }
                     return Task.CompletedTask;
-                }, Guid.NewGuid());
+                }, Guid.NewGuid(), cancellationToken: cancellationToken);
 
             if (!terminal)
             {
@@ -167,7 +167,7 @@ namespace DBADashGUI.XETrace
                             try
                             {
                                 cancellationToken.ThrowIfCancellationRequested();
-                                var outcome = await ListSessionsAsync(context, NoStatus);
+                                var outcome = await ListSessionsAsync(context, NoStatus, cancellationToken);
                                 if (outcome.Ok && outcome.Sessions != null)
                                 {
                                     StampInstance(outcome.Sessions, id, label, context);
