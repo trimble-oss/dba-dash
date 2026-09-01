@@ -2010,7 +2010,7 @@ USING (VALUES
 	(2,N'Email'),
 	(3,N'Slack'),
 	(4,N'PagerDuty'),
-	(5,N'AzureDevOps')
+	(5,N'AWSDevOps')
 ) AS [Source]([NotificationChannelTypeID],[NotificationChannelType])
 ON ([Target].[NotificationChannelTypeID] = [Source].[NotificationChannelTypeID])
 WHEN MATCHED AND (
