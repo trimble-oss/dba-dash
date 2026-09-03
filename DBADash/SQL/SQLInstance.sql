@@ -37,7 +37,8 @@ BEGIN
 		@ContainedAGID as contained_availability_group_id,
 		@ContainedAGName AS contained_availability_group_name,
 		ISNULL(CAST(SERVERPROPERTY('MachineName') AS NVARCHAR(128)),'') AS MachineName,
-		CASE WHEN DB_ID('rdsadmin') IS NOT NULL AND OBJECT_ID('msdb.dbo.rds_backup_database') IS NOT NULL THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS IsRDS
+		CASE WHEN DB_ID('rdsadmin') IS NOT NULL AND OBJECT_ID('msdb.dbo.rds_backup_database') IS NOT NULL THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS IsRDS,
+		CASE WHEN DATABASEPROPERTYEX(DB_NAME(),'Updateability') = 'READ_ONLY' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS IsReadOnlyReplica
 	FROM sys.dm_os_host_info
 END
 ELSE IF OBJECT_ID('sys.dm_os_windows_info') IS NOT NULL
@@ -61,7 +62,8 @@ BEGIN
 		@ContainedAGID as contained_availability_group_id,
 		@ContainedAGName AS contained_availability_group_name,
 		ISNULL(CAST(SERVERPROPERTY('MachineName') AS NVARCHAR(128)),'') AS MachineName,
-		CASE WHEN DB_ID('rdsadmin') IS NOT NULL AND OBJECT_ID('msdb.dbo.rds_backup_database') IS NOT NULL THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS IsRDS
+		CASE WHEN DB_ID('rdsadmin') IS NOT NULL AND OBJECT_ID('msdb.dbo.rds_backup_database') IS NOT NULL THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS IsRDS,
+		CASE WHEN DATABASEPROPERTYEX(DB_NAME(),'Updateability') = 'READ_ONLY' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS IsReadOnlyReplica
 	FROM sys.dm_os_windows_info
 END
 ELSE
@@ -84,5 +86,6 @@ BEGIN
 		@ContainedAGID as contained_availability_group_id,
 		@ContainedAGName AS contained_availability_group_name,
 		ISNULL(CAST(SERVERPROPERTY('MachineName') AS NVARCHAR(128)),'') AS MachineName,
-		CASE WHEN DB_ID('rdsadmin') IS NOT NULL AND OBJECT_ID('msdb.dbo.rds_backup_database') IS NOT NULL THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS IsRDS
+		CASE WHEN DB_ID('rdsadmin') IS NOT NULL AND OBJECT_ID('msdb.dbo.rds_backup_database') IS NOT NULL THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS IsRDS,
+		CASE WHEN DATABASEPROPERTYEX(DB_NAME(),'Updateability') = 'READ_ONLY' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS IsReadOnlyReplica
 END

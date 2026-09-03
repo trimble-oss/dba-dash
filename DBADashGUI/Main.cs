@@ -84,6 +84,7 @@ namespace DBADashGUI
                     var instanceID = (int)row["InstanceID"];
                     var showInSummary = (bool)row["ShowInSummary"];
                     var tagGroup = Convert.ToString(row["TagGroup"]);
+                    var isReadOnlyReplica = row.Table.Columns.Contains("IsReadOnlyReplica") && row["IsReadOnlyReplica"] != DBNull.Value && (bool)row["IsReadOnlyReplica"];
 
                     if (currentTagGroup != tagGroup && !string.IsNullOrEmpty(tagGroup))
                     {
@@ -141,6 +142,9 @@ namespace DBADashGUI
                             ElasticPoolName = poolName,
                             EngineEdition = edition,
                         };
+                        // A read-only replica reports the same server & database name as its primary, so distinguish
+                        // it in the tree (keeping DatabaseName/ObjectName as the raw name for queries).  See issue #2047.
+                        if (isReadOnlyReplica) azureDBNode.Text = db + " (read-only)";
                         azureDBNode.Nodes.AddRange(new TreeNode[] {
                             new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration),
                             new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks)
@@ -164,6 +168,10 @@ namespace DBADashGUI
                             EngineEdition = edition,
                             IsVisibleInSummary = showInSummary
                         };
+                        // No read-only suffix for regular instances: the display name is ConnectionID-based (which
+                        // already carries the "|ReadOnly" suffix) and manually overridable, and Updateability reflects
+                        // the connected database - normally master (READ_WRITE) even on a readable secondary - so the
+                        // flag would be unreliable here.
                         n.AddDummyNode();
                         n.AddInstanceActionsContextMenu();
                         parentNode.Nodes.Add(n);

@@ -828,6 +828,10 @@ namespace DBADash
             {
                 cmd.Parameters.AddWithValue("IsRDS", rInstance["IsRDS"]);
             }
+            if (rInstance.Table.Columns.Contains("IsReadOnlyReplica"))
+            {
+                cmd.Parameters.AddWithValue("IsReadOnlyReplica", rInstance["IsReadOnlyReplica"]);
+            }
             var pInstanceID = cmd.Parameters.Add(new SqlParameter("InstanceID", SqlDbType.Int) { Direction = ParameterDirection.Output });
             var pIsActive = cmd.Parameters.Add(new SqlParameter("IsActive", SqlDbType.Bit) { Direction = ParameterDirection.Output });
             await cmd.ExecuteNonQueryAsync();

@@ -19,8 +19,9 @@ SELECT	I.InstanceID,
 		CASE WHEN Size.AllocatedPctOfMaxSize > cfg.PctMaxSizeCriticalThreshold THEN 1 WHEN Size.AllocatedPctOfMaxSize > cfg.PctMaxSizeWarningThreshold THEN 2 ELSE 4 END PctMaxSizeStatus,
 		CD.SnapshotDate AS FileSnapshotDate,
 		CD.HumanSnapshotAge AS FileSnapshotAge,
-		ISNULL(CD.Status,3) AS FileSnapshotStatus
-FROM dbo.Instances I 
+		ISNULL(CD.Status,3) AS FileSnapshotStatus,
+		I.IsReadOnlyReplica
+FROM dbo.Instances I
 JOIN dbo.Databases D ON I.InstanceID = D.InstanceID
 LEFT JOIN dbo.AzureDBServiceObjectives O ON O.InstanceID = I.InstanceID
 OUTER APPLY(SELECT	 SUM(F.size)/128.0 AS AllocatedSpaceMB,

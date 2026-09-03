@@ -143,6 +143,7 @@ SELECT I.InstanceID,
 	I.FileSnapshotDate,
 	I.FileSnapshotAge,
 	I.FileSnapshotStatus,
+	I.IsReadOnlyReplica,
 	agg.*
 FROM agg
 JOIN dbo.AzureDBInfo I ON I.InstanceID = agg.InstanceID

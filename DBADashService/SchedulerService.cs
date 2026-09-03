@@ -440,9 +440,18 @@ namespace DBADashService
                     Log.Error(ex, "Error scanning for Azure DBs");
                 }
             }
-            if (config.ScanForAzureDBsInterval > 0)
+            // Probe for read replicas after the Azure DB scan so any newly-discovered Azure DBs are included.
+            try
             {
-                Log.Information("Schedule Scan for new Azure DBS every {scanInterval} seconds", config.ScanForAzureDBsInterval);
+                await ScanForReadReplicasAsync();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error scanning for read replicas");
+            }
+            if (config.ScanForAzureDBsInterval > 0 && (config.ScanForAzureDBs || config.MonitorReadReplicas))
+            {
+                Log.Information("Schedule Scan for new Azure DBs/read replicas every {scanInterval} seconds", config.ScanForAzureDBsInterval);
                 azureScanForNewDBsTimer = new System.Timers.Timer
                 {
                     Enabled = true,
@@ -454,7 +463,27 @@ namespace DBADashService
 
         private async void ScanForAzureDBs(object sender, ElapsedEventArgs e)
         {
-            await ScanForAzureDBsAsync();
+            if (config.ScanForAzureDBs)
+            {
+                await ScanForAzureDBsAsync();
+            }
+            await ScanForReadReplicasAsync();
+        }
+
+        private async Task ScanForReadReplicasAsync()
+        {
+            if (!config.MonitorReadReplicas) return;
+            Log.Information("Scan for read replicas");
+            var newSources = config.AddReadReplicas();
+            if (newSources.Count == 0) return;
+            if (config.IsUseQueueBasedScheduling())
+            {
+                await ScheduleCollectionsWithQueueAsync(newSources.ToList());
+            }
+            else
+            {
+                await ScheduleCollectionsAsync(newSources.ToList());
+            }
         }
 
         private async Task ScanForAzureDBsAsync(DBADashSource src)
