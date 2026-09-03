@@ -156,6 +156,24 @@ namespace DBADashGUI.Performance
             dgvPool.ApplyTheme();
             AddHistCols(dgv);
             AddHistCols(dgvPool);
+            dgv.CellFormatting += Dgv_CellFormatting;
+        }
+
+        /// <summary>
+        /// Read-only replicas share the primary's server and database name, so they'd otherwise appear as
+        /// indistinguishable duplicate rows.  Label the DB cell and add a tooltip without altering the bound data
+        /// (drill-down still uses the underlying "DB" value).
+        /// </summary>
+        private void Dgv_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (e.RowIndex < 0 || dgv.Columns[e.ColumnIndex] != colDB) return;
+            if (dgv.Rows[e.RowIndex].DataBoundItem is not DataRowView row) return;
+            if (!row.Row.Table.Columns.Contains("IsReadOnlyReplica")) return;
+            if (row["IsReadOnlyReplica"] == DBNull.Value || !(bool)row["IsReadOnlyReplica"]) return;
+            e.Value = e.Value + " (read-only)";
+            e.FormattingApplied = true;
+            var cell = dgv.Rows[e.RowIndex].Cells[e.ColumnIndex];
+            if (string.IsNullOrEmpty(cell.ToolTipText)) cell.ToolTipText = "Read-only replica";
         }
 
         private void AddHistCols(DataGridView gv)

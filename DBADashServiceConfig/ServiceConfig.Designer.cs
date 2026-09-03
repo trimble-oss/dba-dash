@@ -44,6 +44,7 @@ namespace DBADashServiceConfig
             chkScanEvery = new System.Windows.Forms.CheckBox();
             bttnScanNow = new System.Windows.Forms.Button();
             chkScanAzureDB = new System.Windows.Forms.CheckBox();
+            chkMonitorReadReplicas = new System.Windows.Forms.CheckBox();
             pictureBox3 = new System.Windows.Forms.PictureBox();
             chkScriptJobs = new System.Windows.Forms.CheckBox();
             chkCollectSessionWaits = new System.Windows.Forms.CheckBox();
@@ -346,6 +347,19 @@ namespace DBADashServiceConfig
             toolTip1.SetToolTip(chkScanAzureDB, "Add connection to Azure master DB.  Connections to other AzureDBs will be added on the fly at service start.");
             chkScanAzureDB.UseVisualStyleBackColor = true;
             chkScanAzureDB.CheckedChanged += ChkScanAzureDB_CheckedChanged;
+            //
+            // chkMonitorReadReplicas
+            //
+            chkMonitorReadReplicas.AutoSize = true;
+            chkMonitorReadReplicas.Location = new System.Drawing.Point(300, 37);
+            chkMonitorReadReplicas.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            chkMonitorReadReplicas.Name = "chkMonitorReadReplicas";
+            chkMonitorReadReplicas.Size = new System.Drawing.Size(256, 24);
+            chkMonitorReadReplicas.TabIndex = 24;
+            chkMonitorReadReplicas.Text = "Monitor read replicas";
+            toolTip1.SetToolTip(chkMonitorReadReplicas, "Probe each Azure SQL Database for a read-only replica (ApplicationIntent=ReadOnly) and monitor it as a separate instance.  Only Business Critical / Premium / Hyperscale databases with a readable secondary are added.");
+            chkMonitorReadReplicas.UseVisualStyleBackColor = true;
+            chkMonitorReadReplicas.CheckedChanged += ChkMonitorReadReplicas_CheckedChanged;
             // 
             // pictureBox3
             // 
@@ -1333,6 +1347,7 @@ namespace DBADashServiceConfig
             // 
             groupBox4.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             groupBox4.Controls.Add(chkScanAzureDB);
+            groupBox4.Controls.Add(chkMonitorReadReplicas);
             groupBox4.Controls.Add(lblHHmm);
             groupBox4.Controls.Add(bttnScanNow);
             groupBox4.Controls.Add(numAzureScanInterval);
@@ -2502,6 +2517,7 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.CheckBox chkLogInternalPerfCounters;
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.CheckBox chkScanAzureDB;
+        private System.Windows.Forms.CheckBox chkMonitorReadReplicas;
         private System.Windows.Forms.Label lblHHmm;
         private System.Windows.Forms.Button bttnScanNow;
         private System.Windows.Forms.NumericUpDown numAzureScanInterval;

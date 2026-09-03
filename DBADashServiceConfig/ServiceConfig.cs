@@ -1039,6 +1039,7 @@ namespace DBADashServiceConfig
                 collectionConfig = CollectionConfig.Deserialize(json);
                 txtDestination.Text = collectionConfig.DestinationConnection.EncryptedConnectionString;
                 chkScanAzureDB.Checked = collectionConfig.ScanForAzureDBs;
+                chkMonitorReadReplicas.Checked = collectionConfig.MonitorReadReplicas;
                 chkScanEvery.Checked = collectionConfig.ScanForAzureDBsInterval > 0;
                 numAzureScanInterval.Value = collectionConfig.ScanForAzureDBsInterval;
                 lnkAutoUpgradeDB.Visible = !collectionConfig.AutoUpdateDatabase;
@@ -1681,6 +1682,12 @@ namespace DBADashServiceConfig
         private void ChkScanAzureDB_CheckedChanged(object sender, EventArgs e)
         {
             collectionConfig.ScanForAzureDBs = chkScanAzureDB.Checked;
+            SetJson();
+        }
+
+        private void ChkMonitorReadReplicas_CheckedChanged(object sender, EventArgs e)
+        {
+            collectionConfig.MonitorReadReplicas = chkMonitorReadReplicas.Checked;
             SetJson();
         }
 

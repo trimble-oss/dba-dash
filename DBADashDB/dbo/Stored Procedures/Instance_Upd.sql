@@ -20,6 +20,7 @@
 	@contained_availability_group_name NVARCHAR(128)=NULL,
 	@EngineEdition INT=NULL,
 	@IsRDS BIT=0,
+	@IsReadOnlyReplica BIT=0,
 	@InstanceID INT OUT,
 	@IsActive BIT=NULL OUT
 )
@@ -96,8 +97,8 @@ BEGIN
 			RETURN
 		END
 
-		INSERT INTO dbo.Instances(Instance,ConnectionID,IsActive,EditionID,UTCOffset,CollectAgentID,ImportAgentID,EngineEdition,IsRDS)
-		VALUES(@Instance,@ConnectionID,CAST(1 as BIT),@EditionID,@UTCOffset,@CollectAgentID,@ImportAgentID,@EngineEdition,@IsRDS)
+		INSERT INTO dbo.Instances(Instance,ConnectionID,IsActive,EditionID,UTCOffset,CollectAgentID,ImportAgentID,EngineEdition,IsRDS,IsReadOnlyReplica)
+		VALUES(@Instance,@ConnectionID,CAST(1 as BIT),@EditionID,@UTCOffset,@CollectAgentID,@ImportAgentID,@EngineEdition,@IsRDS,@IsReadOnlyReplica)
 		SELECT @InstanceID = SCOPE_IDENTITY();
 
 		EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,
@@ -126,7 +127,8 @@ BEGIN
 			contained_availability_group_id = @contained_availability_group_id,
 			contained_availability_group_name = @contained_availability_group_name,
 			EngineEdition =ISNULL(@EngineEdition,EngineEdition),
-			IsRDS = @IsRDS
+			IsRDS = @IsRDS,
+			IsReadOnlyReplica = @IsReadOnlyReplica
 		WHERE InstanceID = @InstanceID
 		AND EXISTS(SELECT Instance,
 						EditionID,
@@ -142,7 +144,8 @@ BEGIN
 						contained_availability_group_id,
 						contained_availability_group_name,
 						EngineEdition,
-						IsRDS
+						IsRDS,
+						IsReadOnlyReplica
 					EXCEPT
 					SELECT @Instance,
 							@EditionID,
@@ -158,7 +161,8 @@ BEGIN
 							@contained_availability_group_id,
 							@contained_availability_group_name,
 							ISNULL(@EngineEdition,EngineEdition),
-							@IsRDS
+							@IsRDS,
+							@IsReadOnlyReplica
 					)
 
 		EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  

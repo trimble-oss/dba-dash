@@ -29,6 +29,15 @@ namespace DBADash
         public SchemaSnapshotDBOptions SchemaSnapshotOptions = null;
         public bool ScanForAzureDBs { get; set; } = true;
         public int ScanForAzureDBsInterval { get; set; } = 3600;
+
+        /// <summary>
+        /// When enabled, DBA Dash probes each Azure SQL Database source for a readable secondary (read replica) by
+        /// connecting with ApplicationIntent=ReadOnly and checking DATABASEPROPERTYEX(DB_NAME(),'Updateability').
+        /// Only databases that route to a READ_ONLY replica (Business Critical / Premium / Hyperscale tiers) are
+        /// added; those that route back to the primary (READ_WRITE) are skipped.  Discovered replicas are added as
+        /// distinct sources with a "|ReadOnly" ConnectionID suffix.  Re-scanned on the Azure DB scan interval.
+        /// </summary>
+        public bool MonitorReadReplicas { get; set; }
         public string ServiceName { get; set; } = "DBADashService";
 
         public bool AutoUpdateDatabase { get; set; } = true;
@@ -552,6 +561,89 @@ namespace DBADash
                 }
             }
             return newConnections;
+        }
+
+        public List<DBADashSource> AddReadReplicas()
+        {
+            var newConnections = GetNewReadReplicaConnections();
+            lock (SourceConnections)
+            {
+                SourceConnections.AddRange(newConnections);
+            }
+            return newConnections;
+        }
+
+        public List<DBADashSource> GetNewReadReplicaConnections()
+        {
+            var newConnections = new List<DBADashSource>();
+            if (!MonitorReadReplicas) return newConnections;
+
+            // Snapshot the source list - probing can be slow and we must not enumerate while AddReadReplicas mutates it.
+            List<DBADashSource> sources;
+            lock (SourceConnections)
+            {
+                sources = SourceConnections.ToList();
+            }
+
+            foreach (var cfg in sources.Where(src => src.SourceConnection.Type == ConnectionType.SQL && !OfflineInstances.IsOffline(src)))
+            {
+                try
+                {
+                    var replica = GetReadReplicaConnection(cfg);
+                    if (replica != null)
+                    {
+                        newConnections.Add(replica);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Error checking for read replica for {connection}", cfg.SourceConnection.ConnectionForPrint);
+                }
+            }
+            return newConnections;
+        }
+
+        /// <summary>
+        /// Returns a read-only (read replica) source for the supplied primary source, or null if the primary is not an
+        /// eligible Azure SQL Database, a replica source already exists, or the read-only connection routes back to the
+        /// primary (i.e. there is no readable secondary).  The returned source has ApplicationIntent=ReadOnly and a
+        /// distinct "|ReadOnly" suffixed ConnectionID.
+        /// </summary>
+        private DBADashSource GetReadReplicaConnection(DBADashSource primary)
+        {
+            // Skip sources that are already read-only (an existing replica source).
+            if (primary.SourceConnection.ApplicationIntent() == ApplicationIntent.ReadOnly) return null;
+
+            // Only Azure SQL Database user databases have readable secondaries reached via ApplicationIntent=ReadOnly.
+            if (!primary.SourceConnection.ConnectionInfo.IsAzureDB) return null;
+            var initialCatalog = primary.SourceConnection.InitialCatalog();
+            if (string.IsNullOrEmpty(initialCatalog) || string.Equals(initialCatalog, "master", StringComparison.OrdinalIgnoreCase)) return null;
+
+            var builder = new SqlConnectionStringBuilder(primary.SourceConnection.ConnectionString)
+            {
+                ApplicationIntent = ApplicationIntent.ReadOnly
+            };
+            var readOnlyConnectionString = builder.ConnectionString;
+
+            // Skip if a source for this replica already exists (added manually or on a previous scan).
+            if (SourceExists(readOnlyConnectionString, true)) return null;
+
+            // Probe: connect read-only and confirm the gateway routed us to a read-only secondary.  If it routed back
+            // to the primary (READ_WRITE) there is no replica to monitor, so skip.
+            using (var cn = new SqlConnection(readOnlyConnectionString))
+            using (var cmd = new SqlCommand("SELECT CAST(CASE WHEN DATABASEPROPERTYEX(DB_NAME(),'Updateability') = 'READ_ONLY' THEN 1 ELSE 0 END AS BIT)", cn))
+            {
+                cn.Open();
+                if (!(bool)cmd.ExecuteScalar()) return null;
+            }
+
+            var replica = primary.DeepCopy();
+            replica.SourceConnection.ConnectionString = readOnlyConnectionString;
+            // Set the ConnectionID to match what the collector would generate (<@@SERVERNAME>|<db>|ReadOnly) so the
+            // replica resolves correctly for on-demand collection and stays distinct from the primary instance.
+            replica.ConnectionID = $"{primary.SourceConnection.ConnectionInfo.ServerName}|{initialCatalog}|ReadOnly";
+            Log.Information("Add read replica connection for {ConnectionID}", replica.ConnectionID);
+            return replica;
         }
 
         public override bool ContainsSensitive()

@@ -700,7 +700,13 @@ namespace DBADash
             {
                 if (IsAzureDB)
                 {
-                    dt.Rows[0]["ConnectionID"] = instanceName + "|" + dbName;
+                    // A read-only replica connection (ApplicationIntent=ReadOnly routed to a readable secondary)
+                    // reports the same @@SERVERNAME and DB_NAME() as the primary, so it must be given a distinct
+                    // ConnectionID to avoid colliding with the primary instance in the repository.  This mirrors the
+                    // "|ReadOnly" suffix the config tool applies, and covers replicas added manually without an
+                    // explicit ConnectionID.
+                    var isReadOnlyReplica = dt.Columns.Contains("IsReadOnlyReplica") && dt.Rows[0]["IsReadOnlyReplica"] != DBNull.Value && (bool)dt.Rows[0]["IsReadOnlyReplica"];
+                    dt.Rows[0]["ConnectionID"] = instanceName + "|" + dbName + (isReadOnlyReplica ? "|ReadOnly" : "");
                     noWMI = true;
                 }
                 else if (!string.IsNullOrEmpty(containedAGName)) // Use the name of the contained AG as the ConnectionID.
