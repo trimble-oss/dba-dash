@@ -88,6 +88,11 @@ namespace DBADash.Messaging
         private const int MinBatchIntervalSeconds = 1;
         private const int MaxXelBytes = 100 * 1024 * 1024; // don't ship an oversized .xel back through the reply
 
+        // How long to wait for XELite's ReadEventStream to unwind after cancellation before forcing teardown.  The read
+        // observes its token only cooperatively, so a parked read can overrun; past this window we stop waiting and let
+        // the session DROP abort it rather than hold the trace open indefinitely.
+        private const int StreamStopGraceSeconds = 15;
+
         private byte[] _capturedXel;
 
         // Server UTC captured just before START; events older than this are leftover data and are dropped.
@@ -372,23 +377,40 @@ namespace DBADash.Messaging
                 // the stream (the live streamer otherwise runs until its connection is cancelled).
                 var monitorTask = MonitorLiveAsync(connectionString, databaseScoped, heartbeatTimeout, streamCts, monitor);
 
+                // Whatever trips streamCts - duration cap, an external cancellation, heartbeat loss or the session being
+                // dropped - a live ReadEventStream parked waiting for the *next* event won't observe the cancelled
+                // token: sys.fn_MSxe_read_event_stream just sits there when the workload is idle, so the streamer never
+                // returns and teardown (the DROP below) never runs, leaving the session alive until the 1-hour cap.
+                // Force the streamer to return by issuing a server-side STOP on a separate connection as soon as the
+                // token trips; STOP ends the live read so ReadEventStream unwinds and teardown proceeds immediately.
+                using var stopRegistration = streamCts.Token.Register(() =>
+                    _ = StopSessionForStreamUnblockAsync(connectionString, scope));
+
                 var reader = new XELiveTraceReader(connectionString, SessionName, 500,
                     TimeSpan.FromSeconds(batchInterval));
+                var streamTask = reader.StreamAsync(async batch =>
+                {
+                    if (batch == null || batch.Rows.Count == 0) return;
+                    totalEvents += batch.Rows.Count;
+                    var ds = new DataSet();
+                    ds.Tables.Add(batch);
+                    await ReportProgressAsync(new ResponseMessage
+                    {
+                        Type = ResponseMessage.ResponseTypes.Progress,
+                        Message = $"Captured {totalEvents} events",
+                        Data = ds
+                    });
+                }, streamCts.Token);
                 try
                 {
-                    await reader.StreamAsync(async batch =>
-                    {
-                        if (batch == null || batch.Rows.Count == 0) return;
-                        totalEvents += batch.Rows.Count;
-                        var ds = new DataSet();
-                        ds.Tables.Add(batch);
-                        await ReportProgressAsync(new ResponseMessage
-                        {
-                            Type = ResponseMessage.ResponseTypes.Progress,
-                            Message = $"Captured {totalEvents} events",
-                            Data = ds
-                        });
-                    }, streamCts.Token);
+                    // Don't await the streamer unconditionally: XELite's ReadEventStream only observes its cancellation
+                    // token cooperatively, and a live read parked in sys.fn_MSxe_read_event_stream can fail to return
+                    // when the token trips - so awaiting it directly can hang forever (past even the duration cap),
+                    // leaving the session running.  Once streamCts trips, give the streamer a bounded grace period to
+                    // unwind on its own (helped by the server-side STOP registered above); if it overruns, stop waiting
+                    // and fall through to forced teardown.  The DROP in the finally aborts the read, so the abandoned
+                    // streamTask unwinds in the background instead of holding this trace open indefinitely.
+                    await AwaitStreamWithWatchdogAsync(streamTask, streamCts.Token);
                 }
                 catch (Exception ex)
                 {
@@ -659,6 +681,64 @@ namespace DBADash.Messaging
         {
             try { return await IsSessionRunningAsync(connectionString, databaseScoped, CancellationToken.None); }
             catch { return true; }
+        }
+
+        /// <summary>
+        /// Awaits the live streamer but refuses to hang on it.  XELite's <c>ReadEventStream</c> observes its
+        /// cancellation token only cooperatively, so a read parked in <c>sys.fn_MSxe_read_event_stream</c> can fail to
+        /// return when the token trips.  Once <paramref name="stopToken"/> is cancelled we wait only a bounded grace
+        /// period for the streamer to unwind; if it overruns we return anyway so the caller can force teardown (the DROP
+        /// aborts the read, unwinding the abandoned task in the background) instead of holding the trace open forever.
+        /// </summary>
+        private async Task AwaitStreamWithWatchdogAsync(Task streamTask, CancellationToken stopToken)
+        {
+            // Fast path: the stream ends on its own (or promptly on cancellation) before the token even trips.
+            var stopSignalled = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            await using (stopToken.Register(() => stopSignalled.TrySetResult(true)))
+            {
+                if (await Task.WhenAny(streamTask, stopSignalled.Task).ConfigureAwait(false) == streamTask)
+                {
+                    await streamTask.ConfigureAwait(false); // completed - surface its outcome/exception
+                    return;
+                }
+            }
+
+            // The stop token has tripped.  Give the streamer a bounded window to unwind cooperatively (helped by the
+            // server-side STOP), then stop waiting so forced teardown can run.
+            var grace = TimeSpan.FromSeconds(StreamStopGraceSeconds);
+            if (await Task.WhenAny(streamTask, Task.Delay(grace)).ConfigureAwait(false) == streamTask)
+            {
+                await streamTask.ConfigureAwait(false);
+                return;
+            }
+
+            Log.Warning(
+                "Live ad-hoc XE stream on {instance} did not stop within {grace}s of cancellation; forcing teardown (the session DROP will abort the stuck read)",
+                ConnectionID, StreamStopGraceSeconds);
+            // Abandon the stuck streamTask - it unwinds once the finally DROP aborts the underlying read.  Observe its
+            // eventual exception so it doesn't surface as an unobserved TaskException.
+            _ = streamTask.ContinueWith(t => _ = t.Exception, TaskContinuationOptions.OnlyOnFaulted);
+        }
+
+        /// <summary>
+        /// Issues a server-side STOP on a dedicated connection to unblock a live <c>ReadEventStream</c> that is parked
+        /// waiting for the next event (an idle workload never returns from the read, so a cancelled token alone won't
+        /// end it).  Stopping the session ends the live read so the streamer unwinds and teardown/DROP can run.  Best
+        /// effort - the streamer ending is what matters, and normal teardown STOP/DROP still follows.
+        /// </summary>
+        private async Task StopSessionForStreamUnblockAsync(string connectionString, XESessionScope scope)
+        {
+            try
+            {
+                Log.Information(
+                    "Live ad-hoc XE trace on {instance} cancelled - issuing server-side STOP to end the live stream",
+                    ConnectionID);
+                await ExecAsync(connectionString, StateSql("STOP", scope), CancellationToken.None);
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Error issuing STOP to unblock live ad-hoc XE stream on {instance}", ConnectionID);
+            }
         }
 
         /// <summary>
