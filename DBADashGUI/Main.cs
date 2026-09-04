@@ -143,8 +143,13 @@ namespace DBADashGUI
                             EngineEdition = edition,
                         };
                         // A read-only replica reports the same server & database name as its primary, so distinguish
-                        // it in the tree (keeping DatabaseName/ObjectName as the raw name for queries).  See issue #2047.
-                        if (isReadOnlyReplica) azureDBNode.Text = db + " (read-only)";
+                        // it in the tree with a dedicated icon and label (keeping DatabaseName/ObjectName as the raw
+                        // name for queries).  See issue #2047.
+                        if (isReadOnlyReplica)
+                        {
+                            azureDBNode.Text = db + " (read-only)";
+                            azureDBNode.IsReadOnlyReplica = true;
+                        }
                         azureDBNode.Nodes.AddRange(new TreeNode[] {
                             new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration),
                             new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks)
@@ -290,9 +295,6 @@ namespace DBADashGUI
             Application.AddMessageFilter(this);
             FormClosed += (s, e) => Application.RemoveMessageFilter(this);
             InitializeComponent();
-            // Append the Extended Events node icon to the tree image list (index 32).  The designer-serialized
-            // ImageStream holds indexes 0-31; adding here keeps the icon without re-serializing that blob.
-            TreeViewImageList.Images.Add("EventLog_16x.png", Properties.Resources.EventLog_16x);
             // Ensure cancel button is hidden until a cancellable connection attempt is in progress
             bttnCancel.InvokeSetEnabled(false);
             WindowState = FormWindowState.Maximized;
