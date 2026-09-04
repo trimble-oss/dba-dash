@@ -303,6 +303,16 @@ namespace DBADashGUI.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap CloudDatabase {
+            get {
+                object obj = ResourceManager.GetObject("CloudDatabase", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap CloudDownload_16x {
             get {
                 object obj = ResourceManager.GetObject("CloudDownload_16x", resourceCulture);
@@ -836,6 +846,16 @@ namespace DBADashGUI.Properties {
         internal static System.Drawing.Bitmap query_plan {
             get {
                 object obj = ResourceManager.GetObject("query-plan", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ReadOnlyCloudDatabase_16x {
+            get {
+                object obj = ResourceManager.GetObject("ReadOnlyCloudDatabase_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

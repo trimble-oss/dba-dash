@@ -382,6 +382,23 @@ namespace DBADashGUI
             set => databaseName = value;
         }
 
+        private bool isReadOnlyReplica;
+
+        /// <summary>
+        /// Marks an Azure SQL Database node as a read-only (read replica) source so <see cref="SetIcon"/> selects the
+        /// read-only icon.  Changing it re-evaluates the icon because the constructor runs SetIcon before this is known.
+        /// </summary>
+        public bool IsReadOnlyReplica
+        {
+            get => isReadOnlyReplica;
+            set
+            {
+                if (isReadOnlyReplica == value) return;
+                isReadOnlyReplica = value;
+                SetIcon();
+            }
+        }
+
         private void SetIcon()
         {
             switch (Type)
@@ -442,7 +459,8 @@ namespace DBADashGUI
                     break;
 
                 case TreeType.AzureDatabase:
-                    ImageIndex = 9;
+                    // 9 = CloudDatabase (regular), 33 = ReadOnlyCloudDatabase (read replica).
+                    ImageIndex = IsReadOnlyReplica ? 33 : 9;
                     break;
 
                 case TreeType.AgentJobs:
@@ -519,7 +537,7 @@ namespace DBADashGUI
                     break;
 
                 case TreeType.ExtendedEvents:
-                    ImageIndex = 32; // EventLog_16x.png, appended to TreeViewImageList at runtime (see Main ctor)
+                    ImageIndex = 32; // EventLog_16x.png
                     break;
 
                 default:
