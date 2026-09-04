@@ -461,13 +461,34 @@ namespace DBADashService
             }
         }
 
+        private int _azureScanRunning; // re-entrancy guard for the timer tick (0 = idle, 1 = running)
+
         private async void ScanForAzureDBs(object sender, ElapsedEventArgs e)
         {
-            if (config.ScanForAzureDBs)
+            // Timer.Elapsed invokes this as async void, so an escaping exception could crash the service - swallow and
+            // log.  Also guard against re-entrancy: if a scan runs longer than the interval, overlapping ticks would
+            // otherwise add duplicate sources and contend on SourceConnections.
+            if (Interlocked.CompareExchange(ref _azureScanRunning, 1, 0) != 0)
             {
-                await ScanForAzureDBsAsync();
+                Log.Information("Skipping scheduled Azure DB/read replica scan - previous scan is still running");
+                return;
             }
-            await ScanForReadReplicasAsync();
+            try
+            {
+                if (config.ScanForAzureDBs)
+                {
+                    await ScanForAzureDBsAsync();
+                }
+                await ScanForReadReplicasAsync();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error during scheduled Azure DB/read replica scan");
+            }
+            finally
+            {
+                Interlocked.Exchange(ref _azureScanRunning, 0);
+            }
         }
 
         private async Task ScanForReadReplicasAsync()

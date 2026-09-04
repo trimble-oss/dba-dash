@@ -168,12 +168,21 @@ namespace DBADashGUI.Performance
         {
             if (e.RowIndex < 0 || dgv.Columns[e.ColumnIndex] != colDB) return;
             if (dgv.Rows[e.RowIndex].DataBoundItem is not DataRowView row) return;
-            if (!row.Row.Table.Columns.Contains("IsReadOnlyReplica")) return;
-            if (row["IsReadOnlyReplica"] == DBNull.Value || !(bool)row["IsReadOnlyReplica"]) return;
-            e.Value = e.Value + " (read-only)";
-            e.FormattingApplied = true;
+            var isReplica = row.Row.Table.Columns.Contains("IsReadOnlyReplica")
+                            && row["IsReadOnlyReplica"] != DBNull.Value && (bool)row["IsReadOnlyReplica"];
             var cell = dgv.Rows[e.RowIndex].Cells[e.ColumnIndex];
-            if (string.IsNullOrEmpty(cell.ToolTipText)) cell.ToolTipText = "Read-only replica";
+            // Cells are reused across rebinds, so always set state for both cases - otherwise a row that stops being a
+            // replica after a refresh would keep the stale label/tooltip.
+            if (isReplica)
+            {
+                e.Value = e.Value + " (read-only)";
+                e.FormattingApplied = true;
+                cell.ToolTipText = "Read-only replica";
+            }
+            else
+            {
+                cell.ToolTipText = string.Empty;
+            }
         }
 
         private void AddHistCols(DataGridView gv)

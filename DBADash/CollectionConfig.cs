@@ -457,8 +457,13 @@ namespace DBADash
 
         public DBADashSource GetSourceFromConnectionString(string connectionString, bool? isAzure = null)
         {
+            return GetSourceFromConnectionString(connectionString, SourceConnections, isAzure);
+        }
+
+        public DBADashSource GetSourceFromConnectionString(string connectionString, IEnumerable<DBADashSource> sources, bool? isAzure = null)
+        {
             var findConnection = new DBADashConnection(connectionString);
-            foreach (var s in SourceConnections.Where(s => s.SourceConnection.Type == findConnection.Type))
+            foreach (var s in sources.Where(s => s.SourceConnection.Type == findConnection.Type))
             {
                 if (s.SourceConnection.Type == ConnectionType.SQL && string.Equals(s.SourceConnection.DataSource(), findConnection.DataSource(), StringComparison.CurrentCultureIgnoreCase) && s.SourceConnection.ApplicationIntent() == findConnection.ApplicationIntent())
                 {
@@ -492,6 +497,11 @@ namespace DBADash
         public bool SourceExists(string connectionString, bool? isAzure = null)
         {
             return GetSourceFromConnectionString(connectionString, isAzure) != null;
+        }
+
+        public bool SourceExists(string connectionString, IEnumerable<DBADashSource> sources, bool? isAzure = null)
+        {
+            return GetSourceFromConnectionString(connectionString, sources, isAzure) != null;
         }
 
         public void AddConnections(List<DBADashSource> connections)
@@ -565,12 +575,21 @@ namespace DBADash
 
         public List<DBADashSource> AddReadReplicas()
         {
-            var newConnections = GetNewReadReplicaConnections();
+            var candidates = GetNewReadReplicaConnections();
+            if (candidates.Count == 0) return candidates;
+            var added = new List<DBADashSource>();
             lock (SourceConnections)
             {
-                SourceConnections.AddRange(newConnections);
+                foreach (var replica in candidates)
+                {
+                    // Authoritative dedup under the lock: another thread (or an earlier candidate) may have added an
+                    // equivalent source since we snapshotted, so re-check against the live list before adding.
+                    if (SourceExists(replica.SourceConnection.ConnectionString, SourceConnections, true)) continue;
+                    SourceConnections.Add(replica);
+                    added.Add(replica);
+                }
             }
-            return newConnections;
+            return added;
         }
 
         public List<DBADashSource> GetNewReadReplicaConnections()
@@ -589,7 +608,7 @@ namespace DBADash
             {
                 try
                 {
-                    var replica = GetReadReplicaConnection(cfg);
+                    var replica = GetReadReplicaConnection(cfg, sources);
                     if (replica != null)
                     {
                         newConnections.Add(replica);
@@ -609,7 +628,7 @@ namespace DBADash
         /// primary (i.e. there is no readable secondary).  The returned source has ApplicationIntent=ReadOnly and a
         /// distinct "|ReadOnly" suffixed ConnectionID.
         /// </summary>
-        private DBADashSource GetReadReplicaConnection(DBADashSource primary)
+        private DBADashSource GetReadReplicaConnection(DBADashSource primary, IEnumerable<DBADashSource> existingSources)
         {
             // Skip sources that are already read-only (an existing replica source).
             if (primary.SourceConnection.ApplicationIntent() == ApplicationIntent.ReadOnly) return null;
@@ -625,8 +644,10 @@ namespace DBADash
             };
             var readOnlyConnectionString = builder.ConnectionString;
 
-            // Skip if a source for this replica already exists (added manually or on a previous scan).
-            if (SourceExists(readOnlyConnectionString, true)) return null;
+            // Skip if a source for this replica already exists (added manually or on a previous scan).  Checked against
+            // the caller's snapshot to avoid enumerating the live SourceConnections list without a lock; AddReadReplicas
+            // re-checks authoritatively under the lock before adding.
+            if (SourceExists(readOnlyConnectionString, existingSources, true)) return null;
 
             // Probe: connect read-only and confirm the gateway routed us to a read-only secondary.  If it routed back
             // to the primary (READ_WRITE) there is no replica to monitor, so skip.
