@@ -236,7 +236,11 @@ namespace DBADashServiceConfig
                             src.SourceConnection.Validate();
                             validated = true;
                             src.ConnectionID = await src.GetGeneratedConnectionIDAsync();
-                            if (src.SourceConnection.ApplicationIntent() == ApplicationIntent.ReadOnly)
+                            // The collector already applies the "|ReadOnly" suffix itself for Azure DB read-only
+                            // replicas, so only add it here if it's not already present - otherwise the ConnectionID
+                            // ends up as <server>|<db>|ReadOnly|ReadOnly
+                            if (src.SourceConnection.ApplicationIntent() == ApplicationIntent.ReadOnly &&
+                                !src.ConnectionID.EndsWith("|ReadOnly", StringComparison.InvariantCultureIgnoreCase))
                             {
                                 src.ConnectionID += "|ReadOnly";
                             }
