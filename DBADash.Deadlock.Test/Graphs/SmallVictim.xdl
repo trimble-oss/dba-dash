@@ -1,0 +1,8 @@
+<deadlock>
+  <victim-list>
+	<victimProcess id="p1" />
+  </victim-list>
+  <process-list>
+	<process id="p1" spid="5" logused="412" />
+  </process-list>
+</deadlock>

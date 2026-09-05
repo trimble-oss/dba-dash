@@ -1,10 +1,13 @@
 ﻿using ClosedXML.Excel;
 using DBADash;
+using DBADash.Deadlock;
+using DBADash.Deadlock.Model;
 using Humanizer;
 using DBADashGUI.CustomReports;
 using DBADashGUI.Performance;
 using Microsoft.Data.SqlClient;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
@@ -570,11 +573,85 @@ namespace DBADashGUI
             ShowFileContent(plan, fileName, ".sqlplan");
         }
 
-        public static void ShowDeadlockGraph(string dlGraph, string fileName = null)
+        /// <summary>
+        /// Open a deadlock graph in the built-in viewer.
+        ///
+        /// This used to write a .xdl to temp and hand it to whatever was registered for the
+        /// extension, which required SSMS (or Plan Explorer) to be installed and did nothing useful
+        /// when it was not.  That route is still a click away from the viewer's toolbar - see
+        /// <see cref="ShowDeadlockGraphExternal"/>.
+        /// </summary>
+        /// <param name="context">
+        /// The instance the graph came from, where the caller knows it.  Supplying it lights up the actions
+        /// that need to go back to the source instance - collecting the current plan for a statement, and the
+        /// Query Store lookup.  Without it the viewer still shows everything the graph itself carries.
+        /// </param>
+        public static void ShowDeadlockGraph(string dlGraph, string fileName = null, DBADashContext context = null)
+        {
+            IReadOnlyList<DeadlockGraph> graphs;
+            try
+            {
+                graphs = DeadlockParser.Parse(dlGraph);
+            }
+            catch (DeadlockParseException ex)
+            {
+                throw new InvalidOperationException("Invalid deadlock graph: " + ex.Message, ex);
+            }
+
+            var frm = new Deadlocks.DeadlockViewerForm(graphs, dlGraph, fileName, context);
+            frm.Show();
+        }
+
+        /// <summary>
+        /// The file types the deadlock viewer opens.  .xdl is what SQL Server and SSMS save a graph
+        /// as; the same XML also turns up saved as .xml, and inside an XE event envelope, both of
+        /// which the parser handles.
+        /// </summary>
+        public const string DeadlockFileFilter =
+            "Deadlock graph (*.xdl)|*.xdl|XML (*.xml)|*.xml|All files (*.*)|*.*";
+
+        /// <summary>
+        /// Prompts for a .xdl and opens it in the viewer.  Needs no repository connection and no
+        /// monitored instance - a graph someone emailed you opens the same as one from a report,
+        /// minus the actions that go back to the source instance.
+        /// </summary>
+        public static void OpenDeadlockGraphFile(IWin32Window owner = null)
+        {
+            using var dialog = new OpenFileDialog
+            {
+                Filter = DeadlockFileFilter,
+                Title = @"Open Deadlock Graph"
+            };
+
+            if (dialog.ShowDialog(owner) != DialogResult.OK) return;
+            ShowDeadlockGraphFile(dialog.FileName, owner);
+        }
+
+        /// <summary>Opens a deadlock graph file in the viewer, reporting a bad file rather than throwing.</summary>
+        public static void ShowDeadlockGraphFile(string path, IWin32Window owner = null)
+        {
+            try
+            {
+                ShowDeadlockGraph(File.ReadAllText(path), Path.GetFileName(path));
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(
+                    ex,
+                    "Error opening deadlock graph",
+                    text: $"{path} could not be opened as a deadlock graph.");
+            }
+        }
+
+        /// <summary>
+        /// Write the graph to a .xdl and open it in whatever handles the extension - SSMS, or
+        /// SentryOne Plan Explorer.  Offered alongside the built-in viewer rather than instead of it.
+        /// </summary>
+        public static void ShowDeadlockGraphExternal(string dlGraph, string fileName = null)
         {
             if (!IsValidDeadlockGraph(dlGraph))
             {
-                throw new Exception("Invalid execution plan");
+                throw new InvalidOperationException("Invalid deadlock graph");
             }
             ShowFileContent(dlGraph, fileName, ".xdl");
         }
@@ -636,22 +713,14 @@ namespace DBADashGUI
             }
         }
 
-        public static bool IsValidDeadlockGraph(string xmlString)
-        {
-            if (string.IsNullOrEmpty(xmlString)) return false;
-            try
-            {
-                var doc = XDocument.Parse(xmlString);
-
-                // Basic validation check :The root node is ShowPlanXML
-                return doc.Root is { Name.LocalName: "deadlock" };
-            }
-            catch (XmlException)
-            {
-                // The XML is not well-formed
-                return false;
-            }
-        }
+        /// <summary>
+        /// Validate that a string is a SQL Server deadlock graph.
+        ///
+        /// This previously required a root element of "deadlock", which rejected the deadlock-list
+        /// form SSMS writes when saving a .xdl, and the extended events event envelope.  The parser
+        /// accepts a deadlock element wherever it appears, so all three now work.
+        /// </summary>
+        public static bool IsValidDeadlockGraph(string xmlString) => DeadlockParser.IsDeadlockXml(xmlString);
 
         public static int[] GetCustomColors()
         {

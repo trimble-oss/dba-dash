@@ -1,0 +1,36 @@
+<deadlock>
+  <victim-list>
+    <victimProcess id="pA" />
+  </victim-list>
+  <process-list>
+    <process id="pA" spid="10" ecid="0" status="suspended" lockMode="U" waittime="1200" currentdbname="Ops" loginname="CONTOSO\a" clientapp="AppA" />
+    <process id="pB" spid="20" ecid="0" status="suspended" lockMode="U" waittime="1300" currentdbname="Ops" loginname="CONTOSO\b" clientapp="AppB" />
+    <process id="pC" spid="30" ecid="0" status="suspended" lockMode="U" waittime="1400" currentdbname="Ops" loginname="CONTOSO\c" clientapp="AppC" />
+  </process-list>
+  <resource-list>
+    <keylock hobtid="1" dbid="4" objectname="Ops.dbo.T1" indexname="PK_T1" id="lockA" mode="X">
+      <owner-list>
+        <owner id="pB" mode="X" />
+      </owner-list>
+      <waiter-list>
+        <waiter id="pA" mode="U" requestType="wait" />
+      </waiter-list>
+    </keylock>
+    <keylock hobtid="2" dbid="4" objectname="Ops.dbo.T2" indexname="PK_T2" id="lockB" mode="X">
+      <owner-list>
+        <owner id="pC" mode="X" />
+      </owner-list>
+      <waiter-list>
+        <waiter id="pB" mode="U" requestType="wait" />
+      </waiter-list>
+    </keylock>
+    <keylock hobtid="3" dbid="4" objectname="Ops.dbo.T3" indexname="PK_T3" id="lockC" mode="X">
+      <owner-list>
+        <owner id="pA" mode="X" />
+      </owner-list>
+      <waiter-list>
+        <waiter id="pC" mode="U" requestType="wait" />
+      </waiter-list>
+    </keylock>
+  </resource-list>
+</deadlock>

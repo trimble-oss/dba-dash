@@ -1,0 +1,9 @@
+<deadlock>
+  <victim-list>
+	<victimProcess id="p1" />
+  </victim-list>
+  <process-list>
+	<process id="p1" spid="5" priority="-5" />
+	<process id="p2" spid="6" priority="0" />
+  </process-list>
+</deadlock>

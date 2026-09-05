@@ -1,0 +1,56 @@
+<!--
+  A resource held by more than one process: two readers hold S on the same key while a writer asks
+  for X.  Only one of the two owners is part of the deadlock cycle - the other is simply holding a
+  compatible lock - and it is deliberately listed second, so following the first owner leads off the
+  cycle and finds nothing.
+-->
+<deadlock>
+  <victim-list>
+    <victimProcess id="process3a1b2c0" />
+  </victim-list>
+  <process-list>
+    <process id="process3a1b2c0" taskpriority="0" logused="412" waitresource="KEY: 6:72057594047102976 (91a2c3d4e5f6)" waittime="2103" ownerId="884512" transactionname="user_transaction" lasttranstarted="2024-07-02T14:08:12.117" XDES="0x1f8a2b400" lockMode="X" schedulerid="2" kpid="7712" status="suspended" spid="55" sbid="0" ecid="0" priority="0" trancount="2" lastbatchstarted="2024-07-02T14:08:12.117" lastbatchcompleted="2024-07-02T14:08:12.113" lastattention="1900-01-01T00:00:00.000" clientapp="Billing Service" hostname="APPSRV03" hostpid="4488" loginname="CONTOSO\svc_billing" isolationlevel="read committed (2)" xactid="884512" currentdb="6" currentdbname="Ops" lockTimeout="4294967295" clientoption1="671098912" clientoption2="128056">
+      <executionStack>
+        <frame procname="Ops.dbo.usp_PostInvoice" line="34" stmtstart="1220" stmtend="1560" sqlhandle="0x03000600b73e51aa">
+UPDATE dbo.Customer SET LastInvoiceDate = @Today WHERE CustomerID = @CustomerID;    </frame>
+      </executionStack>
+      <inputbuf>
+EXEC dbo.usp_PostInvoice @CustomerID = 8812;   </inputbuf>
+    </process>
+    <process id="process3a1b31f8" taskpriority="0" logused="1284" waitresource="KEY: 6:72057594047037440 (3b6d1f0a9c22)" waittime="1876" ownerId="884519" transactionname="user_transaction" lasttranstarted="2024-07-02T14:08:12.140" XDES="0x1f8a31280" lockMode="U" schedulerid="4" kpid="9120" status="suspended" spid="62" sbid="0" ecid="0" priority="0" trancount="2" lastbatchstarted="2024-07-02T14:08:12.140" lastbatchcompleted="2024-07-02T14:08:12.137" lastattention="1900-01-01T00:00:00.000" clientapp="Statement Run" hostname="BATCHSRV01" hostpid="2260" loginname="CONTOSO\svc_batch" isolationlevel="repeatable read (3)" xactid="884519" currentdb="6" currentdbname="Ops" lockTimeout="4294967295" clientoption1="671098912" clientoption2="128056">
+      <executionStack>
+        <frame procname="Ops.dbo.usp_BuildStatement" line="18" stmtstart="640" stmtend="1024" sqlhandle="0x030006002c94f7b1">
+UPDATE dbo.Invoice SET StatementID = @StatementID WHERE CustomerID = @CustomerID;    </frame>
+      </executionStack>
+      <inputbuf>
+EXEC dbo.usp_BuildStatement @StatementID = 4471;   </inputbuf>
+    </process>
+    <process id="process3a1b3ac4" taskpriority="0" logused="0" waittime="0" ownerId="884521" transactionname="SELECT" lasttranstarted="2024-07-02T14:08:11.980" XDES="0x1f8a3ba00" lockMode="S" schedulerid="6" kpid="6004" status="running" spid="71" sbid="0" ecid="0" priority="0" trancount="1" lastbatchstarted="2024-07-02T14:08:11.980" lastbatchcompleted="2024-07-02T14:08:11.977" lastattention="1900-01-01T00:00:00.000" clientapp="Report Viewer" hostname="RPTSRV02" hostpid="7340" loginname="CONTOSO\reporting" isolationlevel="repeatable read (3)" xactid="884521" currentdb="6" currentdbname="Ops" lockTimeout="4294967295" clientoption1="671088928" clientoption2="128056">
+      <executionStack>
+        <frame procname="adhoc" line="1" stmtend="132" sqlhandle="0x02000000d51c7e44">
+SELECT CustomerID, Balance FROM dbo.Customer WHERE RegionID = @RegionID;    </frame>
+      </executionStack>
+      <inputbuf>
+SELECT CustomerID, Balance FROM dbo.Customer WHERE RegionID = 4;   </inputbuf>
+    </process>
+  </process-list>
+  <resource-list>
+    <keylock hobtid="72057594047102976" dbid="6" objectname="Ops.dbo.Customer" indexname="PK_Customer" id="lock2c4a11080" mode="S" associatedObjectId="72057594047102976">
+      <owner-list>
+        <owner id="process3a1b3ac4" mode="S" />
+        <owner id="process3a1b31f8" mode="S" />
+      </owner-list>
+      <waiter-list>
+        <waiter id="process3a1b2c0" mode="X" requestType="wait" />
+      </waiter-list>
+    </keylock>
+    <keylock hobtid="72057594047037440" dbid="6" objectname="Ops.dbo.Invoice" indexname="PK_Invoice" id="lock2c4a13500" mode="X" associatedObjectId="72057594047037440">
+      <owner-list>
+        <owner id="process3a1b2c0" mode="X" />
+      </owner-list>
+      <waiter-list>
+        <waiter id="process3a1b31f8" mode="U" requestType="wait" />
+      </waiter-list>
+    </keylock>
+  </resource-list>
+</deadlock>

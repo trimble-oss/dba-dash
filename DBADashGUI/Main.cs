@@ -3225,5 +3225,10 @@ namespace DBADashGUI
                 bttnRetry.Enabled = true;
             }
         }
+
+        private void OpenDeadlockxdlToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Common.OpenDeadlockGraphFile(this);
+        }
     }
 }

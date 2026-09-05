@@ -1,0 +1,40 @@
+<deadlock-list>
+  <deadlock victim="process4d8ba108">
+    <process-list>
+      <process id="process4d8ba108" taskpriority="0" logused="220" waitresource="PAGE: 6:1:2145" waittime="3204" transactionname="user_transaction" lasttranstarted="2023-11-02T14:07:31.180" lockMode="S" status="suspended" spid="55" ecid="0" priority="0" trancount="1" lastbatchstarted="2023-11-02T14:07:31.180" clientapp="Microsoft SQL Server Management Studio - Query" hostname="DESKTOP-A1" hostpid="14220" loginname="CONTOSO\dwiseman" isolationlevel="repeatable read (3)" currentdb="6" currentdbname="Warehouse">
+        <executionStack>
+          <frame procname="adhoc" line="3" stmtstart="52" stmtend="180" sqlhandle="0x02000000c41f2a11">
+SELECT * FROM dbo.Stock WITH (REPEATABLEREAD) WHERE StockID = 12;    </frame>
+        </executionStack>
+        <inputbuf>
+BEGIN TRAN; SELECT * FROM dbo.Stock WITH (REPEATABLEREAD) WHERE StockID = 12;   </inputbuf>
+      </process>
+      <process id="process4d8bc768" taskpriority="0" logused="1120" waitresource="PAGE: 6:1:2098" waittime="3198" transactionname="user_transaction" lasttranstarted="2023-11-02T14:07:31.173" lockMode="X" status="suspended" spid="58" ecid="0" priority="0" trancount="1" lastbatchstarted="2023-11-02T14:07:31.173" clientapp="Warehouse Service" hostname="WHSRV01" hostpid="2244" loginname="CONTOSO\svc_wh" isolationlevel="read committed (2)" currentdb="6" currentdbname="Warehouse">
+        <executionStack>
+          <frame procname="Warehouse.dbo.usp_AdjustStock" line="8" stmtstart="196" stmtend="402" sqlhandle="0x030006002d91b455">
+UPDATE dbo.Stock SET Quantity = Quantity - @Adjustment WHERE StockID = @StockID;    </frame>
+        </executionStack>
+        <inputbuf>
+EXEC dbo.usp_AdjustStock @StockID = 12, @Adjustment = 5;   </inputbuf>
+      </process>
+    </process-list>
+    <resource-list>
+      <pagelock fileid="1" pageid="2145" dbid="6" subresource="FULL" objectname="Warehouse.dbo.Stock" id="lock2a91c400" mode="X" associatedObjectId="72057594038189056">
+        <owner-list>
+          <owner id="process4d8bc768" mode="X" />
+        </owner-list>
+        <waiter-list>
+          <waiter id="process4d8ba108" mode="S" requestType="wait" />
+        </waiter-list>
+      </pagelock>
+      <pagelock fileid="1" pageid="2098" dbid="6" subresource="FULL" objectname="Warehouse.dbo.StockLedger" id="lock2a91d980" mode="S" associatedObjectId="72057594038254592">
+        <owner-list>
+          <owner id="process4d8ba108" mode="S" />
+        </owner-list>
+        <waiter-list>
+          <waiter id="process4d8bc768" mode="X" requestType="wait" />
+        </waiter-list>
+      </pagelock>
+    </resource-list>
+  </deadlock>
+</deadlock-list>

@@ -1,0 +1,64 @@
+<deadlock>
+  <victim-list>
+    <victimProcess id="process6b2a1c0" />
+  </victim-list>
+  <process-list>
+    <process id="process6b2a1c0" taskpriority="0" logused="0" waitresource="PAGE: 6:1:900 " waittime="4102" ownerId="991204" transactionname="SELECT" lasttranstarted="2025-03-11T09:41:18.220" XDES="0x2c1a9b400" lockMode="S" schedulerid="4" kpid="8812" status="suspended" spid="62" sbid="0" ecid="0" priority="0" trancount="0" lastbatchstarted="2025-03-11T09:41:18.220" clientapp="Web" hostname="WEBSRV01" hostpid="4120" loginname="CONTOSO\svc_web" isolationlevel="read committed (2)" currentdb="6" currentdbname="Ops">
+      <executionStack>
+        <frame procname="Ops.dbo.usp_GetAttachment" line="4" stmtstart="120" stmtend="410" sqlhandle="0x03000600b17c2e41">
+SELECT Content FROM dbo.Attachment WHERE AttachmentGUID = @GUID;    </frame>
+      </executionStack>
+      <inputbuf>
+Proc [Database Id = 6 Object Id = 1177767]   </inputbuf>
+    </process>
+    <process id="process6b2a4e8" taskpriority="0" logused="21400" waitresource="PAGE: 6:1:901 " waittime="4180" ownerId="991180" transactionname="user_transaction" lasttranstarted="2025-03-11T09:41:17.880" XDES="0x2c1a9c980" lockMode="U" schedulerid="2" kpid="9440" status="suspended" spid="55" sbid="0" ecid="0" priority="0" trancount="2" lastbatchstarted="2025-03-11T09:41:17.880" clientapp="Batch" hostname="APPSRV02" hostpid="7360" loginname="CONTOSO\svc_batch" isolationlevel="read committed (2)" currentdb="6" currentdbname="Ops">
+      <executionStack>
+        <frame procname="Ops.dbo.usp_PurgeAttachments" line="9" stmtstart="300" stmtend="640" sqlhandle="0x030006002d9e4a12">
+DELETE FROM dbo.Attachment WHERE UploadedUtc &lt; @Cutoff;    </frame>
+      </executionStack>
+      <inputbuf>
+Proc [Database Id = 6 Object Id = 1345522]   </inputbuf>
+    </process>
+    <process id="process6b2a7c4" taskpriority="0" logused="21400" waitresource="PAGE: 6:1:900 " waittime="4180" ownerId="991180" transactionname="user_transaction" lasttranstarted="2025-03-11T09:41:17.880" XDES="0x2c1a9d100" lockMode="U" schedulerid="3" kpid="9448" status="suspended" spid="55" sbid="0" ecid="1" priority="0" trancount="0" lastbatchstarted="2025-03-11T09:41:17.880" clientapp="Batch" hostname="APPSRV02" hostpid="7360" isolationlevel="read committed (2)" currentdb="6" currentdbname="Ops">
+      <executionStack>
+        <frame procname="Ops.dbo.usp_PurgeAttachments" line="9" stmtstart="300" stmtend="640" sqlhandle="0x030006002d9e4a12">
+DELETE FROM dbo.Attachment WHERE UploadedUtc &lt; @Cutoff;    </frame>
+      </executionStack>
+    </process>
+  </process-list>
+  <resource-list>
+    <pagelock fileid="1" pageid="900" dbid="6" subresource="FULL" objectname="Ops.dbo.Attachment" id="lock2a71b400" mode="U" associatedObjectId="72057594045923328">
+      <owner-list>
+        <owner id="process6b2a7c4" mode="U" />
+      </owner-list>
+      <waiter-list>
+        <waiter id="process6b2a1c0" mode="S" requestType="wait" />
+      </waiter-list>
+    </pagelock>
+    <pagelock fileid="1" pageid="900" dbid="6" subresource="FULL" objectname="Ops.dbo.Attachment" id="lock2a71b400" mode="U" associatedObjectId="72057594045923328">
+      <owner-list>
+        <owner id="process6b2a7c4" mode="U" />
+        <owner id="process6b2a7c4" mode="U" />
+      </owner-list>
+      <waiter-list>
+        <waiter id="process6b2a4e8" mode="U" requestType="wait" />
+      </waiter-list>
+    </pagelock>
+    <pagelock fileid="1" pageid="901" dbid="6" subresource="FULL" objectname="Ops.dbo.Attachment" id="lock2a71c980" mode="S" associatedObjectId="72057594045923328">
+      <owner-list>
+        <owner id="process6b2a1c0" mode="S" />
+      </owner-list>
+      <waiter-list>
+        <waiter id="process6b2a4e8" mode="U" requestType="wait" />
+      </waiter-list>
+    </pagelock>
+    <exchangeEvent id="Pipe2c0f11a80" WaitType="e_waitPipeGetRow" nodeId="2">
+      <owner-list>
+        <owner id="process6b2a7c4" />
+      </owner-list>
+      <waiter-list>
+        <waiter id="process6b2a4e8" />
+      </waiter-list>
+    </exchangeEvent>
+  </resource-list>
+</deadlock>

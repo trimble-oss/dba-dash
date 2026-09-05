@@ -39,8 +39,47 @@ namespace DBADashGUI.AgentJobs
                 WebView2.Visible = false;
                 throw;
             }
+            if (!_navigationHandlerAttached)
+            {
+                WebView2.CoreWebView2.NavigationStarting += CoreWebView2_NavigationStarting;
+                _navigationHandlerAttached = true;
+            }
             pnlWebView2Required.Visible = false;
             WebView2.Visible = true;
+        }
+
+        private bool _navigationHandlerAttached;
+
+        /// <summary>
+        /// The content we render is generated from data read off monitored instances, so any link it
+        /// contains is untrusted.  Keep navigation inside the control to the content we load ourselves
+        /// (about:blank/data from NavigateToString, or the temp file when the HTML is too large) and
+        /// send real web links to the user's default browser instead of following them in-frame.
+        /// </summary>
+        private void CoreWebView2_NavigationStarting(object sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationStartingEventArgs e)
+        {
+            var uri = e.Uri ?? string.Empty;
+            if (uri.StartsWith("about:", StringComparison.OrdinalIgnoreCase) ||
+                uri.StartsWith("data:", StringComparison.OrdinalIgnoreCase) ||
+                uri.StartsWith("file:", StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            e.Cancel = true;
+
+            if (uri.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+                uri.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            {
+                try
+                {
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(uri) { UseShellExecute = true });
+                }
+                catch (Exception)
+                {
+                    // Opening the link is best-effort; a blocked navigation is the important part.
+                }
+            }
         }
 
         private static string WebView2SetupTempPath => Path.Combine(Path.GetTempPath(), CommonShared.TempFilePrefix + "MicrosoftEdgeWebview2Setup.exe");

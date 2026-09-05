@@ -1,0 +1,12 @@
+<deadlock>
+  <process-list>
+	<process id="p1" spid="5" />
+  </process-list>
+  <resource-list>
+	<objectlock objid="1" dbid="4" objectname="db.dbo.T" id="lock1" mode="IX">
+	  <owner-list>
+		<owner id="p1" mode="IX" />
+	  </owner-list>
+	</objectlock>
+  </resource-list>
+</deadlock>

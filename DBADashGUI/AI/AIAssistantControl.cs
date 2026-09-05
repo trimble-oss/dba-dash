@@ -988,29 +988,9 @@ namespace DBADashGUI.AI
 
         try
         {
-            var theme = ThemeExtensions.CurrentTheme;
-            var fgColor = ColorTranslator.ToHtml(theme.ForegroundColor);
-            var bgColor = ColorTranslator.ToHtml(theme.BackgroundColor);
-            var codeBgColor = ColorTranslator.ToHtml(theme.InputBackColor);
-            var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
-            var htmlBody = Markdown.ToHtml(markdown, pipeline);
-            var html = $$"""
-                         <html>
-                         <head>
-                           <meta charset='utf-8'/>
-                           <style>
-                             body { font-family: Segoe UI, Arial, sans-serif; margin: 16px; color: {{fgColor}}; background: {{bgColor}}; }
-                             h1,h2,h3 { margin: 8px 0; }
-                             ul { padding-left: 20px; }
-                             code { background: {{codeBgColor}}; padding: 2px 4px; border-radius: 3px; }
-                             pre { background: {{codeBgColor}}; padding: 10px; border-radius: 4px; overflow-x: auto; }
-                           </style>
-                         </head>
-                         <body>{{htmlBody}}</body>
-                         </html>
-                         """;
-
-            var success = await webViewSummary.NavigateToLargeString(html);
+            // Shared with the deadlock viewer's analysis, so a generated answer looks the same
+            // wherever it is read.
+            var success = await webViewSummary.NavigateToLargeString(MarkdownRenderer.ToThemedHtml(markdown));
             tabSummary.SelectedTab = success ? tabRenderedSummary : tabRawSummary;
         }
         catch

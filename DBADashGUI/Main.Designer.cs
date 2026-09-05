@@ -69,6 +69,8 @@ namespace DBADashGUI
             darkToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             whiteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             tsAlert = new System.Windows.Forms.ToolStripMenuItem();
+            tsTools = new System.Windows.Forms.ToolStripMenuItem();
+            openDeadlockxdlToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             tsDateRange = new DateRangeToolStripMenuItem();
@@ -367,7 +369,7 @@ namespace DBADashGUI
             // 
             menuStrip1.GripMargin = new System.Windows.Forms.Padding(2);
             menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsConnect, diffToolStripMenuItem, optionsToolStripMenuItem, tsAlert, helpToolStripMenuItem, tsDateRange, tsTimeFilter, tsDayOfWeek, cboTimeZone, tsToggleSingleInstance, closeChildWindowsToolStripMenuItem });
+            menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsConnect, diffToolStripMenuItem, optionsToolStripMenuItem, tsAlert, tsTools, helpToolStripMenuItem, tsDateRange, tsTimeFilter, tsDayOfWeek, cboTimeZone, tsToggleSingleInstance, closeChildWindowsToolStripMenuItem });
             menuStrip1.Location = new System.Drawing.Point(0, 0);
             menuStrip1.Name = "menuStrip1";
             menuStrip1.Padding = new System.Windows.Forms.Padding(3, 1, 0, 1);
@@ -631,6 +633,23 @@ namespace DBADashGUI
             tsAlert.Text = "0";
             tsAlert.Click += TsAlert_Click;
             tsAlert.MouseHover += ShowAlertToolTip;
+            // 
+            // tsTools
+            // 
+            tsTools.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { openDeadlockxdlToolStripMenuItem });
+            tsTools.Image = Properties.Resources.toolbox_16xLG;
+            tsTools.Name = "tsTools";
+            tsTools.Size = new System.Drawing.Size(78, 28);
+            tsTools.Text = "Tools";
+            // 
+            // openDeadlockxdlToolStripMenuItem
+            // 
+            openDeadlockxdlToolStripMenuItem.Image = Properties.Resources.FolderOpened_16x;
+            openDeadlockxdlToolStripMenuItem.Name = "openDeadlockxdlToolStripMenuItem";
+            openDeadlockxdlToolStripMenuItem.Size = new System.Drawing.Size(280, 26);
+            openDeadlockxdlToolStripMenuItem.Text = "Open Deadlock Graph | *.xdl";
+            openDeadlockxdlToolStripMenuItem.ToolTipText = "Open a deadlock graph (.xdl) saved from SSMS, the system health session, or this viewer.";
+            openDeadlockxdlToolStripMenuItem.Click += OpenDeadlockxdlToolStripMenuItem_Click;
             // 
             // helpToolStripMenuItem
             // 
@@ -3005,5 +3024,7 @@ namespace DBADashGUI
         private System.Windows.Forms.PictureBox picConnectPct;
         private System.Windows.Forms.Button bttnRetry;
         private System.Windows.Forms.Label lblRepositoryDB;
+        private System.Windows.Forms.ToolStripMenuItem tsTools;
+        private System.Windows.Forms.ToolStripMenuItem openDeadlockxdlToolStripMenuItem;
     }
 }

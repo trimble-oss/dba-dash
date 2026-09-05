@@ -1,0 +1,25 @@
+<deadlock>
+  <victim-list>
+    <victimProcess id="processMissing" />
+  </victim-list>
+  <process-list>
+    <process id="processPresent" spid="41" ecid="0" status="suspended">
+      <inputbuf>SELECT 1;</inputbuf>
+    </process>
+  </process-list>
+  <resource-list>
+    <ridlock fileid="1" pageid="884" dbid="4" objectname="Ops.dbo.Queue" id="lockcafe01" mode="X">
+      <owner-list>
+        <owner id="processMissing" mode="X" />
+      </owner-list>
+      <waiter-list>
+        <waiter id="processPresent" mode="S" requestType="wait" />
+      </waiter-list>
+    </ridlock>
+    <somethingNewInSql2030 customAttribute="42" id="locknew01">
+      <owner-list>
+        <owner id="processPresent" />
+      </owner-list>
+    </somethingNewInSql2030>
+  </resource-list>
+</deadlock>

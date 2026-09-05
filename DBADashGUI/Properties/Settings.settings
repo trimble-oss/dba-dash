@@ -41,6 +41,9 @@
     <Setting Name="ChildFormSingleInstance" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
+    <Setting Name="DeadlockLayoutStyle" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Ring</Value>
+    </Setting>
     <Setting Name="LocalAIServiceUrl" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>

@@ -21,6 +21,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Alert\HTMLEmailAlertTemplate.html" />
+    <None Remove="SQL\SQLDeadlockStatementPlans.sql" />
     <None Remove="SQL\SQLDecipherWaitResource.sql" />
     <None Remove="SQL\SQLIdentityColumns.sql" />
     <None Remove="SQL\SQLJobs.sql" />
@@ -57,6 +58,7 @@
 	<EmbeddedResource Include="SQL\SQLBackups.sql" />
 	<EmbeddedResource Include="SQL\SQLBlockingSnapshot.sql" />
 	<EmbeddedResource Include="SQL\SQLCorruption.sql" />
+	<EmbeddedResource Include="SQL\SQLDeadlockStatementPlans.sql" />
 	<EmbeddedResource Include="SQL\SQLDecipherWaitResource.sql" />
 	<EmbeddedResource Include="SQL\SQLCPU.sql" />
 	<EmbeddedResource Include="SQL\SQLCustomChecks.sql" />

@@ -1,0 +1,43 @@
+<deadlock>
+  <victim-list>
+	<victimProcess id="process3a1c0f8c8" />
+  </victim-list>
+  <process-list>
+	<process id="process3a1c0f8c8" taskpriority="0" logused="0" waitresource="KEY: 7:72057594043170816 (8194443284a0)" waittime="1216" ownerId="2003310" transactionname="SELECT" lasttranstarted="2024-03-14T11:02:18.117" XDES="0x2b1f3a2d0" lockMode="S" schedulerid="2" kpid="7220" status="suspended" spid="61" sbid="0" ecid="0" priority="0" trancount="1" lastbatchstarted="2024-03-14T11:02:18.117" lastbatchcompleted="2024-03-14T11:02:18.113" lastattention="1900-01-01T00:00:00.000" clientapp="Reporting" hostname="APPSRV01" hostpid="6120" loginname="CONTOSO\svc_report" isolationlevel="read committed (2)" xactid="2003310" currentdb="7" currentdbname="Sales" lockTimeout="4294967295" clientoption1="671098976" clientoption2="128056">
+	  <executionStack>
+		<frame procname="adhoc" line="1" stmtstart="0" stmtend="184" sqlhandle="0x0200000055c1e30a">
+SELECT OrderID, CustomerID, Total FROM dbo.Orders WHERE Status = @Status;    </frame>
+	  </executionStack>
+	  <inputbuf>
+SELECT OrderID, CustomerID, Total FROM dbo.Orders WHERE Status = 'Open';   </inputbuf>
+	</process>
+	<process id="process3a1c14988" taskpriority="0" logused="712" waitresource="KEY: 7:72057594045595648 (61a06abd401c)" waittime="1204" ownerId="2003314" transactionname="user_transaction" lasttranstarted="2024-03-14T11:02:18.120" XDES="0x2b1f41880" lockMode="X" schedulerid="4" kpid="9044" status="suspended" spid="74" sbid="0" ecid="0" priority="0" trancount="2" lastbatchstarted="2024-03-14T11:02:18.120" lastbatchcompleted="2024-03-14T11:02:18.117" lastattention="1900-01-01T00:00:00.000" clientapp="Order Import" hostname="BATCHSRV02" hostpid="3388" loginname="CONTOSO\svc_batch" isolationlevel="read committed (2)" xactid="2003314" currentdb="7" currentdbname="Sales" lockTimeout="4294967295" clientoption1="671098976" clientoption2="128056">
+	  <executionStack>
+		<frame procname="Sales.dbo.usp_UpdateOrderStatus" line="8" stmtstart="316" stmtend="742" sqlhandle="0x03000700c4f6e21c">
+UPDATE dbo.Orders SET Status = @Status WHERE OrderID = @OrderID;    </frame>
+		<frame procname="adhoc" line="1" stmtend="96" sqlhandle="0x02000000d3b1c50a">
+EXEC dbo.usp_UpdateOrderStatus @OrderID = 4711, @Status = 'Shipped';    </frame>
+	  </executionStack>
+	  <inputbuf>
+EXEC dbo.usp_UpdateOrderStatus @OrderID = 4711, @Status = 'Shipped';   </inputbuf>
+	</process>
+  </process-list>
+  <resource-list>
+	<keylock hobtid="72057594043170816" dbid="7" objectname="Sales.dbo.Orders" indexname="PK_Orders" id="lock2f4a2b080" mode="X" associatedObjectId="72057594043170816">
+	  <owner-list>
+		<owner id="process3a1c14988" mode="X" />
+	  </owner-list>
+	  <waiter-list>
+		<waiter id="process3a1c0f8c8" mode="S" requestType="wait" />
+	  </waiter-list>
+	</keylock>
+	<keylock hobtid="72057594045595648" dbid="7" objectname="Sales.dbo.Orders" indexname="IX_Orders_Status" id="lock2f4a2c500" mode="S" associatedObjectId="72057594043170816">
+	  <owner-list>
+		<owner id="process3a1c0f8c8" mode="S" />
+	  </owner-list>
+	  <waiter-list>
+		<waiter id="process3a1c14988" mode="X" requestType="wait" />
+	  </waiter-list>
+	</keylock>
+  </resource-list>
+</deadlock>

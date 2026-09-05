@@ -1,0 +1,39 @@
+<deadlock>
+  <victim-list>
+    <victimProcess id="process8a1c0c108" />
+  </victim-list>
+  <process-list>
+    <process id="process8a1c0c108" taskpriority="0" logused="0" waittime="5108" schedulerid="2" kpid="7712" status="suspended" spid="88" sbid="0" ecid="0" priority="0" trancount="1" lastbatchstarted="2025-01-08T22:14:02.907" clientapp="Reporting" hostname="RPTSRV01" hostpid="5560" loginname="CONTOSO\svc_rpt" isolationlevel="read committed (2)" currentdb="9" currentdbname="Analytics">
+      <executionStack>
+        <frame procname="Analytics.dbo.usp_RebuildAggregates" line="41" stmtstart="2180" stmtend="3944" sqlhandle="0x030009004ab1c7e2">
+INSERT dbo.FactSalesAgg SELECT ... FROM dbo.FactSales f JOIN dbo.DimDate d ON ...    </frame>
+      </executionStack>
+      <inputbuf>
+EXEC dbo.usp_RebuildAggregates;   </inputbuf>
+    </process>
+    <process id="process8a1c11e88" taskpriority="0" logused="0" waittime="5104" schedulerid="6" kpid="9980" status="suspended" spid="88" sbid="0" ecid="3" priority="0" trancount="1" lastbatchstarted="2025-01-08T22:14:02.907" clientapp="Reporting" hostname="RPTSRV01" hostpid="5560" loginname="CONTOSO\svc_rpt" isolationlevel="read committed (2)" currentdb="9" currentdbname="Analytics">
+      <executionStack>
+        <frame procname="Analytics.dbo.usp_RebuildAggregates" line="41" stmtstart="2180" stmtend="3944" sqlhandle="0x030009004ab1c7e2">
+INSERT dbo.FactSalesAgg SELECT ... FROM dbo.FactSales f JOIN dbo.DimDate d ON ...    </frame>
+      </executionStack>
+    </process>
+  </process-list>
+  <resource-list>
+    <exchangeEvent id="Pipe8a0f2c440" WaitType="e_waitPipeNewRow" nodeId="7">
+      <owner-list>
+        <owner id="process8a1c11e88" />
+      </owner-list>
+      <waiter-list>
+        <waiter id="process8a1c0c108" />
+      </waiter-list>
+    </exchangeEvent>
+    <exchangeEvent id="Pipe8a0f2d900" WaitType="e_waitPipeGetRow" nodeId="7">
+      <owner-list>
+        <owner id="process8a1c0c108" />
+      </owner-list>
+      <waiter-list>
+        <waiter id="process8a1c11e88" />
+      </waiter-list>
+    </exchangeEvent>
+  </resource-list>
+</deadlock>

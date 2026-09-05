@@ -178,7 +178,19 @@ namespace DBADashGUI.Properties {
                 this["ChildFormSingleInstance"] = value;
             }
         }
-        
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Ring")]
+        public string DeadlockLayoutStyle {
+            get {
+                return ((string)(this["DeadlockLayoutStyle"]));
+            }
+            set {
+                this["DeadlockLayoutStyle"] = value;
+            }
+        }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("-1")]

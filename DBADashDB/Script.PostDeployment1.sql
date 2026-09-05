@@ -16,6 +16,12 @@ GRANT SELECT ON SCHEMA::Alert TO App;
 GRANT SELECT ON SCHEMA::Alert TO AppReadOnly
 GRANT EXECUTE ON SCHEMA::AI TO AIService;
 GRANT EXECUTE ON OBJECT::AI.ServiceConfig_Get TO AIUser;
+/* The deadlock viewer shows a pattern's previous analyses whether or not the reader could commission
+   a new one, so the read is granted to the app roles rather than to the AI roles.  It reads through
+   the procedure only - no SELECT on AI.DeadlockAnalysis is granted, and none is needed: the schema is
+   owned by dbo, so ownership chaining covers it. */
+GRANT EXECUTE ON OBJECT::AI.DeadlockAnalysisHistory_Get TO App;
+GRANT EXECUTE ON OBJECT::AI.DeadlockAnalysisHistory_Get TO AppReadOnly;
 /* Ad-hoc XE lives in its own schema so the captured event/session tables aren't exposed by the broad
    GRANT SELECT ON SCHEMA::dbo TO App.  AdhocXE members get EXECUTE on the XE procs only (no SELECT on the
    underlying tables); the procs reach those tables via ownership chaining (XE and dbo are both owned by dbo).

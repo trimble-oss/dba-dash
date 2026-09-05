@@ -1,0 +1,40 @@
+<!--
+  A conversion deadlock: both sessions hold S on the same key inside a transaction and both ask to
+  convert it to X, so each is an owner *and* a waiter of the one resource.  There is a single
+  resource in the graph, so the cycle runs through it twice.
+-->
+<deadlock>
+  <victim-list>
+    <victimProcess id="process47c9a10" />
+  </victim-list>
+  <process-list>
+    <process id="process47c9a10" taskpriority="0" logused="220" waitresource="KEY: 6:72057594048020480 (7c40a1b9e332)" waittime="3204" ownerId="991044" transactionname="user_transaction" lasttranstarted="2024-08-19T09:41:03.220" XDES="0x2b90c1200" lockMode="X" schedulerid="1" kpid="5188" status="suspended" spid="58" sbid="0" ecid="0" priority="0" trancount="2" lastbatchstarted="2024-08-19T09:41:03.220" lastbatchcompleted="2024-08-19T09:41:03.217" lastattention="1900-01-01T00:00:00.000" clientapp="Ledger Service" hostname="APPSRV07" hostpid="3320" loginname="CONTOSO\svc_ledger" isolationlevel="repeatable read (3)" xactid="991044" currentdb="6" currentdbname="Ops" lockTimeout="4294967295" clientoption1="671098912" clientoption2="128056">
+      <executionStack>
+        <frame procname="Ops.dbo.usp_AdjustBalance" line="21" stmtstart="806" stmtend="1180" sqlhandle="0x03000600a41d9f27">
+UPDATE dbo.Ledger SET Balance = Balance - @Amount WHERE LedgerID = @LedgerID;    </frame>
+      </executionStack>
+      <inputbuf>
+EXEC dbo.usp_AdjustBalance @LedgerID = 55, @Amount = 120.00;   </inputbuf>
+    </process>
+    <process id="process47c9d88" taskpriority="0" logused="220" waitresource="KEY: 6:72057594048020480 (7c40a1b9e332)" waittime="3198" ownerId="991047" transactionname="user_transaction" lasttranstarted="2024-08-19T09:41:03.226" XDES="0x2b90c8f40" lockMode="X" schedulerid="3" kpid="8464" status="suspended" spid="64" sbid="0" ecid="0" priority="0" trancount="2" lastbatchstarted="2024-08-19T09:41:03.226" lastbatchcompleted="2024-08-19T09:41:03.223" lastattention="1900-01-01T00:00:00.000" clientapp="Ledger Service" hostname="APPSRV08" hostpid="6612" loginname="CONTOSO\svc_ledger" isolationlevel="repeatable read (3)" xactid="991047" currentdb="6" currentdbname="Ops" lockTimeout="4294967295" clientoption1="671098912" clientoption2="128056">
+      <executionStack>
+        <frame procname="Ops.dbo.usp_AdjustBalance" line="21" stmtstart="806" stmtend="1180" sqlhandle="0x03000600a41d9f27">
+UPDATE dbo.Ledger SET Balance = Balance - @Amount WHERE LedgerID = @LedgerID;    </frame>
+      </executionStack>
+      <inputbuf>
+EXEC dbo.usp_AdjustBalance @LedgerID = 55, @Amount = 75.50;   </inputbuf>
+    </process>
+  </process-list>
+  <resource-list>
+    <keylock hobtid="72057594048020480" dbid="6" objectname="Ops.dbo.Ledger" indexname="PK_Ledger" id="lock3f10b2900" mode="S" associatedObjectId="72057594048020480">
+      <owner-list>
+        <owner id="process47c9a10" mode="S" />
+        <owner id="process47c9d88" mode="S" />
+      </owner-list>
+      <waiter-list>
+        <waiter id="process47c9a10" mode="X" requestType="convert" />
+        <waiter id="process47c9d88" mode="X" requestType="convert" />
+      </waiter-list>
+    </keylock>
+  </resource-list>
+</deadlock>

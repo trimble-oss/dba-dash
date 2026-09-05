@@ -585,6 +585,7 @@
     <Build Include="dbo\Stored Procedures\DatabaseDDLCompare_Get.sql" />
     <Build Include="dbo\Stored Procedures\DDLSnapshotDates_Get.sql" />
     <Build Include="dbo\Stored Procedures\DBSchemaAtDate_Get.sql" />
+    <Build Include="dbo\Stored Procedures\DeadlockObjectDDL_Get.sql" />
     <Build Include="dbo\Stored Procedures\ResourceGovernorConfiguration_Get.sql" />
     <Build Include="dbo\Stored Procedures\ResourceGovernorConfigurationHistory_Get.sql" />
     <Build Include="dbo\User Defined Types\AzureDBResourceGovernance.sql" />
@@ -730,6 +731,7 @@
     <Build Include="Security\AI.sql" />
     <Build Include="AI\Tables\Models.sql" />
     <Build Include="AI\Tables\ExampleQuestions.sql" />
+    <Build Include="AI\Tables\DeadlockAnalysis.sql" />
     <Build Include="AI\Stored Procedures\ActiveAlerts_Get.sql" />
     <Build Include="AI\Stored Procedures\AgDrRisk_Get.sql" />
     <Build Include="AI\Stored Procedures\AgentJobAlerts_Get.sql" />
@@ -742,6 +744,8 @@
     <Build Include="AI\Stored Procedures\CrossSignalCorrelation_Get.sql" />
     <Build Include="AI\Stored Procedures\DBConfigCurrent_Get.sql" />
     <Build Include="AI\Stored Procedures\Deadlocks_Get.sql" />
+    <Build Include="AI\Stored Procedures\DeadlockAnalysis_Upd.sql" />
+    <Build Include="AI\Stored Procedures\DeadlockAnalysisHistory_Get.sql" />
     <Build Include="AI\Stored Procedures\DrivesRisk_Get.sql" />
     <Build Include="AI\Stored Procedures\IdentityColumns_Get.sql" />
     <Build Include="AI\Stored Procedures\InstanceMetadata_Get.sql" />

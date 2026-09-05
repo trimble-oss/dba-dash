@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+  <defs>
+    <style>.canvas{fill: none; opacity: 0;}.light-lightblue{fill: #0077a0; opacity: 1;}.light-defaultgrey{fill: none; stroke: #212121; opacity: 1;}</style>
+  </defs>
+  <title>IconLightDeadlockLayoutRing</title>
+  <g id="canvas" class="canvas">
+    <path class="canvas" d="M16,16H0V0H16Z" />
+  </g>
+  <g id="level-1">
+    <!--
+      Four nodes joined in a closed loop - the shape the ring layout makes of a deadlock.  Drawn
+      first so the nodes cover the ends of the joins.
+
+      Everything sits on whole or half pixels of the 16 unit grid so a 1px stroke lands on one pixel
+      row: a drawn circle, and a diamond of diagonals, both turn to grey specks at this size.
+    -->
+    <path class="light-defaultgrey" d="M4,2.5H12M13.5,4V12M12,13.5H4M2.5,12V4" stroke-width="1" />
+    <rect class="light-lightblue" x="0" y="0" width="5" height="5" rx="1" />
+    <rect class="light-lightblue" x="11" y="0" width="5" height="5" rx="1" />
+    <rect class="light-lightblue" x="11" y="11" width="5" height="5" rx="1" />
+    <rect class="light-lightblue" x="0" y="11" width="5" height="5" rx="1" />
+  </g>
+</svg>

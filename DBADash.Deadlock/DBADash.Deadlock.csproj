@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Library</OutputType>
+    <Nullable>enable</Nullable>
+    <Deterministic>True</Deterministic>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <NeutralLanguage>en-GB</NeutralLanguage>
+    <Configurations>Debug;Release;CLI</Configurations>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+
+    <!--
+      This project is deliberately platform neutral.  It must never take a dependency on WinForms,
+      WPF or System.Drawing so that the parse/layout/interaction layers stay portable (e.g. to a
+      Skia renderer hosted on Avalonia) and remain usable from the non-Windows projects such as
+      DBADashAI.  The compiler enforces this rather than relying on convention.
+    -->
+    <UseWindowsForms>false</UseWindowsForms>
+    <UseWPF>false</UseWPF>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\GlobalAssemblyInfo.cs" Link="Properties\GlobalAssemblyInfo.cs" />
+  </ItemGroup>
+
+</Project>

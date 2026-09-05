@@ -126,7 +126,9 @@ namespace DBADashGUI.CustomReports
                 MessageBox.Show($"Invalid deadlock graph\n{dlGraph}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            Common.ShowDeadlockGraph(dlGraph);
+            // The report's context identifies the instance the graph came from, which is what lets the viewer
+            // offer the plan and Query Store lookups for the statements in the graph.
+            Common.ShowDeadlockGraph(dlGraph, context: context);
         }
     }
 

@@ -1,0 +1,40 @@
+<event name="xml_deadlock_report" package="sqlserver" timestamp="2025-06-19T11:04:58.412Z">
+  <data name="xml_report">
+    <type name="xml" package="package0" />
+    <value>
+      <deadlock>
+        <victim-list>
+          <victimProcess id="processb1d0c8" />
+        </victim-list>
+        <process-list>
+          <process id="processb1d0c8" waitresource="OBJECT: 11:1445580188:0 " waittime="2011" transactionname="user_transaction" lockMode="IX" status="suspended" spid="102" ecid="0" trancount="1" clientapp="Billing" hostname="BILLSRV01" loginname="CONTOSO\svc_bill" isolationlevel="read committed (2)" currentdb="11" currentdbname="Billing">
+            <inputbuf>
+EXEC dbo.usp_PostInvoice @InvoiceID = 88231;   </inputbuf>
+          </process>
+          <process id="processb1e440" waitresource="OBJECT: 11:1461580245:0 " waittime="2007" transactionname="user_transaction" lockMode="IX" status="suspended" spid="117" ecid="0" trancount="1" clientapp="Billing" hostname="BILLSRV02" loginname="CONTOSO\svc_bill" isolationlevel="read committed (2)" currentdb="11" currentdbname="Billing">
+            <inputbuf>
+EXEC dbo.usp_ReverseInvoice @InvoiceID = 88232;   </inputbuf>
+          </process>
+        </process-list>
+        <resource-list>
+          <objectlock lockPartition="0" objid="1445580188" subresource="FULL" dbid="11" objectname="Billing.dbo.Invoice" id="lockb2c1a00" mode="X">
+            <owner-list>
+              <owner id="processb1e440" mode="X" />
+            </owner-list>
+            <waiter-list>
+              <waiter id="processb1d0c8" mode="IX" requestType="wait" />
+            </waiter-list>
+          </objectlock>
+          <objectlock lockPartition="0" objid="1461580245" subresource="FULL" dbid="11" objectname="Billing.dbo.InvoiceLine" id="lockb2c3480" mode="X">
+            <owner-list>
+              <owner id="processb1d0c8" mode="X" />
+            </owner-list>
+            <waiter-list>
+              <waiter id="processb1e440" mode="IX" requestType="wait" />
+            </waiter-list>
+          </objectlock>
+        </resource-list>
+      </deadlock>
+    </value>
+  </data>
+</event>

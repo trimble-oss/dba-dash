@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Library</OutputType>
+    <Nullable>enable</Nullable>
+    <Deterministic>True</Deterministic>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <NeutralLanguage>en-GB</NeutralLanguage>
+    <Configurations>Debug;Release;CLI</Configurations>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+
+    <!--
+      Skia enters here and nowhere lower down: the parse, layout and interaction layers stay free of
+      any drawing dependency.  This project still avoids WinForms and System.Drawing so that the
+      drawing code itself remains portable - Avalonia renders on Skia, so an SKCanvas based renderer
+      moves across unchanged and only the host shim is rewritten.
+    -->
+    <UseWindowsForms>false</UseWindowsForms>
+    <UseWPF>false</UseWPF>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SkiaSharp" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <ProjectReference Include="..\DBADash.Deadlock\DBADash.Deadlock.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\GlobalAssemblyInfo.cs" Link="Properties\GlobalAssemblyInfo.cs" />
+  </ItemGroup>
+
+</Project>

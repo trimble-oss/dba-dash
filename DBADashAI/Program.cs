@@ -158,6 +158,8 @@ builder.Services.AddScoped<AiSummaryFormatter>();
 builder.Services.AddScoped<AiEvidenceRanker>();
 builder.Services.AddSingleton<AiFeedbackStore>();
 builder.Services.AddScoped<AiRcaTemplateService>();
+builder.Services.AddScoped<AiDeadlockPromptBuilder>();
+builder.Services.AddScoped<DeadlockAnalysisStore>();
 builder.Services.AddScoped<AiRunbookLinkService>();
 builder.Services.AddScoped<AiRiskForecastService>();
 
@@ -586,6 +588,71 @@ ApplyAuthAndRateLimit(app.MapPost("/api/ai/ask", async (
         telemetry.Fail(requestId, ex);
         return Results.Problem(
             title: "AI request failed",
+            detail: $"RequestId={requestId}. {ex.Message}",
+            statusCode: StatusCodes.Status500InternalServerError);
+    }
+}));
+
+// Analysis of an artifact the caller already holds, rather than a question answered from the
+// repository: the deadlock graph, and what the caller's own rules made of it, go up together.
+ApplyAuthAndRateLimit(app.MapPost("/api/ai/analyse-deadlock", async (
+    AiDeadlockAnalysisRequest request,
+    AiChatClient aiChat,
+    AiDeadlockPromptBuilder promptBuilder,
+    AiRequestTelemetryService telemetry,
+    DeadlockAnalysisStore store,
+    IConfiguration config,
+    CancellationToken cancellationToken) =>
+{
+    var validationError = request.Validate();
+    if (!string.IsNullOrWhiteSpace(validationError))
+    {
+        return Results.BadRequest(new { error = validationError });
+    }
+
+    var requestId = Guid.NewGuid().ToString("N");
+    var totalSw = telemetry.Start(requestId, $"Deadlock analysis {request.Signature}", "deadlock-analysis");
+
+    // The model is part of the cache key, so it has to be resolved before the lookup rather than
+    // reported after the call.
+    var model = request.ModelOverride
+                ?? config["Anthropic:Model"]
+                ?? config["AzureOpenAI:Deployment"]
+                ?? "unknown";
+    var payloadVersion = string.IsNullOrWhiteSpace(request.PayloadVersion) ? "1" : request.PayloadVersion!;
+
+    try
+    {
+        // Always asks the model.  The caller has seen any previous analysis of this pattern before
+        // getting here - the viewer shows it on opening - so a request is a request for another
+        // opinion, not for the one already on their screen.
+        var prompt = promptBuilder.Build(request);
+        var analysis = await aiChat.SummarizeWithPromptAsync(prompt, cancellationToken, request.ModelOverride);
+
+        await store.SaveAsync(request.Signature, model, payloadVersion, analysis, request.InstanceId, cancellationToken);
+
+        totalSw.Stop();
+        telemetry.Complete(requestId, "deadlock-analysis", 1, 0, totalSw.ElapsedMilliseconds, 0, "n/a");
+
+        return Results.Ok(new AiDeadlockAnalysisResponse
+        {
+            RequestId = requestId,
+            Signature = request.Signature,
+            Analysis = analysis,
+            Model = model,
+            TotalExecutionMs = totalSw.ElapsedMilliseconds
+        });
+    }
+    catch (OperationCanceledException)
+    {
+        telemetry.Fail(requestId, new TimeoutException("AI request cancelled or timed out."));
+        return Results.StatusCode(StatusCodes.Status499ClientClosedRequest);
+    }
+    catch (Exception ex)
+    {
+        telemetry.Fail(requestId, ex);
+        return Results.Problem(
+            title: "Deadlock analysis failed",
             detail: $"RequestId={requestId}. {ex.Message}",
             statusCode: StatusCodes.Status500InternalServerError);
     }

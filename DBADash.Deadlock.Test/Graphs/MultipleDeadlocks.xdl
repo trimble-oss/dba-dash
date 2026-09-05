@@ -1,0 +1,42 @@
+<deadlock-list>
+  <deadlock victim="processAA1">
+    <process-list>
+      <process id="processAA1" spid="201" ecid="0" status="suspended" currentdbname="Alpha">
+        <inputbuf>EXEC dbo.usp_Alpha;</inputbuf>
+      </process>
+      <process id="processAA2" spid="202" ecid="0" status="suspended" currentdbname="Alpha">
+        <inputbuf>EXEC dbo.usp_AlphaTwo;</inputbuf>
+      </process>
+    </process-list>
+    <resource-list>
+      <keylock hobtid="72057594038000001" dbid="4" objectname="Alpha.dbo.T1" indexname="PK_T1" id="lockAA" mode="X">
+        <owner-list>
+          <owner id="processAA2" mode="X" />
+        </owner-list>
+        <waiter-list>
+          <waiter id="processAA1" mode="S" requestType="wait" />
+        </waiter-list>
+      </keylock>
+    </resource-list>
+  </deadlock>
+  <deadlock victim="processBB2">
+    <process-list>
+      <process id="processBB1" spid="301" ecid="0" status="suspended" currentdbname="Bravo">
+        <inputbuf>EXEC dbo.usp_Bravo;</inputbuf>
+      </process>
+      <process id="processBB2" spid="302" ecid="0" status="suspended" currentdbname="Bravo">
+        <inputbuf>EXEC dbo.usp_BravoTwo;</inputbuf>
+      </process>
+    </process-list>
+    <resource-list>
+      <keylock hobtid="72057594038000002" dbid="5" objectname="Bravo.dbo.T2" indexname="PK_T2" id="lockBB" mode="X">
+        <owner-list>
+          <owner id="processBB1" mode="X" />
+        </owner-list>
+        <waiter-list>
+          <waiter id="processBB2" mode="S" requestType="wait" />
+        </waiter-list>
+      </keylock>
+    </resource-list>
+  </deadlock>
+</deadlock-list>

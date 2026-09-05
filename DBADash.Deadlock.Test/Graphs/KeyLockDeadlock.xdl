@@ -1,0 +1,43 @@
+<deadlock>
+  <victim-list>
+    <victimProcess id="process21ec1f0c8" />
+  </victim-list>
+  <process-list>
+    <process id="process21ec1f0c8" taskpriority="0" logused="288" waitresource="KEY: 7:72057594043170816 (8194443284a0)" waittime="1842" ownerId="1002748" transactionname="user_transaction" lasttranstarted="2024-03-14T09:21:44.523" XDES="0x2a4f3a2d0" lockMode="U" schedulerid="3" kpid="8412" status="suspended" spid="61" sbid="0" ecid="0" priority="0" trancount="2" lastbatchstarted="2024-03-14T09:21:44.523" lastbatchcompleted="2024-03-14T09:21:44.520" lastattention="1900-01-01T00:00:00.000" clientapp="DBA Dash" hostname="APPSRV01" hostpid="6120" loginname="CONTOSO\svc_app" isolationlevel="read committed (2)" xactid="1002748" currentdb="7" currentdbname="Sales" lockTimeout="4294967295" clientoption1="671098976" clientoption2="128056">
+      <executionStack>
+        <frame procname="Sales.dbo.usp_UpdateOrder" line="12" stmtstart="418" stmtend="712" sqlhandle="0x03000700a1f4e21c">
+UPDATE dbo.Orders SET Status = @Status WHERE OrderID = @OrderID;    </frame>
+        <frame procname="adhoc" line="1" stmtend="88" sqlhandle="0x0200000041a2bd07">
+EXEC dbo.usp_UpdateOrder @OrderID = 4711, @Status = 'Shipped';    </frame>
+      </executionStack>
+      <inputbuf>
+EXEC dbo.usp_UpdateOrder @OrderID = 4711, @Status = 'Shipped';   </inputbuf>
+    </process>
+    <process id="process21ec24988" taskpriority="0" logused="512" waitresource="KEY: 7:72057594043236352 (4d19d9f0c1b2)" waittime="1903" ownerId="1002751" transactionname="user_transaction" lasttranstarted="2024-03-14T09:21:44.517" XDES="0x2a4f41880" lockMode="U" schedulerid="5" kpid="9044" status="suspended" spid="74" sbid="0" ecid="0" priority="0" trancount="2" lastbatchstarted="2024-03-14T09:21:44.517" lastbatchcompleted="2024-03-14T09:21:44.513" lastattention="1900-01-01T00:00:00.000" clientapp="Order Import" hostname="BATCHSRV02" hostpid="3388" loginname="CONTOSO\svc_batch" isolationlevel="read committed (2)" xactid="1002751" currentdb="7" currentdbname="Sales" lockTimeout="4294967295" clientoption1="671098976" clientoption2="128056">
+      <executionStack>
+        <frame procname="Sales.dbo.usp_ImportOrderLines" line="27" stmtstart="1044" stmtend="1388" sqlhandle="0x03000700bb2f77d9">
+UPDATE dbo.OrderLines SET Quantity = @Quantity WHERE OrderLineID = @OrderLineID;    </frame>
+      </executionStack>
+      <inputbuf>
+EXEC dbo.usp_ImportOrderLines @BatchID = 902;   </inputbuf>
+    </process>
+  </process-list>
+  <resource-list>
+    <keylock hobtid="72057594043170816" dbid="7" objectname="Sales.dbo.Orders" indexname="PK_Orders" id="lock1f4a2b080" mode="X" associatedObjectId="72057594043170816">
+      <owner-list>
+        <owner id="process21ec24988" mode="X" />
+      </owner-list>
+      <waiter-list>
+        <waiter id="process21ec1f0c8" mode="U" requestType="wait" />
+      </waiter-list>
+    </keylock>
+    <keylock hobtid="72057594043236352" dbid="7" objectname="Sales.dbo.OrderLines" indexname="PK_OrderLines" id="lock1f4a2c500" mode="X" associatedObjectId="72057594043236352">
+      <owner-list>
+        <owner id="process21ec1f0c8" mode="X" />
+      </owner-list>
+      <waiter-list>
+        <waiter id="process21ec24988" mode="U" requestType="wait" />
+      </waiter-list>
+    </keylock>
+  </resource-list>
+</deadlock>

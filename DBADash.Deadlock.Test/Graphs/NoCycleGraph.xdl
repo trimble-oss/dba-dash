@@ -1,0 +1,19 @@
+<deadlock>
+  <victim-list>
+	<victimProcess id="p1" />
+  </victim-list>
+  <process-list>
+	<process id="p1" spid="5" />
+	<process id="p2" spid="6" />
+  </process-list>
+  <resource-list>
+	<keylock objectname="db.dbo.T" indexname="PK_T" id="lock1" mode="X">
+	  <owner-list>
+		<owner id="p2" mode="X" />
+	  </owner-list>
+	  <waiter-list>
+		<waiter id="p1" mode="S" requestType="wait" />
+	  </waiter-list>
+	</keylock>
+  </resource-list>
+</deadlock>
