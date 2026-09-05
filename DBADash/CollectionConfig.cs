@@ -4,6 +4,7 @@ using Microsoft.Data.SqlClient;
 using Newtonsoft.Json;
 using Serilog;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -38,6 +39,13 @@ namespace DBADash
         /// distinct sources with a "|ReadOnly" ConnectionID suffix.  Re-scanned on the Azure DB scan interval.
         /// </summary>
         public bool MonitorReadReplicas { get; set; }
+
+        /// <summary>
+        /// How many read replica probes run concurrently.  Each probe is a connection that spends almost all its time
+        /// waiting, so this is about capping load on the Azure gateway and the thread pool, not about CPU.
+        /// </summary>
+        private const int ReadReplicaScanParallelism = 8;
+
         public string ServiceName { get; set; } = "DBADashService";
 
         public bool AutoUpdateDatabase { get; set; } = true;
@@ -594,8 +602,7 @@ namespace DBADash
 
         public List<DBADashSource> GetNewReadReplicaConnections()
         {
-            var newConnections = new List<DBADashSource>();
-            if (!MonitorReadReplicas) return newConnections;
+            if (!MonitorReadReplicas) return new List<DBADashSource>();
 
             // Snapshot the source list - probing can be slow and we must not enumerate while AddReadReplicas mutates it.
             List<DBADashSource> sources;
@@ -604,22 +611,48 @@ namespace DBADash
                 sources = SourceConnections.ToList();
             }
 
-            foreach (var cfg in sources.Where(src => src.SourceConnection.Type == ConnectionType.SQL && !OfflineInstances.IsOffline(src)))
-            {
-                try
+            return GetNewReadReplicaConnections(sources);
+        }
+
+        /// <summary>
+        /// Get the read replicas of the supplied sources that aren't already covered by them.  Takes the sources to
+        /// probe so the config tool's scan can include replicas of Azure DBs found in the same scan but not yet added
+        /// to the config.
+        /// </summary>
+        public List<DBADashSource> GetNewReadReplicaConnections(List<DBADashSource> sources)
+        {
+            if (!MonitorReadReplicas) return new List<DBADashSource>();
+
+            var candidates = sources
+                .Where(src => src.SourceConnection.Type == ConnectionType.SQL && !OfflineInstances.IsOffline(src))
+                .ToList();
+            var newConnections = new ConcurrentBag<DBADashSource>();
+
+            // Every candidate that isn't rejected on its connection string alone costs a connection (and the read-only
+            // probe costs another), so probe in parallel - a scan of a large estate is otherwise as slow as the sum of
+            // its connection times.  Bounded so a big config doesn't flood the gateway or the thread pool.  Each
+            // candidate is probed by a single task and "sources" is only read, so no locking is needed here.
+            Parallel.ForEach(candidates,
+                new ParallelOptions { MaxDegreeOfParallelism = ReadReplicaScanParallelism },
+                cfg =>
                 {
-                    var replica = GetReadReplicaConnection(cfg, sources);
-                    if (replica != null)
+                    try
                     {
-                        newConnections.Add(replica);
+                        var replica = GetReadReplicaConnection(cfg, sources);
+                        if (replica != null)
+                        {
+                            newConnections.Add(replica);
+                        }
                     }
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex, "Error checking for read replica for {connection}", cfg.SourceConnection.ConnectionForPrint);
-                }
-            }
-            return newConnections;
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex, "Error checking for read replica for {connection}", cfg.SourceConnection.ConnectionForPrint);
+                    }
+                });
+
+            // Ordered so the replicas are added (and written to the config) in a stable order rather than in whichever
+            // order the probes happened to complete.
+            return newConnections.OrderBy(src => src.ConnectionID, StringComparer.InvariantCultureIgnoreCase).ToList();
         }
 
         /// <summary>
@@ -634,7 +667,9 @@ namespace DBADash
             if (primary.SourceConnection.ApplicationIntent() == ApplicationIntent.ReadOnly) return null;
 
             // Only Azure SQL Database user databases have readable secondaries reached via ApplicationIntent=ReadOnly.
-            if (!primary.SourceConnection.ConnectionInfo.IsAzureDB) return null;
+            // The connection string tests come first because they're free: reading ConnectionInfo opens a connection
+            // for any source we haven't inspected yet, so an instance monitored without an initial catalog (the normal
+            // case for anything that isn't an Azure DB) is skipped without connecting to it.
             var initialCatalog = primary.SourceConnection.InitialCatalog();
             if (string.IsNullOrEmpty(initialCatalog) || string.Equals(initialCatalog, "master", StringComparison.OrdinalIgnoreCase)) return null;
 
@@ -648,6 +683,8 @@ namespace DBADash
             // the caller's snapshot to avoid enumerating the live SourceConnections list without a lock; AddReadReplicas
             // re-checks authoritatively under the lock before adding.
             if (SourceExists(readOnlyConnectionString, existingSources, true)) return null;
+
+            if (!primary.SourceConnection.ConnectionInfo.IsAzureDB) return null;
 
             // Probe: connect read-only and confirm the gateway routed us to a read-only secondary.  If it routed back
             // to the primary (READ_WRITE) there is no replica to monitor, so skip.
@@ -700,36 +737,69 @@ namespace DBADash
                 {
                     return src;
                 }
-                else if
-                    (connectionID.Contains('|') &&
-                     ScanForAzureDBs) // We don't have a match but ConnectionID looks like an AzureDB connection.
+                src = await GetImplicitAzureDBSourceAsync(connectionID);
+                if (src != null)
                 {
-                    // Try to find the master connection for this AzureDB
-                    var masterInstanceName = connectionID.Split('|')[0] + "|master";
-                    var masterSrc = SourceConnections.FirstOrDefault(s =>
-                        string.Equals(s.ConnectionID, masterInstanceName, StringComparison.InvariantCultureIgnoreCase));
-                    if (masterSrc != null)
-                    {
-                        // Master connection found. Create a copy with the correct database name
-                        src = masterSrc.DeepCopy();
-                        src.ConnectionID = null;
-                        var builder = new SqlConnectionStringBuilder(masterSrc.SourceConnection.ConnectionString)
-                        {
-                            InitialCatalog = connectionID.Split('|')[1]
-                        };
-                        src.SourceConnection.ConnectionString = builder.ToString();
-                        var collector = await DBCollector.CreateAsync(src, ServiceName);
-                        src.ConnectionID = collector.ConnectionID;
-                        // Double check that the generated ConnectionID matches the one we're looking for & return the connection
-                        if (string.Equals(src.ConnectionID, connectionID, StringComparison.InvariantCultureIgnoreCase))
-                        {
-                            return src;
-                        }
-                    }
+                    return src;
                 }
             }
 
             throw new ArgumentException($"Unable to find instance with ConnectionID {connectionID}");
+        }
+
+        /// <summary>
+        /// Resolve an Azure SQL Database source that isn't in the config, but is monitored implicitly: databases added
+        /// by the Azure DB scan (from the server's master connection) and read replicas added by replica monitoring
+        /// (from the primary).  Returns null if the ConnectionID can't be resolved this way.
+        /// </summary>
+        private async Task<DBADashSource> GetImplicitAzureDBSourceAsync(string connectionID)
+        {
+            if (!connectionID.Contains('|')) return null; // Doesn't look like an Azure DB ConnectionID
+
+            // <@@SERVERNAME>|<db>, or <@@SERVERNAME>|<db>|ReadOnly for a read replica.  Split from each end rather than
+            // taking element [1] so a database name containing a pipe doesn't get truncated.
+            var parts = connectionID.Split('|');
+            var isReadOnlyReplica = parts.Length > 2 &&
+                                    string.Equals(parts[^1], "ReadOnly", StringComparison.InvariantCultureIgnoreCase);
+            var serverName = parts[0];
+            var dbName = string.Join("|", parts[1..(isReadOnlyReplica ? ^1 : ^0)]);
+            if (dbName.Length == 0) return null;
+
+            // A read replica source only exists while replica monitoring is enabled, so there is nothing to resolve
+            // otherwise - short circuit instead of paying for a connection attempt that can't produce a match.
+            if (isReadOnlyReplica && !MonitorReadReplicas) return null;
+
+            // The replica of an explicitly configured Azure DB is created from that source, so use the primary as the
+            // template where we have it.  Otherwise fall back to the master connection, which is what the Azure DB scan
+            // adds databases from.
+            var template = isReadOnlyReplica
+                ? SourceConnections.FirstOrDefault(s => string.Equals(s.ConnectionID, serverName + "|" + dbName,
+                    StringComparison.InvariantCultureIgnoreCase))
+                : null;
+            if (template == null && ScanForAzureDBs)
+            {
+                template = SourceConnections.FirstOrDefault(s => string.Equals(s.ConnectionID, serverName + "|master",
+                    StringComparison.InvariantCultureIgnoreCase));
+            }
+            if (template == null) return null;
+
+            var src = template.DeepCopy();
+            src.ConnectionID = null;
+            var builder = new SqlConnectionStringBuilder(template.SourceConnection.ConnectionString)
+            {
+                InitialCatalog = dbName
+            };
+            if (isReadOnlyReplica)
+            {
+                builder.ApplicationIntent = ApplicationIntent.ReadOnly;
+            }
+            src.SourceConnection.ConnectionString = builder.ToString();
+            var collector = await DBCollector.CreateAsync(src, ServiceName);
+            src.ConnectionID = collector.ConnectionID;
+            // Double check that the generated ConnectionID matches the one we're looking for & return the connection.
+            // For a replica this also confirms the read-only connection actually routed to a readable secondary - if it
+            // routed back to the primary the collector generates the primary's ConnectionID and we don't match.
+            return string.Equals(src.ConnectionID, connectionID, StringComparison.InvariantCultureIgnoreCase) ? src : null;
         }
 
         /// <summary>
@@ -745,9 +815,11 @@ namespace DBADash
                     source = await GetSourceConnectionAsync(connectionId);
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                // Not found, or the probe connection for an implicitly monitored Azure DB failed.  Fall back to the
+                // connection string match - logged because it's otherwise invisible why a known instance didn't match.
+                Log.Debug(ex, "Unable to resolve source connection for ConnectionID {ConnectionID}", connectionId);
             }
 
             return source;

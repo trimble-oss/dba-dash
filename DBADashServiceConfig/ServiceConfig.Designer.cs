@@ -82,6 +82,10 @@ namespace DBADashServiceConfig
             chkAllowPlanForcing = new System.Windows.Forms.CheckBox();
             chkAllowKillSession = new System.Windows.Forms.CheckBox();
             chkEnableMessaging = new System.Windows.Forms.CheckBox();
+            txtAllowedCustomProcs = new System.Windows.Forms.TextBox();
+            txtAllowedJobs = new System.Windows.Forms.TextBox();
+            txtAllowScripts = new System.Windows.Forms.TextBox();
+            xeMaxDuration = new DBADashGUI.Pickers.DurationDropDown();
             labelManageXE = new System.Windows.Forms.Label();
             lnkManageXEAll = new System.Windows.Forms.LinkLabel();
             lnkManageXENone = new System.Windows.Forms.LinkLabel();
@@ -129,25 +133,19 @@ namespace DBADashServiceConfig
             bttnSchedule = new System.Windows.Forms.Button();
             chkDefaultIdentityCollection = new System.Windows.Forms.CheckBox();
             groupBox4 = new System.Windows.Forms.GroupBox();
-            lblHHmm = new System.Windows.Forms.Label();
-            numAzureScanInterval = new System.Windows.Forms.NumericUpDown();
-            label11 = new System.Windows.Forms.Label();
+            durationAzureDBScan = new DBADashGUI.Pickers.DurationDropDown();
             label10 = new System.Windows.Forms.Label();
             grpMessaging = new System.Windows.Forms.GroupBox();
             label22 = new System.Windows.Forms.Label();
-            txtAllowedCustomProcs = new System.Windows.Forms.TextBox();
             lnkAllowNoJobs = new System.Windows.Forms.LinkLabel();
             lnkAllowAllJobs = new System.Windows.Forms.LinkLabel();
-            txtAllowedJobs = new System.Windows.Forms.TextBox();
             lnkAllowExplicit = new System.Windows.Forms.LinkLabel();
             lnkAllowNone = new System.Windows.Forms.LinkLabel();
             lnkAllowAll = new System.Windows.Forms.LinkLabel();
             label18 = new System.Windows.Forms.Label();
-            txtAllowScripts = new System.Windows.Forms.TextBox();
             label8 = new System.Windows.Forms.Label();
             label6 = new System.Windows.Forms.Label();
             txtSQS = new System.Windows.Forms.TextBox();
-            xeMaxDuration = new DBADashGUI.Pickers.DurationDropDown();
             label25 = new System.Windows.Forms.Label();
             label4 = new System.Windows.Forms.Label();
             tabSource = new System.Windows.Forms.TabPage();
@@ -232,7 +230,6 @@ namespace DBADashServiceConfig
             ((System.ComponentModel.ISupportInitialize)numBackupRetention).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numIdentityCollectionThreshold).BeginInit();
             groupBox4.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)numAzureScanInterval).BeginInit();
             grpMessaging.SuspendLayout();
             tabSource.SuspendLayout();
             groupBox2.SuspendLayout();
@@ -313,25 +310,25 @@ namespace DBADashServiceConfig
             // chkScanEvery
             // 
             chkScanEvery.AutoSize = true;
-            chkScanEvery.Location = new System.Drawing.Point(18, 72);
+            chkScanEvery.Location = new System.Drawing.Point(18, 70);
             chkScanEvery.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             chkScanEvery.Name = "chkScanEvery";
-            chkScanEvery.Size = new System.Drawing.Size(223, 24);
+            chkScanEvery.Size = new System.Drawing.Size(226, 24);
             chkScanEvery.TabIndex = 26;
-            chkScanEvery.Text = "Scan for new AzureDBs every";
+            chkScanEvery.Text = "Scan for new AzureDBs every:";
             toolTip1.SetToolTip(chkScanEvery, "Automatically detect when new azure DBs are created on this interval.");
             chkScanEvery.UseVisualStyleBackColor = true;
             chkScanEvery.CheckedChanged += ChkScanEvery_CheckedChanged;
             // 
             // bttnScanNow
             // 
-            bttnScanNow.Location = new System.Drawing.Point(421, 67);
+            bttnScanNow.Location = new System.Drawing.Point(427, 24);
             bttnScanNow.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             bttnScanNow.Name = "bttnScanNow";
             bttnScanNow.Size = new System.Drawing.Size(104, 37);
             bttnScanNow.TabIndex = 22;
             bttnScanNow.Text = "Scan Now";
-            toolTip1.SetToolTip(bttnScanNow, "Click this button to add connections for each Azure DB from the connection added for the master database.");
+            toolTip1.SetToolTip(bttnScanNow, "Click this button to add connections for each Azure DB from the connection added for the master database.  Read replicas are included if the monitor read replicas option is enabled.");
             bttnScanNow.UseVisualStyleBackColor = true;
             bttnScanNow.Click += BttnScanNow_Click;
             // 
@@ -347,17 +344,17 @@ namespace DBADashServiceConfig
             toolTip1.SetToolTip(chkScanAzureDB, "Add connection to Azure master DB.  Connections to other AzureDBs will be added on the fly at service start.");
             chkScanAzureDB.UseVisualStyleBackColor = true;
             chkScanAzureDB.CheckedChanged += ChkScanAzureDB_CheckedChanged;
-            //
+            // 
             // chkMonitorReadReplicas
-            //
+            // 
             chkMonitorReadReplicas.AutoSize = true;
-            chkMonitorReadReplicas.Location = new System.Drawing.Point(300, 37);
+            chkMonitorReadReplicas.Location = new System.Drawing.Point(18, 103);
             chkMonitorReadReplicas.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             chkMonitorReadReplicas.Name = "chkMonitorReadReplicas";
-            chkMonitorReadReplicas.Size = new System.Drawing.Size(256, 24);
+            chkMonitorReadReplicas.Size = new System.Drawing.Size(173, 24);
             chkMonitorReadReplicas.TabIndex = 24;
             chkMonitorReadReplicas.Text = "Monitor read replicas";
-            toolTip1.SetToolTip(chkMonitorReadReplicas, "Probe each Azure SQL Database for a read-only replica (ApplicationIntent=ReadOnly) and monitor it as a separate instance.  Only Business Critical / Premium / Hyperscale databases with a readable secondary are added.");
+            toolTip1.SetToolTip(chkMonitorReadReplicas, resources.GetString("chkMonitorReadReplicas.ToolTip"));
             chkMonitorReadReplicas.UseVisualStyleBackColor = true;
             chkMonitorReadReplicas.CheckedChanged += ChkMonitorReadReplicas_CheckedChanged;
             // 
@@ -812,6 +809,45 @@ namespace DBADashServiceConfig
             toolTip1.SetToolTip(chkEnableMessaging, "Uncheck to disable all messaging related features. ");
             chkEnableMessaging.UseVisualStyleBackColor = true;
             chkEnableMessaging.CheckedChanged += ChkEnableMessaging_CheckedChanged;
+            // 
+            // txtAllowedCustomProcs
+            // 
+            txtAllowedCustomProcs.Location = new System.Drawing.Point(247, 124);
+            txtAllowedCustomProcs.Name = "txtAllowedCustomProcs";
+            txtAllowedCustomProcs.Size = new System.Drawing.Size(370, 27);
+            txtAllowedCustomProcs.TabIndex = 16;
+            toolTip1.SetToolTip(txtAllowedCustomProcs, resources.GetString("txtAllowedCustomProcs.ToolTip"));
+            txtAllowedCustomProcs.TextChanged += AllowedCustomProcs_TextChanged;
+            // 
+            // txtAllowedJobs
+            // 
+            txtAllowedJobs.Location = new System.Drawing.Point(247, 157);
+            txtAllowedJobs.Name = "txtAllowedJobs";
+            txtAllowedJobs.Size = new System.Drawing.Size(370, 27);
+            txtAllowedJobs.TabIndex = 13;
+            toolTip1.SetToolTip(txtAllowedJobs, "Comma-separated list of allowed agent jobs, categories or job IDs.  Prefix with \"-\" to deny (deny wins).  Use \"*\" or \"%\" as wildcard characters.  Blank = None.");
+            txtAllowedJobs.TextChanged += AllowedJobs_TextChanged;
+            // 
+            // txtAllowScripts
+            // 
+            txtAllowScripts.Location = new System.Drawing.Point(247, 91);
+            txtAllowScripts.Name = "txtAllowScripts";
+            txtAllowScripts.Size = new System.Drawing.Size(370, 27);
+            txtAllowScripts.TabIndex = 7;
+            toolTip1.SetToolTip(txtAllowScripts, resources.GetString("txtAllowScripts.ToolTip"));
+            txtAllowScripts.TextChanged += TxtAllowScripts_TextChanged;
+            // 
+            // xeMaxDuration
+            // 
+            xeMaxDuration.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            xeMaxDuration.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            xeMaxDuration.IncludeSeconds = true;
+            xeMaxDuration.Location = new System.Drawing.Point(247, 61);
+            xeMaxDuration.MinimumSize = new System.Drawing.Size(387, 0);
+            xeMaxDuration.Name = "xeMaxDuration";
+            xeMaxDuration.Size = new System.Drawing.Size(387, 34);
+            xeMaxDuration.TabIndex = 22;
+            toolTip1.SetToolTip(xeMaxDuration, "Maximum duration allowed for an ad-hoc XE trace, preventing long running extended events.");
             // 
             // labelManageXE
             // 
@@ -1346,12 +1382,10 @@ namespace DBADashServiceConfig
             // groupBox4
             // 
             groupBox4.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            groupBox4.Controls.Add(durationAzureDBScan);
             groupBox4.Controls.Add(chkScanAzureDB);
             groupBox4.Controls.Add(chkMonitorReadReplicas);
-            groupBox4.Controls.Add(lblHHmm);
             groupBox4.Controls.Add(bttnScanNow);
-            groupBox4.Controls.Add(numAzureScanInterval);
-            groupBox4.Controls.Add(label11);
             groupBox4.Controls.Add(chkScanEvery);
             groupBox4.Controls.Add(label10);
             groupBox4.Location = new System.Drawing.Point(8, 361);
@@ -1363,42 +1397,26 @@ namespace DBADashServiceConfig
             groupBox4.TabStop = false;
             groupBox4.Text = "Azure DB";
             // 
-            // lblHHmm
+            // durationAzureDBScan
             // 
-            lblHHmm.AutoSize = true;
-            lblHHmm.Location = new System.Drawing.Point(247, 103);
-            lblHHmm.Name = "lblHHmm";
-            lblHHmm.Size = new System.Drawing.Size(63, 20);
-            lblHHmm.TabIndex = 29;
-            lblHHmm.Text = "00:00:00";
-            // 
-            // numAzureScanInterval
-            // 
-            numAzureScanInterval.Increment = new decimal(new int[] { 3600, 0, 0, 0 });
-            numAzureScanInterval.Location = new System.Drawing.Point(247, 72);
-            numAzureScanInterval.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            numAzureScanInterval.Maximum = new decimal(new int[] { int.MaxValue, 0, 0, 0 });
-            numAzureScanInterval.Minimum = new decimal(new int[] { 1, 0, 0, int.MinValue });
-            numAzureScanInterval.Name = "numAzureScanInterval";
-            numAzureScanInterval.Size = new System.Drawing.Size(95, 27);
-            numAzureScanInterval.TabIndex = 28;
-            numAzureScanInterval.ValueChanged += NumAzureScanInterval_ValueChanged;
-            // 
-            // label11
-            // 
-            label11.AutoSize = true;
-            label11.Location = new System.Drawing.Point(347, 75);
-            label11.Name = "label11";
-            label11.Size = new System.Drawing.Size(62, 20);
-            label11.TabIndex = 27;
-            label11.Text = "seconds";
+            durationAzureDBScan.AllowDays = false;
+            durationAzureDBScan.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
+            durationAzureDBScan.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            durationAzureDBScan.IncludeSeconds = true;
+            durationAzureDBScan.Location = new System.Drawing.Point(247, 68);
+            durationAzureDBScan.MinimumSize = new System.Drawing.Size(284, 29);
+            durationAzureDBScan.Name = "durationAzureDBScan";
+            durationAzureDBScan.Size = new System.Drawing.Size(284, 32);
+            durationAzureDBScan.TabIndex = 30;
+            durationAzureDBScan.Value = new decimal(new int[] { 60, 0, 0, 0 });
+            durationAzureDBScan.ValueChanged += UpdateAzureDBScanInterval;
             // 
             // label10
             // 
             label10.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic);
-            label10.Location = new System.Drawing.Point(623, 37);
+            label10.Location = new System.Drawing.Point(574, 37);
             label10.Name = "label10";
-            label10.Size = new System.Drawing.Size(466, 85);
+            label10.Size = new System.Drawing.Size(515, 85);
             label10.TabIndex = 24;
             label10.Text = resources.GetString("label10.Text");
             // 
@@ -1436,15 +1454,6 @@ namespace DBADashServiceConfig
             label22.TabIndex = 17;
             label22.Text = "Allowed Custom Procedures";
             // 
-            // txtAllowedCustomProcs
-            // 
-            txtAllowedCustomProcs.Location = new System.Drawing.Point(247, 124);
-            txtAllowedCustomProcs.Name = "txtAllowedCustomProcs";
-            txtAllowedCustomProcs.Size = new System.Drawing.Size(370, 27);
-            txtAllowedCustomProcs.TabIndex = 16;
-            toolTip1.SetToolTip(txtAllowedCustomProcs, "Comma-separated list of your own custom stored procedures to allow (execute on demand).  Each procedure must be listed explicitly (schema.proc or proc) - wildcards and * (all) are NOT supported.  Blank = None.");
-            txtAllowedCustomProcs.TextChanged += AllowedCustomProcs_TextChanged;
-            // 
             // lnkAllowNoJobs
             // 
             lnkAllowNoJobs.AutoSize = true;
@@ -1466,15 +1475,6 @@ namespace DBADashServiceConfig
             lnkAllowAllJobs.TabStop = true;
             lnkAllowAllJobs.Text = "ALL";
             lnkAllowAllJobs.LinkClicked += lnkAllowAllJobs_LinkClicked;
-            // 
-            // txtAllowedJobs
-            // 
-            txtAllowedJobs.Location = new System.Drawing.Point(247, 157);
-            txtAllowedJobs.Name = "txtAllowedJobs";
-            txtAllowedJobs.Size = new System.Drawing.Size(370, 27);
-            txtAllowedJobs.TabIndex = 13;
-            toolTip1.SetToolTip(txtAllowedJobs, "Comma-separated list of allowed agent jobs, categories or job IDs.  Prefix with \"-\" to deny (deny wins).  Use \"*\" or \"%\" as wildcard characters.  Blank = None.");
-            txtAllowedJobs.TextChanged += AllowedJobs_TextChanged;
             // 
             // lnkAllowExplicit
             // 
@@ -1518,15 +1518,6 @@ namespace DBADashServiceConfig
             label18.TabIndex = 8;
             label18.Text = "Allowed Community Procedures";
             // 
-            // txtAllowScripts
-            // 
-            txtAllowScripts.Location = new System.Drawing.Point(247, 91);
-            txtAllowScripts.Name = "txtAllowScripts";
-            txtAllowScripts.Size = new System.Drawing.Size(370, 27);
-            txtAllowScripts.TabIndex = 7;
-            toolTip1.SetToolTip(txtAllowScripts, "Comma-separated list of community stored procedures to allow (execute on demand).  Blank = None.  * = All (grants access to the full curated list of supported community procedures, not arbitrary procedures).");
-            txtAllowScripts.TextChanged += TxtAllowScripts_TextChanged;
-            // 
             // label8
             // 
             label8.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic);
@@ -1553,18 +1544,6 @@ namespace DBADashServiceConfig
             txtSQS.TabIndex = 2;
             txtSQS.Validating += TxtSQS_Validating;
             txtSQS.Validated += TxtSQS_Validated;
-            // 
-            // xeMaxDuration
-            // 
-            xeMaxDuration.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
-            xeMaxDuration.ForeColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            xeMaxDuration.IncludeSeconds = true;
-            xeMaxDuration.Location = new System.Drawing.Point(247, 61);
-            xeMaxDuration.MinimumSize = new System.Drawing.Size(387, 0);
-            xeMaxDuration.Name = "xeMaxDuration";
-            xeMaxDuration.Size = new System.Drawing.Size(387, 34);
-            xeMaxDuration.TabIndex = 22;
-            toolTip1.SetToolTip(xeMaxDuration, "Maximum duration allowed for an ad-hoc XE trace, preventing long running extended events.");
             // 
             // label25
             // 
@@ -2400,7 +2379,6 @@ namespace DBADashServiceConfig
             ((System.ComponentModel.ISupportInitialize)numIdentityCollectionThreshold).EndInit();
             groupBox4.ResumeLayout(false);
             groupBox4.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)numAzureScanInterval).EndInit();
             grpMessaging.ResumeLayout(false);
             grpMessaging.PerformLayout();
             tabSource.ResumeLayout(false);
@@ -2518,11 +2496,8 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.CheckBox chkScanAzureDB;
         private System.Windows.Forms.CheckBox chkMonitorReadReplicas;
-        private System.Windows.Forms.Label lblHHmm;
         private System.Windows.Forms.Button bttnScanNow;
-        private System.Windows.Forms.NumericUpDown numAzureScanInterval;
         private System.Windows.Forms.Label label10;
-        private System.Windows.Forms.Label label11;
         private System.Windows.Forms.CheckBox chkScanEvery;
         private System.Windows.Forms.TabPage tabJson;
         private System.Windows.Forms.TextBox txtJson;
@@ -2613,6 +2588,7 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.Label label25;
         private DBADashGUI.Pickers.DurationDropDown xeMaxDuration;
         private System.Windows.Forms.GroupBox grpXE;
+        private DBADashGUI.Pickers.DurationDropDown durationAzureDBScan;
     }
 }
 
