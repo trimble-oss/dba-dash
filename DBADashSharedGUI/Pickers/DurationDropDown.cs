@@ -19,6 +19,7 @@ namespace DBADashGUI.Pickers
         private readonly IWindowsFormsEditorServiceCloser closer;
         private bool includeSeconds = false;
         private bool allowDays = true;
+        private bool suppressValueChanged = false;
 
         /// <summary>Small abstraction so the control can close the drop-down when Enter is pressed.</summary>
         internal interface IWindowsFormsEditorServiceCloser
@@ -41,6 +42,13 @@ namespace DBADashGUI.Pickers
             SetStyle(ControlStyles.SupportsTransparentBackColor, true);
 
             InitializeComponent();
+
+            // Raise ValueChanged whenever any of the entry boxes change so callers can react
+            // to edits without polling. chkNotSet is handled in ChkNotSet_CheckedChanged.
+            numDays.ValueChanged += Num_ValueChanged;
+            numHours.ValueChanged += Num_ValueChanged;
+            numMinutes.ValueChanged += Num_ValueChanged;
+            if (numSeconds != null) numSeconds.ValueChanged += Num_ValueChanged;
 
             // Apply initial seconds visibility/layout based on IncludeSeconds (may be changed later by designer code)
             UpdateSecondsVisibility();
@@ -76,6 +84,22 @@ namespace DBADashGUI.Pickers
             }
         }
 
+        /// <summary>
+        /// Raised whenever the edited <see cref="Value"/> changes, whether through the day / hour /
+        /// minute / second boxes or the "Not set" checkbox.
+        /// </summary>
+        [Category("Behavior")]
+        [Description("Occurs when the duration value changes.")]
+        public event EventHandler ValueChanged;
+
+        private void OnValueChanged() => ValueChanged?.Invoke(this, EventArgs.Empty);
+
+        private void Num_ValueChanged(object sender, EventArgs e)
+        {
+            if (suppressValueChanged) return;
+            OnValueChanged();
+        }
+
         private void ChkNotSet_CheckedChanged(object sender, EventArgs e)
         {
             var enabled = !chkNotSet.Checked;
@@ -83,6 +107,7 @@ namespace DBADashGUI.Pickers
             numHours.Enabled = enabled;
             numMinutes.Enabled = enabled;
             if (numSeconds != null) numSeconds.Enabled = enabled && IncludeSeconds;
+            if (!suppressValueChanged) OnValueChanged();
         }
 
         /// <summary>
@@ -254,16 +279,29 @@ namespace DBADashGUI.Pickers
             get => allowNull && chkNotSet.Checked ? null : TotalMinutes;
             set
             {
-                if (value == null)
+                // Assigning day/hour/minute/second boxes fires a ValueChanged per box; suppress those
+                // and raise a single event for the overall change instead.
+                var previous = Value;
+                suppressValueChanged = true;
+                try
                 {
-                    if (allowNull) { chkNotSet.Checked = true; }
-                    TotalMinutes = 0;
+                    if (value == null)
+                    {
+                        if (allowNull) { chkNotSet.Checked = true; }
+                        TotalMinutes = 0;
+                    }
+                    else
+                    {
+                        if (allowNull) { chkNotSet.Checked = false; }
+                        TotalMinutes = value.Value;
+                    }
                 }
-                else
+                finally
                 {
-                    if (allowNull) { chkNotSet.Checked = false; }
-                    TotalMinutes = value.Value;
+                    suppressValueChanged = false;
                 }
+
+                if (Value != previous) OnValueChanged();
             }
         }
 

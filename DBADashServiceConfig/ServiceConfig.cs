@@ -210,6 +210,8 @@ namespace DBADashServiceConfig
             var addUnvalidated = false;
             var doNotAddUnvalidated = false;
             var doesNotHaveUpdateApproval = false;
+            var hasScannedApproval = false;
+            var doesNotHaveScannedApproval = false;
             var isDeleted = false;
             foreach (var src in GetNewSourceConnections())
             {
@@ -295,20 +297,47 @@ namespace DBADashServiceConfig
                     if (existingConnection != null)
                     {
                         src.CollectionSchedules = existingConnection.CollectionSchedules;
-                        if (doesNotHaveUpdateApproval)
+                        // The match isn't necessarily a configured connection.  With "Scan for Azure DBs" enabled,
+                        // FindSourceConnectionAsync also resolves a database that is only monitored implicitly through
+                        // the master connection's scan - that source doesn't exist in the config, so there is nothing
+                        // to update or replace and the "Update existing connection(s)?" prompt is misleading.
+                        if (collectionConfig.SourceConnections.Contains(existingConnection))
+                        {
+                            if (doesNotHaveUpdateApproval)
+                            {
+                                continue;
+                            }
+                            else if (hasUpdateApproval || MessageBox.Show("Update existing connection(s)?", "Update",
+                                         MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                            {
+                                collectionConfig.SourceConnections.Remove(existingConnection);
+                                src.ConnectionID = existingConnection.ConnectionID;
+                                hasUpdateApproval = true;
+                            }
+                            else
+                            {
+                                doesNotHaveUpdateApproval = true;
+                                continue;
+                            }
+                        }
+                        else if (doesNotHaveScannedApproval)
                         {
                             continue;
                         }
-                        else if (hasUpdateApproval || MessageBox.Show("Update existing connection(s)?", "Update",
-                                     MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                        else if (hasScannedApproval || MessageBox.Show(
+                                     $"{src.ConnectionID} is already monitored automatically via the \"{(src.SourceConnection.ApplicationIntent() == ApplicationIntent.ReadOnly ? "Monitor read replicas" : "Scan for AzureDBs on service start")}\" option and doesn't need to be added." +
+                                     Environment.NewLine + Environment.NewLine +
+                                     "Adding it here won't create a duplicate instance - it lets you configure this database explicitly instead of it inheriting the settings it's monitored with now." +
+                                     Environment.NewLine + Environment.NewLine +
+                                     "Add this connection?",
+                                     "Database is already monitored", MessageBoxButtons.YesNo,
+                                     MessageBoxIcon.Question) == DialogResult.Yes)
                         {
-                            collectionConfig.SourceConnections.Remove(existingConnection);
-                            src.ConnectionID = existingConnection.ConnectionID;
-                            hasUpdateApproval = true;
+                            hasScannedApproval = true;
                         }
                         else
                         {
-                            doesNotHaveUpdateApproval = true;
+                            doesNotHaveScannedApproval = true;
                             continue;
                         }
                     }
@@ -1045,7 +1074,7 @@ namespace DBADashServiceConfig
                 chkScanAzureDB.Checked = collectionConfig.ScanForAzureDBs;
                 chkMonitorReadReplicas.Checked = collectionConfig.MonitorReadReplicas;
                 chkScanEvery.Checked = collectionConfig.ScanForAzureDBsInterval > 0;
-                numAzureScanInterval.Value = collectionConfig.ScanForAzureDBsInterval;
+                durationAzureDBScan.TotalSeconds = collectionConfig.ScanForAzureDBsInterval;
                 lnkAutoUpgradeDB.Visible = !collectionConfig.AutoUpdateDatabase;
                 chkLogInternalPerfCounters.Checked = collectionConfig.LogInternalPerformanceCounters;
                 chkDefaultIdentityCollection.Checked = !collectionConfig.IdentityCollectionThreshold.HasValue;
@@ -1107,7 +1136,6 @@ namespace DBADashServiceConfig
                 chkUpgradeAllowPreRelease.Checked = collectionConfig.UpgradeAllowPreRelease;
                 UpdateThreadCount();
                 UpdateSummaryRefreshCronLabel();
-                UpdateScanInterval();
                 setDgv();
                 RefreshEncryption();
                 UpdateCustomCollectionCount();
@@ -1662,67 +1690,99 @@ namespace DBADashServiceConfig
             SetAvailableOptionsForSource();
         }
 
-        private void BttnScanNow_Click(object sender, EventArgs e)
+        private async void BttnScanNow_Click(object sender, EventArgs e)
         {
-            var newConnections = collectionConfig.GetNewAzureDBConnections();
-            if (newConnections.Count == 0)
+            List<DBADashSource> newDatabases;
+            List<DBADashSource> newReplicas;
+            bttnScanNow.Enabled = false;
+            Cursor.Current = Cursors.WaitCursor;
+            try
             {
-                MessageBox.Show("No new Azure DB connections found", "Scan", MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
-            }
-            else
-            {
-                if (MessageBox.Show($"Found {newConnections.Count} new connections.  Add connections to config file?",
-                        "Scan", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                // The scan connects to each master, and to each candidate database when replica monitoring is on, so
+                // run it off the UI thread to keep the form responsive.
+                (newDatabases, newReplicas) = await Task.Run(() =>
                 {
-                    collectionConfig.AddConnections(newConnections);
-                    SetJson();
-                    SetConnectionCount();
-                    SetDgv();
-                }
+                    var databases = collectionConfig.GetNewAzureDBConnections();
+                    // Probe for replicas of the databases found in this scan as well as of the configured sources - the
+                    // service scans in that order too, so what's added here matches what the service would discover.
+                    var replicas = collectionConfig.MonitorReadReplicas
+                        ? collectionConfig.GetNewReadReplicaConnections(
+                            collectionConfig.SourceConnections.Concat(databases).ToList())
+                        : new List<DBADashSource>();
+                    return (databases, replicas);
+                });
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex, "Error scanning for Azure DBs:");
+                return;
+            }
+            finally
+            {
+                Cursor.Current = Cursors.Default;
+                bttnScanNow.Enabled = true;
+            }
+
+            if (newDatabases.Count + newReplicas.Count == 0)
+            {
+                MessageBox.Show(
+                    collectionConfig.MonitorReadReplicas
+                        ? "No new Azure DB connections or read replicas found"
+                        : "No new Azure DB connections found", "Scan", MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+                return;
+            }
+
+            var found = newReplicas.Count == 0
+                ? $"Found {newDatabases.Count} new connections."
+                : $"Found {newDatabases.Count} new Azure DB connections and {newReplicas.Count} read replicas.";
+            if (MessageBox.Show(found + "  Add connections to config file?",
+                    "Scan", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                collectionConfig.AddConnections(newDatabases);
+                collectionConfig.AddConnections(newReplicas);
+                SetJson();
+                SetConnectionCount();
+                SetDgv();
             }
         }
 
         private void ChkScanAzureDB_CheckedChanged(object sender, EventArgs e)
         {
+            if (IsSetFromJson) return;
             collectionConfig.ScanForAzureDBs = chkScanAzureDB.Checked;
             SetJson();
         }
 
         private void ChkMonitorReadReplicas_CheckedChanged(object sender, EventArgs e)
         {
+            if (IsSetFromJson) return;
             collectionConfig.MonitorReadReplicas = chkMonitorReadReplicas.Checked;
             SetJson();
         }
 
         private void ChkScanEvery_CheckedChanged(object sender, EventArgs e)
         {
-            if (numAzureScanInterval.Value == 0 && chkScanEvery.Checked)
+            if (IsSetFromJson) return;
+            if (durationAzureDBScan.TotalSeconds == 0 && chkScanEvery.Checked)
             {
-                numAzureScanInterval.Value = 3600;
+                durationAzureDBScan.TotalSeconds = 3600;
             }
 
             if (!chkScanEvery.Checked)
             {
-                numAzureScanInterval.Value = 0;
+                durationAzureDBScan.TotalSeconds = 0;
             }
 
-            collectionConfig.ScanForAzureDBsInterval = Convert.ToInt32(numAzureScanInterval.Value);
-            UpdateScanInterval();
+            collectionConfig.ScanForAzureDBsInterval = Convert.ToInt32(durationAzureDBScan.TotalSeconds);
             SetJson();
         }
 
-        private void UpdateScanInterval()
+        private void UpdateAzureDBScanInterval(object sender, EventArgs e)
         {
-            lblHHmm.Visible = chkScanEvery.Checked;
-            lblHHmm.Text = TimeSpan.FromSeconds(Convert.ToInt32(numAzureScanInterval.Value)).ToString();
-        }
-
-        private void NumAzureScanInterval_ValueChanged(object sender, EventArgs e)
-        {
-            chkScanEvery.Checked = numAzureScanInterval.Value > 0;
-            collectionConfig.ScanForAzureDBsInterval = Convert.ToInt32(numAzureScanInterval.Value);
-            UpdateScanInterval();
+            if (IsSetFromJson) return;
+            chkScanEvery.Checked = durationAzureDBScan.TotalSeconds > 0;
+            collectionConfig.ScanForAzureDBsInterval = Convert.ToInt32(durationAzureDBScan.TotalSeconds);
             SetJson();
         }
 

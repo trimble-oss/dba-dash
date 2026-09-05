@@ -151,6 +151,9 @@ Or:
 
 Source can also be a folder or a S3 bucket to import data from remote DBA Dash agents</value>
   </data>
+  <data name="chkMonitorReadReplicas.ToolTip" xml:space="preserve">
+    <value>Probe each Azure SQL Database for a read-only replica (ApplicationIntent=ReadOnly) and monitor it as a separate instance.  Only Business Critical / Premium / Hyperscale databases with a readable secondary are added.</value>
+  </data>
   <data name="label10.Text" xml:space="preserve">
     <value>Connections are required to each AzureDB to capture data for monitoring.  Alternatively, add a connection to the master database and check the option to scan for AzureDBs on service start and/or check the option to scan for new Azure DBs every 'X' seconds.
 
@@ -158,6 +161,12 @@ You can also click "Scan Now" to persist any new connections to the config file.
   </data>
   <data name="txtWatchXESessions.ToolTip" xml:space="preserve">
     <value>Comma-separated list of existing extended event sessions that may be watched / viewed via the messaging feature (XESessionFilter syntax: * = all, -name = deny, deny wins). Blank disables watching. Governs watching independently of Manage XE and Ad-hoc XE.</value>
+  </data>
+  <data name="txtAllowedCustomProcs.ToolTip" xml:space="preserve">
+    <value>Comma-separated list of your own custom stored procedures to allow (execute on demand).  Each procedure must be listed explicitly (schema.proc or proc) - wildcards and * (all) are NOT supported.  Blank = None.</value>
+  </data>
+  <data name="txtAllowScripts.ToolTip" xml:space="preserve">
+    <value>Comma-separated list of community stored procedures to allow (execute on demand).  Blank = None.  * = All (grants access to the full curated list of supported community procedures, not arbitrary procedures).</value>
   </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
