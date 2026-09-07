@@ -113,6 +113,7 @@ namespace DBADash
                 { CollectionType.DatabaseRoleMembers, 900 },
                 { CollectionType.IdentityColumns, 900 },
                 { CollectionType.SlowQueries, 90 },
+                { CollectionType.Deadlocks, 90 },
                 // Set timeouts for hourly schedules to 120, and midnight and elevenPM schedules to 300
                 { CollectionType.ServerProperties, 120 },
                 { CollectionType.Databases, 120 },

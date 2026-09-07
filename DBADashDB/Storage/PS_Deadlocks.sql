@@ -1,0 +1,4 @@
+﻿CREATE PARTITION SCHEME [PS_Deadlocks]
+    AS PARTITION [PF_Deadlocks]
+    ALL TO ([PRIMARY]);
+

@@ -364,6 +364,7 @@ namespace DBADashGUI
             TreeViewImageList.Images.SetKeyName(31, "ServerReport-yellow.png");
             TreeViewImageList.Images.SetKeyName(32, "EventLog_16x.png");
             TreeViewImageList.Images.SetKeyName(33, "ReadOnlyCloudDatabase_16x.png");
+            TreeViewImageList.Images.SetKeyName(34, "Deadlock_16x.png");
             // 
             // menuStrip1
             // 

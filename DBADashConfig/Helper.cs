@@ -1,4 +1,5 @@
 ﻿using DBADash;
+using DBADashService;
 using Microsoft.Data.SqlClient;
 using Serilog;
 using System.Runtime.InteropServices;
@@ -137,6 +138,17 @@ namespace DBADashConfig
             Console.WriteLine(latest.Body);
         }
 
+        /// <summary>
+        /// The extended events session the Deadlocks collection reads for this connection.  --CaptureDeadlocks
+        /// is the shorthand for the session DBA Dash manages; --DeadlockXESessionName names any session,
+        /// including system_health or one the DBA runs.  A name given explicitly wins, so passing both is not
+        /// a conflict.  Blank switches the collection off - see DBADashSource.DeadlockXESessionName.
+        /// </summary>
+        private static string GetDeadlockXESessionName(Options o) =>
+            o.CaptureDeadlocks && string.IsNullOrWhiteSpace(o.DeadlockXESessionName)
+                ? DBADashSource.ManagedDeadlockXESessionName
+                : o.DeadlockXESessionName;
+
         public static async Task AddSourceConnectionAsync(CollectionConfig config, Options o)
         {
             if (string.IsNullOrEmpty(o.ConnectionString))
@@ -156,6 +168,8 @@ namespace DBADashConfig
                 CollectSessionWaits = !o.NoCollectSessionWaits,
                 PlanCollectionEnabled = o.PlanCollectionEnabled,
                 SlowQueryThresholdMs = o.SlowQueryThresholdMs,
+                DeadlockXESessionName = GetDeadlockXESessionName(o),
+                FlushDeadlockXERingBuffer = o.FlushDeadlockXERingBuffer,
                 SlowQuerySessionMaxMemoryKB = o.SlowQuerySessionMaxMemoryKB,
                 SlowQueryTargetMaxMemoryKB = o.SlowQueryTargetMaxMemoryKB,
                 UseDualEventSession = o.UseDualEventSession ?? true,
@@ -214,6 +228,18 @@ namespace DBADashConfig
                 source.PlanCollectionDurationThreshold = o.PlanCollectionDurationThreshold;
                 source.PlanCollectionMemoryGrantThreshold = o.PlanCollectionMemoryGrantThreshold;
             }
+            // Naming a session says which session to read, not when to read it.  The Deadlocks collection is
+            // disabled in the default schedule, so without a schedule the connection is configured for
+            // deadlocks and still collects nothing.
+            if (source.IsDeadlockCollectionEnabled &&
+                !(config.GetSchedules().TryGetValue(CollectionType.Deadlocks, out var deadlockSchedule) &&
+                  !string.IsNullOrWhiteSpace(deadlockSchedule?.Schedule)))
+            {
+                Log.Warning(
+                    "Deadlock capture is set to read the {SessionName} session, but the Deadlocks collection doesn't have a schedule so no deadlocks will be collected.  Set a schedule for the Deadlocks collection.",
+                    source.DeadlockXESessionName);
+            }
+
             // check if connection exists before adding a new connection
             var oldSource = await config.FindSourceConnectionAsync(o.ConnectionString, source.ConnectionID);
             if (oldSource != null)
@@ -437,6 +463,160 @@ namespace DBADashConfig
 
             SaveConfig(config, o);
         }
+
+
+        /// <summary>
+        /// Sets how often one collection runs, at service level or for a single connection.
+        ///
+        /// <para>Both levels, because they answer different questions: the service level schedule is how
+        /// often this service collects something, and a connection override is how often it does so for the
+        /// one instance that needs a different cadence.  The service combines the two, so an override
+        /// replaces the schedule for that collection on that connection and leaves every other collection,
+        /// and every other connection, alone.</para>
+        ///
+        /// <para>Only the collection named is written.  A schedule this does not mention keeps whatever it
+        /// had, which is what makes it safe to run against a configured service.</para>
+        /// </summary>
+        public static async Task SetScheduleAsync(CollectionConfig config, Options o)
+        {
+            // A connection target (-c or --ConnectionID) switches to a per-connection override; otherwise
+            // the service level schedule is edited.  Mirrors SetPerfmonCounters.
+            var perConnection = !string.IsNullOrEmpty(o.ConnectionString) || !string.IsNullOrEmpty(o.ConnectionID);
+
+            if (!CollectionTypeLegacyNames.TryParse(o.CollectionType ?? string.Empty, out var collectionType))
+            {
+                Log.Error("--CollectionType is required and must name a collection.  Valid values: {Types}",
+                    string.Join(", ", Enum.GetNames<CollectionType>()));
+                Environment.Exit(1);
+                return;
+            }
+
+            if (o.ScheduleClear && (o.Schedule != null || o.RunOnServiceStart.HasValue))
+            {
+                Log.Error("--ScheduleClear cannot be combined with --Schedule or --RunOnServiceStart.");
+                Environment.Exit(1);
+                return;
+            }
+
+            if (!o.ScheduleClear && o.Schedule == null && !o.RunOnServiceStart.HasValue)
+            {
+                Log.Error("Nothing to do.  Specify --Schedule and/or --RunOnServiceStart, or --ScheduleClear to remove the override.");
+                Environment.Exit(1);
+                return;
+            }
+
+            if (o.Schedule != null && !IsValidSchedule(o.Schedule))
+            {
+                Log.Error("Invalid --Schedule value {Schedule}.  Expected a cron expression such as \"0 0/5 * * * ?\", a whole number of seconds, or an empty value to disable the collection.",
+                    o.Schedule);
+                Environment.Exit(1);
+                return;
+            }
+
+            DBADashSource? source = null;
+            if (perConnection)
+            {
+                source = await GetSourceConnectionAsync(o, config);
+                if (source == null)
+                {
+                    Log.Error("Source connection not found.");
+                    Environment.Exit(1);
+                    return;
+                }
+            }
+
+            var target = perConnection ? source!.CollectionSchedules : config.CollectionSchedules;
+            var scope = perConnection ? source!.SourceConnection.ConnectionForPrint : "the service";
+
+            if (o.ScheduleClear)
+            {
+                if (target?.Remove(collectionType) != true)
+                {
+                    Log.Information("{CollectionType} had no schedule override for {Scope} - nothing to clear",
+                        collectionType, scope);
+                    return;
+                }
+                // An override object holding nothing says nothing, so it is dropped rather than left behind.
+                if (target!.Count == 0) target = null;
+                Apply(config, source, perConnection, target);
+                Log.Information("{CollectionType} schedule override removed for {Scope}", collectionType, scope);
+                SaveConfig(config, o);
+                return;
+            }
+
+            // What this level would run without an override of its own: the shipped defaults for the
+            // service, and the service level schedule for a connection.  Used so --RunOnServiceStart on its
+            // own keeps the schedule already in effect rather than writing a blank one, which would read as
+            // "disabled".
+            var inherited = perConnection ? config.GetSchedules() : CollectionSchedules.DefaultSchedules;
+            CollectionSchedule? current = null;
+            if (target?.TryGetValue(collectionType, out current) != true)
+            {
+                inherited.TryGetValue(collectionType, out current);
+            }
+
+            var schedule = o.Schedule ?? current?.Schedule ?? string.Empty;
+            var runOnServiceStart = o.RunOnServiceStart ?? current?.RunOnServiceStart ?? true;
+
+            target ??= new CollectionSchedules();
+            target[collectionType] = new CollectionSchedule { Schedule = schedule, RunOnServiceStart = runOnServiceStart };
+            Apply(config, source, perConnection, target);
+
+            Log.Information("{CollectionType} schedule for {Scope} set to {Schedule} (RunOnServiceStart={RunOnServiceStart})",
+                collectionType, scope,
+                string.IsNullOrWhiteSpace(schedule) ? "disabled" : schedule, runOnServiceStart);
+
+            WarnIfCollectionDisabledByConfiguration(config, source, perConnection, collectionType, schedule);
+
+            SaveConfig(config, o);
+        }
+
+        private static void Apply(CollectionConfig config, DBADashSource? source, bool perConnection,
+            CollectionSchedules? schedules)
+        {
+            if (perConnection)
+            {
+                source!.CollectionSchedules = schedules;
+            }
+            else
+            {
+                config.CollectionSchedules = schedules;
+            }
+        }
+
+        /// <summary>
+        /// A schedule says when a collection runs, not that it will: deadlocks need a session to read and
+        /// slow queries a threshold to capture against.  The mirror of the warning <see cref="AddSourceConnectionAsync"/>
+        /// gives for the opposite mistake, and worth saying here because scheduling something that then
+        /// collects nothing looks like a bug in the collection rather than a gap in the configuration.
+        /// </summary>
+        private static void WarnIfCollectionDisabledByConfiguration(CollectionConfig config, DBADashSource? source,
+            bool perConnection, CollectionType collectionType, string schedule)
+        {
+            if (string.IsNullOrWhiteSpace(schedule)) return;
+
+            var affected = perConnection
+                ? new[] { source! }
+                : config.SourceConnections.ToArray();
+            if (affected.Length == 0 || !affected.All(src => src.IsCollectionDisabledByConfiguration(collectionType))) return;
+
+            Log.Warning("{CollectionType} is scheduled but switched off by configuration for {Scope}, so nothing will be collected.  {Advice}",
+                collectionType,
+                perConnection ? source!.SourceConnection.ConnectionForPrint : "every connection",
+                collectionType == CollectionType.Deadlocks
+                    ? "Set a session to read with --CaptureDeadlocks or --DeadlockXESessionName."
+                    : "Set a threshold with --SlowQueryThresholdMs.");
+        }
+
+        /// <summary>
+        /// Empty disables the collection.  Otherwise the service takes either a whole number of seconds or a
+        /// cron expression - see SchedulerService - so both are accepted rather than only cron.
+        /// </summary>
+        private static bool IsValidSchedule(string schedule) =>
+            string.IsNullOrWhiteSpace(schedule)
+            || (int.TryParse(schedule, out var seconds)
+                ? seconds > 0
+                : Quartz.CronExpression.IsValidExpression(schedule));
 
         public static void SaveConfig(CollectionConfig config, Options o)
         {

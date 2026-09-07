@@ -185,6 +185,8 @@ namespace DBADash.Deadlock
                 LastBatchCompleted = ParseDateTime(Attr(el, "lastbatchcompleted")),
                 LogUsed = ParseLong(Attr(el, "logused")),
                 Priority = ParseInt(Attr(el, "priority")),
+                ClientOption1 = ParseInt(Attr(el, "clientoption1")),
+                ClientOption2 = ParseInt(Attr(el, "clientoption2")),
                 CurrentDatabaseId = ParseInt(Attr(el, "currentdb")),
                 CurrentDatabaseName = Attr(el, "currentdbname"),
                 InputBuffer = TrimToNull(ElementNamed(el, "inputbuf")?.Value),

@@ -1,4 +1,5 @@
 ﻿using CommandLine;
+using DBADash;
 
 namespace DBADashConfig
 {
@@ -28,7 +29,8 @@ SetConfigFileBackupRetention - Specify how long to keep config file backups. --R
 PopulateConnectionID - Add ConnectionID to source connections without a ConnectionID
 PopulateConnectionID2 - Add ConnectionID to source connections without a ConnectionID.  If connection fails, set ConnectionID based on Data Source in connection string.
 SetAWS - Set AWS Credentials
-SetPerfmonCounters - Set OS-level (perfmon) counters.  Sets the global list, or a per-connection override when -c/--ConnectionID is supplied.  Use --PerfmonDefaults, --PerfmonCounters, --PerfmonClear and/or --PerfmonInherit.")]
+SetPerfmonCounters - Set OS-level (perfmon) counters.  Sets the global list, or a per-connection override when -c/--ConnectionID is supplied.  Use --PerfmonDefaults, --PerfmonCounters, --PerfmonClear and/or --PerfmonInherit.
+SetSchedule - Set how often a collection runs.  Sets the service level schedule, or a per-connection override when -c/--ConnectionID is supplied.  Use --CollectionType with --Schedule, --RunOnServiceStart and/or --ScheduleClear.")]
         public CommandLineActionOption Option { get; set; }
 
         [Option('r', "Replace", Required = false, HelpText = "Option to replace the existing connection if it already exists", Default = false)]
@@ -39,6 +41,15 @@ SetPerfmonCounters - Set OS-level (perfmon) counters.  Sets the global list, or 
 
         [Option("SlowQueryThresholdMs", Default = -1, Required = false, HelpText = "Set to -1 to disable extended event capture of rpc/batch completed events.  Set to 1000 to capture queries that take longer than 1second to run (or other value in milliseconds as required)")]
         public int SlowQueryThresholdMs { get; set; }
+
+        [Option("DeadlockXESessionName", Default = "", Required = false, HelpText = "Extended events session the Deadlocks collection reads deadlock graphs from.  Blank (the default) switches deadlock collection off for the connection.  DBADash_Deadlocks is created and started by DBA Dash and is much the fastest to read - reading system_health costs seconds per collection because the cost is opening and seeking its file set, not reading new events.  system_health needs nothing deployed and covers deadlocks from before collection was enabled.  Any other name is a session you manage - DBA Dash reads it and never alters it.  On Azure SQL Database the session is database scoped and reads from a ring buffer - system_health is not available there.")]
+        public string DeadlockXESessionName { get; set; } = string.Empty;
+
+        [Option("CaptureDeadlocks", Default = false, Required = false, HelpText = "Set this switch to capture deadlocks using the DBADash_Deadlocks session, which DBA Dash creates, starts and reads itself.  Shorthand for --DeadlockXESessionName DBADash_Deadlocks; use that option instead to read system_health or a session you manage.  Note that the Deadlocks collection is disabled in the default schedule, so set a schedule for it as well.")]
+        public bool CaptureDeadlocks { get; set; }
+
+        [Option("FlushDeadlockXERingBuffer", Default = false, Required = false, HelpText = "Set this switch to empty the deadlock session's ring buffer after each collection by stopping and starting it.  A ring buffer read costs what the buffer holds rather than what is new in it - roughly half a second for a full one against thirty milliseconds for an empty one - so on a database that deadlocks steadily this keeps collections short.  It can lose a deadlock that has fired but not yet reached the target when the session stops.  Only applies to the DBADash_Deadlocks session with a ring buffer target, which in practice means Azure SQL Database; a session you manage is never stopped.")]
+        public bool FlushDeadlockXERingBuffer { get; set; }
 
         [Option("PlanCollectionEnabled", Default = false, Required = false, HelpText = "Set this switch to enable plan collection.")]
         public bool PlanCollectionEnabled { get; set; }
@@ -156,6 +167,18 @@ SetPerfmonCounters - Set OS-level (perfmon) counters.  Sets the global list, or 
         [Option("PerfmonInherit", Default = false, Required = false, HelpText = "Use with -a SetPerfmonCounters and -c/--ConnectionID to make a connection inherit the global perfmon counter list (removes any per-connection override).")]
         public bool PerfmonInherit { get; set; }
 
+        [Option("CollectionType", Default = "", Required = false, HelpText = "Use with -a SetSchedule to name the collection to schedule, e.g. Deadlocks.")]
+        public string CollectionType { get; set; } = "";
+
+        [Option("Schedule", Required = false, HelpText = "Use with -a SetSchedule.  A cron expression (e.g. \"0 0/5 * * * ?\" for every 5 minutes) or a whole number of seconds.  An empty value disables the collection.")]
+        public string? Schedule { get; set; }
+
+        [Option("RunOnServiceStart", Required = false, HelpText = "Use with -a SetSchedule to say whether the collection also runs once when the service starts.  Left as it is when not supplied.")]
+        public bool? RunOnServiceStart { get; set; }
+
+        [Option("ScheduleClear", Default = false, Required = false, HelpText = "Use with -a SetSchedule to remove the schedule override and go back to the level above - the service level schedule for a connection, or the shipped default for the service.")]
+        public bool ScheduleClear { get; set; }
+
         public enum CommandLineActionOption
         {
             Add,
@@ -180,7 +203,8 @@ SetPerfmonCounters - Set OS-level (perfmon) counters.  Sets the global list, or 
             PopulateConnectionID,
             PopulateConnectionID2,
             SetAWS,
-            SetPerfmonCounters
+            SetPerfmonCounters,
+            SetSchedule
         }
     }
 }

@@ -92,6 +92,22 @@ namespace DBADashGUI
             }
         }
 
+        /// <summary>
+        /// The repository's DatabaseID for a database name on a specific instance, or -1 where the database
+        /// isn't there - dropped, renamed, or never collected.  Used where a name is all that was recorded:
+        /// a deadlock stores the module's database as part of its three part name, not as an ID.
+        /// </summary>
+        public static int GetDatabaseID(int instanceID, string dbName)
+        {
+            if (instanceID <= 0 || string.IsNullOrEmpty(dbName)) return -1;
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.DatabaseID_Get", cn) { CommandType = CommandType.StoredProcedure };
+            cn.Open();
+            cmd.Parameters.AddWithValue("InstanceID", instanceID);
+            cmd.Parameters.AddWithValue("DBName", dbName);
+            return cmd.ExecuteScalar() is int databaseID ? databaseID : -1;
+        }
+
         public static DataTable GetFiles(int DatabaseID)
         {
             using var cn = new SqlConnection(Common.ConnectionString);
@@ -526,6 +542,77 @@ namespace DBADashGUI
             {
                 return new Params();
             }
+        }
+
+        /// <summary>
+        /// True when the specified collection type is enabled for the specified instance.  
+        /// </summary>
+        internal static bool IsCollectionEnabled(int instanceID, CollectionType collectionType)
+        {
+            if (instanceID <= 0) return false;
+            try
+            {
+                using var cn = new SqlConnection(Common.ConnectionString);
+                using var cmd = new SqlCommand(
+                    "dbo.ScheduleInfo_Get", cn)
+                { CommandType = CommandType.StoredProcedure };
+                cmd.Parameters.AddWithValue("@InstanceIDs", new List<int> { instanceID }.AsDataTable());
+                cmd.Parameters.AddWithValue("@Reference", collectionType.ToString());
+                cn.Open();
+                var rdr = cmd.ExecuteReader();
+                if (rdr.Read())
+                {
+                    return rdr.GetSqlBoolean(rdr.GetOrdinal("IsEnabled")).IsTrue;
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error checking if the collection is enabled: {ex}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// The collections, of those named, that the given instances report as disabled - by an empty schedule
+        /// or by configuration, which dbo.ScheduleInfo records the same way.  Returned as one row per instance
+        /// and collection, so a report covering several instances can say how many of them are not collecting.
+        ///
+        /// <para>Only what the repository positively says is disabled comes back.  An instance with no schedule
+        /// info for a collection - a service that predates the collection, one that has not reported since it
+        /// was added - is absent rather than reported as disabled, so a missing row never produces a notice
+        /// saying a collection is switched off when it may well be running.</para>
+        /// </summary>
+        internal static List<(int InstanceID, string Reference)> GetDisabledCollections(IEnumerable<int> instanceIDs,
+            IEnumerable<string> references)
+        {
+            var results = new List<(int, string)>();
+            var ids = instanceIDs?.Where(id => id > 0).Distinct().ToList();
+            var refs = references?.Where(r => !string.IsNullOrWhiteSpace(r)).Distinct().ToList();
+            if (ids is not { Count: > 0 } || refs is not { Count: > 0 }) return results;
+            try
+            {
+                using var cn = new SqlConnection(Common.ConnectionString);
+                using var cmd = new SqlCommand("dbo.ScheduleInfo_Get", cn) { CommandType = CommandType.StoredProcedure };
+                cmd.Parameters.AddWithValue("@InstanceIDs", ids.AsDataTable());
+                // The references are a report's TriggerCollectionTypes - a handful at most - passed as a
+                // comma-separated list, which dbo.ScheduleInfo_Get splits.
+                cmd.Parameters.AddWithValue("@Reference", string.Join(",", refs));
+                cmd.Parameters.AddWithValue("@IsEnabled", false);
+                cn.Open();
+                using var rdr = cmd.ExecuteReader();
+                while (rdr.Read())
+                {
+                    results.Add((rdr.GetInt32(rdr.GetOrdinal("InstanceID")), rdr.GetString(rdr.GetOrdinal("Reference"))));
+                }
+            }
+            catch (Exception ex)
+            {
+                // The notice this drives is informational - show nothing rather than fail the report.
+                Debug.WriteLine($"Error checking collection schedules: {ex}");
+                results.Clear();
+            }
+            return results;
         }
     }
 }

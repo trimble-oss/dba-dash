@@ -86,6 +86,14 @@ jobs:
           sqlcmd -S localhost -U sa -P dbatools.I0 -d tempdb -Q "CREATE DATABASE TestIdentity"
           sqlcmd -S localhost -U sa -P dbatools.I0 -d TestIdentity -Q "CREATE TABLE dbo.IdentityTest(ID TINYINT IDENTITY(1,1));DECLARE @i INT=1; WHILE @i <250 BEGIN INSERT INTO dbo.IdentityTest  DEFAULT VALUES; SET @i+=1; END"
 
+      # Created before the service starts so the Databases collection sees it and the deadlock's
+      # database_id resolves to a DatabaseID on import.  Deadlocking itself has to wait until the
+      # extended events session exists, which is after the first collection has run.
+      - name: Create Deadlock Test DB
+        shell: powershell
+        run: |
+          ./Scripts/New-TestDeadlock -SetupOnly -ConnectionString "Data Source=localhost;UID=sa;pwd=dbatools.I0"
+
       - name: Configure & Install DBA Dash as Service
         shell: powershell
         run: | 
@@ -97,9 +105,11 @@ jobs:
           Set-Location $InstallPath
           "Configure"
           ./dbadashconfig -c "Data Source=localhost;UID=sa;pwd=dbatools.I0;Initial Catalog=DBADashDB_GitHubAction;Encrypt=True;TrustServerCertificate=True;" -a SetDestination
-          ./dbadashconfig -c "Data Source=localhost;UID=sa;pwd=dbatools.I0;Encrypt=True;TrustServerCertificate=True;" -a Add --PlanCollectionEnabled --SlowQueryThresholdMs 1000 --SchemaSnapshotDBs "*"
+          ./dbadashconfig -c "Data Source=localhost;UID=sa;pwd=dbatools.I0;Encrypt=True;TrustServerCertificate=True;" -a Add --PlanCollectionEnabled --SlowQueryThresholdMs 1000 --SchemaSnapshotDBs "*" --CaptureDeadlocks
           "Enable OS-level (perfmon) counter collection"
           ./dbadashconfig -a SetPerfmonCounters --PerfmonDefaults
+          "Collect deadlocks every minute - the workflow does not run long enough to wait out the shipped five minute schedule, and the session DBA Dash manages is not created until the first collection has run"
+          ./dbadashconfig -a SetSchedule --CollectionType Deadlocks --Schedule "0 0/1 * * * ?" --RunOnServiceStart true
           "Install Service"
           ./DBADashService install --localsystem
           "Start Service"
@@ -113,6 +123,13 @@ jobs:
           Get-ChildItem -Path $logsFolder | Get-Content
 
           exit 0
+
+      # After the service has started, so the session is there to record it.  The script waits for
+      # the session rather than sleeping a fixed time, and retries until SQL Server picks a victim.
+      - name: Generate a deadlock
+        shell: powershell
+        run: |
+          ./Scripts/New-TestDeadlock -SessionName "DBADash_Deadlocks" -ConnectionString "Data Source=localhost;UID=sa;pwd=dbatools.I0"
 
       - name: Wait 5min
         shell: powershell
@@ -146,7 +163,7 @@ jobs:
           }
           Import-Module Pester -MinimumVersion 5.0.0
           # Perfmon = $true: this leg enables the default perfmon counters, so assert they were collected.
-          $container = New-PesterContainer -Path 'Scripts\CI_Workflow.Tests.ps1' -Data @{ Perfmon = $true }
+          $container = New-PesterContainer -Path 'Scripts\CI_Workflow.Tests.ps1' -Data @{ Perfmon = $true; Deadlocks = $true }
           Invoke-Pester -Container $container -Output Detailed
 
       - name: Output Table Counts Following Delete

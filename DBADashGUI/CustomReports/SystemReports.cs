@@ -8,6 +8,8 @@ namespace DBADashGUI.CustomReports
         {
             Add(DatabaseExtendedPropertiesReport.Instance);
             Add(DatabaseFinderReport.Instance);
+            Add(DeadlockChartsReport.Instance);
+            Add(DeadlocksReport.Instance);
             Add(DeletedDatabasesReport.Instance);
             Add(FailedLoginsReport.Instance);
             Add(FlushPlanLogReport.Instance);

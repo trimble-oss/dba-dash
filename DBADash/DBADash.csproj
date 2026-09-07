@@ -42,6 +42,8 @@
     <EmbeddedResource Include="SQL\SQLFailedLogins.sql" />
     <EmbeddedResource Include="SQL\SQLAvailableCounters.sql" />
     <EmbeddedResource Include="SQL\SQLAvailableProcs.sql" />
+    <EmbeddedResource Include="SQL\SQLDeadlockSession.sql" />
+    <EmbeddedResource Include="SQL\SQLDeadlockSessionAzure.sql" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="PerformanceCounters.xml">
@@ -183,6 +185,10 @@
     <None Update="commandTimeouts.json.example">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Deadlock parsing / signature for the deadlock collection.  Platform neutral and dependency free. -->
+    <ProjectReference Include="..\DBADash.Deadlock\DBADash.Deadlock.csproj" />
   </ItemGroup>
   <Import Project="..\packages\Microsoft.Data.SqlClient.SNI.3.0.0\build\net46\Microsoft.Data.SqlClient.SNI.targets" Condition="Exists('..\packages\Microsoft.Data.SqlClient.SNI.3.0.0\build\net46\Microsoft.Data.SqlClient.SNI.targets')" />
 </Project>

@@ -651,8 +651,34 @@ namespace DBADashGUI.Performance
         private const string CommunityToolsHelpUrl = "https://dbadash.com/docs/help/community-tools/";
         private const string MessagingHelpUrl = "https://dbadash.com/docs/help/messaging/";
 
+        /// <summary>
+        /// Opens the native Deadlocks report for the clicked window, using the graphs the collection stored -
+        /// no round trip to the instance and nothing for the user to deploy.  Falls back to sp_BlitzLock where
+        /// the collection is not enabled for this instance - nothing is storing the graphs the native report
+        /// reads, so it has nothing to show.  An instance that collected in the past and has since been
+        /// switched off goes to sp_BlitzLock too: the repository holds only what it collected before that, and
+        /// the window the user clicked is more recent than that in every case that matters.
+        /// </summary>
         private Task ShowDeadlockReportAsync(DateTime fromUtc, DateTime toUtc)
         {
+            if (CommonData.IsCollectionEnabled(InstanceID, CollectionType.Deadlocks))
+            {
+                var nativeContext = CurrentContext.DeepCopy();
+                nativeContext.ObjectID = 0;
+                nativeContext.ObjectName = string.Empty;
+                var report = DeadlocksReport.Instance;
+                nativeContext.Report = report;
+
+                var nativeParams = report.GetCustomSqlParameters();
+                // The chart's squares cover the period between two snapshots, so the report is scoped to that
+                // window rather than to the global date filter.
+                SetParameter(nativeParams, "@FromDate", fromUtc);
+                SetParameter(nativeParams, "@ToDate", toUtc);
+
+                var nativeViewer = new CustomReportViewer { Context = nativeContext, CustomParams = nativeParams };
+                return nativeViewer.ShowDialogAsync();
+            }
+
             if (!HasDeadlockReportAccess)
             {
                 ShowDeadlockAccessMessage();
@@ -672,6 +698,15 @@ namespace DBADashGUI.Performance
             customParams.Add(new CustomSqlParameter { Param = new SqlParameter("@EndDate", toInstance) { DbType = DbType.DateTime } });
             reportViewer.CustomParams = customParams;
             return reportViewer.ShowDialogAsync();
+        }
+
+        private static void SetParameter(List<CustomSqlParameter> customParams, string name, DateTime value)
+        {
+            customParams.RemoveAll(p => p.Param.ParameterName.Equals(name, StringComparison.OrdinalIgnoreCase));
+            customParams.Add(new CustomSqlParameter
+            {
+                Param = new SqlParameter(name, value) { DbType = DbType.DateTime2 }
+            });
         }
 
         /// <summary>

@@ -2,6 +2,9 @@
 using DBADashGUI.Utils;
 using LiveChartsCore;
 using LiveChartsCore.Defaults;
+using LiveChartsCore.Kernel;
+using LiveChartsCore.Kernel.Sketches;
+using LiveChartsCore.Painting;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Drawing.Geometries;
 using LiveChartsCore.SkiaSharpView.Painting;
@@ -31,6 +34,12 @@ namespace DBADashGUI.Charts
         }
 
         private static readonly LiveChartsCore.Drawing.Padding DefaultYAxisPadding = new LiveChartsCore.Drawing.Padding(10, 0, 10, 0);
+
+        /// <summary>
+        /// The stroke width LiveCharts' own theme gives a line series.  Only used when a series is being
+        /// recoloured before the theme has painted it, which would otherwise leave it a zero width line.
+        /// </summary>
+        private const float DefaultLineStrokeThickness = 4;
 
         // Helper: create Copy Image menu item with handler (returns item and handler so callers can unsubscribe)
         private static (ToolStripMenuItem item, EventHandler handler) CreateCopyMenuItem(Control chart)
@@ -659,7 +668,12 @@ namespace DBADashGUI.Charts
             }
         }
 
-        private static ISeries CreateSeriesForGroup(string groupName, ObservablePoint[] values, ChartTypes chartType, double lineSmoothness = 0, double geometrySize = 0, bool lineFill = false)
+        /// <summary>
+        /// One series of a cartesian chart.  <typeparamref name="TModel"/> is the point type the X axis kind
+        /// selected - <see cref="DateTimePoint"/> for a time axis, <see cref="ObservablePoint"/> otherwise.
+        /// </summary>
+        /// <param name="style">Optional colour/marker override.  Null leaves the series on the theme palette.</param>
+        private static ISeries CreateSeriesForGroup<TModel>(string groupName, TModel[] values, ChartTypes chartType, double lineSmoothness = 0, double geometrySize = 0, bool lineFill = false, ChartSeriesStyle style = null)
         {
             ArgumentNullException.ThrowIfNull(values);
             if (values.Length == 0)
@@ -668,60 +682,130 @@ namespace DBADashGUI.Charts
             if (string.IsNullOrWhiteSpace(groupName))
                 groupName = "Unknown"; // Provide default instead of throwing
 
+            var marker = style?.Marker ?? ChartMarkers.Default;
+            ISeries series;
+
             switch (chartType)
             {
                 case ChartTypes.StackedArea:
-                    return new StackedAreaSeries<ObservablePoint>()
+                    series = new StackedAreaSeries<TModel>()
                     {
                         Name = groupName,
                         Values = values,
                         GeometrySize = geometrySize,
                         LineSmoothness = lineSmoothness
                     };
+                    break;
 
                 case ChartTypes.StackedColumn:
-                    return new StackedColumnSeries<ObservablePoint>()
+                    series = new StackedColumnSeries<TModel>()
                     {
                         Name = groupName,
                         Values = values
                     };
+                    break;
 
                 case ChartTypes.Column:
-                    return new ColumnSeries<ObservablePoint>()
+                    series = new ColumnSeries<TModel>()
                     {
                         Name = groupName,
                         Values = values
                     };
+                    break;
 
                 case ChartTypes.Line:
-                    var lineSeries = new LineSeries<ObservablePoint>()
-                    {
-                        Name = groupName,
-                        Values = values,
-                        GeometrySize = geometrySize,
-                        LineSmoothness = lineSmoothness
-                    };
+                    var lineSeries = CreateLineSeries(groupName, values, geometrySize, lineSmoothness, marker);
 
                     // Only set Fill to null if lineFill is false (default behavior)
-                    if (!lineFill)
+                    if (!lineFill && lineSeries is IStrokedAndFilled unfilled)
                     {
-                        lineSeries.Fill = null;
+                        unfilled.Fill = null;
                     }
 
-                    return lineSeries;
+                    series = lineSeries;
+                    break;
 
                 case ChartTypes.Scatter:
-                    return new ScatterSeries<ObservablePoint>()
-                    {
-                        Name = groupName,
-                        Values = values,
-                        GeometrySize = geometrySize
-                    };
+                    series = CreateScatterSeries(groupName, values, geometrySize, marker);
+                    break;
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(chartType), $"Unsupported chart type: {chartType}");
             }
+
+            ApplySeriesStyle(series, style);
+            return series;
         }
+
+        /// <summary>
+        /// A scatter series drawn with the marker the style asks for.  The marker is the series' visual type
+        /// argument rather than a property, so it has to be chosen as the series is created.
+        /// </summary>
+        private static ISeries CreateScatterSeries<TModel>(string name, TModel[] values, double geometrySize, ChartMarkers marker) =>
+            marker switch
+            {
+                ChartMarkers.Square => new ScatterSeries<TModel, RectangleGeometry> { Name = name, Values = values, GeometrySize = geometrySize },
+                ChartMarkers.Diamond => new ScatterSeries<TModel, DiamondGeometry> { Name = name, Values = values, GeometrySize = geometrySize },
+                ChartMarkers.Cross => new ScatterSeries<TModel, CrossGeometry> { Name = name, Values = values, GeometrySize = geometrySize },
+                ChartMarkers.Star => new ScatterSeries<TModel, StarGeometry> { Name = name, Values = values, GeometrySize = geometrySize },
+                _ => new ScatterSeries<TModel> { Name = name, Values = values, GeometrySize = geometrySize }
+            };
+
+        /// <summary>
+        /// A line series whose points are drawn with the marker the style asks for.  See
+        /// <see cref="CreateScatterSeries"/> for why the marker cannot be set after construction.
+        /// </summary>
+        private static ISeries CreateLineSeries<TModel>(string name, TModel[] values, double geometrySize, double lineSmoothness, ChartMarkers marker) =>
+            marker switch
+            {
+                ChartMarkers.Square => new LineSeries<TModel, RectangleGeometry> { Name = name, Values = values, GeometrySize = geometrySize, LineSmoothness = lineSmoothness },
+                ChartMarkers.Diamond => new LineSeries<TModel, DiamondGeometry> { Name = name, Values = values, GeometrySize = geometrySize, LineSmoothness = lineSmoothness },
+                ChartMarkers.Cross => new LineSeries<TModel, CrossGeometry> { Name = name, Values = values, GeometrySize = geometrySize, LineSmoothness = lineSmoothness },
+                ChartMarkers.Star => new LineSeries<TModel, StarGeometry> { Name = name, Values = values, GeometrySize = geometrySize, LineSmoothness = lineSmoothness },
+                _ => new LineSeries<TModel> { Name = name, Values = values, GeometrySize = geometrySize, LineSmoothness = lineSmoothness }
+            };
+
+        /// <summary>
+        /// Paints a series in the colour its style names.  Which paint carries the colour depends on the
+        /// series - a column or a point is its fill, a line is its stroke and its markers - so each is set
+        /// so the series still reads as one colour.
+        /// </summary>
+        private static void ApplySeriesStyle(ISeries series, ChartSeriesStyle style)
+        {
+            if (series == null || style?.SkiaColor is not { } color) return;
+
+            switch (series)
+            {
+                // Lines and stacked areas.  A stroke of zero thickness draws nothing, so a stroke the theme
+                // has not painted yet - it paints on first draw, which is after this - takes the theme width.
+                case ILineSeries lineSeries:
+                    lineSeries.Stroke = Repaint(lineSeries.Stroke, color, DefaultLineStrokeThickness);
+                    lineSeries.GeometryStroke = Repaint(lineSeries.GeometryStroke, color, DefaultLineStrokeThickness);
+                    lineSeries.GeometryFill = Repaint(lineSeries.GeometryFill, color, 0);
+                    if (lineSeries.Fill is not null)
+                    {
+                        lineSeries.Fill = Repaint(lineSeries.Fill, color, 0);
+                    }
+                    break;
+
+                // Columns and scatter points.
+                case IStrokedAndFilled strokedAndFilled:
+                    strokedAndFilled.Fill = Repaint(strokedAndFilled.Fill, color, 0);
+                    break;
+            }
+        }
+
+        private static SolidColorPaint Repaint(Paint existing, SKColor color, float thicknessWhenUnpainted) =>
+            new(color) { StrokeThickness = existing?.StrokeThickness ?? thicknessWhenUnpainted };
+
+        /// <summary>
+        /// The colour/marker override for a series, if the configuration names one.  The key is the metric
+        /// column, or the series value when SeriesColumn groups the data.
+        /// </summary>
+        private static ChartSeriesStyle GetSeriesStyle(ChartConfiguration config, string key) =>
+            config?.SeriesStyles != null && key != null && config.SeriesStyles.TryGetValue(key, out var style)
+                ? style
+                : null;
 
         /// <summary>
         /// Build a tick -> index map and sorted arrays for nearest lookup.
@@ -889,70 +973,6 @@ namespace DBADashGUI.Charts
             return true;
         }
 
-        private static ISeries CreateSeriesForGroup(string groupName, DateTimePoint[] values, ChartTypes chartType, double lineSmoothness = 0, double geometrySize = 0, bool lineFill = false)
-        {
-            ArgumentNullException.ThrowIfNull(values);
-            if (values.Length == 0)
-                throw new ArgumentException("Values array cannot be empty", nameof(values));
-
-            if (string.IsNullOrWhiteSpace(groupName))
-                groupName = "Unknown"; // Provide default instead of throwing
-
-            switch (chartType)
-            {
-                case ChartTypes.StackedArea:
-                    return new StackedAreaSeries<DateTimePoint>()
-                    {
-                        Name = groupName,
-                        Values = values,
-                        GeometrySize = geometrySize,
-                        LineSmoothness = lineSmoothness
-                    };
-
-                case ChartTypes.StackedColumn:
-                    return new StackedColumnSeries<DateTimePoint>()
-                    {
-                        Name = groupName,
-                        Values = values
-                    };
-
-                case ChartTypes.Column:
-                    return new ColumnSeries<DateTimePoint>()
-                    {
-                        Name = groupName,
-                        Values = values
-                    };
-
-                case ChartTypes.Line:
-                    var lineSeries = new LineSeries<DateTimePoint>()
-                    {
-                        Name = groupName,
-                        Values = values,
-                        GeometrySize = geometrySize,
-                        LineSmoothness = lineSmoothness
-                    };
-
-                    // Only set Fill to null if lineFill is false (default behavior)
-                    if (!lineFill)
-                    {
-                        lineSeries.Fill = null;
-                    }
-
-                    return lineSeries;
-
-                case ChartTypes.Scatter:
-                    return new ScatterSeries<DateTimePoint>()
-                    {
-                        Name = groupName,
-                        Values = values,
-                        GeometrySize = geometrySize
-                    };
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(chartType), $"Unsupported chart type: {chartType}");
-            }
-        }
-
         /// <summary>
         /// Creates a CartesianChart from a DataTable using the provided configuration
         /// </summary>
@@ -1108,7 +1128,9 @@ namespace DBADashGUI.Charts
             if (xKind == XAxisKind.DateTime)
             {
                 var unit = CalculateDateUnit(minDate, maxDate, config.ChartType, series, config);
-                xAxes = CreateXAxes(unit, labelPaint, minDate, maxDate, config.XAxisLabel);
+                // Only a chart that asked for it gets the right hand edge pinned as well - see FixXAxisToRange.
+                var fixToRange = config.FixXAxisToRange && config.XAxisMin.HasValue && config.XAxisMax.HasValue;
+                xAxes = CreateXAxes(unit, labelPaint, minDate, maxDate, config.XAxisLabel, fixToRange);
             }
             else if (xKind == XAxisKind.Numeric)
             {
@@ -1239,7 +1261,7 @@ namespace DBADashGUI.Charts
                         if (values.Length > 0)
                         {
                             var seriesName = GetFriendlyColumnName(metricColumn, config);
-                            series.Add(CreateSeriesForGroup(seriesName, values, config.ChartType, effectiveLineSmoothness, config.GeometrySize, config.LineFill));
+                            series.Add(CreateSeriesForGroup(seriesName, values, config.ChartType, effectiveLineSmoothness, config.GeometrySize, config.LineFill, GetSeriesStyle(config, metricColumn)));
                         }
                     }
                     else if (xKind == XAxisKind.Numeric)
@@ -1248,7 +1270,7 @@ namespace DBADashGUI.Charts
                         if (values.Length > 0)
                         {
                             var seriesName = GetFriendlyColumnName(metricColumn, config);
-                            series.Add(CreateSeriesForGroup(seriesName, values, config.ChartType, effectiveLineSmoothness, config.GeometrySize, config.LineFill));
+                            series.Add(CreateSeriesForGroup(seriesName, values, config.ChartType, effectiveLineSmoothness, config.GeometrySize, config.LineFill, GetSeriesStyle(config, metricColumn)));
                         }
                     }
                     else
@@ -1258,7 +1280,7 @@ namespace DBADashGUI.Charts
                         if (values.Length > 0)
                         {
                             var seriesName = GetFriendlyColumnName(metricColumn, config);
-                            series.Add(CreateSeriesForGroup(seriesName, values, config.ChartType, effectiveLineSmoothness, config.GeometrySize, config.LineFill));
+                            series.Add(CreateSeriesForGroup(seriesName, values, config.ChartType, effectiveLineSmoothness, config.GeometrySize, config.LineFill, GetSeriesStyle(config, metricColumn)));
                         }
                     }
                 }
@@ -1272,7 +1294,7 @@ namespace DBADashGUI.Charts
                     if (values.Length > 0)
                     {
                         var seriesName = GetFriendlyColumnName(config.MetricColumn, config);
-                        series.Add(CreateSeriesForGroup(seriesName, values, config.ChartType, effectiveLineSmoothness, config.GeometrySize, config.LineFill));
+                        series.Add(CreateSeriesForGroup(seriesName, values, config.ChartType, effectiveLineSmoothness, config.GeometrySize, config.LineFill, GetSeriesStyle(config, config.MetricColumn)));
                     }
                 }
                 else if (xKind == XAxisKind.Numeric)
@@ -1281,7 +1303,7 @@ namespace DBADashGUI.Charts
                     if (values.Length > 0)
                     {
                         var seriesName = GetFriendlyColumnName(config.MetricColumn, config);
-                        series.Add(CreateSeriesForGroup(seriesName, values, config.ChartType, effectiveLineSmoothness, config.GeometrySize, config.LineFill));
+                        series.Add(CreateSeriesForGroup(seriesName, values, config.ChartType, effectiveLineSmoothness, config.GeometrySize, config.LineFill, GetSeriesStyle(config, config.MetricColumn)));
                     }
                 }
                 else
@@ -1290,7 +1312,7 @@ namespace DBADashGUI.Charts
                     if (values.Length > 0)
                     {
                         var seriesName = GetFriendlyColumnName(config.MetricColumn, config);
-                        series.Add(CreateSeriesForGroup(seriesName, values, config.ChartType, effectiveLineSmoothness, config.GeometrySize, config.LineFill));
+                        series.Add(CreateSeriesForGroup(seriesName, values, config.ChartType, effectiveLineSmoothness, config.GeometrySize, config.LineFill, GetSeriesStyle(config, config.MetricColumn)));
                     }
                 }
             }
@@ -1307,19 +1329,19 @@ namespace DBADashGUI.Charts
                     {
                         var values = ExtractDateTimePoints(group, config.XColumn, config.MetricColumn);
                         if (values.Length > 0)
-                            series.Add(CreateSeriesForGroup(group.Key, values, config.ChartType, effectiveLineSmoothness, config.GeometrySize, config.LineFill));
+                            series.Add(CreateSeriesForGroup(group.Key, values, config.ChartType, effectiveLineSmoothness, config.GeometrySize, config.LineFill, GetSeriesStyle(config, group.Key)));
                     }
                     else if (xKind == XAxisKind.Numeric)
                     {
                         var values = ExtractNumericPoints(group, config.XColumn, config.MetricColumn);
                         if (values.Length > 0)
-                            series.Add(CreateSeriesForGroup(group.Key, values, config.ChartType, effectiveLineSmoothness, config.GeometrySize, config.LineFill));
+                            series.Add(CreateSeriesForGroup(group.Key, values, config.ChartType, effectiveLineSmoothness, config.GeometrySize, config.LineFill, GetSeriesStyle(config, group.Key)));
                     }
                     else
                     {
                         var values = ExtractCategoryPoints(group, config.XColumn, config.MetricColumn, categories);
                         if (values.Length > 0)
-                            series.Add(CreateSeriesForGroup(group.Key, values, config.ChartType, effectiveLineSmoothness, config.GeometrySize, config.LineFill));
+                            series.Add(CreateSeriesForGroup(group.Key, values, config.ChartType, effectiveLineSmoothness, config.GeometrySize, config.LineFill, GetSeriesStyle(config, group.Key)));
                     }
                 }
             }
@@ -1487,6 +1509,128 @@ namespace DBADashGUI.Charts
             return XAxisKind.Category;
         }
 
+        /// <summary>
+        /// The chart point under a mouse position, or null when the pointer is not over one.  Takes the
+        /// control rather than a chart type so pie and cartesian charts are hit tested the same way.
+        /// </summary>
+        internal static ChartPoint GetPointAt(Control chartControl, System.Drawing.Point location)
+        {
+            if (chartControl is not IChartView view) return null;
+            try
+            {
+                // The same strategy LiveCharts uses for its own pointer down event, so a point is clickable
+                // exactly where the chart already shows it as hovered.
+                return view.GetPointsAt(new LiveChartsCore.Drawing.LvcPointD(location.X, location.Y),
+                        LiveChartsCore.Measure.FindingStrategy.Automatic, LiveChartsCore.Measure.FindPointFor.PointerDownEvent)
+                    .FirstOrDefault();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"ChartHelper.GetPointAt error: {ex}");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// The row of a chart's source table that a clicked point was drawn from, or null when the point
+        /// cannot be traced back to a single row - an aggregated pie slice, or a chart whose series are
+        /// whole columns rather than rows.
+        ///
+        /// Matched on value rather than on the point's position in its series: rows the chart could not
+        /// plot are dropped as the series is built, so the nth point is not reliably the nth row.
+        /// </summary>
+        internal static DataRow FindSourceRow(DataTable dt, ChartConfigurationBase config, ChartPoint point)
+        {
+            if (dt == null || point == null) return null;
+            try
+            {
+                return config switch
+                {
+                    PieChartConfiguration pie => FindPieSourceRow(dt, pie, point),
+                    ChartConfiguration cartesian => FindCartesianSourceRow(dt, cartesian, point),
+                    _ => null
+                };
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"ChartHelper.FindSourceRow error: {ex}");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Each pie slice is a series named for its category, so the clicked slice names the row it came
+        /// from.  A pie built from MetricColumns has no category column and so no row to find.
+        /// </summary>
+        private static DataRow FindPieSourceRow(DataTable dt, PieChartConfiguration config, ChartPoint point)
+        {
+            var category = point.Context?.Series?.Name;
+            if (string.IsNullOrEmpty(category)) return null;
+            if (string.IsNullOrWhiteSpace(config.CategoryColumn) || !dt.Columns.Contains(config.CategoryColumn)) return null;
+
+            var nullLabel = string.IsNullOrWhiteSpace(config.NullCategoryLabel) ? "(null)" : config.NullCategoryLabel;
+            return dt.Rows.Cast<DataRow>().FirstOrDefault(r =>
+            {
+                var value = r[config.CategoryColumn];
+                var label = value == null || value == DBNull.Value ? nullLabel : value.ToString();
+                return string.Equals(label, category, StringComparison.Ordinal);
+            });
+        }
+
+        /// <summary>
+        /// A cartesian point carries its X value, which is what identifies its row: ticks on a time axis,
+        /// the value itself on a numeric one, the category's position otherwise.  Nearest rather than exact
+        /// on the first two - a tick count is larger than a double holds exactly, so the value that comes
+        /// back from the chart is a few ticks off the one that went in.
+        /// </summary>
+        private static DataRow FindCartesianSourceRow(DataTable dt, ChartConfiguration config, ChartPoint point)
+        {
+            if (string.IsNullOrWhiteSpace(config.XColumn) || !dt.Columns.Contains(config.XColumn)) return null;
+            var x = point.Coordinate.SecondaryValue;
+            if (double.IsNaN(x)) return null;
+
+            switch (DetectXAxisKind(dt, config.XColumn))
+            {
+                case XAxisKind.DateTime:
+                    // A second is far below the gap between two points on any bucketed chart, and far above
+                    // the error in the round trip through a double.
+                    return FindNearestRow(dt, r => TryConvertToDateTime(r[config.XColumn], out var d) ? d.Ticks : (double?)null,
+                        x, TimeSpan.TicksPerSecond);
+
+                case XAxisKind.Numeric:
+                    return FindNearestRow(dt, r => TryConvertToDouble(r[config.XColumn], out var d) ? d : (double?)null,
+                        x, Math.Max(1e-6, Math.Abs(x) * 1e-9));
+
+                default:
+                    var categories = BuildCategoriesFromTable(dt, config.XColumn);
+                    var index = (int)Math.Round(x);
+                    if (index < 0 || index >= categories.Length) return null;
+                    var category = categories[index];
+                    return dt.Rows.Cast<DataRow>()
+                        .FirstOrDefault(r => string.Equals(r[config.XColumn]?.ToString(), category, StringComparison.Ordinal));
+            }
+        }
+
+        /// <summary>
+        /// The row whose X value is closest to the one clicked, or null when the closest is further away
+        /// than <paramref name="tolerance"/> - which means the point did not come from this table.
+        /// </summary>
+        private static DataRow FindNearestRow(DataTable dt, Func<DataRow, double?> getValue, double target, double tolerance)
+        {
+            DataRow nearest = null;
+            var nearestDistance = double.MaxValue;
+            foreach (DataRow row in dt.Rows)
+            {
+                var value = getValue(row);
+                if (value == null) continue;
+                var distance = Math.Abs(value.Value - target);
+                if (distance >= nearestDistance) continue;
+                nearestDistance = distance;
+                nearest = row;
+            }
+            return nearestDistance <= tolerance ? nearest : null;
+        }
+
         private static SolidColorPaint CreateLabelPaint()
         {
             return DBADashUser.SelectedTheme.ThemeIdentifier == ThemeType.Dark
@@ -1494,7 +1638,12 @@ namespace DBADashGUI.Charts
                 : new SolidColorPaint(DashColors.TrimbleBlueDark.ToSKColor());
         }
 
-        private static Axis[] CreateXAxes(TimeSpan unit, SolidColorPaint labelPaint, DateTime minDate, DateTime maxDate, string label)
+        /// <param name="fixToRange">
+        /// Also pin the axis to <paramref name="maxDate"/>.  Off for every caller that doesn't ask, because a
+        /// column or stacked chart draws its last bar centred on its own x value, so a hard right hand limit
+        /// can clip half of it - see <see cref="ChartConfiguration.FixXAxisToRange"/>.
+        /// </param>
+        private static Axis[] CreateXAxes(TimeSpan unit, SolidColorPaint labelPaint, DateTime minDate, DateTime maxDate, string label, bool fixToRange = false)
         {
             var duration = maxDate - minDate;
             var labelFontSize = DBADashUser.ChartAxisLabelFontSize;
@@ -1508,6 +1657,7 @@ namespace DBADashGUI.Charts
                     NamePaint = labelPaint,
                     NameTextSize = nameFontSize,
                     MinLimit = minDate.Ticks,
+                    MaxLimit = fixToRange ? maxDate.Ticks : null,
                     Name = label
                 }
             };

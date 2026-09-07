@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+  <defs>
+    <style>
+      .canvas{fill: none; opacity: 0;}
+      .trimble-blue{fill: #0063a3;}
+      .trimble-grey-stroke{fill: none; stroke: #252a2e; stroke-width: 1;}
+      .trimble-grey-fill{fill: #252a2e;}
+      .trimble-red-cross{fill: none; stroke: #da212c; stroke-width: 2.4; stroke-linecap: round;}
+    </style>
+  </defs>
+  <title>IconLightDeadlock</title>
+  <g id="canvas" class="canvas">
+    <path class="canvas" d="M16,16H0V0H16Z" />
+  </g>
+  <g id="level-1">
+    <!--
+      The 16 pixel form of Assets/Deadlock.svg: two sessions caught in a cycle of waits, the lower
+      right one killed as the victim.
+
+      The large icon runs both arrows along one circle.  That does not survive here - a 1px curve
+      off the pixel grid comes out as a grey smear - so the loop is squared off instead: each arrow
+      is a straight run on a half pixel row or column with one short corner curve between them.  A
+      1px stroke centred on 3.5 or 12.5 covers exactly one pixel row, so the straight parts stay
+      sharp and only the two small corners soften.
+
+      The live session is a filled disc and the victim a cross, both solid shapes that antialias
+      cleanly at this size where a drawn outline would not.  The cross ends at 14.8 rather than 15
+      so its round cap stops on the edge of the canvas instead of being clipped by it.
+
+      The second arrow is the first rotated 180 degrees about the centre.
+    -->
+    <g>
+      <path class="trimble-grey-stroke" d="M7.8,3.5H11A1.5,1.5 0 0 1 12.5,5V6.3" />
+      <path class="trimble-grey-fill" d="M12.5,8.7 11.1,6.1 13.9,6.1Z" />
+    </g>
+    <g transform="rotate(180 8 8)">
+      <path class="trimble-grey-stroke" d="M7.8,3.5H11A1.5,1.5 0 0 1 12.5,5V6.3" />
+      <path class="trimble-grey-fill" d="M12.5,8.7 11.1,6.1 13.9,6.1Z" />
+    </g>
+    <!-- Sessions last so they cover the tails of the arrows. -->
+    <circle class="trimble-blue" cx="3.5" cy="3.5" r="3.5" />
+    <path class="trimble-red-cross" d="M10.2,10.2 14.8,14.8M10.2,14.8 14.8,10.2" />
+  </g>
+</svg>

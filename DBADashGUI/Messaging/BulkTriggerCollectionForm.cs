@@ -294,6 +294,7 @@ namespace DBADashGUI.Messaging
                 "Success" => DashColors.Success,
                 "Failed" => DashColors.Fail,
                 "Warning" => DashColors.Warning,
+                "Skipped" => DashColors.Warning,
                 "Cancelled" => DashColors.Warning,
                 "Pending" => DashColors.Information,
                 _ => e.CellStyle.ForeColor
@@ -356,9 +357,9 @@ namespace DBADashGUI.Messaging
         }
 
         /// <summary>
-        /// If any collections were skipped because they aren't scheduled, prompts the user to run them anyway
-        /// and - if confirmed - re-runs just those collections on just those instances with the disabled
-        /// schedule ignored.
+        /// If any collections were skipped but could still be collected, prompts the user to run them anyway
+        /// and - if confirmed - re-runs just those collections on just those instances forced.  What qualifies
+        /// is decided as each instance reports back - see <see cref="OnProgress"/>.
         /// </summary>
         private async Task OfferForcedRerunAsync()
         {
@@ -381,8 +382,8 @@ namespace DBADashGUI.Messaging
 
             var distinctTypes = string.Join(", ", rerun.SelectMany(i => i.CollectionTypes).Distinct());
             if (MessageBox.Show(
-                    $"{rerun.Count} instance(s) had collection(s) that aren't scheduled ({distinctTypes}), so they were skipped.\n\nRun them anyway?",
-                    "Collections Not Scheduled", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
+                    $"{rerun.Count} instance(s) had collection(s) that are disabled ({distinctTypes}), so they were skipped.\n\nRun them anyway?",
+                    "Collections Disabled", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
             {
                 return;
             }
@@ -521,16 +522,39 @@ namespace DBADashGUI.Messaging
             var progress = reply.CollectionProgress;
             if (progress != null)
             {
+                var status = progress.Status;
                 // Remember instances skipped because their collection(s) aren't scheduled so we can offer to
                 // re-run just those, forced, once the batch finishes.
                 if (progress.Status == "Warning" && progress.DisabledCollections is { Count: > 0 })
                 {
-                    lock (disabledLock)
+                    // A collection configuration has switched off is skipped outright rather than offered for
+                    // a forced re-run.  Triggering from the tree targets whatever instances are in scope, so
+                    // the ones that don't collect are expected to be there - skipping them quietly is the
+                    // point, and one prompt covering a batch cannot say which instances it would change.
+                    var configurationDisabled = progress.ConfigurationDisabledCollections ?? new List<string>();
+                    var rerunnable = progress.DisabledCollections
+                        .Where(c => !configurationDisabled.Contains(c, StringComparer.OrdinalIgnoreCase)).ToList();
+                    if (instances.Count == 1)
                     {
-                        disabledByInstance[progress.InstanceID] = progress.DisabledCollections;
+                        // A batch of one is the same request as the per-instance Trigger Collection button, so
+                        // it gets the same offer - deadlocks read from system_health rather than skipped.
+                        rerunnable.AddRange(configurationDisabled.Where(CollectionMessaging.CanForceConfigurationDisabled));
+                    }
+                    if (rerunnable.Count > 0)
+                    {
+                        lock (disabledLock)
+                        {
+                            disabledByInstance[progress.InstanceID] = rerunnable;
+                        }
+                    }
+                    else
+                    {
+                        // Nothing here will be re-run, so say so rather than leaving a warning that reads as
+                        // something the user still has to deal with.
+                        status = "Skipped";
                     }
                 }
-                UpdateInstanceStatus(progress.InstanceID, progress.Status, progress.Detail);
+                UpdateInstanceStatus(progress.InstanceID, status, progress.Detail);
             }
             return Task.CompletedTask;
         }
@@ -606,10 +630,12 @@ namespace DBADashGUI.Messaging
             var succeeded = rows.Count(r => Convert.ToString(r["Status"]) == "Success");
             var failed = rows.Count(r => Convert.ToString(r["Status"]) == "Failed");
             var warning = rows.Count(r => Convert.ToString(r["Status"]) == "Warning");
+            var skipped = rows.Count(r => Convert.ToString(r["Status"]) == "Skipped");
             var cancelled = rows.Count(r => Convert.ToString(r["Status"]) == "Cancelled");
 
             var text = $"Succeeded: {succeeded}   Failed: {failed}";
             if (warning > 0) text += $"   Warning: {warning}";
+            if (skipped > 0) text += $"   Skipped: {skipped}";
             if (cancelled > 0) text += $"   Cancelled: {cancelled}";
             text += $"   Pending: {pending}";
 
@@ -620,11 +646,11 @@ namespace DBADashGUI.Messaging
                 // In progress - flag amber if failures/cancellations have already appeared, otherwise blue.
                 color = (failed > 0 || cancelled > 0) ? DashColors.Warning : DashColors.Information;
             }
-            else if (failed == 0 && cancelled == 0 && warning == 0)
+            else if (failed == 0 && cancelled == 0 && warning == 0 && skipped == 0)
             {
                 color = DashColors.Success; // everything succeeded
             }
-            else if (succeeded > 0 || warning > 0 || cancelled > 0)
+            else if (succeeded > 0 || warning > 0 || skipped > 0 || cancelled > 0)
             {
                 color = DashColors.Warning; // partial - some succeeded / skipped / cancelled, but not all failed
             }

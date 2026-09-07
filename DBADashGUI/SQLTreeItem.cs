@@ -80,7 +80,8 @@ namespace DBADashGUI
             CustomTool,
             DirectSystemReport,
             DatabaseExtendedProperties,
-            ExtendedEvents
+            ExtendedEvents,
+            DeadlocksFolder
         }
 
         private DatabaseEngineEdition _engineEdition = DatabaseEngineEdition.Unknown;
@@ -116,6 +117,13 @@ namespace DBADashGUI
         public string ElasticPoolName { get; set; }
 
         public CustomReport Report;
+
+        /// <summary>
+        /// The reports a folder node shows as tabs rather than as children - see
+        /// <see cref="AddDeadlocksFolder"/>.  The folder itself holds no report, so this is where the set
+        /// the tabs are built from lives.
+        /// </summary>
+        public List<CustomReport> FolderReports;
 
         public DBADashContext Context
         {
@@ -540,6 +548,10 @@ namespace DBADashGUI
                     ImageIndex = 32; // EventLog_16x.png
                     break;
 
+                case TreeType.DeadlocksFolder:
+                    ImageIndex = 34; // Deadlock_16x.png
+                    break;
+
                 default:
                     ImageIndex = 5;
                     break;
@@ -590,6 +602,50 @@ namespace DBADashGUI
                 Nodes.Add(reportsNode);
             }
         }
+
+        /// <summary>
+        /// Procedure names of the deadlock reports, which get their own tree folder rather than sitting in
+        /// the flat Reports list.  Deadlock investigation is several related views of one subject, and a
+        /// folder keeps them together instead of scattered alphabetically among unrelated reports.
+        ///
+        /// <para>The order is load bearing: it is the order of the tabs selecting the folder shows, so the
+        /// charts come first and are what the folder opens on.  A picture of when and where the deadlocks
+        /// are is the better first look; the signature grid is where you go once you know which one to
+        /// chase.</para>
+        /// </summary>
+        public static readonly string[] DeadlockReportProcedures =
+            { "DeadlockCharts_Get", "DeadlockSummary_Get" };
+
+        /// <summary>
+        /// The deadlock reports the current user may see, in <see cref="DeadlockReportProcedures"/> order.
+        /// </summary>
+        public static IEnumerable<CustomReport> DeadlockReports(IEnumerable<CustomReport> reports) =>
+            (reports ?? Enumerable.Empty<CustomReport>())
+            .Where(r => DeadlockReportProcedures.Contains(r.ProcedureName) && r.HasAccess())
+            .OrderBy(r => Array.IndexOf(DeadlockReportProcedures, r.ProcedureName));
+
+        /// <summary>
+        /// Adds a Deadlocks folder holding the deadlock reports.  They are removed from the caller's
+        /// report list by <see cref="ExcludeDeadlockReports"/> so nothing appears in two places.
+        ///
+        /// <para>The folder has no children: selecting it shows each of its reports as a tab, so a child
+        /// per report would be a second way to reach what the folder already displays.</para>
+        /// </summary>
+        public void AddDeadlocksFolder(IEnumerable<CustomReport> reports)
+        {
+            var deadlockReports = DeadlockReports(reports).ToList();
+            if (deadlockReports.Count == 0) return;
+
+            Nodes.Add(new SQLTreeItem("Deadlocks", TreeType.DeadlocksFolder)
+            {
+                InstanceID = InstanceID,
+                FolderReports = deadlockReports
+            });
+        }
+
+        /// <summary>The reports that belong in the flat Reports folder - everything the Deadlocks folder didn't take.</summary>
+        public static IEnumerable<CustomReport> ExcludeDeadlockReports(IEnumerable<CustomReport> reports) =>
+            reports.Where(r => !DeadlockReportProcedures.Contains(r.ProcedureName));
 
         public void AddDatabaseFolders()
         {

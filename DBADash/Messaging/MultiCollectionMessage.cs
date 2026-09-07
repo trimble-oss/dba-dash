@@ -100,6 +100,7 @@ namespace DBADash.Messaging
                 string status;
                 string detail = null;
                 List<string> disabledCollections = null;
+                List<string> configurationDisabledCollections = null;
                 try
                 {
                     data = await collector.CollectAsync(cfg, instance.ConnectionID, instance.DatabaseName, cancellationToken);
@@ -148,6 +149,7 @@ namespace DBADash.Messaging
                     status = "Warning";
                     detail = ex.Message;
                     disabledCollections = ex.DisabledCollections;
+                    configurationDisabledCollections = ex.ConfigurationDisabledCollections;
                     Log.Warning("Batched collection {Id} skipped disabled collection(s) for instance {InstanceID} ({ConnectionID}): {detail}",
                         Id, instance.InstanceID, instance.ConnectionID, ex.Message);
                 }
@@ -173,7 +175,8 @@ namespace DBADash.Messaging
                         InstanceID = instance.InstanceID,
                         Status = status,
                         Detail = detail,
-                        DisabledCollections = disabledCollections
+                        DisabledCollections = disabledCollections,
+                        ConfigurationDisabledCollections = configurationDisabledCollections
                     }
                 };
 

@@ -59,6 +59,17 @@ namespace DBADash.Deadlock.Model
         /// <summary>DEADLOCK_PRIORITY of the process.</summary>
         public int? Priority { get; internal set; }
 
+        /// <summary>
+        /// The <c>clientoption1</c> bitmask: the SET options the session was running under, such as
+        /// IMPLICIT_TRANSACTIONS, XACT_ABORT and ARITHABORT.  Carried and stored raw; the repository
+        /// decodes it into option names at report time (dbo.DecodeClientOptions), which keeps the bits
+        /// SQL Server does not name available and lets the naming be corrected without recollecting.
+        /// </summary>
+        public int? ClientOption1 { get; internal set; }
+
+        /// <summary>The <c>clientoption2</c> bitmask.  See <see cref="ClientOption1"/>.</summary>
+        public int? ClientOption2 { get; internal set; }
+
         public int? CurrentDatabaseId { get; internal set; }
 
         public string? CurrentDatabaseName { get; internal set; }

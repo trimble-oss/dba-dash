@@ -2,7 +2,14 @@ param(
     [string]$Database = "DBADashDB_GitHubAction",
 	[string]$Server = "LOCALHOST",
 	# Only the leg that enables the default perfmon counters asserts they were collected.
-	[bool]$Perfmon = $false
+	[bool]$Perfmon = $false,
+	# Set by the leg whose connection is configured with --NoWMI, which has no WMI data to assert.
+	[bool]$NoWMI = $false,
+	# Only a leg that enabled deadlock capture and then made the instance deadlock asserts the
+	# collection.  Scripts\New-TestDeadlock.ps1 is what creates the database below and deadlocks in it.
+	[bool]$Deadlocks = $false,
+	[string]$DeadlockDatabase = "DBADashDeadlockTest",
+	[string]$DeadlockClientApp = "DBADash CI Deadlock"
 )
 
 # Get SQL Server version at the script level
@@ -162,6 +169,90 @@ Describe 'CI Workflow checks' {
 		# and there is exactly one row for it (no fragmentation across display names).
 		$results = Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "SELECT COUNT(*) cnt FROM dbo.Counters WHERE WmiClass = 'Win32_PerfRawData_PerfOS_Processor' AND WmiProperty = 'PercentProcessorTime' AND instance_name = '_Total'"
 		$results.cnt | Should -Be 1
+	}
+
+	# Deadlock collection.  Skipped unless this leg enabled deadlock capture and produced a deadlock for
+	# it to find - see Scripts\New-TestDeadlock.ps1.  These assert the path rather than a row count: the
+	# graph is read from an extended events session, shredded in the collector, sent as three table
+	# valued parameters and reassembled by dbo.Deadlocks_Upd, and any of those steps can drop a column
+	# quietly.
+	It 'Deadlock collection ran' -Skip:(-not $Deadlocks) {
+		# The collection date advances even when nothing was found, so this separates "no deadlocks" from
+		# "the collection never ran".
+		$results = Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "SELECT COUNT(*) cnt FROM dbo.CollectionDates WHERE Reference = 'Deadlocks'"
+		$results.cnt | Should -BeGreaterThan 0
+	}
+	It 'Deadlocks captured' -Skip:(-not $Deadlocks) {
+		$results = Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "SELECT COUNT(*) cnt FROM dbo.Deadlocks"
+		$results.cnt | Should -BeGreaterThan 0
+	}
+	It 'Every deadlock has its participants' -Skip:(-not $Deadlocks) {
+		# dbo.Deadlocks_Upd inserts the children only for headers that survived dedup, so a header with no
+		# process rows means that filter dropped rows it should have kept.
+		$results = Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "SELECT COUNT(*) cnt FROM dbo.Deadlocks D WHERE NOT EXISTS(SELECT 1 FROM dbo.DeadlockProcesses P WHERE P.InstanceID = D.InstanceID AND P.EventTime = D.EventTime AND P.DeadlockHash = D.DeadlockHash)"
+		$results.cnt | Should -Be 0
+	}
+	It 'Every deadlock names a victim' -Skip:(-not $Deadlocks) {
+		$results = Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "SELECT COUNT(*) cnt FROM dbo.Deadlocks D WHERE NOT EXISTS(SELECT 1 FROM dbo.DeadlockProcesses P WHERE P.InstanceID = D.InstanceID AND P.EventTime = D.EventTime AND P.DeadlockHash = D.DeadlockHash AND P.IsVictim = 1)"
+		$results.cnt | Should -Be 0
+	}
+	It 'Contended resources captured' -Skip:(-not $Deadlocks) {
+		# The tables New-TestDeadlock deadlocks over, so this proves the resource-list shredding produced a
+		# usable object name rather than only a row.
+		$results = Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "SELECT COUNT(*) cnt FROM dbo.DeadlockResources WHERE ObjectName LIKE '%DeadlockA%' OR ObjectName LIKE '%DeadlockB%'"
+		$results.cnt | Should -BeGreaterThan 0
+	}
+	It 'Deadlock graph stored and decompresses' -Skip:(-not $Deadlocks) {
+		# The collector gzips UTF-16 so SQL Server's own DECOMPRESS reads it back.  Reading it that way here
+		# is what proves the contract - nothing else in the repository depends on it.
+		$results = Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "SELECT COUNT(*) cnt FROM dbo.DeadlockXml WHERE CAST(DECOMPRESS(DeadlockXmlCompressed) AS NVARCHAR(MAX)) LIKE '%<deadlock%'"
+		$results.cnt | Should -BeGreaterThan 0
+	}
+	It 'Every deadlock kept its graph' -Skip:(-not $Deadlocks) {
+		$results = Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "SELECT COUNT(*) cnt FROM dbo.Deadlocks D WHERE NOT EXISTS(SELECT 1 FROM dbo.DeadlockXml X WHERE X.InstanceID = D.InstanceID AND X.EventTime = D.EventTime AND X.DeadlockHash = D.DeadlockHash)"
+		$results.cnt | Should -Be 0
+	}
+	It 'Deadlock signature populated' -Skip:(-not $Deadlocks) {
+		# The signature is what groups recurrences, and it is converted from a hex string to BINARY(8) on
+		# import - a conversion that yields NULL rather than failing if the format ever changes.
+		$results = Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "SELECT COUNT(*) cnt FROM dbo.Deadlocks WHERE Signature IS NULL OR SignatureVersion IS NULL"
+		$results.cnt | Should -Be 0
+	}
+	It 'Deadlock event time is a sane UTC value' -Skip:(-not $Deadlocks) {
+		# The event envelope carries the only timestamp there is, and it is parsed as UTC.  A local-time
+		# reading would land hours out.  The window is wide enough for CI clock skew.
+		$results = Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "SELECT COUNT(*) cnt FROM dbo.Deadlocks WHERE EventTime < DATEADD(HOUR, -2, GETUTCDATE()) OR EventTime > DATEADD(MINUTE, 5, GETUTCDATE())"
+		$results.cnt | Should -Be 0
+	}
+	It 'Client application carried through to the participants' -Skip:(-not $Deadlocks) {
+		$results = Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "SELECT COUNT(*) cnt FROM dbo.DeadlockProcesses WHERE ClientApp = '$DeadlockClientApp'"
+		$results.cnt | Should -BeGreaterThan 0
+	}
+	It 'Deadlocking module captured' -Skip:(-not $Deadlocks) {
+		# New-TestDeadlock puts the deadlocking statement inside a procedure, so the execution stack has a
+		# module frame to name.  Ad-hoc frames are stored as NULL, so this is the only check that the module
+		# path works - and the report groups by it.
+		$results = Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "SELECT COUNT(*) cnt FROM dbo.DeadlockProcesses WHERE ProcedureName LIKE '%usp_DeadlockUpdate%'"
+		$results.cnt | Should -BeGreaterThan 0
+	}
+	It 'Participants resolve to the database that deadlocked' -Skip:(-not $Deadlocks) {
+		# The graph carries the source instance's database_id and dbo.Deadlocks_Upd maps it to a DatabaseID.
+		# New-TestDeadlock creates its database before the service starts so the mapping has something to
+		# find.
+		$results = Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "SELECT COUNT(*) cnt FROM dbo.DeadlockProcesses P JOIN dbo.Databases DB ON DB.DatabaseID = P.DatabaseID WHERE DB.name = '$DeadlockDatabase'"
+		$results.cnt | Should -BeGreaterThan 0
+	}
+	It 'DeadlockGraph_Get returns a graph for a stored deadlock' -Skip:(-not $Deadlocks) {
+		# The report grid carries the key rather than the graph and fetches the one that is clicked, so this
+		# is the path the viewer takes.
+		$results = Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "DECLARE @InstanceID INT, @EventTime DATETIME2(3), @DeadlockHash BINARY(16); SELECT TOP(1) @InstanceID = InstanceID, @EventTime = EventTime, @DeadlockHash = DeadlockHash FROM dbo.Deadlocks ORDER BY EventTime DESC; EXEC dbo.DeadlockGraph_Get @InstanceID = @InstanceID, @EventTime = @EventTime, @DeadlockHash = @DeadlockHash"
+		$results.DeadlockGraph | Should -BeLike '*<deadlock*'
+	}
+	It 'DeadlockScope returns the collected deadlocks' -Skip:(-not $Deadlocks) {
+		# The function both reports read, so a filter that selected nothing would leave both grids and all
+		# seven charts empty while every table above still had rows.
+		$results = Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "DECLARE @IDs dbo.IDs; INSERT INTO @IDs(ID) SELECT InstanceID FROM dbo.Instances; SELECT COUNT(*) cnt FROM dbo.DeadlockScope(@IDs, NULL, '19000101', '99991231 23:59:59.999', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0)"
+		$results.cnt | Should -BeGreaterThan 0
 	}
 
 }

@@ -1,4 +1,5 @@
-﻿using DBADash.InstanceMetadata;
+﻿using DBADash.Deadlocks;
+using DBADash.InstanceMetadata;
 using Microsoft.Data.SqlClient;
 using Microsoft.Management.Infrastructure;
 using Microsoft.Management.Infrastructure.Options;
@@ -87,7 +88,8 @@ namespace DBADash
         ResourceGovernorWorkloadGroups,
         ResourceGovernorResourcePools,
         ScheduleInfo,
-        PerfmonCounters
+        PerfmonCounters,
+        Deadlocks
     }
 
     public enum HostPlatform
@@ -113,7 +115,7 @@ namespace DBADash
             = new(StringComparer.OrdinalIgnoreCase);
 
         private string computerName;
-        private readonly CollectionType[] azureCollectionTypes = new[] { CollectionType.SlowQueries, CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceStats, CollectionType.CPU, CollectionType.DBFiles, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ObjectExecutionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions, CollectionType.SysConfig, CollectionType.DatabasePrincipals, CollectionType.DatabaseRoleMembers, CollectionType.DatabasePermissions, CollectionType.OSInfo, CollectionType.CustomChecks, CollectionType.PerformanceCounters, CollectionType.VLF, CollectionType.DatabaseQueryStoreOptions, CollectionType.AzureDBResourceGovernance, CollectionType.RunningQueries, CollectionType.IdentityColumns, CollectionType.TableSize, CollectionType.AvailableProcs, CollectionType.DatabaseExtendedProperties };
+        private readonly CollectionType[] azureCollectionTypes = new[] { CollectionType.SlowQueries, CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceStats, CollectionType.CPU, CollectionType.DBFiles, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ObjectExecutionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions, CollectionType.SysConfig, CollectionType.DatabasePrincipals, CollectionType.DatabaseRoleMembers, CollectionType.DatabasePermissions, CollectionType.OSInfo, CollectionType.CustomChecks, CollectionType.PerformanceCounters, CollectionType.VLF, CollectionType.DatabaseQueryStoreOptions, CollectionType.AzureDBResourceGovernance, CollectionType.RunningQueries, CollectionType.IdentityColumns, CollectionType.TableSize, CollectionType.AvailableProcs, CollectionType.DatabaseExtendedProperties, CollectionType.Deadlocks };
         private readonly CollectionType[] azureOnlyCollectionTypes = new[] { CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceGovernance };
         private readonly CollectionType[] azureMasterOnlyCollectionTypes = new[] { CollectionType.AzureDBElasticPoolResourceStats };
         public DBADashSource Source;
@@ -152,6 +154,24 @@ namespace DBADash
         private const string SetArithAbortOn = "SET ARITHABORT ON;\n";
         public List<Exception> Exceptions = new();
         public int FailedLoginsBackfillMinutes { get; set; } = CollectionConfig.DefaultFailedLoginsBackfillMinutes;
+
+        /// <summary>
+        /// Ring buffer size for the deadlock session DBA Dash creates.  Only reaches Azure SQL Database - see
+        /// <see cref="CollectionConfig.DeadlockXERingBufferKB"/>.
+        /// </summary>
+        public int DeadlockXERingBufferKB { get; set; } = CollectionConfig.DefaultDeadlockXERingBufferKB;
+
+        /// <summary>
+        /// Session the Deadlocks collection reads when configuration has switched the collection off for this
+        /// connection and the user has asked, from the GUI, for it to run anyway.  Null for every scheduled
+        /// collection, which reads <see cref="DBADashSource.DeadlockXESessionName"/> as normal.
+        ///
+        /// <para>In practice this is always <see cref="DBADashSource.SystemHealthXESessionName"/>: it is the
+        /// only session that is already running on an instance that was never configured to collect, and the
+        /// only one that holds deadlocks from before the request was made.  Read only, like any session DBA
+        /// Dash does not own, so an on-demand run neither creates nor alters anything on the instance.</para>
+        /// </summary>
+        public string OnDemandDeadlockXESessionName { get; set; }
 
         public const int DefaultIdentityCollectionThreshold = 5;
 
@@ -843,7 +863,19 @@ namespace DBADash
             }
             else if (collectionType == CollectionType.SlowQueries)
             {
-                return Source.SlowQueryThresholdMs >= 0 && (!(IsAzureDB && isAzureMasterDB)); // Threshold must be set.  Azure master DB is excluded
+                return Source.IsSlowQueryCollectionEnabled && (!(IsAzureDB && isAzureMasterDB)); // Threshold must be set.  Azure master DB is excluded
+            }
+            else if (collectionType == CollectionType.Deadlocks)
+            {
+                // Reads an XE session, so it needs extended events and a session name to read.  Azure DB is
+                // included: the session there is database scoped and reads from a ring buffer, which the
+                // collector handles.  The Azure master database is not - it has no user workload to deadlock
+                // and cannot hold a database scoped session.
+                //
+                // An on-demand session name stands in for the configured one where the collection is switched
+                // off, which is what lets the user run it once from the GUI - see OnDemandDeadlockXESessionName.
+                return IsXESupported && !isAzureMasterDB &&
+                       (Source.IsDeadlockCollectionEnabled || !string.IsNullOrWhiteSpace(OnDemandDeadlockXESessionName));
             }
             else if (collectionType == CollectionType.Instance)
             {
@@ -1209,6 +1241,10 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
                     IsExtendedEventsNotSupportedException = true;
                 }
             }
+            else if (collectionType == CollectionType.Deadlocks)
+            {
+                await CollectDeadlocksAsync();
+            }
             else if (collectionType == CollectionType.PerformanceCounters)
             {
                 await CollectPerformanceCountersAsync();
@@ -1519,6 +1555,60 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             };
             using var xmlReader = System.Xml.XmlReader.Create(textReader, settings);
             return await XElement.LoadAsync(xmlReader, LoadOptions.None, CancellationToken.None);
+        }
+
+        private async Task CollectDeadlocksAsync()
+        {
+            if (!IsXESupported) return;
+
+            var sessionName = Source.DeadlockXESessionName;
+            var manageSession = Source.IsDeadlockXESessionManaged;
+            // Held outside the collector - one is built per run - and kept on disk so a service restart does
+            // not send every instance back to the start of its event file set.  See DeadlockCursorStore.
+            var cursorKey = ConnectionID;
+
+            if (string.IsNullOrWhiteSpace(sessionName))
+            {
+                // Configuration has the collection switched off and the user has asked for it to run anyway.
+                // system_health is what makes that worth doing: it is already running and already holds the
+                // deadlocks this instance has had recently, so the request returns the history rather than
+                // starting a capture and returning nothing.
+                sessionName = OnDemandDeadlockXESessionName;
+                manageSession = false;
+                if (IsAzureDB)
+                {
+                    // No server scoped session there, so nothing is already capturing.  A database scoped
+                    // session could be created, but it would start empty and the run would report success
+                    // having collected nothing - say why instead.
+                    throw new Exception(
+                        "Deadlock collection can't be run on demand on Azure SQL Database - there is no system_health session to read.  Set a deadlock session for this connection in the service config tool and let it capture.");
+                }
+                // Kept apart from the configured session's position: the two read different file sets, and a
+                // cursor from one is meaningless - and potentially a long way wrong - against the other.
+                cursorKey = ConnectionID + "|" + sessionName;
+            }
+
+            var state = DeadlockCursorStore.GetOrAdd(cursorKey);
+
+            var result = await DeadlockCollector.CollectAsync(ConnectionString, sessionName, IsAzureDB, state,
+                CancellationToken.None, manageSession, Source.FlushDeadlockXERingBuffer,
+                DeadlockXERingBufferKB);
+
+            // After the read, not after the import: the cursor records what has been read off the instance,
+            // and a failed import is retried from data we already hold rather than by re-reading.
+            DeadlockCursorStore.Save(cursorKey, state);
+
+            // The tables go over even when empty: the import advances the collection date from them, which is
+            // what stops an instance that simply isn't deadlocking from being reported as overdue.
+            AddDT(result.Deadlocks);
+            AddDT(result.Processes);
+            AddDT(result.Resources);
+
+            if (result.GraphCount > 0)
+            {
+                Log.Debug("Collected {count} deadlock(s) from session {session} on {instance}", result.GraphCount,
+                    sessionName, instanceName);
+            }
         }
 
         private async Task CollectSlowQueriesAsync()

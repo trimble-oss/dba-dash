@@ -72,6 +72,7 @@
             scriptGridsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             tsClearFilter = new System.Windows.Forms.ToolStripButton();
             tsTrigger = new System.Windows.Forms.ToolStripButton();
+            tsCollectionDisabled = new System.Windows.Forms.ToolStripLabel();
             tsReset = new System.Windows.Forms.ToolStripButton();
             tsNewWindow = new System.Windows.Forms.ToolStripButton();
             splitToggle1 = new System.Windows.Forms.ToolStripSeparator();
@@ -111,7 +112,7 @@
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsExecute, tsRefresh, tsCancel, tsCopy, tsParams, tsExcel, tsCols, tsConfigure, cboResults, lblSelectResults, tsScriptResults, tsClearFilter, tsTrigger, tsReset, tsNewWindow, splitToggle1, tsToggleCharts, tsToggleGrids, splitToggle2, tsToggleSinglePage });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsExecute, tsRefresh, tsCancel, tsCopy, tsParams, tsExcel, tsCols, tsConfigure, cboResults, lblSelectResults, tsScriptResults, tsClearFilter, tsTrigger, tsCollectionDisabled, tsReset, tsNewWindow, splitToggle1, tsToggleCharts, tsToggleGrids, splitToggle2, tsToggleSinglePage });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
@@ -485,6 +486,16 @@
             tsTrigger.Visible = false;
             tsTrigger.Click += TsTrigger_Click;
             // 
+            // tsCollectionDisabled
+            // 
+            tsCollectionDisabled.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            tsCollectionDisabled.Image = Properties.Resources.StatusAnnotations_Warning_16xLG_color;
+            tsCollectionDisabled.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsCollectionDisabled.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
+            tsCollectionDisabled.Name = "tsCollectionDisabled";
+            tsCollectionDisabled.Size = new System.Drawing.Size(180, 24);
+            tsCollectionDisabled.Visible = false;
+            // 
             // tsReset
             // 
             tsReset.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -749,6 +760,7 @@
         private System.Windows.Forms.ToolStripButton tsClearFilter;
         private System.Windows.Forms.ToolStripDropDownButton tsParams;
         private System.Windows.Forms.ToolStripButton tsTrigger;
+        private System.Windows.Forms.ToolStripLabel tsCollectionDisabled;
         private System.Windows.Forms.ToolStripMenuItem associateCollectionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem editPickersToolStripMenuItem;
         private System.Windows.Forms.ToolStripButton tsExecute;

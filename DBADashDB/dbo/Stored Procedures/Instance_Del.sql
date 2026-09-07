@@ -143,6 +143,8 @@ BEGIN
 	DELETE dbo.DatabaseMirroring 
 	WHERE InstanceID = @InstanceID
 
+	EXEC dbo.Deadlocks_Del @InstanceID=@InstanceID,@DaysToKeep=0
+
 	DELETE DP 
 	FROM dbo.DatabasePermissions DP
 	WHERE EXISTS(

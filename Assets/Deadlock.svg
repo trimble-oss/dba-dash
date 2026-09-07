@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <style>
+      .canvas{fill: none; opacity: 0;}
+      .trimble-blue{fill: #0063a3;}
+      .trimble-grey-stroke{fill: none; stroke: #252a2e; stroke-width: 4.5; stroke-linecap: round;}
+      .trimble-grey-fill{fill: #252a2e;}
+      .trimble-red-cross{fill: none; stroke: #da212c; stroke-width: 8.5; stroke-linecap: round;}
+    </style>
+  </defs>
+  <title>Deadlock</title>
+  <g id="canvas" class="canvas">
+    <path class="canvas" d="M64,64H0V0H64Z" />
+  </g>
+  <g id="level-1">
+    <!--
+      A deadlock is a cycle of waits: each session holds what the other one wants, so the arrows
+      close a loop and neither can move.  The two sessions sit on a circle of radius 22 about
+      (32,32), at 135 and -45 degrees, and both arrows are arcs of that same circle - so the loop
+      reads as one ring rather than two unrelated curves.
+
+      SQL Server breaks the cycle by killing one of the two, so the lower right session is a red
+      cross where the other is a live blue disc.  The cross replaces the disc rather than sitting
+      on top of it: at the sizes this icon is drawn down to, a disc behind the cross only adds a
+      grey fringe, and the cross alone carries the same weight as the disc opposite it.
+
+      The second arrow is the first rotated 180 degrees about the centre, which keeps the two
+      halves of the ring identical without repeating the arc maths.
+    -->
+    <g>
+      <!-- Arc from just clear of the blue disc (95 deg) round to the arrowhead base (17 deg). -->
+      <path class="trimble-grey-stroke" d="M30.08,10.08A22,22 0 0 1 53.04,25.57" />
+      <!-- Arrowhead: base centred on the arc end, tip 11 further along the tangent, aimed at the victim. -->
+      <path class="trimble-grey-fill" d="M56.26,36.09 47.30,27.32 58.78,23.82Z" />
+    </g>
+    <g transform="rotate(180 32 32)">
+      <path class="trimble-grey-stroke" d="M30.08,10.08A22,22 0 0 1 53.04,25.57" />
+      <path class="trimble-grey-fill" d="M56.26,36.09 47.30,27.32 58.78,23.82Z" />
+    </g>
+    <!-- Sessions last so they cover the tails of the arrows. -->
+    <circle class="trimble-blue" cx="16.44" cy="16.44" r="11" />
+    <path class="trimble-red-cross" d="M41.56,41.56 53.56,53.56M41.56,53.56 53.56,41.56" />
+  </g>
+</svg>

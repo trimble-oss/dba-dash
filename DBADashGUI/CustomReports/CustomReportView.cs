@@ -39,6 +39,14 @@ namespace DBADashGUI.CustomReports
         public CustomReport Report { get; set; }
 
         protected List<CustomSqlParameter> customParams = new();
+
+        /// <summary>
+        /// The parameter values this report is currently showing, including whatever the pickers and the
+        /// parameters dialog have been set to.  Read by drill-downs that carry the report's filters into
+        /// the report they open - see <see cref="BaseDrillDownLinkColumnInfo.CarryUserParameters"/>.
+        /// </summary>
+        public IReadOnlyList<CustomSqlParameter> CurrentParameters => customParams;
+
         /// <summary>
         /// When true, the Report property will not be overwritten by SetContext when a
         /// context contains a Report. This allows hosts to lock the initially-assigned
@@ -569,6 +577,19 @@ namespace DBADashGUI.CustomReports
                     foreach (var chart in Charts.ToArray())
                     {
                         if (chart == null) continue;
+
+                        // The custom tooltip is a window of its own, held in a table keyed by the chart
+                        // rather than parented to it, so disposing the chart leaves it on screen - which is
+                        // what a reader sees after clicking a point and drilling away from the chart.
+                        try
+                        {
+                            if (chart is CartesianChart cartesianChart) cartesianChart.DisableCustomTooltips();
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine($"CleanupCharts: failed disabling chart tooltips: {ex}");
+                        }
+
                         try
                         {
                             var parent = chart.Parent;
@@ -1179,7 +1200,7 @@ namespace DBADashGUI.CustomReports
                     }
 
                     // configuration-based chart behavior
-                    var chartConfig = chartWrapper.Config;
+                    var chartConfig = ResolveChartConfig(chartWrapper);
                     // Ensure the configured table exists
                     if (chartConfig == null)
                     {
@@ -1206,6 +1227,7 @@ namespace DBADashGUI.CustomReports
                         {
                             var newChart = ChartHelper.GetChartControlFromDataTable(dt, chartConfig);
                             newChart.Tag = chartWrapper;
+                            AttachChartDrillDown(newChart, chartWrapper);
 
                             // Replace in the panel's controls keeping the ToolStrip in place
                             if (parent != null)
@@ -1262,6 +1284,52 @@ namespace DBADashGUI.CustomReports
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// The chart configuration to draw with, which is the report's own unless the chart asked to be drawn
+        /// over the report's date range - see <see cref="CustomReportChart.BindXAxisToDateRange"/>.  The stored
+        /// configuration is left alone: a copy carries the bounds, so the report is not rewritten with the
+        /// dates of whichever range happened to be selected when it was last viewed.
+        /// </summary>
+        private ChartConfigurationBase ResolveChartConfig(CustomReportChart chartWrapper)
+        {
+            if (chartWrapper.Config is not ChartConfiguration config) return chartWrapper.Config;
+            if (!chartWrapper.BindXAxisToDateRange) return config;
+
+            if (GetReportDateRangeUtc() is not { } range || range.ToUtc <= range.FromUtc) return config;
+
+            // The result sets have already been converted to the app time zone for display, so the bounds have
+            // to be in the same terms as the points they are bounding.
+            return config with
+            {
+                XAxisMin = range.FromUtc.ToAppTimeZone(),
+                XAxisMax = range.ToUtc.ToAppTimeZone(),
+                FixXAxisToRange = true
+            };
+        }
+
+        /// <summary>
+        /// The date range the report was last run with, in UTC, or null where it was not run with one.
+        ///
+        /// <para>Read from the parameters rather than from <see cref="DateRange"/>, for three reasons: a
+        /// drill-down overrides them, so a chart is bounded by what was drilled into rather than by the whole
+        /// view; a relative range would otherwise move between running the query and drawing the chart, as
+        /// DateRange.ToUTC is DateTime.UtcNow each time it is read; and a report with no date parameters is not
+        /// filtered by date at all, so bounding its charts by the global range would hide its data rather than
+        /// frame it.  The last case is why this returns null rather than falling back.</para>
+        /// </summary>
+        private (DateTime FromUtc, DateTime ToUtc)? GetReportDateRangeUtc()
+        {
+            DateTime? ParamValue(string name) =>
+                customParams?.FirstOrDefault(p =>
+                    p.Param.ParameterName.Equals(name, StringComparison.OrdinalIgnoreCase))?.Param.Value as DateTime?;
+
+            // Either bound missing means the query was not bounded there, so the data can lie outside anything
+            // we would pin the axis to - and what falls outside the axis is not drawn.
+            return ParamValue("@FromDate") is { } fromUtc && ParamValue("@ToDate") is { } toUtc
+                ? (fromUtc, toUtc)
+                : null;
         }
 
         private void GetChartPanels()
@@ -1346,7 +1414,7 @@ namespace DBADashGUI.CustomReports
             for (int idx = 0; idx < Report.Charts.Count; idx++)
             {
                 var chartWrapper = Report.Charts[idx];
-                var chartConfig = chartWrapper.Config;
+                var chartConfig = ResolveChartConfig(chartWrapper);
                 var chartId = idx;
 
                 Control chartControl = null;
@@ -1446,9 +1514,27 @@ namespace DBADashGUI.CustomReports
                     }
 
                     var dt = reportDS.Tables[chartWrapper.TableIndex];
-                    chartControl = ChartHelper.GetChartControlFromDataTable(dt, chartConfig);
+                    try
+                    {
+                        chartControl = ChartHelper.GetChartControlFromDataTable(dt, chartConfig);
+                    }
+                    // ArgumentException for a missing column, InvalidOperationException from the config's own
+                    // Validate - both mean "this data can't drive this chart".
+                    catch (Exception ex) when (ex is ArgumentException or InvalidOperationException)
+                    {
+                        // The result set doesn't carry the columns this chart is configured for.  A proc that
+                        // returns a different shape in some cases - a "collection not enabled" message row, say -
+                        // is a chart we can't draw, not a reason to abandon the whole report: throwing here
+                        // escapes ShowTable and leaves the view half built, which then misbehaves on the next
+                        // click.  Skip the chart and render everything else.
+                        Debug.WriteLine($"Warning: chart for result set {chartWrapper.TableIndex} skipped - {ex.Message}");
+                        continue;
+                    }
                     chartControl.Tag = chartWrapper;
                     pnl = chartLayoutHelper.CreateResizablePanel(chartControl, chartId, enableResize, chartConfig.ChartTitle, panelName: $"chart_{chartId}");
+                    // After the panel, so the drill-down's cursor handler runs after the one the panel's
+                    // resize helper adds and can show the hand over a clickable point.
+                    AttachChartDrillDown(chartControl, chartWrapper);
                 }
                 else
                 {
@@ -2215,7 +2301,7 @@ namespace DBADashGUI.CustomReports
         /// Run the query to get the data for the user custom report
         /// </summary>
         /// <returns></returns>
-        protected async Task<DataSet> GetReportDataAsync(CancellationToken cancellationToken)
+        protected virtual async Task<DataSet> GetReportDataAsync(CancellationToken cancellationToken)
         {
             // If no procedure is configured for this report (system-only charts), don't attempt to execute a stored procedure
             if (string.IsNullOrWhiteSpace(Report?.QualifiedProcedureName))
@@ -2631,8 +2717,63 @@ namespace DBADashGUI.CustomReports
             }
         }
 
-        public void SetTriggerCollectionVisibility() => tsTrigger.Visible = Report.TriggerCollectionTypes.Count > 0 &&
-            (context.CanMessage || (context.InstanceID <= 0 && ContextHasMessagingEnabledInstances()));
+        public void SetTriggerCollectionVisibility()
+        {
+            tsTrigger.Visible = Report.TriggerCollectionTypes.Count > 0 &&
+                (context.CanMessage || (context.InstanceID <= 0 && ContextHasMessagingEnabledInstances()));
+            UpdateCollectionDisabledNotice();
+        }
+
+        /// <summary>
+        /// Bumped every time the notice is refreshed, so a lookup that finishes after the user has moved on is
+        /// discarded rather than labelling the report they are now looking at with the previous one's answer.
+        /// </summary>
+        private int collectionNoticeToken;
+
+        /// <summary>
+        /// Says in the toolbar when the collection behind the report is switched off for the instances in
+        /// view, which is otherwise indistinguishable from an instance that simply has nothing to report -
+        /// an empty deadlock grid reads as "no deadlocks" rather than "not collecting".
+        ///
+        /// <para>Only collections the repository positively reports as disabled are counted, so an instance
+        /// whose service has never reported a schedule is left out rather than accused of not collecting -
+        /// see <see cref="CommonData.GetDisabledCollections"/>.</para>
+        /// </summary>
+        private async void UpdateCollectionDisabledNotice()
+        {
+            var token = ++collectionNoticeToken;
+            tsCollectionDisabled.Visible = false;
+            var types = Report.TriggerCollectionTypes;
+            if (types is not { Count: > 0 }) return;
+            var instanceIDs = GetEffectiveInstanceIDs();
+            if (instanceIDs.Count == 0) return;
+
+            var disabled = await Task.Run(() => CommonData.GetDisabledCollections(instanceIDs, types));
+            if (token != collectionNoticeToken || IsDisposed) return;
+
+            var references = disabled.Select(d => d.Reference).Distinct()
+                .OrderBy(r => r, StringComparer.OrdinalIgnoreCase).ToList();
+            if (references.Count == 0) return;
+
+            var names = string.Join(", ", references);
+            var noun = references.Count == 1 ? "collection" : "collections";
+            var disabledInstances = disabled.Select(d => d.InstanceID).Distinct().Count();
+
+            if (instanceIDs.Count == 1)
+            {
+                tsCollectionDisabled.Text = $"{names} {noun} disabled";
+                tsCollectionDisabled.ToolTipText =
+                    $"This instance is not collecting {names}.  Enable it in the service config tool, or use Trigger Collection to run it once on demand.";
+            }
+            else
+            {
+                tsCollectionDisabled.Text = $"{names} {noun} disabled on {disabledInstances} of {instanceIDs.Count} instances";
+                tsCollectionDisabled.ToolTipText =
+                    $"{disabledInstances} of the {instanceIDs.Count} instances in view are not collecting {names}.  Triggering a collection skips them.";
+            }
+            tsCollectionDisabled.ForeColor = DashColors.Warning;
+            tsCollectionDisabled.Visible = true;
+        }
 
         /// <summary>
         /// True if the current (group/folder/root) context contains at least one messaging-enabled
@@ -3105,6 +3246,111 @@ namespace DBADashGUI.CustomReports
             {
                 CommonShared.ShowExceptionDialog(ex, "Error navigating to link");
             }
+        }
+
+        /// <summary>
+        /// How far the pointer must move before the cursor is worked out again.  Hit testing a chart on
+        /// every mouse move is wasted work - the cursor only changes when the pointer leaves a point.
+        /// </summary>
+        private const int ChartMouseMoveThresholdPixels = 3;
+
+        /// <summary>How far the pointer may travel between press and release and still count as a click.</summary>
+        private const int ChartClickTolerancePixels = 3;
+
+        /// <summary>
+        /// Makes a chart's points clickable where the report gives the chart a drill-down.
+        ///
+        /// The row behind a point is resolved when the click happens rather than captured here: cartesian
+        /// charts are updated in place when the report is refreshed, so the result the chart is showing is
+        /// only reliably found through the report's current results.
+        /// </summary>
+        private void AttachChartDrillDown(Control chartControl, CustomReportChart chartWrapper)
+        {
+            if (chartControl == null || chartWrapper?.DrillDown == null || chartWrapper.Config == null) return;
+
+            // Navigating on release rather than on press, and only where the pointer stayed put: a press on
+            // a chart can be the start of a drag - resizing the panel from its edge, or panning the chart -
+            // and drilling away in the middle of one would be the last thing the user asked for.
+            var pressedAt = (System.Drawing.Point?)null;
+            chartControl.MouseDown += (_, e) => pressedAt = e.Button == MouseButtons.Left ? e.Location : null;
+
+            chartControl.MouseUp += (_, e) =>
+            {
+                var pressed = pressedAt;
+                pressedAt = null;
+                if (e.Button != MouseButtons.Left || pressed == null) return;
+                if (Math.Abs(e.X - pressed.Value.X) > ChartClickTolerancePixels
+                    || Math.Abs(e.Y - pressed.Value.Y) > ChartClickTolerancePixels) return;
+
+                var row = FindChartDrillDownRow(chartControl, chartWrapper, e.Location);
+                if (row == null) return;
+                try
+                {
+                    chartWrapper.DrillDown.Navigate(GetContext(), new DataRowDrillDownSource(row), chartWrapper.TableIndex, this);
+                }
+                catch (Exception ex)
+                {
+                    CommonShared.ShowExceptionDialog(ex, "Error navigating to link");
+                }
+            };
+
+            // Whether the pointer is over a point is worked out only when it has moved enough to be worth
+            // hit testing again, but the cursor is set from that answer on every move.  The panel's resize
+            // helper sets the cursor on every move too, so a hand set once is cleared again by the next
+            // twitch of the mouse - which is why re-asserting it is not the redundancy it looks like.
+            var lastPosition = System.Drawing.Point.Empty;
+            var overPoint = false;
+            chartControl.MouseMove += (_, e) =>
+            {
+                if (Math.Abs(e.X - lastPosition.X) > ChartMouseMoveThresholdPixels
+                    || Math.Abs(e.Y - lastPosition.Y) > ChartMouseMoveThresholdPixels)
+                {
+                    lastPosition = e.Location;
+                    overPoint = FindChartDrillDownRow(chartControl, chartWrapper, e.Location) != null;
+                }
+                if (overPoint)
+                {
+                    if (chartControl.Cursor != Cursors.Hand) chartControl.Cursor = Cursors.Hand;
+                }
+                else if (chartControl.Cursor == Cursors.Hand)
+                {
+                    // Only the cursor this handler set is cleared - the resize helper owns the cursor
+                    // elsewhere, and its resize arrows are the point of the panel edges.
+                    chartControl.Cursor = Cursors.Default;
+                }
+            };
+
+            chartControl.MouseLeave += (_, _) =>
+            {
+                overPoint = false;
+                if (chartControl.Cursor == Cursors.Hand) chartControl.Cursor = Cursors.Default;
+            };
+        }
+
+        /// <summary>
+        /// The result row a chart point can be drilled into, or null where the pointer is not over a point,
+        /// the point cannot be traced back to a row, or the row is one the chart excludes.
+        /// </summary>
+        private DataRow FindChartDrillDownRow(Control chartControl, CustomReportChart chartWrapper, System.Drawing.Point location)
+        {
+            if (reportDS == null || reportDS.Tables.Count <= chartWrapper.TableIndex) return null;
+            var point = ChartHelper.GetPointAt(chartControl, location);
+            if (point == null) return null;
+            var row = ChartHelper.FindSourceRow(reportDS.Tables[chartWrapper.TableIndex], chartWrapper.Config, point);
+            return row == null || IsExcludedFromDrillDown(chartWrapper, row) ? null : row;
+        }
+
+        /// <summary>
+        /// True where a mapped value is one the chart says isn't drillable - a rolled up "Other" slice, or
+        /// the "(none)" a report puts where the value was null.
+        /// </summary>
+        private static bool IsExcludedFromDrillDown(CustomReportChart chartWrapper, DataRow row)
+        {
+            if (chartWrapper.DrillDownExcludedValues is not { Count: > 0 } excluded) return false;
+            return chartWrapper.DrillDown.ColumnToParameterMap.Values
+                .Where(column => row.Table.Columns.Contains(column))
+                .Select(column => row[column].DBNullToNull()?.ToString())
+                .Any(value => value != null && excluded.Contains(value, StringComparer.OrdinalIgnoreCase));
         }
 
         private DBADashContext GetContext()

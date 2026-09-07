@@ -148,6 +148,10 @@ public class Program
             case CommandLineActionOption.SetPerfmonCounters:
                 await Helper.SetPerfmonCounters(config, o);
                 break;
+
+            case CommandLineActionOption.SetSchedule:
+                await Helper.SetScheduleAsync(config, o);
+                break;
         }
     }
 }

@@ -285,7 +285,8 @@ namespace DBADash.Messaging
                 // Requested collections are disabled for the instance - report as a warning, not an error.
                 Log.Warning("Message with handle {handle} skipped: {Message}", handle, ex.Message);
                 await SendReplyMessage(DBADashAgentIdentifier, handle, destinationConnectionHash, replySQS, replyAgent,
-                    ResponseMessage.ResponseTypes.Warning, ex.Message, disabledCollections: ex.DisabledCollections).ConfigureAwait(false);
+                    ResponseMessage.ResponseTypes.Warning, ex.Message, disabledCollections: ex.DisabledCollections,
+                    configurationDisabledCollections: ex.ConfigurationDisabledCollections).ConfigureAwait(false);
             }
             catch (UnknownCollectionTypeException ex)
             {
@@ -366,9 +367,11 @@ namespace DBADash.Messaging
         private async Task SendReplyMessage(string DBADashAgentIdentifier, Guid handle,
             string destinationConnectionHash, string replySQS, string replyAgent,
             ResponseMessage.ResponseTypes responseType, string message, string messageDataPath = null,
-            List<string> disabledCollections = null, int? expectedProgressCount = null)
+            List<string> disabledCollections = null, int? expectedProgressCount = null,
+            List<string> configurationDisabledCollections = null)
         {
-            var payload = CreateResponsePayload(responseType, message, messageDataPath, disabledCollections, expectedProgressCount);
+            var payload = CreateResponsePayload(responseType, message, messageDataPath, disabledCollections,
+                expectedProgressCount, configurationDisabledCollections);
             await AWSTools.SendSQSMessageAsync(Config, Convert.ToBase64String(payload),
                 DBADashAgentIdentifier, replyAgent, handle, replySQS, "REPLY", destinationConnectionHash);
         }
@@ -416,7 +419,8 @@ namespace DBADash.Messaging
         }
 
         private static byte[] CreateResponsePayload(ResponseMessage.ResponseTypes responseType, string message,
-            string messageDataPath = null, List<string> disabledCollections = null, int? expectedProgressCount = null)
+            string messageDataPath = null, List<string> disabledCollections = null, int? expectedProgressCount = null,
+            List<string> configurationDisabledCollections = null)
         {
             var responseMessage = new ResponseMessage
             {
@@ -424,6 +428,7 @@ namespace DBADash.Messaging
                 Message = message,
                 MessageDataPath = messageDataPath,
                 DisabledCollections = disabledCollections,
+                ConfigurationDisabledCollections = configurationDisabledCollections,
                 ExpectedProgressCount = expectedProgressCount
             };
             return responseMessage.Serialize();

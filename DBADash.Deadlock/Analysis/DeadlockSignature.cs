@@ -40,8 +40,15 @@ namespace DBADash.Deadlock.Analysis
         /// </summary>
         public string Components { get; }
 
+        /// <summary>
+        /// Signature version.  Bump it whenever what goes into <see cref="Compute"/> changes, so that a
+        /// regrouping of history is visible rather than silent.  Stored alongside the value (see
+        /// dbo.Deadlocks.SignatureVersion) so a backfill has something to select on.
+        /// </summary>
+        public const int VersionNumber = 1;
+
         /// <summary>Version prefix, so a change to what goes into a signature is visible rather than silent.</summary>
-        private const string Version = "v1";
+        private static readonly string Version = "v" + VersionNumber.ToString(CultureInfo.InvariantCulture);
 
         public static DeadlockSignature Compute(DeadlockGraph graph)
         {

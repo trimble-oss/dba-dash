@@ -1,0 +1,4 @@
+﻿CREATE PARTITION FUNCTION [PF_DeadlockProcesses](DATETIME2 (3))
+    AS RANGE RIGHT
+    FOR VALUES ();
+

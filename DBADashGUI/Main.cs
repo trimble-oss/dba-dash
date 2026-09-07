@@ -125,7 +125,12 @@ namespace DBADashGUI
                                 new SQLTreeItem("Storage", SQLTreeItem.TreeType.Storage)
                             });
 
-                            AzureNode.AddReportsFolder(reports?.InstanceLevelReports);
+                            // Deadlocks get their own folder here as they do on a regular instance, and are
+                            // taken out of the flat Reports list so nothing is listed twice.  At this level
+                            // it covers every database on the logical server.
+                            AzureNode.AddDeadlocksFolder(reports?.InstanceLevelReports);
+                            AzureNode.AddReportsFolder(
+                                SQLTreeItem.ExcludeDeadlockReports(reports?.InstanceLevelReports ?? Enumerable.Empty<CustomReport>()));
                             var poolNodes = poolTable.Rows.Cast<DataRow>()
                                 .Where(r => (string)r["InstanceGroupName"] == instance && r["elastic_pool_name"] != DBNull.Value)
                                 .Select(r => (string)r["elastic_pool_name"]).Distinct().OrderBy(r => r)
@@ -160,6 +165,15 @@ namespace DBADashGUI
                         {
                             azureDBNode.Nodes.Add(new SQLTreeItem("Extended Events", SQLTreeItem.TreeType.ExtendedEvents)
                             { InstanceID = azureDBNode.InstanceID });
+                        }
+                        // Deadlock collection on Azure SQL Database is per database - the session is database
+                        // scoped - so the database node is where its deadlocks belong.  Added before the
+                        // database folders so it sits in the same place as on a regular instance: after the
+                        // instance's own nodes, ahead of Reports.  Not on master, which carries no user
+                        // workload and cannot hold a database scoped session, so it could only ever be empty.
+                        if (!string.Equals(db, "master", StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            azureDBNode.AddDeadlocksFolder(reports?.InstanceLevelReports);
                         }
                         AzureNode.Nodes.Add(azureDBNode);
                         azureDBNode.AddDatabaseFolders();
@@ -273,6 +287,21 @@ namespace DBADashGUI
         private CustomReports.CustomReports customReports = new();
         private readonly Dictionary<ProcedureExecutionMessage.CommunityProcs, TabPage> CommunityToolsTabPages = new Dictionary<ProcedureExecutionMessage.CommunityProcs, TabPage>();
         private Dictionary<string, TabPage> CustomToolsTabs = new Dictionary<string, TabPage>();
+
+        /// <summary>
+        /// The tab each deadlock report gets when the Deadlocks folder is selected, keyed by procedure name,
+        /// and the report behind each of those tabs.
+        ///
+        /// <para>Selecting a folder otherwise shows whatever tab was open for the previous node, which for a
+        /// folder whose whole content is two reports is a dead end.  The reports are shown side by side
+        /// instead, so the folder is the deadlock view rather than a thing to expand first.</para>
+        ///
+        /// <para>Built once and reused: a TabPage rebuilt on every selection loses its grid state, and
+        /// re-creating the report view is what the tab caching elsewhere in this form exists to avoid.</para>
+        /// </summary>
+        private readonly Dictionary<string, TabPage> DeadlockReportTabs = new();
+
+        private readonly Dictionary<TabPage, CustomReport> DeadlockTabReports = new();
         private TabPage tabBlitzIndex => CommunityToolsTabPages[ProcedureExecutionMessage.CommunityProcs.sp_BlitzIndex];
         private TabPage tabDBADashAlerts;
         private NotifyIcon notifyIcon;
@@ -433,7 +462,9 @@ namespace DBADashGUI
             {
                 tabPerformanceSummary, tabPerformance, tabSlowQueries, tabAzureDB, tabAzureSummary, tabMetrics,
                 tabObjectExecutionSummary, tabWaits, tabRunningQueries, tabMemory, tabJobStats, tabJobTimeline, tabDrivePerformance, tabTopQueries, tabOfflineInstances, tabPoolsAndGroups
-            }).Contains(tabs.SelectedTab) || (tabs.SelectedTab == tabCustomReport && ((SQLTreeItem)tv1.SelectedNode).Report.TimeFilterSupported);
+            }).Contains(tabs.SelectedTab) || (tabs.SelectedTab == tabCustomReport && ((SQLTreeItem)tv1.SelectedNode).Report.TimeFilterSupported)
+            // The Deadlocks folder's tabs run reports too, and both of them are over a date range.
+            || SelectedDeadlockTabReport(tv1.SelectedNode as SQLTreeItem)?.TimeFilterSupported == true;
 
         private bool IsAzureOnly;
         private bool ShowCounts;
@@ -536,6 +567,59 @@ namespace DBADashGUI
             InitializeNotifyIcon();
             desktopNotificationsToolStripMenuItem.Checked = Properties.Settings.Default.DesktopNotificationsEnabled;
             _ = Task.Run(GetNewAlertsLoop);
+        }
+
+        /// <summary>
+        /// Swaps the report tab's view for the one the report asks for.
+        ///
+        /// <para>The tab is built in the designer with a plain <see cref="CustomReportView"/>, so without this
+        /// a report's <see cref="CustomReport.ViewType"/> was honoured when the report was opened as a
+        /// drill-down or in the popup viewer, but silently ignored when the same report was opened from the
+        /// tree - which showed the base view running the report's procedure directly.  Mirrors
+        /// <c>CustomReportViewer.ReplaceViewType</c>.</para>
+        /// </summary>
+        private void ReplaceCustomReportViewType(CustomReports.CustomReport report)
+        {
+            var desiredType = report?.ViewType ?? typeof(CustomReports.CustomReportView);
+            if (!typeof(CustomReports.CustomReportView).IsAssignableFrom(desiredType))
+            {
+                desiredType = typeof(CustomReports.CustomReportView);
+            }
+            if (customReportView1 != null && customReportView1.GetType() == desiredType) return;
+
+            var oldView = customReportView1;
+            tabCustomReport.SuspendLayout();
+            try
+            {
+                var desiredView = (CustomReports.CustomReportView)Activator.CreateInstance(desiredType);
+                desiredView.Dock = DockStyle.Fill;
+                desiredView.ReportNameChanged += CustomReport_ReportNameChanged;
+
+                if (oldView != null)
+                {
+                    oldView.ReportNameChanged -= CustomReport_ReportNameChanged;
+                    tabCustomReport.Controls.Remove(oldView);
+                }
+
+                customReportView1 = desiredView;
+                tabCustomReport.Controls.Add(customReportView1);
+                oldView?.Dispose();
+            }
+            catch (Exception ex)
+            {
+                // Keep the view we had rather than leaving the tab empty - the report will run on the base
+                // view, which is wrong for a ViewType report but still shows something.
+                System.Diagnostics.Debug.WriteLine($"Error switching the report view to {desiredType.FullName}: {ex}");
+                if (oldView != null && !tabCustomReport.Controls.Contains(oldView))
+                {
+                    customReportView1 = oldView;
+                    tabCustomReport.Controls.Add(oldView);
+                }
+            }
+            finally
+            {
+                tabCustomReport.ResumeLayout();
+            }
         }
 
         private void CustomReport_ReportNameChanged(object sender, EventArgs e)
@@ -1039,9 +1123,21 @@ namespace DBADashGUI
             }
             else
             {
+                if (tabs.SelectedTab == tabCustomReport)
+                {
+                    ReplaceCustomReportViewType(n.Context?.Report);
+                }
+                // A Deadlocks folder holds no report of its own - the tab decides which of its reports runs -
+                // so the context handed to the view carries that tab's report rather than the node's.
+                var context = n.Context;
+                if (SelectedDeadlockTabReport(n) is { } deadlockReport)
+                {
+                    context = (DBADashContext)n.Context.Clone();
+                    context.Report = deadlockReport;
+                }
                 foreach (var ctrl in tabs.SelectedTab?.Controls.OfType<ISetContext>() ?? Enumerable.Empty<ISetContext>())
                 {
-                    ctrl.SetContext(n.Context);
+                    ctrl.SetContext(context);
                 }
             }
 
@@ -1176,7 +1272,10 @@ namespace DBADashGUI
             }
 
             instanceNode.Nodes.AddRange(nodesToAdd.ToArray());
-            instanceNode.AddReportsFolder(customReports.InstanceLevelReports);
+            // Deadlock reports get their own folder; the Reports folder takes everything else so that
+            // nothing is listed twice.
+            instanceNode.AddDeadlocksFolder(customReports.InstanceLevelReports);
+            instanceNode.AddReportsFolder(SQLTreeItem.ExcludeDeadlockReports(customReports.InstanceLevelReports));
             instanceNode.AddCommunityTools();
             instanceNode.AddCustomToolsFolder();
         }
@@ -1261,6 +1360,37 @@ namespace DBADashGUI
             }
             dbFolder.Nodes.AddRange(nodesToAdd.ToArray());
         }
+
+        /// <summary>
+        /// The tabs for the reports a Deadlocks folder holds, in the order the folder lists them.
+        /// </summary>
+        private IEnumerable<TabPage> GetDeadlockReportTabs(SQLTreeItem folder)
+        {
+            foreach (var report in folder.FolderReports ?? Enumerable.Empty<CustomReport>())
+            {
+                if (!DeadlockReportTabs.TryGetValue(report.ProcedureName, out var tab))
+                {
+                    tab = new TabPage(report.ReportName);
+                    tab.Controls.Add(new CustomReportView { Dock = DockStyle.Fill });
+                    DeadlockReportTabs.Add(report.ProcedureName, tab);
+                }
+                // The report object is rebuilt when the tree is, so re-point the tab at the current one
+                // rather than holding the definition the tab was first created with.
+                DeadlockTabReports[tab] = report;
+                yield return tab;
+            }
+        }
+
+        /// <summary>
+        /// The report to run on the selected tab when a Deadlocks folder is selected, or null when the
+        /// selection is anything else.  Each of the folder's tabs runs a different report off the one node,
+        /// so the node's own context cannot say which.
+        /// </summary>
+        private CustomReport SelectedDeadlockTabReport(SQLTreeItem node) =>
+            node?.Type == SQLTreeItem.TreeType.DeadlocksFolder && tabs.SelectedTab != null
+            && DeadlockTabReports.TryGetValue(tabs.SelectedTab, out var report)
+                ? report
+                : null;
 
         private List<TabPage> GetAllowedTabs()
         {
@@ -1441,6 +1571,19 @@ namespace DBADashGUI
             {
                 tabCustomReport.Text = n.Report.ReportName;
                 allowedTabs.Add(tabCustomReport);
+            }
+            else if (n.Type == SQLTreeItem.TreeType.DeadlocksFolder)
+            {
+                // One tab per report the folder holds, in the folder's own order - charts first, so that is
+                // what the folder opens on.  RefreshTabPages selects the first tab whenever the previously
+                // selected one is not in the new set, which is every arrival at this folder from elsewhere.
+                allowedTabs.AddRange(GetDeadlockReportTabs(n));
+                // sp_BlitzLock is the community tool for deadlocks, so it belongs with them - last, after the
+                // repository reports, as it runs against the instance rather than off collected data.
+                if (n.Context.IsScriptAllowed(ProcedureExecutionMessage.CommunityProcs.sp_BlitzLock))
+                {
+                    allowedTabs.Add(CommunityToolsTabPages[ProcedureExecutionMessage.CommunityProcs.sp_BlitzLock]);
+                }
             }
             else if (n.Type == SQLTreeItem.TreeType.Folder && n.Text == "Tables")
             {
@@ -3098,6 +3241,13 @@ namespace DBADashGUI
             cboTimeZone.BackColor = theme.TimeZoneBackColor;
             cboTimeZone.ForeColor = theme.TimeZoneForeColor;
             cboTimeZone.FlatStyle = FlatStyle.Flat;
+            // The deadlock folder's tabs are built on demand rather than in the designer, so they are not in
+            // AllTabs.  RefreshTabPages only re-themes when the tab set changes, which a theme switch on its
+            // own does not, so they would keep the old theme until the user navigated away and back.
+            foreach (var tab in DeadlockReportTabs.Values)
+            {
+                try { tab.ApplyTheme(); _tabThemeApplied[tab] = theme.ThemeIdentifier; } catch { }
+            }
             if (AllTabs == null) return;
             foreach (var tab in AllTabs)
             {

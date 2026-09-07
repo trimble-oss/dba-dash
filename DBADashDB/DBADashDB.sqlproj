@@ -321,6 +321,28 @@
     <Build Include="dbo\User Defined Types\SlowQueries.sql" />
     <Build Include="Storage\PF_SlowQueries.sql" />
     <Build Include="Storage\PS_SlowQueries.sql" />
+    <Build Include="dbo\Tables\Deadlocks.sql" />
+    <Build Include="dbo\Tables\DeadlockXml.sql" />
+    <Build Include="dbo\Tables\DeadlockProcesses.sql" />
+    <Build Include="dbo\Tables\DeadlockResources.sql" />
+    <Build Include="dbo\User Defined Types\Deadlocks.sql" />
+    <Build Include="dbo\User Defined Types\DeadlockProcesses.sql" />
+    <Build Include="dbo\User Defined Types\DeadlockResources.sql" />
+    <Build Include="dbo\Stored Procedures\Deadlocks_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\Deadlocks_Del.sql" />
+    <Build Include="dbo\Stored Procedures\DeadlockSummary_Get.sql" />
+    <Build Include="dbo\Stored Procedures\DeadlockCharts_Get.sql" />
+    <Build Include="dbo\Stored Procedures\DeadlockGraph_Get.sql" />
+    <Build Include="dbo\Functions\DeadlockScope.sql" />
+    <Build Include="dbo\Functions\DecodeClientOptions.sql" />
+    <Build Include="Storage\PF_Deadlocks.sql" />
+    <Build Include="Storage\PS_Deadlocks.sql" />
+    <Build Include="Storage\PF_DeadlockXml.sql" />
+    <Build Include="Storage\PS_DeadlockXml.sql" />
+    <Build Include="Storage\PF_DeadlockProcesses.sql" />
+    <Build Include="Storage\PS_DeadlockProcesses.sql" />
+    <Build Include="Storage\PF_DeadlockResources.sql" />
+    <Build Include="Storage\PS_DeadlockResources.sql" />
     <Build Include="dbo\Tables\SlowQueriesStats.sql" />
     <Build Include="dbo\User Defined Types\SlowQueriesStats.sql" />
     <Build Include="dbo\Stored Procedures\SlowQueriesStats_Upd.sql" />
@@ -1011,6 +1033,7 @@
     <Build Include="Alert\Procedures\CustomSqlAlertError_Log.sql" />
     <Build Include="Alert\Procedures\CustomSqlProcs_Get.sql" />
     <Build Include="UserAlert\Stored Procedures\DatabaseCorruptionExample.sql" />
+    <Build Include="dbo\Stored Procedures\ScheduleInfo_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

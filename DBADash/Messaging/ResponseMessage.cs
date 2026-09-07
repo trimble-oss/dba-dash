@@ -55,6 +55,13 @@ namespace DBADash.Messaging
         public List<string> DisabledCollections { get; set; }
 
         /// <summary>
+        /// The subset of <see cref="DisabledCollections"/> that configuration rather than the schedule
+        /// switched off - see <see cref="CollectionScheduleDisabledException.ConfigurationDisabledCollections"/>.
+        /// The GUI reads it to know which of the skipped collections a re-run could actually collect.
+        /// </summary>
+        public List<string> ConfigurationDisabledCollections { get; set; }
+
+        /// <summary>
         /// Optional per-instance progress payload.  Populated when a batched message (e.g.
         /// <see cref="MultiCollectionMessage"/>) reports the completion of a single instance so the
         /// GUI can tick instances off as they complete rather than waiting for the whole batch.
@@ -199,5 +206,12 @@ namespace DBADash.Messaging
         /// this instance, the disabled collection names so the GUI can offer to re-run them forced.
         /// </summary>
         public List<string> DisabledCollections { get; set; }
+
+        /// <summary>
+        /// The subset of <see cref="DisabledCollections"/> that configuration rather than the schedule
+        /// switched off.  These are not offered for a forced re-run across a batch - see
+        /// <see cref="CollectionScheduleDisabledException.ConfigurationDisabledCollections"/>.
+        /// </summary>
+        public List<string> ConfigurationDisabledCollections { get; set; }
     }
 }

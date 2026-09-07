@@ -193,6 +193,48 @@ namespace DBADash
 
         public int? FailedLoginsBackfillMinutes { get; set; }
 
+        /// <summary>
+        /// Size in KB of the ring buffer on the deadlock extended events session DBA Dash creates.  Null uses
+        /// <see cref="DefaultDeadlockXERingBufferKB"/>.
+        ///
+        /// <para>Only Azure SQL Database is affected.  It is the one platform where the deadlock session
+        /// reads a ring buffer, because an event_file target there writes to blob storage; everywhere else
+        /// the session writes to an event file and the resume cursor bounds the read instead.</para>
+        ///
+        /// <para>Bigger buys a longer outage to bridge - a deadlock stays in the buffer until a collection
+        /// reads it or it is pushed out - and costs read time, because a ring buffer read costs what the
+        /// buffer holds rather than what is new in it.  Service level rather than per connection: it is a
+        /// tuning decision about how the service reads, not a fact about one database.</para>
+        ///
+        /// <para>Applied to a session DBA Dash already created as well as to a new one - see the deadlock
+        /// session script - so changing it takes effect on the next collection rather than only on a fresh
+        /// deployment.  Resizing discards what the buffer holds, since a target's options cannot be altered
+        /// in place, so it happens once when the value changes and not on every run.</para>
+        /// </summary>
+        public int? DeadlockXERingBufferKB { get; set; }
+
+        /// <summary>
+        /// 1MB, which is the largest ring buffer SQL Server recommends: above it a target's target_data can
+        /// be returned truncated, and truncated XML does not parse, so the whole read is lost rather than
+        /// part of it.  A deadlock graph is a few KB, so this still holds hundreds of them.
+        /// </summary>
+        public const int DefaultDeadlockXERingBufferKB = 1024;
+
+        /// <summary>Below this the buffer cannot hold a single large deadlock graph.</summary>
+        public const int MinDeadlockXERingBufferKB = 64;
+
+        /// <summary>
+        /// Above <see cref="DefaultDeadlockXERingBufferKB"/> is allowed but is a deliberate choice against
+        /// SQL Server's own advice, so the ceiling is the point at which truncation is close to certain
+        /// rather than merely possible.  A truncated buffer is reported when it is read.
+        /// </summary>
+        public const int MaxDeadlockXERingBufferKB = 4096;
+
+        /// <summary>The configured buffer size, defaulted and clamped to what the target can actually take.</summary>
+        public int GetDeadlockXERingBufferKB() =>
+            Math.Clamp(DeadlockXERingBufferKB ?? DefaultDeadlockXERingBufferKB,
+                MinDeadlockXERingBufferKB, MaxDeadlockXERingBufferKB);
+
         public const int DefaultAlertProcessingFrequencySeconds = 60;
 
         public const int DefaultAlertProcessingStartupDelaySeconds = 60;

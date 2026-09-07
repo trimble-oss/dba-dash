@@ -20,9 +20,10 @@ namespace DBADash.XE
         /// <summary>
         /// Reads the live targets of the running session, keyed by <c>target_name</c> -&gt; <c>target_data</c> XML.
         /// Only a running session has live targets (they come from the <c>dm_xe_*</c> views).
+        /// <paramref name="commandTimeout"/> is seconds; 0 or less leaves SqlClient's own default.
         /// </summary>
         public static async Task<Dictionary<string, string>> GetSessionTargetsAsync(string connectionString,
-            bool databaseScoped, string sessionName, CancellationToken ct)
+            bool databaseScoped, string sessionName, CancellationToken ct, int commandTimeout = 0)
         {
             var sessions = databaseScoped ? "sys.dm_xe_database_sessions" : "sys.dm_xe_sessions";
             var targetsView = databaseScoped ? "sys.dm_xe_database_session_targets" : "sys.dm_xe_session_targets";
@@ -34,6 +35,7 @@ namespace DBADash.XE
             var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             await using var cn = new SqlConnection(connectionString);
             await using var cmd = new SqlCommand(sql, cn) { CommandType = CommandType.Text };
+            if (commandTimeout > 0) cmd.CommandTimeout = commandTimeout;
             cmd.Parameters.Add("@name", SqlDbType.NVarChar, 128).Value = sessionName;
             await cn.OpenAsync(ct);
             await using var rdr = await cmd.ExecuteReaderAsync(ct);

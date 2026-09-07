@@ -252,7 +252,7 @@ namespace DBADash.Messaging
             {
                 // Requested collections are disabled for the instance - report as a warning, not an error.
                 Log.Warning("Message of type {MessageType} with handle {handle} skipped: {Message}", type, handle, ex.Message);
-                await SendReplyMessage(handle, (new ResponseMessage() { Type = ResponseMessage.ResponseTypes.Warning, Message = ex.Message, DisabledCollections = ex.DisabledCollections }).Serialize(), dest.ConnectionString);
+                await SendReplyMessage(handle, (new ResponseMessage() { Type = ResponseMessage.ResponseTypes.Warning, Message = ex.Message, DisabledCollections = ex.DisabledCollections, ConfigurationDisabledCollections = ex.ConfigurationDisabledCollections }).Serialize(), dest.ConnectionString);
             }
             catch (UnknownCollectionTypeException ex)
             {

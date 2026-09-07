@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using DBADash.Deadlocks;
+using Microsoft.Data.SqlClient;
 using Polly;
 using Polly.Retry;
 using Serilog;
@@ -504,6 +505,10 @@ namespace DBADash
             }
             await TryUpdateAsync(async _ => await UpdateServerExtraPropertiesAsync(), "ServerExtraProperties", exceptions);
             await TryUpdateAsync(async _ => await UpdateInstanceMetadata_Async(), "InstanceMetadata", exceptions);
+            if (tablesInDataSet.Contains(DeadlockTables.DeadlocksTableName))
+            {
+                await TryUpdateAsync(async _ => await UpdateDeadlocksAsync(), DeadlockTables.DeadlocksTableName, exceptions);
+            }
 
             // retry based on policy then let caller handle the exception
 
@@ -574,6 +579,48 @@ namespace DBADash
             {
                 throw new Exception($"DDLSnapshot:{databaseName}. Primary key violation.  This can occur if you have a case sensitive database collation that contains tables, SPs or other database objects with names that are no longer unique with a case insensitive comparison.", ex);
             }
+        }
+
+        /// <summary>
+        /// Imports the deadlock collection.
+        ///
+        /// <para>Special cased rather than driven by <see cref="tablesToProcess"/> because the header, the
+        /// graph, the participants and the resources have to be written together: the children may only be
+        /// inserted for the headers that survived dedup, which is known only inside the proc.  One call, one
+        /// transaction, no ordering assumptions.</para>
+        ///
+        /// <para>Runs whenever the collection ran, including when it found nothing - the proc still advances
+        /// the collection date, which is what stops a healthy instance with no deadlocks looking overdue.</para>
+        /// </summary>
+        private async Task UpdateDeadlocksAsync()
+        {
+            var dtDeadlocks = data.Tables[DeadlockTables.DeadlocksTableName];
+            if (dtDeadlocks == null) return;
+
+            await using var cn = new SqlConnection(connectionString);
+            await using var cmd = new SqlCommand("dbo.Deadlocks_Upd", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = CommandTimeout };
+            await cn.OpenAsync();
+
+            // A table-valued parameter that isn't supplied defaults to an empty table, so only send what we have.
+            if (dtDeadlocks.Rows.Count > 0)
+            {
+                cmd.Parameters.AddWithValue("Deadlocks", dtDeadlocks);
+
+                var dtProcesses = data.Tables[DeadlockTables.ProcessesTableName];
+                if (dtProcesses is { Rows.Count: > 0 })
+                {
+                    cmd.Parameters.AddWithValue("DeadlockProcesses", dtProcesses);
+                }
+                var dtResources = data.Tables[DeadlockTables.ResourcesTableName];
+                if (dtResources is { Rows.Count: > 0 })
+                {
+                    cmd.Parameters.AddWithValue("DeadlockResources", dtResources);
+                }
+            }
+
+            cmd.Parameters.AddWithValue("InstanceID", instanceID);
+            cmd.Parameters.AddWithValue("SnapshotDate", snapshotDate);
+            await cmd.ExecuteNonQueryAsync();
         }
 
         private async Task UpdateServerExtraPropertiesAsync()

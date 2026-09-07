@@ -23,6 +23,10 @@ namespace DBADash.Messaging
         /// When true, collection types whose schedule is disabled (no cron expression) for the target
         /// instance are run anyway rather than skipped.  Set when the user explicitly confirms they want
         /// to run an unscheduled collection after being warned (see <see cref="CollectionScheduleDisabledException"/>).
+        ///
+        /// <para>It also waives the configuration check for Deadlocks, which is read from system_health when
+        /// no session is configured - the one switched-off collection that still has something to read.  See
+        /// <see cref="SkipDisabledCollections"/>.</para>
         /// </summary>
         public bool IgnoreDisabledSchedule { get; set; }
 
@@ -87,11 +91,12 @@ namespace DBADash.Messaging
             // Don't run collections whose schedule has been disabled for this instance - a manual trigger
             // shouldn't collect something the user has turned off.  Disabled collections are skipped and, if
             // nothing is left to run, a warning is reported back rather than silently doing nothing.  The user
-            // can confirm the warning to re-send the message with IgnoreDisabledSchedule set, forcing them to run.
-            if (!IgnoreDisabledSchedule)
-            {
-                SkipDisabledCollections(cfg, src, standardCollections, customCollections, connectionID);
-            }
+            // can confirm the warning to re-send the message with IgnoreDisabledSchedule set, forcing them to
+            // run.  That force overrides a schedule; it overrides configuration only where the collection
+            // still has something to read, which for deadlocks means system_health - see
+            // SkipDisabledCollections.
+            var onDemandDeadlockSession = SkipDisabledCollections(cfg, src, standardCollections, customCollections,
+                connectionID, IgnoreDisabledSchedule);
 
             // A requested collection type that doesn't exist for this instance (e.g. a custom collection that
             // has since been removed) shouldn't sink the whole request - run whatever's valid and warn about
@@ -107,6 +112,8 @@ namespace DBADash.Messaging
 
             var collector = await DBCollector.CreateAsync(src, cfg.ServiceName, true);
             collector.FailedLoginsBackfillMinutes = cfg.FailedLoginsBackfillMinutes ?? CollectionConfig.DefaultFailedLoginsBackfillMinutes;
+            collector.DeadlockXERingBufferKB = cfg.GetDeadlockXERingBufferKB();
+            collector.OnDemandDeadlockXESessionName = onDemandDeadlockSession;
             await collector.CollectAsync(standardCollections.ToArray());
             await collector.CollectAsync(customCollections);
 
@@ -148,14 +155,25 @@ namespace DBADash.Messaging
         }
 
         /// <summary>
-        /// Removes any requested collections whose schedule is disabled (an empty cron expression) for this
-        /// source.  SchemaSnapshot is scheduled separately and is always allowed.  If every requested
+        /// Removes any requested collections that are disabled for this source - an empty cron expression, or
+        /// configuration that leaves the collection nothing to do, as a blank deadlock session name does.
+        /// SchemaSnapshot is scheduled separately and is always allowed.  If every requested
         /// collection is disabled a <see cref="CollectionScheduleDisabledException"/> is thrown so the
         /// caller can report a warning; otherwise the disabled ones are skipped and the rest run as normal.
+        ///
+        /// <para><paramref name="ignoreDisabledSchedule"/> is the user's confirmation that they want an
+        /// unscheduled collection run anyway.  It waives the schedule check, and the configuration check only
+        /// where a switched-off collection still has something to read: deadlocks have system_health, which is
+        /// running on every supported on-premises instance and holds what has deadlocked recently whether or
+        /// not the collection was ever configured.  Slow queries have no such fallback and stay skipped -
+        /// forcing one would collect nothing and report success.</para>
+        ///
+        /// <para>Returns the session an on-demand deadlock read should use, or null where the collection is
+        /// running as configured.  See <see cref="DBCollector.OnDemandDeadlockXESessionName"/>.</para>
         /// </summary>
-        private void SkipDisabledCollections(CollectionConfig cfg, DBADashSource src,
+        internal string SkipDisabledCollections(CollectionConfig cfg, DBADashSource src,
             List<CollectionType> standardCollections, Dictionary<string, CustomCollection> customCollections,
-            string connectionID)
+            string connectionID, bool ignoreDisabledSchedule)
         {
             // Effective schedule = agent/config schedule overlaid with any per-source overrides (mirrors the
             // resolution the scheduler uses when deciding what to collect automatically).
@@ -164,10 +182,31 @@ namespace DBADash.Messaging
                 : cfg.GetSchedules();
 
             var disabled = new List<string>();
+            var configurationDisabled = new List<string>();
+            string onDemandDeadlockSession = null;
 
             standardCollections.RemoveAll(type =>
             {
                 if (type == CollectionType.SchemaSnapshot) return false; // scheduled separately - always allowed
+                // Configuration switches a collection off as surely as an empty schedule does: deadlocks have
+                // no session to read when the session name is blank, slow queries no threshold to capture
+                // against when it is negative.  The collector excludes both either way, so report that rather
+                // than running a collection that cannot produce anything.
+                if (src.IsCollectionDisabledByConfiguration(type))
+                {
+                    if (ignoreDisabledSchedule && type == CollectionType.Deadlocks)
+                    {
+                        // The one switched-off collection a force can still satisfy.  system_health is already
+                        // capturing deadlocks on the instance, so the run returns the history rather than
+                        // starting a capture and coming back with nothing.
+                        onDemandDeadlockSession = DBADashSource.SystemHealthXESessionName;
+                        return false;
+                    }
+                    disabled.Add(Enum.GetName(type));
+                    configurationDisabled.Add(Enum.GetName(type));
+                    return true;
+                }
+                if (ignoreDisabledSchedule) return false;
                 // Only skip when the schedule is explicitly present but disabled (empty cron expression).
                 // Types absent from the schedule map are left to run rather than wrongly treated as disabled.
                 if (schedule.TryGetValue(type, out var s) && string.IsNullOrEmpty(s.NormalizedSchedule))
@@ -178,23 +217,27 @@ namespace DBADash.Messaging
                 return false;
             });
 
-            foreach (var name in customCollections
-                         .Where(c => string.IsNullOrEmpty(c.Value.NormalizedSchedule))
-                         .Select(c => c.Key).ToList())
+            if (!ignoreDisabledSchedule)
             {
-                customCollections.Remove(name);
-                disabled.Add(name);
+                foreach (var name in customCollections
+                             .Where(c => string.IsNullOrEmpty(c.Value.NormalizedSchedule))
+                             .Select(c => c.Key).ToList())
+                {
+                    customCollections.Remove(name);
+                    disabled.Add(name);
+                }
             }
 
-            if (disabled.Count == 0) return;
+            if (disabled.Count == 0) return onDemandDeadlockSession;
 
             if (standardCollections.Count == 0 && customCollections.Count == 0)
             {
                 // Nothing left to run - surface a warning rather than silently completing.
-                throw new CollectionScheduleDisabledException(disabled);
+                throw new CollectionScheduleDisabledException(disabled, configurationDisabled);
             }
 
             Log.Warning("Message {Id}: skipping disabled collection(s) {disabled} for {instance}", Id, disabled, connectionID);
+            return onDemandDeadlockSession;
         }
 
         private (List<CollectionType>, Dictionary<string, CustomCollection>, List<string>) ParseCollectionTypes(DBADashSource src, CollectionConfig cfg)
@@ -249,19 +292,30 @@ namespace DBADash.Messaging
     }
 
     /// <summary>
-    /// Thrown when every collection requested by a message is disabled (no schedule) for the target
-    /// instance, so nothing was run.  Reported back to the GUI as a warning rather than an error.
+    /// Thrown when every collection requested by a message is disabled for the target instance - no schedule,
+    /// or configuration that leaves it nothing to collect - so nothing was run.  Reported back to the GUI as a
+    /// warning rather than an error.
     /// </summary>
     public class CollectionScheduleDisabledException : Exception
     {
         public List<string> DisabledCollections { get; }
 
-        public CollectionScheduleDisabledException(List<string> disabledCollections)
+        /// <summary>
+        /// The subset of <see cref="DisabledCollections"/> that configuration switched off rather than the
+        /// schedule - a blank deadlock session name, a negative slow query threshold.  Held apart because the
+        /// two are answered differently: an unscheduled collection can simply be run, while one configuration
+        /// has switched off has nothing to read unless a fallback exists, so it must not be forced blindly.
+        /// </summary>
+        public List<string> ConfigurationDisabledCollections { get; }
+
+        public CollectionScheduleDisabledException(List<string> disabledCollections,
+            List<string> configurationDisabledCollections = null)
             : base(disabledCollections is { Count: 1 }
-                ? $"Collection '{disabledCollections[0]}' is disabled (no schedule) for this instance - nothing was collected."
-                : $"Collections [{string.Join(", ", disabledCollections)}] are disabled (no schedule) for this instance - nothing was collected.")
+                ? $"Collection '{disabledCollections[0]}' is disabled for this instance - nothing was collected."
+                : $"Collections [{string.Join(", ", disabledCollections)}] are disabled for this instance - nothing was collected.")
         {
             DisabledCollections = disabledCollections;
+            ConfigurationDisabledCollections = configurationDisabledCollections ?? new List<string>();
         }
     }
 

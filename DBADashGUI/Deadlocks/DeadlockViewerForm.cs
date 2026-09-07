@@ -131,6 +131,7 @@ namespace DBADashGUI.Deadlocks
             _canLookup = DeadlockPlansControl.CanShow(context);
 
             Text = "Deadlock";
+            Icon = Properties.Resources.DeadlockIcon;
             Width = 1100;
             Height = 780;
             StartPosition = FormStartPosition.CenterParent;

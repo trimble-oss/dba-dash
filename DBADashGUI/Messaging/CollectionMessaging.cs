@@ -138,11 +138,11 @@ namespace DBADashGUI.Messaging
                             break;
 
                         case ResponseMessage.ResponseTypes.Warning:
-                            // The collection(s) aren't scheduled for this instance so nothing was run.  Offer to
+                            // The collection(s) are disabled for this instance so nothing was run.  Offer to
                             // run them anyway; if confirmed, re-send the same message forced and keep listening on
                             // the new conversation rather than treating the warning as the end of the operation.
                             if (reply.DisabledCollections is { Count: > 0 } && !message.IgnoreDisabledSchedule &&
-                                PromptRunUnscheduled(control, reply.DisabledCollections))
+                                PromptRunDisabled(control, reply.DisabledCollections, reply.ConfigurationDisabledCollections))
                             {
                                 // The service ends the conversation after the warning.  Drain its end-of-dialog
                                 // message so it isn't orphaned in the broker queue, but fire-and-forget so we
@@ -153,7 +153,7 @@ namespace DBADashGUI.Messaging
                                 group = Guid.NewGuid();
                                 message.Id = group; // New conversation - retrack under the new group for cancellation/logging.
                                 await MessageProcessing.SendMessageToService(message.Serialize(), importAgentID, group, Common.ConnectionString, message.Lifetime);
-                                control.SetStatus(messageBase + "running unscheduled collection(s)...", null, DashColors.Information);
+                                control.SetStatus(messageBase + "running disabled collection(s) on demand...", null, DashColors.Information);
                                 break; // completed stays false - continue receiving on the re-sent conversation
                             }
                             // Show the warning but keep listening (completed stays false) so the service's
@@ -188,18 +188,62 @@ namespace DBADashGUI.Messaging
         }
 
         /// <summary>
-        /// Prompts the user (on the UI thread) to confirm running collection(s) that aren't scheduled for the
-        /// target instance.  Returns true if the user chose to run them anyway.
+        /// True where a collection configuration has switched off can still be collected by a forced run.
+        /// Deadlocks is the only one: system_health is already capturing on the instance and holds what it has
+        /// deadlocked on recently, so the run has real data to bring back.  Everything else reads the thing
+        /// that was switched off, so forcing it would collect nothing and report success.
         /// </summary>
-        private static bool PromptRunUnscheduled(ISetStatus control, List<string> disabledCollections)
+        internal static bool CanForceConfigurationDisabled(string collectionType) =>
+            string.Equals(collectionType, nameof(CollectionType.Deadlocks), StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// Prompts the user (on the UI thread) to confirm running collection(s) that are disabled for the
+        /// target instance.  Returns true if the user chose to run them anyway.
+        ///
+        /// <para>A collection the service reports as disabled by configuration rather than by its schedule is
+        /// a different offer: forcing it usually collects nothing, because what was switched off is the thing
+        /// it reads.  Deadlocks is the exception - system_health is already capturing on the instance and
+        /// holds what it has deadlocked on recently, so an on-demand run has real data to bring back.  When
+        /// nothing that was skipped could be collected by a re-run, nothing is offered and the warning stands.</para>
+        /// </summary>
+        private static bool PromptRunDisabled(ISetStatus control, List<string> disabledCollections,
+            List<string> configurationDisabledCollections)
         {
+            var configurationDisabled = configurationDisabledCollections ?? new List<string>();
+            var deadlocks = Enum.GetName(CollectionType.Deadlocks);
+
+            // Disabled by schedule alone - a re-run collects these as normal.
+            var unscheduled = disabledCollections
+                .Where(c => !configurationDisabled.Contains(c, StringComparer.OrdinalIgnoreCase)).ToList();
+            var deadlocksFromSystemHealth =
+                configurationDisabled.Contains(deadlocks, StringComparer.OrdinalIgnoreCase);
+            // Switched off in the service configuration with nothing standing in for what they read.
+            var notCollectable = configurationDisabled.Where(c => !CanForceConfigurationDisabled(c)).ToList();
+
+            if (unscheduled.Count == 0 && !deadlocksFromSystemHealth) return false;
+
             bool Confirm()
             {
-                var list = string.Join(", ", disabledCollections);
-                var text = disabledCollections.Count == 1
-                    ? $"The {list} collection is not scheduled for this instance, so it was not run.\n\nRun it anyway?"
-                    : $"The following collections are not scheduled for this instance, so they were not run:\n\n{list}\n\nRun them anyway?";
-                return MessageBox.Show(text, "Collection Not Scheduled", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes;
+                var sb = new StringBuilder();
+                sb.AppendLine(disabledCollections.Count == 1
+                    ? $"The {disabledCollections[0]} collection is disabled for this instance, so it was not run."
+                    : $"The following collections are disabled for this instance, so they were not run:\n\n{string.Join(", ", disabledCollections)}");
+                if (deadlocksFromSystemHealth)
+                {
+                    sb.AppendLine();
+                    sb.AppendLine("Deadlocks can still be read on demand from the instance's system_health session, which already holds the deadlocks it has had recently.");
+                }
+                if (notCollectable.Count > 0)
+                {
+                    sb.AppendLine();
+                    sb.AppendLine(notCollectable.Count == 1
+                        ? $"{notCollectable[0]} is switched off in the service configuration and has nothing to collect, so it will be skipped."
+                        : $"These are switched off in the service configuration and have nothing to collect, so they will be skipped: {string.Join(", ", notCollectable)}");
+                }
+                sb.AppendLine();
+                var toRun = unscheduled.Concat(deadlocksFromSystemHealth ? new[] { deadlocks } : Array.Empty<string>()).ToList();
+                sb.Append(toRun.Count == 1 ? $"Run {toRun[0]} now?" : $"Run {string.Join(", ", toRun)} now?");
+                return MessageBox.Show(sb.ToString(), "Collection Disabled", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes;
             }
 
             if (control is Control c && c.InvokeRequired)

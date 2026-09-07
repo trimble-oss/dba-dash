@@ -95,7 +95,8 @@ namespace DBADashService
                     // applicable to this instance.
                     continue;
                 }
-                AddRow(dt, type.ToString(), schedule,
+                AddRow(dt, type.ToString(),
+                    source.IsCollectionDisabledByConfiguration(type) ? DisabledSchedule : schedule,
                     source.CollectionSchedules != null && source.CollectionSchedules.ContainsKey(type));
             }
 
@@ -110,6 +111,14 @@ namespace DBADashService
             ds.Tables.Add(dt);
             return ds;
         }
+
+        /// <summary>An empty schedule is what dbo.ScheduleInfo already reads as disabled - see its IsEnabled
+        /// computed column, which the CollectionDatesStatus view reports as "Schedule disabled".  A collection
+        /// switched off by configuration rather than by its schedule is reported this way too, so the instance
+        /// doesn't show as overdue for a collection that was never going to run - see
+        /// <see cref="DBADashSource.IsCollectionDisabledByConfiguration"/>.</summary>
+        private static readonly CollectionSchedule DisabledSchedule =
+            new() { Schedule = string.Empty, RunOnServiceStart = false };
 
         private static void AddRow(DataTable dt, string reference, CollectionSchedule schedule, bool isInstanceOverride)
         {

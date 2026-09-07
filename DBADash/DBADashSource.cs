@@ -28,6 +28,7 @@ namespace DBADash
         private int slowQuerySessionMaxMemoryKB = 4096;
         private int slowQueryTargetMaxMemoryKB = -1;
         private bool persistXESessions;
+        private string deadlockXESessionName;
         private bool useDualXESession = true;
         public bool WriteToSecondaryDestinations { get; set; } = true;
         public string ConnectionID { get; set; }
@@ -193,11 +194,123 @@ namespace DBADash
             set => slowQueryThresholdMs = value;
         }
 
+        /// <summary>True when a threshold is set for the SlowQueries collection to capture against.  A
+        /// negative threshold is the off switch - see <see cref="SlowQueryThresholdMs"/>.</summary>
+        [JsonIgnore]
+        public bool IsSlowQueryCollectionEnabled => SlowQueryThresholdMs >= 0;
+
         [DefaultValue(false)]
         public bool PersistXESessions
         {
             get => SourceConnection is { Type: ConnectionType.SQL } && persistXESessions; set => persistXESessions = value;
         }
+
+        /// <summary>
+        /// The extended events session the Deadlocks collection reads <c>xml_deadlock_report</c> from.  Four
+        /// options, distinguished by the name alone so there is no separate mode switch to get out of step
+        /// with it:
+        ///
+        /// <list type="bullet">
+        /// <item>Blank - deadlock collection is switched off for this connection, and the default.  There is
+        /// no session to read, so <c>CollectionTypeIsApplicable</c> excludes the collection whatever its
+        /// schedule says.</item>
+        /// <item><see cref="ManagedDeadlockXESessionName"/> - DBA Dash creates, starts and reads its own
+        /// session.  The one to choose when switching the collection on, because reading an event file costs
+        /// roughly what it costs to open and seek the file set rather than what it costs to read the new
+        /// events: a session holding nothing but deadlock reports reads in milliseconds where system_health
+        /// takes seconds, on every collection, getting worse as its files grow.</item>
+        /// <item><c>system_health</c> - read only, nothing to deploy, and it already holds whatever the
+        /// instance has done recently, so it is the option that shows deadlocks from before the collection
+        /// was switched on.  Needs only VIEW SERVER STATE.</item>
+        /// <item>Any other name - a session the DBA already runs.  Read only; if it isn't running that is
+        /// reported rather than started.</item>
+        /// </list>
+        ///
+        /// <para>Only the reserved name is ever created or altered.  A session DBA Dash did not make -
+        /// system_health included - is read and left alone.</para>
+        ///
+        /// <para>On Azure SQL Database the same name means a <em>database</em> scoped session, capturing
+        /// <c>database_xml_deadlock_report</c> into a ring buffer.  There is no system_health there and no
+        /// server scoped session to point at, so the managed session is the only option that needs nothing
+        /// set up by hand.</para>
+        ///
+        /// <para>Null, empty and whitespace are the same thing - off.  Nothing distinguishes a name that was
+        /// cleared from one that was never set: a config written before the collection existed has no value
+        /// here and gets the collection switched off, which is what its schedule already said.</para>
+        /// </summary>
+        [DefaultValue("")]
+        public string DeadlockXESessionName
+        {
+            get => SourceConnection is { Type: ConnectionType.SQL }
+                ? deadlockXESessionName?.Trim() ?? string.Empty
+                : string.Empty; // Only a SQL connection has an XE session to read
+            set => deadlockXESessionName = value;
+        }
+
+        /// <summary>True when a session is configured for the Deadlocks collection to read.  Blank is the off
+        /// switch - see <see cref="DeadlockXESessionName"/>.</summary>
+        [JsonIgnore]
+        public bool IsDeadlockCollectionEnabled => !string.IsNullOrWhiteSpace(DeadlockXESessionName);
+
+        /// <summary>
+        /// True when configuration alone switches this collection off for the connection, whatever its
+        /// schedule says: deadlocks have no session to read when the session name is blank, slow queries no
+        /// threshold to capture against when it is negative.  <c>DBCollector.CollectionTypeIsApplicable</c>
+        /// excludes both from collection, so the schedule reported to the repository and an on-demand
+        /// request have to treat them as disabled rather than as merely overdue.
+        /// </summary>
+        public bool IsCollectionDisabledByConfiguration(CollectionType type) => type switch
+        {
+            CollectionType.Deadlocks => !IsDeadlockCollectionEnabled,
+            CollectionType.SlowQueries => !IsSlowQueryCollectionEnabled,
+            _ => false
+        };
+
+        /// <summary>
+        /// The one session name DBA Dash will create and start itself, and the one to pick when switching the
+        /// collection on: it is the option that keeps the per-collection cost to milliseconds.  Costs ALTER
+        /// ANY EVENT SESSION - the permission the slow query collection already takes - and starts empty, so
+        /// it shows deadlocks from when it was switched on rather than before.
+        /// </summary>
+        public const string ManagedDeadlockXESessionName = "DBADash_Deadlocks";
+
+        /// <summary>The session every supported on-premises instance runs already.  Read only.  Not available
+        /// on Azure SQL Database, which has no server scoped sessions.</summary>
+        public const string SystemHealthXESessionName = "system_health";
+
+
+        /// <summary>
+        /// Empty the deadlock session's ring buffer after each collection, by stopping and starting it.
+        ///
+        /// <para>A ring buffer read costs what the buffer holds rather than what is new in it - around half
+        /// a second for a full one against around thirty milliseconds for an empty one, on every collection.
+        /// On a database that deadlocks steadily the buffer stays full, so every run pays the full cost to
+        /// return data almost all of which has already been stored.  Emptying it after reading keeps the
+        /// reads short.</para>
+        ///
+        /// <para>Off by default because it can lose a deadlock: one that has fired but is still in the
+        /// session's memory buffer when the session stops is gone.  The window is the session's dispatch
+        /// latency, which the managed session keeps short for this reason, and a flush only happens when the
+        /// buffer had something in it - so an idle database is never stopped and started at all.</para>
+        ///
+        /// <para>Only ever applies to the session DBA Dash owns, and only when that session's target is a
+        /// ring buffer - so in practice Azure SQL Database.  A session the DBA runs is never stopped
+        /// whatever this is set to, and the on-premises managed session reads an event file, where the
+        /// resume cursor already makes each read proportional to what is new.</para>
+        /// </summary>
+        [DefaultValue(false)]
+        public bool FlushDeadlockXERingBuffer
+        {
+            get => SourceConnection is { Type: ConnectionType.SQL } && flushDeadlockXERingBuffer;
+            set => flushDeadlockXERingBuffer = value;
+        }
+
+        private bool flushDeadlockXERingBuffer;
+
+        /// <summary>True when the configured session is one DBA Dash owns, and may therefore create or start.</summary>
+        [JsonIgnore]
+        public bool IsDeadlockXESessionManaged =>
+            string.Equals(DeadlockXESessionName, ManagedDeadlockXESessionName, StringComparison.OrdinalIgnoreCase);
 
         private bool _collectSessionWaits = true;
 

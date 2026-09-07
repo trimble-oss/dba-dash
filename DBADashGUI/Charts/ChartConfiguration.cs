@@ -50,6 +50,21 @@ namespace DBADashGUI.Charts
         public DateTime? XAxisMax { get; init; }
 
         /// <summary>
+        /// Draw the X axis over exactly <see cref="XAxisMin"/> to <see cref="XAxisMax"/> rather than letting it
+        /// end at the last data point.
+        ///
+        /// <para>Off by default, which is the long-standing behaviour: the axis starts at XAxisMin but ends
+        /// wherever the data does.  On a dense series that is the same picture either way.  On a sparse one it
+        /// is not - three events in an hour drawn across an axis that ends at the last of them read as an hour
+        /// of steady activity rather than as three events, and the last of them always sits at the right hand
+        /// edge whatever time it happened.  Turn this on where the selected range is what the reader is
+        /// judging the data against.</para>
+        ///
+        /// <para>Has no effect unless both bounds are set, or on a chart whose X axis is not a date.</para>
+        /// </summary>
+        public bool FixXAxisToRange { get; init; }
+
+        /// <summary>
         /// Gets the label for the X-axis.
         /// </summary>
 
@@ -84,6 +99,13 @@ namespace DBADashGUI.Charts
         public bool LineFill { get; init; } = false;
 
         // Series names are on base
+
+        /// <summary>
+        /// Optional colour/marker overrides for individual series.
+        /// Key = the metric column name, or the series value when SeriesColumn is used - the same key
+        /// SeriesNames takes.  Series not named here keep the colour the theme's palette gives them.
+        /// </summary>
+        public Dictionary<string, ChartSeriesStyle> SeriesStyles { get; init; }
 
         /// <summary>
         /// Configuration for multiple Y-axes. When specified, overrides YAxisLabel, YAxisFormat, YAxisMin, and YAxisMax.

@@ -12,6 +12,7 @@ namespace DBADashService
     public class CollectionSchedules : Dictionary<CollectionType, CollectionSchedule>
     {
         private const string every1min = "0 0/1 * * * ?";
+        private const string every5min = "0 0/5 * * * ?";
         private const string hourly = "0 0 0/1 * * ?";
         private const string midnight = "0 0 0 * * ?";
         private const string elevenPm = "0 0 23 * * ?";
@@ -59,6 +60,9 @@ namespace DBADashService
                             {CollectionType.OSInfo, new CollectionSchedule(){ Schedule = every1min } },
                             {CollectionType.ResourceGovernorWorkloadGroups, new CollectionSchedule(){ Schedule = every1min, RunOnServiceStart=false }  },
                             {CollectionType.ResourceGovernorResourcePools, new CollectionSchedule(){ Schedule = every1min, RunOnServiceStart=false }  },
+                    
+                            /* Deadlocks default schedule is every 5 minutes, but also requires enablement for each instance */
+                            {CollectionType.Deadlocks, new CollectionSchedule() {Schedule = every5min, RunOnServiceStart = false} },
 
                             {CollectionType.ServerPrincipals, new CollectionSchedule(){ Schedule = midnight } },
                             {CollectionType.ServerRoleMembers, new CollectionSchedule(){ Schedule = midnight } },
@@ -82,6 +86,9 @@ namespace DBADashService
 
                             {CollectionType.ScheduleInfo, new CollectionSchedule() {Schedule = disabled, RunOnServiceStart = true} },
         };
+
+        /// <summary>The schedule to use when deadlock collection is switched on.  Not a default - see above.</summary>
+        public const string DeadlocksSchedule = every5min;
 
         public static readonly CollectionSchedules DefaultSchedules
                = collectionSchedules;

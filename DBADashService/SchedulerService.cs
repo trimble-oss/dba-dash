@@ -1,4 +1,5 @@
 ﻿using DBADash;
+using DBADash.Deadlocks;
 using DBADash.InstanceMetadata;
 using DBADash.Messaging;
 using Microsoft.Extensions.Hosting;
@@ -363,6 +364,10 @@ namespace DBADashService
             {
                 backgroundTasksCts?.Dispose();
             }
+
+            // After the jobs are done, so the last collection's read position is included rather than left to
+            // the timer that stops with the process.
+            DeadlockCursorStore.Flush();
 
             Log.Information("Shutdown Scheduler");
             await scheduler.Shutdown();

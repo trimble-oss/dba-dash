@@ -95,6 +95,7 @@ namespace DBADashService
                     collector.IsExtendedEventsNotSupportedException = State.IsExtendedEventsNotSupportedException;
                     collector.FailedLoginsBackfillMinutes = config.FailedLoginsBackfillMinutes ??
                         CollectionConfig.DefaultFailedLoginsBackfillMinutes;
+                    collector.DeadlockXERingBufferKB = config.GetDeadlockXERingBufferKB();
 
                     if (SchedulerServiceConfig.Config.IdentityCollectionThreshold.HasValue)
                     {

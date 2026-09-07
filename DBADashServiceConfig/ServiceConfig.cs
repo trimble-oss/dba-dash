@@ -86,6 +86,104 @@ namespace DBADashServiceConfig
             {
                 // Defensive: if control does not exist on older builds, ignore
             }
+
+            foreach (var opt in new[]
+                     { optDisableDeadlock, optSystemManagedDeadlock, optSystemHealthDeadlock, optCustomDeadlockSession })
+            {
+                opt.CheckedChanged += (_, _) => UpdateDeadlockOptionsEnabled();
+            }
+            UpdateDeadlockOptionsEnabled();
+        }
+
+        /// <summary>
+        /// The session name described by the Deadlocks tab.  The name is the only mode switch - see
+        /// <see cref="DBADashSource.DeadlockXESessionName"/> - so a blank name is what disables the collection.
+        /// </summary>
+        private string SelectedDeadlockXESessionName
+        {
+            get
+            {
+                if (optSystemManagedDeadlock.Checked) return DBADashSource.ManagedDeadlockXESessionName;
+                if (optSystemHealthDeadlock.Checked) return DBADashSource.SystemHealthXESessionName;
+                if (optCustomDeadlockSession.Checked) return txtDeadlockSessionName.Text.Trim();
+                return string.Empty;
+            }
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    optDisableDeadlock.Checked = true;
+                    txtDeadlockSessionName.Text = string.Empty;
+                }
+                else if (string.Equals(value, DBADashSource.ManagedDeadlockXESessionName,
+                             StringComparison.OrdinalIgnoreCase))
+                {
+                    optSystemManagedDeadlock.Checked = true;
+                    txtDeadlockSessionName.Text = string.Empty;
+                }
+                else if (string.Equals(value, DBADashSource.SystemHealthXESessionName,
+                             StringComparison.OrdinalIgnoreCase))
+                {
+                    optSystemHealthDeadlock.Checked = true;
+                    txtDeadlockSessionName.Text = string.Empty;
+                }
+                else
+                {
+                    optCustomDeadlockSession.Checked = true;
+                    txtDeadlockSessionName.Text = value;
+                }
+
+                UpdateDeadlockOptionsEnabled();
+            }
+        }
+
+        private void UpdateDeadlockOptionsEnabled()
+        {
+            txtDeadlockSessionName.Enabled = optCustomDeadlockSession.Checked;
+            if (!optCustomDeadlockSession.Checked)
+            {
+                errorProvider1.SetError(txtDeadlockSessionName, null);
+            }
+        }
+
+        /// <summary>The custom option is the only one that needs a name typed - the others carry their own.</summary>
+        private bool ValidateDeadlockOptions()
+        {
+            errorProvider1.SetError(txtDeadlockSessionName, null);
+            if (!optCustomDeadlockSession.Checked || !string.IsNullOrWhiteSpace(txtDeadlockSessionName.Text))
+            {
+                return true;
+            }
+
+            errorProvider1.SetError(txtDeadlockSessionName,
+                "Enter the name of the extended events session to read deadlocks from");
+            tab1.SelectedTab = tabSource;
+            tabSrcOptions.SelectedTab = tabDeadlocks;
+            return false;
+        }
+
+        /// <summary>
+        /// True if the Deadlocks collection has a schedule that would actually run it, taking the connection's
+        /// own schedule overrides into account.  The collection is disabled in the default schedule, so setting
+        /// a session name alone leaves it collecting nothing.
+        /// </summary>
+        private bool IsDeadlockCollectionScheduled(DBADashSource src)
+        {
+            var schedules = src.CollectionSchedules is { Count: > 0 }
+                ? DBADashService.CollectionSchedules.Combine(collectionConfig.GetSchedules(), src.CollectionSchedules)
+                : collectionConfig.GetSchedules();
+            return schedules.TryGetValue(CollectionType.Deadlocks, out var schedule) &&
+                   !string.IsNullOrWhiteSpace(schedule?.Schedule);
+        }
+
+        private static void SetDefaultDeadlockSchedule(DBADashSource src)
+        {
+            src.CollectionSchedules ??= new DBADashService.CollectionSchedules();
+            src.CollectionSchedules[CollectionType.Deadlocks] = new DBADashService.CollectionSchedule
+            {
+                Schedule = DBADashService.CollectionSchedules.DeadlocksSchedule,
+                RunOnServiceStart = false
+            };
         }
 
         /// <summary>
@@ -135,6 +233,11 @@ namespace DBADashServiceConfig
                 return;
             }
 
+            if (!ValidateDeadlockOptions())
+            {
+                return;
+            }
+
             try
             {
                 await AddInstance();
@@ -168,6 +271,7 @@ namespace DBADashServiceConfig
                 UseDualEventSession = chkDualSession.Checked,
                 PersistXESessions = chkPersistXESession.Checked,
                 SlowQueryThresholdMs = chkSlowQueryThreshold.Checked ? (int)numSlowQueryThreshold.Value : -1,
+                DeadlockXESessionName = SelectedDeadlockXESessionName,
                 RunningQueryPlanThreshold = chkCollectPlans.Checked
                     ? new PlanCollectionThreshold()
                     {
@@ -213,6 +317,7 @@ namespace DBADashServiceConfig
             var hasScannedApproval = false;
             var doesNotHaveScannedApproval = false;
             var isDeleted = false;
+            bool? deadlockScheduleApproval = null;
             foreach (var src in GetNewSourceConnections())
             {
                 var validated = ValidateSource(src.SourceConnection.ConnectionString);
@@ -354,6 +459,24 @@ namespace DBADashServiceConfig
                         catch (Exception ex)
                         {
                             CommonShared.ShowExceptionDialog(ex, "Error checking connection status in repository database:");
+                        }
+                    }
+
+                    //  Choosing a session says which session to read, not when to read it: the Deadlocks
+                    //  collection is disabled in the default schedule, so unless a schedule has been set the
+                    //  connection would be configured for deadlocks and still collect nothing.
+                    if (src.IsDeadlockCollectionEnabled && !IsDeadlockCollectionScheduled(src))
+                    {
+                        deadlockScheduleApproval ??= MessageBox.Show(
+                            "Deadlock collection doesn't have a schedule, so no deadlocks will be collected." +
+                            Environment.NewLine + Environment.NewLine +
+                            "Use the default deadlock collection schedule (every 5 minutes) for this instance?" +
+                            Environment.NewLine + Environment.NewLine +
+                            "Choose No to leave the schedule alone - you can set it for all instances with the Schedule button, or per instance from the connections grid.",
+                            "Deadlock Schedule", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes;
+                        if (deadlockScheduleApproval == true)
+                        {
+                            SetDefaultDeadlockSchedule(src);
                         }
                     }
 
@@ -689,6 +812,30 @@ namespace DBADashServiceConfig
             { DataPropertyName = "NoWMI", HeaderText = "No WMI" });
             dgvConnections.Columns.Add(new DataGridViewTextBoxColumn()
             { DataPropertyName = "SlowQueryThresholdMs", HeaderText = "Slow Query Threshold (ms)" });
+            //  Free text rather than a dropdown: any session name is valid, and a combo column throws a
+            //  DataError the moment the bound value isn't one of its items - which is exactly the case for a
+            //  session the DBA created themselves.  The tooltip carries the three choices instead.
+            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                DataPropertyName = "DeadlockXESessionName",
+                HeaderText = "Deadlock XE Session",
+                ToolTipText =
+                    "Blank - deadlock collection is switched off for this connection.\r\n" +
+                    $"{DBADashSource.ManagedDeadlockXESessionName} - created, started and read by DBA Dash.  Fastest to read.\r\n" +
+                    $"{DBADashSource.SystemHealthXESessionName} - read only, nothing to deploy, covers deadlocks from before collection was enabled, but costs seconds per collection.\r\n" +
+                    "Any other name - a session you create and manage.  DBA Dash reads it and never alters it.\r\n" +
+                    "On Azure SQL Database the session is database scoped and reads from a ring buffer.  system_health doesn't exist there."
+            });
+            dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn
+            {
+                DataPropertyName = "FlushDeadlockXERingBuffer",
+                HeaderText = "Flush Deadlock Ring Buffer",
+                ToolTipText =
+                    "Empty the deadlock session's ring buffer after each collection by stopping and starting it.\r\n" +
+                    "A ring buffer read costs what the buffer holds, not what is new in it - roughly half a second for a full one against thirty milliseconds for an empty one.\r\n" +
+                    "Can lose a deadlock that has fired but not yet reached the target when the session stops.\r\n" +
+                    $"Only applies to the {DBADashSource.ManagedDeadlockXESessionName} session with a ring buffer target (Azure SQL Database).  A session you manage is never stopped."
+            });
             dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn()
             { DataPropertyName = "UseDualEventSession", HeaderText = "Use Dual Event Session" });
             dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn()
@@ -1554,6 +1701,7 @@ namespace DBADashServiceConfig
                 chkNoWMI.Checked = src.NoWMI;
                 chkPersistXESession.Checked = src.PersistXESessions;
                 chkSlowQueryThreshold.Checked = (src.SlowQueryThresholdMs != -1);
+                SelectedDeadlockXESessionName = src.DeadlockXESessionName;
                 chkScriptJobs.Checked = src.ScriptAgentJobs;
                 numSlowQueryThreshold.Value = chkSlowQueryThreshold.Checked ? src.SlowQueryThresholdMs : 0;
 
@@ -1882,6 +2030,7 @@ namespace DBADashServiceConfig
             bool isSql = src.SourceConnection.Type == ConnectionType.SQL;
 
             pnlExtendedEvents.Enabled = isSql;
+            tabDeadlocks.Enabled = isSql; // Reading an XE session needs a SQL connection
             chkCollectPlans.Enabled = isSql;
             grpRunningQueryThreshold.Enabled = isSql && chkCollectPlans.Checked;
             chkNoWMI.Enabled = isSql;

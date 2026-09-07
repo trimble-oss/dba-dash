@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Microsoft.Data.SqlClient;
+using Serilog;
 
 namespace DBADash.XE
 {
@@ -232,6 +233,8 @@ namespace DBADash.XE
         private readonly string _readPath;
         private readonly int _maxEvents;
         private readonly bool _newestFirst;
+        private readonly IReadOnlyList<string> _eventNameFilter;
+        private readonly int _commandTimeout;
         private FileTargetCursor _cursor = FileTargetCursor.None;
 
         public EventFileTraceReader(string connectionString, string readPath)
@@ -256,19 +259,63 @@ namespace DBADash.XE
         /// descending, so the whole file is scanned but only <paramref name="maxEvents"/> rows come back) and
         /// <see cref="ReadNextAsync"/> reverses them so the returned batch is still in chronological order; otherwise
         /// (the incremental trace/watch readers) the cap has no ORDER BY and short-circuits on the oldest rows.
+        ///
+        /// <para><paramref name="commandTimeout"/> is seconds; 0 or less leaves SqlClient's own default.  Worth
+        /// setting for a caller that pages a whole file set - the cost of a read is opening and seeking the
+        /// files rather than the number of events in them, so a large or busy session can take longer than the
+        /// 30 second default allows.</para>
         /// </summary>
         public EventFileTraceReader(string connectionString, string readPath, FileTargetCursor initialCursor,
-            int maxEvents, bool newestFirst = false)
+            int maxEvents, bool newestFirst = false, IReadOnlyList<string> eventNameFilter = null,
+            int commandTimeout = 0)
         {
             _connectionString = connectionString;
             _readPath = readPath;
             _cursor = initialCursor;
             _maxEvents = maxEvents > 0 ? maxEvents : 0;
             _newestFirst = newestFirst;
+            _eventNameFilter = eventNameFilter is { Count: > 0 } ? eventNameFilter : null;
+            _commandTimeout = commandTimeout > 0 ? commandTimeout : 0;
         }
 
         public long LastReadMilliseconds { get; private set; }
         public long LastShredMilliseconds { get; private set; }
+
+        /// <summary>
+        /// The current resume position.  Callers that outlive the reader (the deadlock collection builds a
+        /// new reader per run) persist this and pass it back to the constructor next time.
+        /// </summary>
+        public FileTargetCursor Cursor => _cursor;
+
+        /// <summary>
+        /// Rows the last read returned before the cursor's boundary de-duplication, which is what tells a
+        /// paging caller whether the end of the file was reached: a read that comes back short of the cap has
+        /// nothing left to give.  The de-duplicated count can be lower for a full batch, so comparing that
+        /// against the cap would stop paging early and leave the rest of the file unread.
+        /// </summary>
+        public int LastRawRowCount { get; private set; }
+
+        /// <summary>
+        /// The events captured since the previous call, as the raw rows the target returned, and advancing the
+        /// cursor exactly as <see cref="ReadNextAsync"/> does.
+        ///
+        /// <para>For callers that want the event XML rather than <see cref="XETraceShredder"/>'s
+        /// column-per-field table - the deadlock collection hands the XML straight to the deadlock parser, so
+        /// shredding it into a dynamic table first would be work done only to be undone.</para>
+        /// </summary>
+        public async Task<List<RawXEvent>> ReadRawNextAsync(CancellationToken cancellationToken)
+        {
+            var sw = Stopwatch.StartNew();
+            var rows = await ReadRawAsync(cancellationToken);
+            LastReadMilliseconds = sw.ElapsedMilliseconds;
+            LastShredMilliseconds = 0;
+            LastRawRowCount = rows.Count;
+
+            var (newEvents, cursor) = FileTargetCursorReader.Apply(rows, _cursor);
+            _cursor = cursor;
+            if (_newestFirst) newEvents.Reverse();
+            return newEvents;
+        }
 
         public async Task<DataTable> ReadNextAsync(CancellationToken cancellationToken)
         {
@@ -287,24 +334,90 @@ namespace DBADash.XE
             return dt;
         }
 
+        /// <summary>
+        /// Errors <c>sys.fn_xe_file_target_read_file</c> raises when the resume position no longer exists:
+        /// 25717 when the file itself has rolled out of the set, 25722 when the file is still there but the
+        /// offset is not.  Both mean the same thing to us - the cursor is stale.
+        /// </summary>
+        private const int ErrorFileNotFound = 25717;
+
+        private const int ErrorInvalidOffset = 25722;
+
+        /// <summary>
+        /// True when the last read found its resume position gone and started again from the beginning of the
+        /// file set.  The caller may then have re-read events it has already seen.
+        /// </summary>
+        public bool CursorWasReset { get; private set; }
+
+        /// <summary>
+        /// Reads from the current cursor, falling back to the start of the file set when that position no
+        /// longer exists.
+        ///
+        /// <para>Event files roll: a cursor kept across a service restart, or simply held long enough by a
+        /// running service, eventually points at a file that has aged out.  Without this the collection would
+        /// fail on that instance on every run from then on, since nothing else clears the cursor.</para>
+        /// </summary>
         private async Task<List<RawXEvent>> ReadRawAsync(CancellationToken cancellationToken)
+        {
+            CursorWasReset = false;
+            try
+            {
+                return await ExecuteReadAsync(_cursor, cancellationToken);
+            }
+            catch (SqlException ex) when (_cursor.HasValue
+                                          && ex.Errors.Cast<SqlError>().Any(e =>
+                                              e.Number is ErrorFileNotFound or ErrorInvalidOffset))
+            {
+                Log.Warning(ex,
+                    "The resume position for {path} no longer exists ({file} offset {offset}); reading from the start of the file set.",
+                    _readPath, _cursor.FileName, _cursor.Offset);
+                _cursor = FileTargetCursor.None;
+                CursorWasReset = true;
+                return await ExecuteReadAsync(FileTargetCursor.None, cancellationToken);
+            }
+        }
+
+        private async Task<List<RawXEvent>> ExecuteReadAsync(FileTargetCursor cursor, CancellationToken cancellationToken)
         {
             var rows = new List<RawXEvent>();
             var top = _maxEvents > 0 ? "TOP (@max) " : string.Empty;
             // Newest-first needs an explicit order (file_name then file_offset are monotonic with time, matching the
             // watch's end-cursor scan); the incremental readers stay unordered so their TOP can short-circuit.
             var orderBy = _newestFirst ? " ORDER BY file_name DESC, file_offset DESC" : string.Empty;
+
+            //  event_data is already NVARCHAR(MAX) on this function, so it is selected as-is.  (The cast that
+            //  target_data needs elsewhere is a different thing - that column really is the XML type.)
+            //
+            //  With a filter, every row is still returned - the cursor is derived from the last row read, so
+            //  filtering rows away would stop it advancing past a stretch containing nothing of interest, and
+            //  the same range would be rescanned forever.  Only the payload is suppressed: event_data comes
+            //  back NULL for events we don't want, which is what keeps a session like system_health cheap to
+            //  follow (its sp_server_diagnostics events are large and fire constantly).
+            //  More than one name is matched because the event carrying a deadlock graph is named differently
+            //  at database scope than at server scope, and a caller that reads both passes both.
+            var eventNames = _eventNameFilter == null
+                ? null
+                : Enumerable.Range(0, _eventNameFilter.Count).Select(i => "@eventName" + i).ToArray();
+            var eventData = eventNames == null
+                ? "event_data"
+                : $"CASE WHEN object_name IN ({string.Join(", ", eventNames)}) THEN event_data END";
             var sql =
-                $"SELECT {top}file_name, file_offset, CAST(event_data AS NVARCHAR(MAX)) AS event_data " +
+                $"SELECT {top}file_name, file_offset, {eventData} AS event_data " +
                 "FROM sys.fn_xe_file_target_read_file(@path, NULL, @initFile, @initOffset)" + orderBy;
             await using var cn = new SqlConnection(_connectionString);
             await using var cmd = new SqlCommand(sql, cn) { CommandType = CommandType.Text };
+            if (_commandTimeout > 0) cmd.CommandTimeout = _commandTimeout;
             if (_maxEvents > 0) cmd.Parameters.Add("@max", SqlDbType.Int).Value = _maxEvents;
+            // object_name is NVARCHAR(60) on the function; match it rather than over-declaring the parameter.
+            for (var i = 0; i < (eventNames?.Length ?? 0); i++)
+            {
+                cmd.Parameters.Add(eventNames[i], SqlDbType.NVarChar, 60).Value = _eventNameFilter[i];
+            }
             cmd.Parameters.Add("@path", SqlDbType.NVarChar, 260).Value = _readPath;
             cmd.Parameters.Add("@initFile", SqlDbType.NVarChar, 260).Value =
-                _cursor.HasValue ? _cursor.FileName : (object)DBNull.Value;
+                cursor.HasValue ? cursor.FileName : (object)DBNull.Value;
             cmd.Parameters.Add("@initOffset", SqlDbType.BigInt).Value =
-                _cursor.HasValue ? _cursor.Offset : (object)DBNull.Value;
+                cursor.HasValue ? cursor.Offset : (object)DBNull.Value;
 
             await cn.OpenAsync(cancellationToken);
             await using var registration = cancellationToken.Register(() => cmd.Cancel());
