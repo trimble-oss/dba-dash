@@ -135,7 +135,6 @@ namespace DBADashService
                             State.IsExtendedEventsNotSupportedException = true;
                         }
 
-                        State.JobInstanceId = collector.Job_instance_id;
                         op.Complete();
                     }
 
@@ -155,6 +154,12 @@ namespace DBADashService
                         collector.CacheCollectedText();
                         collector.CacheCollectedPlans();
                         collector.CommitDeadlockCursor();
+                        // Advanced here rather than straight after the collection: the next run asks msdb for
+                        // history above this id, so moving it for a batch that never reached a destination
+                        // would step over that history until the service restarts and the watermark resets.
+                        // JobHistory_Upd derives its own watermark from the repository, so re-reading the same
+                        // rows imports nothing twice.
+                        State.JobInstanceId = collector.Job_instance_id;
                     }
                     catch (Exception ex)
                     {
@@ -216,13 +221,16 @@ namespace DBADashService
 
             if (containsJobs)
             {
-                state.JobLastModified = collector.JobLastModified;
-                state.JobCollectDate = DateTime.Now;
-
                 var fileName = DBADashSource.GenerateFileName(cfg.SourceConnection.ConnectionForFileName);
                 try
                 {
                     await DestinationHandling.WriteAllDestinationsAsync(collector.Data, cfg, fileName, config);
+
+                    // Only once the jobs have been written: this is what the next run compares against to
+                    // decide nothing has changed, so advancing it for a batch that never arrived would leave
+                    // the change unstored until the ~daily forced collection came round.
+                    state.JobLastModified = collector.JobLastModified;
+                    state.JobCollectDate = DateTime.Now;
                 }
                 catch (Exception ex)
                 {
