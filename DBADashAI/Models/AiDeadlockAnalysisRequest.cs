@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 namespace DBADashAI.Models
 {
     /// <summary>
@@ -18,6 +20,20 @@ namespace DBADashAI.Models
 
         /// <summary>Groups occurrences of one deadlock, and is what a cached answer is keyed on.</summary>
         public string? Signature { get; set; }
+
+        /// <summary>
+        /// The shape a signature has: DeadlockSignature emits "0x" followed by eight bytes of a
+        /// SHA-256 as hex.  Checked rather than assumed - the caller is whoever posted the request,
+        /// and the value goes into the prompt, the telemetry description, the log, and the key of a
+        /// stored answer.  None of those want free text, and the repository cannot take it anyway:
+        /// the upsert converts the string to BINARY(8).
+        ///
+        /// Anchored with \A and \z rather than ^ and $: the latter also matches before a trailing
+        /// newline, which would let a line break through the one check standing between a posted
+        /// value and the log.
+        /// </summary>
+        private static readonly Regex SignaturePattern =
+            new(@"\A0x[0-9a-fA-F]{16}\z", RegexOptions.CultureInvariant);
 
         public string? Instance { get; set; }
 
@@ -71,6 +87,11 @@ namespace DBADashAI.Models
             if (GraphXml.Length > MaxGraphXmlLength)
             {
                 return $"GraphXml exceeds {MaxGraphXmlLength} characters.";
+            }
+
+            if (!string.IsNullOrWhiteSpace(Signature) && !SignaturePattern.IsMatch(Signature!))
+            {
+                return "Signature is not a deadlock signature.";
             }
 
             return Schema.Sum(s => s.Ddl?.Length ?? 0) > MaxSchemaLength
