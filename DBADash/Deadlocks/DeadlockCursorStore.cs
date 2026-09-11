@@ -79,20 +79,34 @@ namespace DBADash.Deadlocks
         }
 
         /// <summary>
-        /// The collection state for an instance, restored from disk on first use.
+        /// The state an instance's next read starts from - a detached copy, not the live state that
+        /// <see cref="Commit"/> registers.  The read advances the copy, so a run that never commits leaves
+        /// the position where it was and the next run reads the same events again rather than stepping over
+        /// deadlocks that were collected but never stored.  Dedup on DeadlockHash absorbs whatever that
+        /// re-read brings back, so the cost of an unnecessary one is the read itself.
         /// </summary>
-        public static DeadlockCollectionState GetOrAdd(string connectionID)
+        public static DeadlockCollectionState GetPending(string connectionID)
         {
             EnsureLoaded();
-            return States.GetOrAdd(connectionID, _ => new DeadlockCollectionState());
+            if (!States.TryGetValue(connectionID, out var current)) return new DeadlockCollectionState();
+            return new DeadlockCollectionState
+            {
+                Cursor = current.Cursor,
+                // Copied rather than shared: the ring_buffer read replaces this set, and an uncommitted run
+                // must leave the previous run's set in place so anything it read but did not store is still
+                // treated as unseen.
+                SeenHashes = new HashSet<string>(current.SeenHashes, StringComparer.Ordinal)
+            };
         }
 
         /// <summary>
-        /// Records the cursor for an instance, for the flush timer to write.  Called after a collection run,
-        /// so at the collection's own cadence rather than per batch, and does no disk IO of its own: the
-        /// collection thread is not the place to write a file shared with every other instance.
+        /// Makes the state a run reached the one the next run starts from, and records the cursor for the
+        /// flush timer to write.  Called once the run's deadlocks have reached a destination - see
+        /// <see cref="DBCollector.CommitDeadlockCursor"/> - so at the collection's own cadence rather than per
+        /// batch, and does no disk IO of its own: the collection thread is not the place to write a file
+        /// shared with every other instance.
         /// </summary>
-        public static void Save(string connectionID, DeadlockCollectionState state)
+        public static void Commit(string connectionID, DeadlockCollectionState state)
         {
             if (string.IsNullOrEmpty(connectionID) || state == null) return;
             EnsureLoaded();

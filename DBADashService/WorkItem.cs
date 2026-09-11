@@ -154,6 +154,7 @@ namespace DBADashService
                         await DestinationHandling.WriteAllDestinationsAsync(collector.Data, Source, fileName, config);
                         collector.CacheCollectedText();
                         collector.CacheCollectedPlans();
+                        collector.CommitDeadlockCursor();
                     }
                     catch (Exception ex)
                     {

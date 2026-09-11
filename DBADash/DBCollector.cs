@@ -143,6 +143,12 @@ namespace DBADash
         public bool IsExtendedEventsNotSupportedException;
         private readonly bool DisableRetry;
 
+        /// <summary>
+        /// Where this run's deadlock read got to, and the key it belongs to, held until the events it read have
+        /// been written.  See <see cref="CommitDeadlockCursor"/>.
+        /// </summary>
+        private (string Key, DeadlockCollectionState State)? pendingDeadlockCursor;
+
         // SqlClient connections never issue SET ARITHABORT ON, and ARITHABORT is only implicitly ON when
         // ANSI_WARNINGS is ON *and* the connection database's compatibility level is >= 90.  On instances
         // where the connection database is at compatibility level 80 (or has ANSI_WARNINGS OFF) any collection
@@ -1064,6 +1070,23 @@ namespace DBADash
         }
 
         ///<summary>
+        ///Once written to the destination, call this function to move the deadlock read position forward. Until it is
+        ///called the position stays where the previous run left it, so a run whose data never reached a destination is
+        ///retried by re-reading the same events rather than stepping over them.<br/>
+        ///Note: the repository dedups on DeadlockHash, so a re-read that turns out to be a duplicate costs only the
+        ///read.  The ring buffer flush is deliberately not deferred this way - emptying the buffer is what frees it,
+        ///and a flush held back until the write completed would drop whatever arrived in the meantime.  That path can
+        ///lose a deadlock either way, which is why flushing it is opt in.
+        ///</summary>
+        public void CommitDeadlockCursor()
+        {
+            if (pendingDeadlockCursor == null) return;
+            var (key, state) = pendingDeadlockCursor.Value;
+            DeadlockCursorStore.Commit(key, state);
+            pendingDeadlockCursor = null;
+        }
+
+        ///<summary>
         ///Once written to the destination, call this function to cache the sql_handles for captured query text. If the handle is cached it won't be collected in future.<br/>
         ///Note: We capture text at the batch level and can use the statement offsets to get the statement text.
         ///</summary>
@@ -1588,15 +1611,15 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
                 cursorKey = ConnectionID + "|" + sessionName;
             }
 
-            var state = DeadlockCursorStore.GetOrAdd(cursorKey);
+            var state = DeadlockCursorStore.GetPending(cursorKey);
 
             var result = await DeadlockCollector.CollectAsync(ConnectionString, sessionName, IsAzureDB, state,
                 CancellationToken.None, manageSession, Source.FlushDeadlockXERingBuffer,
                 DeadlockXERingBufferKB);
 
-            // After the read, not after the import: the cursor records what has been read off the instance,
-            // and a failed import is retried from data we already hold rather than by re-reading.
-            DeadlockCursorStore.Save(cursorKey, state);
+            // Held rather than saved: the position moves once these deadlocks have reached a destination, so a
+            // write that fails is retried by reading them again.  See CommitDeadlockCursor.
+            pendingDeadlockCursor = (cursorKey, state);
 
             // The tables go over even when empty: the import advances the collection date from them, which is
             // what stops an instance that simply isn't deadlocking from being reported as overdue.
