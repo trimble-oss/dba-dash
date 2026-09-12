@@ -28,50 +28,61 @@ namespace DBADashGUI.CustomReports
 
         public override void Navigate(DBADashContext context, DataGridViewRow row, int selectedTableIndex, ContainerControl sender)
         {
+            // A blank cell - a rollup row has no hash of its own - is not something to look up
+            var value = row.Cells[TargetColumn].Value.DBNullToNull();
+            if (value == null) return;
+            var hash = GetHash(value);
+            if (TargetColumnLinkType is (QueryStoreLinkColumnType.QueryHash or QueryStoreLinkColumnType.PlanHash) && hash == null) return;
+
             var frmQS = new QueryStoreViewer();
 
             var newContext = context.DeepCopy();
-            if (!string.IsNullOrEmpty(InstanceIdColumn))
+            if (!string.IsNullOrEmpty(InstanceIdColumn) && row.Cells[InstanceIdColumn].Value.DBNullToNull() is int instanceId)
             {
-                var instanceId = row.Cells[InstanceIdColumn].Value;
-                newContext.InstanceID = (int)instanceId;
+                newContext.InstanceID = instanceId;
             }
             if (!string.IsNullOrEmpty(DatabaseNameColumn))
             {
-                var databaseName = row.Cells[DatabaseNameColumn].Value;
-                newContext.DatabaseName = (string)databaseName;
+                // No database searches them all, which is the right answer for a query whose database is unknown
+                newContext.DatabaseName = row.Cells[DatabaseNameColumn].Value.DBNullToNull() as string;
             }
 
             switch (TargetColumnLinkType)
             {
                 case QueryStoreLinkColumnType.QueryID:
-                    long queryId = (long)row.Cells[TargetColumn].Value;
-                    frmQS.QueryId = queryId;
+                    frmQS.QueryId = (long)value;
                     break;
 
                 case QueryStoreLinkColumnType.PlanID:
-                    long planId = (long)row.Cells[TargetColumn].Value;
-                    frmQS.PlanId = planId;
+                    frmQS.PlanId = (long)value;
                     break;
 
                 case QueryStoreLinkColumnType.ObjectName:
-                    string objectName = (string)row.Cells[TargetColumn].Value;
-                    newContext.ObjectName = objectName;
+                    newContext.ObjectName = (string)value;
                     newContext.Type = SQLTreeItem.TreeType.StoredProcedure;
                     break;
 
                 case QueryStoreLinkColumnType.QueryHash:
-                    byte[] objectHash = (byte[])row.Cells[TargetColumn].Value;
-                    frmQS.QueryHash = objectHash;
+                    frmQS.QueryHash = hash;
                     break;
 
                 case QueryStoreLinkColumnType.PlanHash:
-                    byte[] planHash = (byte[])row.Cells[TargetColumn].Value;
-                    frmQS.PlanHash = planHash;
+                    frmQS.PlanHash = hash;
                     break;
             }
             frmQS.Context = newContext;
             frmQS.ShowSingleInstance();
         }
+
+        /// <summary>
+        /// Query Store returns hashes as binary, but a report that filters or drills down on a hash carries it
+        /// as a 0x string so it can be passed as a parameter, so both are accepted.
+        /// </summary>
+        private static byte[] GetHash(object value) => value switch
+        {
+            byte[] bytes => bytes,
+            string hex => hex.HexStringToByteArray(),
+            _ => null
+        };
     }
 }

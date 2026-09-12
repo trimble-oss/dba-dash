@@ -24,6 +24,8 @@ VALUES -- Daily Partitions
 	('dbo','FailedLogins','d',14,CAST(1 AS BIT)),
 	('dbo','ResourceGovernorWorkloadGroupsMetrics','d',14,CAST(1 AS BIT)),
 	('dbo','ResourceGovernorResourcePoolsMetrics','d',14,CAST(1 AS BIT)),
+	('dbo','QueryStats','d',14,CAST(1 AS BIT)),
+	('dbo','QueryStatsCollection','d',14,CAST(1 AS BIT)),
 	('dbo','Deadlocks','d',14,CAST(1 AS BIT)),
 	('dbo','DeadlockXml','d',14,CAST(1 AS BIT)),
 	('dbo','DeadlockProcesses','d',14,CAST(1 AS BIT)),
@@ -38,6 +40,8 @@ VALUES -- Daily Partitions
 	('dbo','ObjectExecutionStats_60MIN','m',3,CAST(1 AS BIT)),
 	('dbo','PerformanceCounters_60MIN','m',3,CAST(1 AS BIT)),
 	('dbo','JobStats_60MIN','m',3,CAST(1 AS BIT)),
+	('dbo','QueryStats_60MIN','m',3,CAST(1 AS BIT)),
+	('dbo','QueryStatsCollection_60MIN','m',3,CAST(1 AS BIT)),
 	('dbo','IdentityColumnsHistory','m',3,CAST(1 AS BIT)),
 	('dbo','TableSize','m',3,CAST(1 AS BIT)),
 	('dbo','AvailabilityGroupHealthEvents','m',3,CAST(1 AS BIT))

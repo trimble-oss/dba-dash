@@ -2,6 +2,7 @@
 using DBADash.Deadlocks;
 using DBADash.SlowQueries;
 using DBADash.InstanceMetadata;
+using DBADash.QueryStats;
 using Microsoft.Data.SqlClient;
 using Microsoft.Management.Infrastructure;
 using Microsoft.Management.Infrastructure.Options;
@@ -92,7 +93,8 @@ namespace DBADash
         ScheduleInfo,
         PerfmonCounters,
         Deadlocks,
-        AGHealthEvents
+        AGHealthEvents,
+        QueryStats
     }
 
     public enum HostPlatform
@@ -118,7 +120,7 @@ namespace DBADash
             = new(StringComparer.OrdinalIgnoreCase);
 
         private string computerName;
-        private readonly CollectionType[] azureCollectionTypes = new[] { CollectionType.SlowQueries, CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceStats, CollectionType.CPU, CollectionType.DBFiles, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ObjectExecutionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions, CollectionType.SysConfig, CollectionType.DatabasePrincipals, CollectionType.DatabaseRoleMembers, CollectionType.DatabasePermissions, CollectionType.OSInfo, CollectionType.CustomChecks, CollectionType.PerformanceCounters, CollectionType.VLF, CollectionType.DatabaseQueryStoreOptions, CollectionType.AzureDBResourceGovernance, CollectionType.RunningQueries, CollectionType.IdentityColumns, CollectionType.TableSize, CollectionType.AvailableProcs, CollectionType.DatabaseExtendedProperties, CollectionType.Deadlocks };
+        private readonly CollectionType[] azureCollectionTypes = new[] { CollectionType.SlowQueries, CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceStats, CollectionType.CPU, CollectionType.DBFiles, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ObjectExecutionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions, CollectionType.SysConfig, CollectionType.DatabasePrincipals, CollectionType.DatabaseRoleMembers, CollectionType.DatabasePermissions, CollectionType.OSInfo, CollectionType.CustomChecks, CollectionType.PerformanceCounters, CollectionType.VLF, CollectionType.DatabaseQueryStoreOptions, CollectionType.AzureDBResourceGovernance, CollectionType.RunningQueries, CollectionType.IdentityColumns, CollectionType.TableSize, CollectionType.AvailableProcs, CollectionType.DatabaseExtendedProperties, CollectionType.Deadlocks, CollectionType.QueryStats };
         private readonly CollectionType[] azureOnlyCollectionTypes = new[] { CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceGovernance };
         private readonly CollectionType[] azureMasterOnlyCollectionTypes = new[] { CollectionType.AzureDBElasticPoolResourceStats };
         public DBADashSource Source;
@@ -163,6 +165,55 @@ namespace DBADash
         /// See <see cref="CommitReadPositions"/>.
         /// </summary>
         private (string Key, AGHealthEventCollectionState State)? pendingAGHealthEventCursor;
+
+        /// <summary>
+        /// This run's query stats result, kept for the text collection that follows it: the statements it
+        /// stored are the ones whose text is worth fetching.  Its baseline has already moved on - see
+        /// <see cref="QueryStatsBaselineStore"/>.
+        /// </summary>
+        private QueryStatsResult queryStats;
+
+        /// <summary>
+        /// Handles whose text this run has already asked for.  The cache only learns about a handle once the
+        /// data has been written, so within a single run it is this set that stops two collections fetching
+        /// the same text twice and sending a table the repository cannot insert.
+        /// </summary>
+        private readonly HashSet<string> textHandlesRequested = new(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// Cache keys of the query shapes this run made a template for.  Like the text handles, they only go into
+        /// the cache once the data has been written - see <see cref="CacheCollectedText"/>.
+        /// </summary>
+        private readonly List<string> queryStatsTemplatesCollected = new();
+
+        /// <summary>
+        /// How long a shape's template counts as sent.  When it lapses the template is sent again, which the
+        /// repository ignores where it already has one, so this decides how often that happens - and how long a
+        /// template lost on the way stays lost: one in a collection the repository refused as an overlap, say.
+        /// Absolute rather than sliding for that reason, since a shape kept every interval would never let a
+        /// sliding entry lapse.  A day: one fetch per shape per day.
+        /// </summary>
+        private static readonly TimeSpan QueryStatsTemplateLifetime = TimeSpan.FromDays(1);
+
+        /// <summary>
+        /// Cache keys of the plan shapes this run sent a plan for.  Like the templates, they only go into the cache
+        /// once the data has been written - see <see cref="CacheCollectedPlans"/>.
+        /// </summary>
+        private readonly List<string> queryStatsPlansCollected = new();
+
+        /// <summary>
+        /// How long a plan shape's plan counts as sent - absolute, and a day, for the reasons
+        /// <see cref="QueryStatsTemplateLifetime"/> gives.  A plan sent again is ignored by the repository where it
+        /// already has one, so this decides how often each plan in use is fetched: once a day.
+        /// </summary>
+        private static readonly TimeSpan QueryStatsPlanLifetime = TimeSpan.FromDays(1);
+
+        /// <summary>
+        /// How long a plan that could not be fetched waits before it is asked for again: evicted between the read
+        /// and the fetch, recompiled to another shape, or in an encrypted module.  Long enough that a plan which
+        /// never stays cached does not take a place under the cap every interval.
+        /// </summary>
+        private static readonly TimeSpan QueryStatsPlanRetryDelay = TimeSpan.FromHours(1);
 
         // SqlClient connections never issue SET ARITHABORT ON, and ARITHABORT is only implicitly ON when
         // ANSI_WARNINGS is ON *and* the connection database's compatibility level is >= 90.  On instances
@@ -929,6 +980,14 @@ namespace DBADash
                 // Reads the AlwaysOn_health XE session.  HADR and Azure checks are above.
                 return IsXESupported;
             }
+            else if (collectionType == CollectionType.QueryStats)
+            {
+                // Reads the plan cache, so the cost scales with the size of that cache rather than with
+                // anything we can filter on.  Off until a top N is configured, for the same reason the slow
+                // query collection is off until a threshold is set.  The Azure master database has no user
+                // workload to account for.
+                return Source.IsQueryStatsCollectionEnabled && !isAzureMasterDB;
+            }
             else if (collectionType == CollectionType.Instance)
             {
                 return false; // Required & collected by default
@@ -999,25 +1058,52 @@ namespace DBADash
                 LogError(ex, collectionTypeString);
                 StopCollection();
             }
-            if (collectionType == CollectionType.RunningQueries)
+            // Text is shared between the two collections that need it, and fetched once per handle.  Query
+            // stats keeps only the statements it stored, so a row in that grid has text to show; running
+            // queries keeps everything it sampled.
+            if (collectionType is CollectionType.RunningQueries or CollectionType.QueryStats)
             {
-                try
+                await CollectStepAsync(collectionType, "Text", $"Error collecting text for {collectionTypeString}", () =>
                 {
                     CollectText();
-                }
-                catch (Exception ex)
-                {
-                    LogError(new Exception("Error collecting text for Running Queries", ex), "RunningQueries");
-                }
-                try
-                {
-                    await CollectPlansAsync();
-                }
-                catch (Exception ex)
-                {
-                    LogError(new Exception("Error collecting plans for Running Queries", ex), "RunningQueries");
-                }
+                    return Task.CompletedTask;
+                });
             }
+            if (collectionType == CollectionType.QueryStats)
+            {
+                await CollectStepAsync(collectionType, "Templates", "Error collecting query shape templates for QueryStats", () =>
+                {
+                    CollectQueryStatsTemplates();
+                    return Task.CompletedTask;
+                });
+                await CollectStepAsync(collectionType, "Plans", "Error collecting plans for QueryStats", CollectQueryStatsPlansAsync);
+            }
+            if (collectionType == CollectionType.RunningQueries)
+            {
+                await CollectStepAsync(collectionType, "Plans", "Error collecting plans for Running Queries", CollectPlansAsync);
+            }
+        }
+
+        /// <summary>
+        /// One of the steps that follow a collection - fetching the text, templates or plans it needs - timed as a
+        /// Collection Duration of its own, for the collection and step together: "QueryStats Plans", say.  Not part
+        /// of the collection's own duration, which covers the collection and stops before these start, so that
+        /// figure stays comparable with its history and a slow step shows up as itself.  Every step is timed, work
+        /// or not, so the counters for a collection add up to the time it took.
+        /// </summary>
+        private async Task CollectStepAsync(CollectionType collectionType, string step, string errorMessage, Func<Task> collectStep)
+        {
+            var timer = Stopwatch.StartNew();
+            try
+            {
+                await collectStep();
+            }
+            catch (Exception ex)
+            {
+                LogError(new Exception(errorMessage, ex), EnumToString(collectionType));
+            }
+            LogInternalPerformanceCounter("DBADash", "Collection Duration (ms)", $"{collectionType} {step}",
+                Convert.ToDecimal(timer.Elapsed.TotalMilliseconds));
         }
 
         private async Task CollectPlansAsync()
@@ -1082,8 +1168,9 @@ namespace DBADash
         ///</summary>
         private void CollectText()
         {
-            if (!Data.Tables.Contains("RunningQueries")) return;
-            var handlesSQL = GetTextFromHandlesSQL();
+            var handles = TextHandles();
+            if (handles.Count == 0) return;
+            var handlesSQL = GetTextFromHandlesSQL(handles);
             if (string.IsNullOrEmpty(handlesSQL)) return;
             using var cn = new SqlConnection(ConnectionString);
             using var da = new SqlDataAdapter(handlesSQL, cn);
@@ -1091,18 +1178,199 @@ namespace DBADash
             da.Fill(dt);
             if (dt.Rows.Count > 0)
             {
-                Data.Tables.Add(dt);
+                // Both collections that need text can run in the same batch, and the second call must add to
+                // what the first fetched rather than adding a second table the import would never look at.
+                // A handle is only ever requested once per run, so the merged table cannot hold duplicates -
+                // which matters, because QueryText_Upd would fail on a primary key violation if it did.
+                var existing = Data.Tables["QueryText"];
+                if (existing == null)
+                {
+                    Data.Tables.Add(dt);
+                }
+                else
+                {
+                    existing.Merge(dt);
+                }
             }
             LogInternalPerformanceCounter("DBADash", "Count of text collected", "", dt.Rows.Count); // Count of text collected from sql_handles
-            LogInternalPerformanceCounter("DBADash", "Count of running queries", "", Data.Tables["RunningQueries"]!.Rows.Count); // Total number of running queries
+            if (Data.Tables.Contains("RunningQueries"))
+            {
+                LogInternalPerformanceCounter("DBADash", "Count of running queries", "", Data.Tables["RunningQueries"]!.Rows.Count); // Total number of running queries
+            }
+        }
+
+        /// <summary>
+        /// Make the templates of the ad hoc shapes this collection stored and has not yet sent one for: fetch each
+        /// one's example batch, cut the statement out of it and take its literal values out - see
+        /// <see cref="QueryTemplate"/>.  The template and the batch travel on the shape's own rows, and the
+        /// repository keeps the first it is sent, so a shape costs a fetch a day rather than one per interval - see
+        /// <see cref="QueryStatsTemplateLifetime"/>.
+        ///
+        /// <para>Not through <see cref="CollectText"/>: that would store the example's batch whether or not the
+        /// repository already had a template, so every shape sent again - after a restart, or once its cache entry
+        /// lapses - would leave behind a batch text that nothing refers to.  The repository stores the batch only
+        /// when it takes the template.</para>
+        /// </summary>
+        private void CollectQueryStatsTemplates()
+        {
+            if (queryStats == null || queryStats.Shapes.Count == 0) return;
+
+            // Heaviest first, as the processor ordered them, so a capped collection templates the shapes that matter
+            var needed = queryStats.Shapes
+                .Where(s => s.SqlHandle is { Length: > 0 } && !cache.Contains(QueryStatsTemplateCacheKey(s)))
+                .Take(Source.QueryStatsTextHandlesPerCollection)
+                .ToList();
+            if (needed.Count == 0) return;
+
+            var texts = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            using (var cn = new SqlConnection(ConnectionString))
+            using (var cmd = new SqlCommand(GetBatchTextSQL(needed.Select(s => s.SqlHandle.ToHexString()).Distinct(StringComparer.OrdinalIgnoreCase)), cn))
+            {
+                cn.Open();
+                using var rdr = cmd.ExecuteReader();
+                while (rdr.Read())
+                {
+                    if (!rdr.IsDBNull(1)) texts[((byte[])rdr[0]).ToHexString()] = rdr.GetString(1);
+                }
+            }
+
+            foreach (var shape in needed)
+            {
+                // Evicted since the read: the next interval the shape is kept tries again, most likely with another
+                // variant as its example
+                if (!texts.TryGetValue(shape.SqlHandle.ToHexString(), out var batch)) continue;
+                var statementText = QueryTemplate.GetStatementText(batch, shape.StartOffset, shape.EndOffset);
+                var template = QueryTemplate.Create(statementText, shape.QuotedIdentifier);
+                if (string.IsNullOrWhiteSpace(template)) continue;
+
+                // One row is enough: the repository takes a shape's template from whichever of its rows carries one
+                var row = shape.Rows[0];
+                row["StatementTemplate"] = template;
+                row["ExampleBatchText"] = batch;
+                queryStatsTemplatesCollected.Add(QueryStatsTemplateCacheKey(shape));
+            }
+            LogInternalPerformanceCounter("DBADash", "Count of query shape templates collected", "", queryStatsTemplatesCollected.Count);
+        }
+
+        private string QueryStatsTemplateCacheKey(ShapeExample shape) =>
+            $"QueryStatsTemplate|{ConnectionID}|{shape.DatabaseName}|{shape.QueryHash.ToHexString()}";
+
+        /// <summary>
+        /// Fetch the plans of the plan shapes this collection stored and has not sent a plan for in the last day,
+        /// heaviest first and capped per collection, and write each onto the row of the plan shape it is the plan
+        /// for.  The repository keeps the first plan it is sent for each statement and plan shape - see
+        /// dbo.QueryStats_Upd.
+        ///
+        /// <para>After the statistics rather than with them: the read stays a scan of the plan cache, and only the
+        /// rows that survived the ranking are worth a plan.  Seconds after it, so the entries the processor chose
+        /// are still cached.  The fetch is the one running queries use - see <see cref="Plan.GetPlansAsync"/> - but
+        /// what has been sent is remembered by statement and plan shape rather than by cache entry, which for an ad
+        /// hoc shape is a different variant almost every interval.</para>
+        /// </summary>
+        private async Task CollectQueryStatsPlansAsync()
+        {
+            if (queryStats == null || queryStats.Plans.Count == 0 || Source.QueryStatsPlansPerCollection <= 0) return;
+
+            var threshold = (long)Source.QueryStatsPlanCPUThresholdMs * 1000; // worker time is in microseconds
+            var needed = queryStats.Plans
+                .Where(p => p.WorkerTime >= threshold)
+                .Where(p => !cache.Contains(QueryStatsPlanCacheKey(p)) && !cache.Contains(QueryStatsPlanRetryKey(p)))
+                .Take(Source.QueryStatsPlansPerCollection)
+                .ToList();
+            LogInternalPerformanceCounter("DBADash", "Count of query stats plans to collect", "", needed.Count);
+            if (needed.Count == 0) return;
+
+            var fetched = new Dictionary<string, DataRow>(StringComparer.Ordinal);
+            // In batches: the fetch lists its entries in a VALUES clause, which takes at most 1000 rows
+            foreach (var batch in needed.Chunk(500))
+            {
+                var plans = await Plan.GetPlansAsync(
+                    batch.Select(p => new Plan(p.PlanHandle, p.PlanHash, p.StartOffset, p.EndOffset)).ToList(),
+                    ConnectionString);
+                foreach (DataRow r in plans.Rows)
+                {
+                    fetched[PlanEntryKey((byte[])r["plan_handle"], (int)r["statement_start_offset"], (int)r["statement_end_offset"])] = r;
+                }
+            }
+
+            var retryPolicy = new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.Add(QueryStatsPlanRetryDelay) };
+            foreach (var plan in needed)
+            {
+                // The hash is read from the plan itself, so a different one means the entry recompiled to another
+                // shape since the read, and its plan belongs to some other row if to any
+                if (fetched.TryGetValue(PlanEntryKey(plan.PlanHandle, plan.StartOffset, plan.EndOffset), out var row)
+                    && row["query_plan_hash"] is byte[] hash && hash.AsSpan().SequenceEqual(plan.PlanHash)
+                    && row["query_plan_compressed"] is byte[] compressed)
+                {
+                    plan.Row["query_plan_compressed"] = compressed;
+                    queryStatsPlansCollected.Add(QueryStatsPlanCacheKey(plan));
+                }
+                else
+                {
+                    cache.Set(QueryStatsPlanRetryKey(plan), "", retryPolicy);
+                }
+            }
+            LogInternalPerformanceCounter("DBADash", "Count of query stats plans collected", "", queryStatsPlansCollected.Count);
+        }
+
+        private string QueryStatsPlanCacheKey(PlanExample plan) =>
+            $"QueryStatsPlan|{ConnectionID}|{plan.StatementKey}|{plan.PlanHash.ToHexString()}";
+
+        private string QueryStatsPlanRetryKey(PlanExample plan) => "Retry|" + QueryStatsPlanCacheKey(plan);
+
+        private static string PlanEntryKey(byte[] planHandle, int startOffset, int endOffset) =>
+            $"{planHandle.ToHexString()}|{startOffset}|{endOffset}";
+
+        /// <summary>
+        /// The batch text for each of <paramref name="handles"/>, cached or not - unlike
+        /// <see cref="GetTextFromHandlesSQL"/>, whose cache is of texts already sent to the repository.
+        /// </summary>
+        private string GetBatchTextSQL(IEnumerable<string> handles)
+        {
+            var sb = new StringBuilder();
+            sb.Append(@"DECLARE @handles TABLE(sql_handle VARBINARY(64))
+INSERT INTO @handles(sql_handle)");
+            var cnt = 0;
+            if (IsTableValuedConstructorsSupported)
+            {
+                sb.Append("\nVALUES");
+            }
+            foreach (var strHandle in handles)
+            {
+                if (IsTableValuedConstructorsSupported)
+                {
+                    if (cnt > 0) sb.Append(',');
+                    sb.Append($"(0x{strHandle})");
+                }
+                else
+                {
+                    if (cnt > 0) sb.Append("\nUNION ALL");
+                    sb.Append($"\nSELECT 0x{strHandle}");
+                }
+                cnt++;
+            }
+            sb.AppendLine("OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid polluting the plan cache
+            sb.AppendLine();
+            sb.Append(@"SELECT H.sql_handle,
+    txt.text
+FROM @handles H
+CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt
+OPTION(RECOMPILE)");
+            return sb.ToString();
         }
 
         ///<summary>
         ///Once written to the destination, call this function to cache the plan handles and query plan hash. If the plan is cached it won't be collected in future.<br/>
-        ///Note: We are just caching the plan handle and hash with the statement offsets.
+        ///Note: We are just caching the plan handle and hash with the statement offsets.<br/>
+        ///The query stats plan shapes this run sent a plan for are cached here too, by statement and plan shape.
         ///</summary>
         public void CacheCollectedPlans()
         {
+            var queryStatsPlanPolicy = new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.Add(QueryStatsPlanLifetime) };
+            foreach (var key in queryStatsPlansCollected)
+            {
+                cache.Set(key, "", queryStatsPlanPolicy);
+            }
             if (!Data.Tables.Contains("QueryPlans")) return;
             var dt = Data.Tables["QueryPlans"];
             foreach (DataRow r in dt!.Rows)
@@ -1137,6 +1405,8 @@ namespace DBADash
         /// (see <see cref="CommitDeadlockCursor"/>) and the slow query one.  The slow query repository import only
         /// inserts events newer than those it holds, so a re-read after a failed write costs only the read.  The
         /// default ring buffer mode has no position: its buffer is emptied as it is read, as it always has been.
+        /// The query stats baseline is not here: it moves before the write, because a delta can't be re-read
+        /// harmlessly - see <see cref="QueryStatsBaselineStore"/>.
         /// </summary>
         /// <param name="includeAGHealthEvents">
         /// False when the data hasn't been durably written yet - see the S3 path in <see cref="Messaging.CollectionMessage"/>.
@@ -1212,10 +1482,16 @@ namespace DBADash
 
         ///<summary>
         ///Once written to the destination, call this function to cache the sql_handles for captured query text. If the handle is cached it won't be collected in future.<br/>
-        ///Note: We capture text at the batch level and can use the statement offsets to get the statement text.
+        ///Note: We capture text at the batch level and can use the statement offsets to get the statement text.<br/>
+        ///The query shapes this run sent a template for are cached here too, so their example isn't fetched again.
         ///</summary>
         public void CacheCollectedText()
         {
+            var templatePolicy = new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.Add(QueryStatsTemplateLifetime) };
+            foreach (var key in queryStatsTemplatesCollected)
+            {
+                cache.Set(key, "", templatePolicy);
+            }
             if (!Data.Tables.Contains("QueryText")) return;
             var dt = Data.Tables["QueryText"];
             foreach (DataRow r in dt!.Rows)
@@ -1227,9 +1503,8 @@ namespace DBADash
         ///<summary>
         ///Generate a SQL query to get the query text associated with the plan handles for running queries
         ///</summary>
-        private string GetTextFromHandlesSQL()
+        private string GetTextFromHandlesSQL(List<string> handles)
         {
-            var handles = RunningQueriesHandles();
             int cnt = 0;
             int cacheCount = 0;
             var sb = new StringBuilder();
@@ -1243,7 +1518,11 @@ INSERT INTO @handles(sql_handle)");
 
             foreach (string strHandle in handles)
             {
-                if (!cache.Contains(strHandle))
+                // Requested, not yet collected: a handle asked for once in a run must not be asked for again
+                // by the other collection later in the same run.  Checked here rather than where the handles
+                // are gathered, because the running queries handles are gathered from their tables again on
+                // every call, and a handle fetched twice is a duplicate key in the table type QueryText_Upd takes.
+                if (!cache.Contains(strHandle) && textHandlesRequested.Add(strHandle))
                 {
                     if (IsTableValuedConstructorsSupported)
                     {
@@ -1293,9 +1572,11 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
         }
 
         ///<summary>
-        ///Get a distinct list of sql_handle from RunningQueries and RunningQueriesCursors tables (if they exist).  The handles are later used to capture query text
+        ///Get a distinct list of sql_handle for the collections that need query text: RunningQueries,
+        ///RunningQueriesCursors and QueryStats (whichever of them ran).  The handles are later used to capture
+        ///query text.
         ///</summary>
-        private List<string> RunningQueriesHandles()
+        private List<string> TextHandles()
         {
             var handles = new List<string>();
 
@@ -1313,6 +1594,19 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
                                      where r["sql_handle"] != DBNull.Value
                                      select ((byte[])r["sql_handle"]).ToHexString();
                 handles.AddRange(cursorsHandles);
+            }
+
+            if (queryStats != null)
+            {
+                // Capped, and only counting the handles that would actually be fetched, so a first collection
+                // on a busy instance does not pull hundreds of batch texts in one go.  What the cap leaves
+                // behind is collected over the following intervals: the statements are still stored, they
+                // just show their text a few minutes later.
+                var queryStatsHandles = queryStats.TextHandles
+                    .Select(h => h.ToHexString())
+                    .Where(h => !cache.Contains(h) && !textHandlesRequested.Contains(h))
+                    .Take(Source.QueryStatsTextHandlesPerCollection);
+                handles.AddRange(queryStatsHandles);
             }
 
             return handles.Distinct().ToList();
@@ -1438,6 +1732,10 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             else if (collectionType == CollectionType.RunningQueries)
             {
                 await CollectRunningQueriesAsync();
+            }
+            else if (collectionType == CollectionType.QueryStats)
+            {
+                await CollectQueryStatsAsync();
             }
             else if (collectionType == CollectionType.RunningJobs)
             {
@@ -1592,6 +1890,111 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             var ss = new SchemaSnapshotDB(Source.SourceConnection);
             var dtRG = ss.ResourceGovernorConfiguration();
             Data.Tables.Add(dtRG);
+        }
+
+        /// <summary>
+        /// The interval assumed when there is no previous collection to measure from - a first run, or one
+        /// following a lost baseline.  Kept short deliberately: nothing compiled before the window can be
+        /// attributed anyway, so a longer one would return rows that could only be counted as unattributed
+        /// while making the read more expensive.
+        /// </summary>
+        private static readonly TimeSpan QueryStatsDefaultInterval = TimeSpan.FromMinutes(5);
+
+        /// <summary>
+        /// The longest normal gap between this connection's query stats collections, from the schedule it runs
+        /// on - see <see cref="CollectionConfig.GetMaxScheduleInterval"/>.  Sets the floor under the lookback, so
+        /// a slower schedule isn't taken for an outage.  Null where the schedule isn't known.
+        /// </summary>
+        public TimeSpan? QueryStatsScheduleInterval { get; set; }
+
+        /// <summary>
+        /// Read the plan cache, diff it against the baseline, and move the baseline on.  Unlike most
+        /// collections what is sent is not what the source returned: see <see cref="QueryStatsProcessor"/> for
+        /// why the diff has to happen here rather than in the repository, and why ranking happens after it
+        /// rather than in the source query.
+        /// </summary>
+        private async Task CollectQueryStatsAsync()
+        {
+            // Held until the baseline has moved on, so a second collection for this connection - a triggered
+            // one landing on the scheduled one - diffs against this one's result rather than reporting the
+            // same interval again.
+            using var baselineLock = await QueryStatsBaselineStore.LockAsync(ConnectionID);
+
+            var maxEntries = Source.QueryStatsBaselineMaxEntries;
+            var baseline = QueryStatsBaselineStore.Get(ConnectionID, maxEntries);
+            var snapshotDate = DateTime.UtcNow;
+
+            // A gap longer than the cap - a service stopped for hours or days - makes the baseline worse
+            // than useless.  See Baseline.DiscardIfStale.  The run then behaves as a first collection: a
+            // short window, whatever compiled inside it attributed, and the rest counted as unattributed.
+            var gap = baseline.LastCollectionUtc == null
+                ? TimeSpan.Zero
+                : snapshotDate.Subtract(baseline.LastCollectionUtc.Value);
+            var maxLookback = Baseline.GetMaxLookback(TimeSpan.FromMinutes(Source.QueryStatsMaxLookbackMinutes),
+                QueryStatsScheduleInterval);
+            if (baseline.DiscardIfStale(snapshotDate, maxLookback))
+            {
+                Log.Information(
+                    "Query stats baseline for {Instance} discarded: the previous collection was {Gap} ago, over the {Max} lookback.  This interval reports what compiled inside it and counts the rest as unattributed.",
+                    instanceName, gap, maxLookback);
+            }
+
+            var periodStart = baseline.LastCollectionUtc ?? snapshotDate.Subtract(QueryStatsDefaultInterval);
+
+            // The previous read is the only available predictor of what this one will cost, and a plan cache
+            // big enough to make it expensive is a property of the instance rather than a blip.  Skipping an
+            // interval and clearing the recorded duration backs the collection off to every other interval
+            // for as long as the problem lasts, rather than disabling it silently or hammering the instance.
+            if (Source.QueryStatsMaxReadDurationMs > 0 && baseline.LastReadDurationMs > Source.QueryStatsMaxReadDurationMs)
+            {
+                Log.Warning(
+                    "Skipping query stats collection for {Instance}. The previous read of sys.dm_exec_query_stats took {Duration}ms, over the {Max}ms limit.",
+                    instanceName, baseline.LastReadDurationMs, Source.QueryStatsMaxReadDurationMs);
+                var periodTime = (long)snapshotDate.Subtract(periodStart).TotalMilliseconds * 1000;
+                Data.Tables.Add(QueryStatsProcessor.GetSkippedCollection(snapshotDate, periodTime, baseline.LastReadDurationMs));
+                baseline.LastReadDurationMs = 0;
+                return;
+            }
+
+            QueryStatsResult result;
+            await using (var cn = new SqlConnection(ConnectionString))
+            {
+                await using var cmd = new SqlCommand(SqlStrings.QueryStats, cn)
+                { CommandTimeout = CollectionType.QueryStats.GetCommandTimeout() };
+                cmd.Parameters.AddWithValue("LastExecutionTimeFromUTC", periodStart);
+                await cn.OpenAsync();
+                var readStarted = Stopwatch.GetTimestamp();
+                await using var rdr = await cmd.ExecuteReaderAsync();
+                // Diffed as the rows arrive rather than loaded into a table first - see QueryStatsProcessor.Process
+                result = QueryStatsProcessor.Process(rdr, baseline, Source.GetQueryStatsLimits(),
+                    QueryStatsDefaultInterval, readStarted);
+            }
+
+            // Before the data is written, not after: a write that fails part way must cost this interval, not
+            // have the next delta cover it again.  See QueryStatsBaselineStore.
+            QueryStatsBaselineStore.Apply(ConnectionID, baseline, result);
+            queryStats = result;
+
+            // What the baseline holds and dropped once this collection is applied, which the processor can't know
+            // when it writes the row - Apply makes the room for this collection's rows.
+            var collectionRow = result.Collection.Rows[0];
+            collectionRow["BaselineCount"] = baseline.Count;
+            collectionRow["BaselineEvictions"] = baseline.Evictions;
+
+            // Added even with no rows.  An interval where nothing ran still happened, and the import updates
+            // the collection date from the table's presence rather than its contents, so dropping it here
+            // would make a quiet instance look like a stale collection.  The DataSet is serialised with its
+            // schema, so an empty table survives the file and S3 transports too.
+            Data.Tables.Add(result.QueryStats);
+            Data.Tables.Add(result.Collection);
+
+            LogInternalPerformanceCounter("DBADash", "Query stats rows read", "", result.RowsRead);
+            LogInternalPerformanceCounter("DBADash", "Query stats rows stored", "", result.QueryStats.Rows.Count);
+            LogInternalPerformanceCounter("DBADash", "Query stats baseline size", "", baseline.Count);
+            LogInternalPerformanceCounter("DBADash", "Query stats read duration (ms)", "", result.ReadDurationMs);
+
+            Log.Debug("Query stats for {Instance}: {Read} rows read in {Duration}ms, {Stored} stored.",
+                instanceName, result.RowsRead, result.ReadDurationMs, result.QueryStats.Rows.Count);
         }
 
         private static string PerformanceCountersSQL(string productVersion)

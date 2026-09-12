@@ -890,6 +890,25 @@ namespace DBADashServiceConfig
             { DataPropertyName = "NoWMI", HeaderText = "No WMI" });
             dgvConnections.Columns.Add(new DataGridViewTextBoxColumn()
             { DataPropertyName = "SlowQueryThresholdMs", HeaderText = "Slow Query Threshold (ms)" });
+            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                DataPropertyName = "QueryStatsTopN",
+                HeaderText = "Query Stats Top N",
+                ToolTipText =
+                    "0 - statement level query stats collection is switched off for this connection, and the default.\r\n" +
+                    "Any other value - the number of query families kept per ranking measure each collection.  Seven measures are ranked and the results combined, so the number of queries stored is usually close to this but can reach seven times it, plus any query kept for one slow execution.\r\n" +
+                    "Everything below the cut is rolled up rather than discarded, so the totals for an interval stay correct whatever this is set to.  Raising it buys detail, not accuracy.\r\n" +
+                    "Reading sys.dm_exec_query_stats walks the plan cache, so the cost of the collection depends on the size of that cache rather than on this value."
+            });
+            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                DataPropertyName = "QueryStatsPlansPerCollection",
+                HeaderText = "Query Stats Plans",
+                ToolTipText =
+                    "0 - query stats collects no plans.  Plans can still be fetched from the plan cache from the grid, with messaging enabled.\r\n" +
+                    "Any other value - the most plans one collection fetches, for the plan shapes of the queries it stored.  50 by default.\r\n" +
+                    "Each plan shape's plan is sent once a day rather than every collection, so once the plans in use have been sent a collection only fetches the ones that are new.  The cap bites after a restart, and the heaviest plans are fetched first."
+            });
             //  Free text rather than a dropdown: any session name is valid, and a combo column throws a
             //  DataError the moment the bound value isn't one of its items - which is exactly the case for a
             //  session the DBA created themselves.  The tooltip carries the three choices instead.

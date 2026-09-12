@@ -19,9 +19,18 @@ AND NOT EXISTS(SELECT 1
 				FROM dbo.RunningQueries Q 
 				WHERE QT.sql_handle = Q.sql_handle
 				)
-AND NOT EXISTS(SELECT 1 
-				FROM dbo.RunningQueriesCursors RQC 
+AND NOT EXISTS(SELECT 1
+				FROM dbo.RunningQueriesCursors RQC
 				WHERE QT.sql_handle = RQC.sql_handle
+				)
+/*	The query stats collection shares this table, and its statements outlive the snapshots that reference
+	them - a statement keeps its row so that it keeps its identity and its history if it runs again.  Text
+	deleted while a statement still points at it would leave that statement unreadable in the report
+	with nothing to re-collect it from.  dbo.PurgeQueryStatements runs first and removes the statements
+	that have aged out, which is what releases their text to be purged here. */
+AND NOT EXISTS(SELECT 1
+				FROM dbo.QueryStatements QS
+				WHERE QT.sql_handle = QS.sql_handle
 				)
 
 DECLARE @From INT =1

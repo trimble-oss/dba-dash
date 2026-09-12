@@ -278,7 +278,8 @@ namespace DBADashGUI
             ExtendedEvents,
             AdhocTrace,
             XETraceSessions,
-            MultiInstanceXE
+            MultiInstanceXE,
+            QueryStats
         }
 
         private static readonly List<Main.Tabs> InstanceOnlyTabs = new() { Main.Tabs.PerformanceSummary, Tabs.Metrics, Tabs.Waits, Tabs.Memory, Tabs.RunningQueries };
@@ -327,6 +328,24 @@ namespace DBADashGUI
         private TabPage tabAdhocTrace;
         private TabPage tabXETraceSessions;
         private TabPage tabMultiInstanceXE;
+
+        /// <summary>
+        /// Query stats on the instance node, rather than only in its Reports folder where it is easy to miss.
+        ///
+        /// <para>One tab rather than one per report: the charts and the grid are two views of the same data,
+        /// the charts already drill into the grid in place, and the report's own Show Data / Show Charts button
+        /// switches between them.  Sub-tabs would have been a second way to do what the drill-down does, and a
+        /// Charts sub-tab that had been drilled into would be showing the grid.</para>
+        /// </summary>
+        private TabPage tabQueryStats;
+
+        private CustomReportView queryStatsView;
+
+        /// <summary>The node context the query stats tab was last given - see <see cref="GetQueryStatsTabContext"/>.</summary>
+        private DBADashContext queryStatsSourceContext;
+
+        /// <summary>Procedure names of the reports the query stats tab shows, which the instance's Reports folder leaves out.</summary>
+        private static readonly string[] QueryStatsReportProcedures = { "QueryStatsCharts_Get", "QueryStats_Get" };
 
         public Main(CommandLineOptions opts)
         {
@@ -424,6 +443,38 @@ namespace DBADashGUI
 
             tabMultiInstanceXE = new TabPage("Running Sessions") { Name = Tabs.MultiInstanceXE.TabName() };
             tabMultiInstanceXE.Controls.Add(new XETrace.MultiInstanceXEView { Dock = DockStyle.Fill });
+
+            tabQueryStats = new TabPage("Query Stats") { Name = Tabs.QueryStats.TabName() };
+            // Opens on the charts: which objects dominate and when is the better first look, and the grid is a
+            // click away.  After that the tab stays on whichever view the user left it on.
+            queryStatsView = new CustomReportView
+            {
+                Dock = DockStyle.Fill,
+                Report = CustomReports.CustomReports.SystemReports.First(r => r.ProcedureName == QueryStatsReportProcedures[0])
+            };
+            tabQueryStats.Controls.Add(queryStatsView);
+        }
+
+        /// <summary>
+        /// The context to give the query stats tab.  An instance node carries no report, and the view needs one
+        /// in its context for drill-downs to resolve, so the node's context is cloned with the report the view is
+        /// currently showing - which is also what keeps the tab on the grid when the user moves to another
+        /// instance after switching to it.
+        ///
+        /// <para>For the node the tab was last given, the view's own context comes back instead.  A fresh clone
+        /// would count as a new context and reload the report, throwing away a drill-down the user made before
+        /// looking at another tab.</para>
+        /// </summary>
+        private DBADashContext GetQueryStatsTabContext(DBADashContext nodeContext)
+        {
+            if (nodeContext == queryStatsSourceContext && queryStatsView.CurrentContext != null)
+            {
+                return queryStatsView.CurrentContext;
+            }
+            queryStatsSourceContext = nodeContext;
+            var context = (DBADashContext)nodeContext.Clone();
+            context.Report = queryStatsView.Report;
+            return context;
         }
 
         public TabPage GetCommunityToolsTabPage(ProcedureExecutionMessage.CommunityProcs proc)
@@ -488,7 +539,8 @@ namespace DBADashGUI
                 tabObjectExecutionSummary, tabWaits, tabRunningQueries, tabMemory, tabJobStats, tabJobTimeline, tabDrivePerformance, tabTopQueries, tabOfflineInstances, tabPoolsAndGroups
             }).Contains(tabs.SelectedTab) || (tabs.SelectedTab == tabCustomReport && (tv1.SelectedNode as SQLTreeItem)?.Report?.TimeFilterSupported == true)
             // The Deadlocks folder's tabs run reports too, and both of them are over a date range.
-            || SelectedDeadlockTabReport(tv1.SelectedNode as SQLTreeItem)?.TimeFilterSupported == true;
+            || SelectedDeadlockTabReport(tv1.SelectedNode as SQLTreeItem)?.TimeFilterSupported == true
+            || tabs.SelectedTab == tabQueryStats;
 
         private bool IsAzureOnly;
         private bool ShowCounts;
@@ -1204,6 +1256,10 @@ namespace DBADashGUI
                     context = (DBADashContext)n.Context.Clone();
                     context.Report = deadlockReport;
                 }
+                else if (tabs.SelectedTab == tabQueryStats)
+                {
+                    context = GetQueryStatsTabContext(n.Context);
+                }
                 foreach (var ctrl in tabs.SelectedTab?.Controls.OfType<ISetContext>() ?? Enumerable.Empty<ISetContext>())
                 {
                     ctrl.SetContext(context);
@@ -1344,7 +1400,9 @@ namespace DBADashGUI
             // Deadlock reports get their own folder; the Reports folder takes everything else so that
             // nothing is listed twice.
             instanceNode.AddDeadlocksFolder(customReports.InstanceLevelReports);
-            instanceNode.AddReportsFolder(SQLTreeItem.ExcludeDeadlockReports(customReports.InstanceLevelReports), new[] { instanceNode.InstanceID });
+            // The query stats reports are the Query Stats tab on this node, so they are left out of its Reports folder too
+            instanceNode.AddReportsFolder(SQLTreeItem.ExcludeDeadlockReports(customReports.InstanceLevelReports)
+                .Where(r => !QueryStatsReportProcedures.Contains(r.ProcedureName)), new[] { instanceNode.InstanceID });
             instanceNode.AddCommunityTools();
             instanceNode.AddCustomToolsFolder();
         }
@@ -1498,7 +1556,7 @@ namespace DBADashGUI
             {
                 allowedTabs.AddRange(new[]
                 {
-                    tabPerformanceSummary, tabPerformance, tabMetrics,tabDBADashAlerts, tabObjectExecutionSummary, tabSlowQueries, tabWaits,
+                    tabPerformanceSummary, tabPerformance, tabMetrics,tabDBADashAlerts, tabObjectExecutionSummary, tabQueryStats, tabSlowQueries, tabWaits,
                     tabRunningQueries, tabMemory,tabTopQueries, tabQueryStoreForcedPlans, tabTuningRecommendations
                 });
                 if (n.Context.HasResourceGovernorWorkloadGroups)

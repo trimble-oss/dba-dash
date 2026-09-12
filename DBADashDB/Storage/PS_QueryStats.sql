@@ -1,0 +1,3 @@
+﻿CREATE PARTITION SCHEME [PS_QueryStats]
+    AS PARTITION [PF_QueryStats]
+    ALL TO([PRIMARY]);

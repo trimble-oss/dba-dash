@@ -369,6 +369,22 @@ namespace DBADash
             }
         }
 
+        /// <summary>
+        /// The longest normal gap between runs of <paramref name="type"/> for <paramref name="source"/>, from the
+        /// schedule it actually runs on: the agent's, with any the source overrides laid over it.  Null when the
+        /// collection has no schedule, or one <see cref="CronParser"/> can't size.
+        /// </summary>
+        public TimeSpan? GetMaxScheduleInterval(DBADashSource source, CollectionType type)
+        {
+            var schedules = source.CollectionSchedules is { Count: > 0 }
+                ? CollectionSchedules.Combine(GetSchedules(), source.CollectionSchedules)
+                : GetSchedules();
+            return schedules.TryGetValue(type, out var schedule)
+                   && CronParser.TryGetMaxIntervalMinutes(schedule.Schedule, out var minutes)
+                ? TimeSpan.FromMinutes(minutes)
+                : null;
+        }
+
         public List<DBADashSource> SourceConnections = new();
 
         public static CollectionConfig Deserialize(string json, string password = null)

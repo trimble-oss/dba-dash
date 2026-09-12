@@ -98,6 +98,7 @@ namespace DBADashService
                     collector.DeadlockXERingBufferKB = config.GetDeadlockXERingBufferKB();
                     collector.DeadlockBackfillTimeLimitSeconds = config.GetDeadlockBackfillTimeLimitSeconds();
                     collector.ScheduleDeadlockBackfill = true;
+                    collector.QueryStatsScheduleInterval = config.GetMaxScheduleInterval(Source, CollectionType.QueryStats);
 
                     if (SchedulerServiceConfig.Config.IdentityCollectionThreshold.HasValue)
                     {

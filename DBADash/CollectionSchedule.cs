@@ -42,6 +42,10 @@ namespace DBADashService
                             {CollectionType.ServerServices, new CollectionSchedule(){Schedule = hourly} },
 
                             {CollectionType.ObjectExecutionStats, new CollectionSchedule(){ Schedule = every1min,RunOnServiceStart=false } },
+                            // Every 5 minutes rather than every minute: the read walks the plan cache, so its
+                            // cost scales with the size of that cache.  Does nothing until a top N is
+                            // configured for the connection.
+                            {CollectionType.QueryStats, new CollectionSchedule(){ Schedule = every5min,RunOnServiceStart=false } },
                             {CollectionType.CPU, new CollectionSchedule(){ Schedule = every1min,RunOnServiceStart=false  } },
                             {CollectionType.IOStats, new CollectionSchedule(){ Schedule = every1min,RunOnServiceStart=false  } },
                             {CollectionType.Waits, new CollectionSchedule(){ Schedule = every1min,RunOnServiceStart=false  } },

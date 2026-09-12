@@ -1,4 +1,5 @@
 ﻿using DBADash.Deadlocks;
+using DBADash.QueryStats;
 using Microsoft.Data.SqlClient;
 using Polly;
 using Polly.Retry;
@@ -530,6 +531,10 @@ namespace DBADash
             {
                 await TryUpdateAsync(async _ => await UpdateDeadlocksAsync(), DeadlockTables.DeadlocksTableName, exceptions);
             }
+            if (tablesInDataSet.Contains(QueryStatsTables.CollectionTableName))
+            {
+                await TryUpdateAsync(async _ => await UpdateQueryStatsAsync(), QueryStatsTables.QueryStatsTableName, exceptions);
+            }
 
             // retry based on policy then let caller handle the exception
 
@@ -644,6 +649,43 @@ namespace DBADash
                 {
                     cmd.Parameters.AddWithValue("DeadlockResources", dtResources);
                 }
+            }
+
+            cmd.Parameters.AddWithValue("InstanceID", instanceID);
+            cmd.Parameters.AddWithValue("SnapshotDate", snapshotDate);
+            await cmd.ExecuteNonQueryAsync();
+        }
+
+        /// <summary>
+        /// Imports the query stats collection: the deltas and the row describing the collection that produced
+        /// them.
+        ///
+        /// <para>Special cased rather than driven by <see cref="tablesToProcess"/> because the two have to be
+        /// written together.  The reports divide one by the other's covered time, so storing one without the
+        /// other gets a window's rates wrong rather than leaving them incomplete - and the proc refuses a
+        /// collection that overlaps one already stored, a decision that has to cover both.</para>
+        ///
+        /// <para>Keyed on the collection table, which is sent for every collection that ran, including one that
+        /// found nothing or was skipped.</para>
+        /// </summary>
+        private async Task UpdateQueryStatsAsync()
+        {
+            var dtCollection = data.Tables[QueryStatsTables.CollectionTableName];
+            if (dtCollection == null) return;
+
+            await using var cn = new SqlConnection(connectionString);
+            await using var cmd = new SqlCommand("dbo.QueryStats_Upd", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = CommandTimeout };
+            await cn.OpenAsync();
+
+            // A table-valued parameter that isn't supplied defaults to an empty table, so only send what we have.
+            if (dtCollection.Rows.Count > 0)
+            {
+                cmd.Parameters.AddWithValue("QueryStatsCollection", dtCollection);
+            }
+            var dtQueryStats = data.Tables[QueryStatsTables.QueryStatsTableName];
+            if (dtQueryStats is { Rows.Count: > 0 })
+            {
+                cmd.Parameters.AddWithValue("QueryStats", dtQueryStats);
             }
 
             cmd.Parameters.AddWithValue("InstanceID", instanceID);

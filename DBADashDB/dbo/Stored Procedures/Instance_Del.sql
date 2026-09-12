@@ -391,6 +391,16 @@ BEGIN
 
 	EXEC dbo.ObjectExecutionStats_Del @InstanceID=@InstanceID,@DaysToKeep=0
 
+	/* Before dbo.QueryStats_Del, which removes the statements these rows refer to */
+	EXEC dbo.QueryStats_60MIN_Del @InstanceID=@InstanceID,@DaysToKeep=0
+
+	/* Removes the statement dimension for the instance as well, since @DaysToKeep is 0 */
+	EXEC dbo.QueryStats_Del @InstanceID=@InstanceID,@DaysToKeep=0
+
+	EXEC dbo.QueryStatsCollection_Del @InstanceID=@InstanceID,@DaysToKeep=0
+
+	EXEC dbo.QueryStatsCollection_60MIN_Del @InstanceID=@InstanceID,@DaysToKeep=0
+
 	EXEC dbo.ObjectExecutionStats_60MIN_Del @InstanceID=@InstanceID,@DaysToKeep=0
 
 	DELETE DO
