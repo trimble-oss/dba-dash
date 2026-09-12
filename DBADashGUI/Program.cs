@@ -15,6 +15,7 @@ using System.Drawing.Design;
 using System.Windows.Forms;
 using DBADash.Alert;
 using DBADashGUI.DBADashAlerts;
+using LiveChartsCore.SkiaSharpView;
 using Serilog;
 using DBADashGUI.Viewers;
 
@@ -39,6 +40,7 @@ namespace DBADashGUI
             ViewerSettings.Store = new GuiViewerSettingsStore();
             ViewerLauncher.DefaultHost = new DBADashViewerHost();
             ConfigureLogging();
+            ConfigureCharts();
             try
             {
                 Run(args);
@@ -46,6 +48,31 @@ namespace DBADashGUI
             finally
             {
                 Log.CloseAndFlush();
+            }
+        }
+
+        /// <summary>
+        /// LiveCharts clips the labels it draws in tooltips and legends to a fixed width, and its default is
+        /// narrow enough to cut a query to about a dozen characters - "INSERT INTO dbo." and no more, which
+        /// looks like the data being truncated rather than the label being clipped.  Raised so a statement in
+        /// a chart tooltip says which statement it is.  Applies to every chart in the app: a tooltip or legend
+        /// entry is only as wide as its text, so this raises the ceiling rather than the height of anything
+        /// that was already fitting.
+        /// </summary>
+        private static void ConfigureCharts()
+        {
+            try
+            {
+                LiveChartsCore.LiveCharts.Configure(settings =>
+                {
+                    settings.UseDefaults();
+                    settings.MaxTooltipsAndLegendsLabelsWidth = 800;
+                });
+            }
+            catch (Exception ex)
+            {
+                // A chart setting is never a reason not to start
+                Log.Debug(ex, "Error configuring charts");
             }
         }
 

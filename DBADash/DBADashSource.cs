@@ -200,6 +200,116 @@ namespace DBADash
         [JsonIgnore]
         public bool IsSlowQueryCollectionEnabled => SlowQueryThresholdMs >= 0;
 
+        /// <summary>
+        /// How many query families to keep per ranking measure each interval, and the off switch for the
+        /// whole collection at zero - which is the default.  Reading sys.dm_exec_query_stats walks the plan
+        /// cache, so the cost is a property of the instance rather than something the query can filter down,
+        /// and that is a decision to make per connection rather than to impose on every upgrade.
+        ///
+        /// <para>Seven measures are ranked and the results unioned, so the number of families kept is at
+        /// least this and usually near it, because heavy queries top several measures at once.  Up to seven
+        /// times it, plus any family kept for one slow execution.  Everything not kept is rolled up rather than dropped, so raising it buys
+        /// detail rather than accuracy.</para>
+        /// </summary>
+        [DefaultValue(0)]
+        public int QueryStatsTopN
+        {
+            get => SourceConnection is { Type: ConnectionType.SQL } ? queryStatsTopN : 0;
+            set => queryStatsTopN = value;
+        }
+
+        /// <summary>Statements kept within a family before the remainder becomes a single rolled up row.</summary>
+        [DefaultValue(3)]
+        public int QueryStatsMaxStatementsPerFamily { get; set; } = 3;
+
+        /// <summary>Plan shapes kept within a statement before the remainder becomes a single rolled up row.</summary>
+        [DefaultValue(5)]
+        public int QueryStatsMaxPlansPerStatement { get; set; } = 5;
+
+        /// <summary>
+        /// An execution known to have taken at least this elapsed time in milliseconds keeps its family whatever
+        /// the ranking says.  One expensive run is exactly what a top N by total would hide.  The plan cache only
+        /// shows a run like that where it was the last execution, set a new maximum for its plan, or dominates
+        /// the interval's average - the Slow Queries collection is the one that records every slow execution.
+        /// </summary>
+        [DefaultValue(1000)]
+        public int QueryStatsSingleExecutionThresholdMs { get; set; } = 1000;
+
+        /// <summary>
+        /// Cap on the per-instance baseline, which is what bounds the memory the collection costs the
+        /// service.  An entry takes about 160 bytes, so twenty thousand is a little over 3MB per instance;
+        /// the least recently seen are evicted first and the eviction count travels with the collection, so
+        /// a cap set too low is visible rather than silently lossy.
+        /// </summary>
+        [DefaultValue(20000)]
+        public int QueryStatsBaselineMaxEntries { get; set; } = 20000;
+
+        /// <summary>
+        /// Skip the next collection when the previous read of the DMV took longer than this, in
+        /// milliseconds.  Zero disables the check.  Monitoring should not become the performance problem it
+        /// is reporting on, and the failure mode here is a very large plan cache rather than a bug.
+        /// </summary>
+        [DefaultValue(5000)]
+        public int QueryStatsMaxReadDurationMs { get; set; } = 5000;
+
+        /// <summary>
+        /// How far back a collection will diff against.  When the previous collection is older than this -
+        /// a service stopped for hours, or a monitored instance unreachable for a while - the baseline is
+        /// discarded and the run behaves as a first collection rather than reporting a multi-day delta as
+        /// though it happened in one interval.  See <c>Baseline.DiscardIfStale</c> for why that is the
+        /// safer answer.
+        ///
+        /// <para>An hour by default, so a restart or a handful of missed intervals still produce a real
+        /// delta: the point is to bound the damage, not to throw away every gap.  Never less than three
+        /// intervals of the collection's schedule, so a slower schedule isn't taken for an outage - see
+        /// <c>Baseline.GetMaxLookback</c>.</para>
+        /// </summary>
+        [DefaultValue(60)]
+        public int QueryStatsMaxLookbackMinutes { get; set; } = 60;
+
+        /// <summary>
+        /// Cap on how many new batch texts one collection will fetch for the statements it stored, and
+        /// separately on how many ad hoc query shapes it will fetch an example for to make their templates.
+        /// Both are fetched once and cached, so the cap only bites while a workload is new to the
+        /// collection: what it leaves behind is picked up over the following intervals, and the statements
+        /// are stored either way.
+        /// </summary>
+        [DefaultValue(100)]
+        public int QueryStatsTextHandlesPerCollection { get; set; } = 100;
+
+        /// <summary>
+        /// Cap on how many plans one collection will fetch, for the plan shapes of the statements it stored that it
+        /// has not sent a plan for in the last day.  Zero switches plan capture off.  Heaviest first, so a cap that
+        /// bites - after a restart, when nothing has been sent yet - leaves the cheapest for the following intervals.
+        /// Once the plans in use have been sent, a collection only fetches the plan shapes that are new.
+        /// </summary>
+        [DefaultValue(50)]
+        public int QueryStatsPlansPerCollection { get; set; } = 50;
+
+        /// <summary>
+        /// A plan is only fetched for a row whose CPU in the interval reached this many milliseconds.  Zero, the
+        /// default, fetches one for every row the ranking kept, which is already the top of the workload - and a
+        /// threshold misses the plan most worth having, the one a statement ran under before a regression made it
+        /// expensive.
+        /// </summary>
+        [DefaultValue(0)]
+        public int QueryStatsPlanCPUThresholdMs { get; set; }
+
+        /// <summary>True when a top N is configured for the QueryStats collection.  Zero is the off switch,
+        /// and the default - see <see cref="QueryStatsTopN"/>.</summary>
+        [JsonIgnore]
+        public bool IsQueryStatsCollectionEnabled => QueryStatsTopN > 0;
+
+        public QueryStats.QueryStatsLimits GetQueryStatsLimits() => new()
+        {
+            TopN = QueryStatsTopN,
+            MaxStatementsPerFamily = QueryStatsMaxStatementsPerFamily,
+            MaxPlansPerStatement = QueryStatsMaxPlansPerStatement,
+            SingleExecutionElapsedThreshold = (long)QueryStatsSingleExecutionThresholdMs * 1000
+        };
+
+        private int queryStatsTopN;
+
         [DefaultValue(false)]
         public bool PersistXESessions
         {
@@ -375,6 +485,7 @@ namespace DBADash
         {
             CollectionType.Deadlocks => !IsDeadlockCollectionEnabled,
             CollectionType.SlowQueries => !IsSlowQueryCollectionEnabled,
+            CollectionType.QueryStats => !IsQueryStatsCollectionEnabled,
             _ => false
         };
 

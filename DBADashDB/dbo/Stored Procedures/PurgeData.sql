@@ -119,6 +119,11 @@ AND SettingValue < DATEADD(d,-1,GETUTCDATE())
 
 IF @@ROWCOUNT =1 OR @Force=1
 BEGIN
+	/*	Statements first: a statement that has aged out is what releases its text to be purged below, so
+		running these the other way round would leave the text behind for a day. */
+	PRINT 'Cleanup QueryStatements'
+	EXEC dbo.PurgeQueryStatements
+
 	PRINT 'Cleanup QueryText'
 	EXEC dbo.PurgeQueryText
 

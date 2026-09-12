@@ -34,6 +34,13 @@ namespace DBADashGUI.Charts
         private const double PointDetectionTolerance = 20.0; // Pixel tolerance for point detection
         private const int MouseJitterThreshold = 2; // Pixel threshold for mouse movement to be considered "moving"
 
+        /// <summary>
+        /// How wide a series name may be drawn before it wraps onto another line.  A statement is a legitimate
+        /// series name and runs to a couple of hundred characters, which on one line is a tooltip wider than the
+        /// screen; wrapping keeps it readable and keeps the value column where the eye expects it.
+        /// </summary>
+        private const int MaxNameWidth = 520;
+
         // Pre-calculated search offsets for circular pattern (12 points at 30° intervals)
         private static readonly (int dx, int dy)[] _searchOffsets = CalculateSearchOffsets();
 
@@ -197,7 +204,17 @@ namespace DBADashGUI.Charts
             private void SetLabelText(Label label, string text)
             {
                 if (label.Text == text) return;
-                label.MinimumSize = TextRenderer.MeasureText(text, _highlightFont);
+                // A label with a maximum width wraps at it, so it is measured wrapped - see MaxNameWidth
+                var maxWidth = label.MaximumSize.Width;
+                if (maxWidth > 0)
+                {
+                    var size = TextRenderer.MeasureText(text, _highlightFont, new Size(maxWidth, int.MaxValue), TextFormatFlags.WordBreak);
+                    label.MinimumSize = new Size(Math.Min(size.Width, maxWidth), size.Height);
+                }
+                else
+                {
+                    label.MinimumSize = TextRenderer.MeasureText(text, _highlightFont);
+                }
                 label.Text = text;
             }
 
@@ -332,6 +349,8 @@ namespace DBADashGUI.Charts
                         var nameLabel = new Label
                         {
                             AutoSize = true,
+                            // Wraps rather than running off the screen - see MaxNameWidth
+                            MaximumSize = new Size(MaxNameWidth, 0),
                             Font = _normalFont,
                             ForeColor = TextColor,
                             Left = 16,

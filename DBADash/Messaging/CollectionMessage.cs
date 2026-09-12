@@ -142,6 +142,9 @@ namespace DBADash.Messaging
             collector.DeadlockXERingBufferKB = cfg.GetDeadlockXERingBufferKB();
             collector.OnDemandDeadlockXESessionName = onDemandDeadlockSession;
             collector.ForceAGHealthEventsCheck = true;
+            // The schedule the connection's query stats collection runs on, though this run wasn't scheduled: the
+            // gap it measures is from the previous collection, which usually was.
+            collector.QueryStatsScheduleInterval = cfg.GetMaxScheduleInterval(src, CollectionType.QueryStats);
             await collector.CollectAsync(standardCollections.ToArray());
             await collector.CollectAsync(customCollections);
 

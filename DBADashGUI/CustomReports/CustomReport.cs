@@ -164,6 +164,14 @@ namespace DBADashGUI.CustomReports
 
         public List<string> TriggerCollectionTypes { get; set; } = new();
 
+        /// <summary>
+        /// Another report over the same data that a toolbar button switches to in place - the charts and the
+        /// grid behind them, for example.  Null for no button.  System reports only: the target is looked up
+        /// among them by procedure name, and it is not serialized with user reports.
+        /// </summary>
+        [JsonIgnore]
+        public ReportSwitch SwitchTo { get; set; }
+
         public string CancellationMessageWarning { get; set; }
 
         public bool ChartVisible { get; set; } = true;

@@ -45,6 +45,12 @@ namespace DBADashGUI.Performance
             get => runningQueries1.JobId; set => runningQueries1.JobId = value;
         }
 
+        /// <summary>
+        /// Show the sessions <paramref name="filters"/> match across every snapshot in their date range, rather than
+        /// one snapshot - the view's own date range filter, set by the caller.
+        /// </summary>
+        public void SetFilters(RunningQueriesFilters filters) => runningQueries1.SetFilters(filters);
+
         public ThemedTabControl Tab;
 
         public void LoadSnapshots(List<RunningQueriesSnapshotInfo> snapshots)

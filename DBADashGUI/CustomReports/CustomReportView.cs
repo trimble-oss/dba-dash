@@ -47,6 +47,9 @@ namespace DBADashGUI.CustomReports
         /// </summary>
         public IReadOnlyList<CustomSqlParameter> CurrentParameters => customParams;
 
+        /// <summary>The context the view is showing, which after a drill-down or a report switch is not the one its host passed in.</summary>
+        public DBADashContext CurrentContext => context;
+
         /// <summary>
         /// When true, the Report property will not be overwritten by SetContext when a
         /// context contains a Report. This allows hosts to lock the initially-assigned
@@ -134,6 +137,8 @@ namespace DBADashGUI.CustomReports
                 _ = SetContext(state.Context, state.Params);
             }
             UpdateBackButtonVisibility();
+            // SetContext updates the switch itself, but the same-context branch above only refreshes
+            UpdateSwitchReportButton();
             return true;
         }
 
@@ -169,6 +174,50 @@ namespace DBADashGUI.CustomReports
             tsBack = new ToolStripButton() { ToolTipText = "Navigate back to previous view", Visible = false, Image = Properties.Resources.arrow_back_16xLG, DisplayStyle = ToolStripItemDisplayStyle.Image };
             tsBack.Click += (_, _) => NavigateBack();
             toolStrip1.Items.Insert(0, tsBack);
+        }
+
+        private ToolStripButton tsSwitchReport;
+
+        /// <summary>Straight after Back, so the two ways of moving between reports sit together.</summary>
+        private void AddSwitchReportButton()
+        {
+            tsSwitchReport = new ToolStripButton { Visible = false, DisplayStyle = ToolStripItemDisplayStyle.ImageAndText };
+            tsSwitchReport.Click += (_, _) => SwitchReport();
+            toolStrip1.Items.Insert(toolStrip1.Items.IndexOf(tsBack) + 1, tsSwitchReport);
+        }
+
+        private void UpdateSwitchReportButton()
+        {
+            if (tsSwitchReport == null) return;
+            var target = Report?.SwitchTo;
+            tsSwitchReport.Visible = target != null;
+            if (target == null) return;
+            tsSwitchReport.Text = target.Text;
+            tsSwitchReport.ToolTipText = target.ToolTipText;
+            tsSwitchReport.Image = target.Image;
+        }
+
+        /// <summary>
+        /// Replaces the report in place with the one <see cref="CustomReport.SwitchTo"/> names, for the same
+        /// context.  The target opens on its own defaults rather than on whatever the current report was drilled
+        /// down to - a slice or a time bucket filter belongs to the view it was clicked in - but a filter the user
+        /// set that both reports declare, such as leaving the rollups out, is carried across.
+        /// </summary>
+        private void SwitchReport()
+        {
+            if (context == null || Report?.SwitchTo == null) return;
+            var target = CustomReports.SystemReports.FirstOrDefault(r => r.ProcedureName == Report.SwitchTo.ProcedureName);
+            if (target == null) return;
+
+            var newContext = (DBADashContext)context.Clone();
+            newContext.Report = target;
+            var targetParams = target.GetCustomSqlParameters();
+            BaseDrillDownLinkColumnInfo.CarryFilters(customParams, targetParams);
+
+            PushNavigationState();
+            Report = target;
+            DrillDownGridFilters = null;
+            _ = SetContext(newContext, targetParams);
         }
 
         #region Child report panel
@@ -372,6 +421,7 @@ namespace DBADashGUI.CustomReports
             Grids = new();
             InitializeComponent();
             AddBackButton();
+            AddSwitchReportButton();
             // Re-flow stacked result sets when the available area changes (window resize / splitter move).
             splitTablesCharts.Panel1.SizeChanged += (_, _) => { if (Grids.Count > 0) ResizeResultPanels(); };
             splitTablesCharts.Panel2.SizeChanged += (_, _) => { if (Grids.Count > 0) ResizeResultPanels(); };
@@ -2604,6 +2654,7 @@ namespace DBADashGUI.CustomReports
                 lblURL.Visible = !string.IsNullOrEmpty(Report.URL);
                 AddPickers();
                 SetTriggerCollectionVisibility();
+                UpdateSwitchReportButton();
                 CheckChartLocation();
                 SetTablePanelCollapsed(!Report.TableVisible);
                 if (AutoLoad)

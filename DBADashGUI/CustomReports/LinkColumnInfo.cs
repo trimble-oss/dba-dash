@@ -220,6 +220,117 @@ namespace DBADashGUI.CustomReports
     }
 
     /// <summary>
+    /// Opens the whole batch or module definition a query stats statement came from, fetching it by the
+    /// statement's id when the link is clicked.
+    ///
+    /// The grid could carry the text in a cell, as <see cref="TextLinkColumnInfo"/> needs, but for a statement
+    /// inside a procedure the batch is the procedure's definition, and a grid of up to a thousand rows would
+    /// carry one for every row for the sake of the one that gets opened.  This trades that for two seeks per
+    /// click - the same trade <see cref="DeadlockGraphLookupLinkColumnInfo"/> makes for deadlock graphs.
+    ///
+    /// Used as a synthetic column (no matching column in the result), so the link shows its own header text on
+    /// every row.  A rollup row has no statement, and nothing to open.
+    /// </summary>
+    public class QueryStatementBatchTextLinkColumnInfo : LinkColumnInfo
+    {
+        public string StatementIDColumn { get; set; } = "StatementID";
+
+        public override void Navigate(DBADashContext context, DataGridViewRow row, int selectedTableIndex, ContainerControl sender)
+        {
+            if (row.DataGridView == null || !row.DataGridView.Columns.Contains(StatementIDColumn)) return;
+            if (row.Cells[StatementIDColumn].Value.DBNullToNull() is not long statementId) return;
+
+            string text;
+            bool isExample;
+            var cursor = sender?.Cursor;
+            try
+            {
+                if (sender != null) sender.Cursor = Cursors.WaitCursor;
+                (text, isExample) = FetchBatchText(statementId);
+            }
+            finally
+            {
+                if (sender != null) sender.Cursor = cursor;
+            }
+
+            // No text is an ordinary state rather than an error: it is collected separately from the statistics,
+            // capped per collection, and purged on its own retention.
+            if (string.IsNullOrEmpty(text))
+            {
+                MessageBox.Show("The batch text for this statement hasn't been collected yet, or is no longer available.",
+                    "Batch", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            // An ad hoc shape's batch is one of its variants, which the text itself also says at the top
+            Common.ShowCodeViewer(text, isExample ? "Example batch" : "Batch", CodeEditorModes.SQL);
+        }
+
+        private static (string Text, bool IsExample) FetchBatchText(long statementId)
+        {
+            using var connection = new SqlConnection(Common.ConnectionString);
+            using var command = new SqlCommand("dbo.QueryStatementBatchText_Get", connection)
+            {
+                CommandType = CommandType.StoredProcedure,
+                CommandTimeout = 60
+            };
+            command.Parameters.Add("StatementID", SqlDbType.BigInt).Value = statementId;
+            connection.Open();
+            using var reader = command.ExecuteReader();
+            if (!reader.Read()) return (null, false);
+            return (reader["BatchText"] as string, reader["IsExample"] is true);
+        }
+    }
+
+    /// <summary>
+    /// Opens the Running Queries snapshots that caught a query shape running - executions with the row's query hash,
+    /// in its database, in the window the row's work was done in - so the actual texts behind a query stats row can
+    /// be seen next to their own duration and waits.  Snapshots catch whatever is running at the time, so they lean
+    /// towards the long-running executions, which are the ones worth seeing.
+    ///
+    /// The dates are the row's, displayed in the app timezone and converted back to UTC for the lookup.
+    /// </summary>
+    public class QueryHashRunningQueriesLinkColumnInfo : LinkColumnInfo
+    {
+        public string InstanceColumn { get; set; } = "InstanceID";
+        public string QueryHashColumn { get; set; } = "QueryHash";
+        public string DatabaseColumn { get; set; } = "Database";
+        public string FromColumn { get; set; } = "FirstPeriodStart";
+        public string ToColumn { get; set; } = "LastSnapshotDate";
+
+        /// <summary>The rows to show at most, as the Running Queries view's own date range filter does</summary>
+        public int Top { get; set; } = 5000;
+
+        public override void Navigate(DBADashContext context, DataGridViewRow row, int selectedTableIndex, ContainerControl sender)
+        {
+            if (row.Cells[QueryHashColumn].Value.DBNullToNull() is not string queryHash) return;
+            if (row.Cells[InstanceColumn].Value.DBNullToNull() is not int instanceId) return;
+            if (row.Cells[FromColumn].Value.DBNullToNull() is not DateTime from) return;
+            if (row.Cells[ToColumn].Value.DBNullToNull() is not DateTime to) return;
+
+            try
+            {
+                var filters = new Performance.RunningQueriesFilters
+                {
+                    InstanceID = instanceId,
+                    QueryHashString = queryHash,
+                    DatabaseName = row.Cells[DatabaseColumn].Value.DBNullToNull() as string,
+                    From = from.AppTimeZoneToUtc(),
+                    // The end is exclusive, and a snapshot taken at the same moment as the last collection belongs in it
+                    To = to.AppTimeZoneToUtc().AddSeconds(1),
+                    Top = Top
+                };
+                var viewer = new Performance.RunningQueriesViewer();
+                viewer.SetFilters(filters);
+                viewer.ShowSingleInstance();
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex);
+            }
+        }
+    }
+
+    /// <summary>
     /// Opens the Object Execution stats for the module a row names - the link the object name on Slow
     /// Queries gives, made available to a report grid.
     ///
@@ -484,7 +595,7 @@ namespace DBADashGUI.CustomReports
         /// parameters are skipped: the instances and the date range are set from context by the view that
         /// is about to run the report, and pinning them here would take the date range picker out of use.
         /// </summary>
-        private static void CarryFilters(IEnumerable<CustomSqlParameter> sourceParams, List<CustomSqlParameter> targetParams)
+        internal static void CarryFilters(IEnumerable<CustomSqlParameter> sourceParams, List<CustomSqlParameter> targetParams)
         {
             foreach (var source in sourceParams ?? Enumerable.Empty<CustomSqlParameter>())
             {

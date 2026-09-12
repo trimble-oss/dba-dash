@@ -91,6 +91,8 @@
 	<EmbeddedResource Include="SQL\SQLOSInfo.sql" />
 	<EmbeddedResource Include="SQL\SQLOSLoadedModules.sql" />
 	<EmbeddedResource Include="SQL\SQLPerformanceCounters.sql" />
+	<EmbeddedResource Include="SQL\SQLQueryStats.sql" />
+	<EmbeddedResource Include="SQL\SQLQueryStatsPlan.sql" />
 	<EmbeddedResource Include="SQL\SQLQueryStoreForcedPlans.sql" />
 	<EmbeddedResource Include="SQL\SQLQueryStoreTopQueries.sql" />
 	<EmbeddedResource Include="SQL\SQLRemoveEventSessions.sql" />

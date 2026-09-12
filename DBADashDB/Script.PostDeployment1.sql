@@ -1202,6 +1202,17 @@ INSERT INTO dbo.DataRetention(
 )
 SELECT t.SchemaName,t.TableName,t.RetentionDays
 FROM (VALUES('dbo','ObjectExecutionStats',120),
+				/* Denser than any other performance table: statement level rather than module level.  Long
+				   retention belongs to the hourly rollup, QueryStats_60MIN. */
+				('dbo','QueryStats',30),
+				/* Every rate the query stats reports show divides by the time recorded here, so keep this at
+				   least as long as QueryStats */
+				('dbo','QueryStatsCollection',30),
+				/* A year rather than the two the other hourly tables keep: statement level is still many rows
+				   per hour, and statements and their text are kept for as long as anything here refers to them */
+				('dbo','QueryStats_60MIN',365),
+				/* At least as long as QueryStats_60MIN, for the same reason as QueryStatsCollection */
+				('dbo','QueryStatsCollection_60MIN',365),
 				('dbo','Waits',120),
 				('dbo','DBIOStats',120),
 				('dbo','CPU',365),
@@ -1471,6 +1482,9 @@ BEGIN
 	(-1,'CPU',5,10),
 	(-1,'IOStats',5,10),
 	(-1,'ObjectExecutionStats',5,10),
+	/* Collected every 5 minutes by default rather than every minute, so it is given a wider window before
+	   it counts as stale */
+	(-1,'QueryStats',15,30),
 	(-1,'SlowQueries',5,10),
 	(-1,'SlowQueriesStats',5,10),
 	(-1,'AzureDBElasticPoolResourceStat',5,10),

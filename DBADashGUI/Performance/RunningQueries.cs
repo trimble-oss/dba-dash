@@ -2429,5 +2429,16 @@ namespace DBADashGUI.Performance
         {
             ShowCursors(InstanceID, currentSnapshotDate);
         }
+
+        /// <summary>
+        /// Show the sessions <paramref name="filters"/> match across every snapshot in their date range, as the date
+        /// range filter does.  The dates are UTC.  Back returns to the instance's list of snapshots.
+        /// </summary>
+        public void SetFilters(RunningQueriesFilters filters)
+        {
+            InstanceID = filters.InstanceID;
+            forceDetailFilters = filters;
+            IsForceDetail = true;
+        }
     }
 }
