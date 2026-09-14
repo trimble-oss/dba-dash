@@ -70,12 +70,14 @@ jobs:
         shell: powershell
         run: |
           $ErrorActionPreference = "Stop"
+          $minioVersion = "RELEASE.2025-06-13T11-33-47Z"
+          $mcVersion = "RELEASE.2025-08-13T08-35-41Z"
           
           # Download MinIO server
           $minioPath = "C:\minio"
           New-Item -ItemType Directory -Path $minioPath -Force | Out-Null
           
-          Invoke-WebRequest -Uri "https://dl.min.io/server/minio/release/windows-amd64/minio.exe" -OutFile "$minioPath\minio.exe"
+          Invoke-WebRequest -Uri "https://github.com/minio/minio/releases/download/$minioVersion/minio.windows-amd64.$minioVersion.exe" -OutFile "$minioPath\minio.exe"
           
           # Create data directory
           $minioData = "C:\minio-data"
@@ -118,7 +120,7 @@ jobs:
           }
           
           # Download MinIO client
-          Invoke-WebRequest -Uri "https://dl.min.io/client/mc/release/windows-amd64/mc.exe" -OutFile "$minioPath\mc.exe"
+          Invoke-WebRequest -Uri "https://github.com/minio/mc/releases/download/$mcVersion/mc.windows-amd64.$mcVersion.exe" -OutFile "$minioPath\mc.exe"
           
           # Configure mc and create test bucket
           & "$minioPath\mc.exe" alias set local http://localhost:9000 minioadmin minioadmin
