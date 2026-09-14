@@ -170,6 +170,7 @@ namespace DBADashConfig
                 SlowQueryThresholdMs = o.SlowQueryThresholdMs,
                 DeadlockXESessionName = GetDeadlockXESessionName(o),
                 FlushDeadlockXERingBuffer = o.FlushDeadlockXERingBuffer,
+                BackfillDeadlocksFromSystemHealth = !o.NoDeadlockBackfill,
                 SlowQuerySessionMaxMemoryKB = o.SlowQuerySessionMaxMemoryKB,
                 SlowQueryTargetMaxMemoryKB = o.SlowQueryTargetMaxMemoryKB,
                 UseDualEventSession = o.UseDualEventSession ?? true,

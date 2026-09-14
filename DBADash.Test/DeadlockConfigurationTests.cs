@@ -106,6 +106,55 @@ namespace DBADash.Test
         }
 
         [TestMethod]
+        [DataRow("DBADash_Deadlocks")]
+        [DataRow("MyOwnDeadlockSession")]
+        public void DedicatedSession_BackfillsFromSystemHealthByDefault(string sessionName)
+        {
+            // A dedicated session starts empty, so the first run reads system_health for the history it lacks.
+            var source = Source(sessionName);
+
+            Assert.IsTrue(source.BackfillDeadlocksFromSystemHealth, "On by default - it costs a single read");
+            Assert.AreEqual(DBADashSource.SystemHealthXESessionName, source.GetDeadlockBackfillSessionName(isAzureDB: false));
+        }
+
+        [TestMethod]
+        public void Backfill_OnlyWhereThereIsSomethingToBackfillFrom()
+        {
+            // Reading system_health already has the history, a blank name has no collection, and Azure SQL
+            // Database has no system_health to read.
+            Assert.IsNull(Source(DBADashSource.SystemHealthXESessionName).GetDeadlockBackfillSessionName(false));
+            Assert.IsNull(Source("SYSTEM_HEALTH").GetDeadlockBackfillSessionName(false), "Session names are not case sensitive");
+            Assert.IsNull(Source(string.Empty).GetDeadlockBackfillSessionName(false));
+            Assert.IsNull(Source(DBADashSource.ManagedDeadlockXESessionName).GetDeadlockBackfillSessionName(isAzureDB: true));
+
+            var optedOut = Source(DBADashSource.ManagedDeadlockXESessionName);
+            optedOut.BackfillDeadlocksFromSystemHealth = false;
+            Assert.IsNull(optedOut.GetDeadlockBackfillSessionName(false));
+
+            var folder = Source(DBADashSource.ManagedDeadlockXESessionName, @"C:\Dump");
+            Assert.IsFalse(folder.BackfillDeadlocksFromSystemHealth, "No instance to read without a SQL connection");
+            Assert.IsNull(folder.GetDeadlockBackfillSessionName(false));
+        }
+
+        [TestMethod]
+        public void Backfill_IsOnForAConfigWrittenBeforeTheOptionExisted()
+        {
+            // An existing connection has no value for the option, and gets the default rather than false.
+            var config = BasicConfig.Deserialize<CollectionConfig>(
+                "{\"SourceConnections\":[{\"ConnectionString\":\"" + SqlConnection + "\",\"DeadlockXESessionName\":\"DBADash_Deadlocks\"}]}");
+
+            Assert.IsTrue(config.SourceConnections[0].BackfillDeadlocksFromSystemHealth);
+        }
+
+        [TestMethod]
+        public void DeadlockCollectionState_IsNotAFirstRunUnlessTheStoreSaysSo()
+        {
+            // A state built outside the store - every test and on-demand shred - must not trigger a backfill.
+            Assert.IsFalse(new Deadlocks.DeadlockCollectionState().IsFirstRun);
+            Assert.IsFalse(new Deadlocks.DeadlockCollectionState().BackfillAttempted);
+        }
+
+        [TestMethod]
         public void SlowQueryThreshold_IsTheOffSwitchForSlowQueries()
         {
             // The other collection configuration alone can switch off, and the reason

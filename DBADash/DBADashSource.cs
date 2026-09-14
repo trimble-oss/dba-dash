@@ -307,6 +307,44 @@ namespace DBADash
 
         private bool flushDeadlockXERingBuffer;
 
+        /// <summary>
+        /// On the first run of the Deadlocks collection, read system_health as well as the configured session.
+        ///
+        /// <para>What a dedicated session gives up is history: it starts empty, where system_health already
+        /// holds whatever the instance deadlocked on recently.  Reading system_health once, when the collection
+        /// is first switched on, gets that history without paying system_health's read cost on every collection
+        /// afterwards.  The configured session is created before system_health is read, so nothing falls
+        /// between the two, and a deadlock both return is stored once.</para>
+        ///
+        /// <para>On by default because it costs a single read.  Applies only where there is something to
+        /// backfill from - see <see cref="GetDeadlockBackfillSessionName"/>.  "First run" means no entry for the
+        /// connection in the service's DeadlockCursors.json - one is added as soon as the backfill is attempted,
+        /// whatever its outcome - so losing that file repeats the backfill once; repository dedup absorbs what
+        /// comes back.  The read is limited to the Deadlocks command timeout in total, and keeps what it read
+        /// if it runs out of time.</para>
+        /// </summary>
+        [DefaultValue(true)]
+        public bool BackfillDeadlocksFromSystemHealth
+        {
+            get => SourceConnection is { Type: ConnectionType.SQL } && backfillDeadlocksFromSystemHealth;
+            set => backfillDeadlocksFromSystemHealth = value;
+        }
+
+        private bool backfillDeadlocksFromSystemHealth = true;
+
+        /// <summary>
+        /// The session a first run should backfill from, or null when there is nothing to backfill: the option is
+        /// off, the collection is off, the configured session is system_health already, or the instance is Azure
+        /// SQL Database - which has no system_health.
+        /// </summary>
+        public string GetDeadlockBackfillSessionName(bool isAzureDB) =>
+            BackfillDeadlocksFromSystemHealth
+            && IsDeadlockCollectionEnabled
+            && !isAzureDB
+            && !string.Equals(DeadlockXESessionName, SystemHealthXESessionName, StringComparison.OrdinalIgnoreCase)
+                ? SystemHealthXESessionName
+                : null;
+
         /// <summary>True when the configured session is one DBA Dash owns, and may therefore create or start.</summary>
         [JsonIgnore]
         public bool IsDeadlockXESessionManaged =>

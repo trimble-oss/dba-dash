@@ -68,7 +68,12 @@ namespace DBADash.Deadlocks
 
         /// <summary>What is written to disk - the cursor only.  The ring buffer's seen-hash set is deliberately
         /// not persisted: it is bounded by the buffer's current contents, so a stale one would suppress
-        /// deadlocks that are still there.</summary>
+        /// deadlocks that are still there.
+        ///
+        /// <para>An entry is written for every instance that has committed a run or attempted a backfill, with no
+        /// file name where there is no cursor - a session that has never captured a deadlock, or a ring buffer.
+        /// The entry itself is the record that the instance is past its first run, so a restart does not repeat
+        /// the system_health backfill for an instance whose dedicated session is still empty.</para></summary>
         private sealed class StoredCursor
         {
             public string FileName { get; set; }
@@ -84,11 +89,15 @@ namespace DBADash.Deadlocks
         /// the position where it was and the next run reads the same events again rather than stepping over
         /// deadlocks that were collected but never stored.  Dedup on DeadlockHash absorbs whatever that
         /// re-read brings back, so the cost of an unnecessary one is the read itself.
+        ///
+        /// <para>An instance with nothing stored is on its first run, which is what the system_health backfill
+        /// keys on.  The backfill leaves an entry of its own the moment it is attempted - see
+        /// <see cref="MarkBackfillAttempted"/> - so a run that never commits does not repeat it.</para>
         /// </summary>
         public static DeadlockCollectionState GetPending(string connectionID)
         {
             EnsureLoaded();
-            if (!States.TryGetValue(connectionID, out var current)) return new DeadlockCollectionState();
+            if (!States.TryGetValue(connectionID, out var current)) return new DeadlockCollectionState { IsFirstRun = true };
             return new DeadlockCollectionState
             {
                 Cursor = current.Cursor,
@@ -112,12 +121,31 @@ namespace DBADash.Deadlocks
             EnsureLoaded();
             States[connectionID] = state;
 
-            // The cursor is the only thing written, so a run that did not move it has nothing new to say.
-            // Worth checking rather than always marking dirty: the ring_buffer path never sets a cursor at
-            // all, and that is the path every Azure SQL Database source takes, so without this each of them
-            // would keep the file permanently out of date and the timer would write it forever.
+            // The cursor is the only thing written, so a run that did not move it has nothing new to say - once
+            // the instance has an entry on disk at all.  Worth checking rather than always marking dirty: the
+            // ring_buffer path never sets a cursor, and that is the path every Azure SQL Database source takes,
+            // so without this each of them would keep the file permanently out of date and the timer would
+            // write it forever.
             if (Persisted.TryGetValue(connectionID, out var written) && SamePosition(written, state.Cursor)) return;
             Interlocked.Exchange(ref _dirty, 1);
+        }
+
+        /// <summary>
+        /// Records that an instance has had its one system_health backfill, whether or not the run it was part of
+        /// commits.  Separate from <see cref="Commit"/> because the two answer different questions: the cursor
+        /// must only move once the deadlocks have reached a destination, but a backfill is too expensive to repeat
+        /// on that basis - a repository outage would otherwise have every instance re-read system_health on every
+        /// run, and a backfill that timed out would most likely time out again.
+        ///
+        /// <para>Adds an entry with no cursor, and only where there is no entry already, so a committed position
+        /// is never overwritten.  No cursor is exactly what a first run reads the configured session from, so the
+        /// next run starts from the same place it would have - it just isn't a first run any more.</para>
+        /// </summary>
+        public static void MarkBackfillAttempted(string connectionID)
+        {
+            if (string.IsNullOrEmpty(connectionID)) return;
+            EnsureLoaded();
+            if (States.TryAdd(connectionID, new DeadlockCollectionState())) Interlocked.Exchange(ref _dirty, 1);
         }
 
         /// <summary>
@@ -149,17 +177,10 @@ namespace DBADash.Deadlocks
                 try
                 {
                     if (!File.Exists(FilePath)) return;
-                    var stored = JsonConvert.DeserializeObject<Dictionary<string, StoredCursor>>(
-                        File.ReadAllText(FilePath));
-                    if (stored == null) return;
-
-                    foreach (var entry in stored)
+                    foreach (var entry in Deserialize(File.ReadAllText(FilePath)))
                     {
-                        if (entry.Value?.FileName == null) continue;
-                        var cursor = new FileTargetCursor(entry.Value.FileName, entry.Value.Offset,
-                            entry.Value.ConsumedAtOffset);
-                        States[entry.Key] = new DeadlockCollectionState { Cursor = cursor };
-                        Persisted[entry.Key] = cursor;
+                        States[entry.Key] = new DeadlockCollectionState { Cursor = entry.Value };
+                        Persisted[entry.Key] = entry.Value;
                     }
                     Log.Debug("Restored {count} deadlock read position(s) from {path}", States.Count, FilePath);
                 }
@@ -191,28 +212,17 @@ namespace DBADash.Deadlocks
             {
                 try
                 {
-                    var stored = new Dictionary<string, StoredCursor>(StringComparer.OrdinalIgnoreCase);
-                    // Every instance's cursor is taken, not only those with a position to store, because what
-                    // this becomes is the record of what the file now says.  An instance with no cursor - the
-                    // ring_buffer path - has to be in it, or nothing would ever mark it as up to date.
                     var written = new List<KeyValuePair<string, FileTargetCursor>>(States.Count);
                     foreach (var entry in States)
                     {
                         written.Add(new KeyValuePair<string, FileTargetCursor>(entry.Key, entry.Value.Cursor));
-                        if (!entry.Value.Cursor.HasValue) continue;
-                        stored[entry.Key] = new StoredCursor
-                        {
-                            FileName = entry.Value.Cursor.FileName,
-                            Offset = entry.Value.Cursor.Offset,
-                            ConsumedAtOffset = entry.Value.Cursor.ConsumedAtOffset
-                        };
                     }
 
                     // Written to a temporary file and moved into place: a service killed mid-write would
                     // otherwise leave a truncated file, and the next start would discard every cursor rather
                     // than just the one being written.
                     var temp = FilePath + ".tmp";
-                    File.WriteAllText(temp, JsonConvert.SerializeObject(stored, Formatting.Indented));
+                    File.WriteAllText(temp, Serialize(written));
                     File.Move(temp, FilePath, true);
 
                     // Recorded only once the file is actually on disk, so a failed write leaves every instance
@@ -230,6 +240,46 @@ namespace DBADash.Deadlocks
                     return false;
                 }
             }
+        }
+
+        /// <summary>
+        /// The file's contents for these positions.  Every instance is written, not only those with a position
+        /// to store: an instance with no cursor - an empty session, the ring_buffer path, or one that has only
+        /// attempted a backfill - still needs its entry, which is what stops the next start treating it as a
+        /// first run.  See <see cref="StoredCursor"/>.
+        /// </summary>
+        internal static string Serialize(IEnumerable<KeyValuePair<string, FileTargetCursor>> cursors)
+        {
+            var stored = new Dictionary<string, StoredCursor>(StringComparer.OrdinalIgnoreCase);
+            foreach (var entry in cursors)
+            {
+                stored[entry.Key] = new StoredCursor
+                {
+                    FileName = entry.Value.FileName,
+                    Offset = entry.Value.Offset,
+                    ConsumedAtOffset = entry.Value.ConsumedAtOffset
+                };
+            }
+            return JsonConvert.SerializeObject(stored, Formatting.Indented);
+        }
+
+        /// <summary>The positions in the file's contents - the reverse of <see cref="Serialize"/>.</summary>
+        internal static Dictionary<string, FileTargetCursor> Deserialize(string json)
+        {
+            var cursors = new Dictionary<string, FileTargetCursor>(StringComparer.OrdinalIgnoreCase);
+            var stored = JsonConvert.DeserializeObject<Dictionary<string, StoredCursor>>(json);
+            if (stored == null) return cursors;
+
+            foreach (var entry in stored)
+            {
+                if (entry.Value == null) continue;
+                // No file name is an instance that has run but has no position to resume from.  Kept, because
+                // the entry is what marks it as past its first run.
+                cursors[entry.Key] = entry.Value.FileName == null
+                    ? FileTargetCursor.None
+                    : new FileTargetCursor(entry.Value.FileName, entry.Value.Offset, entry.Value.ConsumedAtOffset);
+            }
+            return cursors;
         }
     }
 }

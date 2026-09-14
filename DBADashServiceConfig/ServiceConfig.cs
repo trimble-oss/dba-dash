@@ -140,6 +140,8 @@ namespace DBADashServiceConfig
         private void UpdateDeadlockOptionsEnabled()
         {
             txtDeadlockSessionName.Enabled = optCustomDeadlockSession.Checked;
+            // Only a dedicated session has anything to backfill - system_health is the backfill source itself
+            chkBackfillDeadlocks.Enabled = optSystemManagedDeadlock.Checked || optCustomDeadlockSession.Checked;
             if (!optCustomDeadlockSession.Checked)
             {
                 errorProvider1.SetError(txtDeadlockSessionName, null);
@@ -272,6 +274,7 @@ namespace DBADashServiceConfig
                 PersistXESessions = chkPersistXESession.Checked,
                 SlowQueryThresholdMs = chkSlowQueryThreshold.Checked ? (int)numSlowQueryThreshold.Value : -1,
                 DeadlockXESessionName = SelectedDeadlockXESessionName,
+                BackfillDeadlocksFromSystemHealth = chkBackfillDeadlocks.Checked,
                 RunningQueryPlanThreshold = chkCollectPlans.Checked
                     ? new PlanCollectionThreshold()
                     {
@@ -835,6 +838,15 @@ namespace DBADashServiceConfig
                     "A ring buffer read costs what the buffer holds, not what is new in it - roughly half a second for a full one against thirty milliseconds for an empty one.\r\n" +
                     "Can lose a deadlock that has fired but not yet reached the target when the session stops.\r\n" +
                     $"Only applies to the {DBADashSource.ManagedDeadlockXESessionName} session with a ring buffer target (Azure SQL Database).  A session you manage is never stopped."
+            });
+            dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn
+            {
+                DataPropertyName = "BackfillDeadlocksFromSystemHealth",
+                HeaderText = "Backfill Deadlocks",
+                ToolTipText =
+                    $"On the first deadlock collection, also read {DBADashSource.SystemHealthXESessionName} so deadlocks from before the dedicated session existed are collected.\r\n" +
+                    "Read once - later collections read the configured session only.\r\n" +
+                    $"No effect when the session is {DBADashSource.SystemHealthXESessionName} or blank, or on Azure SQL Database."
             });
             dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn()
             { DataPropertyName = "UseDualEventSession", HeaderText = "Use Dual Event Session" });
@@ -1702,6 +1714,7 @@ namespace DBADashServiceConfig
                 chkPersistXESession.Checked = src.PersistXESessions;
                 chkSlowQueryThreshold.Checked = (src.SlowQueryThresholdMs != -1);
                 SelectedDeadlockXESessionName = src.DeadlockXESessionName;
+                chkBackfillDeadlocks.Checked = src.BackfillDeadlocksFromSystemHealth;
                 chkScriptJobs.Checked = src.ScriptAgentJobs;
                 numSlowQueryThreshold.Value = chkSlowQueryThreshold.Checked ? src.SlowQueryThresholdMs : 0;
 
