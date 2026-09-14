@@ -265,6 +265,7 @@ namespace DBADashConfig.Test
             Assert.IsTrue(conn.IsDeadlockCollectionEnabled);
             Assert.IsTrue(conn.IsDeadlockXESessionManaged, "The reserved name is the one DBA Dash may create");
             Assert.IsFalse(conn.FlushDeadlockXERingBuffer, "Flushing can lose a deadlock, so it is opt in");
+            Assert.IsTrue(conn.BackfillDeadlocksFromSystemHealth, "The one-off system_health backfill is on by default");
 
             Helper.RunProcess(new ProcessStartInfo("DBADashConfig", $"-a Remove --ConnectionID {connectionID}"));
         }
@@ -275,13 +276,14 @@ namespace DBADashConfig.Test
         {
             // A named session is read and never altered - system_health included.
             Helper.RunProcess(new ProcessStartInfo("DBADashConfig",
-                $"-a Add -c \"{connectionString}\" --SkipValidation true --ConnectionID {connectionID} --DeadlockXESessionName system_health --FlushDeadlockXERingBuffer"));
+                $"-a Add -c \"{connectionString}\" --SkipValidation true --ConnectionID {connectionID} --DeadlockXESessionName system_health --FlushDeadlockXERingBuffer --NoDeadlockBackfill"));
 
             var conn = BasicConfig.Load<CollectionConfig>().SourceConnections.Single(c => c.ConnectionID == connectionID);
             Assert.AreEqual(DBADashSource.SystemHealthXESessionName, conn.DeadlockXESessionName);
             Assert.IsTrue(conn.IsDeadlockCollectionEnabled);
             Assert.IsFalse(conn.IsDeadlockXESessionManaged, "A session DBA Dash did not create is read only");
             Assert.IsTrue(conn.FlushDeadlockXERingBuffer);
+            Assert.IsFalse(conn.BackfillDeadlocksFromSystemHealth);
 
             Helper.RunProcess(new ProcessStartInfo("DBADashConfig", $"-a Remove --ConnectionID {connectionID}"));
         }

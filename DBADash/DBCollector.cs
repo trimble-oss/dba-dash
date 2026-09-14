@@ -1586,6 +1586,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
 
             var sessionName = Source.DeadlockXESessionName;
             var manageSession = Source.IsDeadlockXESessionManaged;
+            var backfillSessionName = Source.GetDeadlockBackfillSessionName(IsAzureDB);
             // Held outside the collector - one is built per run - and kept on disk so a service restart does
             // not send every instance back to the start of its event file set.  See DeadlockCursorStore.
             var cursorKey = ConnectionID;
@@ -1613,9 +1614,28 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
 
             var state = DeadlockCursorStore.GetPending(cursorKey);
 
-            var result = await DeadlockCollector.CollectAsync(ConnectionString, sessionName, IsAzureDB, state,
-                CancellationToken.None, manageSession, Source.FlushDeadlockXERingBuffer,
-                DeadlockXERingBufferKB);
+            // Only on the first run: after that the configured session has been capturing, so everything
+            // system_health could add is already stored.
+            if (!state.IsFirstRun) backfillSessionName = null;
+            if (backfillSessionName != null)
+            {
+                Log.Information("First deadlock collection for {instance}: backfilling from session {backfill} before reading {session}",
+                    instanceName, backfillSessionName, sessionName);
+            }
+
+            DeadlockCollector.Result result;
+            try
+            {
+                result = await DeadlockCollector.CollectAsync(ConnectionString, sessionName, IsAzureDB, state,
+                    CancellationToken.None, manageSession, Source.FlushDeadlockXERingBuffer,
+                    DeadlockXERingBufferKB, backfillSessionName);
+            }
+            finally
+            {
+                // Recorded now rather than with the cursor, and whether or not this run succeeds: a backfill is not
+                // repeated because its run failed to commit.  See DeadlockCursorStore.MarkBackfillAttempted.
+                if (state.BackfillAttempted) DeadlockCursorStore.MarkBackfillAttempted(cursorKey);
+            }
 
             // Held rather than saved: the position moves once these deadlocks have reached a destination, so a
             // write that fails is retried by reading them again.  See CommitDeadlockCursor.

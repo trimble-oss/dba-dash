@@ -41,5 +41,21 @@ namespace DBADash.Deadlocks
         /// Unused by the event_file path, where the cursor does the job.
         /// </summary>
         public HashSet<string> SeenHashes { get; set; } = new(StringComparer.Ordinal);
+
+        /// <summary>
+        /// True when this key has no stored entry - no run committed and no backfill attempted - which is what
+        /// decides whether the run backfills from system_health before reading the configured session.  Set by
+        /// <see cref="DeadlockCursorStore.GetPending"/> and never persisted itself: the presence of a stored entry
+        /// is the record that the instance is past its first run.
+        /// </summary>
+        public bool IsFirstRun { get; init; }
+
+        /// <summary>
+        /// Set by the collection as soon as it starts reading the backfill session, whatever comes of the read.
+        /// The caller hands this to <see cref="DeadlockCursorStore.MarkBackfillAttempted"/> whether or not the run
+        /// goes on to commit, so a backfill that timed out - or whose run failed afterwards - is not repeated on
+        /// every run that follows.
+        /// </summary>
+        public bool BackfillAttempted { get; set; }
     }
 }

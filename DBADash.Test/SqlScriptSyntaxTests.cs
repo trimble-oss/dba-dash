@@ -87,6 +87,22 @@ namespace DBADash.Test
         }
 
         /// <summary>
+        /// The filtered read the system_health backfill sends.  Built in C# with a parameter per event name, so
+        /// it is taken from the collector itself.
+        /// </summary>
+        [TestMethod]
+        public void DeadlockBackfillReadParses()
+        {
+            var sql = DeadlockCollector.BuildDeadlockEventsSql();
+
+            AssertParses("deadlock backfill read", sql);
+            for (var i = 0; i < DeadlockCollector.DeadlockEventNames.Count; i++)
+            {
+                StringAssert.Contains(sql, "@eventName" + i, "Every event name needs a parameter to match on");
+            }
+        }
+
+        /// <summary>
         /// Rebuilds every statement <paramref name="script"/> assembles by concatenation and parses each.
         /// </summary>
         private static void AssertBuiltStatementsParse(string label, string script, int expectedCount)

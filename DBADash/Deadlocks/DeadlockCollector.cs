@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Security.Cryptography;
@@ -102,10 +103,15 @@ namespace DBADash.Deadlocks
         /// session, which is the only one with a ring buffer - see
         /// <see cref="CollectionConfig.DeadlockXERingBufferKB"/>.
         /// </param>
+        /// <param name="backfillSessionName">
+        /// A second session to read in full, once, alongside the configured one - system_health, so a dedicated
+        /// session that starts empty still shows what the instance deadlocked on before it existed.  Null for no
+        /// backfill.  See <see cref="ReadBackfillAsync"/>.
+        /// </param>
         public static async Task<Result> CollectAsync(string connectionString, string sessionName,
             bool databaseScoped, DeadlockCollectionState state, CancellationToken cancellationToken,
             bool manageSession = false, bool flushRingBuffer = false,
-            int ringBufferKB = CollectionConfig.DefaultDeadlockXERingBufferKB)
+            int ringBufferKB = CollectionConfig.DefaultDeadlockXERingBufferKB, string backfillSessionName = null)
         {
             if (string.IsNullOrWhiteSpace(sessionName))
             {
@@ -133,32 +139,123 @@ namespace DBADash.Deadlocks
             }
 
             // event_file first: it survives a restart, and the cursor makes each run read only what is new.
-            if (targets.TryGetValue("event_file", out var fileTargetData) &&
-                XESessionTargetResolver.ResolveEventFileReadPath(fileTargetData) is { Length: > 0 } readPath)
+            var readPath = targets.TryGetValue("event_file", out var fileTargetData)
+                ? XESessionTargetResolver.ResolveEventFileReadPath(fileTargetData)
+                : null;
+            var hasRingBuffer = targets.TryGetValue("ring_buffer", out var ringTargetData);
+
+            if (string.IsNullOrEmpty(readPath) && !hasRingBuffer)
             {
-                return await CollectFromEventFileAsync(connectionString, readPath, state, cancellationToken);
+                throw new Exception(
+                    $"Extended events session '{sessionName}' has no readable event stream - it has " +
+                    $"{string.Join(", ", targets.Keys)}, and only event_file and ring_buffer carry one.  Add one " +
+                    "of those targets, or point the collection at a session that has one.");
             }
 
-            if (targets.TryGetValue("ring_buffer", out var ringTargetData))
+            // Only once the configured session is known to be running and readable, so there is no gap between
+            // the two: anything that deadlocks after this point is in the configured session as well, and a
+            // deadlock in both is the same graph with the same timestamp, which Build de-duplicates.
+            var captured = new List<CapturedDeadlock>();
+            if (!string.IsNullOrWhiteSpace(backfillSessionName))
             {
-                var result = ShredRingBufferTargetData(ringTargetData, state);
+                // Flagged before the read rather than after it, so the caller records the attempt even when this
+                // run goes on to fail - see DeadlockCollectionState.BackfillAttempted.
+                state.BackfillAttempted = true;
+                captured = await ReadBackfillAsync(connectionString, backfillSessionName, databaseScoped,
+                    cancellationToken);
+            }
 
-                // Only a session DBA Dash created may be emptied - stopping someone else's session would
-                // throw away data its owner is relying on - and only when it holds something, so an idle
-                // database is never stopped and started for nothing.  SeenHashes is everything the read
-                // found, new or not, which is what decides whether the next read would be an expensive one.
-                if (flushRingBuffer && manageSession && state.SeenHashes.Count > 0)
+            if (!string.IsNullOrEmpty(readPath))
+            {
+                captured.AddRange(ParseEvents(
+                    await ReadEventFileAsync(connectionString, readPath, state, cancellationToken)));
+                return Build(captured);
+            }
+
+            captured.AddRange(SelectUnseenRingBufferDeadlocks(ringTargetData, state));
+
+            // Only a session DBA Dash created may be emptied - stopping someone else's session would throw away
+            // data its owner is relying on - and only when it holds something, so an idle database is never
+            // stopped and started for nothing.  SeenHashes is everything the read found, new or not, which is
+            // what decides whether the next read would be an expensive one.
+            if (flushRingBuffer && manageSession && state.SeenHashes.Count > 0)
+            {
+                await FlushRingBufferAsync(connectionString, sessionName, databaseScoped, state,
+                    cancellationToken);
+            }
+            return Build(captured);
+        }
+
+        /// <summary>
+        /// Reads the whole of another session, once, for the deadlocks it already holds.  In practice
+        /// system_health: a dedicated session starts empty, where system_health has whatever the instance
+        /// deadlocked on recently, so reading it on the first run is what gives the dedicated session history.
+        ///
+        /// <para>Read from the start of its file set, with no cursor at all: it is read once, so there is no
+        /// position worth keeping, and the configured session's cursor must never be moved by a read of a
+        /// different file set.  Read only, like any session DBA Dash does not own.</para>
+        ///
+        /// <para>Best effort, and attempted once.  A backfill that can't be read - system_health stopped, or a
+        /// file set too large to read in time - is a warning rather than a failed collection: the configured
+        /// session is what the collection is for, and failing the run would hold back what it did capture.
+        /// Nor is it retried, whether or not the run commits (see
+        /// <see cref="DeadlockCursorStore.MarkBackfillAttempted"/>): a read that timed out would most likely time
+        /// out again, and repeating a full read of system_health on every run is the cost the dedicated session
+        /// exists to avoid.</para>
+        ///
+        /// <para>The whole backfill - finding the target as well as reading it - gets one command timeout's worth
+        /// of time (<see cref="CommandTimeout"/>, which the user can raise for the Deadlocks collection).  What
+        /// was read before it stopped is kept.  The file set is read oldest first, so a partial read keeps the
+        /// older end - see <see cref="ReadDeadlockEventsAsync"/> for why that is the better end to lose.</para>
+        /// </summary>
+        private static async Task<List<CapturedDeadlock>> ReadBackfillAsync(string connectionString,
+            string sessionName, bool databaseScoped, CancellationToken cancellationToken)
+        {
+            using var budget = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            // Zero is SqlClient's "no timeout", so it means no limit here too rather than cancelling at once.
+            if (CommandTimeout > 0) budget.CancelAfter(TimeSpan.FromSeconds(CommandTimeout));
+            var elapsed = Stopwatch.StartNew();
+
+            // Filled row by row, so whatever was read before a failure is still here to keep.
+            var eventXml = new List<string>();
+            try
+            {
+                var targets = await XESessionTargetResolver.GetSessionTargetsAsync(connectionString, databaseScoped,
+                    sessionName, budget.Token, CommandTimeout);
+
+                if (targets.TryGetValue("event_file", out var fileTargetData) &&
+                    XESessionTargetResolver.ResolveEventFileReadPath(fileTargetData) is { Length: > 0 } readPath)
                 {
-                    await FlushRingBufferAsync(connectionString, sessionName, databaseScoped, state,
-                        cancellationToken);
+                    await ReadDeadlockEventsAsync(connectionString, readPath, eventXml, budget.Token);
                 }
-                return result;
+                else if (targets.TryGetValue("ring_buffer", out var ringTargetData))
+                {
+                    var fromRingBuffer = ParseRingBuffer(ringTargetData).ToList();
+                    Log.Information("Deadlock backfill read {count} deadlock(s) from session {session}",
+                        fromRingBuffer.Count, sessionName);
+                    return fromRingBuffer;
+                }
+                else
+                {
+                    Log.Warning("Deadlock backfill skipped: extended events session {session} is not running or " +
+                                "has no event_file or ring_buffer target to read.", sessionName);
+                    return new List<CapturedDeadlock>();
+                }
+            }
+            catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
+            {
+                // The time limit lands here too - it is the linked token, not the caller's - so running out of time
+                // keeps what was read, where a shutdown still propagates.
+                Log.Warning(ex, "Deadlock backfill from session {session} stopped after {elapsed:N0}s " +
+                                "({limit}s limit).  Keeping the {count} deadlock event(s) read before it stopped; " +
+                                "the backfill is not attempted again.  Collection continues from the configured " +
+                                "session.", sessionName, elapsed.Elapsed.TotalSeconds, CommandTimeout, eventXml.Count);
             }
 
-            throw new Exception(
-                $"Extended events session '{sessionName}' has no readable event stream - it has " +
-                $"{string.Join(", ", targets.Keys)}, and only event_file and ring_buffer carry one.  Add one " +
-                "of those targets, or point the collection at a session that has one.");
+            var captured = ParseEvents(eventXml);
+            Log.Information("Deadlock backfill read {count} deadlock(s) from session {session} in {elapsed:N0}s",
+                captured.Count, sessionName, elapsed.Elapsed.TotalSeconds);
+            return captured;
         }
 
 
@@ -282,7 +379,7 @@ namespace DBADash.Deadlocks
         /// after the cursor is lost, which is also what makes the collection pick up the deadlocks that
         /// happened before it was switched on.</para>
         /// </summary>
-        private static async Task<Result> CollectFromEventFileAsync(string connectionString, string readPath,
+        private static async Task<List<string>> ReadEventFileAsync(string connectionString, string readPath,
             DeadlockCollectionState state, CancellationToken cancellationToken)
         {
             var reader = new EventFileTraceReader(connectionString, readPath, state.Cursor, MaxEventsPerRun,
@@ -311,7 +408,55 @@ namespace DBADash.Deadlocks
                 if (SamePosition(before, reader.Cursor)) break;
             }
 
-            return ShredEvents(eventXml);
+            return eventXml;
+        }
+
+        /// <summary>
+        /// The query <see cref="ReadDeadlockEventsAsync"/> sends, taking the file set as <c>@path</c> and each of
+        /// <see cref="DeadlockEventNames"/> as <c>@eventName0</c>, <c>@eventName1</c>...  Separated from the
+        /// execution so its syntax can be checked without an instance - see <c>SqlScriptSyntaxTests</c>.
+        /// </summary>
+        internal static string BuildDeadlockEventsSql() =>
+            "SELECT event_data FROM sys.fn_xe_file_target_read_file(@path, NULL, NULL, NULL) " +
+            "WHERE object_name IN (" +
+            string.Join(", ", Enumerable.Range(0, DeadlockEventNames.Count).Select(i => "@eventName" + i)) + ");";
+
+        /// <summary>
+        /// Reads every deadlock event in an event file set in a single filtered query - the backfill's read.
+        ///
+        /// <para>Not <see cref="ReadEventFileAsync"/>, because that read has a cursor to keep and this one
+        /// doesn't.  The cursor comes from the last row read, so that read has to return every row - deadlock or
+        /// not - and pages to keep the result bounded, stopping at <see cref="MaxBatchesPerRun"/>.  With no cursor
+        /// the filter can go in the WHERE clause instead: a system_health file set can hold millions of events
+        /// and only a handful of deadlocks, and this returns just the handful.  One query, so no paging and no
+        /// batch cap to stop short of the newest; SQL Server still scans the whole set, but without shipping every
+        /// row across or restarting the scan from an offset every batch.</para>
+        ///
+        /// <para>No ORDER BY, so rows come back in file order as the scan reaches them, and each is added to
+        /// <paramref name="eventXml"/> as it is read: a read cut off by the caller's time limit keeps what arrived
+        /// before it, the older end of the file set.  Newest first would be the better end to keep, but ordering
+        /// holds every row back until the whole set has been scanned, so a read cut off would keep nothing.</para>
+        /// </summary>
+        private static async Task ReadDeadlockEventsAsync(string connectionString, string readPath,
+            List<string> eventXml, CancellationToken cancellationToken)
+        {
+            await using var cn = new SqlConnection(connectionString);
+            await using var cmd = new SqlCommand(BuildDeadlockEventsSql(), cn)
+            { CommandType = CommandType.Text, CommandTimeout = CommandTimeout };
+            cmd.Parameters.Add("@path", SqlDbType.NVarChar, 260).Value = readPath;
+            // object_name is NVARCHAR(60) on the function - see EventFileTraceReader.
+            for (var i = 0; i < DeadlockEventNames.Count; i++)
+            {
+                cmd.Parameters.Add("@eventName" + i, SqlDbType.NVarChar, 60).Value = DeadlockEventNames[i];
+            }
+
+            await cn.OpenAsync(cancellationToken);
+            await using var registration = cancellationToken.Register(() => cmd.Cancel());
+            await using var rdr = await cmd.ExecuteReaderAsync(cancellationToken);
+            while (await rdr.ReadAsync(cancellationToken))
+            {
+                if (!rdr.IsDBNull(0)) eventXml.Add(rdr.GetString(0));
+            }
         }
 
         private static bool SamePosition(FileTargetCursor a, FileTargetCursor b) =>
@@ -327,14 +472,21 @@ namespace DBADash.Deadlocks
         public static Result ShredEvents(IEnumerable<string> eventXml)
         {
             ArgumentNullException.ThrowIfNull(eventXml);
-            return Build(eventXml.SelectMany(ParseEvent).ToList());
+            return Build(ParseEvents(eventXml));
         }
+
+        private static List<CapturedDeadlock> ParseEvents(IEnumerable<string> eventXml) =>
+            eventXml.SelectMany(ParseEvent).ToList();
 
         /// <summary>
         /// Shreds a ring_buffer target's <c>target_data</c>, suppressing what the previous read of the same
         /// buffer already returned.  Reads only - the buffer is never flushed.
         /// </summary>
-        public static Result ShredRingBufferTargetData(string targetDataXml, DeadlockCollectionState state)
+        public static Result ShredRingBufferTargetData(string targetDataXml, DeadlockCollectionState state) =>
+            Build(SelectUnseenRingBufferDeadlocks(targetDataXml, state));
+
+        private static List<CapturedDeadlock> SelectUnseenRingBufferDeadlocks(string targetDataXml,
+            DeadlockCollectionState state)
         {
             var graphs = new List<CapturedDeadlock>();
             var seen = new HashSet<string>(StringComparer.Ordinal);
@@ -351,7 +503,7 @@ namespace DBADash.Deadlocks
             // is what keeps this bounded by the buffer rather than growing for the life of the service.
             if (seen.Count > 0 || !string.IsNullOrEmpty(targetDataXml)) state.SeenHashes = seen;
 
-            return Build(graphs);
+            return graphs;
         }
 
         private static IEnumerable<CapturedDeadlock> ParseRingBuffer(string targetDataXml)

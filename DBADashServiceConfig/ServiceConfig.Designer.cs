@@ -216,6 +216,7 @@ namespace DBADashServiceConfig
             optSystemHealthDeadlock = new System.Windows.Forms.RadioButton();
             optCustomDeadlockSession = new System.Windows.Forms.RadioButton();
             txtDeadlockSessionName = new System.Windows.Forms.TextBox();
+            chkBackfillDeadlocks = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)errorProvider1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox3).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
@@ -2348,6 +2349,7 @@ namespace DBADashServiceConfig
             // 
             // tabDeadlocks
             // 
+            tabDeadlocks.Controls.Add(chkBackfillDeadlocks);
             tabDeadlocks.Controls.Add(txtDeadlockSessionName);
             tabDeadlocks.Controls.Add(optCustomDeadlockSession);
             tabDeadlocks.Controls.Add(optSystemHealthDeadlock);
@@ -2412,6 +2414,19 @@ namespace DBADashServiceConfig
             txtDeadlockSessionName.Name = "txtDeadlockSessionName";
             txtDeadlockSessionName.Size = new System.Drawing.Size(207, 27);
             txtDeadlockSessionName.TabIndex = 4;
+            // 
+            // chkBackfillDeadlocks
+            // 
+            chkBackfillDeadlocks.AutoSize = true;
+            chkBackfillDeadlocks.Checked = true;
+            chkBackfillDeadlocks.CheckState = System.Windows.Forms.CheckState.Checked;
+            chkBackfillDeadlocks.Location = new System.Drawing.Point(23, 142);
+            chkBackfillDeadlocks.Name = "chkBackfillDeadlocks";
+            chkBackfillDeadlocks.Size = new System.Drawing.Size(334, 24);
+            chkBackfillDeadlocks.TabIndex = 5;
+            chkBackfillDeadlocks.Text = "Backfill from system health on first collection";
+            toolTip1.SetToolTip(chkBackfillDeadlocks, "On the first collection, also read the system_health session so deadlocks from before the dedicated session was created are collected.  Read once - later collections use the dedicated session only.");
+            chkBackfillDeadlocks.UseVisualStyleBackColor = true;
             // 
             // ServiceConfig
             // 
@@ -2670,6 +2685,7 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.RadioButton optSystemManagedDeadlock;
         private System.Windows.Forms.RadioButton optDisableDeadlock;
         private System.Windows.Forms.TextBox txtDeadlockSessionName;
+        private System.Windows.Forms.CheckBox chkBackfillDeadlocks;
         private System.Windows.Forms.RadioButton optCustomDeadlockSession;
         private System.Windows.Forms.RadioButton optSystemHealthDeadlock;
     }
