@@ -1,6 +1,8 @@
 using DBADash;
 using DBADash.Alert;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 
 namespace DBADashConfig.Test
@@ -235,6 +237,95 @@ namespace DBADashConfig.Test
             Assert.IsFalse(string.IsNullOrWhiteSpace(content), "Template should not be empty");
             Assert.IsFalse(content.ToLowerInvariant().Contains("<html"), "Expected plain-text template, not HTML");
         }
+
+        [TestMethod]
+        public void TestCloudPlaceholders()
+        {
+            var testAlert = CreateTestAlert();
+            testAlert.CloudProvider = "AWS";
+            testAlert.CloudResourceID = "i-0123456789abcdef0";
+            testAlert.CloudRegion = "eu-west-1";
+            testAlert.CloudAccountID = "123456789012";
+            var emailChannel = new EmailNotificationChannel { ChannelName = DefaultChannelName };
+
+            var result = emailChannel.ReplacePlaceholders(testAlert, "{CloudProvider}|{CloudResourceID}|{CloudRegion}|{cloudaccountid}");
+
+            Assert.AreEqual("AWS|i-0123456789abcdef0|eu-west-1|123456789012", result);
+            foreach (var placeholder in new[] { "{CloudProvider}", "{CloudResourceID}", "{CloudRegion}", "{CloudAccountID}" })
+            {
+                Assert.Contains(placeholder, emailChannel.Placeholders, $"Placeholders list should contain {placeholder}");
+            }
+        }
+
+        [TestMethod]
+        public void TestCloudPlaceholdersEmptyWhenNoMetadata()
+        {
+            // JSON escaping must not render a missing value as "null"
+            var webhookChannel = new WebhookNotificationChannel { ChannelName = DefaultChannelName };
+
+            var result = webhookChannel.ReplacePlaceholders(CreateTestAlert(), "[{CloudProvider}{CloudResourceID}{CloudRegion}{CloudAccountID}]");
+
+            Assert.AreEqual("[]", result);
+        }
+
+        [TestMethod]
+        public void AWSDevOps_ResolvedEvent_TimestampDiffersFromCreated()
+        {
+            // The DevOps Agent de-duplicates on incidentId + timestamp, so a resolved event must not reuse the trigger time
+            var channel = new AWSDevOpsNotificationChannel();
+            var now = new DateTime(2026, 2, 9, 14, 35, 0);
+            var alert = CreateTestAlert();
+
+            var created = ParsePayload(channel.GetPayload(alert, now));
+
+            alert.IsResolved = true;
+            alert.NotificationCount = 1;
+            alert.ResolvedDate = new DateTime(2026, 2, 9, 14, 31, 45);
+            var resolved = ParsePayload(channel.GetPayload(alert, now));
+
+            Assert.AreEqual("created", created["action"]?.ToString());
+            Assert.AreEqual("resolved", resolved["action"]?.ToString());
+            Assert.AreEqual(created["incidentId"]?.ToString(), resolved["incidentId"]?.ToString());
+            Assert.AreEqual("2026-02-09T14:30:45Z", created["timestamp"]?.ToString());
+            Assert.AreEqual("2026-02-09T14:31:45Z", resolved["timestamp"]?.ToString());
+        }
+
+        [TestMethod]
+        public void AWSDevOps_Payload_IncludesInstanceAndCloudIdentity()
+        {
+            var channel = new AWSDevOpsNotificationChannel();
+            var alert = CreateTestAlert(connectionId: "sqlvm01.contoso.com", instanceDisplayName: "PROD-SQL-01");
+            alert.CloudProvider = "Azure";
+            alert.CloudRegion = "uksouth";
+            alert.CloudAccountID = "00000000-0000-0000-0000-000000000001";
+            alert.CloudResourceID = "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg/providers/Microsoft.Compute/virtualMachines/sqlvm01";
+
+            var payload = ParsePayload(channel.GetPayload(alert, DateTime.UtcNow));
+            var description = payload["description"]!.ToString();
+
+            Assert.AreEqual($"{DefaultAlertName} on PROD-SQL-01", payload["title"]?.ToString());
+            StringAssert.StartsWith(description, "SQL Server instance: PROD-SQL-01 (sqlvm01.contoso.com)");
+            StringAssert.Contains(description, "Region: uksouth");
+            StringAssert.Contains(description, "Subscription ID: 00000000-0000-0000-0000-000000000001");
+            StringAssert.Contains(description, alert.CloudResourceID);
+            StringAssert.Contains(description, DefaultMessage);
+            Assert.AreEqual("uksouth", payload["data"]!["metadata"]!["region"]?.ToString());
+        }
+
+        [TestMethod]
+        public void AWSDevOps_Payload_OmitsCloudMetadataWhenNotAvailable()
+        {
+            var channel = new AWSDevOpsNotificationChannel();
+            var payload = ParsePayload(channel.GetPayload(CreateTestAlert(), DateTime.UtcNow));
+
+            Assert.IsNull(payload["data"]!["metadata"]);
+            StringAssert.StartsWith(payload["description"]!.ToString(), $"SQL Server instance: {DefaultInstanceDisplayName}");
+            Assert.IsFalse(channel.SupportsConsolidation);
+        }
+
+        private static JObject ParsePayload(string json) =>
+            // Keep ISO 8601 values as strings rather than letting Json.NET convert them to DateTime
+            JsonConvert.DeserializeObject<JObject>(json, new JsonSerializerSettings { DateParseHandling = DateParseHandling.None })!;
 
         private static Alert CreateTestAlert(
             bool isResolved = false,

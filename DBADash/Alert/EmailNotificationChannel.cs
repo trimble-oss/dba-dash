@@ -57,7 +57,7 @@ namespace DBADash.Alert
         [Category("Email Message"), DisplayName("Email Subject Template")]
         public string EmailSubjectTemplate { get; set; }
 
-        [Description("Optional.  Default: {Text}\nHTML Default: https://github.com/trimble-oss/dba-dash/blob/main/DBADash/Alert/HTMLEmailAlertTemplate.html\nPlaceholders: {Emoji}, {AlertKey}, {Action}, {Instance}, {ConnectionID}, {InstanceAndConnectionID}, {Priority}, {Title}, {Text}, {TriggerDate}.")]
+        [Description("Optional.  Default: {Text}\nHTML Default: https://github.com/trimble-oss/dba-dash/blob/main/DBADash/Alert/HTMLEmailAlertTemplate.html\nPlaceholders: {Emoji}, {AlertKey}, {Action}, {Instance}, {ConnectionID}, {InstanceAndConnectionID}, {Priority}, {Title}, {Text}, {TriggerDate}, {CloudProvider}, {CloudResourceID}, {CloudRegion}, {CloudAccountID}.")]
         [Category("Email Message"), DisplayName("Email Message Template")]
         public string EmailMessageTemplate { get; set; }
 
