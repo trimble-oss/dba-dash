@@ -91,6 +91,24 @@ namespace DBADash.Alert
         public bool IsAcknowledged { get; set; }
 
         /// <summary>
+        /// Content recorded in the notification log for this notification. Channels set this to the exact
+        /// payload sent (e.g. AWS DevOps) where the receiving system doesn't expose it. Defaults to Message when null.
+        /// </summary>
+        public string NotificationLogMessage { get; set; }
+
+        /// <summary>Cloud provider from collected instance metadata (AWS/Azure). Null if not available.</summary>
+        public string CloudProvider { get; set; }
+
+        /// <summary>Azure VM resource ID or AWS EC2 instance ID from collected instance metadata.</summary>
+        public string CloudResourceID { get; set; }
+
+        /// <summary>Azure location or AWS region from collected instance metadata.</summary>
+        public string CloudRegion { get; set; }
+
+        /// <summary>Azure subscription ID or AWS account ID from collected instance metadata.</summary>
+        public string CloudAccountID { get; set; }
+
+        /// <summary>
         /// The alert priority mapped onto coarse severity buckets
         /// (CRITICAL / HIGH / MEDIUM / LOW / MINIMAL). Used by channels and
         /// message templates that expect a small, fixed set of severities.

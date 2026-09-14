@@ -25,11 +25,18 @@ SELECT AA.AlertID,
 		CASE WHEN AA.Escalated > AA.LastNotification THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS IsEscalated,
 		CTK.ThreadKey AS CustomThreadKey,
 		AA.AlertType,
-		AA.IsAcknowledged
+		AA.IsAcknowledged,
+		IM.Provider AS CloudProvider,
+		ISNULL(JSON_VALUE(IMJ.Metadata,'$.compute.resourceId'),JSON_VALUE(IMJ.Metadata,'$.instanceId')) AS CloudResourceID,
+		ISNULL(JSON_VALUE(IMJ.Metadata,'$.compute.location'),JSON_VALUE(IMJ.Metadata,'$.region')) AS CloudRegion,
+		ISNULL(JSON_VALUE(IMJ.Metadata,'$.compute.subscriptionId'),JSON_VALUE(IMJ.Metadata,'$.accountId')) AS CloudAccountID
 FROM Alert.ActiveAlerts AA
 JOIN dbo.Instances I ON AA.InstanceID = I.InstanceID
 JOIN Alert.NotificationChannel NC ON AA.GroupID = NC.GroupID
 LEFT JOIN Alert.CustomThreadKey CTK ON AA.AlertID = CTK.AlertID AND NC.NotificationChannelID = CTK.NotificationChannelID
+LEFT JOIN dbo.InstanceMetadata IM ON I.InstanceID = IM.InstanceID AND IM.Provider IN('AWS','Azure')
+/* Guard against invalid JSON so a bad metadata row can't break alert notifications */
+OUTER APPLY(SELECT CASE WHEN ISJSON(IM.Metadata) = 1 THEN IM.Metadata END AS Metadata) IMJ
 WHERE (AA.UpdatedDate > AA.LastNotification OR AA.LastNotification IS NULL)
 AND (AA.IsAcknowledged = 0 OR (AA.AcknowledgedDate > AA.LastNotification AND NC.AcknowledgedNotification=1))
 AND AA.NotificationCount < @AlertMaxNotificationCount

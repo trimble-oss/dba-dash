@@ -26,7 +26,7 @@ namespace DBADash.Alert
         public string SlackChannel { get; set; }
 
         [DisplayName("Message Template")]
-        [Description("Json message template (Leave blank to use default template).  Available parameters to replace: {title}, {text}, {instance}, {connectionid}, {icon}, {emoji}")]
+        [Description("Json message template (Leave blank to use default template).  Available parameters to replace: {title}, {text}, {instance}, {connectionid}, {icon}, {emoji}, {cloudprovider}, {cloudresourceid}, {cloudregion}, {cloudaccountid}")]
         [Category("Slack Config")]
         public JsonString MessageTemplate { get; set; }
 

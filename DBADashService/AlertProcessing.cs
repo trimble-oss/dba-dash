@@ -129,7 +129,11 @@ namespace DBADashService
                     NotificationCount = (int)rdr["NotificationCount"],
                     MaxNotifications = (int)rdr["AlertMaxNotificationCount"],
                     AlertType = (string)rdr["AlertType"],
-                    IsAcknowledged = (bool)rdr["IsAcknowledged"]
+                    IsAcknowledged = (bool)rdr["IsAcknowledged"],
+                    CloudProvider = rdr["CloudProvider"] as string,
+                    CloudResourceID = rdr["CloudResourceID"] as string,
+                    CloudRegion = rdr["CloudRegion"] as string,
+                    CloudAccountID = rdr["CloudAccountID"] as string
                 };
 
                 var notificationChannelId = (int)rdr["NotificationChannelID"];
@@ -154,7 +158,7 @@ namespace DBADashService
             foreach (var (notificationChannelId, alerts) in groupedAlerts)
             {
                 var channel = NotificationChannelBase.GetChannelWithCaching(notificationChannelId, ConnectionString);
-                if (alerts.Count >= (channel.AlertConsolidationThreshold ?? NotificationChannelBase.DefaultAlertConsolidationThreshold))
+                if (channel.SupportsConsolidation && alerts.Count >= (channel.AlertConsolidationThreshold ?? NotificationChannelBase.DefaultAlertConsolidationThreshold))
                 {
                     await SendConsolidatedAlertNotification(channel, alerts);
                 }

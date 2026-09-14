@@ -60,7 +60,7 @@ namespace DBADashGUI.DBADashAlerts
 
         [DisplayName("Alert Consolidation Threshold"), Description("Number of alerts that result in a consolidated alert message to reduce the number of notifications."), DefaultValue(DefaultAlertConsolidationThreshold)]
         [Category("DBA Dash Notification Channel")]
-        public int? AlertConsolidationThreshold { get; set; }
+        public virtual int? AlertConsolidationThreshold { get; set; }
 
         [JsonIgnore]
         [Description("Option to enable/disable notifications when alert is acknowledged in DBA Dash.")]
@@ -79,6 +79,14 @@ namespace DBADashGUI.DBADashAlerts
         [Browsable(false)]
         [JsonIgnore]
         public virtual bool IncludeNotificationCountInMessage => true;
+
+        /// <summary>
+        /// False for channels where each alert must be sent individually (e.g. incident systems that
+        /// need one incident per instance/alert), so AlertConsolidationThreshold is ignored.
+        /// </summary>
+        [Browsable(false)]
+        [JsonIgnore]
+        public virtual bool SupportsConsolidation => true;
 
         protected NotificationChannelBase()
         {
@@ -109,7 +117,7 @@ namespace DBADashGUI.DBADashAlerts
             { CommandType = CommandType.StoredProcedure };
             cmd.Parameters.AddWithValue("@AlertID", alert.AlertID);
             cmd.Parameters.AddWithValue("@NotificationChannelID", ChannelID);
-            cmd.Parameters.AddWithValue("@NotificationMessage", alert.Message);
+            cmd.Parameters.AddWithValue("@NotificationMessage", alert.NotificationLogMessage ?? alert.Message);
             if (!string.IsNullOrEmpty(errorMessage))
             {
                 cmd.Parameters.AddWithValue("@ErrorMessage", errorMessage);
@@ -398,7 +406,11 @@ namespace DBADashGUI.DBADashAlerts
             "{Priority}",
             "{PriorityBucket}",
             "{TriggerDate}",
-            "{Now}"
+            "{Now}",
+            "{CloudProvider}",
+            "{CloudResourceID}",
+            "{CloudRegion}",
+            "{CloudAccountID}"
         };
 
         public string ReplacePlaceholders(Alert alert, string template) =>
@@ -427,7 +439,12 @@ namespace DBADashGUI.DBADashAlerts
                 // {PriorityBucket} must be replaced before {Priority} would be a prefix match; the
                 // trailing brace makes them distinct, but replacing the longer token first is safest.
                 .Replace("{PriorityBucket}", escape(alert.PriorityBucket), StringComparison.InvariantCultureIgnoreCase)
-                .Replace("{Priority}", escape(alert.Priority.ToString()), StringComparison.InvariantCultureIgnoreCase);
+                .Replace("{Priority}", escape(alert.Priority.ToString()), StringComparison.InvariantCultureIgnoreCase)
+                // Cloud values come from collected instance metadata (AWS/Azure) and are empty when not available
+                .Replace("{CloudProvider}", escape(alert.CloudProvider ?? string.Empty), StringComparison.InvariantCultureIgnoreCase)
+                .Replace("{CloudResourceID}", escape(alert.CloudResourceID ?? string.Empty), StringComparison.InvariantCultureIgnoreCase)
+                .Replace("{CloudRegion}", escape(alert.CloudRegion ?? string.Empty), StringComparison.InvariantCultureIgnoreCase)
+                .Replace("{CloudAccountID}", escape(alert.CloudAccountID ?? string.Empty), StringComparison.InvariantCultureIgnoreCase);
 
             result = ReplaceDate(alert.TriggerDate.ToUtcDateTimeOffset(), result, "{TriggerDate}", escape);
             result = ReplaceDate(DateTimeOffset.UtcNow, result, "{Now}", escape);
