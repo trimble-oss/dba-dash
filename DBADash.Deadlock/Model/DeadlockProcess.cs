@@ -98,6 +98,8 @@ namespace DBADash.Deadlock.Model
         /// The execution stack frame most likely to be the interesting one - the innermost frame carrying
         /// statement text, falling back to the innermost frame that at least identifies the statement by
         /// sql handle.  The statement, the plan lookup and the Query Store lookup all key off this frame.
+        /// System procedure frames such as sp_executesql are skipped - their text is only the procedure
+        /// name, while the statement they ran is in the frame above or the input buffer.
         /// </summary>
         public DeadlockFrame? PrimaryFrame
         {
@@ -105,11 +107,11 @@ namespace DBADash.Deadlock.Model
             {
                 foreach (var frame in ExecutionStack)
                 {
-                    if (!string.IsNullOrWhiteSpace(frame.Sql)) return frame;
+                    if (!frame.IsResourceDatabaseModule && !string.IsNullOrWhiteSpace(frame.Sql)) return frame;
                 }
                 foreach (var frame in ExecutionStack)
                 {
-                    if (!string.IsNullOrWhiteSpace(frame.SqlHandle)) return frame;
+                    if (!frame.IsResourceDatabaseModule && !string.IsNullOrWhiteSpace(frame.SqlHandle)) return frame;
                 }
                 return null;
             }
