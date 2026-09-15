@@ -112,6 +112,62 @@ namespace DBADash.Deadlock.Test
                 SignatureOf(template.Replace("{status}", "Cancelled").Replace("{row}", "9930")));
         }
 
+        /// <summary>One process running <paramref name="frameText"/>, with <paramref name="inputBuffer"/> as its batch.</summary>
+        private static string SingleStatementDeadlock(string frameText, string inputBuffer = "") =>
+            $"""
+             <deadlock>
+               <process-list>
+                 <process id="p1" spid="77">
+                   <executionStack>
+                     <frame procname="adhoc" line="1" sqlhandle="0x020000002a7d8708">
+             unknown    </frame>
+                     <frame procname="adhoc" line="1" sqlhandle="0x01000100f0a18610">
+             {frameText}    </frame>
+                   </executionStack>
+                   <inputbuf>
+             {inputBuffer}   </inputbuf>
+                 </process>
+               </process-list>
+             </deadlock>
+             """;
+
+        [TestMethod]
+        public void Signature_GroupsBackupAndRestoreByOperationRegardlessOfDatabaseOrPath()
+        {
+            var restore = SignatureOf(SingleStatementDeadlock(
+                "RESTORE LOG [db1] FROM URL = 'https://a.blob.core.windows.net/dbbackup/LOG/db1.trn' WITH NORECOVERY, FILE ="));
+            var otherRestore = SignatureOf(SingleStatementDeadlock(
+                "RESTORE LOG [Sales] FROM DISK = N'\\\\backupsrv\\share\\Sales\\LOG\\Sales_20260913_080000.tr"));
+            var backup = SignatureOf(SingleStatementDeadlock(
+                "BACKUP LOG [db1] TO URL = 'https://a.blob.core.windows.net/dbbackup/LOG/db1.trn'"));
+
+            Assert.AreEqual(restore, otherRestore);
+            Assert.AreNotEqual(restore, backup);
+            StringAssert.Contains(
+                DeadlockSignature.Compute(DeadlockParser.Parse(SingleStatementDeadlock("restore log x")).First()).Components,
+                "operation=restore log");
+        }
+
+        [TestMethod]
+        public void Signature_DoesNotTreatABatchInTheInputBufferAsABackupOrRestore()
+        {
+            // With no frame text, the input buffer is the whole batch - the restore may be one step of many.
+            var graph = SingleStatementDeadlock("unknown", "RESTORE LOG [db1] FROM DISK = 'x.trn'; DELETE FROM dbo.T;");
+
+            var components = DeadlockSignature.Compute(DeadlockParser.Parse(graph).First()).Components;
+
+            StringAssert.Contains(components, "statement=restore log [db1] from disk = ?; delete from dbo.t;");
+        }
+
+        [TestMethod]
+        public void Signature_IgnoresALiteralCutOffByTruncation()
+        {
+            var shortPath = SignatureOf(SingleStatementDeadlock("SELECT * FROM dbo.T WHERE Path = 'C:\\a"));
+            var longPath = SignatureOf(SingleStatementDeadlock("SELECT * FROM dbo.T WHERE Path = 'C:\\backups\\somewhere\\much\\longer"));
+
+            Assert.AreEqual(shortPath, longPath);
+        }
+
         [TestMethod]
         public void Signature_IgnoresTheOrderProcessesAppearIn()
         {

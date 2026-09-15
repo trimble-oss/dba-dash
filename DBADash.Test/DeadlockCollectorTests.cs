@@ -2,6 +2,7 @@
 using System.Data;
 using System.Linq;
 using DBADash;
+using DBADash.Deadlock.Analysis;
 using DBADash.Deadlocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -86,7 +87,7 @@ EXEC dbo.usp_ReverseInvoice @InvoiceID = 88232;   </inputbuf>
             Assert.AreEqual((short)2, row["ResourceCount"]);
             Assert.AreEqual(false, row["IsParallel"]);
             Assert.AreEqual(DeadlockTables.DeadlockHashBytes, ((byte[])row["DeadlockHash"]).Length);
-            Assert.AreEqual((byte)1, row["SignatureVersion"]);
+            Assert.AreEqual((byte)DeadlockSignature.VersionNumber, row["SignatureVersion"]);
             StringAssert.StartsWith((string)row["Signature"], "0x", "Stored as the hex form the _Upd proc converts.");
         }
 
