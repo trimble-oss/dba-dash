@@ -844,7 +844,7 @@ namespace DBADashServiceConfig
                 DataPropertyName = "BackfillDeadlocksFromSystemHealth",
                 HeaderText = "Backfill Deadlocks",
                 ToolTipText =
-                    $"On the first deadlock collection, also read {DBADashSource.SystemHealthXESessionName} so deadlocks from before the dedicated session existed are collected.\r\n" +
+                    $"After the first deadlock collection, read {DBADashSource.SystemHealthXESessionName} once in the background for the deadlocks from before the dedicated session started.\r\n" +
                     "Read once - later collections read the configured session only.\r\n" +
                     $"No effect when the session is {DBADashSource.SystemHealthXESessionName} or blank, or on Azure SQL Database."
             });

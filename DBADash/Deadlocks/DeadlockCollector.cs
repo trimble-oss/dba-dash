@@ -14,6 +14,7 @@ using DBADash.Deadlock.Analysis;
 using DBADash.Deadlock.Model;
 using DBADash.XE;
 using Microsoft.Data.SqlClient;
+using Microsoft.SqlServer.XEvent.XELite;
 using Serilog;
 
 namespace DBADash.Deadlocks
@@ -103,15 +104,10 @@ namespace DBADash.Deadlocks
         /// session, which is the only one with a ring buffer - see
         /// <see cref="CollectionConfig.DeadlockXERingBufferKB"/>.
         /// </param>
-        /// <param name="backfillSessionName">
-        /// A second session to read in full, once, alongside the configured one - system_health, so a dedicated
-        /// session that starts empty still shows what the instance deadlocked on before it existed.  Null for no
-        /// backfill.  See <see cref="ReadBackfillAsync"/>.
-        /// </param>
         public static async Task<Result> CollectAsync(string connectionString, string sessionName,
             bool databaseScoped, DeadlockCollectionState state, CancellationToken cancellationToken,
             bool manageSession = false, bool flushRingBuffer = false,
-            int ringBufferKB = CollectionConfig.DefaultDeadlockXERingBufferKB, string backfillSessionName = null)
+            int ringBufferKB = CollectionConfig.DefaultDeadlockXERingBufferKB)
         {
             if (string.IsNullOrWhiteSpace(sessionName))
             {
@@ -152,27 +148,12 @@ namespace DBADash.Deadlocks
                     "of those targets, or point the collection at a session that has one.");
             }
 
-            // Only once the configured session is known to be running and readable, so there is no gap between
-            // the two: anything that deadlocks after this point is in the configured session as well, and a
-            // deadlock in both is the same graph with the same timestamp, which Build de-duplicates.
-            var captured = new List<CapturedDeadlock>();
-            if (!string.IsNullOrWhiteSpace(backfillSessionName))
-            {
-                // Flagged before the read rather than after it, so the caller records the attempt even when this
-                // run goes on to fail - see DeadlockCollectionState.BackfillAttempted.
-                state.BackfillAttempted = true;
-                captured = await ReadBackfillAsync(connectionString, backfillSessionName, databaseScoped,
-                    cancellationToken);
-            }
-
             if (!string.IsNullOrEmpty(readPath))
             {
-                captured.AddRange(ParseEvents(
-                    await ReadEventFileAsync(connectionString, readPath, state, cancellationToken)));
-                return Build(captured);
+                return ShredEvents(await ReadEventFileAsync(connectionString, readPath, state, cancellationToken));
             }
 
-            captured.AddRange(SelectUnseenRingBufferDeadlocks(ringTargetData, state));
+            var captured = SelectUnseenRingBufferDeadlocks(ringTargetData, state);
 
             // Only a session DBA Dash created may be emptied - stopping someone else's session would throw away
             // data its owner is relying on - and only when it holds something, so an idle database is never
@@ -187,46 +168,155 @@ namespace DBADash.Deadlocks
         }
 
         /// <summary>
-        /// Reads the whole of another session, once, for the deadlocks it already holds.  In practice
-        /// system_health: a dedicated session starts empty, where system_health has whatever the instance
-        /// deadlocked on recently, so reading it on the first run is what gives the dedicated session history.
+        /// How far past the configured session's start the backfill keeps deadlocks.  The two clocks compared - the
+        /// session's start and an event's timestamp - are read separately and converted separately, so an exact
+        /// cutoff could drop a deadlock that fired as the session was starting.  A minute of overlap costs at most a
+        /// deadlock or two sent twice, which the repository discards.
+        /// </summary>
+        internal static readonly TimeSpan BackfillCutoffMargin = TimeSpan.FromMinutes(1);
+
+        /// <summary>
+        /// The deadlocks <paramref name="backfillSessionName"/> holds from before
+        /// <paramref name="configuredSessionName"/> started - system_health's history for a dedicated session that
+        /// started empty.  Null, having read nothing, when the configured session isn't running: the cutoff can't
+        /// be known, and a backfill taken without one could leave a gap the configured session doesn't cover.
+        ///
+        /// <para>Runs on its own, after the run that first read the configured session, rather than inside that run
+        /// - so a read of the whole of system_health waits in a low priority queue instead of holding up the
+        /// collection.  The cutoff divides the work between the two: anything from before the configured session
+        /// started can only be here, and anything after is the configured session's to collect, so what they both
+        /// send is limited to <see cref="BackfillCutoffMargin"/>.  Their imports can run at the same time, and a
+        /// deadlock in that overlap arriving in both is discarded by dbo.Deadlocks_Upd, whose dedup check locks the
+        /// key so concurrent imports of the same deadlock don't both insert it.</para>
+        ///
+        /// <para>A session started more than once - an instance restart, say - is cut off at its latest start.
+        /// Older deadlocks it holds from before the restart come back from system_health too, and the repository
+        /// discards them as already stored.</para>
+        /// </summary>
+        public static async Task<Result> BackfillAsync(string connectionString, string backfillSessionName,
+            string configuredSessionName, bool databaseScoped, int timeLimitSeconds,
+            CancellationToken cancellationToken)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(backfillSessionName);
+            ArgumentException.ThrowIfNullOrWhiteSpace(configuredSessionName);
+
+            // The time limit covers the whole backfill, from the first lookup - not only the read.
+            using var budget = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            if (timeLimitSeconds > 0) budget.CancelAfter(TimeSpan.FromSeconds(timeLimitSeconds));
+            var elapsed = Stopwatch.StartNew();
+
+            DateTime? configuredStart;
+            try
+            {
+                configuredStart = await GetSessionStartUtcAsync(connectionString, configuredSessionName,
+                    databaseScoped, timeLimitSeconds, budget.Token);
+            }
+            catch (Exception) when (budget.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
+            {
+                // Treated like a read that ran out of time - finished, with nothing to keep - rather than as a
+                // failure that leaves the backfill to be tried again.
+                Log.Warning("Deadlock backfill from {backfill} stopped at its {limit}s time limit before finding when " +
+                            "{session} started; the backfill is not attempted again.", backfillSessionName,
+                    timeLimitSeconds, configuredSessionName);
+                return Build(Array.Empty<CapturedDeadlock>());
+            }
+
+            if (configuredStart == null)
+            {
+                Log.Information("Deadlock backfill from {backfill} deferred: session {session} is not running, so " +
+                                "there is no start time to backfill up to.", backfillSessionName, configuredSessionName);
+                return null;
+            }
+
+            var cutoff = configuredStart.Value + BackfillCutoffMargin;
+            var captured = await ReadBackfillAsync(connectionString, backfillSessionName, databaseScoped,
+                timeLimitSeconds, budget, elapsed, cancellationToken);
+            var before = captured.Where(c => c.EventTime < cutoff).ToList();
+
+            Log.Information("Deadlock backfill keeping {kept} of {read} deadlock(s) from {backfill}: those before " +
+                            "{session} started at {start:u}", before.Count, captured.Count, backfillSessionName,
+                configuredSessionName, configuredStart.Value);
+            return Build(before);
+        }
+
+        /// <summary>
+        /// The batch <see cref="GetSessionStartUtcAsync"/> sends.  <c>create_time</c> is the server's local time, so
+        /// it is moved to UTC on the server by the server's own offset - the event timestamps it is compared with are
+        /// UTC.  Second precision on the offset is enough given <see cref="BackfillCutoffMargin"/>, and keeps to
+        /// functions every supported version has.
+        /// </summary>
+        internal static string BuildSessionStartSql(bool databaseScoped) =>
+            "SELECT DATEADD(SECOND, DATEDIFF(SECOND, GETDATE(), GETUTCDATE()), create_time) " +
+            $"FROM {(databaseScoped ? "sys.dm_xe_database_sessions" : "sys.dm_xe_sessions")} " +
+            "WHERE name = @name;";
+
+        /// <summary>When the running session last started, in UTC, or null when it isn't running.</summary>
+        private static async Task<DateTime?> GetSessionStartUtcAsync(string connectionString, string sessionName,
+            bool databaseScoped, int timeLimitSeconds, CancellationToken cancellationToken)
+        {
+            await using var cn = new SqlConnection(connectionString);
+            await using var cmd = new SqlCommand(BuildSessionStartSql(databaseScoped), cn)
+            { CommandType = CommandType.Text, CommandTimeout = timeLimitSeconds };
+            cmd.Parameters.Add("@name", SqlDbType.NVarChar, 128).Value = sessionName;
+            await cn.OpenAsync(cancellationToken);
+            var value = await cmd.ExecuteScalarAsync(cancellationToken);
+            return value is DateTime start ? DateTime.SpecifyKind(start, DateTimeKind.Unspecified) : null;
+        }
+
+        /// <summary>
+        /// Reads the whole of another session, once, for the deadlocks it already holds - the read behind
+        /// <see cref="BackfillAsync"/>.
         ///
         /// <para>Read from the start of its file set, with no cursor at all: it is read once, so there is no
         /// position worth keeping, and the configured session's cursor must never be moved by a read of a
         /// different file set.  Read only, like any session DBA Dash does not own.</para>
         ///
-        /// <para>Best effort, and attempted once.  A backfill that can't be read - system_health stopped, or a
-        /// file set too large to read in time - is a warning rather than a failed collection: the configured
-        /// session is what the collection is for, and failing the run would hold back what it did capture.
-        /// Nor is it retried, whether or not the run commits (see
-        /// <see cref="DeadlockCursorStore.MarkBackfillAttempted"/>): a read that timed out would most likely time
-        /// out again, and repeating a full read of system_health on every run is the cost the dedicated session
-        /// exists to avoid.</para>
+        /// <para>Best effort.  A backfill that can't be read - system_health stopped, or a file set too large to
+        /// read in time - is a warning rather than a failure, and what was read before it stopped is kept.  It
+        /// still counts as the backfill having run: a read that timed out would most likely time out again, and
+        /// repeating a full read of system_health is the cost the dedicated session exists to avoid.  Shutdown is
+        /// the exception, and propagates, so a backfill the service stopped is attempted again.</para>
         ///
-        /// <para>The whole backfill - finding the target as well as reading it - gets one command timeout's worth
-        /// of time (<see cref="CommandTimeout"/>, which the user can raise for the Deadlocks collection).  What
-        /// was read before it stopped is kept.  The file set is read oldest first, so a partial read keeps the
-        /// older end - see <see cref="ReadDeadlockEventsAsync"/> for why that is the better end to lose.</para>
+        /// <para>An event file set is read through <see cref="TryReadDeadlockEventStreamAsync"/> where the instance
+        /// allows it, and through <see cref="ReadDeadlockEventsAsync"/> where it doesn't.  Neither can put the newest
+        /// first without holding every row back until the end, so a partial read keeps whatever the scan reached -
+        /// see <see cref="ReadDeadlockEventsAsync"/>.</para>
+        ///
+        /// <para>Bounded by <paramref name="budget"/>, the backfill's own time limit rather than the Deadlocks command
+        /// timeout: it reads the whole file set once, where the command timeout is sized for the routine read every
+        /// run makes.  Every command it sends - finding the target as well as reading it - takes the limit as its
+        /// command timeout too, so 0 is no limit throughout.  <paramref name="cancellationToken"/> is the caller's,
+        /// and is what tells shutdown, which propagates, apart from the limit.</para>
         /// </summary>
         private static async Task<List<CapturedDeadlock>> ReadBackfillAsync(string connectionString,
-            string sessionName, bool databaseScoped, CancellationToken cancellationToken)
+            string sessionName, bool databaseScoped, int timeLimitSeconds, CancellationTokenSource budget,
+            Stopwatch elapsed, CancellationToken cancellationToken)
         {
-            using var budget = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            // Zero is SqlClient's "no timeout", so it means no limit here too rather than cancelling at once.
-            if (CommandTimeout > 0) budget.CancelAfter(TimeSpan.FromSeconds(CommandTimeout));
-            var elapsed = Stopwatch.StartNew();
 
-            // Filled row by row, so whatever was read before a failure is still here to keep.
+            // Both filled as they are read, so whatever was read before a failure is still here to keep.  A deadlock
+            // in both - a stream read that failed part way, then the fallback - is the same graph with the same
+            // timestamp, which Build de-duplicates.
+            var captured = new List<CapturedDeadlock>();
             var eventXml = new List<string>();
+            // Named for the read in progress, so a warning says which read the limit or the failure stopped.
+            var readMethod = "session target lookup";
             try
             {
                 var targets = await XESessionTargetResolver.GetSessionTargetsAsync(connectionString, databaseScoped,
-                    sessionName, budget.Token, CommandTimeout);
+                    sessionName, budget.Token, timeLimitSeconds);
 
                 if (targets.TryGetValue("event_file", out var fileTargetData) &&
                     XESessionTargetResolver.ResolveEventFileReadPath(fileTargetData) is { Length: > 0 } readPath)
                 {
-                    await ReadDeadlockEventsAsync(connectionString, readPath, eventXml, budget.Token);
+                    readMethod = "fn_MSxe_read_event_stream";
+                    if (!await TryReadDeadlockEventStreamAsync(connectionString,
+                            XESessionTargetResolver.ResolveEventFileCurrentFile(fileTargetData), captured,
+                            timeLimitSeconds, budget.Token))
+                    {
+                        readMethod = "fn_xe_file_target_read_file";
+                        await ReadDeadlockEventsAsync(connectionString, readPath, eventXml, timeLimitSeconds,
+                            budget.Token);
+                    }
                 }
                 else if (targets.TryGetValue("ring_buffer", out var ringTargetData))
                 {
@@ -246,16 +336,119 @@ namespace DBADash.Deadlocks
             {
                 // The time limit lands here too - it is the linked token, not the caller's - so running out of time
                 // keeps what was read, where a shutdown still propagates.
-                Log.Warning(ex, "Deadlock backfill from session {session} stopped after {elapsed:N0}s " +
-                                "({limit}s limit).  Keeping the {count} deadlock event(s) read before it stopped; " +
-                                "the backfill is not attempted again.  Collection continues from the configured " +
-                                "session.", sessionName, elapsed.Elapsed.TotalSeconds, CommandTimeout, eventXml.Count);
+                if (budget.IsCancellationRequested)
+                {
+                    Log.Warning("Deadlock backfill from session {session} stopped at its {limit}s time limit, " +
+                                "reading with {method}.  Keeping the {count} deadlock event(s) read before it " +
+                                "stopped; the backfill is not attempted again.  Raise DeadlockBackfillTimeLimitSeconds " +
+                                "in the service configuration (0 for no limit) if older deadlocks are needed.",
+                        sessionName, timeLimitSeconds, readMethod, captured.Count + eventXml.Count);
+                }
+                else
+                {
+                    Log.Warning(ex, "Deadlock backfill from session {session} failed after {elapsed:N0}s, reading " +
+                                    "with {method}.  Keeping the {count} deadlock event(s) read before it stopped; the " +
+                                    "backfill is not attempted again.", sessionName, elapsed.Elapsed.TotalSeconds,
+                        readMethod, captured.Count + eventXml.Count);
+                }
             }
 
-            var captured = ParseEvents(eventXml);
-            Log.Information("Deadlock backfill read {count} deadlock(s) from session {session} in {elapsed:N0}s",
-                captured.Count, sessionName, elapsed.Elapsed.TotalSeconds);
+            captured.AddRange(ParseEvents(eventXml));
+            Log.Information("Deadlock backfill read {count} deadlock(s) from session {session} in {elapsed:N0}s using {method}",
+                captured.Count, sessionName, elapsed.Elapsed.TotalSeconds, readMethod);
             return captured;
+        }
+
+        /// <summary>
+        /// Reads every deadlock in an event file set through <c>sys.fn_MSxe_read_event_stream</c> - the call SSMS
+        /// uses - adding each to <paramref name="captured"/> as it is parsed.  Returns false, having read what it
+        /// could, when this path isn't available, so the caller falls back to <see cref="ReadDeadlockEventsAsync"/>.
+        ///
+        /// <para>Worth the extra path because it moves the cost of the read.  <c>fn_xe_file_target_read_file</c>
+        /// converts every event in the set to XML on the server before any filter applies, and a system_health file
+        /// set is hundreds of thousands of events with a handful of deadlocks among them.  The stream returns the
+        /// files' raw buffers instead and XELite decodes them here: measured against a 142MB system_health set, 3s
+        /// against 8s, and the gap is widest on a busy server, where that conversion competes with the workload.
+        /// What it costs is the file set crossing the network, so on a slow link to the instance the gap narrows.
+        /// </para>
+        ///
+        /// <para>The graph and timestamp it produces match the TVF's exactly - the timestamp once truncated to the
+        /// millisecond, as <see cref="TryGetEventTime"/> does - so a deadlock read both ways, or read here and by the
+        /// configured session, is still recognised as one.</para>
+        ///
+        /// <para>Each buffer is parsed as it arrives and only the deadlocks are kept, so memory is bounded by a
+        /// buffer rather than the file set.  Relies on XELite internals and an undocumented function, which is why
+        /// any failure other than the caller's cancellation falls back rather than fails.</para>
+        /// </summary>
+        private static async Task<bool> TryReadDeadlockEventStreamAsync(string connectionString, string currentFile,
+            List<CapturedDeadlock> captured, int timeLimitSeconds, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrEmpty(currentFile)) return false;
+
+            var events = 0;
+            try
+            {
+                var parser = new XELiveStreamShredder.RowParser();
+
+                await using var cn = new SqlConnection(connectionString);
+                // The caller's time limit cancels the read; the command timeout matches it as a backstop - see
+                // ReadDeadlockEventsAsync.
+                await using var cmd = new SqlCommand("SELECT type, data FROM sys.fn_MSxe_read_event_stream(@source, 1)", cn)
+                { CommandType = CommandType.Text, CommandTimeout = timeLimitSeconds };
+                // 1 reads the session's files rather than its live buffers.  The source is the file name pattern, the
+                // way SSMS passes it - see XELiteEventFileReader.BuildEventStreamSource.
+                cmd.Parameters.Add("@source", SqlDbType.NVarChar, 256).Value =
+                    XELiteEventFileReader.BuildEventStreamSource(currentFile);
+
+                await cn.OpenAsync(cancellationToken);
+                await using var registration = cancellationToken.Register(() => cmd.Cancel());
+                await using var rdr = await cmd.ExecuteReaderAsync(CommandBehavior.SequentialAccess, cancellationToken);
+                while (await rdr.ReadAsync(cancellationToken))
+                {
+                    var type = rdr.IsDBNull(0) ? -1 : Convert.ToInt32(rdr.GetValue(0));
+                    if (rdr.IsDBNull(1)) continue;
+                    var data = (byte[])rdr.GetValue(1);
+
+                    await parser.ParseRowAsync(type, data, ev =>
+                    {
+                        events++;
+                        if (IsDeadlockEvent(ev.Name)) captured.AddRange(ParseStreamEvent(ev));
+                    }, cancellationToken);
+                }
+            }
+            catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
+            {
+                Log.Information(ex, "Deadlock backfill could not read {file} with fn_MSxe_read_event_stream after " +
+                                    "{events} event(s); falling back to fn_xe_file_target_read_file", currentFile, events);
+                return false;
+            }
+
+            // A system_health file set is never empty, so nothing decoded means a stream this parser doesn't
+            // understand rather than a session with nothing in it.  The TVF is the one to say which.
+            if (events > 0) return true;
+            Log.Information("Deadlock backfill decoded no events from {file} with fn_MSxe_read_event_stream; falling " +
+                            "back to fn_xe_file_target_read_file", currentFile);
+            return false;
+        }
+
+        /// <summary>A deadlock event decoded by XELite, as <see cref="ParseEvent(XElement)"/> takes one from XML.</summary>
+        private static IEnumerable<CapturedDeadlock> ParseStreamEvent(IXEvent ev)
+        {
+            if (ev.Fields == null || !ev.Fields.TryGetValue("xml_report", out var report) ||
+                report is not string { Length: > 0 } graphXml)
+            {
+                Log.Warning("Skipping a deadlock event at {eventTime} with no xml_report.", ev.Timestamp);
+                return Array.Empty<CapturedDeadlock>();
+            }
+
+            var eventTime = TruncateToMillisecond(ev.Timestamp.UtcDateTime);
+            if (!DeadlockParser.TryParse(graphXml, out var graphs))
+            {
+                Log.Warning("Skipping a deadlock event at {eventTime} whose graph could not be parsed.", eventTime);
+                return Array.Empty<CapturedDeadlock>();
+            }
+
+            return graphs.Select(g => new CapturedDeadlock(eventTime, g)).ToList();
         }
 
 
@@ -438,11 +631,15 @@ namespace DBADash.Deadlocks
         /// holds every row back until the whole set has been scanned, so a read cut off would keep nothing.</para>
         /// </summary>
         private static async Task ReadDeadlockEventsAsync(string connectionString, string readPath,
-            List<string> eventXml, CancellationToken cancellationToken)
+            List<string> eventXml, int timeLimitSeconds, CancellationToken cancellationToken)
         {
             await using var cn = new SqlConnection(connectionString);
+            // The backfill's time limit rather than the Deadlocks command timeout, which would cut the read off at 90
+            // seconds whatever the limit said.  The caller's cancellation is what enforces the limit - a command
+            // timeout doesn't reliably bound the total time of a result read row by row - so this is the backstop
+            // for a read that cancellation fails to interrupt.  0 on both is no limit.
             await using var cmd = new SqlCommand(BuildDeadlockEventsSql(), cn)
-            { CommandType = CommandType.Text, CommandTimeout = CommandTimeout };
+            { CommandType = CommandType.Text, CommandTimeout = timeLimitSeconds };
             cmd.Parameters.Add("@path", SqlDbType.NVarChar, 260).Value = readPath;
             // object_name is NVARCHAR(60) on the function - see EventFileTraceReader.
             for (var i = 0; i < DeadlockEventNames.Count; i++)
@@ -597,11 +794,18 @@ namespace DBADash.Deadlocks
                 return false;
             }
 
-            // Stored as DATETIME2(3); truncate here so the value that goes into the key is the value we
-            // matched on, rather than something SQL Server rounds afterwards.
-            eventTime = new DateTime(parsed.Ticks - parsed.Ticks % TimeSpan.TicksPerMillisecond, DateTimeKind.Unspecified);
+            eventTime = TruncateToMillisecond(parsed);
             return true;
         }
+
+        /// <summary>
+        /// Stored as DATETIME2(3); truncate here so the value that goes into the key is the value we matched on,
+        /// rather than something SQL Server rounds afterwards.  Truncated rather than rounded because that is what the
+        /// XML timestamp attribute already is, so a deadlock decoded from the binary stream - which carries the full
+        /// precision - keys the same as one read as XML.
+        /// </summary>
+        private static DateTime TruncateToMillisecond(DateTime value) =>
+            new(value.Ticks - value.Ticks % TimeSpan.TicksPerMillisecond, DateTimeKind.Unspecified);
 
         /// <summary>A parsed graph with the time its event carried, and its identity.</summary>
         private sealed class CapturedDeadlock

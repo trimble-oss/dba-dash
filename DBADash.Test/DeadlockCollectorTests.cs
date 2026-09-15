@@ -282,6 +282,25 @@ EXEC dbo.usp_ReverseInvoice @InvoiceID = 88232;   </inputbuf>
         }
 
         [TestMethod]
+        public void BackfillTimeLimitDefaultsAndZeroIsNoLimit()
+        {
+            // Its own limit rather than the Deadlocks command timeout, which cut a system_health read off at 90s.
+            Assert.AreEqual(CollectionConfig.DefaultDeadlockBackfillTimeLimitSeconds,
+                new CollectionConfig().GetDeadlockBackfillTimeLimitSeconds(), "Unset uses the default.");
+            // Against the built-in Deadlocks timeout rather than GetCommandTimeout(), which would pick up a
+            // commandTimeouts.json sitting beside the test run and make the result depend on the machine.
+            var builtInDeadlocksTimeout = new CollectionCommandTimeout.CommandTimeoutSettings()
+                .CollectionCommandTimeouts[CollectionType.Deadlocks];
+            Assert.IsTrue(CollectionConfig.DefaultDeadlockBackfillTimeLimitSeconds > builtInDeadlocksTimeout,
+                "A whole file set needs longer than a routine read.");
+
+            Assert.AreEqual(0, new CollectionConfig { DeadlockBackfillTimeLimitSeconds = 0 }.GetDeadlockBackfillTimeLimitSeconds());
+            Assert.AreEqual(0, new CollectionConfig { DeadlockBackfillTimeLimitSeconds = -5 }.GetDeadlockBackfillTimeLimitSeconds(),
+                "Negative is treated as no limit, not as an immediate stop.");
+            Assert.AreEqual(1200, new CollectionConfig { DeadlockBackfillTimeLimitSeconds = 1200 }.GetDeadlockBackfillTimeLimitSeconds());
+        }
+
+        [TestMethod]
         public void RingBufferSeenSetCountsWhatTheBufferHoldsNotWhatWasReturned()
         {
             // The decision to empty the buffer after reading it is taken on this count, not on the number of

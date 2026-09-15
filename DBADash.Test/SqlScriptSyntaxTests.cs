@@ -103,6 +103,16 @@ namespace DBADash.Test
         }
 
         /// <summary>
+        /// The session start lookup the backfill takes its cutoff from, for both scopes.
+        /// </summary>
+        [TestMethod]
+        public void DeadlockBackfillSessionStartParses()
+        {
+            AssertParses("backfill session start (server scoped)", DeadlockCollector.BuildSessionStartSql(false));
+            AssertParses("backfill session start (database scoped)", DeadlockCollector.BuildSessionStartSql(true));
+        }
+
+        /// <summary>
         /// Rebuilds every statement <paramref name="script"/> assembles by concatenation and parses each.
         /// </summary>
         private static void AssertBuiltStatementsParse(string label, string script, int expectedCount)

@@ -247,6 +247,27 @@ namespace DBADash
             Math.Clamp(DeadlockXERingBufferKB ?? DefaultDeadlockXERingBufferKB,
                 MinDeadlockXERingBufferKB, MaxDeadlockXERingBufferKB);
 
+        /// <summary>
+        /// Seconds the one-off system_health deadlock backfill may take before it stops and keeps what it has read.
+        /// Null uses <see cref="DefaultDeadlockBackfillTimeLimitSeconds"/>; 0 means no limit.
+        ///
+        /// <para>Separate from the Deadlocks command timeout, which bounds every run: the backfill reads the whole
+        /// system_health file set once per instance, so it can reasonably need far longer than a routine read.  What
+        /// it costs is a collection worker - and one of that instance's concurrent collection slots - for that long,
+        /// once per instance.  It runs in the low priority queue, whose concurrency cap stops a batch of newly enabled
+        /// instances taking every worker; the limit bounds how long each one holds its worker and slot.</para>
+        ///
+        /// <para>Service level rather than per connection, like <see cref="DeadlockXERingBufferKB"/>: a tuning
+        /// decision about how the service reads rather than a fact about one instance.</para>
+        /// </summary>
+        public int? DeadlockBackfillTimeLimitSeconds { get; set; }
+
+        public const int DefaultDeadlockBackfillTimeLimitSeconds = 300;
+
+        /// <summary>The configured backfill time limit, defaulted.  A negative value is treated as no limit, as 0 is.</summary>
+        public int GetDeadlockBackfillTimeLimitSeconds() =>
+            Math.Max(0, DeadlockBackfillTimeLimitSeconds ?? DefaultDeadlockBackfillTimeLimitSeconds);
+
         public const int DefaultAlertProcessingFrequencySeconds = 60;
 
         public const int DefaultAlertProcessingStartupDelaySeconds = 60;

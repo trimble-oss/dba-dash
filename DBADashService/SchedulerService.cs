@@ -71,6 +71,7 @@ namespace DBADashService
             {
                 workQueue = new CollectionWorkQueue(config);
                 ScheduledCollectionJob.Initialize(workQueue);
+                DeadlockBackfillWorkItem.Initialize(workQueue);
                 Log.Information("Queue-based scheduling enabled");
             }
             else
