@@ -3696,5 +3696,167 @@ namespace DBADashServiceConfig
 
             await DeployDatabase();
         }
+
+        private async void ApplyDeadlockConfigToAll(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (!ValidateDeadlockOptions())
+            {
+                return;
+            }
+
+            if (collectionConfig?.SourceConnections is not { Count: > 0 })
+            {
+                MessageBox.Show("There are no source connections to apply the deadlock configuration to.",
+                    "Apply Deadlock Configuration", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            var sessionName = SelectedDeadlockXESessionName;
+            var backfill = chkBackfillDeadlocks.Checked;
+            // system_health doesn't exist on Azure SQL Database, so that mode can't be applied there
+            var isSystemHealth = string.Equals(sessionName, DBADashSource.SystemHealthXESessionName,
+                StringComparison.OrdinalIgnoreCase);
+
+            if (MessageBox.Show(
+                    "Apply the deadlock configuration shown on the Deadlocks tab to all existing source connections?\r\n\r\n",
+                    "Apply Deadlock Configuration", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+            {
+                return;
+            }
+
+            var sqlSources = collectionConfig.SourceConnections
+                .Where(src => src.SourceConnection is { Type: ConnectionType.SQL })
+                .ToList();
+
+            // system_health mode requires knowing whether each instance is Azure SQL Database (where the
+            // session doesn't exist).  Detect the platform up front, off the UI thread and with bounded
+            // concurrency, so an unreachable instance can't block the config window one timeout at a time.
+            Dictionary<DBADashSource, bool?> azureStatus = null;
+            if (isSystemHealth)
+            {
+                Cursor.Current = Cursors.WaitCursor;
+                try
+                {
+                    azureStatus = await DetectAzureStatusAsync(sqlSources);
+                }
+                finally
+                {
+                    Cursor.Current = Cursors.Default;
+                }
+            }
+
+            var applied = 0;
+            var skippedAzure = new List<string>();
+            var detectionFailed = new List<string>();
+            bool? deadlockScheduleApproval = null;
+
+            foreach (var src in sqlSources)
+            {
+                if (isSystemHealth)
+                {
+                    // null => platform couldn't be determined.  Don't assume non-Azure, otherwise an Azure
+                    // SQL Database with a transient/auth/timeout failure would be assigned a session that
+                    // doesn't exist there.  Skip and report it instead.
+                    var isAzure = azureStatus != null && azureStatus.TryGetValue(src, out var status) ? status : null;
+
+                    if (isAzure == null)
+                    {
+                        detectionFailed.Add(src.SourceConnection.ConnectionForPrint);
+                        continue;
+                    }
+
+                    if (isAzure == true)
+                    {
+                        skippedAzure.Add(src.SourceConnection.ConnectionForPrint);
+                        continue;
+                    }
+                }
+
+                src.DeadlockXESessionName = sessionName;
+                src.BackfillDeadlocksFromSystemHealth = backfill;
+
+                // Setting a session name alone leaves the collection unscheduled, so offer to add the default schedule
+                if (src.IsDeadlockCollectionEnabled && !IsDeadlockCollectionScheduled(src))
+                {
+                    deadlockScheduleApproval ??= MessageBox.Show(
+                        "Deadlock collection doesn't have a schedule, so no deadlocks will be collected." +
+                        "\r\n\r\nUse the default deadlock collection schedule (every 5 minutes) for these instances?" +
+                        "\r\n\r\nThe schedule can be adjusted later on the Collection Schedule tab.",
+                        "Deadlock Schedule", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes;
+
+                    if (deadlockScheduleApproval == true)
+                    {
+                        SetDefaultDeadlockSchedule(src);
+                    }
+                }
+
+                applied++;
+            }
+
+            if (applied > 0)
+            {
+                SetJson();
+                dgvConnections.Refresh();
+            }
+
+            if (skippedAzure.Count > 0)
+            {
+                MessageBox.Show(
+                    $"{DBADashSource.SystemHealthXESessionName} doesn't exist on Azure SQL Database.  " +
+                    $"The following Azure SQL Database connection(s) were skipped:\r\n\r\n" +
+                    string.Join("\r\n", skippedAzure),
+                    "Apply Deadlock Configuration", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+
+            if (detectionFailed.Count > 0)
+            {
+                MessageBox.Show(
+                    "The platform couldn't be determined for the following connection(s), so the configuration " +
+                    "wasn't applied to avoid setting a session that isn't supported on Azure SQL Database:\r\n\r\n" +
+                    string.Join("\r\n", detectionFailed),
+                    "Apply Deadlock Configuration", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+
+            MessageBox.Show(
+                $"Deadlock configuration applied to {applied} connection(s).",
+                "Apply Deadlock Configuration", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        /// <summary>
+        /// Determines whether each SQL source targets Azure SQL Database.  Instances whose metadata is
+        /// already cached are answered without opening a connection; the rest are probed concurrently
+        /// (bounded) off the UI thread.  A value of null indicates the platform couldn't be determined.
+        /// </summary>
+        private static async Task<Dictionary<DBADashSource, bool?>> DetectAzureStatusAsync(
+            IEnumerable<DBADashSource> sqlSources)
+        {
+            const int maxConcurrency = 8;
+            using var semaphore = new SemaphoreSlim(maxConcurrency);
+            var results = new ConcurrentDictionary<DBADashSource, bool?>();
+
+            var tasks = sqlSources.Select(async src =>
+            {
+                await semaphore.WaitAsync().ConfigureAwait(false);
+                try
+                {
+                    results[src] = await src.SourceConnection.IsAzureDBAsync().ConfigureAwait(false);
+                }
+                catch
+                {
+                    // Couldn't determine the platform (transient/auth/timeout/etc.)
+                    results[src] = null;
+                }
+                finally
+                {
+                    semaphore.Release();
+                }
+            });
+
+            await Task.WhenAll(tasks).ConfigureAwait(false);
+
+            return sqlSources.ToDictionary(
+                src => src,
+                src => results.TryGetValue(src, out var isAzure) ? isAzure : null);
+        }
     }
 }

@@ -31,9 +31,9 @@ namespace DBADashServiceConfig
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ServiceConfig));
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             errorProvider1 = new System.Windows.Forms.ErrorProvider(components);
             bttnSave = new System.Windows.Forms.Button();
             label5 = new System.Windows.Forms.Label();
@@ -86,6 +86,10 @@ namespace DBADashServiceConfig
             txtAllowedJobs = new System.Windows.Forms.TextBox();
             txtAllowScripts = new System.Windows.Forms.TextBox();
             xeMaxDuration = new DBADashGUI.Pickers.DurationDropDown();
+            optSystemManagedDeadlock = new System.Windows.Forms.RadioButton();
+            optSystemHealthDeadlock = new System.Windows.Forms.RadioButton();
+            optCustomDeadlockSession = new System.Windows.Forms.RadioButton();
+            chkBackfillDeadlocks = new System.Windows.Forms.CheckBox();
             labelManageXE = new System.Windows.Forms.Label();
             lnkManageXEAll = new System.Windows.Forms.LinkLabel();
             lnkManageXENone = new System.Windows.Forms.LinkLabel();
@@ -185,6 +189,10 @@ namespace DBADashServiceConfig
             lblSchemaSnapshotDBs = new System.Windows.Forms.Label();
             txtSnapshotDBs = new System.Windows.Forms.TextBox();
             chkNoWMI = new System.Windows.Forms.CheckBox();
+            tabDeadlocks = new System.Windows.Forms.TabPage();
+            lnkApplyDeadlockConfigurationToAll = new System.Windows.Forms.LinkLabel();
+            txtDeadlockSessionName = new System.Windows.Forms.TextBox();
+            optDisableDeadlock = new System.Windows.Forms.RadioButton();
             bttnAdd = new System.Windows.Forms.Button();
             groupBox1 = new System.Windows.Forms.GroupBox();
             bttnPermissionsHelper = new System.Windows.Forms.Button();
@@ -210,13 +218,6 @@ namespace DBADashServiceConfig
             tab1 = new ThemedTabControl();
             tabMessaging = new System.Windows.Forms.TabPage();
             grpXE = new System.Windows.Forms.GroupBox();
-            tabDeadlocks = new System.Windows.Forms.TabPage();
-            optDisableDeadlock = new System.Windows.Forms.RadioButton();
-            optSystemManagedDeadlock = new System.Windows.Forms.RadioButton();
-            optSystemHealthDeadlock = new System.Windows.Forms.RadioButton();
-            optCustomDeadlockSession = new System.Windows.Forms.RadioButton();
-            txtDeadlockSessionName = new System.Windows.Forms.TextBox();
-            chkBackfillDeadlocks = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)errorProvider1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox3).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
@@ -248,6 +249,7 @@ namespace DBADashServiceConfig
             tabRunningQueries.SuspendLayout();
             grpRunningQueryThreshold.SuspendLayout();
             tabAddConnectionOther.SuspendLayout();
+            tabDeadlocks.SuspendLayout();
             groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvConnections).BeginInit();
             tabDest.SuspendLayout();
@@ -255,7 +257,6 @@ namespace DBADashServiceConfig
             tab1.SuspendLayout();
             tabMessaging.SuspendLayout();
             grpXE.SuspendLayout();
-            tabDeadlocks.SuspendLayout();
             SuspendLayout();
             // 
             // errorProvider1
@@ -856,6 +857,52 @@ namespace DBADashServiceConfig
             xeMaxDuration.Size = new System.Drawing.Size(387, 34);
             xeMaxDuration.TabIndex = 22;
             toolTip1.SetToolTip(xeMaxDuration, "Maximum duration allowed for an ad-hoc XE trace, preventing long running extended events.");
+            // 
+            // optSystemManagedDeadlock
+            // 
+            optSystemManagedDeadlock.AutoSize = true;
+            optSystemManagedDeadlock.Location = new System.Drawing.Point(23, 46);
+            optSystemManagedDeadlock.Name = "optSystemManagedDeadlock";
+            optSystemManagedDeadlock.Size = new System.Drawing.Size(381, 24);
+            optSystemManagedDeadlock.TabIndex = 1;
+            optSystemManagedDeadlock.Text = "Dedicated System Managed Session (recommended)";
+            toolTip1.SetToolTip(optSystemManagedDeadlock, "Uses a system managed \"DBADash_Deadlocks\" session.");
+            optSystemManagedDeadlock.UseVisualStyleBackColor = true;
+            // 
+            // optSystemHealthDeadlock
+            // 
+            optSystemHealthDeadlock.AutoSize = true;
+            optSystemHealthDeadlock.Location = new System.Drawing.Point(23, 76);
+            optSystemHealthDeadlock.Name = "optSystemHealthDeadlock";
+            optSystemHealthDeadlock.Size = new System.Drawing.Size(148, 24);
+            optSystemHealthDeadlock.TabIndex = 2;
+            optSystemHealthDeadlock.Text = "Use system health";
+            toolTip1.SetToolTip(optSystemHealthDeadlock, "Uses existing system_health session.  This option has additional overhead compared to using a dedicated session.");
+            optSystemHealthDeadlock.UseVisualStyleBackColor = true;
+            // 
+            // optCustomDeadlockSession
+            // 
+            optCustomDeadlockSession.AutoSize = true;
+            optCustomDeadlockSession.Location = new System.Drawing.Point(23, 106);
+            optCustomDeadlockSession.Name = "optCustomDeadlockSession";
+            optCustomDeadlockSession.Size = new System.Drawing.Size(163, 24);
+            optCustomDeadlockSession.TabIndex = 3;
+            optCustomDeadlockSession.Text = "Use existing session:";
+            toolTip1.SetToolTip(optCustomDeadlockSession, resources.GetString("optCustomDeadlockSession.ToolTip"));
+            optCustomDeadlockSession.UseVisualStyleBackColor = true;
+            // 
+            // chkBackfillDeadlocks
+            // 
+            chkBackfillDeadlocks.AutoSize = true;
+            chkBackfillDeadlocks.Checked = true;
+            chkBackfillDeadlocks.CheckState = System.Windows.Forms.CheckState.Checked;
+            chkBackfillDeadlocks.Location = new System.Drawing.Point(23, 142);
+            chkBackfillDeadlocks.Name = "chkBackfillDeadlocks";
+            chkBackfillDeadlocks.Size = new System.Drawing.Size(328, 24);
+            chkBackfillDeadlocks.TabIndex = 5;
+            chkBackfillDeadlocks.Text = "Backfill from system health on first collection";
+            toolTip1.SetToolTip(chkBackfillDeadlocks, "On the first collection, also read the system_health session so deadlocks from before the dedicated session was created are collected.  Read once - later collections use the dedicated session only.");
+            chkBackfillDeadlocks.UseVisualStyleBackColor = true;
             // 
             // labelManageXE
             // 
@@ -1998,6 +2045,54 @@ namespace DBADashServiceConfig
             chkNoWMI.Text = "Don't use WMI";
             chkNoWMI.UseVisualStyleBackColor = true;
             // 
+            // tabDeadlocks
+            // 
+            tabDeadlocks.Controls.Add(lnkApplyDeadlockConfigurationToAll);
+            tabDeadlocks.Controls.Add(chkBackfillDeadlocks);
+            tabDeadlocks.Controls.Add(txtDeadlockSessionName);
+            tabDeadlocks.Controls.Add(optCustomDeadlockSession);
+            tabDeadlocks.Controls.Add(optSystemHealthDeadlock);
+            tabDeadlocks.Controls.Add(optSystemManagedDeadlock);
+            tabDeadlocks.Controls.Add(optDisableDeadlock);
+            tabDeadlocks.Location = new System.Drawing.Point(4, 39);
+            tabDeadlocks.Name = "tabDeadlocks";
+            tabDeadlocks.Padding = new System.Windows.Forms.Padding(3);
+            tabDeadlocks.Size = new System.Drawing.Size(1059, 178);
+            tabDeadlocks.TabIndex = 5;
+            tabDeadlocks.Text = "Deadlocks";
+            tabDeadlocks.UseVisualStyleBackColor = true;
+            // 
+            // lnkApplyDeadlockConfigurationToAll
+            // 
+            lnkApplyDeadlockConfigurationToAll.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            lnkApplyDeadlockConfigurationToAll.AutoSize = true;
+            lnkApplyDeadlockConfigurationToAll.Location = new System.Drawing.Point(671, 20);
+            lnkApplyDeadlockConfigurationToAll.Name = "lnkApplyDeadlockConfigurationToAll";
+            lnkApplyDeadlockConfigurationToAll.Size = new System.Drawing.Size(382, 20);
+            lnkApplyDeadlockConfigurationToAll.TabIndex = 6;
+            lnkApplyDeadlockConfigurationToAll.TabStop = true;
+            lnkApplyDeadlockConfigurationToAll.Text = "Apply deadlock configuration to all existing connections";
+            lnkApplyDeadlockConfigurationToAll.LinkClicked += ApplyDeadlockConfigToAll;
+            // 
+            // txtDeadlockSessionName
+            // 
+            txtDeadlockSessionName.Location = new System.Drawing.Point(321, 106);
+            txtDeadlockSessionName.Name = "txtDeadlockSessionName";
+            txtDeadlockSessionName.Size = new System.Drawing.Size(207, 27);
+            txtDeadlockSessionName.TabIndex = 4;
+            // 
+            // optDisableDeadlock
+            // 
+            optDisableDeadlock.AutoSize = true;
+            optDisableDeadlock.Checked = true;
+            optDisableDeadlock.Location = new System.Drawing.Point(23, 16);
+            optDisableDeadlock.Name = "optDisableDeadlock";
+            optDisableDeadlock.Size = new System.Drawing.Size(136, 24);
+            optDisableDeadlock.TabIndex = 0;
+            optDisableDeadlock.TabStop = true;
+            optDisableDeadlock.Text = "Disable Capture";
+            optDisableDeadlock.UseVisualStyleBackColor = true;
+            // 
             // bttnAdd
             // 
             bttnAdd.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
@@ -2065,23 +2160,23 @@ namespace DBADashServiceConfig
             dgvConnections.AllowUserToAddRows = false;
             dgvConnections.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             dgvConnections.BackgroundColor = System.Drawing.Color.White;
-            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle5.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle5.Font = new System.Drawing.Font("Segoe UI", 9F);
-            dataGridViewCellStyle5.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            dgvConnections.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgvConnections.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             dgvConnections.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle6.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle6.Font = new System.Drawing.Font("Segoe UI", 9F);
-            dataGridViewCellStyle6.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle6.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            dgvConnections.DefaultCellStyle = dataGridViewCellStyle6;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dgvConnections.DefaultCellStyle = dataGridViewCellStyle2;
             dgvConnections.Location = new System.Drawing.Point(16, 27);
             dgvConnections.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgvConnections.Name = "dgvConnections";
@@ -2347,87 +2442,6 @@ namespace DBADashServiceConfig
             grpXE.TabStop = false;
             grpXE.Text = "Extended Events";
             // 
-            // tabDeadlocks
-            // 
-            tabDeadlocks.Controls.Add(chkBackfillDeadlocks);
-            tabDeadlocks.Controls.Add(txtDeadlockSessionName);
-            tabDeadlocks.Controls.Add(optCustomDeadlockSession);
-            tabDeadlocks.Controls.Add(optSystemHealthDeadlock);
-            tabDeadlocks.Controls.Add(optSystemManagedDeadlock);
-            tabDeadlocks.Controls.Add(optDisableDeadlock);
-            tabDeadlocks.Location = new System.Drawing.Point(4, 39);
-            tabDeadlocks.Name = "tabDeadlocks";
-            tabDeadlocks.Padding = new System.Windows.Forms.Padding(3);
-            tabDeadlocks.Size = new System.Drawing.Size(1059, 178);
-            tabDeadlocks.TabIndex = 5;
-            tabDeadlocks.Text = "Deadlocks";
-            tabDeadlocks.UseVisualStyleBackColor = true;
-            // 
-            // optDisableDeadlock
-            // 
-            optDisableDeadlock.AutoSize = true;
-            optDisableDeadlock.Checked = true;
-            optDisableDeadlock.Location = new System.Drawing.Point(23, 16);
-            optDisableDeadlock.Name = "optDisableDeadlock";
-            optDisableDeadlock.Size = new System.Drawing.Size(136, 24);
-            optDisableDeadlock.TabIndex = 0;
-            optDisableDeadlock.TabStop = true;
-            optDisableDeadlock.Text = "Disable Capture";
-            optDisableDeadlock.UseVisualStyleBackColor = true;
-            // 
-            // optSystemManagedDeadlock
-            // 
-            optSystemManagedDeadlock.AutoSize = true;
-            optSystemManagedDeadlock.Location = new System.Drawing.Point(23, 46);
-            optSystemManagedDeadlock.Name = "optSystemManagedDeadlock";
-            optSystemManagedDeadlock.Size = new System.Drawing.Size(381, 24);
-            optSystemManagedDeadlock.TabIndex = 1;
-            optSystemManagedDeadlock.Text = "Dedicated System Managed Session (recommended)";
-            toolTip1.SetToolTip(optSystemManagedDeadlock, "Uses a system managed \"DBADash_Deadlocks\" session.");
-            optSystemManagedDeadlock.UseVisualStyleBackColor = true;
-            // 
-            // optSystemHealthDeadlock
-            // 
-            optSystemHealthDeadlock.AutoSize = true;
-            optSystemHealthDeadlock.Location = new System.Drawing.Point(23, 76);
-            optSystemHealthDeadlock.Name = "optSystemHealthDeadlock";
-            optSystemHealthDeadlock.Size = new System.Drawing.Size(148, 24);
-            optSystemHealthDeadlock.TabIndex = 2;
-            optSystemHealthDeadlock.Text = "Use system health";
-            toolTip1.SetToolTip(optSystemHealthDeadlock, "Uses existing system_health session.  This option has additional overhead compared to using a dedicated session.");
-            optSystemHealthDeadlock.UseVisualStyleBackColor = true;
-            // 
-            // optCustomDeadlockSession
-            // 
-            optCustomDeadlockSession.AutoSize = true;
-            optCustomDeadlockSession.Location = new System.Drawing.Point(23, 106);
-            optCustomDeadlockSession.Name = "optCustomDeadlockSession";
-            optCustomDeadlockSession.Size = new System.Drawing.Size(163, 24);
-            optCustomDeadlockSession.TabIndex = 3;
-            optCustomDeadlockSession.Text = "Use existing session:";
-            toolTip1.SetToolTip(optCustomDeadlockSession, resources.GetString("optCustomDeadlockSession.ToolTip"));
-            optCustomDeadlockSession.UseVisualStyleBackColor = true;
-            // 
-            // txtDeadlockSessionName
-            // 
-            txtDeadlockSessionName.Location = new System.Drawing.Point(321, 106);
-            txtDeadlockSessionName.Name = "txtDeadlockSessionName";
-            txtDeadlockSessionName.Size = new System.Drawing.Size(207, 27);
-            txtDeadlockSessionName.TabIndex = 4;
-            // 
-            // chkBackfillDeadlocks
-            // 
-            chkBackfillDeadlocks.AutoSize = true;
-            chkBackfillDeadlocks.Checked = true;
-            chkBackfillDeadlocks.CheckState = System.Windows.Forms.CheckState.Checked;
-            chkBackfillDeadlocks.Location = new System.Drawing.Point(23, 142);
-            chkBackfillDeadlocks.Name = "chkBackfillDeadlocks";
-            chkBackfillDeadlocks.Size = new System.Drawing.Size(334, 24);
-            chkBackfillDeadlocks.TabIndex = 5;
-            chkBackfillDeadlocks.Text = "Backfill from system health on first collection";
-            toolTip1.SetToolTip(chkBackfillDeadlocks, "On the first collection, also read the system_health session so deadlocks from before the dedicated session was created are collected.  Read once - later collections use the dedicated session only.");
-            chkBackfillDeadlocks.UseVisualStyleBackColor = true;
-            // 
             // ServiceConfig
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -2486,6 +2500,8 @@ namespace DBADashServiceConfig
             grpRunningQueryThreshold.PerformLayout();
             tabAddConnectionOther.ResumeLayout(false);
             tabAddConnectionOther.PerformLayout();
+            tabDeadlocks.ResumeLayout(false);
+            tabDeadlocks.PerformLayout();
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)dgvConnections).EndInit();
@@ -2498,8 +2514,6 @@ namespace DBADashServiceConfig
             tabMessaging.PerformLayout();
             grpXE.ResumeLayout(false);
             grpXE.PerformLayout();
-            tabDeadlocks.ResumeLayout(false);
-            tabDeadlocks.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -2688,6 +2702,7 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.CheckBox chkBackfillDeadlocks;
         private System.Windows.Forms.RadioButton optCustomDeadlockSession;
         private System.Windows.Forms.RadioButton optSystemHealthDeadlock;
+        private System.Windows.Forms.LinkLabel lnkApplyDeadlockConfigurationToAll;
     }
 }
 
