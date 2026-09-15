@@ -1,4 +1,5 @@
 using DBADash;
+using DBADash.Deadlock.Analysis;
 using DBADash.Deadlock.Interaction;
 using DBADash.Deadlock.Layout;
 using DBADash.Deadlock.Model;
@@ -222,6 +223,12 @@ namespace DBADashGUI.Deadlocks
             });
             toolbar.Items.Add(new ToolStripButton("Copy Image", Properties.Resources.ASX_Copy_blue_16x, (_, _) => CopyImage()) { DisplayStyle = ToolStripItemDisplayStyle.Image });
             toolbar.Items.Add(new ToolStripButton("Save As...", Properties.Resources.Save_16x, (_, _) => SaveAs()) { DisplayStyle = ToolStripItemDisplayStyle.Image });
+            toolbar.Items.Add(new ToolStripSeparator());
+            toolbar.Items.Add(new ToolStripButton("Signature", null, (_, _) => ShowSignature())
+            {
+                DisplayStyle = ToolStripItemDisplayStyle.Text,
+                ToolTipText = "Show what the deadlock signature is computed from, using the current signature version."
+            });
             // Keeps its caption where the rest of the toolbar is icons only: the icon can say the
             // graph leaves for another application, but not which one.
             toolbar.Items.Add(new ToolStripButton("Open in SSMS", Properties.Resources.Open_16x, (_, _) => OpenExternal())
@@ -993,6 +1000,26 @@ namespace DBADashGUI.Deadlocks
             using var frm = new CodeEditorForm { Code = e.Statement, Syntax = CodeEditor.CodeEditorModes.SQL };
             frm.EditEnabled = false;
             frm.ShowDialog();
+        }
+
+        /// <summary>
+        /// The signature and the text it hashes, computed now with the current version rather than read
+        /// from the repository - so it explains why two deadlocks do or don't group today, even for a
+        /// row stored under an older version.
+        /// </summary>
+        private void ShowSignature()
+        {
+            if (_current is null) return;
+
+            var signature = DeadlockSignature.Compute(_current);
+            var text = $"Signature: {signature.Value}{Environment.NewLine}" +
+                       $"Version: {DeadlockSignature.VersionNumber}{Environment.NewLine}{Environment.NewLine}" +
+                       signature.Components.Replace("\n", Environment.NewLine);
+
+            using var frm = new CodeEditorForm { Code = text, Syntax = CodeEditor.CodeEditorModes.None };
+            frm.EditEnabled = false;
+            frm.Text = "Deadlock Signature";
+            frm.ShowDialog(this);
         }
 
         private void CopyImage()
