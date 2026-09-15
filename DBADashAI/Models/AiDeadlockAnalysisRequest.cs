@@ -35,6 +35,13 @@ namespace DBADashAI.Models
         private static readonly Regex SignaturePattern =
             new(@"\A0x[0-9a-fA-F]{16}\z", RegexOptions.CultureInvariant);
 
+        /// <summary>
+        /// The version of the signature algorithm the caller computed <see cref="Signature"/> with.  Stored with the
+        /// analysis, alongside the graph, so the signature can be recomputed when the version changes.  Null from
+        /// callers that predate it, which the recompute treats as older than any version.
+        /// </summary>
+        public byte? SignatureVersion { get; set; }
+
         public string? Instance { get; set; }
 
         /// <summary>One line per participant, as the viewer summarises them.</summary>

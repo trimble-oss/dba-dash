@@ -43,6 +43,15 @@ namespace DBADash.Deadlock.Analysis
         /// <summary>Groups occurrences of one deadlock - see <see cref="DeadlockSignature"/>.</summary>
         public string Signature { get; internal set; } = string.Empty;
 
+        /// <summary>The <see cref="DeadlockSignature.VersionNumber"/> <see cref="Signature"/> was computed with.</summary>
+        public int SignatureVersion { get; internal set; } = DeadlockSignature.VersionNumber;
+
+        /// <summary>
+        /// Identifies this exact deadlock, in "0x..." hex - see <see cref="Analysis.DeadlockHash"/>.  Not sent: the
+        /// service hashes the graph it is given.  Used to find analyses of this deadlock ahead of the pattern's.
+        /// </summary>
+        public string DeadlockHash { get; internal set; } = string.Empty;
+
         /// <summary>What the signature was computed from, so the grouping is inspectable.</summary>
         public string SignatureComponents { get; internal set; } = string.Empty;
 
@@ -86,6 +95,7 @@ namespace DBADash.Deadlock.Analysis
             return new DeadlockAnalysisPayload
             {
                 Signature = signature.Value,
+                DeadlockHash = Analysis.DeadlockHash.ToHex(Analysis.DeadlockHash.Compute(graph)),
                 SignatureComponents = signature.Components,
                 Instance = instance,
                 Participants = graph.Processes.Select(Describe).ToList(),
@@ -124,7 +134,7 @@ namespace DBADash.Deadlock.Analysis
             preview.AppendLine("Nothing leaves this machine until you press Submit for analysis.");
             preview.AppendLine();
 
-            Section(preview, "Signature", Signature);
+            Section(preview, "Signature", $"{Signature} (version {SignatureVersion})");
             Section(preview, "Signature is based on", SignatureComponents.Split('\n'));
             Section(preview, "Instance", Instance);
             Section(preview, "Participants", Participants);

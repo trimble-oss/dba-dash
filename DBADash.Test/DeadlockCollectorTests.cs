@@ -92,6 +92,40 @@ EXEC dbo.usp_ReverseInvoice @InvoiceID = 88232;   </inputbuf>
         }
 
         [TestMethod]
+        public void RecomputedSignatureFromStoredGraphMatchesCollectedSignature()
+        {
+            // The recompute reads the graph as stored, not the XE event the collector parsed - they must agree, or
+            // a recompute at the same version would regroup everything.
+            var result = DeadlockCollector.ShredEvents(new[] { DeadlockEvent });
+            var row = result.Deadlocks.Rows[0];
+            var storedXml = SMOBaseClass.Unzip((byte[])row["DeadlockXmlCompressed"]);
+
+            Assert.AreEqual((string)row["Signature"], DeadlockSignatureRecompute.ComputeSignature(storedXml));
+        }
+
+        [TestMethod]
+        public void AnalysisPayloadHashMatchesCollectedDeadlockHash()
+        {
+            // The viewer matches stored AI analyses to this deadlock by hash, computed from the graph it holds -
+            // which for a collected deadlock is the stored graph, not the XE event the collector hashed.
+            var result = DeadlockCollector.ShredEvents(new[] { DeadlockEvent });
+            var row = result.Deadlocks.Rows[0];
+            var storedXml = SMOBaseClass.Unzip((byte[])row["DeadlockXmlCompressed"]);
+            var graph = DBADash.Deadlock.DeadlockParser.Parse(storedXml).Single();
+
+            var payload = DeadlockAnalysisPayload.Build(graph, DeadlockAnalyser.Analyse(graph));
+
+            Assert.AreEqual(DeadlockHash.ToHex((byte[])row["DeadlockHash"]), payload.DeadlockHash);
+        }
+
+        [TestMethod]
+        public void RecomputedSignatureIsNullForAGraphThatDoesNotParse()
+        {
+            Assert.IsNull(DeadlockSignatureRecompute.ComputeSignature("<deadlock><process-list>"));
+            Assert.IsNull(DeadlockSignatureRecompute.ComputeSignature(null));
+        }
+
+        [TestMethod]
         public void CompressedGraphRoundTrips()
         {
             var result = DeadlockCollector.ShredEvents(new[] { DeadlockEvent });

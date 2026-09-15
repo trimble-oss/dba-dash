@@ -1,3 +1,4 @@
+using DBADash.Deadlock.Analysis;
 using System;
 using System.Data;
 
@@ -28,7 +29,7 @@ namespace DBADash.Deadlocks
         /// wait time, and the graph-internal process and lock ids are what separate two distinct deadlocks
         /// that happen to share a signature and a millisecond.</para>
         /// </summary>
-        public const int DeadlockHashBytes = 16;
+        public const int DeadlockHashBytes = DeadlockHash.Bytes;
 
         /// <summary>DataSet table names.  DBImporter keys off these, so they are also the wire contract.</summary>
         public const string DeadlocksTableName = "Deadlocks";
