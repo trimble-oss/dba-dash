@@ -136,6 +136,27 @@ namespace DBADash
             return ConnectionInfo.IsAzureDB;
         }
 
+        /// <summary>
+        /// True when the connection metadata has already been retrieved and cached, so platform
+        /// checks (e.g. <see cref="IsAzureDB()"/>) can be answered without opening a connection.
+        /// </summary>
+        [JsonIgnore]
+        public bool IsConnectionInfoKnown => _connectionInfo != null;
+
+        /// <summary>
+        /// Asynchronously determines whether the connection targets Azure SQL Database.
+        /// Uses cached connection metadata when available; otherwise opens a connection off the
+        /// calling thread. Throws if the connection metadata can't be retrieved.
+        /// </summary>
+        public async System.Threading.Tasks.Task<bool> IsAzureDBAsync()
+        {
+            if (_connectionInfo == null && connectionType == ConnectionType.SQL)
+            {
+                _connectionInfo = await ConnectionInfo.GetConnectionInfoAsync(connectionString);
+            }
+            return ConnectionInfo.IsAzureDB;
+        }
+
         private void ValidateSQLConnection()
         {
             if (!supportedProductVersions.Contains(ConnectionInfo.MajorVersion))
