@@ -1,11 +1,12 @@
+using DBADash.Deadlock.Analysis;
 using Microsoft.Data.SqlClient;
 using System.Data;
 
 namespace DBADashAI.Services
 {
     /// <summary>
-    /// Records what the model said about a deadlock pattern, so the next person to open that deadlock
-    /// sees the analysis without paying for it again.
+    /// Records what the model said about a deadlock, so the next person to open that deadlock - or another
+    /// occurrence of its pattern - sees the analysis without paying for it again.  Every answer is kept.
     ///
     /// This writes only.  It started as a read-through cache, which stopped making sense once the
     /// viewer began showing a pattern's previous analysis automatically: by the time somebody presses
@@ -38,6 +39,8 @@ namespace DBADashAI.Services
             string payloadVersion,
             string analysis,
             int? instanceId,
+            byte? signatureVersion,
+            string? graphXml,
             CancellationToken cancellationToken)
         {
             if (!IsAvailable || string.IsNullOrWhiteSpace(signature) || string.IsNullOrWhiteSpace(analysis)) return;
@@ -56,6 +59,13 @@ namespace DBADashAI.Services
                 command.Parameters.AddWithValue("@PayloadVersion", payloadVersion);
                 command.Parameters.AddWithValue("@Analysis", analysis);
                 command.Parameters.AddWithValue("@InstanceID", (object?)instanceId ?? DBNull.Value);
+                command.Parameters.AddWithValue("@SignatureVersion", (object?)signatureVersion ?? DBNull.Value);
+                // The graph the answer was produced from, so its signature can be recomputed when the version changes.
+                command.Parameters.Add("@GraphXml", SqlDbType.NVarChar, -1).Value = (object?)graphXml ?? DBNull.Value;
+                // Hashed here rather than taken from the caller, so every stored answer gets one.  The viewer sends the
+                // graph as the parser re-serialised it, which is what the collector hashes too.
+                command.Parameters.Add("@DeadlockHash", SqlDbType.Binary, DeadlockHash.Bytes).Value =
+                    string.IsNullOrWhiteSpace(graphXml) ? DBNull.Value : (object)DeadlockHash.Compute(graphXml);
 
                 await connection.OpenAsync(cancellationToken);
                 await command.ExecuteNonQueryAsync(cancellationToken);

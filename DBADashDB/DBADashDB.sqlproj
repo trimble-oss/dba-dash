@@ -127,6 +127,7 @@
     <Folder Include="XE\Tables\" />
     <Folder Include="XE\Stored Procedures\" />
     <Folder Include="XE\User Defined Types\" />
+    <Folder Include="AI\User Defined Types\" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\LogRestoreThresholds.sql" />
@@ -333,6 +334,9 @@
     <Build Include="dbo\Stored Procedures\DeadlockSummary_Get.sql" />
     <Build Include="dbo\Stored Procedures\DeadlockCharts_Get.sql" />
     <Build Include="dbo\Stored Procedures\DeadlockGraph_Get.sql" />
+    <Build Include="dbo\User Defined Types\DeadlockSignatures.sql" />
+    <Build Include="dbo\Stored Procedures\DeadlockSignatureRecompute_Get.sql" />
+    <Build Include="dbo\Stored Procedures\DeadlockSignatureRecompute_Upd.sql" />
     <Build Include="dbo\Functions\DeadlockScope.sql" />
     <Build Include="dbo\Functions\DecodeClientOptions.sql" />
     <Build Include="Storage\PF_Deadlocks.sql" />
@@ -767,6 +771,9 @@
     <Build Include="AI\Stored Procedures\DBConfigCurrent_Get.sql" />
     <Build Include="AI\Stored Procedures\Deadlocks_Get.sql" />
     <Build Include="AI\Stored Procedures\DeadlockAnalysis_Upd.sql" />
+    <Build Include="AI\User Defined Types\DeadlockAnalysisSignatures.sql" />
+    <Build Include="AI\Stored Procedures\DeadlockAnalysisSignatureRecompute_Get.sql" />
+    <Build Include="AI\Stored Procedures\DeadlockAnalysisSignatureRecompute_Upd.sql" />
     <Build Include="AI\Stored Procedures\DeadlockAnalysisHistory_Get.sql" />
     <Build Include="AI\Stored Procedures\DrivesRisk_Get.sql" />
     <Build Include="AI\Stored Procedures\IdentityColumns_Get.sql" />
