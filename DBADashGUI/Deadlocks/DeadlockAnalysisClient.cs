@@ -61,6 +61,7 @@ namespace DBADashGUI.Deadlocks
                 {
                     graphXml = payload.GraphXml,
                     signature = payload.Signature,
+                    signatureVersion = payload.SignatureVersion,
                     payloadVersion = payload.Version,
                     instanceId,
                     instance = payload.Instance,

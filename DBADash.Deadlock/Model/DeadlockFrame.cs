@@ -31,6 +31,16 @@ namespace DBADash.Deadlock.Model
             !ProcedureName!.Equals("unknown", System.StringComparison.OrdinalIgnoreCase);
 
         /// <summary>
+        /// True when the frame is a system procedure in the resource database, e.g.
+        /// "mssqlsystemresource.sys.sp_executesql".  These wrap the statement that was actually running
+        /// (the frame above them) and their text is just the procedure name, so they are never the
+        /// interesting frame.
+        /// </summary>
+        public bool IsResourceDatabaseModule =>
+            IsModule &&
+            ProcedureName!.StartsWith("mssqlsystemresource.", System.StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>
         /// The database part of a three-part <see cref="ProcedureName"/> (e.g. "Sales" from
         /// "Sales.dbo.usp_UpdateOrder").  Null when the frame isn't a module or the name isn't qualified.
         /// </summary>

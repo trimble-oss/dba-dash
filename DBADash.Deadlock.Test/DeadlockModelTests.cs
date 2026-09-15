@@ -119,6 +119,35 @@ namespace DBADash.Deadlock.Test
         }
 
         [TestMethod]
+        public void PrimaryStatement_SkipsSpExecuteSqlFrameAndFallsBackToInputBuffer()
+        {
+            // Dynamic SQL run through sp_executesql: the inner statement is "unknown", and the
+            // resource database frame carries only the text "sp_executesql".
+            var process = FirstProcess(
+                """
+                <deadlock>
+                  <process-list>
+                    <process id="p1" spid="62">
+                      <executionStack>
+                        <frame procname="adhoc" line="2" stmtstart="4" stmtend="2608" sqlhandle="0x02000000a337b71d">
+                unknown    </frame>
+                        <frame procname="mssqlsystemresource.sys.sp_executesql" line="1" stmtstart="-1" sqlhandle="0x0400ff7f427f99d9">
+                sp_executesql    </frame>
+                        <frame procname="adhoc" line="61" stmtstart="4366" stmtend="4410" sqlhandle="0x02000000a66a4808">
+                unknown    </frame>
+                      </executionStack>
+                      <inputbuf>
+                SELECT 1 AS TEST;  </inputbuf>
+                    </process>
+                  </process-list>
+                </deadlock>
+                """);
+
+            Assert.AreEqual("SELECT 1 AS TEST;", process.PrimaryStatement);
+            Assert.AreEqual("0x02000000a337b71d", process.PrimaryFrame?.SqlHandle);
+        }
+
+        [TestMethod]
         public void PrimaryStatement_FallsBackToInputBuffer()
         {
             var process = FirstProcess(

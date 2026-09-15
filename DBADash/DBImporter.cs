@@ -604,6 +604,13 @@ namespace DBADash
             // A table-valued parameter that isn't supplied defaults to an empty table, so only send what we have.
             if (dtDeadlocks.Rows.Count > 0)
             {
+                // Collected by an agent on an older signature version, the rows would be stored under it.
+                var upgraded = DeadlockSignatureRecompute.UpgradeCollectedSignatures(dtDeadlocks);
+                if (upgraded > 0)
+                {
+                    Log.Debug("Recomputed {count} deadlock signature(s) collected under an older signature version", upgraded);
+                }
+
                 cmd.Parameters.AddWithValue("Deadlocks", dtDeadlocks);
 
                 var dtProcesses = data.Tables[DeadlockTables.ProcessesTableName];

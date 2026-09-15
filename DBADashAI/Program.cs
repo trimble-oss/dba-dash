@@ -613,8 +613,7 @@ ApplyAuthAndRateLimit(app.MapPost("/api/ai/analyse-deadlock", async (
     var requestId = Guid.NewGuid().ToString("N");
     var totalSw = telemetry.Start(requestId, $"Deadlock analysis {request.Signature}", "deadlock-analysis");
 
-    // The model is part of the cache key, so it has to be resolved before the lookup rather than
-    // reported after the call.
+    // Resolved up front: it is stored with the analysis, and reported back to the caller.
     var model = request.ModelOverride
                 ?? config["Anthropic:Model"]
                 ?? config["AzureOpenAI:Deployment"]
@@ -629,7 +628,8 @@ ApplyAuthAndRateLimit(app.MapPost("/api/ai/analyse-deadlock", async (
         var prompt = promptBuilder.Build(request);
         var analysis = await aiChat.SummarizeWithPromptAsync(prompt, cancellationToken, request.ModelOverride);
 
-        await store.SaveAsync(request.Signature, model, payloadVersion, analysis, request.InstanceId, cancellationToken);
+        await store.SaveAsync(request.Signature, model, payloadVersion, analysis, request.InstanceId,
+            request.SignatureVersion, request.GraphXml, cancellationToken);
 
         totalSw.Stop();
         telemetry.Complete(requestId, "deadlock-analysis", 1, 0, totalSw.ElapsedMilliseconds, 0, "n/a");

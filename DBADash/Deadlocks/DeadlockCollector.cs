@@ -4,7 +4,6 @@ using System.Data;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -883,26 +882,11 @@ namespace DBADash.Deadlocks
         }
 
         /// <summary>
-        /// The occurrence identity: a SHA-256 of the graph, truncated to
-        /// <see cref="DeadlockTables.DeadlockHashBytes"/>.
-        ///
-        /// <para>Hashes <see cref="DeadlockGraph.Xml"/>, which the parser produces by re-serialising the
-        /// element it parsed.  That round trip is what makes this stable: whitespace between elements is
-        /// dropped on the way in, so the same deadlock read through the event file and through the ring
-        /// buffer produces the same bytes.  Every attribute value survives it, which is what keeps two
-        /// distinct deadlocks apart.</para>
-        ///
-        /// <para>The normalisation reaches formatting only.  Text inside <c>inputbuf</c> and <c>frame</c> is
-        /// the statement itself and is preserved verbatim, trailing spaces included - so if a future read path
-        /// were to return that text padded differently, the same deadlock would hash differently and be stored
-        /// twice.  Nothing does today, and the alternative - trimming statement text before hashing - would
-        /// throw away part of what distinguishes one occurrence from another.</para>
+        /// The occurrence identity - see <see cref="DeadlockHash"/>, which the viewer also uses to match an AI
+        /// analysis to this deadlock.  A read path returning statement text padded differently would make the
+        /// same deadlock hash differently and be stored twice.
         /// </summary>
-        private static byte[] ComputeHash(string graphXml)
-        {
-            var digest = SHA256.HashData(Encoding.UTF8.GetBytes(graphXml ?? string.Empty));
-            return digest[..DeadlockTables.DeadlockHashBytes];
-        }
+        private static byte[] ComputeHash(string graphXml) => DeadlockHash.Compute(graphXml);
 
         private static Result Build(IReadOnlyCollection<CapturedDeadlock> captured)
         {

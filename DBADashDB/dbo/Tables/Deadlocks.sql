@@ -47,3 +47,9 @@ CREATE TABLE dbo.Deadlocks(
 GO
 /* Drives the group-by-signature report, which is the default view of this data. */
 CREATE INDEX IX_Deadlocks_Signature ON dbo.Deadlocks(InstanceID, Signature, EventTime) WITH (DATA_COMPRESSION = PAGE) ON PS_Deadlocks(EventTime);
+GO
+/*	Drives the signature recompute (dbo.DeadlockSignatureRecompute_Get).  The service asks whether anything is
+	stored under an older signature version on every start, so the answer has to be a seek rather than a scan of
+	the table.  A recomputed row leaves the seek range, so the backlog shrinks as it is worked through.  EventTime
+	isn't needed as a key: the index is partition aligned, so a range on it already eliminates partitions. */
+CREATE INDEX IX_Deadlocks_SignatureVersion ON dbo.Deadlocks(SignatureVersion) WITH (DATA_COMPRESSION = PAGE) ON PS_Deadlocks(EventTime);

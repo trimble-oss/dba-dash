@@ -2,6 +2,7 @@
 using System.Data;
 using System.Linq;
 using DBADash;
+using DBADash.Deadlock.Analysis;
 using DBADash.Deadlocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -86,8 +87,72 @@ EXEC dbo.usp_ReverseInvoice @InvoiceID = 88232;   </inputbuf>
             Assert.AreEqual((short)2, row["ResourceCount"]);
             Assert.AreEqual(false, row["IsParallel"]);
             Assert.AreEqual(DeadlockTables.DeadlockHashBytes, ((byte[])row["DeadlockHash"]).Length);
-            Assert.AreEqual((byte)1, row["SignatureVersion"]);
+            Assert.AreEqual((byte)DeadlockSignature.VersionNumber, row["SignatureVersion"]);
             StringAssert.StartsWith((string)row["Signature"], "0x", "Stored as the hex form the _Upd proc converts.");
+        }
+
+        [TestMethod]
+        public void RecomputedSignatureFromStoredGraphMatchesCollectedSignature()
+        {
+            // The recompute reads the graph as stored, not the XE event the collector parsed - they must agree, or
+            // a recompute at the same version would regroup everything.
+            var result = DeadlockCollector.ShredEvents(new[] { DeadlockEvent });
+            var row = result.Deadlocks.Rows[0];
+            var storedXml = SMOBaseClass.Unzip((byte[])row["DeadlockXmlCompressed"]);
+
+            Assert.AreEqual((string)row["Signature"], DeadlockSignatureRecompute.ComputeSignature(storedXml));
+        }
+
+        [TestMethod]
+        public void AnalysisPayloadHashMatchesCollectedDeadlockHash()
+        {
+            // The viewer matches stored AI analyses to this deadlock by hash, computed from the graph it holds -
+            // which for a collected deadlock is the stored graph, not the XE event the collector hashed.
+            var result = DeadlockCollector.ShredEvents(new[] { DeadlockEvent });
+            var row = result.Deadlocks.Rows[0];
+            var storedXml = SMOBaseClass.Unzip((byte[])row["DeadlockXmlCompressed"]);
+            var graph = DBADash.Deadlock.DeadlockParser.Parse(storedXml).Single();
+
+            var payload = DeadlockAnalysisPayload.Build(graph, DeadlockAnalyser.Analyse(graph));
+
+            Assert.AreEqual(DeadlockHash.ToHex((byte[])row["DeadlockHash"]), payload.DeadlockHash);
+        }
+
+        [TestMethod]
+        public void ImportUpgradesSignaturesCollectedUnderAnOlderVersion()
+        {
+            // As a remote agent on an older version would send it: an old signature and version, with the graph.
+            var result = DeadlockCollector.ShredEvents(new[] { DeadlockEvent });
+            var row = result.Deadlocks.Rows[0];
+            var current = (string)row["Signature"];
+            row["Signature"] = "0x0000000000000000";
+            row["SignatureVersion"] = (byte)(DeadlockSignature.VersionNumber - 1);
+
+            Assert.AreEqual(1, DeadlockSignatureRecompute.UpgradeCollectedSignatures(result.Deadlocks));
+            Assert.AreEqual(current, (string)row["Signature"]);
+            Assert.AreEqual((byte)DeadlockSignature.VersionNumber, row["SignatureVersion"]);
+
+            // Already current: left alone.
+            Assert.AreEqual(0, DeadlockSignatureRecompute.UpgradeCollectedSignatures(result.Deadlocks));
+        }
+
+        [TestMethod]
+        public void ImportLeavesSignaturesFromANewerVersionAlone()
+        {
+            var result = DeadlockCollector.ShredEvents(new[] { DeadlockEvent });
+            var row = result.Deadlocks.Rows[0];
+            row["Signature"] = "0x0000000000000000";
+            row["SignatureVersion"] = (byte)(DeadlockSignature.VersionNumber + 1);
+
+            Assert.AreEqual(0, DeadlockSignatureRecompute.UpgradeCollectedSignatures(result.Deadlocks));
+            Assert.AreEqual("0x0000000000000000", (string)row["Signature"]);
+        }
+
+        [TestMethod]
+        public void RecomputedSignatureIsNullForAGraphThatDoesNotParse()
+        {
+            Assert.IsNull(DeadlockSignatureRecompute.ComputeSignature("<deadlock><process-list>"));
+            Assert.IsNull(DeadlockSignatureRecompute.ComputeSignature(null));
         }
 
         [TestMethod]

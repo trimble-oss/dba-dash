@@ -35,6 +35,14 @@ namespace DBADashGUI.Deadlocks
         private readonly ToolStripDropDownButton _options;
         private readonly ToolStripMenuItem _showRequest;
         private readonly ToolStripLabel _signature = new();
+
+        /// <summary>Every stored analysis of this deadlock and its pattern, to pick from.  Hidden when there are none.</summary>
+        private readonly ToolStripDropDownButton _history = new("Previous analyses")
+        {
+            DisplayStyle = ToolStripItemDisplayStyle.Text,
+            Visible = false,
+            ToolTipText = "Analyses of this deadlock, then of other occurrences of its pattern, newest first."
+        };
         private readonly ToolStripStatusLabel _status = new();
 
         private readonly ToolStripMenuItem _includeSchema;
@@ -103,6 +111,7 @@ namespace DBADashGUI.Deadlocks
             toolbar.Items.Add(_submit);
             toolbar.Items.Add(new ToolStripSeparator());
             toolbar.Items.Add(_options);
+            toolbar.Items.Add(_history);
             toolbar.Items.Add(new ToolStripSeparator());
             toolbar.Items.Add(_signature);
 
@@ -156,42 +165,84 @@ namespace DBADashGUI.Deadlocks
             _showRequest.Checked = true;
             _analysisNote = null;
             _submit.Text = "Submit for analysis";
+            _history.DropDownItems.Clear();
+            _history.Visible = false;
             UpdateOptionsVisibility();
 
             _ = FindServiceAsync();
             _ = FetchSchemaAsync(context);
-            _ = ShowPreviousAnalysisAsync(_payload?.Signature);
+            _ = LoadHistoryAsync(showLatest: true);
         }
 
         /// <summary>
-        /// Shows what was found the last time this deadlock pattern was analysed, if it ever was.
+        /// Fills the Previous analyses drop-down, and when <paramref name="showLatest"/> shows the first entry - the
+        /// newest analysis of this exact deadlock, or failing that the newest of its pattern.
         ///
-        /// The signature is the point of this: two hundred occurrences of one problem have one
+        /// The pattern is the point of the fallback: two hundred occurrences of one problem have one
         /// answer, and the reader should not have to know they are looking at a repeat, or pay for
-        /// the answer again to find out.  Model and payload version are deliberately ignored here -
-        /// an older answer is still worth reading, and asking again is one button away.
+        /// the answer again to find out.  An answer about this exact graph is still the better one to
+        /// lead with where there is one - a signature is a grouping heuristic, and can be too broad.
+        /// Model and payload version are deliberately ignored - an older answer is still worth reading,
+        /// and asking again is one button away.
         /// </summary>
-        private async Task ShowPreviousAnalysisAsync(string signature)
+        private async Task LoadHistoryAsync(bool showLatest)
         {
             var graph = _graph;
-            var history = await DeadlockAnalysisHistory.FetchAsync(signature);
+            var history = await DeadlockAnalysisHistory.FetchAsync(_payload?.Signature, _payload?.DeadlockHash);
 
-            // A different deadlock was selected while this was in flight, or the reader has already
-            // asked for a fresh answer - either way, do not overwrite what is on screen.
-            if (IsDisposed || !ReferenceEquals(graph, _graph) || history.Count == 0) return;
-            if (!_split.Panel2Collapsed || _inFlight is not null) return;
+            // A different deadlock was selected while this was in flight.
+            if (IsDisposed || !ReferenceEquals(graph, _graph)) return;
 
-            var latest = history[0];
-            await ShowAnalysisAsync(latest.Analysis);
+            _history.DropDownItems.Clear();
+            foreach (var entry in history)
+            {
+                var instance = string.IsNullOrEmpty(entry.Instance) ? string.Empty : $" on {entry.Instance}";
+                var item = new ToolStripMenuItem(
+                    $"{entry.GeneratedUtc.ToLocalTime():g}  {entry.Model}{instance}  ({entry.Scope})")
+                {
+                    Tag = entry
+                };
+                item.Click += async (_, _) => await ShowEntryAsync(entry);
+                _history.DropDownItems.Add(item);
+            }
 
-            var age = latest.GeneratedUtc.ToLocalTime().ToString("g");
-            var older = history.Count > 1 ? $"  {history.Count} analyses of this pattern are stored." : string.Empty;
-            var thinner = latest.WithoutSchema && _schema.Count > 0
+            _history.Visible = history.Count > 0;
+            if (history.Count == 0) return;
+
+            // Once an answer is on screen it stays: the reader is reading it, or has just asked for it.
+            if (showLatest && _split.Panel2Collapsed && _inFlight is null)
+            {
+                await ShowEntryAsync(history[0]);
+            }
+        }
+
+        /// <summary>Shows a stored analysis, saying what it is about and where it came from.</summary>
+        private async Task ShowEntryAsync(DeadlockAnalysisHistory.Entry entry)
+        {
+            if (_inFlight is not null) return;
+
+            var graph = _graph;
+            await ShowAnalysisAsync(entry.Analysis);
+
+            // Rendering is asynchronous: a different deadlock may have been selected meanwhile, and this entry's
+            // note and selection must not be written over it.
+            if (IsDisposed || !ReferenceEquals(graph, _graph)) return;
+
+            foreach (var item in _history.DropDownItems.OfType<ToolStripMenuItem>())
+            {
+                item.Checked = ReferenceEquals(item.Tag, entry);
+            }
+
+            var age = entry.GeneratedUtc.ToLocalTime().ToString("g");
+            var others = _history.DropDownItems.Count > 1
+                ? $"  {_history.DropDownItems.Count} analyses are stored - see Previous analyses."
+                : string.Empty;
+            var thinner = entry.WithoutSchema && _schema.Count > 0
                 ? "  It was produced without the object definitions now available - re-analyse to include them."
                 : string.Empty;
 
             _analysisNote =
-                $"Previous analysis of this deadlock pattern, by {latest.Model} on {age}.{thinner}{older}  " +
+                $"Previous analysis of {entry.Scope}, by {entry.Model} on {age}.{thinner}{others}  " +
                 "Generated advice - check it against the code before acting on it.";
             _statusColour = DashColors.Information;
             UpdateStatus();
@@ -199,8 +250,8 @@ namespace DBADashGUI.Deadlocks
             // With an answer already on screen, the button is asking for another opinion rather than
             // a first one, and should say so.
             _submit.Text = "Analyse again";
-            _submit.ToolTipText = "Ask the model again.  Two runs over the same graph rarely say " +
-                                  "quite the same thing, and the request may now carry more than it did.";
+            _submit.ToolTipText = "Ask the model again.  Every answer is kept, and two runs over the same graph " +
+                                  "rarely say quite the same thing - the request may also now carry more than it did.";
         }
 
         /// <summary>
@@ -281,9 +332,12 @@ namespace DBADashGUI.Deadlocks
 
             try
             {
+                var graph = _graph;
                 var result = await DeadlockAnalysisClient.AnalyseAsync(
                     _payload, _service, _inFlight.Token, _instanceId);
-                if (IsDisposed) return;
+
+                // The answer is stored either way; it just isn't shown against a deadlock selected while it was coming.
+                if (IsDisposed || !ReferenceEquals(graph, _graph)) return;
 
                 if (!result.Success)
                 {
@@ -294,9 +348,16 @@ namespace DBADashGUI.Deadlocks
                 }
 
                 await ShowAnalysisAsync(result.Analysis ?? string.Empty);
+                if (IsDisposed || !ReferenceEquals(graph, _graph)) return;
+
                 _analysisNote = Describe(result);
                 _statusColour = DashColors.Success;
                 UpdateStatus();
+
+                // The answer just stored joins the list, alongside the ones it didn't replace.  Nothing on screen
+                // is checked: the fresh answer is showing, not a stored one.
+                _submit.Text = "Analyse again";
+                _ = LoadHistoryAsync(showLatest: false);
             }
             finally
             {
@@ -322,10 +383,13 @@ namespace DBADashGUI.Deadlocks
         /// </summary>
         private async Task ShowAnalysisAsync(string markdown)
         {
+            var graph = _graph;
             _analysisText.Text = markdown.Replace("\n", Environment.NewLine);
 
             var renderedOk = await _rendered.NavigateToLargeString(MarkdownRenderer.ToThemedHtml(markdown));
-            if (IsDisposed) return;
+
+            // A different deadlock selected while rendering starts with the answer panel collapsed - leave it that way.
+            if (IsDisposed || !ReferenceEquals(graph, _graph)) return;
 
             _rendered.Visible = renderedOk;
             _analysisText.Visible = !renderedOk;

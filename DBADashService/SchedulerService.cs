@@ -72,6 +72,7 @@ namespace DBADashService
                 workQueue = new CollectionWorkQueue(config);
                 ScheduledCollectionJob.Initialize(workQueue);
                 DeadlockBackfillWorkItem.Initialize(workQueue);
+                DeadlockSignatureRecomputeWorkItem.Initialize(workQueue);
                 Log.Information("Queue-based scheduling enabled");
             }
             else
@@ -416,6 +417,25 @@ namespace DBADashService
             }
         }
 
+        /// <summary>
+        /// Recomputes deadlock signatures stored under an older signature version.  The job removes itself once a run
+        /// finds nothing left to do, so on an up to date repository it costs one short query per service start.
+        /// </summary>
+        private void ScheduleDeadlockSignatureRecompute()
+        {
+            var i = 0;
+            foreach (var d in config.AllDestinations.Where(cn => cn.Type == ConnectionType.SQL))
+            {
+                i += 1;
+                var job = JobBuilder.Create<DeadlockSignatureRecomputeJob>()
+                    .WithIdentity("DeadlockSignatureRecomputeJob" + i)
+                    .UsingJobData("ConnectionString", d.ConnectionString)
+                    .UsingJobData("ConnectionForPrint", d.ConnectionForPrint)
+                    .Build();
+                ScheduleJob(DeadlockSignatureRecomputeWorkItem.IntervalSeconds.ToString(), job);
+            }
+        }
+
         private void ScheduleUpgradeCheck()
         {
             if (string.IsNullOrEmpty(config.UpgradeCheckCron))
@@ -705,6 +725,7 @@ namespace DBADashService
 
             await ScheduleAndRunMaintenanceJobAsync();
             ScheduleSummaryRefresh();
+            ScheduleDeadlockSignatureRecompute();
             ScheduleUpgradeCheck();
 
             if (config.IsUseQueueBasedScheduling())
