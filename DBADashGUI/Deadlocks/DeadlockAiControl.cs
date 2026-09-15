@@ -221,8 +221,12 @@ namespace DBADashGUI.Deadlocks
         {
             if (_inFlight is not null) return;
 
+            var graph = _graph;
             await ShowAnalysisAsync(entry.Analysis);
-            if (IsDisposed) return;
+
+            // Rendering is asynchronous: a different deadlock may have been selected meanwhile, and this entry's
+            // note and selection must not be written over it.
+            if (IsDisposed || !ReferenceEquals(graph, _graph)) return;
 
             foreach (var item in _history.DropDownItems.OfType<ToolStripMenuItem>())
             {
@@ -328,9 +332,12 @@ namespace DBADashGUI.Deadlocks
 
             try
             {
+                var graph = _graph;
                 var result = await DeadlockAnalysisClient.AnalyseAsync(
                     _payload, _service, _inFlight.Token, _instanceId);
-                if (IsDisposed) return;
+
+                // The answer is stored either way; it just isn't shown against a deadlock selected while it was coming.
+                if (IsDisposed || !ReferenceEquals(graph, _graph)) return;
 
                 if (!result.Success)
                 {
@@ -341,6 +348,8 @@ namespace DBADashGUI.Deadlocks
                 }
 
                 await ShowAnalysisAsync(result.Analysis ?? string.Empty);
+                if (IsDisposed || !ReferenceEquals(graph, _graph)) return;
+
                 _analysisNote = Describe(result);
                 _statusColour = DashColors.Success;
                 UpdateStatus();
@@ -374,10 +383,13 @@ namespace DBADashGUI.Deadlocks
         /// </summary>
         private async Task ShowAnalysisAsync(string markdown)
         {
+            var graph = _graph;
             _analysisText.Text = markdown.Replace("\n", Environment.NewLine);
 
             var renderedOk = await _rendered.NavigateToLargeString(MarkdownRenderer.ToThemedHtml(markdown));
-            if (IsDisposed) return;
+
+            // A different deadlock selected while rendering starts with the answer panel collapsed - leave it that way.
+            if (IsDisposed || !ReferenceEquals(graph, _graph)) return;
 
             _rendered.Visible = renderedOk;
             _analysisText.Visible = !renderedOk;

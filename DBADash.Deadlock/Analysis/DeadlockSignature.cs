@@ -117,10 +117,6 @@ namespace DBADash.Deadlock.Analysis
             if (string.IsNullOrWhiteSpace(sql)) return string.Empty;
 
             var text = QuotedLiterals.Replace(sql, "?");
-            // SQL Server truncates long statement text, and the cut can land inside a string literal.
-            // Whatever is left unclosed at the end is still a literal, and would otherwise vary with
-            // its length (a backup path, say).
-            text = UnterminatedLiteral.Replace(text, "?");
             text = Numbers.Replace(text, "?");
             text = Whitespace.Replace(text, " ");
 
@@ -163,11 +159,15 @@ namespace DBADash.Deadlock.Analysis
             return builder.ToString();
         }
 
+        /// <summary>
+        /// A string literal, with <c>''</c> as part of its content, closed by a quote or by the end of the text.  SQL Server
+        /// truncates long statement text and the cut can land inside a literal - a backup path, say - so what is left
+        /// unclosed at the end is still one literal.  One pattern rather than a closed-literal pass followed by an
+        /// unclosed one: with two, <c>'a''b</c> cut off mid literal would be read as <c>'a'</c> plus <c>'b</c> - two
+        /// placeholders where a cut elsewhere gives one.  Atomic, so the content is never backtracked into.
+        /// </summary>
         private static readonly Regex QuotedLiterals =
-            new("'([^']|'')*'", RegexOptions.Compiled | RegexOptions.CultureInvariant);
-
-        private static readonly Regex UnterminatedLiteral =
-            new("'[^']*$", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+            new(@"'(?>[^']|'')*(?:'|\z)", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
         private static readonly Regex BackupRestore =
             new(@"^\s*(BACKUP|RESTORE)\s+(\w+)", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);

@@ -119,6 +119,36 @@ EXEC dbo.usp_ReverseInvoice @InvoiceID = 88232;   </inputbuf>
         }
 
         [TestMethod]
+        public void ImportUpgradesSignaturesCollectedUnderAnOlderVersion()
+        {
+            // As a remote agent on an older version would send it: an old signature and version, with the graph.
+            var result = DeadlockCollector.ShredEvents(new[] { DeadlockEvent });
+            var row = result.Deadlocks.Rows[0];
+            var current = (string)row["Signature"];
+            row["Signature"] = "0x0000000000000000";
+            row["SignatureVersion"] = (byte)(DeadlockSignature.VersionNumber - 1);
+
+            Assert.AreEqual(1, DeadlockSignatureRecompute.UpgradeCollectedSignatures(result.Deadlocks));
+            Assert.AreEqual(current, (string)row["Signature"]);
+            Assert.AreEqual((byte)DeadlockSignature.VersionNumber, row["SignatureVersion"]);
+
+            // Already current: left alone.
+            Assert.AreEqual(0, DeadlockSignatureRecompute.UpgradeCollectedSignatures(result.Deadlocks));
+        }
+
+        [TestMethod]
+        public void ImportLeavesSignaturesFromANewerVersionAlone()
+        {
+            var result = DeadlockCollector.ShredEvents(new[] { DeadlockEvent });
+            var row = result.Deadlocks.Rows[0];
+            row["Signature"] = "0x0000000000000000";
+            row["SignatureVersion"] = (byte)(DeadlockSignature.VersionNumber + 1);
+
+            Assert.AreEqual(0, DeadlockSignatureRecompute.UpgradeCollectedSignatures(result.Deadlocks));
+            Assert.AreEqual("0x0000000000000000", (string)row["Signature"]);
+        }
+
+        [TestMethod]
         public void RecomputedSignatureIsNullForAGraphThatDoesNotParse()
         {
             Assert.IsNull(DeadlockSignatureRecompute.ComputeSignature("<deadlock><process-list>"));
