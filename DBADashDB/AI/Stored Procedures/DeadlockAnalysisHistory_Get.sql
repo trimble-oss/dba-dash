@@ -13,8 +13,8 @@
 CREATE PROC AI.DeadlockAnalysisHistory_Get
 (
 	@Signature VARCHAR(18),
-	@DeadlockHash BINARY(16) = NULL,
-	@MaxRows INT = 50
+	@MaxRows INT = 50,
+	@DeadlockHash BINARY(16) = NULL
 )
 AS
 SET NOCOUNT ON

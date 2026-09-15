@@ -169,6 +169,26 @@ namespace DBADash.Deadlock.Test
         }
 
         [TestMethod]
+        public void Signature_IgnoresWhereTruncationCutsALiteralWithAnEscapedQuote()
+        {
+            // Cut just after an escaped quote, the rest of the literal must still be one placeholder - not a closed
+            // 'O' followed by an unclosed 'Brien.
+            var cutAfterEscape = SignatureOf(SingleStatementDeadlock("SELECT * FROM dbo.T WHERE Name = 'O''Brien"));
+            var cutBeforeEscape = SignatureOf(SingleStatementDeadlock("SELECT * FROM dbo.T WHERE Name = 'O"));
+
+            Assert.AreEqual(cutBeforeEscape, cutAfterEscape);
+        }
+
+        [TestMethod]
+        public void Signature_TreatsAnEscapedQuoteAsPartOfTheLiteral()
+        {
+            var escaped = SignatureOf(SingleStatementDeadlock("SELECT * FROM dbo.T WHERE Name = 'O''Brien' AND Id = 1"));
+            var plain = SignatureOf(SingleStatementDeadlock("SELECT * FROM dbo.T WHERE Name = 'Smith' AND Id = 2"));
+
+            Assert.AreEqual(plain, escaped);
+        }
+
+        [TestMethod]
         public void Signature_IgnoresTheOrderProcessesAppearIn()
         {
             var graph = TwoProcessDeadlock();

@@ -140,6 +140,47 @@ namespace DBADash.Deadlocks
         }
 
         /// <summary>
+        /// Brings the signatures in a collected Deadlocks table (<see cref="DeadlockTables.CreateDeadlocksTable"/>) up to
+        /// the current version before it is imported.  A remote agent on an older version collects with its own
+        /// signature version, and those rows would otherwise be stored under it - after the background recompute has
+        /// finished and stopped looking.  Rows at or above the current version are left alone, as are rows without a
+        /// graph or whose graph doesn't parse; the background recompute handles those the next time it runs.
+        /// </summary>
+        /// <returns>The number of rows whose signature was recomputed.</returns>
+        public static int UpgradeCollectedSignatures(DataTable deadlocks)
+        {
+            if (deadlocks is not { Rows.Count: > 0 } || !deadlocks.Columns.Contains("Signature") ||
+                !deadlocks.Columns.Contains("SignatureVersion") || !deadlocks.Columns.Contains("DeadlockXmlCompressed"))
+            {
+                return 0;
+            }
+
+            // One collection comes from one agent, so every row carries the same signature version.  The usual case is
+            // an agent on the current version, and one row is enough to tell.
+            if (IsCurrent(deadlocks.Rows[0])) return 0;
+
+            var upgraded = 0;
+            foreach (DataRow row in deadlocks.Rows)
+            {
+                if (IsCurrent(row)) continue;
+                if (row["DeadlockXmlCompressed"] is not byte[] { Length: > 0 } compressed) continue;
+
+                var signature = ComputeSignature(SMOBaseClass.Unzip(compressed));
+                if (signature is null) continue;
+
+                row["Signature"] = signature;
+                row["SignatureVersion"] = (byte)DeadlockSignature.VersionNumber;
+                upgraded++;
+            }
+
+            return upgraded;
+
+            static bool IsCurrent(DataRow row) =>
+                row["SignatureVersion"] is not DBNull &&
+                Convert.ToInt32(row["SignatureVersion"]) >= DeadlockSignature.VersionNumber;
+        }
+
+        /// <summary>
         /// The current version's signature for a stored graph, or null when it doesn't parse.  Computed exactly as the
         /// collector does, from the graph as stored - the collector stores the XML the parser re-serialised.
         /// </summary>
