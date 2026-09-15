@@ -63,10 +63,11 @@ namespace DBADash.Test
         [TestMethod]
         public void DeadlockSessionScriptsBuildParseableStatements()
         {
-            // Three statements on Azure - create, drop to resize, start - and two on-premises, which has no
-            // buffer to resize.
+            // Three statements on Azure - create, drop to resize, start - and four server scoped: the same three,
+            // with a create for each target, since a managed instance gets a ring buffer where on-premises gets an
+            // event file.
             AssertBuiltStatementsParse("DeadlockSessionAzure", SqlStrings.GetSqlString("DeadlockSessionAzure"), 3);
-            AssertBuiltStatementsParse("DeadlockSession", SqlStrings.GetSqlString("DeadlockSession"), 2);
+            AssertBuiltStatementsParse("DeadlockSession", SqlStrings.GetSqlString("DeadlockSession"), 4);
         }
 
         /// <summary>

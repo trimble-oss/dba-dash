@@ -294,7 +294,7 @@ namespace DBADash
         /// buffer had something in it - so an idle database is never stopped and started at all.</para>
         ///
         /// <para>Only ever applies to the session DBA Dash owns, and only when that session's target is a
-        /// ring buffer - so in practice Azure SQL Database.  A session the DBA runs is never stopped
+        /// ring buffer - so in practice Azure SQL Database and Managed Instance.  A session the DBA runs is never stopped
         /// whatever this is set to, and the on-premises managed session reads an event file, where the
         /// resume cursor already makes each read proportional to what is new.</para>
         /// </summary>

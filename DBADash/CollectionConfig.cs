@@ -209,9 +209,10 @@ namespace DBADash
         /// Size in KB of the ring buffer on the deadlock extended events session DBA Dash creates.  Null uses
         /// <see cref="DefaultDeadlockXERingBufferKB"/>.
         ///
-        /// <para>Only Azure SQL Database is affected.  It is the one platform where the deadlock session
-        /// reads a ring buffer, because an event_file target there writes to blob storage; everywhere else
-        /// the session writes to an event file and the resume cursor bounds the read instead.</para>
+        /// <para>Only Azure SQL Database and Azure SQL Managed Instance are affected.  They are the platforms
+        /// where the deadlock session reads a ring buffer, because an event_file target there writes to blob
+        /// storage; everywhere else the session writes to an event file and the resume cursor bounds the read
+        /// instead.</para>
         ///
         /// <para>Bigger buys a longer outage to bridge - a deadlock stays in the buffer until a collection
         /// reads it or it is pushed out - and costs read time, because a ring buffer read costs what the

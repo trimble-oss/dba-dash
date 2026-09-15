@@ -32,6 +32,11 @@ namespace DBADash.Deadlocks
     /// <c>xml_deadlock_report</c>, and the target is a ring buffer because an event_file there writes to
     /// blob storage.  Both event names are accepted on both paths, so a session holding either is read.</para>
     ///
+    /// <para>Azure SQL Managed Instance is server scoped like on-premises, but a session created there can only
+    /// have an event_file in blob storage, so the session DBA Dash creates has a ring buffer - the deadlock
+    /// session script decides which from the engine edition.  system_health there still has a local event
+    /// file, and it is read like any other, by file name - see <see cref="ResolveEventFileReadPath"/>.</para>
+    ///
     /// <para>Read-only throughout.  Neither target is flushed and the session is never stopped or started:
     /// this reads sessions it does not own, including the health session the instance's own owner relies on.
     /// That rules out <see cref="RingBufferTraceReader"/>, whose stop/start flush would discard their data.</para>
@@ -100,14 +105,20 @@ namespace DBADash.Deadlocks
         /// unless the target actually is a ring buffer.  See <see cref="FlushRingBufferAsync"/>.
         /// </param>
         /// <param name="ringBufferKB">
-        /// Size of the ring buffer on the session DBA Dash creates.  Only reaches the database scoped
-        /// session, which is the only one with a ring buffer - see
+        /// Size of the ring buffer on the session DBA Dash creates.  Only used where that session has a ring
+        /// buffer - Azure SQL Database and Azure SQL Managed Instance - see
         /// <see cref="CollectionConfig.DeadlockXERingBufferKB"/>.
+        /// </param>
+        /// <param name="isManagedInstance">
+        /// Azure SQL Managed Instance, where <c>fn_xe_file_target_read_file</c> refuses a full local path as the
+        /// file set to read - see <see cref="ResolveEventFileReadPath"/>.  The resume position is unaffected: the
+        /// function there takes back the full <c>file_name</c> it returned as <c>initial_file_name</c>, and it is
+        /// the full name it needs - the file name alone is not found.
         /// </param>
         public static async Task<Result> CollectAsync(string connectionString, string sessionName,
             bool databaseScoped, DeadlockCollectionState state, CancellationToken cancellationToken,
             bool manageSession = false, bool flushRingBuffer = false,
-            int ringBufferKB = CollectionConfig.DefaultDeadlockXERingBufferKB)
+            int ringBufferKB = CollectionConfig.DefaultDeadlockXERingBufferKB, bool isManagedInstance = false)
         {
             if (string.IsNullOrWhiteSpace(sessionName))
             {
@@ -115,6 +126,15 @@ namespace DBADash.Deadlocks
                     nameof(sessionName));
             }
             ArgumentNullException.ThrowIfNull(state);
+            // Managing a session creates, resizes - which drops it - and flushes it, so it must never reach a
+            // session DBA Dash doesn't own, whatever the caller asked for.
+            if (manageSession && !string.Equals(sessionName, DBADashSource.ManagedDeadlockXESessionName,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                throw new ArgumentException(
+                    $"Only the {DBADashSource.ManagedDeadlockXESessionName} session can be managed by deadlock " +
+                    $"collection, not '{sessionName}'.", nameof(manageSession));
+            }
 
             if (manageSession)
             {
@@ -136,7 +156,7 @@ namespace DBADash.Deadlocks
 
             // event_file first: it survives a restart, and the cursor makes each run read only what is new.
             var readPath = targets.TryGetValue("event_file", out var fileTargetData)
-                ? XESessionTargetResolver.ResolveEventFileReadPath(fileTargetData)
+                ? ResolveEventFileReadPath(fileTargetData, isManagedInstance)
                 : null;
             var hasRingBuffer = targets.TryGetValue("ring_buffer", out var ringTargetData);
 
@@ -153,7 +173,7 @@ namespace DBADash.Deadlocks
                 return ShredEvents(await ReadEventFileAsync(connectionString, readPath, state, cancellationToken));
             }
 
-            var captured = SelectUnseenRingBufferDeadlocks(ringTargetData, state);
+            var captured = SelectUnseenRingBufferDeadlocks(ringTargetData, state, manageSession);
 
             // Only a session DBA Dash created may be emptied - stopping someone else's session would throw away
             // data its owner is relying on - and only when it holds something, so an idle database is never
@@ -193,9 +213,10 @@ namespace DBADash.Deadlocks
         /// Older deadlocks it holds from before the restart come back from system_health too, and the repository
         /// discards them as already stored.</para>
         /// </summary>
+        /// <param name="isManagedInstance">See <see cref="ResolveEventFileReadPath"/>.</param>
         public static async Task<Result> BackfillAsync(string connectionString, string backfillSessionName,
             string configuredSessionName, bool databaseScoped, int timeLimitSeconds,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken, bool isManagedInstance = false)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(backfillSessionName);
             ArgumentException.ThrowIfNullOrWhiteSpace(configuredSessionName);
@@ -230,7 +251,7 @@ namespace DBADash.Deadlocks
 
             var cutoff = configuredStart.Value + BackfillCutoffMargin;
             var captured = await ReadBackfillAsync(connectionString, backfillSessionName, databaseScoped,
-                timeLimitSeconds, budget, elapsed, cancellationToken);
+                isManagedInstance, timeLimitSeconds, budget, elapsed, cancellationToken);
             var before = captured.Where(c => c.EventTime < cutoff).ToList();
 
             Log.Information("Deadlock backfill keeping {kept} of {read} deadlock(s) from {backfill}: those before " +
@@ -282,6 +303,9 @@ namespace DBADash.Deadlocks
         /// first without holding every row back until the end, so a partial read keeps whatever the scan reached -
         /// see <see cref="ReadDeadlockEventsAsync"/>.</para>
         ///
+        /// <para>On Azure SQL Managed Instance the fallback is given the file name alone - see
+        /// <see cref="ResolveEventFileReadPath"/>.  The stream read already takes it that way.</para>
+        ///
         /// <para>Bounded by <paramref name="budget"/>, the backfill's own time limit rather than the Deadlocks command
         /// timeout: it reads the whole file set once, where the command timeout is sized for the routine read every
         /// run makes.  Every command it sends - finding the target as well as reading it - takes the limit as its
@@ -289,8 +313,8 @@ namespace DBADash.Deadlocks
         /// and is what tells shutdown, which propagates, apart from the limit.</para>
         /// </summary>
         private static async Task<List<CapturedDeadlock>> ReadBackfillAsync(string connectionString,
-            string sessionName, bool databaseScoped, int timeLimitSeconds, CancellationTokenSource budget,
-            Stopwatch elapsed, CancellationToken cancellationToken)
+            string sessionName, bool databaseScoped, bool isManagedInstance, int timeLimitSeconds,
+            CancellationTokenSource budget, Stopwatch elapsed, CancellationToken cancellationToken)
         {
 
             // Both filled as they are read, so whatever was read before a failure is still here to keep.  A deadlock
@@ -306,7 +330,7 @@ namespace DBADash.Deadlocks
                     sessionName, budget.Token, timeLimitSeconds);
 
                 if (targets.TryGetValue("event_file", out var fileTargetData) &&
-                    XESessionTargetResolver.ResolveEventFileReadPath(fileTargetData) is { Length: > 0 } readPath)
+                    ResolveEventFileReadPath(fileTargetData, isManagedInstance) is { Length: > 0 } readPath)
                 {
                     readMethod = "fn_MSxe_read_event_stream";
                     if (!await TryReadDeadlockEventStreamAsync(connectionString,
@@ -320,7 +344,8 @@ namespace DBADash.Deadlocks
                 }
                 else if (targets.TryGetValue("ring_buffer", out var ringTargetData))
                 {
-                    var fromRingBuffer = ParseRingBuffer(ringTargetData).ToList();
+                    readMethod = "ring_buffer";
+                    var fromRingBuffer = ParseRingBuffer(ringTargetData, managedSession: false).ToList();
                     Log.Information("Deadlock backfill read {count} deadlock(s) from session {session}",
                         fromRingBuffer.Count, sessionName);
                     return fromRingBuffer;
@@ -471,20 +496,19 @@ namespace DBADash.Deadlocks
                     SqlStrings.GetSqlString(databaseScoped ? "DeadlockSessionAzure" : "DeadlockSession"), cn)
                 { CommandType = CommandType.Text, CommandTimeout = CommandTimeout };
                 cmd.Parameters.Add("@Name", SqlDbType.NVarChar, 128).Value = sessionName;
-                // Only the database scoped script has a ring buffer to size.  The server scoped session
-                // writes to an event file, where the resume cursor is what bounds a read.
-                if (databaseScoped)
-                {
-                    cmd.Parameters.Add("@RingBufferKB", SqlDbType.Int).Value = ringBufferKB;
-                }
+                // Both scripts take it: the server scoped one builds a ring buffer on a managed instance, and
+                // ignores the size everywhere else, where the session writes to an event file.
+                cmd.Parameters.Add("@RingBufferKB", SqlDbType.Int).Value = ringBufferKB;
                 await cn.OpenAsync(cancellationToken);
                 await cmd.ExecuteNonQueryAsync(cancellationToken);
             }
             catch (Exception ex)
             {
+                // The server's own message leads: a missing permission is the likely cause, but not the only
+                // one, and the advice alone reads as a diagnosis whatever actually went wrong.
                 throw new Exception(
                     $"Could not create or start the extended events session '{sessionName}' used for deadlock " +
-                    "collection.  The DBA Dash service account needs " +
+                    $"collection: {ex.Message}  If this is a permissions error, the DBA Dash service account needs " +
                     (databaseScoped
                         ? "ALTER ANY DATABASE EVENT SESSION on this database, or the collection can be pointed " +
                           "at a database scoped session it only reads."
@@ -605,6 +629,30 @@ namespace DBADash.Deadlocks
         }
 
         /// <summary>
+        /// The wildcard path an event file set is read with - see
+        /// <see cref="XESessionTargetResolver.ResolveEventFileReadPath"/> - cut down to the file name on Azure SQL
+        /// Managed Instance.
+        ///
+        /// <para>A managed instance reports system_health's file with its full local path, but
+        /// <c>fn_xe_file_target_read_file</c> there rejects any path that isn't an https:// URL.  Given the file
+        /// name alone it resolves it against the instance's log directory, which is where the path pointed anyway
+        /// - the same form SSMS and <see cref="TryReadDeadlockEventStreamAsync"/> use.  A URL is left as it is: a
+        /// session writing to blob storage is read at its URL.</para>
+        /// </summary>
+        internal static string ResolveEventFileReadPath(string targetDataXml, bool isManagedInstance)
+        {
+            var path = XESessionTargetResolver.ResolveEventFileReadPath(targetDataXml);
+            if (!isManagedInstance || string.IsNullOrEmpty(path) ||
+                path.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            {
+                return path;
+            }
+
+            var separator = path.LastIndexOfAny(new[] { '\\', '/' });
+            return separator >= 0 ? path[(separator + 1)..] : path;
+        }
+
+        /// <summary>
         /// The query <see cref="ReadDeadlockEventsAsync"/> sends, taking the file set as <c>@path</c> and each of
         /// <see cref="DeadlockEventNames"/> as <c>@eventName0</c>, <c>@eventName1</c>...  Separated from the
         /// execution so its syntax can be checked without an instance - see <c>SqlScriptSyntaxTests</c>.
@@ -680,15 +728,15 @@ namespace DBADash.Deadlocks
         /// buffer already returned.  Reads only - the buffer is never flushed.
         /// </summary>
         public static Result ShredRingBufferTargetData(string targetDataXml, DeadlockCollectionState state) =>
-            Build(SelectUnseenRingBufferDeadlocks(targetDataXml, state));
+            Build(SelectUnseenRingBufferDeadlocks(targetDataXml, state, managedSession: true));
 
         private static List<CapturedDeadlock> SelectUnseenRingBufferDeadlocks(string targetDataXml,
-            DeadlockCollectionState state)
+            DeadlockCollectionState state, bool managedSession)
         {
             var graphs = new List<CapturedDeadlock>();
             var seen = new HashSet<string>(StringComparer.Ordinal);
 
-            foreach (var captured in ParseRingBuffer(targetDataXml))
+            foreach (var captured in ParseRingBuffer(targetDataXml, managedSession))
             {
                 var key = captured.HashHex;
                 seen.Add(key);
@@ -703,7 +751,12 @@ namespace DBADash.Deadlocks
             return graphs;
         }
 
-        private static IEnumerable<CapturedDeadlock> ParseRingBuffer(string targetDataXml)
+        /// <param name="managedSession">
+        /// The buffer belongs to the session DBA Dash creates, so DeadlockXERingBufferKB is what sizes it and is
+        /// worth pointing at.  A session DBA Dash only reads - system_health, whose buffer is busy with far more
+        /// than deadlocks and reports itself truncated as a matter of course - gets neither piece of advice.
+        /// </param>
+        private static IEnumerable<CapturedDeadlock> ParseRingBuffer(string targetDataXml, bool managedSession)
         {
             if (string.IsNullOrEmpty(targetDataXml)) yield break;
 
@@ -719,15 +772,17 @@ namespace DBADash.Deadlocks
                 // than part of it.  Named here because nothing else about the failure points at the cause.
                 Log.Warning(ex,
                     "Deadlock collection could not parse the ring buffer target data.  A ring buffer over " +
-                    "1MB can have its target_data truncated, which leaves it malformed - reduce " +
-                    "DeadlockXERingBufferKB in the service configuration if it has been raised above that.");
+                    "1MB can have its target_data truncated, which leaves it malformed" +
+                    (managedSession
+                        ? " - reduce DeadlockXERingBufferKB in the service configuration if it has been raised above that."
+                        : "."));
                 yield break;
             }
 
             // The buffer says so itself when it has dropped events to stay within its size.  Worth saying
             // out loud: it is the one sign that collections are not keeping up with the deadlock rate, and
             // the answer is a bigger buffer or a shorter schedule rather than anything in the data.
-            if (root.Attribute("truncated")?.Value is "1")
+            if (managedSession && root.Attribute("truncated")?.Value is "1")
             {
                 Log.Warning("The deadlock ring buffer reported dropping events to stay within its size.  " +
                             "Deadlocks are being produced faster than they are collected: raise " +

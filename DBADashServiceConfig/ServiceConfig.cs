@@ -827,7 +827,8 @@ namespace DBADashServiceConfig
                     $"{DBADashSource.ManagedDeadlockXESessionName} - created, started and read by DBA Dash.  Fastest to read.\r\n" +
                     $"{DBADashSource.SystemHealthXESessionName} - read only, nothing to deploy, covers deadlocks from before collection was enabled, but costs seconds per collection.\r\n" +
                     "Any other name - a session you create and manage.  DBA Dash reads it and never alters it.\r\n" +
-                    "On Azure SQL Database the session is database scoped and reads from a ring buffer.  system_health doesn't exist there."
+                    "On Azure SQL Database the session is database scoped and reads from a ring buffer.  system_health doesn't exist there.\r\n" +
+                    $"On Azure SQL Managed Instance {DBADashSource.ManagedDeadlockXESessionName} reads from a ring buffer, as an event file there needs blob storage."
             });
             dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn
             {
@@ -837,7 +838,7 @@ namespace DBADashServiceConfig
                     "Empty the deadlock session's ring buffer after each collection by stopping and starting it.\r\n" +
                     "A ring buffer read costs what the buffer holds, not what is new in it - roughly half a second for a full one against thirty milliseconds for an empty one.\r\n" +
                     "Can lose a deadlock that has fired but not yet reached the target when the session stops.\r\n" +
-                    $"Only applies to the {DBADashSource.ManagedDeadlockXESessionName} session with a ring buffer target (Azure SQL Database).  A session you manage is never stopped."
+                    $"Only applies to the {DBADashSource.ManagedDeadlockXESessionName} session with a ring buffer target (Azure SQL Database and Managed Instance).  A session you manage is never stopped."
             });
             dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn
             {
