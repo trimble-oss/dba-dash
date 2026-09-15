@@ -162,8 +162,8 @@ namespace DBADash
         public int FailedLoginsBackfillMinutes { get; set; } = CollectionConfig.DefaultFailedLoginsBackfillMinutes;
 
         /// <summary>
-        /// Ring buffer size for the deadlock session DBA Dash creates.  Only reaches Azure SQL Database - see
-        /// <see cref="CollectionConfig.DeadlockXERingBufferKB"/>.
+        /// Ring buffer size for the deadlock session DBA Dash creates.  Only reaches Azure SQL Database and
+        /// Azure SQL Managed Instance - see <see cref="CollectionConfig.DeadlockXERingBufferKB"/>.
         /// </summary>
         public int DeadlockXERingBufferKB { get; set; } = CollectionConfig.DefaultDeadlockXERingBufferKB;
 
@@ -1108,6 +1108,8 @@ namespace DBADash
         /// </summary>
         public bool IsDeadlockBackfillPending => DeadlockCursorStore.IsBackfillPending(ConnectionID);
 
+        private bool IsManagedInstance => engineEdition == DatabaseEngineEdition.SqlManagedInstance;
+
         /// <summary>
         /// Adds the deadlocks system_health holds from before the configured session started, for an instance whose
         /// backfill is pending.  Returns false, adding nothing, when there is nothing to write: the backfill no longer
@@ -1131,7 +1133,8 @@ namespace DBADash
             }
 
             var result = await DeadlockCollector.BackfillAsync(ConnectionString, backfillSessionName,
-                Source.DeadlockXESessionName, IsAzureDB, DeadlockBackfillTimeLimitSeconds, cancellationToken);
+                Source.DeadlockXESessionName, IsAzureDB, DeadlockBackfillTimeLimitSeconds, cancellationToken,
+                IsManagedInstance);
             if (result == null) return false;
 
             AddDT(result.Deadlocks);
@@ -1676,7 +1679,8 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             var state = DeadlockCursorStore.GetPending(cursorKey);
 
             var result = await DeadlockCollector.CollectAsync(ConnectionString, sessionName, IsAzureDB, state,
-                CancellationToken.None, manageSession, Source.FlushDeadlockXERingBuffer, DeadlockXERingBufferKB);
+                CancellationToken.None, manageSession, Source.FlushDeadlockXERingBuffer, DeadlockXERingBufferKB,
+                IsManagedInstance);
 
             var backfillApplies = backfillSessionName != null && state.IsFirstRun;
             if (backfillApplies && ScheduleDeadlockBackfill)

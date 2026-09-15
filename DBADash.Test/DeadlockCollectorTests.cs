@@ -263,6 +263,33 @@ EXEC dbo.usp_ReverseInvoice @InvoiceID = 88232;   </inputbuf>
         }
 
         [TestMethod]
+        [DataRow("system_health")]
+        [DataRow("MyOwnDeadlockSession")]
+        public async System.Threading.Tasks.Task OnlyTheReservedSessionCanBeManaged(string sessionName)
+        {
+            // Rejected before any connection is opened - the connection string here goes nowhere.  Managing a
+            // session can drop it to resize it, so a session DBA Dash doesn't own must never get that far.
+            await Assert.ThrowsExactlyAsync<ArgumentException>(() => DeadlockCollector.CollectAsync(
+                "Server=invalid;Connect Timeout=1", sessionName, false, new DeadlockCollectionState(),
+                System.Threading.CancellationToken.None, manageSession: true));
+        }
+
+        [TestMethod]
+        public void ManagedInstanceReadsEventFileByNameAlone()
+        {
+            // As a managed instance reports system_health's target.  fn_xe_file_target_read_file there rejects the
+            // full path (Msg 40538) and accepts the file name, which it resolves against the log directory.
+            const string local = "<EventFileTarget truncated=\"0\"><File name=\"C:\\SFApplications\\Worker\\log\\system_health_0_134337278125080000.xel\" /></EventFileTarget>";
+            const string blob = "<EventFileTarget truncated=\"0\"><File name=\"https://acct.blob.core.windows.net/xe/mysession_0_134337278125080000.xel\" /></EventFileTarget>";
+
+            Assert.AreEqual("system_health*.xel", DeadlockCollector.ResolveEventFileReadPath(local, isManagedInstance: true));
+            Assert.AreEqual(@"C:\SFApplications\Worker\log\system_health*.xel",
+                DeadlockCollector.ResolveEventFileReadPath(local, isManagedInstance: false), "Elsewhere the full path is read.");
+            Assert.AreEqual("https://acct.blob.core.windows.net/xe/mysession*.xel",
+                DeadlockCollector.ResolveEventFileReadPath(blob, isManagedInstance: true), "A blob URL is read as it is.");
+        }
+
+        [TestMethod]
         public void RingBufferSizeDefaultsAndIsClampedToWhatTheTargetTakes()
         {
             // The value reaches the session's CREATE/ALTER as a literal, so an out-of-range one would either
