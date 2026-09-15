@@ -77,45 +77,68 @@ namespace DBADash.XE
         public static async Task ParseRowsAsync(IReadOnlyList<(int Type, byte[] Data)> rows, Action<IXEvent> onEvent,
             CancellationToken ct)
         {
-            if (!TryInitialise())
+            var parser = new RowParser();
+            foreach (var (type, data) in rows)
             {
-                throw new InvalidOperationException(
-                    "XELite's internal buffer parser is unavailable (XELite version mismatch?).");
+                await parser.ParseRowAsync(type, data, onEvent, ct).ConfigureAwait(false);
             }
+        }
 
-            HandleMetadata onMeta = () => Task.CompletedTask;
-            HandleXEvent onEvt = ev =>
+        /// <summary>
+        /// Parses <c>fn_MSxe_read_event_stream</c> rows one at a time, as they are read, for a read too large to hold in
+        /// memory - a whole system_health file set can run to a gigabyte.  Carries the per-file streamer between rows,
+        /// which is the only state <see cref="ParseRowsAsync"/> keeps across them.  Throws from the constructor if the
+        /// XELite internals are unavailable, so the caller can fall back before reading anything.
+        /// </summary>
+        internal sealed class RowParser
+        {
+            private static readonly HandleMetadata OnMeta = () => Task.CompletedTask;
+
+            private object _streamer;
+            private int _processed;
+
+            public RowParser()
             {
-                onEvent(ev);
-                return Task.CompletedTask;
-            };
+                if (!TryInitialise())
+                {
+                    throw new InvalidOperationException(
+                        "XELite's internal buffer parser is unavailable (XELite version mismatch?).");
+                }
+
+                _streamer = NewStreamer();
+            }
 
             // Each HEADER buffer marks a new FILE, and each file carries its own metadata AND clock calibration
             // (m_ticksConfig - the ticks->wall-clock mapping, which can differ per file/session-start).  A single
             // streamer would MERGE later files' metadata into the first's (keeping file 1's clock), so events from
             // later files decode with the wrong timestamps.  Start a FRESH streamer per file (like XELite does when it
             // reads each .xel file with its own XEFileEventStreamer) so metadata and clock never leak across files.
-            object NewStreamer() => Activator.CreateInstance(_fileStreamerType, new object[] { new MemoryStream(), false });
-            var streamer = NewStreamer();
+            private static object NewStreamer() =>
+                Activator.CreateInstance(_fileStreamerType, new object[] { new MemoryStream(), false });
 
-            var processed = 0;
-            foreach (var (type, data) in rows)
+            public async Task ParseRowAsync(int type, byte[] data, Action<IXEvent> onEvent, CancellationToken ct)
             {
                 if (type == LbhtHeader)
                 {
                     // New file boundary - reset metadata/clock.  (We don't parse the HEADER itself: its parse result is
                     // discarded by XELite, and in file mode the row is truncated before its padded length anyway.)
-                    if (processed > 0) streamer = NewStreamer();
-                    continue;
+                    if (_processed > 0) _streamer = NewStreamer();
+                    return;
                 }
 
-                if (data == null || data.Length == 0) continue;
+                if (data == null || data.Length == 0) return;
+
+                HandleXEvent onEvt = ev =>
+                {
+                    onEvent(ev);
+                    return Task.CompletedTask;
+                };
 
                 var reader = _readerCtor.Invoke(new object[] { data });
-                var task = (Task)_handleBuffer.Invoke(streamer,
-                    new object[] { reader, onMeta, onEvt, ct, false /* buffer carries its own header */ });
+                var task = (Task)_handleBuffer.Invoke(_streamer,
+                    new object[] { reader, OnMeta, onEvt, ct, false /* buffer carries its own header */ });
                 await task.ConfigureAwait(false);
-                processed++;
+                _processed++;
             }
         }
     }

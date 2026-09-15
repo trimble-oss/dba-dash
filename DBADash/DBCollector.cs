@@ -168,6 +168,22 @@ namespace DBADash
         public int DeadlockXERingBufferKB { get; set; } = CollectionConfig.DefaultDeadlockXERingBufferKB;
 
         /// <summary>
+        /// How long a first run's system_health backfill may take - see
+        /// <see cref="CollectionConfig.DeadlockBackfillTimeLimitSeconds"/>.  0 is no limit.
+        /// </summary>
+        public int DeadlockBackfillTimeLimitSeconds { get; set; } = CollectionConfig.DefaultDeadlockBackfillTimeLimitSeconds;
+
+        /// <summary>
+        /// True for a scheduled collection, which schedules the system_health backfill on an instance's first
+        /// Deadlocks run.  False - the default - for a triggered collection, which reads the configured session and
+        /// leaves the backfill to the scheduled collection: a connection with a dedicated session configured is
+        /// expected to have the Deadlocks collection scheduled, and a triggered run has no queue to hand the
+        /// backfill to.  A connection with no session configured reads system_health whenever it is triggered - see
+        /// <see cref="OnDemandDeadlockXESessionName"/> - so has no backfill to schedule.
+        /// </summary>
+        public bool ScheduleDeadlockBackfill { get; set; }
+
+        /// <summary>
         /// Session the Deadlocks collection reads when configuration has switched the collection off for this
         /// connection and the user has asked, from the GUI, for it to run anyway.  Null for every scheduled
         /// collection, which reads <see cref="DBADashSource.DeadlockXESessionName"/> as normal.
@@ -1086,6 +1102,51 @@ namespace DBADash
             pendingDeadlockCursor = null;
         }
 
+        /// <summary>
+        /// True when this instance's system_health backfill has been scheduled by a Deadlocks run and has not yet run.
+        /// The caller that sees it runs <see cref="CollectDeadlockBackfillAsync"/> on a collector of its own.
+        /// </summary>
+        public bool IsDeadlockBackfillPending => DeadlockCursorStore.IsBackfillPending(ConnectionID);
+
+        /// <summary>
+        /// Adds the deadlocks system_health holds from before the configured session started, for an instance whose
+        /// backfill is pending.  Returns false, adding nothing, when there is nothing to write: the backfill no longer
+        /// applies - configuration has changed since it was scheduled, and it is completed without a read - or the
+        /// configured session isn't running, and it is left pending for a later run to schedule again.
+        ///
+        /// <para>A collection of its own rather than part of the Deadlocks run, so a read of the whole of
+        /// system_health can wait in the low priority queue instead of holding a worker the scheduled collections
+        /// need.  See <see cref="DeadlockCollector.BackfillAsync"/> for why the two can safely run at once.</para>
+        ///
+        /// <para>Once the result has been written, call <see cref="CompleteDeadlockBackfill"/>.</para>
+        /// </summary>
+        public async Task<bool> CollectDeadlockBackfillAsync(CancellationToken cancellationToken)
+        {
+            var backfillSessionName = IsXESupported ? Source.GetDeadlockBackfillSessionName(IsAzureDB) : null;
+            if (backfillSessionName == null)
+            {
+                Log.Information("Deadlock backfill for {instance} no longer applies; marking it complete", instanceName);
+                CompleteDeadlockBackfill();
+                return false;
+            }
+
+            var result = await DeadlockCollector.BackfillAsync(ConnectionString, backfillSessionName,
+                Source.DeadlockXESessionName, IsAzureDB, DeadlockBackfillTimeLimitSeconds, cancellationToken);
+            if (result == null) return false;
+
+            AddDT(result.Deadlocks);
+            AddDT(result.Processes);
+            AddDT(result.Resources);
+            return true;
+        }
+
+        /// <summary>
+        /// Records that the backfill has run, so it isn't scheduled again.  Called once its result has been written -
+        /// or has failed to be, and gone to the failed message folder, since a second full read of system_health
+        /// would be no more likely to get it there.
+        /// </summary>
+        public void CompleteDeadlockBackfill() => DeadlockCursorStore.CompleteBackfill(ConnectionID);
+
         ///<summary>
         ///Once written to the destination, call this function to cache the sql_handles for captured query text. If the handle is cached it won't be collected in future.<br/>
         ///Note: We capture text at the batch level and can use the statement offsets to get the statement text.
@@ -1614,32 +1675,33 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
 
             var state = DeadlockCursorStore.GetPending(cursorKey);
 
-            // Only on the first run: after that the configured session has been capturing, so everything
-            // system_health could add is already stored.
-            if (!state.IsFirstRun) backfillSessionName = null;
-            if (backfillSessionName != null)
-            {
-                Log.Information("First deadlock collection for {instance}: backfilling from session {backfill} before reading {session}",
-                    instanceName, backfillSessionName, sessionName);
-            }
+            var result = await DeadlockCollector.CollectAsync(ConnectionString, sessionName, IsAzureDB, state,
+                CancellationToken.None, manageSession, Source.FlushDeadlockXERingBuffer, DeadlockXERingBufferKB);
 
-            DeadlockCollector.Result result;
-            try
+            var backfillApplies = backfillSessionName != null && state.IsFirstRun;
+            if (backfillApplies && ScheduleDeadlockBackfill)
             {
-                result = await DeadlockCollector.CollectAsync(ConnectionString, sessionName, IsAzureDB, state,
-                    CancellationToken.None, manageSession, Source.FlushDeadlockXERingBuffer,
-                    DeadlockXERingBufferKB, backfillSessionName);
-            }
-            finally
-            {
-                // Recorded now rather than with the cursor, and whether or not this run succeeds: a backfill is not
-                // repeated because its run failed to commit.  See DeadlockCursorStore.MarkBackfillAttempted.
-                if (state.BackfillAttempted) DeadlockCursorStore.MarkBackfillAttempted(cursorKey);
+                // Only on the first run, and only once that run has read the configured session: it is now known to
+                // be running, so the backfill has a start time to fill up to.  Scheduled rather than run here - see
+                // CollectDeadlockBackfillAsync - and marked whether or not this run commits, so a failed write doesn't
+                // schedule it again.
+                DeadlockCursorStore.MarkBackfillPending(cursorKey);
+                Log.Information("First deadlock collection for {instance}: backfill from session {backfill} scheduled",
+                    instanceName, backfillSessionName);
             }
 
             // Held rather than saved: the position moves once these deadlocks have reached a destination, so a
             // write that fails is retried by reading them again.  See CommitDeadlockCursor.
-            pendingDeadlockCursor = (cursorKey, state);
+            //
+            // Not held at all by a triggered first run, which leaves the backfill to the scheduled collection: saving
+            // its position would give the instance an entry, the scheduled run would no longer be a first run, and
+            // the backfill would never be scheduled.  What that costs is each triggered run before the first
+            // scheduled one reading the configured session from the start - little for a dedicated session - and
+            // the repository discards what it has already stored.
+            if (!backfillApplies || ScheduleDeadlockBackfill)
+            {
+                pendingDeadlockCursor = (cursorKey, state);
+            }
 
             // The tables go over even when empty: the import advances the collection date from them, which is
             // what stops an instance that simply isn't deadlocking from being reported as overdue.

@@ -11,7 +11,8 @@
 	the constraint that stops a duplicate is the same one the row is stored under, and nothing has to
 	be allocated or reconciled.  The collector re-reads overlapping data routinely (a bounded full read
 	after a service restart, or after the event file the resume cursor pointed at has rolled away), so
-	an already-stored deadlock arriving again is expected rather than an error.
+	an already-stored deadlock arriving again is expected rather than an error - including from two
+	imports running at once, which the locking hints on the dedup check make safe.
 
 	OUTPUT captures exactly which headers were inserted, so the children can be filtered to those
 	without a second pass over dbo.Deadlocks.
@@ -75,8 +76,13 @@ BEGIN
 			D.ResourceCount,
 			D.IsParallel
 	FROM @Deadlocks D
+	/*	UPDLOCK, HOLDLOCK so two imports of the same deadlock can't both pass the check.  Imports for one
+		instance run concurrently - a scheduled collection alongside a triggered one, or alongside the
+		system_health backfill - and without the hints each would see no row under READ COMMITTED, both
+		would insert, and the second would fail the primary key, losing every deadlock in its batch.  The
+		key range lock is held until COMMIT, so the second waits, then finds the row and skips it. */
 	WHERE NOT EXISTS(SELECT 1
-					FROM dbo.Deadlocks X
+					FROM dbo.Deadlocks X WITH (UPDLOCK, HOLDLOCK)
 					WHERE X.InstanceID = @InstanceID
 					AND X.EventTime = D.EventTime
 					AND X.DeadlockHash = D.DeadlockHash

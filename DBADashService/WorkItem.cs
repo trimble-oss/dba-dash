@@ -96,6 +96,8 @@ namespace DBADashService
                     collector.FailedLoginsBackfillMinutes = config.FailedLoginsBackfillMinutes ??
                         CollectionConfig.DefaultFailedLoginsBackfillMinutes;
                     collector.DeadlockXERingBufferKB = config.GetDeadlockXERingBufferKB();
+                    collector.DeadlockBackfillTimeLimitSeconds = config.GetDeadlockBackfillTimeLimitSeconds();
+                    collector.ScheduleDeadlockBackfill = true;
 
                     if (SchedulerServiceConfig.Config.IdentityCollectionThreshold.HasValue)
                     {
@@ -148,6 +150,7 @@ namespace DBADashService
                     }
 
                     var fileName = DBADashSource.GenerateFileName(Source.SourceConnection.ConnectionForFileName);
+                    var written = false;
                     try
                     {
                         await DestinationHandling.WriteAllDestinationsAsync(collector.Data, Source, fileName, config);
@@ -160,6 +163,7 @@ namespace DBADashService
                         // JobHistory_Upd derives its own watermark from the repository, so re-reading the same
                         // rows imports nothing twice.
                         State.JobInstanceId = collector.Job_instance_id;
+                        written = true;
                     }
                     catch (Exception ex)
                     {
@@ -167,6 +171,14 @@ namespace DBADashService
                             fileName, SchedulerServiceConfig.FailedMessageFolder);
                         await DestinationHandling.WriteFolderAsync(collector.Data,
                             SchedulerServiceConfig.FailedMessageFolder, fileName, config);
+                    }
+
+                    // Outside the try above, so nothing the backfill does can be mistaken for this run's write failing.
+                    // Only after a run that reached its destination: one that didn't is likely to find the backfill's
+                    // destination unavailable too, and the backfill stays pending for the next run to schedule.
+                    if (written && types.Contains(CollectionType.Deadlocks) && collector.IsDeadlockBackfillPending)
+                    {
+                        await DeadlockBackfillWorkItem.ScheduleAsync(Source, config, cancellationToken);
                     }
                 }
 

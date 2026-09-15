@@ -151,7 +151,6 @@ namespace DBADash.Test
         {
             // A state built outside the store - every test and on-demand shred - must not trigger a backfill.
             Assert.IsFalse(new Deadlocks.DeadlockCollectionState().IsFirstRun);
-            Assert.IsFalse(new Deadlocks.DeadlockCollectionState().BackfillAttempted);
         }
 
         [TestMethod]

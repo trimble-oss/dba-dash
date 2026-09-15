@@ -308,20 +308,23 @@ namespace DBADash
         private bool flushDeadlockXERingBuffer;
 
         /// <summary>
-        /// On the first run of the Deadlocks collection, read system_health as well as the configured session.
+        /// After the first run of the Deadlocks collection, read system_health once for the deadlocks from before the
+        /// configured session started.
         ///
         /// <para>What a dedicated session gives up is history: it starts empty, where system_health already
         /// holds whatever the instance deadlocked on recently.  Reading system_health once, when the collection
         /// is first switched on, gets that history without paying system_health's read cost on every collection
-        /// afterwards.  The configured session is created before system_health is read, so nothing falls
-        /// between the two, and a deadlock both return is stored once.</para>
+        /// afterwards.  It runs as a low priority work item after the first run has read the configured session,
+        /// and keeps only what is older than that session's start, so the two cover the time between them without
+        /// a gap and without sending the same deadlock twice.</para>
         ///
         /// <para>On by default because it costs a single read.  Applies only where there is something to
         /// backfill from - see <see cref="GetDeadlockBackfillSessionName"/>.  "First run" means no entry for the
-        /// connection in the service's DeadlockCursors.json - one is added as soon as the backfill is attempted,
-        /// whatever its outcome - so losing that file repeats the backfill once; repository dedup absorbs what
-        /// comes back.  The read is limited to the Deadlocks command timeout in total, and keeps what it read
-        /// if it runs out of time.</para>
+        /// connection in the service's DeadlockCursors.json, where the backfill is recorded as pending until it has
+        /// run, so a restart before it runs doesn't lose it.  Losing that file repeats the backfill once; repository
+        /// dedup absorbs what comes back.  The read is limited by
+        /// <see cref="CollectionConfig.DeadlockBackfillTimeLimitSeconds"/>, and keeps what it read if it runs out of
+        /// time.</para>
         /// </summary>
         [DefaultValue(true)]
         public bool BackfillDeadlocksFromSystemHealth

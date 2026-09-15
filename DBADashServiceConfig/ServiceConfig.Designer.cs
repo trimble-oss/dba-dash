@@ -900,8 +900,8 @@ namespace DBADashServiceConfig
             chkBackfillDeadlocks.Name = "chkBackfillDeadlocks";
             chkBackfillDeadlocks.Size = new System.Drawing.Size(328, 24);
             chkBackfillDeadlocks.TabIndex = 5;
-            chkBackfillDeadlocks.Text = "Backfill from system health on first collection";
-            toolTip1.SetToolTip(chkBackfillDeadlocks, "On the first collection, also read the system_health session so deadlocks from before the dedicated session was created are collected.  Read once - later collections use the dedicated session only.");
+            chkBackfillDeadlocks.Text = "Backfill history from system health";
+            toolTip1.SetToolTip(chkBackfillDeadlocks, "After the first collection, read the system_health session once in the background for the deadlocks from before the dedicated session started.  Later collections use the dedicated session only.");
             chkBackfillDeadlocks.UseVisualStyleBackColor = true;
             // 
             // labelManageXE
