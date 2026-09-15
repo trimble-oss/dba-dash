@@ -45,7 +45,7 @@ namespace DBADash.Deadlock.Analysis
         /// regrouping of history is visible rather than silent.  Stored alongside the value (see
         /// dbo.Deadlocks.SignatureVersion) so a backfill has something to select on.
         /// </summary>
-        public const int VersionNumber = 1;
+        public const int VersionNumber = 2;
 
         /// <summary>Version prefix, so a change to what goes into a signature is visible rather than silent.</summary>
         private static readonly string Version = "v" + VersionNumber.ToString(CultureInfo.InvariantCulture);
@@ -72,10 +72,13 @@ namespace DBADash.Deadlock.Analysis
         private static string Describe(DeadlockProcess process)
         {
             var frame = process.PrimaryFrame;
+            var operation = BackupRestoreOperation(frame?.Sql);
 
             var code = frame is { IsModule: true }
                 ? $"module={frame.ProcedureName!.ToLowerInvariant()}"
-                : $"statement={Fingerprint(process.PrimaryStatement)}";
+                : operation is not null
+                    ? $"operation={operation}"
+                    : $"statement={Fingerprint(process.PrimaryStatement)}";
 
             return $"process|{code}|isolation={Normalise(process.IsolationLevel)}|victim={process.IsVictim}";
         }
@@ -114,10 +117,31 @@ namespace DBADash.Deadlock.Analysis
             if (string.IsNullOrWhiteSpace(sql)) return string.Empty;
 
             var text = QuotedLiterals.Replace(sql, "?");
+            // SQL Server truncates long statement text, and the cut can land inside a string literal.
+            // Whatever is left unclosed at the end is still a literal, and would otherwise vary with
+            // its length (a backup path, say).
+            text = UnterminatedLiteral.Replace(text, "?");
             text = Numbers.Replace(text, "?");
             text = Whitespace.Replace(text, " ");
 
             return text.Trim().ToLowerInvariant();
+        }
+
+        /// <summary>
+        /// "backup log", "restore database" etc. when the statement is a BACKUP or RESTORE, otherwise null.
+        /// The database, destination and options vary between runs of the same job, while what the
+        /// deadlock is about - the msdb history tables - is already captured by the resources.  Only
+        /// applied to frame text, which is the single statement that was running; an input buffer is the
+        /// whole batch, where the backup or restore may be just one part.
+        /// </summary>
+        private static string? BackupRestoreOperation(string? statement)
+        {
+            if (string.IsNullOrWhiteSpace(statement)) return null;
+
+            var match = BackupRestore.Match(statement);
+            return match.Success
+                ? $"{match.Groups[1].Value} {match.Groups[2].Value}".ToLowerInvariant()
+                : null;
         }
 
         private static string Normalise(string? value) =>
@@ -141,6 +165,12 @@ namespace DBADash.Deadlock.Analysis
 
         private static readonly Regex QuotedLiterals =
             new("'([^']|'')*'", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+        private static readonly Regex UnterminatedLiteral =
+            new("'[^']*$", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+        private static readonly Regex BackupRestore =
+            new(@"^\s*(BACKUP|RESTORE)\s+(\w+)", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
 
         private static readonly Regex Numbers =
             new(@"\b\d+(\.\d+)?\b", RegexOptions.Compiled | RegexOptions.CultureInvariant);
