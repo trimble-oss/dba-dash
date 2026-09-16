@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="10 10 236 236">
+  <!-- Transparent background. Trimble Modus palette: Trimble Blue #0063a3, Blue Light #217cbb, Blue Pale #dcedf9, Blue Dark #0e416c; status: Green Dark #006638, Yellow Dark #e49325, Red #da212c -->
+  <!-- body -->
+  <path d="M24 52 V204 A104 30 0 0 0 232 204 V52 Z" fill="#ffffff"/>
+  <path d="M24 52 V204 A104 30 0 0 0 52 225 V73 A104 30 0 0 1 24 52 Z" fill="#dcedf9"/>
+  <!-- top -->
+  <ellipse cx="128" cy="52" rx="104" ry="30" fill="#217cbb"/>
+  <!-- tier separators -->
+  <g fill="none" stroke="#0063a3" stroke-width="12">
+    <path d="M24 103 A104 30 0 0 0 232 103"/>
+    <path d="M24 154 A104 30 0 0 0 232 154"/>
+  </g>
+  <!-- outline -->
+  <path d="M24 52 V204 A104 30 0 0 0 232 204 V52 A104 30 0 0 0 24 52 Z" fill="none" stroke="#0063a3" stroke-width="12" stroke-linejoin="round"/>
+  <path d="M24 52 A104 30 0 0 0 232 52" fill="none" stroke="#0063a3" stroke-width="12"/>
+  <!-- drive slots -->
+  <g fill="#0e416c">
+    <rect x="60" y="100" width="80" height="14" rx="7"/>
+    <rect x="60" y="151" width="80" height="14" rx="7"/>
+    <rect x="60" y="202" width="80" height="14" rx="7"/>
+  </g>
+  <!-- status lights -->
+  <circle cx="184" cy="107" r="17" fill="#006638"/>
+  <circle cx="184" cy="158" r="17" fill="#e49325"/>
+  <circle cx="184" cy="209" r="17" fill="#da212c"/>
+</svg>
