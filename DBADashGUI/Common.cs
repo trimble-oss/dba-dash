@@ -578,8 +578,8 @@ namespace DBADashGUI
         ///
         /// This used to write a .xdl to temp and hand it to whatever was registered for the
         /// extension, which required SSMS (or Plan Explorer) to be installed and did nothing useful
-        /// when it was not.  That route is still a click away from the viewer's toolbar - see
-        /// <see cref="ShowDeadlockGraphExternal"/>.
+        /// when it was not.  That route is still a click away from the viewer's Open With menu - see
+        /// <see cref="WriteDeadlockGraphTempFile"/>.
         /// </summary>
         /// <param name="context">
         /// The instance the graph came from, where the caller knows it.  Supplying it lights up the actions
@@ -644,16 +644,19 @@ namespace DBADashGUI
         }
 
         /// <summary>
-        /// Write the graph to a .xdl and open it in whatever handles the extension - SSMS, or
-        /// SentryOne Plan Explorer.  Offered alongside the built-in viewer rather than instead of it.
+        /// Write the graph to a .xdl in temp, for handing to another application - SSMS, or SentryOne Plan
+        /// Explorer.  Offered alongside the built-in viewer rather than instead of it.
         /// </summary>
-        public static void ShowDeadlockGraphExternal(string dlGraph, string fileName = null)
+        public static string WriteDeadlockGraphTempFile(string dlGraph, string fileName = null)
         {
             if (!IsValidDeadlockGraph(dlGraph))
             {
                 throw new InvalidOperationException("Invalid deadlock graph");
             }
-            ShowFileContent(dlGraph, fileName, ".xdl");
+
+            var path = GetFilePath(fileName, ".xdl");
+            File.WriteAllText(path, dlGraph);
+            return path;
         }
 
         private static void ShowFileContent(string content, string fileName, string extension)
