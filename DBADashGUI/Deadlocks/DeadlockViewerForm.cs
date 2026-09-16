@@ -8,6 +8,7 @@ using DBADashGUI.Performance;
 using DBADashGUI.SchemaCompare;
 using DBADashGUI.Theme;
 using DBADashSharedGUI;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -50,6 +51,9 @@ namespace DBADashGUI.Deadlocks
         private readonly DeadlockGraphControl _graphControl = new() { Dock = DockStyle.Fill };
         private readonly DBADashDataGridView _processGrid = NewGrid();
         private readonly DBADashDataGridView _resourceGrid = NewGrid();
+
+        /// <summary>Its items are rebuilt each time it opens - see <see cref="BuildOpenWithMenu"/>.</summary>
+        private ToolStripDropDownButton _openWith;
 
         /// <summary>
         /// The process grid over the cached plans for the selected statement.  The lower panel stays
@@ -135,7 +139,8 @@ namespace DBADashGUI.Deadlocks
             Icon = Properties.Resources.DeadlockIcon;
             Width = 1100;
             Height = 780;
-            StartPosition = FormStartPosition.CenterParent;
+            // No parent to centre on when the viewer was opened on its own from a file.
+            StartPosition = IsStandalone ? FormStartPosition.CenterScreen : FormStartPosition.CenterParent;
 
             _xmlText = new CodeEditor
             {
@@ -224,6 +229,8 @@ namespace DBADashGUI.Deadlocks
             toolbar.Items.Add(new ToolStripButton("Copy Image", Properties.Resources.ASX_Copy_blue_16x, (_, _) => CopyImage()) { DisplayStyle = ToolStripItemDisplayStyle.Image });
             toolbar.Items.Add(new ToolStripButton("Save As...", Properties.Resources.Save_16x, (_, _) => SaveAs()) { DisplayStyle = ToolStripItemDisplayStyle.Image });
             toolbar.Items.Add(new ToolStripSeparator());
+            toolbar.Items.Add(BuildSettingsMenu());
+            toolbar.Items.Add(new ToolStripSeparator());
             toolbar.Items.Add(new ToolStripButton("Signature", null, (_, _) => ShowSignature())
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Text,
@@ -231,11 +238,15 @@ namespace DBADashGUI.Deadlocks
             });
             // Keeps its caption where the rest of the toolbar is icons only: the icon can say the
             // graph leaves for another application, but not which one.
-            toolbar.Items.Add(new ToolStripButton("Open in SSMS", Properties.Resources.Open_16x, (_, _) => OpenExternal())
+            _openWith = new ToolStripDropDownButton("Open With", Properties.Resources.Open_16x)
             {
-                ToolTipText = "Open the graph in whatever handles .xdl files (e.g. SSMS)",
+                ToolTipText = "Open the graph in another application registered for .xdl files (e.g. SSMS)",
                 Alignment = ToolStripItemAlignment.Right
-            });
+            };
+            // A placeholder so the drop down arrow works - the real items are listed as it opens.
+            _openWith.DropDownItems.Add(new ToolStripMenuItem("Loading..."));
+            _openWith.DropDownOpening += (_, _) => BuildOpenWithMenu();
+            toolbar.Items.Add(_openWith);
 
             // Only worth showing when the source actually held more than one deadlock, which is
             // common for a .xdl saved from the system_health session.
@@ -1053,27 +1064,144 @@ namespace DBADashGUI.Deadlocks
             }
         }
 
-        private void OpenExternal()
+        /// <summary>
+        /// Viewer settings - for now whether .xdl files open in DBA Dash from Explorer.  They live here rather than in
+        /// the main window's menus as they are only of interest to someone using the viewer, and the viewer can be
+        /// running on its own.  The state is read from the registry each time the menu opens: another copy of DBA
+        /// Dash, or the command line switches, can change it.
+        /// </summary>
+        private static ToolStripDropDownButton BuildSettingsMenu()
+        {
+            var settings = new ToolStripDropDownButton("Settings", Properties.Resources.SettingsOutline_16x)
+            {
+                DisplayStyle = ToolStripItemDisplayStyle.Image,
+                ToolTipText = "Settings"
+            };
+
+            var openXdlFiles = new ToolStripMenuItem("Open .xdl Files with DBA Dash", null, (_, _) => ToggleFileAssociation());
+            var makeDefault = new ToolStripMenuItem("Make DBA Dash the Default for .xdl Files...", null, (_, _) => OpenDefaultAppsSettings())
+            {
+                ToolTipText = "Windows only allows the default app to be changed from Settings.  This opens Default apps - choose DBA Dash for .xdl."
+            };
+            settings.DropDownItems.AddRange(new ToolStripItem[] { openXdlFiles, makeDefault });
+
+            settings.DropDownOpening += (_, _) =>
+            {
+                try
+                {
+                    var registered = DeadlockFileAssociation.RegisteredExePath;
+                    openXdlFiles.Checked = DeadlockFileAssociation.IsRegisteredToThisCopy;
+                    openXdlFiles.ToolTipText = openXdlFiles.Checked || registered == null
+                        ? "Offer DBA Dash in Explorer's Open with menu for deadlock graph (.xdl) files.  They open in the deadlock viewer without starting the full GUI."
+                        : $"Currently registered to another copy of DBA Dash:\n{registered}\n\nClick to use this copy instead.";
+                    makeDefault.Enabled = !DeadlockFileAssociation.IsDefaultHandler;
+                }
+                catch (Exception ex)
+                {
+                    Log.Warning(ex, "Unable to read the .xdl file association");
+                }
+            };
+
+            return settings;
+        }
+
+        private static void ToggleFileAssociation()
+        {
+            try
+            {
+                if (DeadlockFileAssociation.IsRegisteredToThisCopy)
+                {
+                    DeadlockFileAssociation.Unregister();
+                }
+                else
+                {
+                    DeadlockFileAssociation.Register();
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex, "Error updating the .xdl file association");
+            }
+        }
+
+        private static void OpenDefaultAppsSettings()
+        {
+            try
+            {
+                DeadlockFileAssociation.OpenDefaultAppsSettings();
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex, "Error opening Default apps");
+            }
+        }
+
+        /// <summary>
+        /// Lists the applications registered for .xdl - the same list as Explorer's Open with - built each time the
+        /// menu opens so an application installed meanwhile shows up.  DBA Dash itself is left out: it is quite
+        /// likely registered, possibly as the default, and would only open the graph in another one of these.
+        /// </summary>
+        private void BuildOpenWithMenu()
+        {
+            DisposeOpenWithItems();
+            try
+            {
+                foreach (var handler in ShellFileHandlers.Get(DeadlockFileAssociation.Extension)
+                             .Where(h => !DeadlockFileAssociation.IsThisCopy(h.Name)))
+                {
+                    _openWith.DropDownItems.Add(new ToolStripMenuItem(handler.DisplayName, handler.Image,
+                        (_, _) => OpenExternal(path => ShellFileHandlers.Open(DeadlockFileAssociation.Extension, handler.Name, path)))
+                    {
+                        ToolTipText = handler.Name
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Unable to list applications for .xdl files");
+            }
+
+            if (_openWith.DropDownItems.Count > 0) _openWith.DropDownItems.Add(new ToolStripSeparator());
+            _openWith.DropDownItems.Add(new ToolStripMenuItem("Choose Another App...", null,
+                (_, _) => OpenExternal(path => ShellFileHandlers.ShowOpenWithDialog(path, Handle))));
+        }
+
+        /// <summary>Dispose rather than just clear - each rebuild loads new icons, which the items don't dispose.</summary>
+        private void DisposeOpenWithItems()
+        {
+            if (_openWith == null) return;
+            foreach (var item in _openWith.DropDownItems.Cast<ToolStripItem>().ToList())
+            {
+                item.Image?.Dispose();
+                item.Dispose();
+            }
+        }
+
+        private void OpenExternal(Action<string> open)
         {
             try
             {
                 // The whole source document, not just the selected deadlock, so what opens externally
                 // matches what was handed to the viewer.
-                Common.ShowDeadlockGraphExternal(_sourceXml ?? _current.Xml, _fileName);
+                open(Common.WriteDeadlockGraphTempFile(_sourceXml ?? _current.Xml, _fileName));
             }
             catch (Exception ex)
             {
-                CommonShared.ShowExceptionDialog(
-                    ex,
-                    "Error opening deadlock graph",
-                    text:
-                    "Opening a .xdl externally needs an application registered for the extension, such as SSMS.");
+                CommonShared.ShowExceptionDialog(ex, "Error opening deadlock graph");
             }
         }
+
+        /// <summary>
+        /// Set when the viewer is all that is running - a graph opened from Explorer rather than from the GUI.
+        /// The process then ends once its last window closes - see Program.RunDeadlockViewer.
+        /// </summary>
+        internal static bool IsStandalone { get; set; }
 
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
             base.OnFormClosed(e);
+            // Disposing the items doesn't dispose their images, and the handler icons are loaded for this menu alone.
+            DisposeOpenWithItems();
             Dispose();
         }
     }
