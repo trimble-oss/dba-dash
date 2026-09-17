@@ -9,7 +9,7 @@ DECLARE @Ref VARCHAR(100)='AzureDBElasticPoolResourceStats'
 IF NOT EXISTS(SELECT 1 FROM dbo.CollectionDates WHERE SnapshotDate>=@SnapshotDate AND InstanceID = @InstanceID AND Reference=@Ref)
 BEGIN
 	CREATE TABLE #Pools(
-		elastic_pool_name NVARCHAR(128) PRIMARY KEY,
+		elastic_pool_name NVARCHAR(128) COLLATE DATABASE_DEFAULT PRIMARY KEY,
 		elastic_pool_dtu_limit INT,
 		elastic_pool_cpu_limit DECIMAL (5, 2),
 		first_end_time DATETIME2(7)
