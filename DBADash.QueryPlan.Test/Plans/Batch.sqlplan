@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  A batch of three statements: a cheap one first, an expensive one second, and a conditional whose
+  THEN branch holds a statement of its own.  Between them they cover the three things the statement
+  list has to get right - order, which one the viewer should open on, and that a nested statement is
+  neither lost nor flattened into a sibling.
+
+  The second statement also has no join predicate, so the plan level warning has somewhere to live.
+-->
+<ShowPlanXML xmlns="http://schemas.microsoft.com/sqlserver/2004/07/showplan" Version="1.539" Build="16.0.4165.4">
+  <BatchSequence>
+    <Batch>
+      <Statements>
+        <StmtSimple StatementId="1" StatementCompId="1" StatementText="SELECT 1" StatementType="SELECT" StatementSubTreeCost="0.001" StatementEstRows="1" StatementOptmLevel="TRIVIAL">
+          <QueryPlan CachedPlanSize="8" CompileTime="0" CompileCPU="0" CompileMemory="16">
+            <RelOp NodeId="0" PhysicalOp="Constant Scan" LogicalOp="Constant Scan" EstimateRows="1" EstimateIO="0" EstimateCPU="0.000001" AvgRowSize="9" EstimatedTotalSubtreeCost="0.001" Parallel="false" EstimatedExecutionMode="Row">
+              <OutputList />
+              <ConstantScan />
+            </RelOp>
+          </QueryPlan>
+        </StmtSimple>
+        <StmtSimple StatementId="2" StatementCompId="2" StatementText="SELECT * FROM dbo.A, dbo.B" StatementType="SELECT" StatementSubTreeCost="55.5" StatementEstRows="1000000" StatementOptmLevel="FULL" StatementOptmEarlyAbortReason="TimeOut">
+          <QueryPlan CachedPlanSize="40" CompileTime="900" CompileCPU="880" CompileMemory="4096">
+            <Warnings NoJoinPredicate="true" />
+            <RelOp NodeId="0" PhysicalOp="Nested Loops" LogicalOp="Inner Join" EstimateRows="1000000" EstimateIO="0" EstimateCPU="4" AvgRowSize="60" EstimatedTotalSubtreeCost="55.5" Parallel="false" EstimatedExecutionMode="Row">
+              <OutputList />
+              <NestedLoops Optimized="false">
+                <RelOp NodeId="1" PhysicalOp="Table Scan" LogicalOp="Table Scan" EstimateRows="1000" EstimateIO="0.5" EstimateCPU="0.1" AvgRowSize="30" EstimatedTotalSubtreeCost="0.6" Parallel="false" EstimatedExecutionMode="Row">
+                  <OutputList />
+                  <TableScan Ordered="false">
+                    <Object Database="[Test]" Schema="[dbo]" Table="[A]" />
+                  </TableScan>
+                </RelOp>
+                <RelOp NodeId="2" PhysicalOp="Table Scan" LogicalOp="Table Scan" EstimateRows="1000" EstimateIO="0.5" EstimateCPU="0.1" AvgRowSize="30" EstimatedTotalSubtreeCost="50.9" Parallel="false" EstimatedExecutionMode="Row">
+                  <OutputList />
+                  <TableScan Ordered="false">
+                    <Object Database="[Test]" Schema="[dbo]" Table="[B]" />
+                  </TableScan>
+                </RelOp>
+              </NestedLoops>
+            </RelOp>
+          </QueryPlan>
+        </StmtSimple>
+        <StmtCond StatementId="3" StatementCompId="3" StatementText="IF @x = 1 SELECT * FROM dbo.C" StatementType="COND WITH QUERY">
+          <Condition>
+            <QueryPlan CachedPlanSize="8" CompileTime="0" CompileCPU="0" CompileMemory="16">
+              <RelOp NodeId="0" PhysicalOp="Constant Scan" LogicalOp="Constant Scan" EstimateRows="1" EstimateIO="0" EstimateCPU="0.000001" AvgRowSize="9" EstimatedTotalSubtreeCost="0.001" Parallel="false" EstimatedExecutionMode="Row">
+                <OutputList />
+                <ConstantScan />
+              </RelOp>
+            </QueryPlan>
+          </Condition>
+          <Then>
+            <Statements>
+              <StmtSimple StatementId="4" StatementCompId="4" StatementText="SELECT * FROM dbo.C" StatementType="SELECT" StatementSubTreeCost="0.25" StatementEstRows="500" StatementOptmLevel="TRIVIAL">
+                <QueryPlan CachedPlanSize="16" CompileTime="1" CompileCPU="1" CompileMemory="32">
+                  <RelOp NodeId="0" PhysicalOp="Clustered Index Scan" LogicalOp="Clustered Index Scan" EstimateRows="500" EstimateIO="0.2" EstimateCPU="0.05" AvgRowSize="40" EstimatedTotalSubtreeCost="0.25" Parallel="false" EstimatedExecutionMode="Row">
+                    <OutputList />
+                    <IndexScan Ordered="false">
+                      <Object Database="[Test]" Schema="[dbo]" Table="[C]" Index="[PK_C]" IndexKind="Clustered" />
+                    </IndexScan>
+                  </RelOp>
+                </QueryPlan>
+              </StmtSimple>
+            </Statements>
+          </Then>
+        </StmtCond>
+      </Statements>
+    </Batch>
+  </BatchSequence>
+</ShowPlanXML>

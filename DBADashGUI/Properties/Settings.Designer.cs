@@ -193,6 +193,126 @@ namespace DBADashGUI.Properties {
 
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Rows")]
+        public string QueryPlanEdgeWidth {
+            get {
+                return ((string)(this["QueryPlanEdgeWidth"]));
+            }
+            set {
+                this["QueryPlanEdgeWidth"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Actual")]
+        public string QueryPlanEdgeWidthBasis {
+            get {
+                return ((string)(this["QueryPlanEdgeWidthBasis"]));
+            }
+            set {
+                this["QueryPlanEdgeWidthBasis"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Own")]
+        public string QueryPlanOperatorTime {
+            get {
+                return ((string)(this["QueryPlanOperatorTime"]));
+            }
+            set {
+                this["QueryPlanOperatorTime"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool QueryPlanShowOperatorDescriptions {
+            get {
+                return ((bool)(this["QueryPlanShowOperatorDescriptions"]));
+            }
+            set {
+                this["QueryPlanShowOperatorDescriptions"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Normal")]
+        public string QueryPlanNodeWidth {
+            get {
+                return ((string)(this["QueryPlanNodeWidth"]));
+            }
+            set {
+                this["QueryPlanNodeWidth"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool QueryPlanUniformColumnWidths {
+            get {
+                return ((bool)(this["QueryPlanUniformColumnWidths"]));
+            }
+            set {
+                this["QueryPlanUniformColumnWidths"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Normal")]
+        public string QueryPlanColumnSpacing {
+            get {
+                return ((string)(this["QueryPlanColumnSpacing"]));
+            }
+            set {
+                this["QueryPlanColumnSpacing"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("3")]
+        public int QueryPlanPropertyRowLines {
+            get {
+                return ((int)(this["QueryPlanPropertyRowLines"]));
+            }
+            set {
+                this["QueryPlanPropertyRowLines"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool QueryPlanWrapObjectNames {
+            get {
+                return ((bool)(this["QueryPlanWrapObjectNames"]));
+            }
+            set {
+                this["QueryPlanWrapObjectNames"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        public int QueryPlanMinFitZoom {
+            get {
+                return ((int)(this["QueryPlanMinFitZoom"]));
+            }
+            set {
+                this["QueryPlanMinFitZoom"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("-1")]
         public float ChartAxisLabelFontSize {
             get {

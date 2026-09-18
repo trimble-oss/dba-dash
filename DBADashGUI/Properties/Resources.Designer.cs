@@ -573,6 +573,16 @@ namespace DBADashGUI.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap NavigationPathLeft_16x {
+            get {
+                object obj = ResourceManager.GetObject("NavigationPathLeft_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap FilterCircle_16x_Colors {
             get {
                 object obj = ResourceManager.GetObject("FilterCircle_16x_Colors", resourceCulture);

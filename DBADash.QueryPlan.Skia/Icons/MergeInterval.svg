@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Merge interval, after SSMS: ranges that overlap, merged down into the one range that covers
+       them all, so it is read only once.  Red is the merging; see README.md. -->
+  <path d="M2 2h10v3.5H2z" fill="#000" stroke="none"/>
+  <path d="M8.5 7.8h13.5v3H8.5z" stroke-width="1.4"/>
+  <path d="M2 15v6.5h20V15"/>
+  <path d="M12 12v7 M9 16l3 3 3-3" stroke="#F00" stroke-width="2"/>
+</svg>

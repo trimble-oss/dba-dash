@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Clustered update: the update icon inside square brackets, which say clustered as they do on
+       the clustered index icons.  See Insert.svg. -->
+  <rect x="4" y="3" width="16" height="18" rx="1"/>
+  <path d="M4.8 3.8h14.4v4.2H4.8z" fill="#000" stroke="none"/>
+  <path d="M2.5 3H1v18h1.5 M21.5 3H23v18h-1.5"/>
+  <path d="M8 19l.8-3.2 6.2-6.2 2.4 2.4-6.2 6.2z M13.4 11.2l2.4 2.4" stroke="#F00" stroke-width="1.8"/>
+</svg>

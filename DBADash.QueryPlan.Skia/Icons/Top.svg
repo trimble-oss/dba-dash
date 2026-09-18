@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Top: the first rows taken, in the accent, and a cut below them; the rows after the cut are
+       never asked for.  Black is drawn in the symbol colour, red in the accent; see README.md. -->
+  <path d="M3 3h18v3H3z M3 8.2h18v3H3z" fill="#F00" stroke="none"/>
+  <path d="M1.5 14h21" stroke-width="1.4" stroke-dasharray="2.2 1.6"/>
+  <path d="M3 17.5h18 M3 21h18" opacity="0.5"/>
+</svg>

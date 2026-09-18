@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  An estimated plan: a nested loop driving a seek on a nonclustered index and a lookup back to the
+  clustered index, with a missing index recommendation and a residual predicate on the lookup.
+
+  Hand written rather than captured, so every figure in it is a known quantity the tests can assert
+  against - a captured plan brings hundreds of attributes nobody is checking and makes a test that
+  fails hard to read.
+-->
+<ShowPlanXML xmlns="http://schemas.microsoft.com/sqlserver/2004/07/showplan" Version="1.539" Build="16.0.4165.4">
+  <BatchSequence>
+    <Batch>
+      <Statements>
+        <StmtSimple StatementId="1" StatementCompId="1" StatementText="SELECT * FROM dbo.Orders AS o WHERE o.CustomerID = 42 AND o.Total &gt; 100" StatementType="SELECT" StatementSubTreeCost="0.5" StatementEstRows="10" StatementOptmLevel="FULL" QueryHash="0x1122334455667788" QueryPlanHash="0x8877665544332211" RetrievedFromCache="true" CardinalityEstimationModelVersion="160">
+          <StatementSetOptions ANSI_NULLS="true" ANSI_PADDING="true" ANSI_WARNINGS="true" ARITHABORT="true" CONCAT_NULL_YIELDS_NULL="true" NUMERIC_ROUNDABORT="false" QUOTED_IDENTIFIER="true" />
+          <QueryPlan DegreeOfParallelism="1" CachedPlanSize="32" CompileTime="3" CompileCPU="3" CompileMemory="216" NonParallelPlanReason="EstimatedDOPIsOne">
+            <MissingIndexes>
+              <MissingIndexGroup Impact="92.4">
+                <MissingIndex Database="[Sales]" Schema="[dbo]" Table="[Orders]">
+                  <ColumnGroup Usage="EQUALITY">
+                    <Column Name="[CustomerID]" ColumnId="2" />
+                  </ColumnGroup>
+                  <ColumnGroup Usage="INEQUALITY">
+                    <Column Name="[OrderDate]" ColumnId="3" />
+                  </ColumnGroup>
+                  <ColumnGroup Usage="INCLUDE">
+                    <Column Name="[Total]" ColumnId="4" />
+                  </ColumnGroup>
+                </MissingIndex>
+              </MissingIndexGroup>
+            </MissingIndexes>
+            <MemoryGrantInfo SerialRequiredMemory="0" SerialDesiredMemory="0" />
+            <RelOp NodeId="0" PhysicalOp="Nested Loops" LogicalOp="Inner Join" EstimateRows="10" EstimateIO="0" EstimateCPU="0.00004" AvgRowSize="120" EstimatedTotalSubtreeCost="0.5" Parallel="false" EstimatedExecutionMode="Row">
+              <OutputList>
+                <ColumnReference Database="[Sales]" Schema="[dbo]" Table="[Orders]" Alias="[o]" Column="OrderID" />
+                <ColumnReference Database="[Sales]" Schema="[dbo]" Table="[Orders]" Alias="[o]" Column="Total" />
+              </OutputList>
+              <NestedLoops Optimized="false">
+                <OuterReferences>
+                  <ColumnReference Database="[Sales]" Schema="[dbo]" Table="[Orders]" Alias="[o]" Column="OrderID" />
+                </OuterReferences>
+                <RelOp NodeId="1" PhysicalOp="Index Seek" LogicalOp="Index Seek" EstimateRows="10" EstimateIO="0.003125" EstimateCPU="0.0001636" AvgRowSize="20" EstimatedTotalSubtreeCost="0.0032886" Parallel="false" EstimatedExecutionMode="Row">
+                  <OutputList>
+                    <ColumnReference Database="[Sales]" Schema="[dbo]" Table="[Orders]" Alias="[o]" Column="OrderID" />
+                  </OutputList>
+                  <IndexScan Ordered="true" ScanDirection="FORWARD" ForcedIndex="false" ForceSeek="false" NoExpandHint="false" Storage="RowStore">
+                    <DefinedValues>
+                      <DefinedValue>
+                        <ColumnReference Database="[Sales]" Schema="[dbo]" Table="[Orders]" Alias="[o]" Column="OrderID" />
+                      </DefinedValue>
+                    </DefinedValues>
+                    <Object Database="[Sales]" Schema="[dbo]" Table="[Orders]" Index="[IX_Orders_CustomerID]" Alias="[o]" IndexKind="NonClustered" Storage="RowStore" />
+                    <SeekPredicates>
+                      <SeekPredicateNew>
+                        <SeekKeys>
+                          <Prefix ScanType="EQ">
+                            <RangeColumns>
+                              <ColumnReference Database="[Sales]" Schema="[dbo]" Table="[Orders]" Alias="[o]" Column="CustomerID" />
+                            </RangeColumns>
+                            <RangeExpressions>
+                              <ScalarOperator ScalarString="(42)">
+                                <Const ConstValue="(42)" />
+                              </ScalarOperator>
+                            </RangeExpressions>
+                          </Prefix>
+                        </SeekKeys>
+                      </SeekPredicateNew>
+                    </SeekPredicates>
+                  </IndexScan>
+                </RelOp>
+                <RelOp NodeId="2" PhysicalOp="Clustered Index Seek" LogicalOp="Clustered Index Seek" EstimateRows="1" EstimateIO="0.003125" EstimateCPU="0.0001581" EstimateRebinds="9" EstimateRewinds="0" AvgRowSize="100" EstimatedTotalSubtreeCost="0.4967114" Parallel="false" EstimatedExecutionMode="Row">
+                  <OutputList>
+                    <ColumnReference Database="[Sales]" Schema="[dbo]" Table="[Orders]" Alias="[o]" Column="Total" />
+                  </OutputList>
+                  <IndexScan Lookup="true" Ordered="true" ScanDirection="FORWARD" ForcedIndex="false" ForceSeek="false" NoExpandHint="false" Storage="RowStore">
+                    <DefinedValues>
+                      <DefinedValue>
+                        <ColumnReference Database="[Sales]" Schema="[dbo]" Table="[Orders]" Alias="[o]" Column="Total" />
+                      </DefinedValue>
+                    </DefinedValues>
+                    <Object Database="[Sales]" Schema="[dbo]" Table="[Orders]" Index="[PK_Orders]" Alias="[o]" IndexKind="Clustered" Storage="RowStore" />
+                    <SeekPredicates>
+                      <SeekPredicateNew>
+                        <SeekKeys>
+                          <Prefix ScanType="EQ">
+                            <RangeColumns>
+                              <ColumnReference Database="[Sales]" Schema="[dbo]" Table="[Orders]" Alias="[o]" Column="OrderID" />
+                            </RangeColumns>
+                            <RangeExpressions>
+                              <ScalarOperator ScalarString="[Sales].[dbo].[Orders].[OrderID] as [o].[OrderID]" />
+                            </RangeExpressions>
+                          </Prefix>
+                        </SeekKeys>
+                      </SeekPredicateNew>
+                    </SeekPredicates>
+                    <Predicate>
+                      <ScalarOperator ScalarString="[Sales].[dbo].[Orders].[Total] as [o].[Total]&gt;(100.)">
+                        <Compare CompareOp="GT" />
+                      </ScalarOperator>
+                    </Predicate>
+                  </IndexScan>
+                </RelOp>
+              </NestedLoops>
+            </RelOp>
+          </QueryPlan>
+        </StmtSimple>
+      </Statements>
+    </Batch>
+  </BatchSequence>
+</ShowPlanXML>

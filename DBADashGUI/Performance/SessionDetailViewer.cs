@@ -1452,29 +1452,9 @@ DBCC FREEPROCCACHE({planHandle});";
                 panel.Controls.Add(card);
             }
 
-            panel.SizeChanged += (_, _) => UpdateInsightLabelWidths(panel);
-            UpdateInsightLabelWidths(panel);
+            panel.SizeChanged += (_, _) => InsightCard.FitToWidth(panel);
+            InsightCard.FitToWidth(panel);
             return panel;
-        }
-
-        private static void UpdateInsightLabelWidths(FlowLayoutPanel panel)
-        {
-            var available = panel.ClientSize.Width - panel.Padding.Horizontal;
-            if (available <= 0) return;
-            foreach (Control card in panel.Controls)
-            {
-                var cardWidth = available - card.Margin.Horizontal;
-                if (cardWidth <= 0) continue;
-                // Stretch each card to fill the panel width instead of shrinking to its text.
-                card.MinimumSize = new Size(cardWidth, 0);
-                card.MaximumSize = new Size(cardWidth, 0);
-                var w = cardWidth - card.Padding.Horizontal;
-                if (w <= 0) continue;
-                foreach (Control c in card.Controls)
-                {
-                    c.MaximumSize = new Size(w, 0);
-                }
-            }
         }
 
         // Cards keep their pale severity background regardless of theme, so re-apply the label
@@ -1499,28 +1479,13 @@ DBCC FREEPROCCACHE({planHandle});";
             }
         }
 
-        private static Color InsightColor(InsightSeverity severity) => severity switch
-        {
-            InsightSeverity.Critical => DashColors.Fail,
-            InsightSeverity.Warning => DashColors.Warning,
-            _ => DashColors.Information
-        };
+        private static Color InsightColor(InsightSeverity severity) => InsightCard.AccentFor(InsightIcon(severity));
 
         // Pale card background per severity (from the Modus palette).
-        private static Color InsightBackColor(InsightSeverity severity) => severity switch
-        {
-            InsightSeverity.Critical => DashColors.RedPale,
-            InsightSeverity.Warning => DashColors.YellowPale,
-            _ => DashColors.BluePale
-        };
+        private static Color InsightBackColor(InsightSeverity severity) => InsightCard.FillFor(InsightIcon(severity));
 
         // Dark, readable text so the message stays legible on the pale card background in either theme.
-        private static Color InsightTextColor(InsightSeverity severity) => severity switch
-        {
-            InsightSeverity.Critical => DashColors.RedDark,
-            InsightSeverity.Warning => DashColors.Gray10,
-            _ => DashColors.Gray10
-        };
+        private static Color InsightTextColor(InsightSeverity severity) => InsightCard.TextFor(InsightIcon(severity));
 
         private static InsightCard.CardIcon InsightIcon(InsightSeverity severity) => severity switch
         {

@@ -1,6 +1,8 @@
 ﻿using ClosedXML.Excel;
 using DBADash;
 using DBADash.Deadlock;
+using DBADash.QueryPlan;
+using DBADash.QueryPlan.Model;
 using DBADash.Deadlock.Model;
 using Humanizer;
 using DBADashGUI.CustomReports;
@@ -564,13 +566,108 @@ namespace DBADashGUI
             }
         }
 
+        /// <summary>
+        /// Open a query plan in the built-in viewer.
+        ///
+        /// This used to write a .sqlplan to temp and hand it to whatever was registered for the
+        /// extension, which required SSMS (or Plan Explorer) to be installed and did nothing useful
+        /// when it was not.  That route is still a click away from the viewer's Open With button -
+        /// see <see cref="WriteQueryPlanTempFile"/>.
+        /// </summary>
         public static void ShowQueryPlan(string plan, string fileName = null)
+        {
+            ExecutionPlan parsed;
+            try
+            {
+                parsed = PlanParser.Parse(plan);
+            }
+            catch (PlanParseException ex)
+            {
+                throw new InvalidOperationException("Invalid execution plan: " + ex.Message, ex);
+            }
+
+            // On a tab of the plan window already open, if there is one, so plans can be compared.
+            OnUIThread(() => QueryPlans.QueryPlanViewerForm.Open(parsed, plan, fileName));
+        }
+
+        /// <summary>
+        /// Run <paramref name="action"/> on the UI thread, waiting for it and passing back anything it
+        /// throws.  Plans often arrive on a background thread - a plan collected through the messaging
+        /// service is handed over from the thread pool - and the viewer is a window, with WPF editors
+        /// in it that need the STA UI thread.
+        /// </summary>
+        private static void OnUIThread(Action action)
+        {
+            var ui = Application.OpenForms.Cast<Form>().FirstOrDefault(f => f.IsHandleCreated && !f.IsDisposed);
+
+            if (ui is { InvokeRequired: true })
+            {
+                ui.Invoke(action);
+            }
+            else
+            {
+                action();
+            }
+        }
+
+        /// <summary>
+        /// The file types the plan viewer opens.  .sqlplan is what SSMS saves a plan as; the same
+        /// XML also turns up saved as .xml, both of which the parser reads.
+        /// </summary>
+        public const string QueryPlanFileFilter =
+            "Query plan (*.sqlplan)|*.sqlplan|XML (*.xml)|*.xml|All files (*.*)|*.*";
+
+        /// <summary>
+        /// Prompts for .sqlplan files and opens them in the viewer, a tab each.  Needs no repository
+        /// connection and no monitored instance - a plan someone emailed you opens the same as one
+        /// from a report.
+        /// </summary>
+        public static void OpenQueryPlanFile(IWin32Window owner = null)
+        {
+            using var dialog = new OpenFileDialog
+            {
+                Filter = QueryPlanFileFilter,
+                Title = @"Open Query Plan",
+                Multiselect = true
+            };
+
+            if (dialog.ShowDialog(owner) != DialogResult.OK) return;
+            foreach (var file in dialog.FileNames) ShowQueryPlanFile(file);
+        }
+
+        /// <summary>Opens a plan file in the viewer, reporting a bad file rather than throwing.</summary>
+        public static void ShowQueryPlanFile(string path)
+        {
+            try
+            {
+                // SSMS saves plans as UTF-16 and other tools as UTF-8, so the encoding is detected
+                // from the preamble rather than assumed.
+                using var reader = new StreamReader(path, Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
+                ShowQueryPlan(reader.ReadToEnd(), Path.GetFileName(path));
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(
+                    ex,
+                    "Error opening query plan",
+                    text: $"{path} could not be opened as a query plan.");
+            }
+        }
+
+        /// <summary>
+        /// Writes a plan to a temp .sqlplan so it can be handed to another application - SSMS, Plan
+        /// Explorer - from the viewer's Open With button.
+        /// </summary>
+        public static string WriteQueryPlanTempFile(string plan, string fileName = null)
         {
             if (!IsValidExecutionPlan(plan))
             {
-                throw new Exception("Invalid execution plan");
+                throw new InvalidOperationException("Invalid execution plan");
             }
-            ShowFileContent(plan, fileName, ".sqlplan");
+
+            var path = GetFilePath(fileName, ".sqlplan");
+            File.WriteAllText(path, plan, Encoding.Unicode);
+            return path;
         }
 
         /// <summary>

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Merge: a table with two streams - the source and what is already there - brought together
+       into it.  See Insert.svg. -->
+  <!-- The table, as the table scan draws it: a frame with a solid header band. -->
+  <rect x="2" y="3" width="20" height="18" rx="1"/>
+  <path d="M2.8 3.8h18.4v4.2H2.8z" fill="#000" stroke="none"/>
+  <path d="M8.5 10.3v1c0 2.3 3.5 2.4 3.5 4.7v2.5 M15.5 10.3v1c0 2.3-3.5 2.4-3.5 4.7 M9.5 16.2l2.5 2.5 2.5-2.5" stroke="#F00" stroke-width="1.9"/>
+</svg>

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Concatenation, after SSMS: one input and then the next, added together into a single stream.
+       Black is drawn in the symbol colour, red in the accent - see README.md. -->
+  <path d="M13 8.5V2H2v8.5h8.5"/>
+  <path d="M2.7 2.7h9.6v2.6H2.7z" fill="#000" stroke="none"/>
+  <path d="M11 15.5V22h11v-8.5h-8.5"/>
+  <path d="M15.5 14.2h5.8v2.6h-5.8z" fill="#000" stroke="none"/>
+  <path d="M12 8.5v7 M8.5 12h7" stroke="#F00" stroke-width="2.2"/>
+</svg>
