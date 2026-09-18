@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Nonclustered index scan.  Black is drawn in the symbol colour, red in the accent - see README.md. -->
+  <!-- The index: a root, its branches, and round leaf nodes, which hold keys rather than rows. -->
+  <circle cx="12" cy="3.25" r="2" fill="#000" stroke="none"/>
+  <path d="M12 5.25V7.5 M6 7.5h12 M6 7.5V10 M12 7.5V10 M18 7.5V10"/>
+  <circle cx="6" cy="12.5" r="2" fill="#000" stroke="none"/>
+  <circle cx="12" cy="12.5" r="2" fill="#000" stroke="none"/>
+  <circle cx="18" cy="12.5" r="2" fill="#000" stroke="none"/>
+  <!-- No brackets: brackets round the leaf level say the index is the table, which only a clustered one is. -->
+  <!-- The scan, along the whole leaf level. -->
+  <path d="M2 20.5h18 M17.5 18l2.5 2.5-2.5 2.5" stroke="#F00" stroke-width="2"/>
+</svg>

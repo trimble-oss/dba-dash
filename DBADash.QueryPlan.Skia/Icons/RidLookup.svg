@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <!-- RID lookup, after Plan Explorer: the table's pages, and a magnifier finding one row in them by
+       its row identifier.  Black is drawn in the symbol colour, red in the accent; see README.md. -->
+  <clipPath id="lens"><path d="M0 0h24v24H0z M18.5 14.3a4.5 4.5 0 1 0 0 9a4.5 4.5 0 1 0 0-9z" clip-rule="evenodd"/></clipPath>
+  <g clip-path="url(#lens)" stroke-width="1.4">
+    <rect x="9.5" y="1.5" width="5" height="4"/>
+    <path d="M12 5.5v2.5 M5.25 8h13.5 M5.25 8v3 M12 8v3 M18.75 8v3"/>
+    <rect x="3" y="11" width="4.5" height="4.5"/>
+    <rect x="9.75" y="11" width="4.5" height="4.5"/>
+    <rect x="16.5" y="11" width="4.5" height="4.5"/>
+    <path d="M2 9.8H1v8h1 M22 9.8h1v8h-1"/>
+  </g>
+  <path d="M18.5 15.8a3 3 0 1 0 0 6a3 3 0 1 0 0-6z M20.7 21l2.3 2.3" stroke="#F00" stroke-width="1.8"/>
+</svg>

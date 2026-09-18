@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Row count spool.  The spools' spool of thread, with what it keeps beside it: not the rows, only
+       how many there were.  One tone only; see TableSpool.svg. -->
+  <!-- A spool of thread: two flanges with the thread wound thick between them, and its loose end.
+       The corner is cut away for what the spool keeps. -->
+  <clipPath id="corner"><path d="M0 0h24v24H0z M12.6 11.6H24V24H12.6z" clip-rule="evenodd"/></clipPath>
+  <g clip-path="url(#corner)">
+    <rect x="1" y="1.5" width="16" height="3" rx="1.2" fill="#000" stroke="none"/>
+    <rect x="1" y="19.5" width="16" height="3" rx="1.2" fill="#000" stroke="none"/>
+    <path d="M3.6 7l10.8-1.4 M3.6 9.8l10.8-1.4 M3.6 12.6l10.8-1.4 M3.6 15.4l10.8-1.4 M3.6 18.2l10.8-1.4" stroke-width="2.2" stroke-linecap="butt"/>
+  </g>
+  <path d="M14.4 5.6c2.2 0 2.4 2.6 4.6 2.6 1.6 0 2.2-1.2 3.4-1.2"/>
+  <!-- What it keeps: a count, as a tally of five. -->
+  <path d="M15.2 13v8 M17.4 13v8 M19.6 13v8 M21.8 13v8 M14 19.2l9-4.4" stroke-width="1.2"/>
+</svg>

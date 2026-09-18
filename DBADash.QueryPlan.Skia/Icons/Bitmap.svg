@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Bitmap, after SSMS: ones and noughts.  The ones - values that might match - are in the accent.
+       Black is drawn in the symbol colour, red in the accent; see README.md. -->
+  <path d="M4.2 4.4L5.6 3v7.5 M17.1 4.4L18.5 3v7.5 M10.6 14.9l1.4-1.4V21" stroke="#F00"/>
+  <rect x="10" y="3" width="4" height="7.5" rx="2"/>
+  <rect x="3.6" y="13.5" width="4" height="7.5" rx="2"/>
+  <rect x="16.4" y="13.5" width="4" height="7.5" rx="2"/>
+</svg>

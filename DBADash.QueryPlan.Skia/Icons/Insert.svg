@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Insert: a table with rows added to it.  Black is drawn in the symbol colour, red in the
+       accent - see README.md.  Insert, update, delete and merge share the table and differ only in
+       the accent, which is the change made to it. -->
+  <!-- The table, as the table scan draws it: a frame with a solid header band. -->
+  <rect x="2" y="3" width="20" height="18" rx="1"/>
+  <path d="M2.8 3.8h18.4v4.2H2.8z" fill="#000" stroke="none"/>
+  <path d="M12 10.3v8.4 M7.8 14.5h8.4" stroke="#F00" stroke-width="2.2"/>
+</svg>

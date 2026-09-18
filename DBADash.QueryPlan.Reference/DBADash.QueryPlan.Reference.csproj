@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Writes the query plan operator icon reference - every operator's icon, what its symbol stands
+    for and the path data it is drawn from - into the git ignored build folder, each time this
+    project builds.  See PlanOperatorReference in DBADash.QueryPlan.Skia.
+
+    A development aid, not part of DBA Dash: nothing references this project, the solution does not
+    build it in the CLI configuration the release pipeline uses, and it writes to its own folder
+    rather than to an output folder that gets packaged.
+  -->
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <Configurations>Debug;Release;CLI</Configurations>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <IsPackable>false</IsPackable>
+
+    <OperatorReferencePath>$(MSBuildThisFileDirectory)..\DBADashBuild\Reference\QueryPlanOperators.html</OperatorReferencePath>
+
+    <!-- The host running this build, so the tool runs on the same .NET; plain dotnet otherwise. -->
+    <OperatorReferenceHost Condition="'$(DOTNET_HOST_PATH)' != ''">$(DOTNET_HOST_PATH)</OperatorReferenceHost>
+    <OperatorReferenceHost Condition="'$(OperatorReferenceHost)' == ''">dotnet</OperatorReferenceHost>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DBADash.QueryPlan.Skia\DBADash.QueryPlan.Skia.csproj" />
+  </ItemGroup>
+
+  <!--
+    Only when the tool or the libraries the icons come from have changed since the page was last
+    written, so an unrelated build does not pay for it.  Never in the CLI configuration, as a second
+    guard for a build that includes this project anyway.
+  -->
+  <Target Name="WriteOperatorReference"
+          AfterTargets="Build"
+          Condition="'$(Configuration)' != 'CLI'"
+          Inputs="$(TargetPath);$(OutDir)DBADash.QueryPlan.Skia.dll;$(OutDir)DBADash.QueryPlan.dll"
+          Outputs="$(OperatorReferencePath)">
+    <Exec Command="&quot;$(OperatorReferenceHost)&quot; &quot;$(TargetPath)&quot; &quot;$(OperatorReferencePath)&quot;" />
+  </Target>
+
+</Project>

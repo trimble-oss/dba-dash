@@ -5,7 +5,7 @@ using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
 
-namespace DBADashGUI.Deadlocks
+namespace DBADashGUI.ShellIntegration
 {
     /// <summary>
     /// The applications Windows has registered to open a file type - the same list Explorer shows under Open with.

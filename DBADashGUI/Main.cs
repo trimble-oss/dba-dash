@@ -3382,5 +3382,10 @@ namespace DBADashGUI
         {
             Common.OpenDeadlockGraphFile(this);
         }
+
+        private void OpenQueryPlanToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Common.OpenQueryPlanFile(this);
+        }
     }
 }

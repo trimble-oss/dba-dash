@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Nonclustered index seek.  Black is drawn in the symbol colour, red in the accent - see README.md. -->
+  <!-- The index: a root, the branches the seek did not take, and round leaf nodes holding keys. -->
+  <circle cx="12" cy="5" r="2" fill="#000" stroke="none"/>
+  <path d="M12 10H6v4 M12 10v4"/>
+  <circle cx="6" cy="17" r="2" fill="#000" stroke="none"/>
+  <circle cx="12" cy="17" r="2" fill="#000" stroke="none"/>
+  <!-- No brackets: brackets round the leaf level say the index is the table, which only a clustered one is. -->
+  <!-- The seek: the one route from the root down to the key it wanted, and that key. -->
+  <path d="M12 7v3h6v4 M16 12l2 2 2-2" stroke="#F00" stroke-width="2"/>
+  <circle cx="18" cy="17" r="2" fill="#F00" stroke="none"/>
+</svg>

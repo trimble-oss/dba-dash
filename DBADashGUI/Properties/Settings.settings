@@ -44,6 +44,36 @@
     <Setting Name="DeadlockLayoutStyle" Type="System.String" Scope="User">
       <Value Profile="(Default)">Ring</Value>
     </Setting>
+    <Setting Name="QueryPlanEdgeWidth" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Rows</Value>
+    </Setting>
+    <Setting Name="QueryPlanEdgeWidthBasis" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Actual</Value>
+    </Setting>
+    <Setting Name="QueryPlanOperatorTime" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Own</Value>
+    </Setting>
+    <Setting Name="QueryPlanShowOperatorDescriptions" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="QueryPlanNodeWidth" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Normal</Value>
+    </Setting>
+    <Setting Name="QueryPlanUniformColumnWidths" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="QueryPlanColumnSpacing" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Normal</Value>
+    </Setting>
+    <Setting Name="QueryPlanPropertyRowLines" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">3</Value>
+    </Setting>
+    <Setting Name="QueryPlanWrapObjectNames" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="QueryPlanMinFitZoom" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">100</Value>
+    </Setting>
     <Setting Name="LocalAIServiceUrl" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>

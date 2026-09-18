@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Merge join, after SSMS: two inputs, each already in order, read side by side and merged into one
+       stream.  Black is drawn in the symbol colour, red in the accent - see README.md. -->
+  <path d="M9.5 11H2.5v10h7 M14.5 11h7v10h-7"/>
+  <!-- The merge: a path up out of each input, joining into one. -->
+  <path d="M6 18v-3.2l6-5 6 5V18 M12 9.8V2.5 M9 5.5l3-3 3 3" stroke="#F00" stroke-width="2"/>
+</svg>

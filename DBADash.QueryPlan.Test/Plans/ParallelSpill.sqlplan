@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  An actual plan at DOP 4: a hash join that spilled, fed by a scan whose rows were badly
+  under-estimated, with per thread counters chosen so the aggregates, the skew and the estimate
+  ratio all have known answers.
+
+  The sort's four worker threads carry 100, 100, 100 and 700 rows: a thousand rows over four threads
+  is an even share of 250, so the busiest thread's 700 is a skew of 2.8.
+-->
+<ShowPlanXML xmlns="http://schemas.microsoft.com/sqlserver/2004/07/showplan" Version="1.539" Build="16.0.4165.4">
+  <BatchSequence>
+    <Batch>
+      <Statements>
+        <StmtSimple StatementId="1" StatementCompId="1" StatementText="SELECT c.Name, SUM(o.Total) FROM dbo.Orders AS o JOIN dbo.Customers AS c ON c.CustomerID = o.CustomerID GROUP BY c.Name" StatementType="SELECT" StatementSubTreeCost="100" StatementEstRows="1000" StatementOptmLevel="FULL" QueryHash="0xAAAA" QueryPlanHash="0xBBBB" RetrievedFromCache="false" CardinalityEstimationModelVersion="160">
+          <QueryPlan DegreeOfParallelism="4" MemoryGrant="8192" CachedPlanSize="64" CompileTime="12" CompileCPU="12" CompileMemory="512">
+            <ThreadStat Branches="2" UsedThreads="9">
+              <ThreadReservation NodeId="0" ReservedThreads="8" />
+            </ThreadStat>
+            <MemoryGrantInfo SerialRequiredMemory="1024" SerialDesiredMemory="2048" RequiredMemory="4096" DesiredMemory="8192" RequestedMemory="8192" GrantWaitTime="25" GrantedMemory="8192" MaxUsedMemory="1024" MaxQueryMemory="262144" />
+            <WaitStats>
+              <Wait WaitType="CXPACKET" WaitTimeMs="480" WaitCount="120" />
+              <Wait WaitType="PAGEIOLATCH_SH" WaitTimeMs="1200" WaitCount="300" />
+            </WaitStats>
+            <QueryTimeStats CpuTime="3200" ElapsedTime="1500" />
+            <ParameterList>
+              <ColumnReference Column="@CustomerID" ParameterDataType="int" ParameterCompiledValue="(1)" ParameterRuntimeValue="(9999)" />
+            </ParameterList>
+            <RelOp NodeId="0" PhysicalOp="Parallelism" LogicalOp="Gather Streams" EstimateRows="1000" EstimateIO="0" EstimateCPU="0.05" AvgRowSize="40" EstimatedTotalSubtreeCost="100" Parallel="true" EstimatedExecutionMode="Row">
+              <OutputList>
+                <ColumnReference Database="[Sales]" Schema="[dbo]" Table="[Customers]" Alias="[c]" Column="Name" />
+              </OutputList>
+              <RunTimeInformation>
+                <RunTimeCountersPerThread Thread="0" ActualRows="1000" ActualExecutions="1" ActualElapsedms="1500" ActualCPUms="20" />
+              </RunTimeInformation>
+              <Parallelism>
+                <RelOp NodeId="1" PhysicalOp="Sort" LogicalOp="Sort" EstimateRows="1000" EstimateIO="0.01" EstimateCPU="0.5" AvgRowSize="40" EstimatedTotalSubtreeCost="60" Parallel="true" EstimatedExecutionMode="Row">
+                  <OutputList>
+                    <ColumnReference Database="[Sales]" Schema="[dbo]" Table="[Customers]" Alias="[c]" Column="Name" />
+                  </OutputList>
+                  <Warnings>
+                    <SortSpillDetails GrantedMemoryKb="8192" UsedMemoryKb="8192" WritesToTempDb="512" ReadsFromTempDb="512" />
+                  </Warnings>
+                  <RunTimeInformation>
+                    <RunTimeCountersPerThread Thread="0" ActualRows="0" ActualExecutions="0" ActualElapsedms="0" ActualCPUms="0" />
+                    <RunTimeCountersPerThread Thread="1" ActualRows="100" ActualExecutions="1" ActualElapsedms="200" ActualCPUms="150" ActualLogicalReads="50" />
+                    <RunTimeCountersPerThread Thread="2" ActualRows="100" ActualExecutions="1" ActualElapsedms="250" ActualCPUms="160" ActualLogicalReads="50" />
+                    <RunTimeCountersPerThread Thread="3" ActualRows="100" ActualExecutions="1" ActualElapsedms="300" ActualCPUms="170" ActualLogicalReads="50" />
+                    <RunTimeCountersPerThread Thread="4" ActualRows="700" ActualExecutions="1" ActualElapsedms="900" ActualCPUms="800" ActualLogicalReads="350" />
+                  </RunTimeInformation>
+                  <Sort Distinct="false">
+                    <OrderBy>
+                      <OrderByColumn Ascending="true">
+                        <ColumnReference Database="[Sales]" Schema="[dbo]" Table="[Customers]" Alias="[c]" Column="Name" />
+                      </OrderByColumn>
+                    </OrderBy>
+                    <RelOp NodeId="2" PhysicalOp="Hash Match" LogicalOp="Inner Join" EstimateRows="1000" EstimateIO="0" EstimateCPU="2" AvgRowSize="40" EstimatedTotalSubtreeCost="40" Parallel="true" EstimatedExecutionMode="Batch">
+                      <OutputList>
+                        <ColumnReference Database="[Sales]" Schema="[dbo]" Table="[Customers]" Alias="[c]" Column="Name" />
+                      </OutputList>
+                      <Warnings>
+                        <HashSpillDetails GrantedMemoryKb="8192" UsedMemoryKb="8192" WritesToTempDb="128" ReadsFromTempDb="128" />
+                      </Warnings>
+                      <RunTimeInformation>
+                        <RunTimeCountersPerThread Thread="1" ActualRows="250" ActualExecutions="1" ActualElapsedms="180" ActualCPUms="140" ActualExecutionMode="Batch" Batches="4" />
+                        <RunTimeCountersPerThread Thread="2" ActualRows="250" ActualExecutions="1" ActualElapsedms="180" ActualCPUms="140" ActualExecutionMode="Batch" Batches="4" />
+                        <RunTimeCountersPerThread Thread="3" ActualRows="250" ActualExecutions="1" ActualElapsedms="180" ActualCPUms="140" ActualExecutionMode="Batch" Batches="4" />
+                        <RunTimeCountersPerThread Thread="4" ActualRows="250" ActualExecutions="1" ActualElapsedms="180" ActualCPUms="140" ActualExecutionMode="Batch" Batches="4" />
+                      </RunTimeInformation>
+                      <Hash>
+                        <HashKeysBuild>
+                          <ColumnReference Database="[Sales]" Schema="[dbo]" Table="[Customers]" Alias="[c]" Column="CustomerID" />
+                        </HashKeysBuild>
+                        <HashKeysProbe>
+                          <ColumnReference Database="[Sales]" Schema="[dbo]" Table="[Orders]" Alias="[o]" Column="CustomerID" />
+                        </HashKeysProbe>
+                        <RelOp NodeId="3" PhysicalOp="Clustered Index Scan" LogicalOp="Clustered Index Scan" EstimateRows="100" EstimateIO="1" EstimateCPU="0.5" AvgRowSize="30" EstimatedTotalSubtreeCost="15" Parallel="true" EstimatedExecutionMode="Row">
+                          <OutputList>
+                            <ColumnReference Database="[Sales]" Schema="[dbo]" Table="[Customers]" Alias="[c]" Column="Name" />
+                          </OutputList>
+                          <RunTimeInformation>
+                            <RunTimeCountersPerThread Thread="1" ActualRows="2500" ActualRowsRead="10000" ActualExecutions="1" ActualElapsedms="90" ActualCPUms="80" ActualLogicalReads="400" />
+                            <RunTimeCountersPerThread Thread="2" ActualRows="2500" ActualRowsRead="10000" ActualExecutions="1" ActualElapsedms="90" ActualCPUms="80" ActualLogicalReads="400" />
+                            <RunTimeCountersPerThread Thread="3" ActualRows="2500" ActualRowsRead="10000" ActualExecutions="1" ActualElapsedms="90" ActualCPUms="80" ActualLogicalReads="400" />
+                            <RunTimeCountersPerThread Thread="4" ActualRows="2500" ActualRowsRead="10000" ActualExecutions="1" ActualElapsedms="90" ActualCPUms="80" ActualLogicalReads="400" />
+                          </RunTimeInformation>
+                          <IndexScan Ordered="false" ForcedIndex="false" ForceScan="false" NoExpandHint="false" Storage="RowStore">
+                            <Object Database="[Sales]" Schema="[dbo]" Table="[Customers]" Index="[PK_Customers]" Alias="[c]" IndexKind="Clustered" Storage="RowStore" />
+                            <Predicate>
+                              <ScalarOperator ScalarString="[Sales].[dbo].[Customers].[Active] as [c].[Active]=(1)">
+                                <Compare CompareOp="EQ" />
+                              </ScalarOperator>
+                            </Predicate>
+                          </IndexScan>
+                        </RelOp>
+                        <RelOp NodeId="4" PhysicalOp="Table Scan" LogicalOp="Table Scan" EstimateRows="1000" EstimateIO="2" EstimateCPU="1" AvgRowSize="25" EstimatedTotalSubtreeCost="20" Parallel="true" EstimatedExecutionMode="Row">
+                          <OutputList>
+                            <ColumnReference Database="[Sales]" Schema="[dbo]" Table="[Orders]" Alias="[o]" Column="CustomerID" />
+                          </OutputList>
+                          <RunTimeInformation>
+                            <RunTimeCountersPerThread Thread="1" ActualRows="250" ActualExecutions="1" ActualElapsedms="60" ActualCPUms="50" />
+                            <RunTimeCountersPerThread Thread="2" ActualRows="250" ActualExecutions="1" ActualElapsedms="60" ActualCPUms="50" />
+                            <RunTimeCountersPerThread Thread="3" ActualRows="250" ActualExecutions="1" ActualElapsedms="60" ActualCPUms="50" />
+                            <RunTimeCountersPerThread Thread="4" ActualRows="250" ActualExecutions="1" ActualElapsedms="60" ActualCPUms="50" />
+                          </RunTimeInformation>
+                          <TableScan Ordered="false" ForcedIndex="false" ForceScan="false" NoExpandHint="false" Storage="RowStore">
+                            <Object Database="[Sales]" Schema="[dbo]" Table="[Orders]" Alias="[o]" Storage="RowStore" />
+                          </TableScan>
+                        </RelOp>
+                      </Hash>
+                    </RelOp>
+                  </Sort>
+                </RelOp>
+              </Parallelism>
+            </RelOp>
+          </QueryPlan>
+        </StmtSimple>
+      </Statements>
+    </Batch>
+  </BatchSequence>
+</ShowPlanXML>

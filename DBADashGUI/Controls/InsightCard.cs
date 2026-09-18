@@ -148,6 +148,49 @@ namespace DBADashGUI.Controls
         }
 
 
+        /// <summary>The accent bar and icon colour for a card of this severity.</summary>
+        public static Color AccentFor(CardIcon severity) => severity switch
+        {
+            CardIcon.Critical => DashColors.Fail,
+            CardIcon.Warning => DashColors.Warning,
+            _ => DashColors.Information
+        };
+
+        /// <summary>The pale background for a card of this severity, the same in either theme.</summary>
+        public static Color FillFor(CardIcon severity) => severity switch
+        {
+            CardIcon.Critical => DashColors.RedPale,
+            CardIcon.Warning => DashColors.YellowPale,
+            _ => DashColors.BluePale
+        };
+
+        /// <summary>Dark text that stays legible on <see cref="FillFor"/>'s background in either theme.</summary>
+        public static Color TextFor(CardIcon severity) => severity == CardIcon.Critical ? DashColors.RedDark : DashColors.Gray10;
+
+        /// <summary>
+        /// Stretch each card in <paramref name="panel"/> to the panel's width, and wrap their labels to
+        /// fit.  Call when the panel is built and whenever it changes size: an auto sized card would
+        /// otherwise shrink to its text rather than fill the width, and its label would not wrap.
+        /// </summary>
+        public static void FitToWidth(Control panel)
+        {
+            var available = panel.ClientSize.Width - panel.Padding.Horizontal;
+            if (available <= 0) return;
+            foreach (Control card in panel.Controls)
+            {
+                var cardWidth = available - card.Margin.Horizontal;
+                if (cardWidth <= 0) continue;
+                card.MinimumSize = new Size(cardWidth, 0);
+                card.MaximumSize = new Size(cardWidth, 0);
+                var w = cardWidth - card.Padding.Horizontal;
+                if (w <= 0) continue;
+                foreach (Control c in card.Controls)
+                {
+                    c.MaximumSize = new Size(w, 0);
+                }
+            }
+        }
+
         private static GraphicsPath RoundedRect(Rectangle bounds, int radius)
         {
             var d = radius * 2;
@@ -187,9 +230,17 @@ namespace DBADashGUI.Controls
             {
                 AutoSize = true,
                 Margin = new Padding(0),
-                LinkBehavior = LinkBehavior.HoverUnderline,
+                // Underlined always rather than on hover: a link has to be seen to be a link before the
+                // pointer is over it, and in a paragraph of text colour alone is easy to miss.
+                LinkBehavior = LinkBehavior.AlwaysUnderline,
                 LinkColor = DashColors.LinkColor
             };
+
+            // LinkLabel counts a "\r\n" as two characters when placing links but draws it as one, so
+            // every link after a Windows line break started a character late - its first letter left
+            // out of the link, and a character after its end taken in.  A bare "\n" breaks the line
+            // the same and is counted as it is drawn.
+            markdown = markdown?.Replace("\r\n", "\n");
 
             var builder = new StringBuilder();
             var linkSpans = new List<(int Start, int Length, string Url)>();

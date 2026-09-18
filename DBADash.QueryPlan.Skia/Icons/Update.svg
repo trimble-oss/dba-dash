@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Update: a table with rows written over in place.  See Insert.svg. -->
+  <!-- The table, as the table scan draws it: a frame with a solid header band. -->
+  <rect x="2" y="3" width="20" height="18" rx="1"/>
+  <path d="M2.8 3.8h18.4v4.2H2.8z" fill="#000" stroke="none"/>
+  <path d="M8 19l.8-3.2 6.2-6.2 2.4 2.4-6.2 6.2z M13.4 11.2l2.4 2.4" stroke="#F00" stroke-width="1.8"/>
+</svg>

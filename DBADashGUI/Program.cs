@@ -2,6 +2,8 @@
 using DBADashGUI.Theme;
 using CommandLine;
 using DBADashGUI.Deadlocks;
+using DBADashGUI.QueryPlans;
+using DBADashGUI.ShellIntegration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -97,8 +99,8 @@ namespace DBADashGUI
            var files = o.Files?.Where(f => !string.IsNullOrWhiteSpace(f)).ToList();
            if (files is { Count: > 0 })
            {
-               // Anything that isn't a file is more likely a mistyped switch than a deadlock graph - say how to
-               // use the command line rather than report it as a graph that couldn't be read.
+               // Anything that isn't a file is more likely a mistyped switch than a graph or a plan - say
+               // how to use the command line rather than report it as a file that couldn't be read.
                var missing = files.Where(f => !File.Exists(f)).ToList();
                if (missing.Count > 0)
                {
@@ -107,27 +109,46 @@ namespace DBADashGUI
                        "DBA Dash", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                }
 
-               RunDeadlockViewer(files.Except(missing));
+               RunViewers(files.Except(missing));
                return;
            }
 
-           DeadlockFileAssociation.UpdateRegistration();
+           FileAssociation.UpdateRegistrations();
            Application.Run(new Main(o));
        });
         }
 
         /// <summary>
-        /// A file passed on the command line - typically from Explorer via the .xdl association - opens just the
-        /// deadlock viewer.  The graph needs no repository connection, so there is no reason to make the user sit
-        /// through the full GUI starting up to read one.  The process ends when the last window is closed.
+        /// A file passed on the command line - typically from Explorer via a file association - opens just the
+        /// viewer for it.  Neither a deadlock graph nor a query plan needs a repository connection, so there is no
+        /// reason to make the user sit through the full GUI starting up to read one.  The process ends when the
+        /// last window is closed.
         /// </summary>
-        private static void RunDeadlockViewer(IEnumerable<string> files)
+        private static void RunViewers(IEnumerable<string> files)
         {
             DeadlockViewerForm.IsStandalone = true;
-            foreach (var file in files)
+            QueryPlanViewerForm.IsStandalone = true;
+
+            // Full paths: another copy opening them resolves a relative path against its own folder.
+            var paths = files.Select(Path.GetFullPath).ToList();
+
+            // Explorer starts a copy per file.  The first opens them all - plans on tabs of one window -
+            // and the rest hand their files to it and exit.  See ViewerInstance.
+            using var instance = ViewerInstance.Claim();
+            if (!instance.IsPrimary && instance.Forward(paths)) return;
+
+            var closing = false;
+            instance.Listen(forwarded =>
             {
-                Common.ShowDeadlockGraphFile(file);
-            }
+                // Once the last window has closed the process is on its way out, and a file opened now
+                // would vanish with it - the sender opens it instead.
+                if (closing) return false;
+
+                OpenFiles(forwarded);
+                return true;
+            });
+
+            OpenFiles(paths);
 
             // Nothing opened - each failure has already been reported.
             if (!AnyVisibleForms()) return;
@@ -136,9 +157,31 @@ namespace DBADashGUI
             // would otherwise be closed out from under the user.  Idle runs once the close has been processed.
             Application.Idle += (_, _) =>
             {
-                if (!AnyVisibleForms()) Application.ExitThread();
+                if (AnyVisibleForms()) return;
+
+                closing = true;
+                Application.ExitThread();
             };
             Application.Run();
+        }
+
+        private static void OpenFiles(IEnumerable<string> files)
+        {
+            foreach (var file in files)
+            {
+                // Which viewer by extension, falling back to the deadlock viewer for the .xml both file
+                // types also get saved as - it reports a file it cannot read, which is a better answer than
+                // guessing at the content and being confidently wrong about it.
+                if (Path.GetExtension(file).Equals(FileAssociation.QueryPlan.Extension,
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    Common.ShowQueryPlanFile(file);
+                }
+                else
+                {
+                    Common.ShowDeadlockGraphFile(file);
+                }
+            }
         }
 
         private static bool AnyVisibleForms() => Application.OpenForms.Cast<Form>().Any(f => f.Visible);
@@ -149,16 +192,16 @@ namespace DBADashGUI
             {
                 if (register)
                 {
-                    DeadlockFileAssociation.Register();
+                    FileAssociation.RegisterAll();
                 }
                 else
                 {
-                    DeadlockFileAssociation.Unregister();
+                    FileAssociation.UnregisterAll();
                 }
             }
             catch (Exception ex)
             {
-                CommonShared.ShowExceptionDialog(ex, "Error updating the .xdl file association");
+                CommonShared.ShowExceptionDialog(ex, "Error updating the file associations");
             }
         }
 

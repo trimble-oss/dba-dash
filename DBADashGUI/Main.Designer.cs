@@ -71,6 +71,7 @@ namespace DBADashGUI
             tsAlert = new System.Windows.Forms.ToolStripMenuItem();
             tsTools = new System.Windows.Forms.ToolStripMenuItem();
             openDeadlockxdlToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            openQueryPlanToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             tsDateRange = new DateRangeToolStripMenuItem();
@@ -637,7 +638,7 @@ namespace DBADashGUI
             // 
             // tsTools
             // 
-            tsTools.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { openDeadlockxdlToolStripMenuItem });
+            tsTools.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { openDeadlockxdlToolStripMenuItem, openQueryPlanToolStripMenuItem });
             tsTools.Image = Properties.Resources.toolbox_16xLG;
             tsTools.Name = "tsTools";
             tsTools.Size = new System.Drawing.Size(78, 28);
@@ -651,7 +652,16 @@ namespace DBADashGUI
             openDeadlockxdlToolStripMenuItem.Text = "Open Deadlock Graph | *.xdl";
             openDeadlockxdlToolStripMenuItem.ToolTipText = "Open a deadlock graph (.xdl) saved from SSMS, the system health session, or this viewer.";
             openDeadlockxdlToolStripMenuItem.Click += OpenDeadlockxdlToolStripMenuItem_Click;
-            // 
+            //
+            // openQueryPlanToolStripMenuItem
+            //
+            openQueryPlanToolStripMenuItem.Image = Properties.Resources.FolderOpened_16x;
+            openQueryPlanToolStripMenuItem.Name = "openQueryPlanToolStripMenuItem";
+            openQueryPlanToolStripMenuItem.Size = new System.Drawing.Size(280, 26);
+            openQueryPlanToolStripMenuItem.Text = "Open Query Plan | *.sqlplan";
+            openQueryPlanToolStripMenuItem.ToolTipText = "Open an execution plan (.sqlplan) saved from SSMS, Query Store, or this viewer.";
+            openQueryPlanToolStripMenuItem.Click += OpenQueryPlanToolStripMenuItem_Click;
+            //
             // helpToolStripMenuItem
             // 
             helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { aboutToolStripMenuItem });
@@ -3027,5 +3037,6 @@ namespace DBADashGUI
         private System.Windows.Forms.Label lblRepositoryDB;
         private System.Windows.Forms.ToolStripMenuItem tsTools;
         private System.Windows.Forms.ToolStripMenuItem openDeadlockxdlToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem openQueryPlanToolStripMenuItem;
     }
 }

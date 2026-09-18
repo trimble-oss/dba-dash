@@ -121,7 +121,7 @@ namespace DBADashGUI.CustomReports
             try
             {
                 Common.ShowQueryPlan(plan, fileName);
-                setStatus?.Invoke("Query plan loaded in associated app", string.Empty, DashColors.Success);
+                setStatus?.Invoke("Query plan loaded", string.Empty, DashColors.Success);
             }
             catch (Exception ex)
             {

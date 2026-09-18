@@ -6,6 +6,7 @@ using DBADash.Deadlock.Model;
 using DBADashGUI.CustomReports;
 using DBADashGUI.Performance;
 using DBADashGUI.SchemaCompare;
+using DBADashGUI.ShellIntegration;
 using DBADashGUI.Theme;
 using DBADashSharedGUI;
 using Serilog;
@@ -1089,12 +1090,12 @@ namespace DBADashGUI.Deadlocks
             {
                 try
                 {
-                    var registered = DeadlockFileAssociation.RegisteredExePath;
-                    openXdlFiles.Checked = DeadlockFileAssociation.IsRegisteredToThisCopy;
+                    var registered = FileAssociation.DeadlockGraph.RegisteredExePath;
+                    openXdlFiles.Checked = FileAssociation.DeadlockGraph.IsRegisteredToThisCopy;
                     openXdlFiles.ToolTipText = openXdlFiles.Checked || registered == null
                         ? "Offer DBA Dash in Explorer's Open with menu for deadlock graph (.xdl) files.  They open in the deadlock viewer without starting the full GUI."
                         : $"Currently registered to another copy of DBA Dash:\n{registered}\n\nClick to use this copy instead.";
-                    makeDefault.Enabled = !DeadlockFileAssociation.IsDefaultHandler;
+                    makeDefault.Enabled = !FileAssociation.DeadlockGraph.IsDefaultHandler;
                 }
                 catch (Exception ex)
                 {
@@ -1109,13 +1110,13 @@ namespace DBADashGUI.Deadlocks
         {
             try
             {
-                if (DeadlockFileAssociation.IsRegisteredToThisCopy)
+                if (FileAssociation.DeadlockGraph.IsRegisteredToThisCopy)
                 {
-                    DeadlockFileAssociation.Unregister();
+                    FileAssociation.DeadlockGraph.Unregister();
                 }
                 else
                 {
-                    DeadlockFileAssociation.Register();
+                    FileAssociation.DeadlockGraph.Register();
                 }
             }
             catch (Exception ex)
@@ -1128,7 +1129,7 @@ namespace DBADashGUI.Deadlocks
         {
             try
             {
-                DeadlockFileAssociation.OpenDefaultAppsSettings();
+                FileAssociation.DeadlockGraph.OpenDefaultAppsSettings();
             }
             catch (Exception ex)
             {
@@ -1146,11 +1147,11 @@ namespace DBADashGUI.Deadlocks
             DisposeOpenWithItems();
             try
             {
-                foreach (var handler in ShellFileHandlers.Get(DeadlockFileAssociation.Extension)
-                             .Where(h => !DeadlockFileAssociation.IsThisCopy(h.Name)))
+                foreach (var handler in ShellFileHandlers.Get(FileAssociation.DeadlockGraph.Extension)
+                             .Where(h => !FileAssociation.IsThisCopy(h.Name)))
                 {
                     _openWith.DropDownItems.Add(new ToolStripMenuItem(handler.DisplayName, handler.Image,
-                        (_, _) => OpenExternal(path => ShellFileHandlers.Open(DeadlockFileAssociation.Extension, handler.Name, path)))
+                        (_, _) => OpenExternal(path => ShellFileHandlers.Open(FileAssociation.DeadlockGraph.Extension, handler.Name, path)))
                     {
                         ToolTipText = handler.Name
                     });

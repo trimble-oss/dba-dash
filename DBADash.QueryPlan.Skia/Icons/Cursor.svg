@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Cursor, after SSMS: a C.  Every cursor type and cursor query shares it; the node's name says
+       which one it is. -->
+  <path d="M17.6 6.4A7.9 7.9 0 1 0 17.6 17.6" stroke-width="3"/>
+</svg>

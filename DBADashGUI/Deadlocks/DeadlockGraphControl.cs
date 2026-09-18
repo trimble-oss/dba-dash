@@ -60,8 +60,13 @@ namespace DBADashGUI.Deadlocks
             _canvas.Resize += Canvas_Resize;
 
             // Focus on enter so the wheel and keyboard work without clicking first.  There is nothing
-            // else on this tab that wants the keyboard, so nothing is taken away by doing so.
-            _canvas.MouseEnter += (_, _) => _canvas.Focus();
+            // else on this tab that wants the keyboard, so nothing is taken away by doing so.  Only
+            // while this window is the active one: focusing a control in an inactive window activates
+            // it, which pulled any window opened from here behind this one as the pointer crossed it.
+            _canvas.MouseEnter += (_, _) =>
+            {
+                if (ReferenceEquals(Form.ActiveForm, FindForm())) _canvas.Focus();
+            };
 
             Controls.Add(_canvas);
         }

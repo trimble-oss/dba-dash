@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Hash match (join), after SSMS: a row, hashed, sent to its bucket in the hash table.  Black is
+       drawn in the symbol colour, red in the accent - see README.md. -->
+  <path d="M15 2h6.5v20H15z M15 6h6.5 M15 10h6.5 M15 14h6.5 M15 18h6.5"/>
+  <path d="M2.5 3h7v4h-7z" fill="#000" stroke="none"/>
+  <!-- The row's path, and the bucket it lands in. -->
+  <path d="M6 7.5V12h6.5 M10.5 9.5L13 12l-2.5 2.5" stroke="#F00" stroke-width="2"/>
+  <path d="M15.8 10.8h4.9v2.4h-4.9z" fill="#F00" stroke="none"/>
+</svg>
