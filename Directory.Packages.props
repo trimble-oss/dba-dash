@@ -4,7 +4,7 @@
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="AsyncKeyedLock" Version="8.0.2" />
+    <PackageVersion Include="AsyncKeyedLock" Version="8.1.2" />
     <PackageVersion Include="AvalonEdit" Version="6.3.1.120" />
     <PackageVersion Include="AWSSDK.Core" Version="4.0.102.1" />
     <PackageVersion Include="AWSSDK.S3" Version="4.0.102.4" />
