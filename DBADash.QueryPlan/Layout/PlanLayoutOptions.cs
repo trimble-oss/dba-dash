@@ -109,6 +109,11 @@ namespace DBADash.QueryPlan.Layout
         /// <summary>Minimum clear space between two nodes stacked in the same column.</summary>
         public double RowSpacing { get; set; } = 22;
 
+        /// <summary>
+        /// Which row each node is put on.  See <see cref="PlanVerticalLayout"/>.
+        /// </summary>
+        public PlanVerticalLayout VerticalLayout { get; set; } = PlanVerticalLayout.FirstChildAligned;
+
         /// <summary>Blank space left around the whole plan.</summary>
         public double Margin { get; set; } = 28;
 

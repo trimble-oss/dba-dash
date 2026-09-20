@@ -211,6 +211,30 @@ namespace DBADashGUI.QueryPlans
         }
 
         /// <summary>
+        /// Whether a node sits between its inputs or level with the first of them.  Like
+        /// <see cref="NodeWidth"/>, held in the layout options and applied by laying the statement
+        /// shown out again.
+        ///
+        /// Unlike the others, this one also puts the view back where opening the plan would have
+        /// left it.  The two shapes differ by most of a plan's height, so whatever the view was
+        /// framing is somewhere else entirely afterwards - often off screen, leaving the switch
+        /// looking as though it did nothing at all.
+        /// </summary>
+        [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+        public PlanVerticalLayout VerticalLayout
+        {
+            get => _layoutOptions.VerticalLayout;
+            set
+            {
+                if (_layoutOptions.VerticalLayout == value) return;
+
+                _layoutOptions.VerticalLayout = value;
+                _controller?.Relayout();
+                _controller?.FitAsOpened();
+            }
+        }
+
+        /// <summary>
         /// Wrap object names too long for the widest node rather than cutting them short.  Applied by
         /// laying the statement shown out again, like <see cref="NodeWidth"/>.
         /// </summary>

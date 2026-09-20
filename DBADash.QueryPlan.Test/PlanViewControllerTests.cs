@@ -120,6 +120,24 @@ namespace DBADash.QueryPlan.Test
         }
 
         [TestMethod]
+        public void FitAsOpened_RefitsOverAViewTheUserSet()
+        {
+            var layout = new PlanLayoutEngine(new FakeTextMeasurer()).Layout(TestPlans.Statement(TestPlans.ParallelSpill));
+            var controller = new PlanViewController(layout, new PlanViewOptions { MinAutoFitZoom = 0.1 });
+            controller.SetViewport(new LayoutSize(800, 600));
+
+            var opened = controller.SaveView();
+            controller.ZoomIn(new LayoutPoint(400, 300));
+            Assert.AreNotEqual(opened, controller.SaveView());
+
+            // Where opening the plan left it, which AutoFit would by now refuse to go back to - for
+            // a change of shape, holding the old view is what loses the plan, not what saves it.
+            Assert.IsTrue(controller.FitAsOpened());
+            Assert.AreEqual(opened, controller.SaveView());
+            Assert.IsFalse(controller.IsViewUserAdjusted);
+        }
+
+        [TestMethod]
         public void SetViewport_LeavesTheViewAloneOnceTheUserHasTouchedIt()
         {
             var controller = Controller();

@@ -252,6 +252,16 @@ namespace DBADash.QueryPlan.Interaction
         public bool AutoFit() => !IsViewUserAdjusted && Fit(_options.MinAutoFitZoom);
 
         /// <summary>
+        /// Put the view back where opening the plan would have left it, whatever the user has zoomed
+        /// or panned to since - which is what <see cref="AutoFit"/> will not do.
+        ///
+        /// For the changes that redraw the plan as a different shape rather than adjusting the one on
+        /// screen.  Holding the view over one of those is no kindness: the operators the view was
+        /// framing have moved, and what is left in frame can easily be the empty margin beside them.
+        /// </summary>
+        public bool FitAsOpened() => Fit(_options.MinAutoFitZoom);
+
+        /// <summary>
         /// Scale and position the plan so it all fits the viewport, however far out that is.  Does
         /// nothing useful before a viewport is set, or for an empty layout.
         /// </summary>

@@ -338,7 +338,7 @@ namespace DBADash.QueryPlan.Test
         [TestMethod]
         public void Layout_CentresAConsumerOnItsInputs()
         {
-            var layout = Layout(TestPlans.KeyLookupSeek);
+            var layout = Centred(TestPlans.KeyLookupSeek);
 
             var join = layout.Nodes.Single(n => n.Kind == PlanOperatorKind.NestedLoops);
             Assert.AreEqual(2, join.Children.Count);
@@ -350,8 +350,11 @@ namespace DBADash.QueryPlan.Test
         [TestMethod]
         public void Layout_LeavesNoTwoNodesOverlappingInAColumn()
         {
-            var layout = Layout(TestPlans.ParallelSpill);
+            AssertNoOverlapsInAnyColumn(Layout(TestPlans.ParallelSpill));
+        }
 
+        private static void AssertNoOverlapsInAnyColumn(PlanLayout layout)
+        {
             foreach (var column in layout.Nodes.GroupBy(n => n.Depth))
             {
                 var ordered = column.OrderBy(n => n.Bounds.Top).ToList();
@@ -363,6 +366,118 @@ namespace DBADash.QueryPlan.Test
                         $"'{ordered[i].Title}' overlaps '{ordered[i - 1].Title}' in column {column.Key}.");
                 }
             }
+        }
+
+        private static PlanLayout Centred(string plan) =>
+            Layout(plan, new PlanLayoutOptions { VerticalLayout = PlanVerticalLayout.Centred });
+
+        private static PlanLayout Aligned(string plan) =>
+            Layout(plan, new PlanLayoutOptions { VerticalLayout = PlanVerticalLayout.FirstChildAligned });
+
+        private static void AssertLevelWithFirstInput(PlanLayout layout)
+        {
+            // The whole first-input spine - the statement root through to the leaf that ultimately
+            // feeds it - on one row, which is what makes this shape the short one.
+            foreach (var node in layout.Nodes.Where(n => n.Children.Count > 0))
+            {
+                Assert.AreEqual(
+                    node.Bounds.Centre.Y,
+                    node.Children[0].Bounds.Centre.Y,
+                    0.001,
+                    $"'{node.Title}' should sit level with its first input '{node.Children[0].Title}'.");
+            }
+        }
+
+        [TestMethod]
+        public void Layout_CanPutEachNodeLevelWithItsFirstInputInstead()
+        {
+            AssertLevelWithFirstInput(Aligned(TestPlans.KeyLookupSeek));
+            AssertLevelWithFirstInput(Aligned(TestPlans.ParallelSpill));
+        }
+
+        [TestMethod]
+        public void Layout_AlignedToFirstInputMovesAConsumerDownToMeetItsInputRatherThanTheOtherWayRound()
+        {
+            // Both inputs of the top join are joins themselves, so the first branch reaches into the
+            // leaf column before the second consumer has even been placed.  Placing that consumer on
+            // its own row and then finding the leaf column taken would leave it stranded above its
+            // own first input; the whole spine has to move down together instead.
+            var statement = Parse(
+                Op(1, "Hash Match", "Inner Join", Rows(10),
+                    Op(2, "Nested Loops", "Inner Join", Rows(10),
+                        Op(3, "Table Scan", "Table Scan", Rows(10)),
+                        Op(4, "Table Scan", "Table Scan", Rows(10))),
+                    Op(5, "Nested Loops", "Inner Join", Rows(10),
+                        Op(6, "Table Scan", "Table Scan", Rows(10)),
+                        Op(7, "Table Scan", "Table Scan", Rows(10)))));
+
+            var layout = new PlanLayoutEngine(
+                    new FakeTextMeasurer(),
+                    new PlanLayoutOptions { VerticalLayout = PlanVerticalLayout.FirstChildAligned })
+                .Layout(statement);
+
+            AssertLevelWithFirstInput(layout);
+            AssertNoOverlapsInAnyColumn(layout);
+
+            // And no taller for it: the second join lands on the row its own first input was going
+            // to occupy anyway, so the four leaves still stack into four rows and no more.
+            Assert.AreEqual(4, layout.Nodes.Select(n => Math.Round(n.Bounds.Centre.Y, 3)).Distinct().Count());
+        }
+
+        [TestMethod]
+        public void Layout_AlignedToFirstInputKeepsAConsumersInputsInOrderDownThePage()
+        {
+            var layout = Aligned(TestPlans.ParallelSpill);
+
+            foreach (var node in layout.Nodes.Where(n => n.Children.Count > 1))
+            {
+                for (var i = 1; i < node.Children.Count; i++)
+                {
+                    // Each input below the one before it.  Only the inputs themselves, not their
+                    // branches: two branches that share no column are free to sit at the same
+                    // height, which is exactly what makes this the short shape.
+                    Assert.IsTrue(
+                        node.Children[i].Bounds.Top >= node.Children[i - 1].Bounds.Bottom,
+                        $"'{node.Children[i].Title}' should sit under the input feeding '{node.Title}' before it.");
+                }
+            }
+        }
+
+        [TestMethod]
+        public void Layout_AlignedToFirstInputLeavesNoTwoNodesOverlappingInAColumn()
+        {
+            AssertNoOverlapsInAnyColumn(Aligned(TestPlans.ParallelSpill));
+            AssertNoOverlapsInAnyColumn(Aligned(TestPlans.KeyLookupSeek));
+        }
+
+        [TestMethod]
+        public void Layout_AlignedToFirstInputIsTheShorterShape()
+        {
+            // A left deep join tree.  Stacking its four leaves is four rows by definition; aligning
+            // each consumer with its first input folds them into two, because the leaves hanging off
+            // the spine are in columns of their own and never have to clear each other.
+            var statement = Parse(
+                Op(1, "Nested Loops", "Inner Join", Rows(10),
+                    Op(2, "Nested Loops", "Inner Join", Rows(10),
+                        Op(3, "Nested Loops", "Inner Join", Rows(10),
+                            Op(4, "Table Scan", "Table Scan", Rows(10)),
+                            Op(5, "Table Scan", "Table Scan", Rows(10))),
+                        Op(6, "Table Scan", "Table Scan", Rows(10))),
+                    Op(7, "Table Scan", "Table Scan", Rows(10))));
+
+            var centred = new PlanLayoutEngine(
+                    new FakeTextMeasurer(),
+                    new PlanLayoutOptions { VerticalLayout = PlanVerticalLayout.Centred })
+                .Layout(statement);
+
+            var aligned = new PlanLayoutEngine(
+                    new FakeTextMeasurer(),
+                    new PlanLayoutOptions { VerticalLayout = PlanVerticalLayout.FirstChildAligned })
+                .Layout(statement);
+
+            Assert.IsTrue(
+                aligned.Bounds.Height < centred.Bounds.Height,
+                $"Aligned came out {aligned.Bounds.Height} tall against centred's {centred.Bounds.Height}.");
         }
 
         [TestMethod]
@@ -982,7 +1097,9 @@ namespace DBADash.QueryPlan.Test
         [TestMethod]
         public void Layout_PutsALabelBelowTheLineWhenTheArrowTurnsUpwards()
         {
-            var layout = Layout(TestPlans.KeyLookupSeek);
+            // The centred shape, which is the one that puts an input above its consumer as well as
+            // below it - aligned to the first input, an arrow only ever turns one way.
+            var layout = Centred(TestPlans.KeyLookupSeek);
 
             var join = layout.Nodes.Single(n => n.Kind == PlanOperatorKind.NestedLoops);
             var inputs = layout.Edges.Where(e => e.To == join).OrderBy(e => e.Points[0].Y).ToList();

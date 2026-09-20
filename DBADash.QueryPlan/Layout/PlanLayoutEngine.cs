@@ -20,6 +20,11 @@ namespace DBADash.QueryPlan.Layout
     /// gives the same result as a full Reingold-Tilford pass for a fraction of the complexity, with
     /// a relaxation pass afterwards to guarantee what the simple version only almost guarantees.
     ///
+    /// <see cref="PlanLayoutOptions.VerticalLayout"/> swaps that for the shape SSMS draws, where a
+    /// node sits level with its first input instead of between all of them.  A plan is then as tall
+    /// as it has branches rather than as tall as it has leaves, which is the difference between a
+    /// wide plan fitting the window and not.
+    ///
     /// Contains no drawing code and no drawing dependency: text is sized through
     /// <see cref="IPlanTextMeasurer"/> so this stays portable and unit testable.
     /// </summary>
@@ -99,8 +104,17 @@ namespace DBADash.QueryPlan.Layout
             var text = nodes.ToDictionary(node => node, MeasureNode);
 
             AssignHorizontal(nodes, text);
-            AssignVertical(root);
-            ResolveOverlaps(nodes, root);
+
+            if (_options.VerticalLayout == PlanVerticalLayout.FirstChildAligned)
+            {
+                AssignVerticalFirstChildAligned(root);
+            }
+            else
+            {
+                AssignVertical(root);
+                ResolveOverlaps(nodes, root);
+            }
+
             PlaceNodeContents(nodes, text);
 
             var bounds = Normalise(nodes);
@@ -700,6 +714,85 @@ namespace DBADash.QueryPlan.Layout
         {
             foreach (var child in node.Children) ReCentre(child);
             Centre(node);
+        }
+
+        /// <summary>
+        /// Put every node level with its first input and drop the rest below it, the way SSMS draws
+        /// a plan.  See <see cref="PlanVerticalLayout.FirstChildAligned"/>.
+        ///
+        /// Top down, which is the other way round from <see cref="AssignVertical"/>: a node's row is
+        /// settled before its inputs are placed, so every input can simply ask to be level with the
+        /// node it feeds.  The first one gets its wish - which is what puts the whole first-input
+        /// spine, the statement root through to the leaf that ultimately feeds it, on one row - and
+        /// the rest are pushed down by the only rule here: nothing may be placed over something
+        /// already in its column.
+        ///
+        /// Which is why a spine is placed all at once rather than a node at a time.  A branch already
+        /// hanging off the plan can reach into a column the spine has yet to enter, and a node placed
+        /// alone would find that column taken and drop out of its parent's row - leaving the parent
+        /// stranded above its own first input, which is the one thing this shape promises never to do.
+        /// Asking the whole spine where it may sit before placing any of it moves the parent down to
+        /// meet the input instead of the input down away from the parent.
+        ///
+        /// Keeping that rule per column rather than over the whole plan is what makes this the short
+        /// shape.  Two branches that share no column never have to clear each other, so a plan with
+        /// a dozen leaves can still be three rows tall - where stacking the leaves is a dozen rows by
+        /// definition.  It is also why nothing needs pushing apart afterwards: the rule is enforced
+        /// as each node is placed, and relaxing the result the way <see cref="ResolveOverlaps"/>
+        /// relaxes the other layout would re-centre the parents and undo the whole thing.
+        /// </summary>
+        private void AssignVerticalFirstChildAligned(PlanNode root) =>
+            PlaceAligned(root, root.Bounds.Height / 2, new Dictionary<int, double>());
+
+        /// <param name="head">The head of a first-input spine, placed here along with the rest of it.</param>
+        /// <param name="desiredCentre">The row the spine asks for, which is the one its consumer is on.</param>
+        /// <param name="columnBottom">The lowest edge so far in each column, keyed by depth.</param>
+        private void PlaceAligned(PlanNode head, double desiredCentre, Dictionary<int, double> columnBottom)
+        {
+            var spine = new List<PlanNode> { head };
+
+            while (spine[^1].Children.Count > 0)
+            {
+                spine.Add(spine[^1].Children[0]);
+            }
+
+            // The row has to clear every column the spine passes through, not just the head's, or
+            // the node that could not have it would be the one to drop instead of all of them.
+            var centre = desiredCentre;
+
+            foreach (var node in spine)
+            {
+                if (columnBottom.TryGetValue(node.Depth, out var occupied))
+                {
+                    centre = Math.Max(centre, occupied + _options.RowSpacing + (node.Bounds.Height / 2));
+                }
+            }
+
+            foreach (var node in spine)
+            {
+                node.Bounds = new LayoutRect(
+                    node.Bounds.X,
+                    centre - (node.Bounds.Height / 2),
+                    node.Bounds.Width,
+                    node.Bounds.Height);
+
+                // Always below the last node placed in this column, because of the clamp above, so
+                // the column's mark only ever moves down.
+                columnBottom[node.Depth] = node.Bounds.Bottom;
+            }
+
+            // The inputs the spine did not take, innermost first, which is the order they would have
+            // been reached in had the spine been walked a node at a time.  Each asks for its
+            // consumer's row and finds the column taken by the input before it, so lands under it.
+            for (var i = spine.Count - 1; i >= 0; i--)
+            {
+                var node = spine[i];
+
+                for (var child = 1; child < node.Children.Count; child++)
+                {
+                    PlaceAligned(node.Children[child], node.Bounds.Centre.Y, columnBottom);
+                }
+            }
         }
 
         /// <summary>

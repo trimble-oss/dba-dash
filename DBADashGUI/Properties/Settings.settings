@@ -65,6 +65,9 @@
     <Setting Name="QueryPlanColumnSpacing" Type="System.String" Scope="User">
       <Value Profile="(Default)">Normal</Value>
     </Setting>
+    <Setting Name="QueryPlanVerticalLayout" Type="System.String" Scope="User">
+      <Value Profile="(Default)">FirstChildAligned</Value>
+    </Setting>
     <Setting Name="QueryPlanPropertyRowLines" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">3</Value>
     </Setting>
