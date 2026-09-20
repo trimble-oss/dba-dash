@@ -1933,7 +1933,15 @@ namespace DBADashGUI.QueryPlans
                 }
                 else
                 {
-                    File.WriteAllText(dialog.FileName, _sourceXml ?? string.Empty, Encoding.Unicode);
+                    // A .sqlplan is for the tools that read one, so a plan that arrived inside an
+                    // extended events envelope is saved without it - see
+                    // <see cref="Common.WriteQueryPlanTempFile"/>.  Whatever cannot be lifted out is
+                    // saved as it stands rather than refused, since the user asked for this file.
+                    var xml = PlanParser.TryExtractShowPlanXml(_sourceXml, out var showPlanXml)
+                        ? showPlanXml
+                        : _sourceXml ?? string.Empty;
+
+                    File.WriteAllText(dialog.FileName, xml, Encoding.Unicode);
                 }
 
                 SetSummary("Saved " + dialog.FileName);
@@ -1997,9 +2005,10 @@ namespace DBADashGUI.QueryPlans
         }
 
         /// <summary>
-        /// Write the plan to a temp .sqlplan and hand it to <paramref name="open"/>.  The whole
-        /// source document, not just the selected statement, so what opens elsewhere matches what
-        /// was handed to this viewer.
+        /// Write the plan to a temp .sqlplan and hand it to <paramref name="open"/>.  Every statement
+        /// of the source document, not just the selected one, so what opens elsewhere matches what
+        /// was handed to this viewer - minus any envelope it arrived in, which the application being
+        /// handed the file would not read past.
         /// </summary>
         private void OpenExternal(Action<string> open)
         {

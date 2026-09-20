@@ -482,6 +482,44 @@ namespace DBADash.QueryPlan.Test
         }
 
         [TestMethod]
+        public void TryExtractShowPlanXml_LiftsAPlanOutOfItsEnvelope()
+        {
+            var bare = TestPlans.Xml(TestPlans.KeyLookupSeek);
+            var wrapped = "<event name=\"query_post_execution_showplan\"><data name=\"showplan_xml\"><value>" +
+                          bare.Replace("<?xml version=\"1.0\" encoding=\"utf-8\"?>", string.Empty) +
+                          "</value></data></event>";
+
+            Assert.IsTrue(PlanParser.TryExtractShowPlanXml(wrapped, out var extracted));
+            Assert.IsNotNull(extracted);
+
+            // What comes out is a .sqlplan another application will open: the plan and nothing above
+            // it, still carrying the showplan namespace it was declared with.
+            StringAssert.StartsWith(extracted, "<ShowPlanXML");
+            StringAssert.Contains(extracted, "schemas.microsoft.com/sqlserver/2004/07/showplan");
+            Assert.AreEqual(1, PlanParser.Parse(extracted).Statements.Count);
+        }
+
+        [TestMethod]
+        public void TryExtractShowPlanXml_HandsBackABarePlanUntouched()
+        {
+            var bare = TestPlans.Xml(TestPlans.Batch);
+
+            Assert.IsTrue(PlanParser.TryExtractShowPlanXml(bare, out var extracted));
+            Assert.AreEqual(bare, extracted);
+        }
+
+        [TestMethod]
+        public void TryExtractShowPlanXml_RefusesWhatIsNotAPlan()
+        {
+            Assert.IsFalse(PlanParser.TryExtractShowPlanXml("<deadlock />", out var none));
+            Assert.IsNull(none);
+
+            Assert.IsFalse(PlanParser.TryExtractShowPlanXml("<ShowPlanXML", out _));
+            Assert.IsFalse(PlanParser.TryExtractShowPlanXml("   ", out _));
+            Assert.IsFalse(PlanParser.TryExtractShowPlanXml(null, out _));
+        }
+
+        [TestMethod]
         public void LooksLikeExecutionPlan_AnswersWithoutParsing()
         {
             Assert.IsTrue(PlanParser.LooksLikeExecutionPlan(TestPlans.Xml(TestPlans.Batch)));

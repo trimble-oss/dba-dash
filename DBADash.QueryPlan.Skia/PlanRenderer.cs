@@ -576,14 +576,19 @@ namespace DBADash.QueryPlan.Skia
             var fade = Math.Min(FadeFactor(edge.From, controller), FadeFactor(edge.To, controller));
 
             // The hovered arrow is marked, so it is clear which one the tooltip is describing where
-            // several run side by side.
+            // several run side by side.  State wins over the estimate: an arrow the reader is
+            // pointing at, or one on the path to the root, is being asked about now, and its colour
+            // has to answer that rather than something it shares with every other arrow on screen.
+            //
+            // An estimate that came within ten times keeps the plain actual or estimated colour.
+            // Colouring the good ones as well would put a third of the picture in the success colour
+            // and leave nothing for the eye to land on, which is the opposite of the point.
             var colour = onPath
                 ? Palette.EdgeHighlight
                 : ReferenceEquals(controller.HoveredEdge, edge)
                     ? Palette.Hover
-                    : edge.IsActual
-                        ? Palette.EdgeActual
-                        : Palette.Edge;
+                    : MissColour(edge)
+                        ?? (edge.IsActual ? Palette.EdgeActual : Palette.Edge);
 
             var thickness = (float)edge.Thickness;
 
@@ -611,6 +616,22 @@ namespace DBADash.QueryPlan.Skia
                 DrawEstimateOutline(canvas, body, (float)estimate, Faded(Palette.ColourFor(accuracy), fade), controller);
             }
         }
+
+        /// <summary>
+        /// The warning or critical colour for an arrow whose estimate was ten or a hundred times out
+        /// - the same thresholds as the operator's estimate mismatch badge, so the arrow into a
+        /// badged operator and the badge itself cannot disagree.  Null where the estimate was close
+        /// enough, or where there is no actual figure to compare it against.
+        ///
+        /// Null as well when the estimate is already drawn as an outline: in
+        /// <see cref="PlanEdgeWidthBasis.Both"/> the outline is the accuracy, and colouring the body
+        /// underneath it the same would swallow the dashes and lose the width comparison that mode
+        /// exists for.
+        /// </summary>
+        private SKColor? MissColour(PlanEdge edge) =>
+            edge.EstimateThickness is null && edge.EstimateAccuracy is { } accuracy and not PlanEstimateAccuracy.Good
+                ? Palette.ColourFor(accuracy)
+                : null;
 
         /// <summary>
         /// The estimate, drawn over the actual arrow as a dashed outline of the width it would have
