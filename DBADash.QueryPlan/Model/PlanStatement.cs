@@ -80,6 +80,15 @@ namespace DBADash.QueryPlan.Model
         /// <summary>SELECT, INSERT, UPDATE, COND WITH QUERY, and the rest.</summary>
         public string? StatementType { get; internal set; }
 
+        /// <summary>
+        /// This statement's own showplan element, re-serialised without formatting.
+        ///
+        /// The document a plan arrives in can hold a whole batch, and one statement is the unit
+        /// anything reasoning about a plan works on - an AI analysis sends this rather than the
+        /// document, so the model is not handed nine other statements and asked about the tenth.
+        /// </summary>
+        public string? Xml { get; internal set; }
+
         /// <summary>The whole statement's estimated cost, which every percentage is taken against.</summary>
         public double StatementSubTreeCost { get; internal set; }
 

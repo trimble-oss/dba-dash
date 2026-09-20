@@ -27,6 +27,7 @@ namespace DBADashSharedGUI
             var foreground = ColorTranslator.ToHtml(theme.ForegroundColor);
             var background = ColorTranslator.ToHtml(theme.BackgroundColor);
             var codeBackground = ColorTranslator.ToHtml(theme.InputBackColor);
+            var accent = ColorTranslator.ToHtml(theme.LinkColor);
             var body = Markdown.ToHtml(markdown ?? string.Empty, Pipeline);
 
             return $$"""
@@ -40,6 +41,15 @@ namespace DBADashSharedGUI
                          ul { padding-left: 20px; }
                          code { background: {{codeBackground}}; padding: 2px 4px; border-radius: 3px; }
                          pre { background: {{codeBackground}}; padding: 10px; border-radius: 4px; overflow-x: auto; }
+                         /* A conversation renders as one document, with the reader's own questions as
+                            blockquotes and a rule between turns, so the thread can be followed without
+                            having to work out who said what. */
+                         blockquote { margin: 16px 0; padding: 8px 12px; border-left: 3px solid {{accent}};
+                                      background: {{codeBackground}}; border-radius: 0 4px 4px 0; }
+                         blockquote p { margin: 4px 0; }
+                         hr { border: none; border-top: 1px solid {{codeBackground}}; margin: 20px 0; }
+                         table { border-collapse: collapse; margin: 8px 0; }
+                         th, td { border: 1px solid {{codeBackground}}; padding: 4px 8px; text-align: left; }
                        </style>
                      </head>
                      <body>{{body}}</body>

@@ -262,7 +262,11 @@ namespace DBADash.QueryPlan
                 QueryPlanHash = Attribute(element, "QueryPlanHash"),
                 RetrievedFromCache = Bool(Attribute(element, "RetrievedFromCache")),
                 CardinalityEstimationModelVersion = Attribute(element, "CardinalityEstimationModelVersion"),
-                NestingLevel = level
+                NestingLevel = level,
+                // Kept because one statement of a batch is the unit anything reasoning about a plan
+                // works on - an AI analysis sends this rather than the whole document.  Unformatted:
+                // it is only ever read by a machine, and showplan indentation is most of its bulk.
+                Xml = element.ToString(SaveOptions.DisableFormatting)
             };
 
             var queryPlan = ChildElements(element, "QueryPlan").FirstOrDefault();

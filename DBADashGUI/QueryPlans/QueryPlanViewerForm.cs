@@ -77,25 +77,25 @@ namespace DBADashGUI.QueryPlans
         /// Show a plan on a tab of the plan window, opening the window if there is none.  A plan that
         /// is already open is brought to the front rather than opened a second time.
         /// </summary>
-        public static void Open(ExecutionPlan plan, string sourceXml, string fileName = null)
+        public static void Open(ExecutionPlan plan, string sourceXml, string fileName = null, DBADashContext context = null)
         {
             var window = _current is { IsDisposed: false } ? _current : null;
 
             if (window is null)
             {
                 window = _current = new QueryPlanViewerForm();
-                window.AddTab(plan, sourceXml, fileName);
+                window.AddTab(plan, sourceXml, fileName, context);
                 window.Show();
                 return;
             }
 
-            window.AddTab(plan, sourceXml, fileName);
+            window.AddTab(plan, sourceXml, fileName, context);
 
             if (window.WindowState == FormWindowState.Minimized) window.WindowState = FormWindowState.Normal;
             window.Activate();
         }
 
-        private void AddTab(ExecutionPlan plan, string sourceXml, string fileName)
+        private void AddTab(ExecutionPlan plan, string sourceXml, string fileName, DBADashContext context)
         {
             var open = _documents.TabPages.Cast<TabPage>()
                 .FirstOrDefault(p => p.Controls.Count > 0 && p.Controls[0] is QueryPlanViewerControl viewer &&
@@ -107,7 +107,7 @@ namespace DBADashGUI.QueryPlans
                 return;
             }
 
-            var viewer = new QueryPlanViewerControl(plan, sourceXml, fileName) { Dock = DockStyle.Fill };
+            var viewer = new QueryPlanViewerControl(plan, sourceXml, fileName, context) { Dock = DockStyle.Fill };
             var page = new TabPage(viewer.Title) { ToolTipText = viewer.TabToolTip };
             page.Controls.Add(viewer);
 

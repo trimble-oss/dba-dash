@@ -574,7 +574,12 @@ namespace DBADashGUI
         /// when it was not.  That route is still a click away from the viewer's Open With button -
         /// see <see cref="WriteQueryPlanTempFile"/>.
         /// </summary>
-        public static void ShowQueryPlan(string plan, string fileName = null)
+        /// <summary>
+        /// Opens a plan in the viewer.  <paramref name="context"/> says where it came from, where the
+        /// caller knows - it names the instance on an AI analysis and records one against it.  Optional
+        /// because a plan can arrive from a file or from a grid with no instance behind it.
+        /// </summary>
+        public static void ShowQueryPlan(string plan, string fileName = null, DBADashContext context = null)
         {
             ExecutionPlan parsed;
             try
@@ -587,7 +592,7 @@ namespace DBADashGUI
             }
 
             // On a tab of the plan window already open, if there is one, so plans can be compared.
-            OnUIThread(() => QueryPlans.QueryPlanViewerForm.Open(parsed, plan, fileName));
+            OnUIThread(() => QueryPlans.QueryPlanViewerForm.Open(parsed, plan, fileName, context));
         }
 
         /// <summary>

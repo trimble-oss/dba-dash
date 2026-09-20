@@ -775,6 +775,9 @@
     <Build Include="AI\Stored Procedures\DeadlockAnalysisSignatureRecompute_Get.sql" />
     <Build Include="AI\Stored Procedures\DeadlockAnalysisSignatureRecompute_Upd.sql" />
     <Build Include="AI\Stored Procedures\DeadlockAnalysisHistory_Get.sql" />
+    <Build Include="AI\Tables\QueryPlanAnalysis.sql" />
+    <Build Include="AI\Stored Procedures\QueryPlanAnalysis_Upd.sql" />
+    <Build Include="AI\Stored Procedures\QueryPlanAnalysisHistory_Get.sql" />
     <Build Include="AI\Stored Procedures\DrivesRisk_Get.sql" />
     <Build Include="AI\Stored Procedures\IdentityColumns_Get.sql" />
     <Build Include="AI\Stored Procedures\InstanceMetadata_Get.sql" />

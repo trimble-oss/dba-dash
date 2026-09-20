@@ -54,7 +54,7 @@ namespace DBADashGUI.Performance
             switch (action)
             {
                 case PlanAction.View:
-                    ViewPlan(row);
+                    ViewPlan(row, context);
                     break;
 
                 case PlanAction.Collect:
@@ -67,14 +67,14 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private static void ViewPlan(DataRowView row)
+        private static void ViewPlan(DataRowView row, DBADashContext context)
         {
             if (row["query_plan_text"] == DBNull.Value ||
                 string.IsNullOrEmpty(Convert.ToString(row["query_plan_text"])))
             {
                 row["query_plan_text"] = RunningQueries.GetPlan(row);
             }
-            Common.ShowQueryPlan((string)row["query_plan_text"]);
+            Common.ShowQueryPlan((string)row["query_plan_text"], context: context);
         }
 
         private static async Task CollectPlan(DataRowView row, DBADashContext context, ToolStripStatusLabel lblStatus)
@@ -141,7 +141,7 @@ namespace DBADashGUI.Performance
                 row["has_plan"] = true;
                 row["query_plan_text"] = planText;
 
-                Common.ShowQueryPlan(planText);
+                Common.ShowQueryPlan(planText, context: context);
                 setStatus(status, tooltip, statusColor);
             }
             catch (Exception ex)

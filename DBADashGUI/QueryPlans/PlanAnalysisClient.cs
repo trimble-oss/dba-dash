@@ -1,9 +1,9 @@
 #nullable enable
-using DBADash.Deadlock.Analysis;
+using DBADash.QueryPlan.Analysis;
 using DBADashGUI.AI;
 using System;
-using System.Configuration;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -11,18 +11,20 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace DBADashGUI.Deadlocks
+namespace DBADashGUI.QueryPlans
 {
     /// <summary>
-    /// Sends a deadlock to the AI service for analysis, using the same discovery and API key path as
-    /// the assistant: a service registered in the repository, or a local one on loopback.
+    /// Sends a query plan to the AI service for analysis, using the same discovery and API key path as
+    /// the assistant and the deadlock viewer: a service registered in the repository, or a local one on
+    /// loopback.
     ///
-    /// The payload is serialised from the object the viewer previewed, so what was shown is what
-    /// goes.  Nothing is sent until someone presses the button.
+    /// The payload is serialised from the object the viewer previewed, so what was shown is what goes.
+    /// Nothing is sent until someone presses the button.
     /// </summary>
-    internal static class DeadlockAnalysisClient
+    internal static class PlanAnalysisClient
     {
-        private static readonly HttpClient Client = new() { Timeout = TimeSpan.FromSeconds(180) };
+        // Plans are larger than deadlock graphs and the answers longer, so the wait can be longer too.
+        private static readonly HttpClient Client = new() { Timeout = TimeSpan.FromSeconds(240) };
 
         internal sealed class Result
         {
@@ -60,14 +62,14 @@ namespace DBADashGUI.Deadlocks
         }
 
         internal static string ToJson(
-            DeadlockAnalysisPayload payload,
+            PlanAnalysisPayload payload,
             int? instanceId = null,
             string? modelOverride = null,
             AiConversation? conversation = null,
             string? question = null)
         {
-            // Everything said about this deadlock so far.  Empty on a first analysis, which is what the
-            // service reads as one.  The deadlock itself is not in here: the service builds the opening
+            // Everything said about this plan so far.  Empty on a first analysis, which is what the
+            // service reads as one.  The plan itself is not in here: the service builds the opening
             // question from the payload below, so a follow-up cannot quietly change what the first
             // answer was about.
             var history = (conversation?.ToHistory() ?? new List<AiConversation.WireTurn>())
@@ -77,25 +79,24 @@ namespace DBADashGUI.Deadlocks
             return JsonSerializer.Serialize(
                 new
                 {
-                    graphXml = payload.GraphXml,
+                    planXml = payload.PlanXml,
+                    statementText = payload.StatementText,
+                    statementTruncated = payload.StatementTruncated,
                     signature = payload.Signature,
-                    signatureVersion = payload.SignatureVersion,
+                    planHash = payload.PlanHash,
                     payloadVersion = payload.Version,
                     instanceId,
                     instance = payload.Instance,
-                    participants = payload.Participants,
+                    fileName = payload.FileName,
+                    context = payload.Context,
+                    statistics = payload.Statistics,
+                    insights = payload.Insights,
+                    missingIndexes = payload.MissingIndexes,
+                    operators = payload.Operators,
+                    waits = payload.Waits,
+                    parameters = payload.Parameters,
                     objects = payload.Objects,
-                    modules = payload.Modules,
-                    findings = payload.Findings,
-                    schema = payload.Schema.Select(s => new
-                    {
-                        name = s.Name,
-                        database = s.Database,
-                        objectType = s.ObjectType,
-                        asAt = s.AsAt,
-                        ddl = s.Ddl,
-                        truncated = s.Truncated
-                    }),
+                    isActualPlan = payload.IsActualPlan,
                     modelOverride,
                     conversationId = conversation?.Id,
                     history,
@@ -105,12 +106,12 @@ namespace DBADashGUI.Deadlocks
         }
 
         /// <summary>
-        /// Asks about the deadlock.  With no <paramref name="conversation"/> that is a first analysis;
-        /// with one, and a <paramref name="question"/>, it is the next turn of the exchange already on
-        /// the reader's screen.
+        /// Asks about the plan.  With no <paramref name="conversation"/> that is a first analysis; with
+        /// one, and a <paramref name="question"/>, it is the next turn of the exchange already on the
+        /// reader's screen.
         /// </summary>
         internal static async Task<Result> AnalyseAsync(
-            DeadlockAnalysisPayload payload,
+            PlanAnalysisPayload payload,
             AIServiceDiscovery.ServiceInfo service,
             CancellationToken cancellationToken,
             int? instanceId = null,
@@ -125,7 +126,7 @@ namespace DBADashGUI.Deadlocks
 
                 using var request = new HttpRequestMessage(
                     HttpMethod.Post,
-                    $"{baseUrl.TrimEnd('/')}/api/ai/analyse-deadlock")
+                    $"{baseUrl.TrimEnd('/')}/api/ai/analyse-plan")
                 {
                     Content = new StringContent(
                         ToJson(payload, instanceId, modelOverride: null, conversation, question),

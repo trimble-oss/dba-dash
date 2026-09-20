@@ -22,6 +22,9 @@ GRANT EXECUTE ON OBJECT::AI.ServiceConfig_Get TO AIUser;
    owned by dbo, so ownership chaining covers it. */
 GRANT EXECUTE ON OBJECT::AI.DeadlockAnalysisHistory_Get TO App;
 GRANT EXECUTE ON OBJECT::AI.DeadlockAnalysisHistory_Get TO AppReadOnly;
+/* The query plan viewer shows a query's previous analyses on the same terms, and for the same reason. */
+GRANT EXECUTE ON OBJECT::AI.QueryPlanAnalysisHistory_Get TO App;
+GRANT EXECUTE ON OBJECT::AI.QueryPlanAnalysisHistory_Get TO AppReadOnly;
 /* Ad-hoc XE lives in its own schema so the captured event/session tables aren't exposed by the broad
    GRANT SELECT ON SCHEMA::dbo TO App.  AdhocXE members get EXECUTE on the XE procs only (no SELECT on the
    underlying tables); the procs reach those tables via ownership chaining (XE and dbo are both owned by dbo).
