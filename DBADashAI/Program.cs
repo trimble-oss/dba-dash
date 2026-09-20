@@ -160,6 +160,8 @@ builder.Services.AddSingleton<AiFeedbackStore>();
 builder.Services.AddScoped<AiRcaTemplateService>();
 builder.Services.AddScoped<AiDeadlockPromptBuilder>();
 builder.Services.AddScoped<DeadlockAnalysisStore>();
+builder.Services.AddScoped<AiPlanPromptBuilder>();
+builder.Services.AddScoped<PlanAnalysisStore>();
 builder.Services.AddScoped<AiRunbookLinkService>();
 builder.Services.AddScoped<AiRiskForecastService>();
 
@@ -611,7 +613,11 @@ ApplyAuthAndRateLimit(app.MapPost("/api/ai/analyse-deadlock", async (
     }
 
     var requestId = Guid.NewGuid().ToString("N");
-    var totalSw = telemetry.Start(requestId, $"Deadlock analysis {request.Signature}", "deadlock-analysis");
+    var isFollowUp = request.History.Count > 0;
+    var totalSw = telemetry.Start(
+        requestId,
+        $"Deadlock {(isFollowUp ? "follow-up" : "analysis")} {request.Signature}",
+        "deadlock-analysis");
 
     // Resolved up front: it is stored with the analysis, and reported back to the caller.
     var model = request.ModelOverride
@@ -620,16 +626,29 @@ ApplyAuthAndRateLimit(app.MapPost("/api/ai/analyse-deadlock", async (
                 ?? "unknown";
     var payloadVersion = string.IsNullOrWhiteSpace(request.PayloadVersion) ? "1" : request.PayloadVersion!;
 
+    // A conversation and its position in it.  The caller mints the id on the first turn and sends it
+    // back with every follow-up; one that doesn't is a caller from before conversations existed, and
+    // its answer stands on its own, which is what a conversation of one turn is.
+    var conversationId = request.ConversationId ?? Guid.NewGuid();
+    var turnNumber = request.History.Count(t => t.IsAssistant) + 1;
+
     try
     {
         // Always asks the model.  The caller has seen any previous analysis of this pattern before
         // getting here - the viewer shows it on opening - so a request is a request for another
         // opinion, not for the one already on their screen.
+        //
+        // The opening prompt is rebuilt from the payload on every turn rather than replayed from the
+        // caller: the deadlock, the findings and the definitions are what the answer has to stay
+        // tied to, and rebuilding them here means a follow-up cannot quietly change what the model
+        // was told the first time.
         var prompt = promptBuilder.Build(request);
-        var analysis = await aiChat.SummarizeWithPromptAsync(prompt, cancellationToken, request.ModelOverride);
+        var messages = AiConversation.Build(prompt, request.History, request.Question);
+        var analysis = await aiChat.ChatAsync(messages, cancellationToken, request.ModelOverride);
 
         await store.SaveAsync(request.Signature, model, payloadVersion, analysis, request.InstanceId,
-            request.SignatureVersion, request.GraphXml, cancellationToken);
+            request.SignatureVersion, request.GraphXml, conversationId, turnNumber, request.Question,
+            cancellationToken);
 
         totalSw.Stop();
         telemetry.Complete(requestId, "deadlock-analysis", 1, 0, totalSw.ElapsedMilliseconds, 0, "n/a");
@@ -640,6 +659,8 @@ ApplyAuthAndRateLimit(app.MapPost("/api/ai/analyse-deadlock", async (
             Signature = request.Signature,
             Analysis = analysis,
             Model = model,
+            ConversationId = conversationId,
+            TurnNumber = turnNumber,
             TotalExecutionMs = totalSw.ElapsedMilliseconds
         });
     }
@@ -653,6 +674,82 @@ ApplyAuthAndRateLimit(app.MapPost("/api/ai/analyse-deadlock", async (
         telemetry.Fail(requestId, ex);
         return Results.Problem(
             title: "Deadlock analysis failed",
+            detail: $"RequestId={requestId}. {ex.Message}",
+            statusCode: StatusCodes.Status500InternalServerError);
+    }
+}));
+
+// The same deal as the deadlock endpoint above, over a query plan: one statement, everything the
+// caller's own parser made of it, and the showplan XML where it was small enough to send.
+ApplyAuthAndRateLimit(app.MapPost("/api/ai/analyse-plan", async (
+    AiPlanAnalysisRequest request,
+    AiChatClient aiChat,
+    AiPlanPromptBuilder promptBuilder,
+    AiRequestTelemetryService telemetry,
+    PlanAnalysisStore store,
+    IConfiguration config,
+    CancellationToken cancellationToken) =>
+{
+    var validationError = request.Validate();
+    if (!string.IsNullOrWhiteSpace(validationError))
+    {
+        return Results.BadRequest(new { error = validationError });
+    }
+
+    var requestId = Guid.NewGuid().ToString("N");
+    var isFollowUp = request.History.Count > 0;
+    var totalSw = telemetry.Start(
+        requestId,
+        $"Query plan {(isFollowUp ? "follow-up" : "analysis")} {request.Signature}",
+        "plan-analysis");
+
+    // Resolved up front: it is stored with the analysis, and reported back to the caller.
+    var model = request.ModelOverride
+                ?? config["Anthropic:Model"]
+                ?? config["AzureOpenAI:Deployment"]
+                ?? "unknown";
+    var payloadVersion = string.IsNullOrWhiteSpace(request.PayloadVersion) ? "1" : request.PayloadVersion!;
+
+    var conversationId = request.ConversationId ?? Guid.NewGuid();
+    var turnNumber = request.History.Count(t => t.IsAssistant) + 1;
+
+    try
+    {
+        // Rebuilt from the payload on every turn rather than replayed from the caller, so a follow-up
+        // cannot quietly change the plan the first answer was about.
+        var prompt = promptBuilder.Build(request);
+        var messages = AiConversation.Build(prompt, request.History, request.Question);
+        var analysis = await aiChat.ChatAsync(messages, cancellationToken, request.ModelOverride);
+
+        await store.SaveAsync(request.Signature, request.PlanHash, model, payloadVersion, analysis,
+            request.InstanceId, request.StatementText, conversationId, turnNumber, request.Question,
+            cancellationToken);
+
+        totalSw.Stop();
+        telemetry.Complete(requestId, "plan-analysis", 1, 0, totalSw.ElapsedMilliseconds, 0, "n/a");
+
+        return Results.Ok(new AiPlanAnalysisResponse
+        {
+            RequestId = requestId,
+            Signature = request.Signature,
+            PlanHash = request.PlanHash,
+            Analysis = analysis,
+            Model = model,
+            ConversationId = conversationId,
+            TurnNumber = turnNumber,
+            TotalExecutionMs = totalSw.ElapsedMilliseconds
+        });
+    }
+    catch (OperationCanceledException)
+    {
+        telemetry.Fail(requestId, new TimeoutException("AI request cancelled or timed out."));
+        return Results.StatusCode(StatusCodes.Status499ClientClosedRequest);
+    }
+    catch (Exception ex)
+    {
+        telemetry.Fail(requestId, ex);
+        return Results.Problem(
+            title: "Query plan analysis failed",
             detail: $"RequestId={requestId}. {ex.Message}",
             statusCode: StatusCodes.Status500InternalServerError);
     }

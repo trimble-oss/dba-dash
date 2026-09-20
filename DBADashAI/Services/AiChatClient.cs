@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using DBADashAI.Models;
 
 namespace DBADashAI.Services
 {
@@ -20,8 +21,25 @@ namespace DBADashAI.Services
 
         private string SystemPrompt => _systemPromptLoader.Prompt;
 
-        public async Task<string> SummarizeWithPromptAsync(string userPrompt, CancellationToken cancellationToken, string? modelOverride = null)
+        /// <summary>One question, one answer - what almost every caller wants.</summary>
+        public Task<string> SummarizeWithPromptAsync(string userPrompt, CancellationToken cancellationToken, string? modelOverride = null) =>
+            ChatAsync(
+                new[] { new AiConversationTurn { Role = AiConversationTurn.User, Content = userPrompt } },
+                cancellationToken,
+                modelOverride);
+
+        /// <summary>
+        /// Sends a conversation and returns the next answer.
+        ///
+        /// The service holds no conversation state: a caller with follow-up questions sends
+        /// everything said so far on every turn.  Both providers take the same alternating
+        /// user/assistant array, so the only difference between a first analysis and a tenth
+        /// follow-up is the length of the list.
+        /// </summary>
+        public async Task<string> ChatAsync(IReadOnlyList<AiConversationTurn> messages, CancellationToken cancellationToken, string? modelOverride = null)
         {
+            if (messages.Count == 0) return "Nothing was asked.";
+
             var provider = _configuration["AI:Provider"]?.Trim();
 
             var azureEndpoint = _configuration["AzureOpenAI:Endpoint"];
@@ -43,7 +61,7 @@ namespace DBADashAI.Services
                         && !string.IsNullOrWhiteSpace(azureApiKey)
                         && !string.IsNullOrWhiteSpace(azureDeployment))
                     {
-                        return await SummarizeWithAzureOpenAIAsync(userPrompt, azureEndpoint, azureApiKey, azureDeployment, azureApiVersion, cancellationToken);
+                        return await SummarizeWithAzureOpenAIAsync(messages, azureEndpoint, azureApiKey, azureDeployment, azureApiVersion, cancellationToken);
                     }
                     return "AI summary is disabled. AI:Provider=AzureOpenAI but AzureOpenAI settings are incomplete.";
                 }
@@ -52,7 +70,7 @@ namespace DBADashAI.Services
                 {
                     if (!string.IsNullOrWhiteSpace(anthropicApiKey) && !string.IsNullOrWhiteSpace(anthropicModel))
                     {
-                        return await SummarizeWithAnthropicAsync(userPrompt, anthropicBaseUrl, anthropicApiKey, anthropicModel, anthropicVersion, anthropicMaxTokens, cancellationToken);
+                        return await SummarizeWithAnthropicAsync(messages, anthropicBaseUrl, anthropicApiKey, anthropicModel, anthropicVersion, anthropicMaxTokens, cancellationToken);
                     }
                     return "AI summary is disabled. AI:Provider=Anthropic but Anthropic settings are incomplete.";
                 }
@@ -61,12 +79,12 @@ namespace DBADashAI.Services
                     && !string.IsNullOrWhiteSpace(azureApiKey)
                     && !string.IsNullOrWhiteSpace(azureDeployment))
                 {
-                    return await SummarizeWithAzureOpenAIAsync(userPrompt, azureEndpoint, azureApiKey, azureDeployment, azureApiVersion, cancellationToken);
+                    return await SummarizeWithAzureOpenAIAsync(messages, azureEndpoint, azureApiKey, azureDeployment, azureApiVersion, cancellationToken);
                 }
 
                 if (!string.IsNullOrWhiteSpace(anthropicApiKey) && !string.IsNullOrWhiteSpace(anthropicModel))
                 {
-                    return await SummarizeWithAnthropicAsync(userPrompt, anthropicBaseUrl, anthropicApiKey, anthropicModel, anthropicVersion, anthropicMaxTokens, cancellationToken);
+                    return await SummarizeWithAnthropicAsync(messages, anthropicBaseUrl, anthropicApiKey, anthropicModel, anthropicVersion, anthropicMaxTokens, cancellationToken);
                 }
 
                 return "AI summary is disabled. Configure AzureOpenAI:* or Anthropic:* settings.";
@@ -83,6 +101,15 @@ namespace DBADashAI.Services
         }
 
         /// <summary>
+        /// The role as a provider will accept it.  Anything that is not an assistant turn is a user
+        /// turn: both providers reject an unknown role outright, and a turn whose role got lost is
+        /// still a turn the model needs to see.  Requests are validated before they reach here - this
+        /// is the belt to that braces.
+        /// </summary>
+        private static string Role(AiConversationTurn turn) =>
+            turn.IsAssistant ? AiConversationTurn.Assistant : AiConversationTurn.User;
+
+        /// <summary>
         /// Strips any characters outside the printable ASCII range (0x20–0x7E) from a
         /// value before it is placed in an HTTP header. Non-ASCII bytes (e.g. a BOM or
         /// unicode quotes copy-pasted from a browser) cause HttpClient to throw immediately.
@@ -95,7 +122,7 @@ namespace DBADashAI.Services
         }
 
         private async Task<string> SummarizeWithAzureOpenAIAsync(
-            string userPrompt,
+            IReadOnlyList<AiConversationTurn> messages,
             string endpoint,
             string apiKey,
             string deployment,
@@ -109,14 +136,13 @@ namespace DBADashAI.Services
             var path = $"openai/deployments/{Uri.EscapeDataString(deployment)}/chat/completions?api-version={Uri.EscapeDataString(apiVersion)}";
             var requestUrl = new Uri(baseUri, path);
 
+            var conversation = new List<object> { new { role = "system", content = SystemPrompt } };
+            conversation.AddRange(messages.Select(m => (object)new { role = Role(m), content = m.Content }));
+
             var payload = new
             {
                 model = deployment,
-                messages = new object[]
-                {
-                    new { role = "system", content = SystemPrompt },
-                    new { role = "user", content = userPrompt }
-                }
+                messages = conversation
             };
 
             var client = _httpClientFactory.CreateClient();
@@ -147,7 +173,7 @@ namespace DBADashAI.Services
         }
 
         private async Task<string> SummarizeWithAnthropicAsync(
-            string userPrompt,
+            IReadOnlyList<AiConversationTurn> messages,
             string baseUrl,
             string apiKey,
             string model,
@@ -166,10 +192,9 @@ namespace DBADashAI.Services
                 ["model"] = model,
                 ["max_tokens"] = maxTokens,
                 ["system"] = SystemPrompt,
-                ["messages"] = new object[]
-                {
-                    new { role = "user", content = userPrompt }
-                }
+                ["messages"] = messages
+                    .Select(m => (object)new { role = Role(m), content = m.Content })
+                    .ToArray()
             };
 
             if (isThinkingModel)

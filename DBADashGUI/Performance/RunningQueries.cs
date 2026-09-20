@@ -1075,7 +1075,7 @@ namespace DBADashGUI.Performance
                     row["query_plan_text"] = GetPlan(row);
                 }
                 var plan = (string)row["query_plan_text"];
-                Common.ShowQueryPlan(plan);
+                Common.ShowQueryPlan(plan, context: CommonData.GetDBADashContext((int)row["InstanceID"]));
             }
         }
 
@@ -1178,7 +1178,7 @@ namespace DBADashGUI.Performance
                     row["query_plan_text"] = planText;
                 }
 
-                Common.ShowQueryPlan(planText);
+                Common.ShowQueryPlan(planText, context: context);
                 SetStatus(status, tooltip, statusColor);
             }
             catch (Exception ex)

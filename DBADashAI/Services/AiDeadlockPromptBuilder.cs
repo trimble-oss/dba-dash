@@ -35,6 +35,13 @@ namespace DBADashAI.Services
                 "inferring intent, say so.  Do not restate the findings below - they are already on screen; " +
                 "build on them, and say so if you disagree with one.  Do not invent object or index names " +
                 "that are not present.");
+            prompt.AppendLine();
+            prompt.AppendLine(
+                "The reader can ask follow-up questions after this answer.  Answer those directly and as " +
+                "briefly as the question allows, without the four headings and without repeating what you " +
+                "have already said - the whole conversation stays on their screen.  Everything above is " +
+                "still all you know about this deadlock, so where a follow-up asks for something it does " +
+                "not contain, say what would answer it rather than guessing.");
 
             Section(prompt, "Signature (identifies this deadlock pattern)", request.Signature);
             Section(prompt, "Instance", request.Instance);

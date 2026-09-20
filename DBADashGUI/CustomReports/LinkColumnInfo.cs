@@ -113,7 +113,7 @@ namespace DBADashGUI.CustomReports
                 MessageBox.Show($"Invalid execution plan\n{queryPlan}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            Common.ShowQueryPlan(queryPlan);
+            Common.ShowQueryPlan(queryPlan, context: context);
         }
     }
 

@@ -35,6 +35,13 @@ namespace DBADashGUI.QueryPlans
         private readonly string _sourceXml;
         private readonly string _fileName;
 
+        /// <summary>
+        /// Where the plan came from, where the caller knew.  Null for a plan opened from a file, and for
+        /// the call sites that have no context to hand - the viewer works the same either way; an
+        /// AI analysis is simply recorded without an instance against it.
+        /// </summary>
+        private readonly DBADashContext _context;
+
         private readonly QueryPlanGraphControl _graphControl = new() { Dock = DockStyle.Fill };
         private readonly QueryPlanPropertiesControl _properties = new() { Dock = DockStyle.Fill };
         private readonly DBADashDataGridView _warningsGrid = NewGrid();
@@ -93,6 +100,8 @@ namespace DBADashGUI.QueryPlans
         private readonly SplitContainer _parameterScriptSplit = new();
 
         private readonly QueryPlanStatementsControl _statements = new() { Dock = DockStyle.Fill };
+
+        private readonly QueryPlanAiControl _ai = new() { Dock = DockStyle.Fill };
 
         /// <summary>
         /// The statement list above the plan.  Above rather than on a tab of its own, because moving
@@ -179,13 +188,14 @@ namespace DBADashGUI.QueryPlans
         // one table differ only by node id - and the grids are sortable, so a row index is no use.
         private const string NodeIdColumn = "NodeId";
 
-        public QueryPlanViewerControl(ExecutionPlan plan, string sourceXml, string fileName = null)
+        public QueryPlanViewerControl(ExecutionPlan plan, string sourceXml, string fileName = null, DBADashContext context = null)
         {
             _plan = plan ?? throw new ArgumentNullException(nameof(plan));
             if (plan.Statements.Count == 0) throw new ArgumentException("No statements to show.", nameof(plan));
 
             _sourceXml = sourceXml;
             _fileName = fileName;
+            _context = context;
 
             // Statements with no plan still appear: the text is often the only reason the file was
             // opened, and dropping them silently would make a batch look shorter than it is.  Set
@@ -239,6 +249,7 @@ namespace DBADashGUI.QueryPlans
             _tabs.TabPages.Add(_parametersTab);
             _tabs.TabPages.Add(_waitsTab);
             _tabs.TabPages.Add(NewPage("Query", _queryHost));
+            _tabs.TabPages.Add(NewPage("AI Analysis", _ai));
             _tabs.TabPages.Add(NewPage("XML", _xmlHost));
 
             Controls.Add(_tabs);
@@ -1347,6 +1358,10 @@ namespace DBADashGUI.QueryPlans
 
             _queryText.Text = statement.StatementText ?? string.Empty;
             _xmlText.Text = _sourceXml ?? string.Empty;
+
+            // The AI tab is about one statement, so it follows the selector.  It contacts nothing until
+            // the reader presses its own button - moving between statements costs nothing.
+            _ai.Show(_plan, statement, _fileName, _context);
 
             SetSummary(Summarise(statement, _graphControl.PlanLayout));
 

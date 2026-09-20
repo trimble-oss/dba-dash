@@ -1,29 +1,27 @@
-using DBADash.Deadlock.Analysis;
 using Microsoft.Data.SqlClient;
 using System.Data;
 
 namespace DBADashAI.Services
 {
     /// <summary>
-    /// Records what the model said about a deadlock, so the next person to open that deadlock - or another
-    /// occurrence of its pattern - sees the analysis without paying for it again.  Every answer is kept.
+    /// Records what the model said about a query plan, so the next person to open that plan - or the
+    /// same query with a different plan - sees the analysis without paying for it again.  Every answer
+    /// is kept, and a follow-up is stored alongside the answer it followed.
     ///
-    /// This writes only.  It started as a read-through cache, which stopped making sense once the
-    /// viewer began showing a pattern's previous analysis automatically: by the time somebody presses
-    /// the button they have already read the stored answer and are asking for another opinion.
-    /// Returning the text they are looking at would have been the one thing they did not want - and
-    /// two runs of the same model on the same graph do not say the same thing anyway.
+    /// The query plan counterpart of <see cref="DeadlockAnalysisStore"/>, and write-only for the same
+    /// reason: by the time somebody presses the button they have already read the stored answer the
+    /// viewer showed them, and are asking for another opinion.
     ///
     /// Writes are best effort.  A record that cannot be written costs the next reader an analysis,
     /// which is not worth failing the one this caller is waiting for.
     /// </summary>
-    public class DeadlockAnalysisStore
+    public class PlanAnalysisStore
     {
         private readonly string? _connectionString;
-        private readonly ILogger<DeadlockAnalysisStore> _logger;
+        private readonly ILogger<PlanAnalysisStore> _logger;
         private readonly int _timeoutSeconds;
 
-        public DeadlockAnalysisStore(IConfiguration configuration, ILogger<DeadlockAnalysisStore> logger)
+        public PlanAnalysisStore(IConfiguration configuration, ILogger<PlanAnalysisStore> logger)
         {
             _connectionString = configuration.GetConnectionString("Repository");
             _timeoutSeconds = configuration.GetValue<int?>("AI:SqlTimeoutSeconds") ?? 30;
@@ -35,54 +33,52 @@ namespace DBADashAI.Services
 
         public async Task SaveAsync(
             string? signature,
+            string? planHash,
             string model,
             string payloadVersion,
             string analysis,
             int? instanceId,
-            byte? signatureVersion,
-            string? graphXml,
+            string? statementText,
             Guid conversationId,
             int turnNumber,
             string? question,
             CancellationToken cancellationToken)
         {
+            // Without an identity there is nothing to find the answer by again, which is the only
+            // reason to store it.
             if (!IsAvailable || string.IsNullOrWhiteSpace(signature) || string.IsNullOrWhiteSpace(analysis)) return;
 
             try
             {
                 await using var connection = new SqlConnection(_connectionString);
-                await using var command = new SqlCommand("AI.DeadlockAnalysis_Upd", connection)
+                await using var command = new SqlCommand("AI.QueryPlanAnalysis_Upd", connection)
                 {
                     CommandType = CommandType.StoredProcedure,
                     CommandTimeout = _timeoutSeconds
                 };
 
                 command.Parameters.AddWithValue("@Signature", signature);
+                command.Parameters.AddWithValue("@PlanHash", (object?)planHash ?? DBNull.Value);
                 command.Parameters.AddWithValue("@Model", model);
                 command.Parameters.AddWithValue("@PayloadVersion", payloadVersion);
                 command.Parameters.AddWithValue("@Analysis", analysis);
                 command.Parameters.AddWithValue("@InstanceID", (object?)instanceId ?? DBNull.Value);
-                command.Parameters.AddWithValue("@SignatureVersion", (object?)signatureVersion ?? DBNull.Value);
-                // Which exchange this belongs to and where in it, so the viewer can read a stored
-                // conversation back as the conversation it was and carry on adding to it.
+                // Kept so the drop-down can say which query an answer is about.  A hash identifies a
+                // statement but does not describe it, and a list of hashes is a list of nothing.
+                command.Parameters.Add("@StatementText", SqlDbType.NVarChar, -1).Value =
+                    string.IsNullOrWhiteSpace(statementText) ? DBNull.Value : statementText;
                 command.Parameters.AddWithValue("@ConversationID", conversationId);
                 command.Parameters.AddWithValue("@TurnNumber", turnNumber);
-                // Null on the opening turn: the question there is the deadlock, which is stored anyway.
+                // Null on the opening turn: the question there is the plan itself.
                 command.Parameters.Add("@Question", SqlDbType.NVarChar, -1).Value =
                     string.IsNullOrWhiteSpace(question) ? DBNull.Value : question;
-                // The graph the answer was produced from, so its signature can be recomputed when the version changes.
-                command.Parameters.Add("@GraphXml", SqlDbType.NVarChar, -1).Value = (object?)graphXml ?? DBNull.Value;
-                // Hashed here rather than taken from the caller, so every stored answer gets one.  The viewer sends the
-                // graph as the parser re-serialised it, which is what the collector hashes too.
-                command.Parameters.Add("@DeadlockHash", SqlDbType.Binary, DeadlockHash.Bytes).Value =
-                    string.IsNullOrWhiteSpace(graphXml) ? DBNull.Value : (object)DeadlockHash.Compute(graphXml);
 
                 await connection.OpenAsync(cancellationToken);
                 await command.ExecuteNonQueryAsync(cancellationToken);
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Could not record the deadlock analysis for {signature}", signature);
+                _logger.LogWarning(ex, "Could not record the query plan analysis for {signature}", signature);
             }
         }
     }

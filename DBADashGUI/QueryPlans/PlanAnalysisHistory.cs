@@ -1,5 +1,4 @@
 #nullable enable
-using DBADash.Deadlock.Analysis;
 using Microsoft.Data.SqlClient;
 using Serilog;
 using System;
@@ -9,25 +8,21 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace DBADashGUI.Deadlocks
+namespace DBADashGUI.QueryPlans
 {
     /// <summary>
-    /// Previous AI conversations about a deadlock, read straight from the repository: those about this exact
-    /// deadlock first, then those about its pattern, newest first within each.
+    /// Previous AI conversations about a query plan, read straight from the repository: those about this
+    /// exact plan first, then those about the same query with a different plan, newest first within each.
     ///
-    /// Conversations rather than answers, because a follow-up read without the analysis it followed is an
-    /// answer to a question nobody can see - and because picking one out of the drop-down puts the whole
-    /// exchange back on screen, which is what the reader can then carry on adding to.
+    /// The query plan counterpart of <see cref="Deadlocks.DeadlockAnalysisHistory"/>, and the same in
+    /// every respect but one: leading with the plan matters more here.  A query that has had two plans
+    /// has usually had a good one and a bad one, so an answer is labelled with which of the two it is
+    /// about rather than quietly offered as an answer about what is on screen.
     ///
-    /// Model and payload version are not matched: this asks whether anyone has ever looked at this
-    /// deadlock, and shows what they found.  An answer from an older model, or from before object
-    /// definitions were being sent, is still worth reading - it is labelled for what it is, and asking
-    /// again is one button away.
-    ///
-    /// Reading the repository directly rather than going through the AI service means a deadlock's
-    /// history is there even when no AI service is configured any more.
+    /// Reading the repository directly rather than going through the AI service means a plan's history
+    /// is there even when no AI service is configured any more.
     /// </summary>
-    internal static class DeadlockAnalysisHistory
+    internal static class PlanAnalysisHistory
     {
         /// <summary>One answer, with the follow-up question that produced it where there was one.</summary>
         internal sealed record Turn(
@@ -43,7 +38,7 @@ namespace DBADashGUI.Deadlocks
             Guid? ConversationId,
             IReadOnlyList<Turn> Turns,
             string? Instance,
-            bool IsThisDeadlock)
+            bool IsThisPlan)
         {
             /// <summary>The model that answered last, which is the one still answering if this is carried on.</summary>
             public string Model => Turns[^1].Model;
@@ -52,13 +47,13 @@ namespace DBADashGUI.Deadlocks
             public DateTime GeneratedUtc => Turns[^1].GeneratedUtc;
 
             /// <summary>
-            /// True when the conversation was started without the object definitions we now send.  Taken
-            /// from the opening turn, which is the one that carried the artifact.
+            /// True when the conversation was started without the plan XML.  Taken from the opening turn,
+            /// which is the one that carried the artifact.
             /// </summary>
-            public bool WithoutSchema => !Turns[0].PayloadVersion.Contains("schema", StringComparison.OrdinalIgnoreCase);
+            public bool WithoutPlanXml => !Turns[0].PayloadVersion.Contains("xml", StringComparison.OrdinalIgnoreCase);
 
-            /// <summary>Whether the conversation is about this deadlock or another occurrence of its pattern.</summary>
-            public string Scope => IsThisDeadlock ? "this deadlock" : "this deadlock pattern";
+            /// <summary>Whether the conversation is about this plan or about another plan for the same query.</summary>
+            public string Scope => IsThisPlan ? "this plan" : "this query, with a different plan";
 
             /// <summary>How the conversation reads in a menu: one answer, or an exchange of several.</summary>
             public string Length => Turns.Count == 1 ? "1 answer" : $"{Turns.Count} answers";
@@ -66,7 +61,7 @@ namespace DBADashGUI.Deadlocks
 
         internal static async Task<IReadOnlyList<Entry>> FetchAsync(
             string? signature,
-            string? deadlockHash,
+            string? planHash,
             CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(signature) || string.IsNullOrWhiteSpace(Common.ConnectionString))
@@ -76,21 +71,20 @@ namespace DBADashGUI.Deadlocks
 
             try
             {
-                // Built up as the rows arrive, which come conversation by conversation and in turn
-                // order within each - so the first row of a conversation is the one that describes it.
+                // Built up as the rows arrive, which come conversation by conversation and in turn order
+                // within each - so the first row of a conversation is the one that describes it.
                 var conversations = new List<Entry>();
                 var turns = new Dictionary<string, List<Turn>>();
 
                 await using var connection = new SqlConnection(Common.ConnectionString);
-                await using var command = new SqlCommand("AI.DeadlockAnalysisHistory_Get", connection)
+                await using var command = new SqlCommand("AI.QueryPlanAnalysisHistory_Get", connection)
                 {
                     CommandType = CommandType.StoredProcedure,
                     CommandTimeout = 30
                 };
 
                 command.Parameters.AddWithValue("Signature", signature);
-                command.Parameters.Add("DeadlockHash", SqlDbType.Binary, DeadlockHash.Bytes).Value =
-                    string.IsNullOrWhiteSpace(deadlockHash) ? DBNull.Value : (object)Convert.FromHexString(deadlockHash[2..]);
+                command.Parameters.AddWithValue("PlanHash", (object?)planHash ?? DBNull.Value);
 
                 await connection.OpenAsync(cancellationToken);
                 await using var reader = await command.ExecuteReaderAsync(cancellationToken);
@@ -108,11 +102,11 @@ namespace DBADashGUI.Deadlocks
                             reader["ConversationID"] as Guid?,
                             list,
                             reader["InstanceDisplayName"] as string,
-                            (bool)reader["IsThisDeadlock"]));
+                            (bool)reader["IsThisPlan"]));
                     }
 
                     list.Add(new Turn(
-                        (long)reader["DeadlockAnalysisID"],
+                        (long)reader["QueryPlanAnalysisID"],
                         reader["Question"] as string,
                         (string)reader["Analysis"],
                         (string)reader["Model"],
@@ -128,7 +122,7 @@ namespace DBADashGUI.Deadlocks
             {
                 // An older repository without the table, or a user without the grant: the viewer works
                 // the same, it just cannot offer what was found before.
-                Log.Debug(ex, "Could not read deadlock analysis history for {signature}", signature);
+                Log.Debug(ex, "Could not read query plan analysis history for {signature}", signature);
                 return Array.Empty<Entry>();
             }
         }

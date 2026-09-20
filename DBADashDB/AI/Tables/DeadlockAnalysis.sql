@@ -6,6 +6,12 @@
 	otherwise the newest answer about its pattern (Signature, see DeadlockSignature in DBADash.Deadlock) - so
 	nobody pays for the same answer twice without meaning to.  The rest are a drop-down away.
 
+	A row is one answer, and a conversation is a run of them: ConversationID groups them and TurnNumber
+	orders them, with the reader's question on every turn after the first - on the first the question is
+	the deadlock, which is stored anyway.  Storing the turns rather than the exchange as a whole keeps the
+	table one shape, keeps a follow-up as cheap to write as the analysis it follows, and means an
+	interrupted conversation stores what it got.
+
 	History rather than replacement: every answer has been paid for, two runs of one model over one graph
 	rarely say the same thing, and asking again is often a search for a better answer rather than a
 	correction of a wrong one.  Analyses are only ever made by someone pressing a button, so the table
@@ -15,7 +21,9 @@
 	stored under.  When the signature version changes, the service recomputes the answer's signature from
 	its own graph (see AI.DeadlockAnalysisSignatureRecompute_Upd), so the answer follows the deadlock it
 	was actually about - a version change that splits an over-broad pattern must not hand one pattern's
-	answer to the others.  Answers stored without a graph can't be recomputed and keep their signature.
+	answer to the others.  It is kept on every turn of a conversation and not just the first, so a version
+	change moves the whole conversation together rather than stranding its follow-ups under the old
+	signature.  Answers stored without a graph can't be recomputed and keep their signature.
 */
 CREATE TABLE AI.DeadlockAnalysis
 (
@@ -34,6 +42,12 @@ CREATE TABLE AI.DeadlockAnalysis
 	/* The graph's occurrence identity, as dbo.Deadlocks.DeadlockHash - computed the same way (DBADash.Deadlock.Analysis.DeadlockHash),
 	   so a graph opened from a file matches too.  NULL for answers stored before it was recorded. */
 	DeadlockHash BINARY(16) NULL,
+	/* The exchange this answer belongs to, and where in it.  NULL for answers stored before follow-up
+	   questions existed, which are conversations of one turn read back as themselves. */
+	ConversationID UNIQUEIDENTIFIER NULL,
+	TurnNumber SMALLINT NULL,
+	/* The follow-up that was asked.  NULL on the opening turn of a conversation. */
+	Question NVARCHAR(MAX) NULL,
 	CONSTRAINT PK_DeadlockAnalysis PRIMARY KEY CLUSTERED (DeadlockAnalysisID)
 );
 GO
@@ -50,3 +64,9 @@ GO
    start - as IX_Deadlocks_SignatureVersion does for dbo.Deadlocks. */
 CREATE NONCLUSTERED INDEX IX_DeadlockAnalysis_SignatureVersion
 	ON AI.DeadlockAnalysis (SignatureVersion);
+GO
+
+/* Reads a conversation back in order once one of its turns has been found by signature or hash. */
+CREATE NONCLUSTERED INDEX IX_DeadlockAnalysis_Conversation
+	ON AI.DeadlockAnalysis (ConversationID, TurnNumber)
+	WHERE ConversationID IS NOT NULL;

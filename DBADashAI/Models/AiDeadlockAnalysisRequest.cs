@@ -78,6 +78,25 @@ namespace DBADashAI.Models
         public string? ModelOverride { get; set; }
 
         /// <summary>
+        /// What has been said about this deadlock already, when this is a follow-up: the model's first
+        /// answer, the reader's next question, and so on - see <see cref="AiConversation"/>.  Empty for
+        /// a first analysis, which is most requests.
+        /// </summary>
+        public List<AiConversationTurn> History { get; set; } = new();
+
+        /// <summary>
+        /// The follow-up question, when there is one.  Required once <see cref="History"/> is not empty
+        /// and meaningless without it: a question with no answer before it is just a first analysis.
+        /// </summary>
+        public string? Question { get; set; }
+
+        /// <summary>
+        /// The conversation this turn belongs to, so stored turns can be read back as the exchange they
+        /// were rather than a pile of unrelated answers.  Minted by the caller on the first turn.
+        /// </summary>
+        public Guid? ConversationId { get; set; }
+
+        /// <summary>
         /// A ceiling on the schema regardless of what the caller sends.  The caller already caps each
         /// definition, but a deadlock across a dozen wide tables would still add up to more context
         /// than the answer improves by.
@@ -101,9 +120,12 @@ namespace DBADashAI.Models
                 return "Signature is not a deadlock signature.";
             }
 
-            return Schema.Sum(s => s.Ddl?.Length ?? 0) > MaxSchemaLength
-                ? $"Schema exceeds {MaxSchemaLength} characters."
-                : null;
+            if (Schema.Sum(s => s.Ddl?.Length ?? 0) > MaxSchemaLength)
+            {
+                return $"Schema exceeds {MaxSchemaLength} characters.";
+            }
+
+            return AiConversation.Validate(History, Question);
         }
     }
 }

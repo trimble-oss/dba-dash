@@ -1,36 +1,35 @@
-using DBADash.Deadlock.Analysis;
-using DBADash.Deadlock.Model;
-using DBADashGUI.AgentJobs;
+using DBADash.QueryPlan.Analysis;
+using DBADash.QueryPlan.Model;
 using DBADashGUI.AI;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace DBADashGUI.Deadlocks
+namespace DBADashGUI.QueryPlans
 {
     /// <summary>
-    /// AI analysis of the deadlock, on the same principle as everything else that leaves the estate:
-    /// the user sees exactly what would be sent, and nothing goes until they press the button.
+    /// AI analysis of the statement on screen, on the same principle as the deadlock viewer's: the user
+    /// sees exactly what would be sent, and nothing goes until they press the button.
     ///
-    /// The preview is not a description of the payload - it is the payload, rendered by the same
-    /// object the client serialises, so the two cannot drift.  It is worth reading before pressing
-    /// send: a deadlock graph carries the statements as they ran, and those routinely include
-    /// parameter values.
+    /// The preview is not a description of the payload - it is the payload, rendered by the same object
+    /// the client serialises, so the two cannot drift.  It is worth reading before pressing send: a plan
+    /// carries the statement as it was compiled or ran, which means literal values, and for an actual
+    /// plan the parameter values it ran with.
     ///
-    /// Once an answer arrives the request gives up the screen to it - by then it has served its
-    /// purpose, and the analysis is what the reader came for - but it stays one button away.
+    /// One statement, not the document.  The tab follows the statement selector, because that is the
+    /// statement the reader is looking at and a batch of ten sent as one produces an answer about
+    /// whichever the model found most interesting.
     ///
-    /// The answer is rarely the end of it.  An analysis raises questions - is that index the one that
-    /// would fix it, what would happen if the transaction were shorter, why is the isolation level
-    /// what it is - so the answer comes with a box to ask the next one, and the whole exchange is
-    /// stored and shown again next time the deadlock is opened.  Each follow-up carries the deadlock
-    /// and everything said so far back to the service, which holds no conversation state of its own.
+    /// The answer is rarely the end of it.  A plan raises questions an analysis cannot anticipate - would
+    /// that index help the other queries on the table, why is the estimate wrong when the statistics are
+    /// fresh, what would this look like with a different join order - so the answer comes with a box to
+    /// ask the next one, and the whole exchange is stored against the query and shown again next time it
+    /// turns up.
     /// </summary>
-    internal sealed class DeadlockAiControl : UserControl
+    internal sealed class QueryPlanAiControl : UserControl
     {
         private readonly TextBox _preview;
         private readonly AiConversationView _conversation = new() { Dock = DockStyle.Fill };
@@ -39,48 +38,58 @@ namespace DBADashGUI.Deadlocks
         private readonly ToolStripButton _submit;
         private readonly ToolStripDropDownButton _options;
         private readonly ToolStripMenuItem _showRequest;
-        private readonly ToolStripLabel _signature = new();
+        private readonly ToolStripMenuItem _includePlanXml;
+        private readonly ToolStripLabel _identity = new();
 
-        /// <summary>Every stored conversation about this deadlock and its pattern, to pick from.  Hidden when there are none.</summary>
+        /// <summary>Every stored conversation about this plan and this query, to pick from.  Hidden when there are none.</summary>
         private readonly ToolStripDropDownButton _history = new("Previous analyses")
         {
             DisplayStyle = ToolStripItemDisplayStyle.Text,
             Visible = false,
-            ToolTipText = "Conversations about this deadlock, then about other occurrences of its pattern, newest first."
+            ToolTipText = "Conversations about this plan, then about the same query with a different plan, newest first."
         };
 
         private readonly ToolStripStatusLabel _status = new();
 
-        private readonly ToolStripMenuItem _includeSchema;
-
-        private DeadlockAnalysisPayload _payload;
+        private PlanAnalysisPayload _payload;
         private AIServiceDiscovery.ServiceInfo _service;
         private CancellationTokenSource _inFlight;
 
         /// <summary>The exchange on screen, which a follow-up continues.  Null until something is asked or restored.</summary>
         private AiConversation _current;
 
-        // Held so the payload can be rebuilt when the schema is toggled without going back to the
-        // repository, and so the preview always matches what the toggle currently says.
-        private DeadlockGraph _graph;
+        /// <summary>
+        /// False when what is on screen is a conversation about a different plan for the same query.
+        ///
+        /// Those are worth showing - the other half of a regression usually is - but not worth adding
+        /// to.  A follow-up sends the plan in front of the reader along with the transcript, so
+        /// continuing one of these would hand the model this plan and an exchange about another, and
+        /// the answer would be about neither.  "Analyse again" starts a conversation about this one.
+        /// </summary>
+        private bool _currentIsThisPlan;
 
+        // Held so the payload can be rebuilt when the XML is toggled, and so the preview always matches
+        // what the toggle currently says.
+        private ExecutionPlan _plan;
+
+        private PlanStatement _statement;
         private string _instance;
         private int? _instanceId;
+        private string _fileName;
 
-        // The status line is composed from these: an answer note and a service note, each set by its
-        // own async lookup, plus the colour the more important of the two deserves.
+        // The status line is composed from these: an answer note and a service note, each set by its own
+        // async lookup, plus the colour the more important of the two deserves.
         private string _analysisNote;
 
         private string _serviceNote;
         private Color _statusColour = DashColors.Information;
-        private IReadOnlyList<DeadlockObjectDefinition> _schema = Array.Empty<DeadlockObjectDefinition>();
 
-        internal DeadlockAiControl()
+        internal QueryPlanAiControl()
         {
             _preview = NewTextBox();
 
-            // Image and text: the caption is what says whether this is the first run or another one,
-            // and sending the deadlock out of the estate is not something to leave to an icon alone.
+            // Image and text: the caption is what says whether this is the first run or another one, and
+            // sending a plan out of the estate is not something to leave to an icon alone.
             _submit = new ToolStripButton("Submit for analysis", Properties.Resources.DeadlockAnalyse_16x, async (_, _) => await SubmitAsync())
             {
                 DisplayStyle = ToolStripItemDisplayStyle.ImageAndText,
@@ -102,18 +111,16 @@ namespace DBADashGUI.Deadlocks
                 ToolTipText = "Show what was sent to the AI service alongside the analysis."
             };
 
-            _includeSchema = new ToolStripMenuItem("Include schema", null, (_, _) => RebuildPayload())
+            _includePlanXml = new ToolStripMenuItem("Include plan XML", null, (_, _) => RebuildPayload())
             {
                 CheckOnClick = true,
                 Checked = true,
-                Visible = false, // Shown once we know whether the repository has any
-                ToolTipText = "Include the definitions of the objects involved, as they were at the " +
-                              "time of the deadlock.  They make the analysis better and the request larger."
+                ToolTipText = "Send the showplan XML as well as the summary.  It makes the analysis better and " +
+                              "the request much larger, and it carries the statement's literal values."
             };
 
             _options.DropDownItems.Add(_showRequest);
-            _options.DropDownItems.Add(_includeSchema);
-            UpdateOptionsVisibility();
+            _options.DropDownItems.Add(_includePlanXml);
 
             var toolbar = new ToolStrip { GripStyle = ToolStripGripStyle.Hidden };
             toolbar.Items.Add(_submit);
@@ -121,7 +128,7 @@ namespace DBADashGUI.Deadlocks
             toolbar.Items.Add(_options);
             toolbar.Items.Add(_history);
             toolbar.Items.Add(new ToolStripSeparator());
-            toolbar.Items.Add(_signature);
+            toolbar.Items.Add(_identity);
 
             _split = new SplitContainer
             {
@@ -153,21 +160,26 @@ namespace DBADashGUI.Deadlocks
         };
 
         /// <summary>
-        /// Builds the payload for a graph and shows it.  Deliberately does not contact anything: the
-        /// tab can be opened, read and closed again without a byte leaving the machine.
+        /// Points the tab at a statement and shows what would be sent about it.  Deliberately does not
+        /// contact anything: the tab can be opened, read and closed again without a byte leaving the
+        /// machine.
+        ///
+        /// Called again whenever the reader picks a different statement, which makes it a different
+        /// question - so anything on screen about the last one goes.
         /// </summary>
-        internal void Show(DeadlockGraph graph, string instance, DBADashContext context)
+        internal void Show(ExecutionPlan plan, PlanStatement statement, string fileName, DBADashContext context)
         {
-            _graph = graph;
-            _instance = instance;
+            _plan = plan;
+            _statement = statement;
+            _fileName = fileName;
+            _instance = context?.InstanceName;
             _instanceId = context is { InstanceID: > 0 } ? context.InstanceID : null;
-            _schema = Array.Empty<DeadlockObjectDefinition>();
-            _includeSchema.Visible = false;
 
             RebuildPayload();
 
-            // A new deadlock means the previous conversation is about something else.
+            // A different statement means the previous conversation is about something else.
             _current = null;
+            _currentIsThisPlan = true;
             _conversation.Clear();
             _split.Panel1Collapsed = false;
             _split.Panel2Collapsed = true;
@@ -177,31 +189,50 @@ namespace DBADashGUI.Deadlocks
             _submit.Text = "Submit for analysis";
             _history.DropDownItems.Clear();
             _history.Visible = false;
-            UpdateOptionsVisibility();
 
-            _ = FindServiceAsync();
-            _ = FetchSchemaAsync(context);
+            // Found once per control rather than per statement: the service does not change while a plan
+            // is open, and probing it again on every click of the statement list would be rude.
+            if (_service is null && _serviceNote is null) _ = FindServiceAsync();
+            UpdateStatus();
+            UpdateCanAsk();
+
             _ = LoadHistoryAsync(showLatest: true);
         }
 
+        /// <summary>Rebuilds the payload and the preview from what is currently switched on.</summary>
+        private void RebuildPayload()
+        {
+            if (_plan is null || _statement is null) return;
+
+            _payload = PlanAnalysisPayload.Build(_plan, _statement, _instance, _fileName, _includePlanXml.Checked);
+
+            _preview.Text = _payload.ToPreview().Replace("\n", Environment.NewLine);
+            _identity.Text = $"Query {_payload.Signature}  Plan {_payload.PlanHash}";
+
+            // The reader can ask for the XML and still not get it - a plan can be too large to send.
+            // Saying so on the toggle is better than leaving them to find the reason in the preview.
+            _includePlanXml.Text = _includePlanXml.Checked && !_payload.PlanXmlIncluded
+                ? "Include plan XML (too large)"
+                : "Include plan XML";
+        }
+
         /// <summary>
-        /// Fills the Previous analyses drop-down, and when <paramref name="showLatest"/> shows the first entry -
-        /// the newest conversation about this exact deadlock, or failing that the newest about its pattern.
+        /// Fills the Previous analyses drop-down, and when <paramref name="showLatest"/> shows the first
+        /// entry - the newest conversation about this exact plan, or failing that the newest about the
+        /// same query with a different plan.
         ///
-        /// The pattern is the point of the fallback: two hundred occurrences of one problem have one
-        /// answer, and the reader should not have to know they are looking at a repeat, or pay for
-        /// the answer again to find out.  A conversation about this exact graph is still the better one
-        /// to lead with where there is one - a signature is a grouping heuristic, and can be too broad.
-        /// Model and payload version are deliberately ignored - an older answer is still worth reading,
-        /// and asking again is one button away.
+        /// The fallback is worth having and worth labelling.  The same query with a different plan is
+        /// often exactly what the reader needs to see - it is the other half of a regression - but an
+        /// answer about a plan that is not the one on screen would be actively misleading if it were
+        /// presented as one, so the status line says which it is.
         /// </summary>
         private async Task LoadHistoryAsync(bool showLatest)
         {
-            var graph = _graph;
-            var history = await DeadlockAnalysisHistory.FetchAsync(_payload?.Signature, _payload?.DeadlockHash);
+            var statement = _statement;
+            var history = await PlanAnalysisHistory.FetchAsync(_payload?.Signature, _payload?.PlanHash);
 
-            // A different deadlock was selected while this was in flight.
-            if (IsDisposed || !ReferenceEquals(graph, _graph)) return;
+            // A different statement was selected while this was in flight.
+            if (IsDisposed || !ReferenceEquals(statement, _statement)) return;
 
             _history.DropDownItems.Clear();
             foreach (var entry in history)
@@ -230,20 +261,19 @@ namespace DBADashGUI.Deadlocks
         /// Shows a stored conversation, saying what it is about and where it came from.  The reader can
         /// carry on adding to it: a conversation read back is a conversation, not a transcript.
         /// </summary>
-        private async Task ShowEntryAsync(DeadlockAnalysisHistory.Entry entry)
+        private async Task ShowEntryAsync(PlanAnalysisHistory.Entry entry)
         {
             if (_inFlight is not null) return;
 
-            var graph = _graph;
+            var statement = _statement;
 
             // A conversation stored before follow-ups existed has no id of its own.  Continuing it mints
-            // one, so the answers added from here are stored as the exchange they are; the turns already
-            // stored keep theirs, and stay a conversation of their own in the drop-down.
+            // one, so the answers added from here are stored as the exchange they are.
             var conversation = AiConversation.Restore(
                 entry.ConversationId ?? Guid.NewGuid(),
                 entry.Turns.Select(t => new AiConversation.Turn(t.Question, t.Analysis, t.Model, t.GeneratedUtc)));
 
-            if (!await ShowConversationAsync(conversation, graph)) return;
+            if (!await ShowConversationAsync(conversation, statement, entry.IsThisPlan)) return;
 
             foreach (var item in _history.DropDownItems.OfType<ToolStripMenuItem>())
             {
@@ -254,28 +284,26 @@ namespace DBADashGUI.Deadlocks
             var others = _history.DropDownItems.Count > 1
                 ? $"  {_history.DropDownItems.Count} conversations are stored - see Previous analyses."
                 : string.Empty;
-            var thinner = entry.WithoutSchema && _schema.Count > 0
-                ? "  It was produced without the object definitions now available - re-analyse to include them."
+            var thinner = entry.WithoutPlanXml
+                ? "  It was produced from the summary alone, without the plan XML."
                 : string.Empty;
 
             _analysisNote =
                 $"Previous analysis of {entry.Scope}, by {entry.Model} on {age}.{thinner}{others}  " +
-                "Generated advice - check it against the code before acting on it.";
-            _statusColour = DashColors.Information;
+                "Generated advice - check it against the plan before acting on it.";
+            _statusColour = entry.IsThisPlan ? DashColors.Information : DashColors.Warning;
             UpdateStatus();
 
-            // With an answer already on screen, the button is starting a fresh conversation rather than
-            // the first one, and should say so.  Building on what is shown is what the question box is for.
             _submit.Text = "Analyse again";
-            _submit.ToolTipText = "Start a new conversation about this graph.  Every answer is kept, and two runs " +
-                                  "over the same graph rarely say quite the same thing - the request may also now " +
-                                  "carry more than it did.  To build on the analysis shown, ask a follow-up instead.";
+            _submit.ToolTipText = "Start a new conversation about this plan.  Every answer is kept, and two runs over " +
+                                  "the same plan rarely say quite the same thing.  To build on the analysis shown, ask " +
+                                  "a follow-up instead.";
         }
 
         /// <summary>
-        /// Composes the status line from the two things that arrive independently: what is on screen
-        /// (a fresh answer, a stored one, or nothing yet) and whether a service is available to ask.
-        /// Both are found asynchronously, so whichever lands second must not erase the other.
+        /// Composes the status line from the two things that arrive independently: what is on screen (a
+        /// fresh answer, a stored one, or nothing yet) and whether a service is available to ask.  Both
+        /// are found asynchronously, so whichever lands second must not erase the other.
         /// </summary>
         private void UpdateStatus()
         {
@@ -285,46 +313,15 @@ namespace DBADashGUI.Deadlocks
             _status.ForeColor = _statusColour;
         }
 
-        /// <summary>Rebuilds the payload and the preview from what is currently switched on.</summary>
-        private void RebuildPayload()
-        {
-            if (_graph is null) return;
-
-            var schema = _includeSchema.Checked ? _schema : Array.Empty<DeadlockObjectDefinition>();
-            _payload = DeadlockAnalysisPayload.Build(_graph, DeadlockAnalyser.Analyse(_graph), _instance, schema);
-
-            _preview.Text = _payload.ToPreview().Replace("\n", Environment.NewLine);
-            _signature.Text = $"Signature {_payload.Signature}";
-        }
-
-        /// <summary>
-        /// Looks for the definitions of the objects involved.  Runs after the preview is already on
-        /// screen, because the repository may be slow and the graph is worth reading meanwhile - the
-        /// preview simply gains a section when they arrive.
-        /// </summary>
-        private async Task FetchSchemaAsync(DBADashContext context)
-        {
-            var graph = _graph;
-            _schema = await DeadlockSchemaLookup.FetchAsync(context, graph);
-
-            // A different deadlock was selected while this was in flight.
-            if (IsDisposed || !ReferenceEquals(graph, _graph)) return;
-
-            _includeSchema.Visible = _schema.Count > 0;
-            _includeSchema.Text = $"Include schema ({_schema.Count})";
-            UpdateOptionsVisibility();
-            if (_schema.Count > 0) RebuildPayload();
-        }
-
         private async Task FindServiceAsync()
         {
-            // Started from the UI thread, so the continuation comes back to it: no Invoke, and no
-            // handle check either - the tab has usually never been shown at this point, and waiting
-            // for a handle would leave the button disabled until it was.
-            _service = await DeadlockAnalysisClient.FindServiceAsync();
+            // Started from the UI thread, so the continuation comes back to it: no Invoke, and no handle
+            // check either - the tab has usually never been shown at this point, and waiting for a handle
+            // would leave the button disabled until it was.
+            _service = await PlanAnalysisClient.FindServiceAsync();
             if (IsDisposed) return;
 
-            _submit.Enabled = _service is not null;
+            _submit.Enabled = _service is not null && _payload is not null;
 
             _serviceNote = _service is null
                 ? "No AI service is configured, so nothing can be submitted."
@@ -335,19 +332,19 @@ namespace DBADashGUI.Deadlocks
         }
 
         /// <summary>
-        /// Asks the model.  With no <paramref name="question"/> that starts a new conversation: the reader
-        /// has already been shown any previous one about this pattern, so pressing the button means they
-        /// want another opinion - and two runs of one model over the same graph do not say the same thing
-        /// anyway.  With a question it is the next turn of the conversation on screen, which goes up with
-        /// the graph and everything said so far.
+        /// Asks the model.  With no <paramref name="question"/> that starts a new conversation; with one it
+        /// is the next turn of the conversation on screen, which goes up with the plan and everything said
+        /// so far.
         /// </summary>
         private async Task SubmitAsync(string question = null)
         {
             if (_payload is null || _service is null || _inFlight is not null) return;
 
             // A follow-up with nothing to follow would be a first analysis with a question stuck on the
-            // front, which is not what was asked for.
-            var continuing = question is null ? null : _current;
+            // front, which is not what was asked for - and one that follows a conversation about another
+            // plan would send this plan with that plan's transcript.  The ask box is disabled in both
+            // cases; this is the belt to that braces.
+            var continuing = question is null || !_currentIsThisPlan ? null : _current;
             if (question is not null && continuing is null) return;
 
             _inFlight = new CancellationTokenSource();
@@ -359,12 +356,13 @@ namespace DBADashGUI.Deadlocks
 
             try
             {
-                var graph = _graph;
-                var result = await DeadlockAnalysisClient.AnalyseAsync(
+                var statement = _statement;
+                var result = await PlanAnalysisClient.AnalyseAsync(
                     _payload, _service, _inFlight.Token, _instanceId, continuing, question);
 
-                // The answer is stored either way; it just isn't shown against a deadlock selected while it was coming.
-                if (IsDisposed || !ReferenceEquals(graph, _graph)) return;
+                // The answer is stored either way; it just isn't shown against a statement selected while
+                // it was coming.
+                if (IsDisposed || !ReferenceEquals(statement, _statement)) return;
 
                 if (!result.Success)
                 {
@@ -389,14 +387,14 @@ namespace DBADashGUI.Deadlocks
                     result.Model,
                     result.GeneratedUtc ?? DateTime.UtcNow));
 
-                if (!await ShowConversationAsync(conversation, graph)) return;
+                if (!await ShowConversationAsync(conversation, statement)) return;
 
-                _analysisNote = Describe(result);
+                _analysisNote = $"Analysed by {result.Model ?? "the configured model"}.  " +
+                                "Generated advice - check it against the plan before acting on it.";
                 _statusColour = DashColors.Success;
                 UpdateStatus();
 
-                // The conversation just stored joins the list, alongside the ones it didn't replace.  Nothing
-                // on screen is checked: what is showing is the live conversation, not a stored one.
+                // The conversation just stored joins the list, alongside the ones it didn't replace.
                 _submit.Text = "Analyse again";
                 _ = LoadHistoryAsync(showLatest: false);
             }
@@ -416,31 +414,26 @@ namespace DBADashGUI.Deadlocks
             }
         }
 
-        /// <summary>Says which model answered, and that the answer is still a reading of the graph.</summary>
-        private static string Describe(DeadlockAnalysisClient.Result result) =>
-            $"Analysed by {result.Model ?? "the configured model"}.  " +
-            "Generated advice - check it against the code before acting on it.";
-
         /// <summary>Puts a conversation on screen and makes it the one a follow-up continues.</summary>
-        /// <returns>False when a different deadlock was selected while it was rendering, so the caller
+        /// <returns>False when a different statement was selected while it was rendering, so the caller
         /// stops rather than describing this one over the top of that one.</returns>
-        private async Task<bool> ShowConversationAsync(AiConversation conversation, DeadlockGraph graph)
+        private async Task<bool> ShowConversationAsync(AiConversation conversation, PlanStatement statement, bool isThisPlan = true)
         {
             // Set before rendering, so a follow-up asked while it renders continues the right exchange.
             _current = conversation;
+            _currentIsThisPlan = isThisPlan;
 
-            if (!await _conversation.ShowAsync(conversation, () => !IsDisposed && ReferenceEquals(graph, _graph)))
+            if (!await _conversation.ShowAsync(conversation, () => !IsDisposed && ReferenceEquals(statement, _statement)))
             {
                 return false;
             }
 
-            // The request has done its job: the reader has either checked it or chosen not to, and
-            // the answer is what they are here for.  One button brings it back.
+            // The request has done its job: the reader has either checked it or chosen not to, and the
+            // answer is what they are here for.  One button brings it back.
             _split.Panel2Collapsed = false;
             _showRequest.Visible = true;
             _showRequest.Checked = false;
             ShowRequest(false);
-            UpdateOptionsVisibility();
             UpdateCanAsk();
 
             return true;
@@ -460,18 +453,17 @@ namespace DBADashGUI.Deadlocks
             {
                 _conversation.SetCanAsk(false, "Waiting for the model...");
             }
+            else if (_current is { IsEmpty: false } && !_currentIsThisPlan)
+            {
+                _conversation.SetCanAsk(false,
+                    "This conversation is about a different plan for the same query, so it cannot be added to.  " +
+                    "Submit for analysis to start one about the plan on screen.");
+            }
             else
             {
                 _conversation.SetCanAsk(_current is { IsEmpty: false });
             }
         }
-
-        /// <summary>
-        /// The Options button is only worth showing when it has something to offer: hide it whenever
-        /// none of its items are visible so an empty dropdown isn't presented.
-        /// </summary>
-        private void UpdateOptionsVisibility() =>
-            _options.Visible = _options.DropDownItems.OfType<ToolStripItem>().Any(i => i.Available);
 
         private void ShowRequest(bool show)
         {
