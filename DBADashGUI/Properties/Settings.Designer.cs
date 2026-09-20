@@ -277,6 +277,18 @@ namespace DBADashGUI.Properties {
 
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("FirstChildAligned")]
+        public string QueryPlanVerticalLayout {
+            get {
+                return ((string)(this["QueryPlanVerticalLayout"]));
+            }
+            set {
+                this["QueryPlanVerticalLayout"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("3")]
         public int QueryPlanPropertyRowLines {
             get {

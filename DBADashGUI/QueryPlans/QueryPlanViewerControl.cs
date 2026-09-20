@@ -143,6 +143,9 @@ namespace DBADashGUI.QueryPlans
         /// <summary>Settings > Column Spacing - see <see cref="BuildColumnSpacingMenu"/>.</summary>
         private readonly ToolStripMenuItem _columnSpacingMenu = new("Column Spacing");
 
+        /// <summary>Settings > Plan Shape - see <see cref="BuildVerticalLayoutMenu"/>.</summary>
+        private readonly ToolStripMenuItem _verticalLayoutMenu = new("Plan Shape");
+
         /// <summary>Settings > Zoom on Open - see <see cref="BuildOpeningZoomMenu"/>.</summary>
         private readonly ToolStripMenuItem _openingZoomMenu = new("Zoom on Open");
 
@@ -214,6 +217,7 @@ namespace DBADashGUI.QueryPlans
             _graphControl.UniformColumnWidths = Properties.Settings.Default.QueryPlanUniformColumnWidths;
             _graphControl.WrapObjectNames = Properties.Settings.Default.QueryPlanWrapObjectNames;
             _graphControl.ColumnSpacing = LoadColumnSpacing();
+            _graphControl.VerticalLayout = LoadVerticalLayout();
             _graphControl.MinAutoFitZoom = LoadMinFitZoom();
             ShowOperatorDescriptions(Properties.Settings.Default.QueryPlanShowOperatorDescriptions);
 
@@ -829,6 +833,58 @@ namespace DBADashGUI.QueryPlans
             SetSlider(_spacingSlider, position);
         }
 
+        /// <summary>The plan shapes on offer - see <see cref="OperatorWidths"/>.</summary>
+        private static readonly (PlanVerticalLayout Layout, string Text, string Tip)[] VerticalLayouts =
+        [
+            (PlanVerticalLayout.Centred, "Centred on Inputs",
+                "Put each operator level with the middle of what feeds it.  The easier shape to follow a join on, and the taller one - every branch pushes the rest of the plan further down."),
+            (PlanVerticalLayout.FirstChildAligned, "Aligned to First Input (SSMS)",
+                "Put each operator level with its first input and drop the rest below, as SSMS draws a plan.  Much shorter on a branching plan, at the cost of an operator no longer sitting between its inputs.")
+        ];
+
+        /// <summary>
+        /// Whether an operator sits between its inputs or level with the first of them.  The second
+        /// is how SSMS draws a plan, and is far shorter on a plan with many branches - which is what
+        /// gets a big plan on screen once the width has been squeezed as far as it will go.  Lays the
+        /// plan out again, keeping the selection, and is remembered for next time.
+        /// </summary>
+        private ToolStripMenuItem BuildVerticalLayoutMenu()
+        {
+            _verticalLayoutMenu.ToolTipText = "Where an operator sits against the inputs that feed it.";
+
+            foreach (var (layout, text, tip) in VerticalLayouts)
+            {
+                var item = new ToolStripMenuItem(text) { ToolTipText = tip, Tag = layout };
+
+                item.Click += (_, _) =>
+                {
+                    _graphControl.VerticalLayout = layout;
+                    ShowCurrentVerticalLayout();
+                    SaveSetting(() => Properties.Settings.Default.QueryPlanVerticalLayout = layout.ToString());
+                };
+
+                _verticalLayoutMenu.DropDownItems.Add(item);
+            }
+
+            ShowCurrentVerticalLayout();
+            return _verticalLayoutMenu;
+        }
+
+        private void ShowCurrentVerticalLayout()
+        {
+            var layout = _graphControl.VerticalLayout;
+
+            foreach (var item in _verticalLayoutMenu.DropDownItems.OfType<ToolStripMenuItem>())
+            {
+                item.Checked = (PlanVerticalLayout)item.Tag! == layout;
+            }
+        }
+
+        private static PlanVerticalLayout LoadVerticalLayout() =>
+            Enum.TryParse<PlanVerticalLayout>(Properties.Settings.Default.QueryPlanVerticalLayout, out var layout)
+                ? layout
+                : PlanVerticalLayout.FirstChildAligned;
+
         /// <summary>
         /// How far out a plan may be zoomed when it is opened, as a percentage - zero meaning fit it
         /// however far out that takes.  Actual size by default: a big plan shrunk to fit is a picture
@@ -969,6 +1025,7 @@ namespace DBADashGUI.QueryPlans
             menu.DropDownItems.Add(descriptions);
             menu.DropDownItems.Add(BuildOperatorWidthMenu());
             menu.DropDownItems.Add(BuildColumnSpacingMenu());
+            menu.DropDownItems.Add(BuildVerticalLayoutMenu());
             menu.DropDownItems.Add(BuildOpeningZoomMenu());
             menu.DropDownItems.Add(new ToolStripSeparator());
 
@@ -1408,6 +1465,7 @@ namespace DBADashGUI.QueryPlans
             e.Items.Add(Mirror("Operator Times", _timeMenu));
             e.Items.Add(Mirror("Operator Width", _operatorWidthMenu));
             e.Items.Add(Mirror("Column Spacing", _columnSpacingMenu));
+            e.Items.Add(Mirror("Plan Shape", _verticalLayoutMenu));
 
             e.Items.Add(new ToolStripMenuItem("Follow Data Path", Properties.Resources.NavigationPathLeft_16x, (_, _) => _dataPathButton.PerformClick())
             {
