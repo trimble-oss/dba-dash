@@ -43,6 +43,17 @@ namespace DBADash.QueryPlan.Test
         }
 
         [TestMethod]
+        public void ForReading_LeavesCommasInsideAnEscapedApostropheAlone()
+        {
+            // A doubled apostrophe is an apostrophe in the string, not the end of it.  Toggling on
+            // every quote is what makes that work: the pair closes and reopens with nothing between
+            // the two, so no comma in the literal is ever seen at the top level.
+            var lines = Lines("[T].[a]=N'O''Brien, AND sons', [T].[b]");
+
+            CollectionAssert.AreEqual(new[] { "[T].[a]=N'O''Brien, AND sons'", "[T].[b]" }, lines);
+        }
+
+        [TestMethod]
         public void Parser_MarksPredicatesAndDefinedValuesAsExpressions()
         {
             var seek = TestPlans.Operator(TestPlans.Statement(TestPlans.KeyLookupSeek), 1);

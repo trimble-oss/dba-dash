@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using DBADash.QueryPlan;
 using DBADash.QueryPlan.Interaction;
@@ -108,6 +109,46 @@ namespace DBADash.QueryPlan.Skia.Test
                     {
                         count++;
                     }
+                }
+            }
+
+            return count;
+        }
+
+        /// <summary>
+        /// Whether a pixel is a colour, allowing for the antialiasing that blends the edge of
+        /// everything drawn.
+        /// </summary>
+        public static bool IsNear(SKColor pixel, SKColor colour, int tolerance = 24) =>
+            Math.Abs(pixel.Red - colour.Red) <= tolerance &&
+            Math.Abs(pixel.Green - colour.Green) <= tolerance &&
+            Math.Abs(pixel.Blue - colour.Blue) <= tolerance;
+
+        /// <summary>
+        /// Pixels near a colour inside one arrow's own footprint, so that the same colour elsewhere
+        /// on the plan - a warning marker, another arrow - does not count towards it.
+        /// </summary>
+        public int PixelsNearEdge(PlanEdge edge, SKColor colour, int tolerance = 24)
+        {
+            var margin = edge.Thickness;
+            var bounds = Controller.ToScreen(new LayoutRect(
+                edge.Points.Min(p => p.X) - margin,
+                edge.Points.Min(p => p.Y) - margin,
+                edge.Points.Max(p => p.X) - edge.Points.Min(p => p.X) + (margin * 2),
+                edge.Points.Max(p => p.Y) - edge.Points.Min(p => p.Y) + (margin * 2)));
+
+            using var bitmap = Snapshot();
+            var left = Math.Max(0, (int)bounds.Left);
+            var top = Math.Max(0, (int)bounds.Top);
+            var right = Math.Min(bitmap.Width, (int)Math.Ceiling(bounds.Right));
+            var bottom = Math.Min(bitmap.Height, (int)Math.Ceiling(bounds.Bottom));
+            var count = 0;
+
+            for (var x = left; x < right; x++)
+            {
+                for (var y = top; y < bottom; y++)
+                {
+                    if (IsNear(bitmap.GetPixel(x, y), colour, tolerance)) count++;
                 }
             }
 

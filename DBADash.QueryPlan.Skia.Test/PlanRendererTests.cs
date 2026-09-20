@@ -31,21 +31,60 @@ namespace DBADash.QueryPlan.Skia.Test
             Assert.AreEqual(fixture.Renderer.Palette.Background, bitmap.GetPixel(1, 1));
         }
 
+        /// <summary>
+        /// The sample's scan was estimated at 100 rows and read 10,000: a hundred times out.
+        /// </summary>
+        private static PlanEdge WorstEstimate(RenderFixture fixture) =>
+            fixture.Layout.Edges.First(e => e.EstimateAccuracy == PlanEstimateAccuracy.Critical);
+
         [TestMethod]
-        public void Render_OutlinesABadEstimateInTheCriticalColour()
+        public void Render_ColoursAnArrowByHowFarItsEstimateWasOut()
         {
-            // The sample's scan was estimated at 100 rows and read 10,000: a hundred times out.
             using var fixture = new RenderFixture();
             fixture.Render();
-            var before = fixture.PixelsNear(fixture.Renderer.Palette.Critical);
 
+            // Counted inside the arrow's own footprint, so the spill's warning marker elsewhere on
+            // the plan cannot stand in for the colouring being tested.
+            var edge = WorstEstimate(fixture);
+            var critical = fixture.PixelsNearEdge(edge, fixture.Renderer.Palette.Critical);
+            var plain = fixture.PixelsNearEdge(edge, fixture.Renderer.Palette.EdgeActual);
+
+            Assert.IsTrue(critical > plain,
+                $"Expected the arrow to be drawn in the critical colour: {critical} critical pixels, {plain} plain.");
+        }
+
+        [TestMethod]
+        public void Render_LeavesAGoodEstimatesArrowTheActualColour()
+        {
+            using var fixture = new RenderFixture();
+            fixture.Render();
+
+            // Colouring the good ones too would leave nothing for the eye to land on.
+            var edge = fixture.Layout.Edges.First(e => e.EstimateAccuracy == PlanEstimateAccuracy.Good);
+            var critical = fixture.PixelsNearEdge(edge, fixture.Renderer.Palette.Critical);
+            var plain = fixture.PixelsNearEdge(edge, fixture.Renderer.Palette.EdgeActual);
+
+            Assert.IsTrue(plain > critical,
+                $"Expected an estimate that was close to leave the arrow plain: {plain} plain pixels, {critical} critical.");
+        }
+
+        [TestMethod]
+        public void Render_OutlinesABadEstimateInTheCriticalColourWithThePlainBodyUnderIt()
+        {
+            using var fixture = new RenderFixture();
             fixture.Controller.EdgeWidthBasis = PlanEdgeWidthBasis.Both;
             fixture.Render();
-            var after = fixture.PixelsNear(fixture.Renderer.Palette.Critical);
 
-            // The colour is already on the plan - the spill's warning marker - so the outline has to
-            // add to it rather than merely be there.
-            Assert.IsTrue(after > before + 20, $"Expected the outline to add critical pixels: {before} before, {after} after.");
+            var edge = WorstEstimate(fixture);
+            var critical = fixture.PixelsNearEdge(edge, fixture.Renderer.Palette.Critical);
+            var plain = fixture.PixelsNearEdge(edge, fixture.Renderer.Palette.EdgeActual);
+
+            // The body goes back to plain where the outline carries the accuracy, or the dashes would
+            // be drawn in the colour of the arrow they are meant to stand out against.
+            Assert.IsTrue(plain > critical,
+                $"Expected the body under the outline to be plain: {plain} plain pixels, {critical} critical.");
+
+            Assert.IsTrue(critical > 20, $"Expected a critical coloured outline on the arrow, found {critical} pixels.");
         }
 
         [TestMethod]

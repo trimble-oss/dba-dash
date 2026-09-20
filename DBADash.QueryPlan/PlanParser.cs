@@ -147,6 +147,49 @@ namespace DBADash.QueryPlan
         }
 
         /// <summary>
+        /// The ShowPlanXML element of a document, on its own, as the .sqlplan every other tool
+        /// expects.  A plan that arrived inside an extended events envelope or a query_plan column
+        /// opens in this viewer as it stands, but SSMS and Plan Explorer want the bare document, so
+        /// the envelope is dropped on the way out rather than the plan being refused.
+        ///
+        /// Returns the input unchanged when it is already a bare plan, so a .sqlplan handed straight
+        /// back is byte for byte what arrived.
+        /// </summary>
+        /// <returns>False when the input is not well formed XML or holds no ShowPlanXML element.</returns>
+        public static bool TryExtractShowPlanXml(string? xml, out string? showPlanXml)
+        {
+            showPlanXml = null;
+            if (string.IsNullOrWhiteSpace(xml)) return false;
+
+            XDocument document;
+            try
+            {
+                document = XDocument.Parse(StripLeadingByteOrderMark(xml));
+            }
+            catch (XmlException)
+            {
+                return false;
+            }
+
+            var root = document.Root;
+            if (root is null) return false;
+
+            if (IsNamed(root, "ShowPlanXML"))
+            {
+                showPlanXml = xml;
+                return true;
+            }
+
+            var showPlan = root.Descendants().FirstOrDefault(e => IsNamed(e, "ShowPlanXML"));
+            if (showPlan is null) return false;
+
+            // ToString carries the namespace declarations the element needs down from the envelope
+            // it is being lifted out of, so the result stands on its own.
+            showPlanXml = showPlan.ToString();
+            return true;
+        }
+
+        /// <summary>
         /// A cheap check that a string looks like a plan, for deciding whether to offer the viewer at
         /// all.  Looks at the text rather than parsing, because this is asked about grid cells and
         /// clipboard contents where the answer is usually no.

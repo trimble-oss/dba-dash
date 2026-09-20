@@ -657,16 +657,22 @@ namespace DBADashGUI
         /// <summary>
         /// Writes a plan to a temp .sqlplan so it can be handed to another application - SSMS, Plan
         /// Explorer - from the viewer's Open With button.
+        ///
+        /// Validated through the viewer's own parser rather than <see cref="IsValidExecutionPlan"/>,
+        /// which wants a root of ShowPlanXML: the viewer opens a plan nested in an extended events
+        /// envelope or a query_plan column too, and those used to reach here only to be refused.
+        /// The envelope is dropped on the way out, because it is this viewer that reads past one and
+        /// not the application the file is being handed to.
         /// </summary>
         public static string WriteQueryPlanTempFile(string plan, string fileName = null)
         {
-            if (!IsValidExecutionPlan(plan))
+            if (!PlanParser.TryExtractShowPlanXml(plan, out var showPlanXml))
             {
                 throw new InvalidOperationException("Invalid execution plan");
             }
 
             var path = GetFilePath(fileName, ".sqlplan");
-            File.WriteAllText(path, plan, Encoding.Unicode);
+            File.WriteAllText(path, showPlanXml, Encoding.Unicode);
             return path;
         }
 
