@@ -28,39 +28,102 @@ namespace DBADash.QueryPlan.Model
         {
             if (statement.MissingIndexes.Count == 0) return string.Empty;
 
-            // The suggestions are the optimiser's view of one statement, made without looking at the
-            // indexes the table already has or what another index costs to maintain - worth saying
-            // above a script that is one keypress from being run.
-            var script = new StringBuilder()
-                .AppendLine("-- Missing indexes the optimizer suggested for this statement, highest estimated impact first.")
-                .AppendLine("-- Each estimate is for this statement alone. Review them against the table's existing indexes")
-                .AppendLine("-- and the cost of maintaining another index before creating any. Key columns are listed")
-                .AppendLine("-- equality columns first, then inequality columns; their order within each group is not tuned.");
+            var script = new StringBuilder();
+            AppendPreamble(script, one: false);
 
             var number = 0;
             foreach (var index in statement.MissingIndexes.OrderByDescending(i => i.Impact))
             {
-                number++;
-                script.AppendLine()
-                    .Append("-- ").Append(number.ToString(CultureInfo.InvariantCulture)).Append(". ").Append(index.QualifiedTableName)
-                    .Append(": estimated to reduce this statement's cost by ")
-                    .Append(index.Impact.ToString("0.#", CultureInfo.InvariantCulture)).AppendLine("%");
-
-                AppendColumns(script, "Equality", index.EqualityColumns);
-                AppendColumns(script, "Inequality", index.InequalityColumns);
-                AppendColumns(script, "Include", index.IncludedColumns);
-
-                if (statement.Operators.FirstOrDefault(op => statement.MissingIndexesFor(op).Contains(index)) is { } reader)
-                {
-                    script.Append("--    Read by ").Append(reader.DisplayName).Append(" (node ")
-                        .Append(reader.NodeId.ToString(CultureInfo.InvariantCulture)).AppendLine(")");
-                }
-
-                script.AppendLine(index.CreateStatement);
+                AppendMissingIndex(script, statement, index, ++number);
             }
 
             return script.ToString();
         }
+
+        /// <summary>
+        /// One missing index written the way the Missing Indexes tab writes it - the same notes above
+        /// the same CREATE INDEX.
+        ///
+        /// What a grid row's link and an insight card's View T-SQL open, rather than the bare
+        /// statement: the notes are the part that says what the index would cost and, on a temp table,
+        /// that creating it this way costs the table its caching, and a reader who reached the script
+        /// from a card has seen none of that.
+        /// </summary>
+        public static string MissingIndex(PlanStatement statement, PlanMissingIndex index)
+        {
+            var script = new StringBuilder();
+            AppendPreamble(script, one: true);
+            AppendMissingIndex(script, statement, index, null);
+            return script.ToString();
+        }
+
+        /// <summary>
+        /// The suggestions are the optimiser's view of one statement, made without looking at the
+        /// indexes the table already has or what another index costs to maintain - worth saying above
+        /// a script that is one keypress from being run.
+        /// </summary>
+        private static void AppendPreamble(StringBuilder script, bool one)
+        {
+            if (one)
+            {
+                script.AppendLine("/* A missing index the optimizer suggested for this statement.  The estimate is for this")
+                    .AppendLine("   statement alone. Review it against the table's existing indexes and the cost of")
+                    .AppendLine("   maintaining another index before creating it. Key columns are listed equality columns")
+                    .AppendLine("   first, then inequality columns; their order within each group is not tuned.")
+                    .AppendLine("*/");
+                return;
+            }
+
+            script.AppendLine("/* Missing indexes the optimizer suggested for this statement, highest estimated impact first.")
+                .AppendLine("   Each estimate is for this statement alone. Review them against the table's existing indexes")
+                .AppendLine("   and the cost of maintaining another index before creating any. Key columns are listed")
+                .AppendLine("   equality columns first, then inequality columns; their order within each group is not tuned.")
+                .AppendLine("*/");
+        }
+
+        /// <summary>
+        /// One recommendation: what the optimiser expected of it, where it would be read, and the
+        /// statement that creates it.  Numbered only where there is more than one to tell apart.
+        /// </summary>
+        private static void AppendMissingIndex(StringBuilder script, PlanStatement statement, PlanMissingIndex index, int? number)
+        {
+            // Built on its own and wrapped afterwards, so that everything the plan supplied passes
+            // through Commented on its way into the comment - see there for why that matters.
+            var notes = new StringBuilder();
+            if (number is { } position) notes.Append(position.ToString(CultureInfo.InvariantCulture)).Append(". ");
+
+            notes.Append(index.QualifiedTableName)
+                .Append(": estimated to reduce this statement's cost by ")
+                .Append(index.Impact.ToString("0.#", CultureInfo.InvariantCulture)).AppendLine("%");
+
+            AppendColumns(notes, "Equality", index.EqualityColumns);
+            AppendColumns(notes, "Inequality", index.InequalityColumns);
+            AppendColumns(notes, "Include", index.IncludedColumns);
+
+            if (statement.Operators.FirstOrDefault(op => statement.MissingIndexesFor(op).Contains(index)) is { } reader)
+            {
+                notes.Append("   Read by ").Append(reader.DisplayName).Append(" (node ")
+                    .Append(reader.NodeId.ToString(CultureInfo.InvariantCulture)).AppendLine(")");
+            }
+
+            AppendTempTableNote(notes, index);
+
+            script.AppendLine().Append("/* ").Append(Commented(notes.ToString())).AppendLine("*/")
+                .AppendLine(index.CreateStatement);
+        }
+
+        /// <summary>
+        /// Text made safe to sit inside a block comment.
+        ///
+        /// The table and column names in these notes are whatever the plan carried, and a delimited
+        /// identifier can hold anything - including the two characters that end a comment.  A table
+        /// named so that its name ends one would leave the rest of the note running as T-SQL in the
+        /// window of whoever copied the script, which is a long way from what they asked for.  The
+        /// delimiters are the only thing a comment gives meaning to, so a space between the two
+        /// characters is all it takes: nested comments mean an opening one is worth the same care.
+        /// </summary>
+        private static string Commented(string text) =>
+            text.Replace("*/", "* /").Replace("/*", "/ *");
 
         /// <summary>True when the plan recorded the values this execution ran with - an actual plan.</summary>
         public static bool HasRuntimeValues(PlanStatement statement) =>
@@ -84,8 +147,9 @@ namespace DBADash.QueryPlan.Model
             if (!RuntimeValuesDiffer(statement)) return DeclareParameters(statement, PlanParameterValues.Runtime);
 
             return new StringBuilder()
-                .AppendLine("-- This execution ran with different parameter values from those the plan was compiled for.")
-                .AppendLine("-- Both sets follow. Use one or the other: they declare the same variables.")
+                .AppendLine("/* This execution ran with different parameter values from those the plan was compiled for.")
+                .AppendLine("   Both sets follow. Use one or the other: they declare the same variables.")
+                .AppendLine("*/")
                 .AppendLine()
                 .Append(DeclareParameters(statement, PlanParameterValues.Runtime))
                 .AppendLine()
@@ -106,12 +170,13 @@ namespace DBADash.QueryPlan.Model
             var script = new StringBuilder();
             if (runtime)
             {
-                script.AppendLine("-- Runtime values: the parameter values this execution ran with.");
+                script.AppendLine("/* Runtime values: the parameter values this execution ran with. */");
             }
             else
             {
-                script.AppendLine("-- Compiled values: the parameter values the plan was compiled for.")
-                    .AppendLine("-- The optimizer built the plan, and made its estimates, for these values.");
+                script.AppendLine("/* Compiled values: the parameter values the plan was compiled for.")
+                    .AppendLine("   The optimizer built the plan, and made its estimates, for these values.")
+                    .AppendLine("*/");
             }
 
             foreach (var parameter in statement.Parameters)
@@ -132,9 +197,11 @@ namespace DBADash.QueryPlan.Model
 
                 if (parameter.CompiledValueDiffers)
                 {
+                    // On one line: the note is a -- comment, and a value with a line break in it
+                    // would put the rest of the note back in the reader's batch as T-SQL.
                     notes.Add(runtime
-                        ? "compiled for " + Literal(parameter.CompiledValue!)
-                        : "ran with " + Literal(parameter.RuntimeValue!));
+                        ? "compiled for " + PlanFormat.SingleLine(Literal(parameter.CompiledValue!), 200)
+                        : "ran with " + PlanFormat.SingleLine(Literal(parameter.RuntimeValue!), 200));
                 }
 
                 script.Append("DECLARE ").Append(parameter.Name).Append(' ').Append(type);
@@ -147,10 +214,31 @@ namespace DBADash.QueryPlan.Model
             return script.ToString();
         }
 
+        /// <summary>
+        /// Why an index on a temp table is better declared on the CREATE TABLE, and the line to paste
+        /// there.  The CREATE INDEX below it still runs, because the reader cannot always reach the
+        /// CREATE TABLE - it may be in a procedure they do not own - but it should not be the first
+        /// thing they reach for.
+        /// </summary>
+        private static void AppendTempTableNote(StringBuilder script, PlanMissingIndex index)
+        {
+            if (!index.IsTempTable) return;
+
+            script.AppendLine()
+                .Append("   ").Append(index.Table).AppendLine(" is a temp table.")
+                .AppendLine("   Adding an index after the table exists stops SQL Server reusing a cached temp table")
+                .AppendLine("   definition between executions of the procedure that creates it.  At high volume execution")
+                .AppendLine("   this can cause contention.  Declared on the CREATE TABLE the caching is kept ")
+                .AppendLine("   (SQL Server 2014 and later; 2016 and later for INCLUDE columns):")
+                .AppendLine()
+                .Append("     CREATE TABLE [").Append(index.Table).Append("] (<columns>, ")
+                .Append(index.InlineIndexDefinition).AppendLine(");");
+        }
+
         private static void AppendColumns(StringBuilder script, string usage, System.Collections.Generic.IReadOnlyList<string> columns)
         {
             if (columns.Count == 0) return;
-            script.Append("--    ").Append(usage).Append(": ").AppendLine(string.Join(", ", columns));
+            script.Append("   ").Append(usage).Append(": ").AppendLine(string.Join(", ", columns));
         }
 
         /// <summary>

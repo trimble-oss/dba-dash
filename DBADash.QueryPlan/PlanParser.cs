@@ -368,6 +368,43 @@ namespace DBADash.QueryPlan
             {
                 node.Properties = BuildOperatorProperties(node, relOp, body);
             }
+
+            NameTempTablesAsTheQueryDoes(statement);
+        }
+
+        /// <summary>
+        /// A missing index on a temp table names it as tempdb stores it - the query's name, padded
+        /// with underscores, then a hex suffix - while the operator that reads it carries the name
+        /// the query used.  Left that way the two are different tables: the recommendation reaches no
+        /// operator, and the CREATE INDEX it writes names a table nobody can see.
+        ///
+        /// Put back from the operators rather than by trimming the padding off, because the padding
+        /// and the last character of a name that ends in an underscore are the same character.  The
+        /// longest name an operator in this statement reads is the one the recommendation is about;
+        /// where no operator reads it, the stored name is left alone, because nothing in the plan
+        /// says what the query called it.
+        /// </summary>
+        private static void NameTempTablesAsTheQueryDoes(PlanStatement statement)
+        {
+            if (statement.MissingIndexes.Count == 0) return;
+
+            var names = statement.Operators
+                .SelectMany(op => op.Objects)
+                .Select(o => o.Table)
+                .Where(table => !string.IsNullOrEmpty(table) && table![0] == '#')
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderByDescending(table => table!.Length)
+                .ToList();
+
+            if (names.Count == 0) return;
+
+            foreach (var index in statement.MissingIndexes)
+            {
+                if (names.FirstOrDefault(name => PlanObjectReference.IsStoredTempTableName(index.Table, name)) is { } match)
+                {
+                    index.Table = match;
+                }
+            }
         }
 
         private static IReadOnlyList<PlanMissingIndex> ParseMissingIndexes(XElement queryPlan)

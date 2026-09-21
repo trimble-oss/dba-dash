@@ -143,6 +143,9 @@ namespace DBADash.QueryPlan.Model
         /// <summary>Columns needed only to avoid a lookup.</summary>
         public IReadOnlyList<string> IncludedColumns { get; internal set; } = [];
 
+        /// <summary>True when the recommendation is about a temp table rather than a permanent one.</summary>
+        public bool IsTempTable => Table is not null && Table.StartsWith('#');
+
         /// <summary>The fully qualified table, for matching against the operator that reads it.</summary>
         public string QualifiedTableName
         {
@@ -169,16 +172,8 @@ namespace DBADash.QueryPlan.Model
         {
             get
             {
-                var keys = new List<string>(EqualityColumns.Count + InequalityColumns.Count);
-                keys.AddRange(EqualityColumns);
-                keys.AddRange(InequalityColumns);
-
-                var name = "IX_" + (Table ?? "Table");
-                foreach (var column in keys) name += "_" + column;
-
-                // A name longer than sysname will not create, and a truncated tail is no worse than
-                // the rename this needs anyway.
-                if (name.Length > 116) name = name[..116];
+                var keys = KeyColumns();
+                var name = IndexName();
 
                 var statement = "CREATE NONCLUSTERED INDEX [" + name + "]\n    ON " + Bracketed() +
                                 " (" + string.Join(", ", Quote(keys)) + ")";
@@ -193,6 +188,48 @@ namespace DBADash.QueryPlan.Model
         }
 
         /// <summary>
+        /// The same index written the way it would go inside a CREATE TABLE, which is how an index on
+        /// a temp table is best declared.
+        ///
+        /// Adding an index to a temp table after the table exists is DDL on that table, and DDL stops
+        /// SQL Server reusing a cached temp table definition between executions of the procedure that creates it -
+        /// so an index meant to make the statement faster hands back the allocation and the tempdb
+        /// metadata work that the caching was saving.  Declared on the CREATE TABLE the caching is
+        /// kept.  Needs SQL Server 2014, or 2016 when there are included columns.
+        /// </summary>
+        public string InlineIndexDefinition
+        {
+            get
+            {
+                var definition = "INDEX [" + IndexName() + "] NONCLUSTERED (" +
+                                 string.Join(", ", Quote(KeyColumns())) + ")";
+
+                return IncludedColumns.Count > 0
+                    ? definition + " INCLUDE (" + string.Join(", ", Quote(IncludedColumns)) + ")"
+                    : definition;
+            }
+        }
+
+        /// <summary>The key, equality columns first, then the inequality ones.</summary>
+        private List<string> KeyColumns()
+        {
+            var keys = new List<string>(EqualityColumns.Count + InequalityColumns.Count);
+            keys.AddRange(EqualityColumns);
+            keys.AddRange(InequalityColumns);
+            return keys;
+        }
+
+        private string IndexName()
+        {
+            var name = "IX_" + (Table ?? "Table");
+            foreach (var column in KeyColumns()) name += "_" + column;
+
+            // A name longer than sysname will not create, and a truncated tail is no worse than the
+            // rename this needs anyway.
+            return name.Length > 116 ? name[..116] : name;
+        }
+
+        /// <summary>
         /// <see cref="CreateStatement"/> on one line, for a grid cell: a grid shows one line a row,
         /// and a copied cell that runs as it is beats one that has to be reassembled.
         /// </summary>
@@ -201,6 +238,11 @@ namespace DBADash.QueryPlan.Model
 
         private string Bracketed()
         {
+            // A temp table is qualified tempdb.dbo on the plan, but the index has to be created from
+            // the session that owns the table and by the name that session knows it by, so the
+            // qualifier would only stop the script running where it has to run.
+            if (IsTempTable) return "[" + Table + "]";
+
             var parts = new List<string>(3);
             if (!string.IsNullOrEmpty(Database)) parts.Add("[" + Database + "]");
             if (!string.IsNullOrEmpty(Schema)) parts.Add("[" + Schema + "]");

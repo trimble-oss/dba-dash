@@ -320,6 +320,10 @@ namespace DBADash.QueryPlan.Analysis
                     var keys = index.EqualityColumns.Concat(index.InequalityColumns).ToList();
                     var parts = new List<string> { $"{index.QualifiedTableName}, impact {index.Impact:0.#}%" };
 
+                    // Which changes the advice: an index added to a temp table after it exists stops
+                    // the temp table definition being cached between executions, so it belongs on the CREATE TABLE.
+                    if (index.IsTempTable) parts.Add("temp table");
+
                     if (keys.Count > 0) parts.Add("keys " + string.Join(", ", keys));
                     if (index.IncludedColumns.Count > 0) parts.Add("include " + string.Join(", ", index.IncludedColumns));
 

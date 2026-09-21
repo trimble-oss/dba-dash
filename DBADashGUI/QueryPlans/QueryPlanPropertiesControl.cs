@@ -323,9 +323,18 @@ namespace DBADashGUI.QueryPlans
             if (index.InequalityColumns.Count > 0) AddRow("Inequality", string.Join(", ", index.InequalityColumns));
             if (index.IncludedColumns.Count > 0) AddRow("Include", string.Join(", ", index.IncludedColumns));
 
+            // The cell holds the statement on its own, ready to run where the row is copied; the row
+            // opens the annotated script - the same text the Missing Indexes tab shows, which on a temp
+            // table is where the note about declaring the index on the CREATE TABLE lives.
             var script = _grid.Rows.Add("    T-SQL", index.CreateStatementOneLine);
-            _grid.Rows[script].Tag = new RowInfo { Title = "Missing Index", FullText = index.CreateStatement, AlwaysLink = true };
-            _grid.Rows[script].Cells[ValueColumnIndex].ToolTipText = "Click to open the CREATE INDEX statement.";
+            _grid.Rows[script].Tag = new RowInfo
+            {
+                Title = "Missing Index",
+                FullText = PlanScripts.MissingIndex(_statement, index),
+                AlwaysLink = true
+            };
+            _grid.Rows[script].Cells[ValueColumnIndex].ToolTipText =
+                "Click to open the CREATE INDEX statement with the optimizer's notes.";
 
             void AddRow(string name, string value)
             {
@@ -620,7 +629,7 @@ namespace DBADashGUI.QueryPlans
 
                 if (insight.MissingIndex is { } index)
                 {
-                    var script = index.CreateStatement;
+                    var script = PlanScripts.MissingIndex(_statement, index);
                     actions["view"] = () => ShowScript(script);
                     actions["copy"] = () => CopyScript(script);
                     links.Add("[View T-SQL](action:view)");

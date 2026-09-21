@@ -1715,8 +1715,9 @@ namespace DBADashGUI.QueryPlans
                     string.Join(", ", missing.IncludedColumns),
                     missing.CreateStatementOneLine);
 
-                _missingIndexGrid.Rows[index].Tag = missing.CreateStatement;
-                _missingIndexGrid.Rows[index].Cells["Script"].ToolTipText = "Double click to open the CREATE INDEX statement.";
+                _missingIndexGrid.Rows[index].Tag = PlanScripts.MissingIndex(statement, missing);
+                _missingIndexGrid.Rows[index].Cells["Script"].ToolTipText =
+                    "Double click to open the CREATE INDEX statement with the optimizer's notes.";
             }
 
             _missingIndexTab.Text = statement.MissingIndexes.Count == 0
