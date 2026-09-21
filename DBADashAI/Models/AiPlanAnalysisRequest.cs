@@ -18,10 +18,16 @@ namespace DBADashAI.Models
     {
         /// <summary>
         /// One statement's plan.  Generous compared with a deadlock graph, because a plan legitimately
-        /// is: a wide query over a partitioned table runs to hundreds of kilobytes of showplan.  The
-        /// viewer refuses to send anything larger and says so rather than cutting one short.
+        /// is: a wide query over a partitioned table runs to hundreds of kilobytes of showplan, and a
+        /// statement over a thousand-partition table to megabytes.
+        ///
+        /// This is not the size an analysis is expected to be - it is the point past which there is no
+        /// model to send one to.  The viewer warns well before here and sends anyway if the reader says
+        /// so, because whether a large plan fits is the configured model's business rather than this
+        /// check's.  What the check is still for is that a request arrives over the network into memory,
+        /// so the field cannot be unbounded however sure of itself the caller is.
         /// </summary>
-        public const int MaxPlanXmlLength = 512 * 1024;
+        public const int MaxPlanXmlLength = 2 * 1024 * 1024;
 
         /// <summary>A statement long enough to be generated rather than written, as the viewer caps it.</summary>
         public const int MaxStatementLength = 16 * 1024;
@@ -134,7 +140,8 @@ namespace DBADashAI.Models
 
             if (PlanXml is { Length: > MaxPlanXmlLength })
             {
-                return $"PlanXml exceeds {MaxPlanXmlLength} characters.";
+                return $"PlanXml exceeds {MaxPlanXmlLength:N0} characters, which is past what any model could " +
+                       "be given.  Send the summary without it.";
             }
 
             if (!string.IsNullOrWhiteSpace(Signature) && !HashPattern.IsMatch(Signature!))

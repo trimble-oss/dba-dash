@@ -142,7 +142,7 @@ namespace DBADashGUI.QueryPlans
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    return new Result { Error = $"{(int)response.StatusCode} {response.ReasonPhrase}: {body}" };
+                    return new Result { Error = $"{(int)response.StatusCode} {response.ReasonPhrase}: {Describe(body)}" };
                 }
 
                 using var document = JsonDocument.Parse(body);
@@ -168,6 +168,39 @@ namespace DBADashGUI.QueryPlans
             {
                 return new Result { Error = ex.Message };
             }
+        }
+
+        /// <summary>
+        /// What the service said, rather than the envelope it said it in.  A refusal arrives as
+        /// ProblemDetails, and what belongs in front of the reader is its detail - which for the one
+        /// refusal they can do something about, a plan larger than the model will take, is the part
+        /// saying what to do about it.
+        /// </summary>
+        private static string Describe(string body)
+        {
+            if (string.IsNullOrWhiteSpace(body)) return "(no detail)";
+
+            try
+            {
+                using var document = JsonDocument.Parse(body);
+
+                foreach (var property in new[] { "detail", "error" })
+                {
+                    if (document.RootElement.TryGetProperty(property, out var value)
+                        && value.ValueKind == JsonValueKind.String
+                        && !string.IsNullOrWhiteSpace(value.GetString()))
+                    {
+                        return value.GetString()!;
+                    }
+                }
+            }
+            catch (JsonException)
+            {
+                // Something other than the service answering - a proxy, or a host that fell over
+                // before the service saw the request.  Whatever it said is better than nothing.
+            }
+
+            return body;
         }
 
         private static string? Read(JsonDocument document, string property) =>
