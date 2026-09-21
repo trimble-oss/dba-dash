@@ -725,13 +725,9 @@ namespace DBADashGUI.QueryPlans
             {
                 var (card, label) = _cards[i];
                 var textWidth = Math.Max(width - card.Padding.Horizontal, 20);
-                var text = TextRenderer.MeasureText(
-                    label.Text,
-                    label.Font,
-                    new Size(textWidth, int.MaxValue),
-                    TextFormatFlags.WordBreak | TextFormatFlags.TextBoxControl);
+                var text = InsightCard.ContentHeight(label, textWidth);
 
-                heights[i] = Math.Max(text.Height, InsightCard.IconSize) + card.Padding.Vertical;
+                heights[i] = Math.Max(text, InsightCard.IconSize) + card.Padding.Vertical;
             }
 
             return heights;
