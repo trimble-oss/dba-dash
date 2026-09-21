@@ -21,12 +21,19 @@ namespace DBADashAI.Services
 
         private string SystemPrompt => _systemPromptLoader.Prompt;
 
-        /// <summary>One question, one answer - what almost every caller wants.</summary>
-        public Task<string> SummarizeWithPromptAsync(string userPrompt, CancellationToken cancellationToken, string? modelOverride = null) =>
-            ChatAsync(
+        /// <summary>
+        /// One question, one answer, for a caller that only displays it.
+        ///
+        /// The reason it can go on returning a string where <see cref="ChatAsync"/> cannot: these
+        /// answers are handed straight back to whoever asked and never stored, so a sentence saying
+        /// the provider refused is a perfectly good thing to show in place of one.  An analysis is
+        /// stored, which is why that caller has to be able to tell the two apart.
+        /// </summary>
+        public async Task<string> SummarizeWithPromptAsync(string userPrompt, CancellationToken cancellationToken, string? modelOverride = null) =>
+            (await ChatAsync(
                 new[] { new AiConversationTurn { Role = AiConversationTurn.User, Content = userPrompt } },
                 cancellationToken,
-                modelOverride);
+                modelOverride)).Text;
 
         /// <summary>
         /// Sends a conversation and returns the next answer.
@@ -36,9 +43,12 @@ namespace DBADashAI.Services
         /// user/assistant array, so the only difference between a first analysis and a tenth
         /// follow-up is the length of the list.
         /// </summary>
-        public async Task<string> ChatAsync(IReadOnlyList<AiConversationTurn> messages, CancellationToken cancellationToken, string? modelOverride = null)
+        public async Task<AiChatResult> ChatAsync(IReadOnlyList<AiConversationTurn> messages, CancellationToken cancellationToken, string? modelOverride = null)
         {
-            if (messages.Count == 0) return "Nothing was asked.";
+            if (messages.Count == 0)
+            {
+                return AiChatResult.Failed(AiChatFailure.NotConfigured, "Nothing was asked.");
+            }
 
             var provider = _configuration["AI:Provider"]?.Trim();
 
@@ -63,7 +73,8 @@ namespace DBADashAI.Services
                     {
                         return await SummarizeWithAzureOpenAIAsync(messages, azureEndpoint, azureApiKey, azureDeployment, azureApiVersion, cancellationToken);
                     }
-                    return "AI summary is disabled. AI:Provider=AzureOpenAI but AzureOpenAI settings are incomplete.";
+                    return AiChatResult.Failed(AiChatFailure.NotConfigured,
+                        "AI summary is disabled. AI:Provider=AzureOpenAI but AzureOpenAI settings are incomplete.");
                 }
 
                 if (string.Equals(provider, "Anthropic", StringComparison.OrdinalIgnoreCase))
@@ -72,7 +83,8 @@ namespace DBADashAI.Services
                     {
                         return await SummarizeWithAnthropicAsync(messages, anthropicBaseUrl, anthropicApiKey, anthropicModel, anthropicVersion, anthropicMaxTokens, cancellationToken);
                     }
-                    return "AI summary is disabled. AI:Provider=Anthropic but Anthropic settings are incomplete.";
+                    return AiChatResult.Failed(AiChatFailure.NotConfigured,
+                        "AI summary is disabled. AI:Provider=Anthropic but Anthropic settings are incomplete.");
                 }
 
                 if (!string.IsNullOrWhiteSpace(azureEndpoint)
@@ -87,7 +99,8 @@ namespace DBADashAI.Services
                     return await SummarizeWithAnthropicAsync(messages, anthropicBaseUrl, anthropicApiKey, anthropicModel, anthropicVersion, anthropicMaxTokens, cancellationToken);
                 }
 
-                return "AI summary is disabled. Configure AzureOpenAI:* or Anthropic:* settings.";
+                return AiChatResult.Failed(AiChatFailure.NotConfigured,
+                    "AI summary is disabled. Configure AzureOpenAI:* or Anthropic:* settings.");
             }
             catch (Exception ex)
             {
@@ -96,7 +109,8 @@ namespace DBADashAI.Services
                 // log entry without exposing internal infrastructure details to the caller.
                 var errorId = Guid.NewGuid().ToString("N")[..8];
                 _logger.LogError(ex, "AI provider call failed. ErrorId={ErrorId}, Provider={Provider}", errorId, provider ?? "auto");
-                return $"AI provider error (ErrorId={errorId}). Check the service logs for details.";
+                return AiChatResult.Failed(AiChatFailure.Provider,
+                    $"AI provider error (ErrorId={errorId}). Check the service logs for details.", errorId);
             }
         }
 
@@ -121,7 +135,7 @@ namespace DBADashAI.Services
             return new string(clean);
         }
 
-        private async Task<string> SummarizeWithAzureOpenAIAsync(
+        private async Task<AiChatResult> SummarizeWithAzureOpenAIAsync(
             IReadOnlyList<AiConversationTurn> messages,
             string endpoint,
             string apiKey,
@@ -163,16 +177,16 @@ namespace DBADashAI.Services
                 var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
                 var errorId = Guid.NewGuid().ToString("N")[..8];
                 _logger.LogError("Azure OpenAI call failed. ErrorId={ErrorId}, Status={StatusCode}, URL={Url}, Body={Body}", LogSanitizer.SanitizeForLog(errorId), (int)response.StatusCode, requestUrl, LogSanitizer.TruncateAndSanitizeForLog(errorBody));
-                return $"Azure OpenAI summary call failed: {(int)response.StatusCode} {StatusHint((int)response.StatusCode)} (ErrorId={errorId}). Check the service logs for details.";
+                return ProviderFailure("Azure OpenAI", (int)response.StatusCode, errorBody, errorId);
             }
 
             using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
             using var document = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken);
 
-            return ExtractOpenAiStyleSummary(document.RootElement, "No summary returned by Azure OpenAI.");
+            return AiChatResult.Answer(ExtractOpenAiStyleSummary(document.RootElement, "No summary returned by Azure OpenAI."));
         }
 
-        private async Task<string> SummarizeWithAnthropicAsync(
+        private async Task<AiChatResult> SummarizeWithAnthropicAsync(
             IReadOnlyList<AiConversationTurn> messages,
             string baseUrl,
             string apiKey,
@@ -222,13 +236,13 @@ namespace DBADashAI.Services
                 var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
                 var errorId = Guid.NewGuid().ToString("N")[..8];
                 _logger.LogError("Anthropic call failed. ErrorId={ErrorId}, Status={StatusCode}, Body={Body}", LogSanitizer.SanitizeForLog(errorId), (int)response.StatusCode, LogSanitizer.TruncateAndSanitizeForLog(errorBody));
-                return $"Anthropic summary call failed: {(int)response.StatusCode} {StatusHint((int)response.StatusCode)} (ErrorId={errorId}). Check the service logs for details.";
+                return ProviderFailure("Anthropic", (int)response.StatusCode, errorBody, errorId);
             }
 
             using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
             using var document = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken);
 
-            return ExtractAnthropicSummary(document.RootElement, "No summary returned by Anthropic.");
+            return AiChatResult.Answer(ExtractAnthropicSummary(document.RootElement, "No summary returned by Anthropic."));
         }
 
         private static string ExtractAnthropicSummary(JsonElement root, string fallbackMessage)
@@ -279,6 +293,85 @@ namespace DBADashAI.Services
             };
 
             return string.IsNullOrWhiteSpace(text) ? fallbackMessage : text;
+        }
+
+        /// <summary>
+        /// A provider that refused, turned into something the caller can act on.
+        ///
+        /// Everything else about a failed call stays as it was - a status code, a hint, and an
+        /// ErrorId to find the logged body by - because there is nothing a caller can do with the
+        /// detail of an expired key or an overloaded region except report it.
+        /// </summary>
+        private static AiChatResult ProviderFailure(string provider, int status, string body, string errorId)
+        {
+            if (!IsTooLarge(status, body))
+            {
+                return AiChatResult.Failed(
+                    AiChatFailure.Provider,
+                    $"{provider} summary call failed: {status} {StatusHint(status)} (ErrorId={errorId}). Check the service logs for details.",
+                    errorId,
+                    status);
+            }
+
+            var detail = TooLargeDetail(body);
+
+            return AiChatResult.Failed(
+                AiChatFailure.TooLarge,
+                $"The request is larger than the model will accept{(detail is null ? string.Empty : ": " + detail)} (ErrorId={errorId}).",
+                errorId,
+                status);
+        }
+
+        /// <summary>
+        /// Whether the refusal was about size.  It is the one provider failure the caller can do
+        /// something about - send less - so it is worth telling apart from the rest.
+        ///
+        /// Neither provider gives it a status code of its own.  Anthropic answers 413 for a request
+        /// over the transport limit but 400 for a prompt over the model's context window, and Azure
+        /// OpenAI answers 400 with the reason as a code in the body.  So the body is what decides,
+        /// and it is matched loosely: the wording of these messages is not a contract.
+        /// </summary>
+        private static bool IsTooLarge(int status, string body)
+        {
+            if (status == 413) return true;
+            if (status != 400 || string.IsNullOrEmpty(body)) return false;
+
+            return body.Contains("context_length_exceeded", StringComparison.OrdinalIgnoreCase)
+                   || body.Contains("request_too_large", StringComparison.OrdinalIgnoreCase)
+                   || body.Contains("string_above_max_length", StringComparison.OrdinalIgnoreCase)
+                   || body.Contains("prompt is too long", StringComparison.OrdinalIgnoreCase)
+                   || body.Contains("maximum context length", StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// The provider's own words for it, which are the useful part: "prompt is too long: 250000
+        /// tokens > 200000 maximum" tells the reader how much to cut, and anything written here
+        /// could only guess at it.  Truncated and stripped of control characters like anything else
+        /// that crosses back to a caller, and left out altogether when the body is not the shape
+        /// both providers document.
+        /// </summary>
+        private static string? TooLargeDetail(string body)
+        {
+            try
+            {
+                using var document = JsonDocument.Parse(body);
+
+                if (document.RootElement.TryGetProperty("error", out var error)
+                    && error.ValueKind == JsonValueKind.Object
+                    && error.TryGetProperty("message", out var message)
+                    && message.ValueKind == JsonValueKind.String)
+                {
+                    var text = LogSanitizer.TruncateAndSanitizeForLog(message.GetString(), 300);
+                    return string.IsNullOrWhiteSpace(text) ? null : text;
+                }
+            }
+            catch (JsonException)
+            {
+                // A provider - or a proxy in front of one - answering with something other than the
+                // documented shape.  The status and the ErrorId still say what happened.
+            }
+
+            return null;
         }
 
         private static string StatusHint(int statusCode) => statusCode switch
