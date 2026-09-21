@@ -191,6 +191,17 @@ namespace DBADashGUI.Controls
             }
         }
 
+        /// <summary>
+        /// The height <paramref name="label"/>'s text needs when wrapped to <paramref name="width"/>.
+        /// <para>
+        /// Ask the label rather than measuring with <see cref="TextRenderer"/>: a <see cref="LinkLabel"/>
+        /// always lays its text out with GDI+, which spaces lines further apart than GDI measures them,
+        /// so a TextRenderer height leaves the last line of a wrapped card clipped by a few pixels.
+        /// </para>
+        /// </summary>
+        public static int ContentHeight(Label label, int width) =>
+            label.GetPreferredSize(new Size(width, 0)).Height;
+
         private static GraphicsPath RoundedRect(Rectangle bounds, int radius)
         {
             var d = radius * 2;
