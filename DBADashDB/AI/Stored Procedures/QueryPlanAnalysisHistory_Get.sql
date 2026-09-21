@@ -73,7 +73,12 @@ GROUP BY M.ConversationKey
 ORDER BY MAX(CONVERT(TINYINT, M.IsThisPlan)) DESC, MAX(M.GeneratedUtc) DESC;
 
 /* Every turn of those conversations: the matched turns, plus any sibling turn the match itself did
-   not return. */
+   not return.
+
+   The sibling join is scoped to the query as well as the conversation.  Turns of one conversation
+   are always about one statement, so this changes nothing about a conversation the viewer produced -
+   it just means a row written against another query under this conversation's id, which a caller
+   posting its own transcript is free to do, cannot pull that query's answers in with it. */
 WITH Turns AS (
 	SELECT C.ConversationKey, C.IsThisPlan, C.LastGeneratedUtc, M.QueryPlanAnalysisID
 	FROM #Conversations C
@@ -82,7 +87,7 @@ WITH Turns AS (
 	SELECT C.ConversationKey, C.IsThisPlan, C.LastGeneratedUtc, QPA.QueryPlanAnalysisID
 	FROM #Conversations C
 	JOIN #Matched M ON M.ConversationKey = C.ConversationKey AND M.ConversationID IS NOT NULL
-	JOIN AI.QueryPlanAnalysis QPA ON QPA.ConversationID = M.ConversationID
+	JOIN AI.QueryPlanAnalysis QPA ON QPA.ConversationID = M.ConversationID AND QPA.Signature = @SignatureBin
 )
 SELECT TOP (@MaxRows)
 	QPA.QueryPlanAnalysisID,
