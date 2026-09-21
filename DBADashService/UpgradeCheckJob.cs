@@ -15,7 +15,7 @@ namespace DBADashService
     {
         private static readonly CollectionConfig config = SchedulerServiceConfig.Config;
 
-        public async Task Execute(IJobExecutionContext context)
+        public async ValueTask Execute(IJobExecutionContext context, System.Threading.CancellationToken cancellationToken = default)
         {
             try
             {

@@ -190,5 +190,8 @@
     <!-- Deadlock parsing / signature for the deadlock collection.  Platform neutral and dependency free. -->
     <ProjectReference Include="..\DBADash.Deadlock\DBADash.Deadlock.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Extensions\" />
+  </ItemGroup>
   <Import Project="..\packages\Microsoft.Data.SqlClient.SNI.3.0.0\build\net46\Microsoft.Data.SqlClient.SNI.targets" Condition="Exists('..\packages\Microsoft.Data.SqlClient.SNI.3.0.0\build\net46\Microsoft.Data.SqlClient.SNI.targets')" />
 </Project>

@@ -84,15 +84,16 @@ namespace DBADashService
 
             NameValueCollection props = new()
             {
-            { "quartz.serializer.type", "binary" },
+            { "quartz.serializer.type", "json" },
             { "quartz.scheduler.instanceName", "DBADashScheduler" },
             { "quartz.jobStore.type", "Quartz.Simpl.RAMJobStore, Quartz" },
             { "quartz.threadPool.threadCount", schedulerThreads.ToString() },
             { "quartz.threadPool.maxConcurrency", schedulerThreads.ToString() }
             };
 
-            StdSchedulerFactory factory = new(props);
-            scheduler = factory.GetScheduler().ConfigureAwait(false).GetAwaiter().GetResult();
+            scheduler = QuartzSchedulerBuilder.Create()
+                .UseProperties(props)
+                .BuildScheduler().ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
         /// <summary>
@@ -297,7 +298,7 @@ namespace DBADashService
             await scheduler.Standby();
             Log.Information("Wait for jobs to complete...");
             var waitCount = 0;
-            while ((await scheduler.GetCurrentlyExecutingJobs()).Count > 0)
+            while ((await scheduler.QueryFireInstances(new FireInstanceQuery { State = FireInstanceState.Executing }, cancellationToken)).Items.Count > 0)
             {
                 await Task.Delay(500, cancellationToken);
                 waitCount++;
@@ -641,7 +642,7 @@ namespace DBADashService
                     .ToDictionary(c => c.Key, c => c.Value);
 
                 var serviceStartJob = GetJob(onStartCollections.ToArray(), src, cfgString, onStartCustom, "OnStart");
-                scheduler.AddJob(serviceStartJob, true).ConfigureAwait(false).GetAwaiter().GetResult();
+                scheduler.AddJob(serviceStartJob, AddJobOptions.Replacing).ConfigureAwait(false).GetAwaiter().GetResult();
                 await scheduler.TriggerJob(serviceStartJob.Key);
             }
             switch (src.SourceConnection.Type)
@@ -1019,14 +1020,14 @@ namespace DBADashService
                 trigger = TriggerBuilder.Create()
                  .StartNow()
                  .WithSimpleSchedule(x =>
-                     x.WithIntervalInSeconds(seconds)
+                     x.WithInterval(TimeSpan.FromSeconds(seconds))
                     .RepeatForever()
                     )
                  .Build();
             }
             else
             {
-                if (!CronExpression.IsValidExpression(schedule))
+                if (!CronExpression.TryParse(schedule, out _))
                     throw new ArgumentException($"Invalid cron expression: {schedule}", nameof(schedule));
                 trigger = TriggerBuilder.Create()
                  .StartNow()
@@ -1040,14 +1041,14 @@ namespace DBADashService
         {
             ArgumentNullException.ThrowIfNull(schedule);
 
-            if (scheduler.CheckExists(job.Key).ConfigureAwait(false).GetAwaiter().GetResult())
+            if (scheduler.Exists(job.Key).ConfigureAwait(false).GetAwaiter().GetResult())
             {
                 return;
             }
 
             ITrigger trigger = int.TryParse(schedule, out var seconds)
-                ? TriggerBuilder.Create().StartNow().WithSimpleSchedule(x => x.WithIntervalInSeconds(seconds).RepeatForever()).Build()
-                : CronExpression.IsValidExpression(schedule)
+                ? TriggerBuilder.Create().StartNow().WithSimpleSchedule(x => x.WithInterval(TimeSpan.FromSeconds(seconds)).RepeatForever()).Build()
+                : CronExpression.TryParse(schedule, out _)
                     ? TriggerBuilder.Create().StartNow().WithCronSchedule(schedule).Build()
                     : throw new ArgumentException($"Invalid cron expression: {schedule}", nameof(schedule));
 

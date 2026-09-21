@@ -555,7 +555,7 @@ namespace DBADash
             {
                 return TimeSpan.FromSeconds(seconds).Humanize(5);
             }
-            if (!CronExpression.IsValidExpression(schedule))
+            if (!CronExpression.TryParse(schedule, out _))
             {
                 throw new ArgumentException("Invalid cron expression", nameof(schedule));
             }

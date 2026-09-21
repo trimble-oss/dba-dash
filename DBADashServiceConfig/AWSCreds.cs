@@ -1,5 +1,5 @@
-﻿using DBADashGUI.Theme;
-using Quartz.Util;
+﻿using DBADash;
+using DBADashGUI.Theme;
 using System;
 using System.ComponentModel;
 using System.Windows.Forms;
@@ -27,6 +27,12 @@ namespace DBADashServiceConfig
         {
             get => txtSecretKey.Text.TrimEmptyToNull();
             set => txtSecretKey.Text = value;
+        }
+
+        private static string TrimEmptyToNull(string value)
+        {
+            var trimmed = value?.Trim();
+            return string.IsNullOrEmpty(trimmed) ? null : trimmed;
         }
 
         public AWSCreds()

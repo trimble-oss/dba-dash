@@ -59,7 +59,7 @@ namespace DBADashService
             return Array.Empty<DBADashSource>();
         }
 
-        public async Task Execute(IJobExecutionContext context)
+        public async ValueTask Execute(IJobExecutionContext context, System.Threading.CancellationToken cancellationToken = default)
         {
             var swTotal = Stopwatch.StartNew();
             var dataMap = context.JobDetail.JobDataMap;

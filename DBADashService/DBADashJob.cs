@@ -15,7 +15,7 @@ namespace DBADashService
     {
         private static readonly CollectionConfig config = SchedulerServiceConfig.Config;
 
-        public async Task Execute(IJobExecutionContext context)
+        public async ValueTask Execute(IJobExecutionContext context, System.Threading.CancellationToken cancellationToken = default)
         {
             Log.Information("Processing Job : " + context.JobDetail.Key);
             var dataMap = context.JobDetail.JobDataMap;
@@ -33,13 +33,13 @@ namespace DBADashService
                     case ConnectionType.Directory:
                         {
                             var wi = new DirectoryWorkItem() { Source = cfg, Schedule = schedule };
-                            await wi.ExecuteAsync(config, CancellationToken.None);
+                            await wi.ExecuteAsync(config, cancellationToken);
                             break;
                         }
                     case ConnectionType.AWSS3:
                         {
                             var wi = new S3WorkItem() { Source = cfg, Schedule = schedule };
-                            await wi.ExecuteAsync(config, CancellationToken.None);
+                            await wi.ExecuteAsync(config, cancellationToken);
                             break;
                         }
                     case ConnectionType.SQL:
@@ -55,13 +55,17 @@ namespace DBADashService
                             PreviousFireTime = context.PreviousFireTimeUtc?.UtcDateTime
                         };
 
-                        await workItem.ExecuteAsync(config, CancellationToken.None);
+                        await workItem.ExecuteAsync(config, cancellationToken);
                         break;
 
                     case ConnectionType.Invalid:
                     default:
                         throw new Exception("Invalid Connection Type");
                 }
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                Log.Information("Job {job} cancelled during shutdown", context.JobDetail.Key);
             }
             catch (Exception ex)
             {

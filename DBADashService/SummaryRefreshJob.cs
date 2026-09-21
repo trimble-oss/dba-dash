@@ -10,7 +10,7 @@ namespace DBADashService
 {
     internal class SummaryRefreshJob : IJob
     {
-        public Task Execute(IJobExecutionContext context)
+        public ValueTask Execute(IJobExecutionContext context, System.Threading.CancellationToken cancellationToken = default)
         {
             var dataMap = context.JobDetail.JobDataMap;
             var connectionString = dataMap.GetString("ConnectionString");
@@ -25,7 +25,7 @@ namespace DBADashService
                 Log.Error(ex, "SummaryRefresh error");
             }
 
-            return Task.CompletedTask;
+            return ValueTask.CompletedTask;
         }
 
         public static void RefreshSummary(string connectionString)

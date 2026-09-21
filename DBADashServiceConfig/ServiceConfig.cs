@@ -3644,7 +3644,7 @@ namespace DBADashServiceConfig
         {
             try
             {
-                if (!Quartz.CronExpression.IsValidExpression(cronExpression))
+                if (!Quartz.CronExpression.TryParse(cronExpression, out _))
                 {
                     return;
                 }
