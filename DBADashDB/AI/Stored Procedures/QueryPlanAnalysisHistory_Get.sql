@@ -31,7 +31,12 @@ DECLARE @SignatureBin BINARY(8) = CONVERT(BINARY(8), @Signature, 1);
 DECLARE @PlanHashBin BINARY(8) = CONVERT(BINARY(8), NULLIF(@PlanHash, ''), 1);
 
 /* The turns that match, and the conversation each belongs to.  A row with no ConversationID is its
-   own, keyed on its ID so it can never collide with a real ConversationID. */
+   own, keyed on its ID so it can never collide with a real ConversationID.
+
+   Matched on the query, never on the plan.  QueryPlanHash identifies a shape of plan, not a query:
+   two unrelated statements that compile to the same shape share one, so matching on it as well would
+   put another query's conversation in this query's list - and, because the plan hash is what marks a
+   row as being about the plan on screen, put it there first and labelled as being about this one. */
 CREATE TABLE #Matched
 (
 	ConversationKey VARCHAR(50) NOT NULL,
@@ -48,8 +53,7 @@ SELECT	ISNULL(CONVERT(VARCHAR(36), QPA.ConversationID), 'row:' + CONVERT(VARCHAR
 		QPA.GeneratedUtc,
 		CASE WHEN QPA.PlanHash = @PlanHashBin THEN 1 ELSE 0 END
 FROM AI.QueryPlanAnalysis QPA
-WHERE QPA.Signature = @SignatureBin
-OR QPA.PlanHash = @PlanHashBin;
+WHERE QPA.Signature = @SignatureBin;
 
 /* Newest first, with anything about this exact plan ahead of the rest of the query's. */
 CREATE TABLE #Conversations
