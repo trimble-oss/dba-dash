@@ -243,7 +243,7 @@ namespace DBADashServiceConfig
                 lblPreview.Text = $"Every {TimeSpan.FromSeconds(secs).Humanize(5)}";
                 return;
             }
-            if (Quartz.CronExpression.IsValidExpression(expression))
+            if (Quartz.CronExpression.TryParse(expression, out _))
             {
                 string desc;
                 try { desc = CronExpressionDescriptor.ExpressionDescriptor.GetDescription(expression); }
@@ -445,7 +445,7 @@ namespace DBADashServiceConfig
         private void BttnOK_Click(object sender, EventArgs e)
         {
             var expression = BuildExpression();
-            if (!string.IsNullOrEmpty(expression) && (!int.TryParse(expression, out var intSeconds) || intSeconds <= 0) && !Quartz.CronExpression.IsValidExpression(expression))
+            if (!string.IsNullOrEmpty(expression) && (!int.TryParse(expression, out var intSeconds) || intSeconds <= 0) && !Quartz.CronExpression.TryParse(expression, out _))
             {
                 MessageBox.Show("The cron expression is not valid.", "Invalid Expression", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;

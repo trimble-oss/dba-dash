@@ -27,6 +27,17 @@ namespace DBADash
             return new Regex(@"\A" + new Regex(@"\.|\$|\^|\{|\[|\(|\||\)|\*|\+|\?|\\").Replace(toFind, ch => @"\" + ch).Replace('_', '.').Replace("%", ".*") + @"\z", RegexOptions.Singleline).IsMatch(toSearch);
         }
 
+        /// <summary>
+        /// Trims the string and returns null if the result is empty or whitespace.
+        /// Mirrors the behavior of the former Quartz.Util.TrimEmptyToNull extension,
+        /// which was removed in Quartz 4.x.
+        /// </summary>
+        public static string TrimEmptyToNull(this string value)
+        {
+            var trimmed = value?.Trim();
+            return string.IsNullOrEmpty(trimmed) ? null : trimmed;
+        }
+
         public static T DeepCopy<T>(this T self)
         {
             var settings = new JsonSerializerSettings

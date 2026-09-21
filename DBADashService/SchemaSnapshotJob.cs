@@ -8,7 +8,7 @@ namespace DBADashService
 {
     public class SchemaSnapshotJob : IJob
     {
-        public async Task Execute(IJobExecutionContext context)
+        public async ValueTask Execute(IJobExecutionContext context, System.Threading.CancellationToken cancellationToken = default)
         {
             var sourceString = context.JobDetail.JobDataMap.GetString("CFG");
             if (sourceString == null) return;

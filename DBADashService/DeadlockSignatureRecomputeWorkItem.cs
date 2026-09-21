@@ -156,7 +156,7 @@ namespace DBADashService
     [DisallowConcurrentExecution]
     internal sealed class DeadlockSignatureRecomputeJob : IJob
     {
-        public async Task Execute(IJobExecutionContext context)
+        public async ValueTask Execute(IJobExecutionContext context, System.Threading.CancellationToken cancellationToken = default)
         {
             var dataMap = context.JobDetail.JobDataMap;
             var scheduler = context.Scheduler;

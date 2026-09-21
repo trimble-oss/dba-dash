@@ -11,7 +11,7 @@ namespace DBADashService
 {
     public class MaintenanceJob : IJob
     {
-        public async Task Execute(IJobExecutionContext context)
+        public async ValueTask Execute(IJobExecutionContext context, System.Threading.CancellationToken cancellationToken = default)
         {
             var dataMap = context.JobDetail.JobDataMap;
             var connectionString = dataMap.GetString("ConnectionString");

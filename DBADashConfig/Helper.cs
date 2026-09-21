@@ -617,7 +617,7 @@ namespace DBADashConfig
             string.IsNullOrWhiteSpace(schedule)
             || (int.TryParse(schedule, out var seconds)
                 ? seconds > 0
-                : Quartz.CronExpression.IsValidExpression(schedule));
+                : Quartz.CronExpression.TryParse(schedule, out _));
 
         public static void SaveConfig(CollectionConfig config, Options o)
         {
