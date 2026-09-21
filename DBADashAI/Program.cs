@@ -650,7 +650,8 @@ ApplyAuthAndRateLimit(app.MapPost("/api/ai/analyse-deadlock", async (
         {
             return AnalysisFailure(telemetry, requestId, "Deadlock analysis failed", result,
                 result.Failure == AiChatFailure.TooLarge
-                    ? "Send it again without the object definitions, or configure a model with a larger context window."
+                    ? "A deadlock request has no optional part to drop, so this needs a model with a larger "
+                      + "context window."
                     : null);
         }
 
