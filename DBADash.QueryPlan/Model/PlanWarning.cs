@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 
 namespace DBADash.QueryPlan.Model
@@ -99,6 +101,25 @@ namespace DBADash.QueryPlan.Model
         public string? Detail { get; }
 
         public PlanWarningSeverity Severity { get; }
+
+        /// <summary>
+        /// For a warning showplan reported against the statement rather than against an operator -
+        /// a plan affecting conversion - the operators it was traced to: see
+        /// <see cref="PlanWarningLocator"/> for how, and why it is worth the trouble.
+        ///
+        /// Empty for a warning that is already on an operator, where the operator carrying it is the
+        /// answer, and for one nothing in the plan could be matched to.
+        /// </summary>
+        public IReadOnlyList<PlanOperator> Operators { get; internal set; } = [];
+
+        /// <summary>Where it was traced to, for a list that has to say so in one column.</summary>
+        public string OperatorsDescription =>
+            PlanFormat.List(
+                Operators.Select(op => op.DisplayName + " (node " + op.NodeId.ToString(CultureInfo.InvariantCulture) + ")").ToList(),
+                MaxNamedOperators);
+
+        /// <summary>The most operators named as carrying one warning before the rest are counted.</summary>
+        private const int MaxNamedOperators = 3;
 
         /// <summary>
         /// True for the warnings that mean the query gave up on memory and used tempdb instead,
@@ -282,6 +303,90 @@ namespace DBADash.QueryPlan.Model
         /// </summary>
         public bool CompiledValueDiffers =>
             RuntimeValue is not null && CompiledValue is not null && RuntimeValue != CompiledValue;
+    }
+
+    /// <summary>
+    /// Works out which operator a plan level warning is actually about.
+    ///
+    /// Showplan reports a plan affecting conversion against the statement, not against an operator,
+    /// so the picture marks the SELECT at the end of the plan and nothing else - which says a
+    /// conversion is costing the query an estimate, and leaves the reader to find where it happens
+    /// by opening operators one at a time.  The warning carries the expression, and the operator
+    /// that evaluates that expression carries the same text in its predicate or its defined values,
+    /// so the two can simply be matched up.
+    ///
+    /// Only conversions: they are the one warning whose detail is an expression.  Everything else
+    /// showplan puts at the statement level is about the statement - a memory grant, an optimiser
+    /// time out - and has no one operator to point at.
+    /// </summary>
+    internal static class PlanWarningLocator
+    {
+        public static void Locate(PlanStatement statement)
+        {
+            var convertWarnings = statement.Warnings
+                .Where(w => w.Kind == PlanWarningKind.PlanAffectingConvert && !string.IsNullOrEmpty(w.Detail))
+                .ToList();
+
+            if (convertWarnings.Count == 0) return;
+
+            // Each operator's text joined once, because every warning is looked for in every operator.
+            var operators = statement.Operators
+                .Select(op => (Operator: op, Text: string.Join("\n", PlanOperatorText.Of(op))))
+                .ToList();
+
+            foreach (var warning in convertWarnings)
+            {
+                warning.Operators = operators
+                    .Where(candidate => Mentions(candidate.Text, warning.Detail!))
+                    .Select(candidate => candidate.Operator)
+                    .ToList();
+            }
+        }
+
+        /// <summary>
+        /// True when an operator's text holds the warning's expression.
+        ///
+        /// The whole expression first, then - where the warning wrote the comparison the conversion
+        /// took part in and the operator wrote a different one, which happens when one predicate
+        /// becomes a range - the conversion on its own.
+        /// </summary>
+        private static bool Mentions(string text, string expression)
+        {
+            if (text.Contains(expression, StringComparison.OrdinalIgnoreCase)) return true;
+
+            var call = LeadingCall(expression);
+            return call is not null && text.Contains(call, StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// The function call an expression starts with - the CONVERT_IMPLICIT(...) of
+        /// CONVERT_IMPLICIT(...)&gt;(10) - or null when it does not start with one, or is nothing but
+        /// one.  Brackets are counted rather than searched for, since the arguments contain their own.
+        /// </summary>
+        private static string? LeadingCall(string expression)
+        {
+            var open = expression.IndexOf('(');
+            if (open <= 0) return null;
+
+            // Everything before the bracket has to be a name for this to be a call at all.
+            for (var i = 0; i < open; i++)
+            {
+                if (!char.IsLetterOrDigit(expression[i]) && expression[i] != '_') return null;
+            }
+
+            var depth = 0;
+            for (var i = open; i < expression.Length; i++)
+            {
+                if (expression[i] == '(') depth++;
+                else if (expression[i] == ')' && --depth == 0)
+                {
+                    var call = expression[..(i + 1)];
+                    return call.Length == expression.Length ? null : call;
+                }
+            }
+
+            return null;
+        }
     }
 
     /// <summary>A wait recorded for the query, from the WaitStats element of an actual plan.</summary>

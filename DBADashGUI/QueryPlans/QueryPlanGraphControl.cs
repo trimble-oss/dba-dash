@@ -252,6 +252,23 @@ namespace DBADashGUI.QueryPlans
         }
 
         /// <summary>
+        /// Put each operator's node id on it - see <see cref="PlanLayoutOptions.ShowNodeIds"/>.  Laid
+        /// out again, like the rest of what changes what a node says.
+        /// </summary>
+        [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+        public bool ShowNodeIds
+        {
+            get => _layoutOptions.ShowNodeIds;
+            set
+            {
+                if (_layoutOptions.ShowNodeIds == value) return;
+
+                _layoutOptions.ShowNodeIds = value;
+                _controller?.Relayout();
+            }
+        }
+
+        /// <summary>
         /// Give every node in a column the width of the widest, so the arrows between two columns are
         /// all the same length.  Off sizes each node to its own content.
         /// </summary>

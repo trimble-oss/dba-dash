@@ -46,6 +46,7 @@ namespace DBADashGUI.QueryPlans
         private readonly QueryPlanPropertiesControl _properties = new() { Dock = DockStyle.Fill };
         private readonly DBADashDataGridView _warningsGrid = NewGrid();
         private readonly DBADashDataGridView _missingIndexGrid = NewGrid();
+        private readonly DBADashDataGridView _expressionsGrid = NewGrid();
         private readonly DBADashDataGridView _parametersGrid = NewGrid();
         private readonly DBADashDataGridView _waitsGrid = NewGrid();
 
@@ -84,6 +85,7 @@ namespace DBADashGUI.QueryPlans
         private readonly ThemedTabControl _tabs = new() { Dock = DockStyle.Fill, ShowToolTips = true };
         private readonly TabPage _warningsTab;
         private readonly TabPage _missingIndexTab;
+        private readonly TabPage _expressionsTab;
         private readonly TabPage _parametersTab;
         private readonly TabPage _waitsTab;
 
@@ -123,7 +125,11 @@ namespace DBADashGUI.QueryPlans
             Width = 130
         };
 
-        private readonly ToolStripTextBox _findBox = new() { Width = 140, ToolTipText = "Find an operator, table, index or predicate" };
+        private readonly ToolStripTextBox _findBox = new()
+        {
+            Width = 140,
+            ToolTipText = "Find an operator, table, index or predicate - or a node id, for the nodes the cards and lists name"
+        };
 
         /// <summary>Own or reported operator times - see <see cref="BuildTimeMenu"/>.</summary>
         private readonly ToolStripDropDownButton _timeMenu = new();
@@ -145,6 +151,9 @@ namespace DBADashGUI.QueryPlans
 
         /// <summary>Settings > Show Operator Descriptions, for the same reason.</summary>
         private ToolStripMenuItem _descriptionsItem;
+
+        /// <summary>Settings > Show Node IDs, so the right click menu can work it and show its state.</summary>
+        private ToolStripMenuItem _nodeIdsItem;
 
         /// <summary>Settings > Operator Width - see <see cref="BuildOperatorWidthMenu"/>.</summary>
         private readonly ToolStripMenuItem _operatorWidthMenu = new("Operator Width");
@@ -226,6 +235,7 @@ namespace DBADashGUI.QueryPlans
             _graphControl.NodeWidth = LoadNodeWidth();
             _graphControl.UniformColumnWidths = Properties.Settings.Default.QueryPlanUniformColumnWidths;
             _graphControl.WrapObjectNames = Properties.Settings.Default.QueryPlanWrapObjectNames;
+            _graphControl.ShowNodeIds = Properties.Settings.Default.QueryPlanShowNodeIds;
             _graphControl.ColumnSpacing = LoadColumnSpacing();
             _graphControl.VerticalLayout = LoadVerticalLayout();
             _graphControl.MinAutoFitZoom = LoadMinFitZoom();
@@ -240,12 +250,14 @@ namespace DBADashGUI.QueryPlans
 
             _warningsTab = NewPage("Warnings", _warningsGrid);
             _missingIndexTab = NewPage("Missing Indexes", GridAndScript(_missingIndexGrid, _missingIndexScript, _missingIndexScriptSplit));
+            _expressionsTab = NewPage("Expressions", _expressionsGrid);
             _parametersTab = NewPage("Parameters", GridAndScript(_parametersGrid, _parameterScript, _parameterScriptSplit));
             _waitsTab = NewPage("Waits", _waitsGrid);
 
             _tabs.TabPages.Add(NewPage("Plan", _statementSplit));
             _tabs.TabPages.Add(_warningsTab);
             _tabs.TabPages.Add(_missingIndexTab);
+            _tabs.TabPages.Add(_expressionsTab);
             _tabs.TabPages.Add(_parametersTab);
             _tabs.TabPages.Add(_waitsTab);
             _tabs.TabPages.Add(NewPage("Query", _queryHost));
@@ -269,6 +281,8 @@ namespace DBADashGUI.QueryPlans
             _properties.OperatorRequested += (_, op) => _graphControl.SelectOperator(op);
             _warningsGrid.CellDoubleClick += (_, e) => SelectFromGrid(_warningsGrid, e.RowIndex);
             _missingIndexGrid.CellDoubleClick += MissingIndexGrid_CellDoubleClick;
+            _expressionsGrid.CellDoubleClick += ExpressionsGrid_CellDoubleClick;
+            _expressionsGrid.CellContentClick += ExpressionsGrid_CellContentClick;
             _waitsGrid.CellContentClick += WaitsGrid_CellContentClick;
 
             // Top of the Parameters list's right click menus - on a row, and on the empty space below the
@@ -1033,7 +1047,23 @@ namespace DBADashGUI.QueryPlans
                 SaveSetting(() => Properties.Settings.Default.QueryPlanShowOperatorDescriptions = descriptions.Checked);
             };
 
+            // Beside the descriptions: both are about what the operators say rather than how the plan
+            // is laid out.  Off by default - see PlanLayoutOptions.ShowNodeIds.
+            var nodeIds = _nodeIdsItem = new ToolStripMenuItem("Show Node IDs")
+            {
+                CheckOnClick = true,
+                Checked = _graphControl.ShowNodeIds,
+                ToolTipText = "Put each operator's node id on it, so the nodes the cards, the warnings list and the properties panel name can be found in the plan."
+            };
+
+            nodeIds.CheckedChanged += (_, _) =>
+            {
+                _graphControl.ShowNodeIds = nodeIds.Checked;
+                SaveSetting(() => Properties.Settings.Default.QueryPlanShowNodeIds = nodeIds.Checked);
+            };
+
             menu.DropDownItems.Add(descriptions);
+            menu.DropDownItems.Add(nodeIds);
             menu.DropDownItems.Add(BuildOperatorWidthMenu());
             menu.DropDownItems.Add(BuildColumnSpacingMenu());
             menu.DropDownItems.Add(BuildVerticalLayoutMenu());
@@ -1353,6 +1383,7 @@ namespace DBADashGUI.QueryPlans
             UpdateTimeMenu(statement);
             ShowWarnings(statement);
             ShowMissingIndexes(statement);
+            ShowExpressions(statement);
             ShowParameters(statement);
             ShowWaits(statement);
 
@@ -1492,6 +1523,14 @@ namespace DBADashGUI.QueryPlans
             {
                 Checked = _descriptionsItem.Checked,
                 ToolTipText = _descriptionsItem.ToolTipText
+            });
+
+            // Beside the descriptions, as on the Settings menu: this is the menu open in front of the
+            // reader who has just been told a warning is on node 9 and is looking for node 9.
+            e.Items.Add(new ToolStripMenuItem("Show Node IDs", null, (_, _) => _nodeIdsItem.Checked = !_nodeIdsItem.Checked)
+            {
+                Checked = _nodeIdsItem.Checked,
+                ToolTipText = _nodeIdsItem.ToolTipText
             });
         }
 
@@ -1650,6 +1689,7 @@ namespace DBADashGUI.QueryPlans
             _warningsGrid.Columns.Add("Operator", "Operator");
             _warningsGrid.Columns.Add("Warning", "Warning");
             _warningsGrid.Columns.Add("Detail", "Detail");
+            _warningsGrid.Columns.Add("Expanded", "In Full");
             _warningsGrid.Columns.Add(NodeIdColumn, NodeIdColumn);
             _warningsGrid.Columns[NodeIdColumn].Visible = false;
 
@@ -1659,7 +1699,16 @@ namespace DBADashGUI.QueryPlans
             // order AllWarnings uses, so the list and the badges agree about what matters.
             foreach (var warning in statement.Warnings.OrderByDescending(w => w.Severity))
             {
-                AddWarningRow(warning.Severity.ToString(), "Plan", warning.Title, warning.Detail, null);
+                // A conversion showplan reported against the statement happens in one operator, and
+                // the reader wants that one - so the row names it and double clicking goes there, the
+                // same as a warning the plan put on an operator itself.
+                AddWarningRow(
+                    warning.Severity.ToString(),
+                    warning.Operators.Count == 0 ? "Plan" : warning.OperatorsDescription,
+                    warning.Title,
+                    warning.Detail,
+                    warning.Operators.Count == 0 ? null : warning.Operators[0].NodeId);
+
                 count++;
             }
 
@@ -1677,7 +1726,12 @@ namespace DBADashGUI.QueryPlans
 
         private void AddWarningRow(string severity, string source, string title, string detail, int? nodeId)
         {
-            var index = _warningsGrid.Rows.Add(severity, source, title, detail ?? string.Empty,
+            // The values the plan works out that the detail names, written out in place: a wrong
+            // estimate blamed on [Expr1011] is unreadable until something says what [Expr1011] is.
+            // Empty where the detail names none, so a filled cell is itself the sign it refers to one.
+            var expanded = PlanExpressions.ExpandedReferencesIn(_current, detail);
+
+            var index = _warningsGrid.Rows.Add(severity, source, title, detail ?? string.Empty, expanded,
                 nodeId?.ToString(CultureInfo.InvariantCulture) ?? string.Empty);
 
             // The severity colour is the point of the column: a spill and a note about a missing
@@ -1725,6 +1779,144 @@ namespace DBADashGUI.QueryPlans
                 : "Missing Indexes (" + statement.MissingIndexes.Count.ToString(CultureInfo.InvariantCulture) + ")";
 
             ShowScript(_missingIndexScript, _missingIndexScriptSplit, PlanScripts.MissingIndexes(statement));
+        }
+
+        // The column naming the operator that works an expression out, which a double click on it
+        // goes to - as against a double click anywhere else on the row, which opens the expression.
+        private const string ExpressionOperatorColumn = "DefinedBy";
+
+        /// <summary>How wide an expression column opens, before the reader drags it.</summary>
+        private const int ExpressionColumnWidth = 420;
+
+        /// <summary>
+        /// The values the plan works out for itself - Expr1011 and the rest - which nothing else in
+        /// the viewer puts in one place.
+        ///
+        /// Showplan writes the definition on the operator that computes it and the bare name on every
+        /// operator that uses it, which on a wide plan are nowhere near each other: a predicate that
+        /// reads Expr1011 &gt; Expr1013 says nothing at all until both are looked up, and looking them
+        /// up means clicking through the plan hunting for the Compute Scalars that define them.
+        /// </summary>
+        private void ShowExpressions(PlanStatement statement)
+        {
+            ResetGrid(_expressionsGrid);
+
+            // The expression name and the operator that works it out are links, so it is obvious they
+            // do something: clicking the name opens the value in full, clicking the operator goes to it
+            // in the plan.  See ExpressionsGrid_CellContentClick.
+            _expressionsGrid.Columns.Add(new DataGridViewLinkColumn
+            {
+                Name = "Name",
+                HeaderText = "Expression",
+                UseColumnTextForLinkValue = false,
+                TrackVisitedState = false
+            });
+            _expressionsGrid.Columns.Add("Definition", "Definition");
+            _expressionsGrid.Columns.Add("Expanded", "In Full");
+            _expressionsGrid.Columns.Add(new DataGridViewLinkColumn
+            {
+                Name = ExpressionOperatorColumn,
+                HeaderText = "Worked Out By",
+                UseColumnTextForLinkValue = false,
+                TrackVisitedState = false
+            });
+            _expressionsGrid.Columns.Add("UsedBy", "Used By");
+            _expressionsGrid.Columns.Add(NodeIdColumn, NodeIdColumn);
+            _expressionsGrid.Columns[NodeIdColumn].Visible = false;
+
+            // The two expression columns hold hundreds of characters, and sized to their content they
+            // push the columns saying where the value comes from and goes off the right of the window.
+            // Wide enough to read the start of an expression, resizable, and the whole of it is a
+            // double click away.
+            foreach (var column in new[] { "Definition", "Expanded" })
+            {
+                _expressionsGrid.Columns[column].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+                _expressionsGrid.Columns[column].Width = ExpressionColumnWidth;
+            }
+
+            foreach (var expression in statement.Expressions)
+            {
+                var index = _expressionsGrid.Rows.Add(
+                    expression.DisplayName,
+                    expression.DefinitionOneLine,
+
+                    // Empty where the expansion says nothing the definition did not, rather than the
+                    // same text twice: a filled cell in this column is itself the sign that the
+                    // expression is built on others.
+                    expression.ExpandedOneLine,
+                    expression.DefinedByDescription,
+                    expression.UsedByDescription,
+                    expression.DefinedBy?.NodeId.ToString(CultureInfo.InvariantCulture) ?? string.Empty);
+
+                var row = _expressionsGrid.Rows[index];
+                row.Tag = expression;
+                row.Cells["Name"].ToolTipText = "Click to see it in full.";
+                row.Cells["Definition"].ToolTipText = "Double click to see it in full.";
+                row.Cells[ExpressionOperatorColumn].ToolTipText = "Click to go to this operator in the plan.";
+            }
+
+            _expressionsTab.Text = statement.Expressions.Count == 0
+                ? "Expressions"
+                : "Expressions (" + statement.Expressions.Count.ToString(CultureInfo.InvariantCulture) + ")";
+
+            var nested = statement.Expressions.Count(e => e.IsNested);
+            _expressionsTab.ToolTipText = statement.Expressions.Count == 0
+                ? string.Empty
+                : "The values the plan works out for itself." +
+                  (nested == 0
+                      ? string.Empty
+                      : " " + nested.ToString(CultureInfo.InvariantCulture) + " of them are built from others.");
+        }
+
+        /// <summary>
+        /// Double clicking an expression opens it with everything it is built from written out, which
+        /// is the whole reason for the list; double clicking the operator that works it out goes
+        /// there instead, the way the other lists point back at the plan.  The Expression and Worked
+        /// Out By columns are links, so a single click does the same - see
+        /// <see cref="ExpressionsGrid_CellContentClick"/>.
+        /// </summary>
+        private void ExpressionsGrid_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+
+            if (e.ColumnIndex >= 0 && _expressionsGrid.Columns[e.ColumnIndex].Name == ExpressionOperatorColumn)
+            {
+                SelectFromGrid(_expressionsGrid, e.RowIndex);
+                return;
+            }
+
+            OpenExpression(e.RowIndex);
+        }
+
+        /// <summary>
+        /// Clicking the Expression link opens the value in full; clicking the Worked Out By link goes
+        /// to the operator that works it out.  Only these two columns are links, so a click anywhere
+        /// else does nothing here.
+        /// </summary>
+        private void ExpressionsGrid_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.ColumnIndex < 0) return;
+
+            var column = _expressionsGrid.Columns[e.ColumnIndex].Name;
+            if (column == ExpressionOperatorColumn)
+            {
+                SelectFromGrid(_expressionsGrid, e.RowIndex);
+            }
+            else if (column == "Name")
+            {
+                OpenExpression(e.RowIndex);
+            }
+        }
+
+        /// <summary>Opens the expression on <paramref name="rowIndex"/> in the code viewer, written out in full.</summary>
+        private void OpenExpression(int rowIndex)
+        {
+            if (_expressionsGrid.Rows[rowIndex].Tag is not PlanExpression expression) return;
+
+            CommonShared.ShowCodeViewer(
+                PlanScripts.Expression(expression),
+                "Expression " + expression.DisplayName,
+                CodeEditor.CodeEditorModes.SQL);
         }
 
         /// <summary>

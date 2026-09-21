@@ -661,6 +661,23 @@ namespace DBADash.QueryPlan.Test
             Assert.AreEqual("10", tooltip.Rows.Single(r => r.Label == "Estimated rows, all executions").Value);
         }
 
+        [TestMethod]
+        public void NodeIds_AreShownOnTheNodesWhenAskedFor()
+        {
+            var plain = Layout(TestPlans.KeyLookupSeek);
+            Assert.IsFalse(plain.Nodes.Any(n => n.MetricLine?.Contains("Node ") == true),
+                "Off by default: it is a number about the plan rather than about the query.");
+
+            var withIds = Layout(TestPlans.KeyLookupSeek, new PlanLayoutOptions { ShowNodeIds = true });
+            var seek = withIds.Nodes.Single(n => n.Operator?.NodeId == 1);
+
+            // First on the line, because the reader turning this on is holding a node id and looking
+            // for the node it belongs to.
+            StringAssert.StartsWith(seek.MetricLine, "Node 1");
+            Assert.IsFalse(withIds.Root.MetricLine?.Contains("Node ") == true,
+                "The statement root is not one of the plan's numbered operators.");
+        }
+
         private static PlanEdge EdgeFrom(PlanLayout layout, int nodeId) =>
             layout.Edges.Single(e => e.From.Operator?.NodeId == nodeId);
 

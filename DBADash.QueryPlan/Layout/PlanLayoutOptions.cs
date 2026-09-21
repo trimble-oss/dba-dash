@@ -55,6 +55,17 @@ namespace DBADash.QueryPlan.Layout
         public int MaxObjectNameLines { get; set; } = 4;
 
         /// <summary>
+        /// Put each operator's node id on it, ahead of its figures.
+        ///
+        /// Off by default, because it is a number the plan gives its operators rather than anything
+        /// about the query, and every node pays a little width for it.  On, because everything that
+        /// names an operator in words - a card saying a conversion happens on node 9, the warnings
+        /// list, the properties panel - names it by that number, and finding node 9 in a picture that
+        /// never shows one means clicking through the plan.
+        /// </summary>
+        public bool ShowNodeIds { get; set; }
+
+        /// <summary>
         /// Set <see cref="MinNodeWidth"/> and <see cref="MaxNodeWidth"/> to a preset, and
         /// <see cref="IconAboveText"/> with it - only <see cref="PlanNodeWidth.Stacked"/> puts the icon above.
         /// </summary>

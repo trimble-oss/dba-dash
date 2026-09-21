@@ -1,3 +1,4 @@
+using System;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -111,6 +112,87 @@ namespace DBADash.QueryPlan.Model
             script.AppendLine().Append("/* ").Append(Commented(notes.ToString())).AppendLine("*/")
                 .AppendLine(index.CreateStatement);
         }
+
+        /// <summary>
+        /// One expression written out for reading: where it is worked out and used, the definition
+        /// itself, and - when it is built from other expressions - the whole thing with those written
+        /// out in place.
+        ///
+        /// Laid out with <see cref="PlanFormat.ForReading"/> rather than left on one line, because a
+        /// generated expression is nested several deep and a reader following one is reading it, not
+        /// glancing at it.  Not runnable T-SQL and not meant to be: it is shown in the code viewer
+        /// because that is where the rest of a plan's text is shown, and the highlighting helps.
+        /// </summary>
+        public static string Expression(PlanExpression expression)
+        {
+            var notes = new StringBuilder(expression.DisplayName).AppendLine();
+
+            if (expression.DefinedBy is { } definedBy)
+            {
+                notes.Append("   Worked out by ").AppendLine(Describe(definedBy));
+            }
+
+            if (expression.UsedBy.Count > 0)
+            {
+                notes.Append("   Used by ")
+                    .AppendLine(string.Join(", ", expression.UsedBy.Select(Describe)));
+            }
+
+            if (expression.References.Count > 0)
+            {
+                notes.Append("   Built from ").AppendLine(string.Join(", ", expression.References));
+            }
+
+            var script = new StringBuilder()
+                .Append("/* ").Append(Commented(notes.ToString())).AppendLine("*/")
+                .AppendLine(PlanFormat.ForReading(expression.Definition));
+
+            if (expression.IsNested)
+            {
+                script.AppendLine()
+                    .AppendLine("/* The same thing with every expression it refers to written out in place. */")
+                    .AppendLine(PlanFormat.ForReading(expression.Expanded));
+            }
+
+            return script.ToString();
+        }
+
+        /// <summary>
+        /// The plan's own values that <paramref name="text"/> refers to, as a note to go under it -
+        /// or nothing when it refers to none.
+        ///
+        /// A predicate reading Expr1011 &gt; Expr1013 says nothing on its own, and the properties
+        /// panel shows a value in full without the room, or the hit testing, for a link on each name:
+        /// so whatever the text refers to is written underneath it instead.  Bracketed or bare, so
+        /// the sort keys and group by lists are covered as well as the predicates.
+        /// </summary>
+        public static string ExpressionsUsedIn(PlanStatement? statement, string? text)
+        {
+            if (statement is null || string.IsNullOrEmpty(text)) return string.Empty;
+
+            var used = PlanExpressions.NamesIn(text)
+                .Select(statement.ExpressionNamed)
+                .Where(expression => expression is not null)
+                .Distinct()
+                .ToList();
+
+            if (used.Count == 0) return string.Empty;
+
+            var notes = new StringBuilder("The values the plan works out that the text above refers to.").AppendLine();
+
+            foreach (var expression in used)
+            {
+                notes.Append("   ").Append(expression!.Name).Append(" = ").AppendLine(expression.DefinitionOneLine);
+
+                if (expression.IsNested) notes.Append("      in full: ").AppendLine(expression.ExpandedOneLine);
+            }
+
+            return Environment.NewLine + "/* " + Commented(notes.ToString()) + "*/" + Environment.NewLine;
+        }
+
+        /// <summary>An operator as a note names it: what it is, and which node, since a plan has several of each.</summary>
+        private static string Describe(PlanOperator op) =>
+            op.DisplayName + " (node " + op.NodeId.ToString(CultureInfo.InvariantCulture) + ")";
 
         /// <summary>
         /// Text made safe to sit inside a block comment.

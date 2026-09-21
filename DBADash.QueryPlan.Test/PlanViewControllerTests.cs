@@ -383,8 +383,12 @@ namespace DBADash.QueryPlan.Test
 
             Assert.AreEqual("Sort", tooltip.Title);
 
-            // The measurements come before the optimiser's guesses on an actual plan.
-            Assert.AreEqual("Actual rows", tooltip.Rows[0].Label);
+            // The node's own id first - everything that names an operator in words names it by that
+            // number - then the measurements, which come before the optimiser's guesses on an actual
+            // plan.
+            Assert.AreEqual("Node", tooltip.Rows[0].Label);
+            Assert.AreEqual("1", tooltip.Rows[0].Value);
+            Assert.AreEqual("Actual rows", tooltip.Rows[1].Label);
 
             var skew = tooltip.Rows.Single(r => r.Label == "Threads");
             StringAssert.Contains(skew.Value, "skew 2.8x");
@@ -482,6 +486,19 @@ namespace DBADash.QueryPlan.Test
             Assert.AreEqual(1, controller.Find("Active"), "Matched on the residual predicate.");
             Assert.AreEqual(1, controller.Find("hash match"), "Case insensitive, on the physical op.");
             Assert.AreEqual(0, controller.Find("no such thing"));
+        }
+
+        [TestMethod]
+        public void Find_TakesANumberAsANodeId()
+        {
+            var controller = Controller();
+
+            // The cards, the warnings list and the properties panel all name operators by node id,
+            // and until now there was no way to turn one back into a node without clicking each.
+            Assert.IsTrue(controller.Find("2") > 0);
+            Assert.IsTrue(controller.Matches.Any(n => n.Operator?.NodeId == 2));
+
+            Assert.AreEqual(0, controller.Find("9999"), "No node, and no text with those digits in it.");
         }
 
         [TestMethod]

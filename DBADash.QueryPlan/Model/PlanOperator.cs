@@ -160,6 +160,14 @@ namespace DBADash.QueryPlan.Model
         public string? SeekPredicate { get; internal set; }
 
         /// <summary>
+        /// The values this operator works out and names - see <see cref="PlanExpression"/>.  The
+        /// statement holds all of them together; this is the ones that happen here, which is what
+        /// says whether a name on this operator's output list is one it computed or one it was
+        /// handed.
+        /// </summary>
+        public IReadOnlyList<PlanExpression> DefinedExpressions { get; internal set; } = [];
+
+        /// <summary>
         /// Everything else showplan said about this operator, as a tree for the properties panel.
         /// </summary>
         public IReadOnlyList<PlanProperty> Properties { get; internal set; } = [];

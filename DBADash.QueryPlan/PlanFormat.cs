@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 
 namespace DBADash.QueryPlan
 {
@@ -178,6 +179,33 @@ namespace DBADash.QueryPlan
         {
             var collapsed = string.Join(' ', value.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
             return collapsed.Length <= maxLength ? collapsed : collapsed[..maxLength] + "...";
+        }
+
+        /// <summary>
+        /// A list of things the way a sentence says them - "a", "a and b", "a, b and c" - and, past
+        /// <paramref name="maxShown"/> of them, "a, b and 11 others".
+        ///
+        /// The cut off is the point: a warning that turns up fourteen times is one thing to read
+        /// about, and naming all fourteen puts the reader back where listing them separately did.
+        /// </summary>
+        public static string List(IReadOnlyList<string> items, int maxShown)
+        {
+            if (items.Count == 0) return string.Empty;
+            if (items.Count == 1) return items[0];
+
+            var shown = Math.Max(1, Math.Min(items.Count, maxShown));
+            var named = string.Join(", ", items.Take(shown));
+
+            if (items.Count > shown)
+            {
+                var rest = items.Count - shown;
+                return named + " and " + rest.ToString(CultureInfo.InvariantCulture) + (rest == 1 ? " other" : " others");
+            }
+
+            // The last one joined with "and" rather than a comma, which is where a list stops reading
+            // as a list and starts reading as a sentence.
+            var lastComma = named.LastIndexOf(", ", StringComparison.Ordinal);
+            return lastComma < 0 ? named : named[..lastComma] + " and " + named[(lastComma + 2)..];
         }
 
         /// <summary>

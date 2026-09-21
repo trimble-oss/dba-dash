@@ -195,7 +195,7 @@ namespace DBADash.QueryPlan.Layout
                 Category = node.Category,
                 Title = node.DisplayName,
                 Subtitle = node.PrimaryObject?.ShortName,
-                MetricLine = BuildMetricLine(node, statement),
+                MetricLine = BuildMetricLine(node, statement, _options.ShowNodeIds),
                 TimingLine = BuildTimingLine(node.ElapsedMs(timeMode), node.CpuMs(timeMode)),
                 Parent = parent,
                 Depth = depth,
@@ -214,9 +214,12 @@ namespace DBADash.QueryPlan.Layout
                 planNode.HiddenDescendantCount = hidden.Count;
 
                 // Hidden warnings are raised on the collapsed node, so collapsing part of a plan to
-                // read the rest never hides a spill in the part put away.
-                planNode.HiddenWarningCount = hidden.Count(op => op.Warnings.Count > 0);
-                planNode.Badges |= WarningBadges(hidden.SelectMany(op => op.Warnings));
+                // read the rest never hides a spill in the part put away.  The plan level warnings
+                // traced to a hidden operator count as its own here too, the same as they do on a
+                // visible node - see BuildBadges - otherwise collapsing an ancestor loses the marker
+                // for a conversion showplan reported against the statement.
+                planNode.HiddenWarningCount = hidden.Count(op => op.Warnings.Count > 0 || statement.WarningsFor(op).Any());
+                planNode.Badges |= WarningBadges(hidden.SelectMany(op => op.Warnings.Concat(statement.WarningsFor(op))));
                 return planNode;
             }
 
@@ -239,11 +242,16 @@ namespace DBADash.QueryPlan.Layout
         ///
         /// Two numbers, not five.  A node is glanced at, not studied - everything else the operator
         /// knows is one click away in the properties panel, and a node crowded with figures is one
-        /// nobody reads.
+        /// nobody reads.  Its node id joins them only when asked for - see
+        /// <see cref="PlanLayoutOptions.ShowNodeIds"/>.
         /// </summary>
-        private static string? BuildMetricLine(PlanOperator node, PlanStatement statement)
+        private static string? BuildMetricLine(PlanOperator node, PlanStatement statement, bool showNodeId)
         {
-            var parts = new List<string>(2);
+            var parts = new List<string>(3);
+
+            // First, where it is looked for: the reader turning this on is holding a node id from a
+            // card or a list and looking for that node in the picture.
+            if (showNodeId) parts.Add("Node " + node.NodeId.ToString(CultureInfo.InvariantCulture));
 
             if (statement.StatementSubTreeCost > 0)
             {
@@ -304,7 +312,10 @@ namespace DBADash.QueryPlan.Layout
 
         private static PlanNodeBadges BuildBadges(PlanOperator node, PlanStatement statement)
         {
-            var badges = WarningBadges(node.Warnings);
+            // The plan level warnings traced to this operator count as its own: a conversion showplan
+            // reported against the statement happens here, and marking only the statement root leaves
+            // the reader to find the operator by opening them one at a time.
+            var badges = WarningBadges(node.Warnings.Concat(statement.WarningsFor(node)));
 
             if (node.RowEstimateError >= EstimateMismatchThreshold)
             {

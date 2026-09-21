@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-16"?>
+<ShowPlanXML xmlns="http://schemas.microsoft.com/sqlserver/2004/07/showplan" Version="1.564" Build="16.0.4175.1">
+  <BatchSequence>
+    <Batch>
+      <Statements>
+        <StmtSimple StatementCompId="1" StatementEstRows="112" StatementId="1" StatementOptmLevel="FULL" StatementSubTreeCost="3.1204" StatementText="SELECT o.OrderID, o.Total * 1.2 AS WithTax FROM dbo.Orders o WHERE o.Reference = 12345 AND o.Total * 1.2 &gt; 10" StatementType="SELECT" QueryHash="0x9A1B2C3D4E5F6071" QueryPlanHash="0x1122334455667788" CardinalityEstimationModelVersion="160">
+          <QueryPlan CachedPlanSize="48" CompileTime="7" CompileCPU="7" CompileMemory="360">
+            <MemoryGrantInfo SerialRequiredMemory="0" SerialDesiredMemory="0" />
+            <OptimizerHardwareDependentProperties EstimatedAvailableMemoryGrant="104857" EstimatedPagesCached="6553" EstimatedAvailableDegreeOfParallelism="4" />
+            <RelOp AvgRowSize="27" EstimateCPU="0.0001" EstimateIO="0" EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row" EstimateRows="112" LogicalOp="Filter" NodeId="0" Parallel="false" PhysicalOp="Filter" EstimatedTotalSubtreeCost="3.1204">
+              <OutputList>
+                <ColumnReference Database="[Sales]" Schema="[dbo]" Table="[Orders]" Alias="[o]" Column="OrderID" />
+                <ColumnReference Column="Expr1004" />
+              </OutputList>
+              <Warnings>
+                <PlanAffectingConvert ConvertIssue="Cardinality Estimate" Expression="CONVERT_IMPLICIT(int,[Expr1001],0)=[@Reference]" />
+                <PlanAffectingConvert ConvertIssue="Cardinality Estimate" Expression="CONVERT_IMPLICIT(int,[Expr1002],0)&gt;(10)" />
+                <PlanAffectingConvert ConvertIssue="Cardinality Estimate" Expression="CONVERT_IMPLICIT(int,[Expr1003],0)" />
+                <PlanAffectingConvert ConvertIssue="Cardinality Estimate" Expression="CONVERT_IMPLICIT(numeric(12,2),[Sales].[dbo].[Orders].[Total],0)" />
+                <PlanAffectingConvert ConvertIssue="Cardinality Estimate" Expression="CONVERT_IMPLICIT(int,[Expr1004],0)" />
+              </Warnings>
+              <Filter StartupExpression="false">
+                <RelOp AvgRowSize="27" EstimateCPU="0.0002" EstimateIO="0" EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row" EstimateRows="1000" LogicalOp="Compute Scalar" NodeId="1" Parallel="false" PhysicalOp="Compute Scalar" EstimatedTotalSubtreeCost="3.12">
+                  <OutputList>
+                    <ColumnReference Database="[Sales]" Schema="[dbo]" Table="[Orders]" Alias="[o]" Column="OrderID" />
+                    <ColumnReference Column="Expr1004" />
+                  </OutputList>
+                  <ComputeScalar>
+                    <DefinedValues>
+                      <DefinedValue>
+                        <ColumnReference Column="Expr1004" />
+                        <ScalarOperator ScalarString="CONVERT_IMPLICIT(int,[Expr1003],0)+[Expr1002]">
+                          <Identifier>
+                            <ColumnReference Column="Expr1003" />
+                          </Identifier>
+                        </ScalarOperator>
+                      </DefinedValue>
+                    </DefinedValues>
+                    <RelOp AvgRowSize="27" EstimateCPU="0.0002" EstimateIO="0" EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row" EstimateRows="1000" LogicalOp="Compute Scalar" NodeId="2" Parallel="false" PhysicalOp="Compute Scalar" EstimatedTotalSubtreeCost="3.11">
+                      <OutputList>
+                        <ColumnReference Database="[Sales]" Schema="[dbo]" Table="[Orders]" Alias="[o]" Column="OrderID" />
+                        <ColumnReference Column="Expr1003" />
+                        <ColumnReference Column="Expr1002" />
+                      </OutputList>
+                      <ComputeScalar>
+                        <DefinedValues>
+                          <DefinedValue>
+                            <ColumnReference Column="Expr1003" />
+                            <ScalarOperator ScalarString="len([Sales].[dbo].[Orders].[Reference] as [o].[Reference])+[Expr1002]" />
+                          </DefinedValue>
+                          <DefinedValue>
+                            <ColumnReference Column="Expr1002" />
+                            <ScalarOperator ScalarString="[Sales].[dbo].[Orders].[Total] as [o].[Total]*(1.2)" />
+                          </DefinedValue>
+                          <DefinedValue>
+                            <ColumnReference Column="Expr1001" />
+                            <ScalarOperator ScalarString="substring([Sales].[dbo].[Orders].[Reference] as [o].[Reference],(1),(8))" />
+                          </DefinedValue>
+                        </DefinedValues>
+                        <RelOp AvgRowSize="27" EstimateCPU="0.0011" EstimateIO="3.1" EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row" EstimateRows="1000" LogicalOp="Clustered Index Scan" NodeId="3" Parallel="false" PhysicalOp="Clustered Index Scan" EstimatedTotalSubtreeCost="3.1">
+                          <OutputList>
+                            <ColumnReference Database="[Sales]" Schema="[dbo]" Table="[Orders]" Alias="[o]" Column="OrderID" />
+                            <ColumnReference Database="[Sales]" Schema="[dbo]" Table="[Orders]" Alias="[o]" Column="Reference" />
+                            <ColumnReference Database="[Sales]" Schema="[dbo]" Table="[Orders]" Alias="[o]" Column="Total" />
+                          </OutputList>
+                          <IndexScan Ordered="false" ForcedIndex="false" ForceScan="false" NoExpandHint="false" Storage="RowStore">
+                            <DefinedValues>
+                              <DefinedValue>
+                                <ColumnReference Database="[Sales]" Schema="[dbo]" Table="[Orders]" Alias="[o]" Column="OrderID" />
+                              </DefinedValue>
+                              <DefinedValue>
+                                <ColumnReference Database="[Sales]" Schema="[dbo]" Table="[Orders]" Alias="[o]" Column="Reference" />
+                              </DefinedValue>
+                              <DefinedValue>
+                                <ColumnReference Database="[Sales]" Schema="[dbo]" Table="[Orders]" Alias="[o]" Column="Total" />
+                              </DefinedValue>
+                            </DefinedValues>
+                            <Object Database="[Sales]" Schema="[dbo]" Table="[Orders]" Index="[PK_Orders]" Alias="[o]" IndexKind="Clustered" Storage="RowStore" />
+                          </IndexScan>
+                        </RelOp>
+                      </ComputeScalar>
+                    </RelOp>
+                  </ComputeScalar>
+                </RelOp>
+                <Predicate>
+                  <ScalarOperator ScalarString="CONVERT_IMPLICIT(int,[Expr1001],0)=(12345) AND [Expr1004]&gt;(10)" />
+                </Predicate>
+              </Filter>
+            </RelOp>
+          </QueryPlan>
+        </StmtSimple>
+      </Statements>
+    </Batch>
+  </BatchSequence>
+</ShowPlanXML>

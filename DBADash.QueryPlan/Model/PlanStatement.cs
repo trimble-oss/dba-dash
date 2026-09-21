@@ -179,6 +179,13 @@ namespace DBADash.QueryPlan.Model
         /// <summary>Warnings on the plan as a whole, as opposed to on one operator.</summary>
         public IReadOnlyList<PlanWarning> Warnings { get; internal set; } = [];
 
+        /// <summary>
+        /// The values the plan works out and names for itself - Expr1011 and the rest - in the order
+        /// the operators define them.  See <see cref="PlanExpression"/> for why they are collected at
+        /// the statement rather than left on the operator that defines each one.
+        /// </summary>
+        public IReadOnlyList<PlanExpression> Expressions { get; internal set; } = [];
+
         /// <summary>Set options, trace flags and the rest, for the properties panel.</summary>
         public IReadOnlyList<PlanProperty> Properties { get; internal set; } = [];
 
@@ -210,6 +217,34 @@ namespace DBADash.QueryPlan.Model
                     .Where(index => string.Equals(index.QualifiedTableName, target.QualifiedTableName, StringComparison.OrdinalIgnoreCase))
                     .OrderByDescending(index => index.Impact)
                 : Enumerable.Empty<PlanMissingIndex>();
+
+        private Dictionary<string, PlanExpression>? _expressionsByName;
+
+        /// <summary>
+        /// What <paramref name="name"/> refers to - the Expr1011 written in a predicate - or null
+        /// when the statement defines no such name.  Looked up often enough, by anything showing plan
+        /// text, that the index is kept rather than the list scanned each time.
+        /// </summary>
+        public PlanExpression? ExpressionNamed(string? name)
+        {
+            if (string.IsNullOrEmpty(name) || Expressions.Count == 0) return null;
+
+            // The same index the expansions were built from, so a name means one thing wherever it
+            // is asked about - see PlanExpressions.Index for which definition wins.
+            _expressionsByName ??= PlanExpressions.Index(Expressions);
+
+            return _expressionsByName.TryGetValue(name!, out var found) ? found : null;
+        }
+
+        /// <summary>
+        /// The plan level warnings that happen in <paramref name="op"/> - the conversions showplan
+        /// reported against the statement but which one operator actually evaluates.  Matched to
+        /// operators once, at parse time, by <see cref="PlanWarningLocator"/>; asked here the way
+        /// <see cref="MissingIndexesFor"/> is asked, so the badge, the tooltip and the cards all
+        /// agree about where a warning belongs.
+        /// </summary>
+        public IEnumerable<PlanWarning> WarningsFor(PlanOperator op) =>
+            Warnings.Where(warning => warning.Operators.Contains(op));
 
         /// <summary>
         /// True when the plan carries measurements rather than only estimates.  Asked of every

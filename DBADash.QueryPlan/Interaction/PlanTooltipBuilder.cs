@@ -58,6 +58,12 @@ namespace DBADash.QueryPlan.Interaction
         {
             var rows = new List<PlanTooltipRow>();
 
+            // The node's own id, first, because everything that names an operator in words names it
+            // by id - a card saying a conversion happens on node 9, the warnings list, the properties
+            // panel - and without it here the only way to tell which node is which is to click each
+            // one and read its properties.
+            rows.Add(new PlanTooltipRow("Node", op.NodeId.ToString(CultureInfo.InvariantCulture)));
+
             if (!string.IsNullOrEmpty(op.LogicalOp) &&
                 !string.Equals(op.LogicalOp, op.PhysicalOp, System.StringComparison.OrdinalIgnoreCase))
             {
@@ -214,14 +220,10 @@ namespace DBADash.QueryPlan.Interaction
                     wraps: true));
             }
 
-            foreach (var warning in op.Warnings)
-            {
-                rows.Add(new PlanTooltipRow(
-                    warning.Title,
-                    warning.Detail is null ? "Yes" : PlanFormat.SingleLine(warning.Detail, maxPredicateLength),
-                    warning.Severity != PlanWarningSeverity.Information,
-                    wraps: true));
-            }
+            // The operator's own warnings and the plan level ones traced to it, which is where a
+            // conversion the whole statement was warned about actually happens.
+            var warnings = op.Warnings.Concat(node.Statement.WarningsFor(op)).ToList();
+            foreach (var row in WarningRows(warnings, maxPredicateLength)) rows.Add(row);
 
             if (node.Badges.HasFlag(PlanNodeBadges.MissingIndex))
             {
@@ -247,6 +249,60 @@ namespace DBADash.QueryPlan.Interaction
             }
 
             return new PlanTooltip(op.DisplayName, op.PrimaryObject?.ToString(), rows, includeDescription ? PlanOperatorDescriptions.For(op) : null);
+        }
+
+        /// <summary>
+        /// The most of a combined warning's own text named on a tooltip before the rest is counted.
+        /// </summary>
+        private const int MaxCombinedWarningDetails = 2;
+
+        /// <summary>
+        /// An operator's warnings, one row each - except where the same warning turns up
+        /// <see cref="PlanInsights.CombineWarningsFrom"/> times or more, which is one row saying how
+        /// many and what they say.
+        ///
+        /// A query written against a varchar column with integer parameters reports a plan affecting
+        /// convert for every one of them, and a tooltip that gives each its own row is a scroll bar
+        /// where the figures used to be.
+        /// </summary>
+        private static IEnumerable<PlanTooltipRow> WarningRows(IReadOnlyList<PlanWarning> warnings, int maxPredicateLength)
+        {
+            foreach (var group in warnings.GroupBy(w => w.Title, StringComparer.Ordinal))
+            {
+                var found = group.ToList();
+
+                if (found.Count < PlanInsights.CombineWarningsFrom)
+                {
+                    foreach (var warning in found)
+                    {
+                        yield return new PlanTooltipRow(
+                            warning.Title,
+                            warning.Detail is null ? "Yes" : PlanFormat.SingleLine(warning.Detail, maxPredicateLength),
+                            warning.Severity != PlanWarningSeverity.Information,
+                            wraps: true);
+                    }
+
+                    continue;
+                }
+
+                // Each one shortened further than a row of its own would be: several of them share
+                // the line, and the whole of any one is in the warnings list and on the cards.
+                var details = found
+                    .Select(w => w.Detail)
+                    .Where(detail => !string.IsNullOrEmpty(detail))
+                    .Distinct(StringComparer.Ordinal)
+                    .Select(detail => PlanFormat.SingleLine(detail!, Math.Max(60, maxPredicateLength / 3)))
+                    .ToList();
+
+                var value = found.Count.ToString(CultureInfo.InvariantCulture) + " of them";
+                if (details.Count > 0) value += ": " + PlanFormat.List(details, MaxCombinedWarningDetails);
+
+                yield return new PlanTooltipRow(
+                    group.Key,
+                    value,
+                    found.Max(w => w.Severity) != PlanWarningSeverity.Information,
+                    wraps: true);
+            }
         }
 
         /// <summary>
@@ -413,14 +469,9 @@ namespace DBADash.QueryPlan.Interaction
                     PlanFormat.Duration(wait.WaitTimeMs)));
             }
 
-            foreach (var warning in statement.Warnings)
-            {
-                rows.Add(new PlanTooltipRow(
-                    warning.Title,
-                    warning.Detail ?? "Yes",
-                    warning.Severity != PlanWarningSeverity.Information,
-                    wraps: true));
-            }
+            // Grouped the same way as an operator's - see WarningRows - so a statement that reports
+            // the same conversion for every parameter is one row saying how many, not a scroll bar.
+            foreach (var row in WarningRows(statement.Warnings, DefaultMaxPredicateLength)) rows.Add(row);
 
             if (statement.MissingIndexes.Count > 0)
             {
