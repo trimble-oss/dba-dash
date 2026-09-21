@@ -644,7 +644,17 @@ ApplyAuthAndRateLimit(app.MapPost("/api/ai/analyse-deadlock", async (
         // was told the first time.
         var prompt = promptBuilder.Build(request);
         var messages = AiConversation.Build(prompt, request.History, request.Question);
-        var analysis = await aiChat.ChatAsync(messages, cancellationToken, request.ModelOverride);
+        var result = await aiChat.ChatAsync(messages, cancellationToken, request.ModelOverride);
+
+        if (!result.Success)
+        {
+            return AnalysisFailure(telemetry, requestId, "Deadlock analysis failed", result,
+                result.Failure == AiChatFailure.TooLarge
+                    ? "Send it again without the object definitions, or configure a model with a larger context window."
+                    : null);
+        }
+
+        var analysis = result.Text;
 
         await store.SaveAsync(request.Signature, model, payloadVersion, analysis, request.InstanceId,
             request.SignatureVersion, request.GraphXml, conversationId, turnNumber, request.Question,
@@ -719,7 +729,18 @@ ApplyAuthAndRateLimit(app.MapPost("/api/ai/analyse-plan", async (
         // cannot quietly change the plan the first answer was about.
         var prompt = promptBuilder.Build(request);
         var messages = AiConversation.Build(prompt, request.History, request.Question);
-        var analysis = await aiChat.ChatAsync(messages, cancellationToken, request.ModelOverride);
+        var result = await aiChat.ChatAsync(messages, cancellationToken, request.ModelOverride);
+
+        if (!result.Success)
+        {
+            return AnalysisFailure(telemetry, requestId, "Query plan analysis failed", result,
+                result.Failure == AiChatFailure.TooLarge && !string.IsNullOrWhiteSpace(request.PlanXml)
+                    ? "Send it again with the plan XML unticked - the summary alone is most of what the answer is "
+                      + "built from - or configure a model with a larger context window."
+                    : null);
+        }
+
+        var analysis = result.Text;
 
         await store.SaveAsync(request.Signature, request.PlanHash, model, payloadVersion, analysis,
             request.InstanceId, request.StatementText, conversationId, turnNumber, request.Question,
@@ -846,6 +867,36 @@ ApplyAuthAndRateLimit(app.MapPost("/api/ai/proactive-digest", async (
 }));
 
 app.Run();
+
+/// <summary>
+/// A provider that did not answer, reported rather than stored.
+///
+/// The store is where the viewer looks for what was said about this artifact last time, so a
+/// sentence explaining that a key had expired would sit there as the analysis of the plan and be
+/// shown, months later, as one.  It is also why the size failure is worth its own status code:
+/// it is the only one the reader can act on, and what they should do about it is send less.
+/// </summary>
+static IResult AnalysisFailure(
+    AiRequestTelemetryService telemetry,
+    string requestId,
+    string title,
+    AiChatResult result,
+    string? advice)
+{
+    telemetry.Fail(requestId, new InvalidOperationException(result.Text));
+
+    return Results.Problem(
+        title: title,
+        detail: string.IsNullOrWhiteSpace(advice)
+            ? $"RequestId={requestId}. {result.Text}"
+            : $"RequestId={requestId}. {result.Text} {advice}",
+        statusCode: result.Failure switch
+        {
+            AiChatFailure.TooLarge => StatusCodes.Status413PayloadTooLarge,
+            AiChatFailure.NotConfigured => StatusCodes.Status503ServiceUnavailable,
+            _ => StatusCodes.Status502BadGateway
+        });
+}
 
 static void LoadSettingsFromServiceConfig(ConfigurationManager config)
 {
