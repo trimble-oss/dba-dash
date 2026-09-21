@@ -51,6 +51,15 @@ namespace DBADashAI.Models
                 return "A follow-up question is required when a conversation is supplied.";
             }
 
+            // And the other way round.  A question with nothing to follow would be appended after the
+            // opening artifact, which is itself a user turn - two in a row, which is not a conversation
+            // any provider will take.  A first analysis is asked by sending the artifact and nothing
+            // else; the four-part answer the prompt asks for is the question.
+            if (history.Count == 0 && !string.IsNullOrWhiteSpace(question))
+            {
+                return "A question needs a conversation to follow.  A first analysis sends the artifact alone.";
+            }
+
             for (var i = 0; i < history.Count; i++)
             {
                 if (string.IsNullOrWhiteSpace(history[i].Content))

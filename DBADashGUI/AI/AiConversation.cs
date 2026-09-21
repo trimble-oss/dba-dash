@@ -68,11 +68,21 @@ namespace DBADashGUI.AI
         {
             var history = new List<WireTurn>();
 
-            foreach (var turn in _turns)
+            for (var i = 0; i < _turns.Count; i++)
             {
-                // The question comes before the answer it produced, except on the opening turn where
-                // the question was the artifact itself.
-                if (!turn.IsOpening) history.Add(new WireTurn("user", turn.Question!));
+                var turn = _turns[i];
+
+                // The question comes before the answer it produced, except on the first turn, whose
+                // question the service supplies itself by rebuilding the artifact.
+                //
+                // First, rather than whichever turn has no question, and deliberately.  A conversation
+                // stored before follow-ups existed has no id of its own, so continuing one stores the
+                // new turn under a freshly minted id while the answer it followed keeps none: read
+                // back, that conversation begins with a turn that does have a question.  Sending it
+                // would put a user turn first, which the service rejects - leaving the reader unable
+                // to add a third turn to an exchange sitting on their screen.
+                if (i > 0 && !turn.IsOpening) history.Add(new WireTurn("user", turn.Question!));
+
                 history.Add(new WireTurn("assistant", turn.Answer));
             }
 

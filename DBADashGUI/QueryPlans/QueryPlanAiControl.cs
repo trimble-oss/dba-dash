@@ -59,6 +59,16 @@ namespace DBADashGUI.QueryPlans
         private AiConversation _current;
 
         /// <summary>
+        /// The payload <see cref="_current"/> was given, which is what its follow-ups carry.
+        ///
+        /// Pinned rather than rebuilt, because the toggle above can change what a payload contains at
+        /// any moment.  A follow-up built from the current one would hand the model a plan it had never
+        /// been shown - or take away the one it had - while the exchange on screen reads as though
+        /// nothing moved.
+        /// </summary>
+        private PlanAnalysisPayload _conversationPayload;
+
+        /// <summary>
         /// False when what is on screen is a conversation about a different plan for the same query.
         ///
         /// Those are worth showing - the other half of a regression usually is - but not worth adding
@@ -120,7 +130,8 @@ namespace DBADashGUI.QueryPlans
                 CheckOnClick = true,
                 Checked = true,
                 ToolTipText = "Send the showplan XML as well as the summary.  It makes the analysis better and " +
-                              "the request much larger, and it carries the statement's literal values."
+                              "the request much larger, and it carries the statement's literal values.  It applies " +
+                              "to the next analysis: a follow-up keeps the plan its conversation started with."
             };
 
             _options.DropDownItems.Add(_showRequest);
@@ -190,6 +201,7 @@ namespace DBADashGUI.QueryPlans
 
             // A different statement means the previous conversation is about something else.
             _current = null;
+            _conversationPayload = null;
             _currentIsThisPlan = true;
             _conversation.Clear();
             _split.Panel1Collapsed = false;
@@ -313,6 +325,11 @@ namespace DBADashGUI.QueryPlans
                 entry.ConversationId ?? Guid.NewGuid(),
                 entry.Turns.Select(t => new AiConversation.Turn(t.Question, t.Analysis, t.Model, t.GeneratedUtc)));
 
+            // The plan is not stored with its answer, so what a follow-up to this can carry is the
+            // payload as it stands now.  Pinned at the moment it is restored for the same reason a
+            // fresh one is: so the toggle cannot change it out from under the exchange.
+            _conversationPayload = _payload;
+
             if (!await ShowConversationAsync(conversation, statement, entry.IsThisPlan)) return;
 
             foreach (var item in _history.DropDownItems.OfType<ToolStripMenuItem>())
@@ -392,6 +409,10 @@ namespace DBADashGUI.QueryPlans
             var continuing = question is null || !_currentIsThisPlan ? null : _current;
             if (question is not null && continuing is null) return;
 
+            // What this conversation is about was settled when it started.  A first analysis sends what
+            // is switched on now; a follow-up sends what the answer above it was given.
+            var payload = continuing is null ? _payload : _conversationPayload ?? _payload;
+
             _inFlight = new CancellationTokenSource();
             _submit.Enabled = false;
             UpdateCanAsk();
@@ -403,7 +424,7 @@ namespace DBADashGUI.QueryPlans
             {
                 var statement = _statement;
                 var result = await PlanAnalysisClient.AnalyseAsync(
-                    _payload, _service, _inFlight.Token, _instanceId, continuing, question);
+                    payload, _service, _inFlight.Token, _instanceId, continuing, question);
 
                 // The answer is stored either way; it just isn't shown against a statement selected while
                 // it was coming.
@@ -431,6 +452,10 @@ namespace DBADashGUI.QueryPlans
                     result.Analysis ?? string.Empty,
                     result.Model,
                     result.GeneratedUtc ?? DateTime.UtcNow));
+
+                // Held from here on, so that toggling the plan XML changes the next analysis rather
+                // than the artifact this exchange is about.
+                _conversationPayload = payload;
 
                 if (!await ShowConversationAsync(conversation, statement)) return;
 
