@@ -156,5 +156,24 @@ namespace DBADash.Test
 
             Assert.IsNull(request.Validate());
         }
+
+        [TestMethod]
+        public void PlanRequest_TakesAPlanLargerThanTheViewerWarnsAbout()
+        {
+            // The viewer warns at half a megabyte and sends anyway when the reader says so, because
+            // whether a plan that size fits is the configured model's business rather than this check's.
+            // A limit here at the size the warning appears would take that choice away.
+            var request = new AiPlanAnalysisRequest
+            {
+                StatementText = "SELECT 1",
+                PlanXml = new string('x', 1024 * 1024)
+            };
+
+            Assert.IsNull(request.Validate());
+
+            // Still a ceiling, because a request arrives over the network and into memory.
+            request.PlanXml = new string('x', AiPlanAnalysisRequest.MaxPlanXmlLength + 1);
+            StringAssert.Contains(request.Validate(), "PlanXml");
+        }
     }
 }

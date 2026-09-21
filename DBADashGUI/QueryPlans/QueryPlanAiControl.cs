@@ -82,6 +82,10 @@ namespace DBADashGUI.QueryPlans
         private string _analysisNote;
 
         private string _serviceNote;
+
+        /// <summary>What the size of this request is worth saying, where it is worth saying anything.</summary>
+        private string _payloadNote;
+
         private Color _statusColour = DashColors.Information;
 
         internal QueryPlanAiControl()
@@ -175,6 +179,13 @@ namespace DBADashGUI.QueryPlans
             _instance = context?.InstanceName;
             _instanceId = context is { InstanceID: > 0 } ? context.InstanceID : null;
 
+            // The XML goes by default - but not when it is large.  A plan of several megabytes is a real
+            // thing to be looking at, and sending one is worth trying; it is just not what should happen
+            // to somebody who pressed a button without reading.  So the expensive version is the one
+            // they ask for, and the choice they make then holds until they pick another statement.
+            _includePlanXml.Checked =
+                (statement?.Xml?.Length ?? 0) <= PlanAnalysisPayload.LargePlanXmlLength;
+
             RebuildPayload();
 
             // A different statement means the previous conversation is about something else.
@@ -186,6 +197,7 @@ namespace DBADashGUI.QueryPlans
             _showRequest.Visible = false;
             _showRequest.Checked = true;
             _analysisNote = null;
+            _statusColour = DashColors.Information;
             _submit.Text = "Submit for analysis";
             _history.DropDownItems.Clear();
             _history.Visible = false;
@@ -209,11 +221,39 @@ namespace DBADashGUI.QueryPlans
             _preview.Text = _payload.ToPreview().Replace("\n", Environment.NewLine);
             _identity.Text = $"Query {_payload.Signature}  Plan {_payload.PlanHash}";
 
-            // The reader can ask for the XML and still not get it - a plan can be too large to send.
-            // Saying so on the toggle is better than leaving them to find the reason in the preview.
-            _includePlanXml.Text = _includePlanXml.Checked && !_payload.PlanXmlIncluded
-                ? "Include plan XML (too large)"
-                : "Include plan XML";
+            // The toggle carries the size, because the size is the whole of the decision it is asking
+            // the reader to make - and in tokens as well as bytes, because tokens are what a model
+            // refuses on.  A plan past anything says so; one that is merely large says how large and
+            // stays theirs to send.
+            var size = PlanAnalysisPayload.DescribeSize(_payload.PlanXmlLength);
+
+            if (_payload.PlanXmlLength == 0)
+            {
+                _includePlanXml.Text = "Include plan XML";
+            }
+            else if (_includePlanXml.Checked && !_payload.PlanXmlIncluded)
+            {
+                _includePlanXml.Text = $"Include plan XML (too large to send: {size})";
+            }
+            else if (_payload.PlanXmlIsLarge)
+            {
+                _includePlanXml.Text = $"Include plan XML ({size})";
+            }
+            else
+            {
+                _includePlanXml.Text = "Include plan XML";
+            }
+
+            // The short version of it goes on the status line too.  The preview says the whole thing,
+            // but it says it near the bottom of a long document, and this is the one part of it worth
+            // having read before pressing Submit.
+            _payloadNote = !_payload.PlanXmlIsLarge
+                ? null
+                : _payload.PlanXmlIncluded
+                    ? $"Large plan: {size} of XML goes with this - the model may refuse it."
+                    : $"The plan XML is {size} and is not being sent.";
+
+            UpdateStatus();
         }
 
         /// <summary>
@@ -307,10 +347,15 @@ namespace DBADashGUI.QueryPlans
         /// </summary>
         private void UpdateStatus()
         {
-            var parts = new[] { _analysisNote, _serviceNote }.Where(p => !string.IsNullOrEmpty(p));
+            var parts = new[] { _analysisNote, _serviceNote, _payloadNote }.Where(p => !string.IsNullOrEmpty(p));
 
             _status.Text = string.Join("  ", parts);
-            _status.ForeColor = _statusColour;
+
+            // The size note only colours the line while nothing more important is using it: an answer
+            // that came back, or one that did not, is the more useful thing to be looking at by then.
+            _status.ForeColor = _payloadNote is not null && _statusColour == DashColors.Information
+                ? DashColors.Warning
+                : _statusColour;
         }
 
         private async Task FindServiceAsync()

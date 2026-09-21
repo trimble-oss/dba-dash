@@ -34,11 +34,18 @@ namespace DBADash.QueryPlan.Analysis
     public sealed class PlanAnalysisPayload
     {
         /// <summary>
-        /// A plan large enough that sending it costs more than the answer is worth - and, past a point,
-        /// more than a model will accept.  Over this the structured summary goes on its own, which is
-        /// most of what the answer is built from anyway.
+        /// A plan large enough to be worth a word before it goes.  Not a limit: a plan this size is
+        /// unusual rather than wrong, and a reader who wants one analysed is better served by being told
+        /// what they are about to send than by being refused.  What is past it goes if they say so.
         /// </summary>
-        public const int MaxPlanXmlLength = 512 * 1024;
+        public const int LargePlanXmlLength = 512 * 1024;
+
+        /// <summary>
+        /// A plan past what any of this is for.  Above this the XML is left out whatever the reader
+        /// says: nothing available today would take it, the service will not accept it either, and the
+        /// structured summary - which is most of what an answer is built from - goes on its own.
+        /// </summary>
+        public const int MaxPlanXmlLength = 2 * 1024 * 1024;
 
         /// <summary>Operators worth naming individually.  Past this the tail is noise in every plan.</summary>
         private const int TopOperators = 15;
@@ -119,8 +126,43 @@ namespace DBADash.QueryPlan.Analysis
 
         public bool PlanXmlIncluded => PlanXml.Length > 0;
 
+        /// <summary>
+        /// The size of this statement's plan XML, whether or not it is going.  Kept when it is not,
+        /// because it is what the viewer's toggle has to say to be worth reading.
+        /// </summary>
+        public int PlanXmlLength { get; private set; }
+
+        /// <summary>Large enough to be worth saying so first - see <see cref="LargePlanXmlLength"/>.</summary>
+        public bool PlanXmlIsLarge => PlanXmlLength > LargePlanXmlLength;
+
+        /// <summary>
+        /// What the reader should know about the size before pressing send.  Set only when the XML is
+        /// both going and large: it is a warning about what is about to happen, not a refusal.
+        /// </summary>
+        public string? PlanXmlWarning { get; private set; }
+
         /// <summary>Why the XML is not here, when it is not.  Null when it is.</summary>
         public string? PlanXmlOmittedReason { get; private set; }
+
+        /// <summary>
+        /// Roughly what a length of showplan costs in tokens.  Showplan runs about three characters to
+        /// the token - tag and attribute names repeat, and most of the rest is numbers and GUIDs - which
+        /// is close enough for the one decision it informs: whether this is near what a model will take.
+        /// </summary>
+        public static int EstimateTokens(int characters) => characters / 3;
+
+        /// <summary>
+        /// A size as the reader needs to see it, which is in tokens as well as bytes.  A megabyte means
+        /// nothing against a context window; 350k tokens against a 200k limit means everything.
+        /// </summary>
+        public static string DescribeSize(int characters)
+        {
+            var size = characters >= 1024 * 1024
+                ? $"{characters / 1024d / 1024d:0.0} MB"
+                : $"{characters / 1024d:N0} KB";
+
+            return $"{size}, roughly {EstimateTokens(characters) / 1000d:N0}k tokens";
+        }
 
         /// <summary>True when the plan carries measurements rather than only the optimiser's estimates.</summary>
         public bool IsActualPlan { get; private set; }
@@ -162,18 +204,24 @@ namespace DBADash.QueryPlan.Analysis
                 Objects = Cap(DescribeObjects(statement))
             };
 
-            payload.SetPlanXml(statement.Xml, includePlanXml);
+            payload.SetPlanXml(statement.Xml, includePlanXml, plan.Statements.Count);
 
             return payload;
         }
 
         /// <summary>
-        /// Decides whether the XML goes.  The reader's choice comes first; after that it is a question of
-        /// size, and a plan over the limit is left out rather than cut - half a plan is not a plan, and a
-        /// model handed a truncated one reasons confidently about a tree that stops in mid-air.
+        /// Decides whether the XML goes, and what to say about it when it does.
+        ///
+        /// The reader's choice comes first.  After that size decides, and it decides twice: a plan that
+        /// is merely large goes with a warning, because a plan measured in megabytes is a real thing to
+        /// have and refusing to try is not help; a plan past <see cref="MaxPlanXmlLength"/> does not go
+        /// at all.  Either way it is sent whole or left out rather than cut - half a plan is not a plan,
+        /// and a model handed a truncated one reasons confidently about a tree that stops in mid-air.
         /// </summary>
-        private void SetPlanXml(string? xml, bool include)
+        private void SetPlanXml(string? xml, bool include, int statementsInDocument)
         {
+            PlanXmlLength = xml?.Length ?? 0;
+
             if (!include)
             {
                 PlanXmlOmittedReason = "The plan XML was not included.  The summary below is all the model is given.";
@@ -189,13 +237,23 @@ namespace DBADash.QueryPlan.Analysis
             if (xml!.Length > MaxPlanXmlLength)
             {
                 PlanXmlOmittedReason =
-                    $"The plan XML is {xml.Length:N0} characters, over the {MaxPlanXmlLength:N0} limit, so it is not " +
-                    "included.  It is left out rather than cut short: a plan that stops in the middle reads as a " +
-                    "complete one.  The summary below is all the model is given.";
+                    $"The plan XML is {DescribeSize(xml.Length)}, past the {DescribeSize(MaxPlanXmlLength)} anything " +
+                    "would accept, so it is not included.  It is left out rather than cut short: a plan that stops " +
+                    "in the middle reads as a complete one.  The summary below is all the model is given.";
                 return;
             }
 
             PlanXml = xml;
+
+            if (xml.Length <= LargePlanXmlLength) return;
+
+            PlanXmlWarning =
+                $"This plan is large: {DescribeSize(xml.Length)}.  Models in common use accept around 200k tokens " +
+                "and refuse anything past that, so this may come back as a refusal rather than an answer - it is " +
+                "worth sending where the service is configured with a model whose context window is larger." +
+                (statementsInDocument > 1
+                    ? $"  This is the plan for this statement alone; the document holds {statementsInDocument:N0}."
+                    : string.Empty);
         }
 
         private static List<string> DescribeContext(ExecutionPlan plan, PlanStatement statement)
@@ -401,14 +459,23 @@ namespace DBADash.QueryPlan.Analysis
             preview.AppendLine("Plan XML");
             preview.AppendLine("--------");
 
-            if (PlanXmlIncluded)
-            {
-                preview.AppendLine(PlanXml);
-            }
-            else
+            if (!PlanXmlIncluded)
             {
                 preview.AppendLine(PlanXmlOmittedReason);
+
+                return preview.ToString();
             }
+
+            preview.AppendLine(DescribeSize(PlanXml.Length));
+
+            if (PlanXmlWarning is not null)
+            {
+                preview.AppendLine();
+                preview.AppendLine(PlanXmlWarning);
+            }
+
+            preview.AppendLine();
+            preview.AppendLine(PlanXml);
 
             return preview.ToString();
         }

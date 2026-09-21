@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using DBADash.QueryPlan.Analysis;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -110,6 +111,81 @@ namespace DBADash.QueryPlan.Test
         public void Preview_WarnsThatThePlanCarriesTheQueryAsItRan()
         {
             StringAssert.Contains(Build(TestPlans.KeyLookupSeek).ToPreview(), "literal values");
+        }
+
+        /// <summary>
+        /// A plan of the given size, built by padding a real one.  Nothing on this path parses the
+        /// XML - it is carried, measured and sent - so padding is the honest way to get a plan of a
+        /// size no sample could reasonably be committed at.
+        /// </summary>
+        private static PlanAnalysisPayload BuildOfSize(int length, bool includePlanXml = true)
+        {
+            var plan = TestPlans.Load(TestPlans.KeyLookupSeek);
+            var statement = plan.PrimaryStatement ?? plan.Statements[0];
+            var xml = statement.Xml!;
+
+            statement.Xml = xml + "<!--" + new string('x', Math.Max(0, length - xml.Length - 7)) + "-->";
+
+            return PlanAnalysisPayload.Build(plan, statement, "SQLPROD01", "padded.sqlplan", includePlanXml);
+        }
+
+        [TestMethod]
+        public void Payload_SendsALargePlanAndSaysWhatIsAboutToHappen()
+        {
+            // The point of the warning: a plan of a few megabytes is a real thing to be looking at, and
+            // refusing to try is not help.  What the reader needs is to know before pressing send.
+            var payload = BuildOfSize(PlanAnalysisPayload.LargePlanXmlLength + 1024);
+
+            Assert.IsTrue(payload.PlanXmlIncluded, "A large plan still goes - it is a warning, not a limit.");
+            Assert.IsTrue(payload.PlanXmlIsLarge);
+            Assert.IsNull(payload.PlanXmlOmittedReason);
+            Assert.IsNotNull(payload.PlanXmlWarning);
+
+            // In tokens, because tokens are what a model refuses on.  Bytes alone say nothing about that.
+            StringAssert.Contains(payload.PlanXmlWarning, "tokens");
+            StringAssert.Contains(payload.ToPreview(), payload.PlanXmlWarning);
+        }
+
+        [TestMethod]
+        public void Payload_SaysNothingAboutTheSizeOfAnOrdinaryPlan()
+        {
+            var payload = Build(TestPlans.KeyLookupSeek);
+
+            Assert.IsFalse(payload.PlanXmlIsLarge);
+            Assert.IsNull(payload.PlanXmlWarning, "Every plan carrying a warning is every warning being ignored.");
+        }
+
+        [TestMethod]
+        public void Payload_LeavesOutAPlanLargerThanAnythingWouldTake()
+        {
+            var payload = BuildOfSize(PlanAnalysisPayload.MaxPlanXmlLength + 1024);
+
+            Assert.IsFalse(payload.PlanXmlIncluded);
+            Assert.IsNotNull(payload.PlanXmlOmittedReason);
+            StringAssert.Contains(payload.ToPreview(), payload.PlanXmlOmittedReason);
+
+            // The summary still goes, which is what makes leaving the XML out worth doing at all.
+            Assert.IsTrue(payload.Operators.Count > 0);
+        }
+
+        [TestMethod]
+        public void Payload_KnowsHowLargeThePlanWasEvenWhenItDoesNotSendIt()
+        {
+            // The viewer's toggle says the size, so it has to be there whether or not the XML is going -
+            // that is the whole of what the reader is deciding.
+            var payload = Build(TestPlans.KeyLookupSeek, includePlanXml: false);
+
+            Assert.IsFalse(payload.PlanXmlIncluded);
+            Assert.IsTrue(payload.PlanXmlLength > 0);
+        }
+
+        [TestMethod]
+        public void DescribeSize_SaysTokensAsWellAsBytes()
+        {
+            // A megabyte means nothing against a context window; the token figure is the one that does.
+            StringAssert.Contains(PlanAnalysisPayload.DescribeSize(512 * 1024), "KB");
+            StringAssert.Contains(PlanAnalysisPayload.DescribeSize(2 * 1024 * 1024), "MB");
+            StringAssert.Contains(PlanAnalysisPayload.DescribeSize(512 * 1024), "tokens");
         }
 
         [TestMethod]
