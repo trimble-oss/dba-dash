@@ -151,6 +151,75 @@ namespace DBADash.QueryPlan.Test
         }
 
         [TestMethod]
+        public void Parse_MatchesAMissingIndexOnATempTableToTheOperatorThatReadsIt()
+        {
+            // Showplan names the same temp table two ways: the operator's Object carries the name the
+            // query used, the MissingIndex the 128 character name tempdb stores it under - the query's
+            // name, padded with underscores, then a hex suffix.  Compared as they arrive they are two
+            // different tables, and the recommendation ends up attached to no operator at all.
+            var statement = TempTableStatement("#Ids");
+            var missing = statement.MissingIndexes.Single();
+            Assert.AreEqual("tempdb.dbo.#Ids", missing.QualifiedTableName);
+
+            var scan = TestPlans.Operator(statement, 0);
+            CollectionAssert.AreEqual(new[] { missing }, statement.MissingIndexesFor(scan).ToArray());
+
+            // The index has to be created from the session that owns the table, by the name that
+            // session knows it by, so the tempdb.dbo qualifier would only stop the script running.
+            StringAssert.Contains(missing.CreateStatement, "ON [#Ids] ([Item])");
+        }
+
+        [TestMethod]
+        public void Parse_MatchesATempTableWhoseNameEndsInAnUnderscore()
+        {
+            // The padding and the last character of this name are the same character, so the stored
+            // name says nothing about where the name ends.  The operator does: #Ids_ is what the query
+            // called it, and trimming the run of underscores instead would name a different table.
+            var statement = TempTableStatement("#Ids_");
+
+            Assert.AreEqual("tempdb.dbo.#Ids_", statement.MissingIndexes.Single().QualifiedTableName);
+            CollectionAssert.AreEqual(
+                new[] { statement.MissingIndexes[0] },
+                statement.MissingIndexesFor(TestPlans.Operator(statement, 0)).ToArray());
+        }
+
+        [TestMethod]
+        public void Parse_KeepsTheStoredNameOfATempTableNoOperatorReads()
+        {
+            // Nothing in the statement says what the query called it, so nothing is guessed: the
+            // recommendation keeps the name tempdb holds it under, as it arrived.
+            var stored = "#Ids" + new string('_', 112) + "0000000032AB";
+            var statement = InlinePlan.Parse(MissingIndexXml(stored) + InlinePlan.Op(0, "Constant Scan", "Constant Scan", ""));
+
+            Assert.AreEqual(stored, statement.MissingIndexes.Single().Table);
+        }
+
+        /// <summary>
+        /// A statement whose one operator reads <paramref name="table"/>, and whose one missing index
+        /// names that table the way tempdb stores it.
+        /// </summary>
+        private static PlanStatement TempTableStatement(string table)
+        {
+            var stored = table + new string('_', 116 - table.Length) + "0000000032AB";
+
+            return InlinePlan.Parse(
+                MissingIndexXml(stored) +
+                InlinePlan.Op(0, "Table Scan", "Table Scan", "",
+                    $"""<Object Database="[tempdb]" Schema="[dbo]" Table="[{table}]" IndexKind="Heap" />"""));
+        }
+
+        private static string MissingIndexXml(string table) =>
+            $"""
+             <MissingIndexes>
+               <MissingIndexGroup Impact="99.2">
+                 <MissingIndex Database="[tempdb]" Schema="[dbo]" Table="[{table}]">
+                   <ColumnGroup Usage="EQUALITY"><Column Name="[Item]" ColumnId="1" /></ColumnGroup>
+                 </MissingIndex>
+               </MissingIndexGroup>
+             </MissingIndexes>
+             """;
+
+        [TestMethod]
         public void Parse_AggregatesRuntimeCountersAcrossThreads()
         {
             var statement = TestPlans.Statement(TestPlans.ParallelSpill);

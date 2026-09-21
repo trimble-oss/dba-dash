@@ -1106,7 +1106,7 @@ namespace DBADash.QueryPlan.Skia
 
             PlanNodeBadges.EstimateMismatch => (Palette.Warning, MismatchSymbol, false, BadgeStrokeWidth),
             PlanNodeBadges.RowsDiscarded => (Palette.Warning, CrossSymbol, false, BadgeStrokeWidth),
-            PlanNodeBadges.MissingIndex => (Palette.Info, PlusSymbol, false, BadgeStrokeWidth),
+            PlanNodeBadges.MissingIndex => (Palette.Warning, PlusSymbol, false, BadgeStrokeWidth),
             PlanNodeBadges.Parallel => (Palette.Info, ParallelSymbol, false, ParallelStrokeWidth),
             PlanNodeBadges.BatchMode => (Palette.Info, BatchSymbol, true, BadgeStrokeWidth),
             _ => (Palette.Info, PlusSymbol, false, BadgeStrokeWidth)

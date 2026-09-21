@@ -96,6 +96,41 @@ namespace DBADash.QueryPlan.Model
                 ? value[1..^1]
                 : value;
         }
+
+        /// <summary>
+        /// True when <paramref name="stored"/> is the name tempdb holds the temp table
+        /// <paramref name="shortName"/> under: the name the query used, padded with underscores to
+        /// 116 characters, then a 12 digit hex suffix that keeps one session's table apart from
+        /// another's.
+        ///
+        /// Showplan writes the query's name on an operator's Object but the stored name on a
+        /// MissingIndex, so the two have to be compared this way for a missing index on a temp table
+        /// to reach the operator that reads it.  Asked rather than trimming the stored name back,
+        /// because the padding and the last character of a name that ends in an underscore are the
+        /// same character: only a name something in the plan actually uses says where one ends.
+        /// </summary>
+        internal static bool IsStoredTempTableName(string? stored, string? shortName)
+        {
+            const int storedLength = 128;
+            const int suffixLength = 12;
+            const int paddedLength = storedLength - suffixLength;
+
+            if (stored is null || stored.Length != storedLength) return false;
+            if (string.IsNullOrEmpty(shortName) || shortName!.Length > paddedLength || shortName[0] != '#') return false;
+            if (!stored.StartsWith(shortName, StringComparison.OrdinalIgnoreCase)) return false;
+
+            for (var i = shortName.Length; i < paddedLength; i++)
+            {
+                if (stored[i] != '_') return false;
+            }
+
+            for (var i = paddedLength; i < storedLength; i++)
+            {
+                if (!Uri.IsHexDigit(stored[i])) return false;
+            }
+
+            return true;
+        }
     }
 
     /// <summary>
