@@ -1,4 +1,4 @@
-﻿<?xml version='1.0' encoding='utf-8'?>
+<?xml version='1.0' encoding='utf-8'?>
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="DBADashGUI.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
@@ -72,6 +72,9 @@
       <Value Profile="(Default)">3</Value>
     </Setting>
     <Setting Name="QueryPlanWrapObjectNames" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="QueryPlanShowNodeIds" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="QueryPlanMinFitZoom" Type="System.Int32" Scope="User">

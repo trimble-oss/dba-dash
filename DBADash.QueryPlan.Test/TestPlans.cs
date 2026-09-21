@@ -21,6 +21,13 @@ namespace DBADash.QueryPlan.Test
 
         public const string Batch = "Batch";
 
+        /// <summary>
+        /// A plan whose compute scalars build one value out of another, and whose filter reports the
+        /// same conversion warning five times - what the expression list and the combined card are
+        /// for.
+        /// </summary>
+        public const string Expressions = "Expressions";
+
         public static string Xml(string name)
         {
             var assembly = Assembly.GetExecutingAssembly();

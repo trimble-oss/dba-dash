@@ -238,6 +238,8 @@ namespace DBADashGUI.QueryPlans
 
             foreach (var index in missing) AddMissingIndex(index);
 
+            AddCombinedWarnings();
+
             SizeRows();
 
             // Scrolled back to the top: the panel is re-filled on every selection change, and
@@ -343,6 +345,39 @@ namespace DBADashGUI.QueryPlans
             }
         }
 
+        /// <summary>
+        /// The combined warnings - four or more of the same kind, said once on the card - listed in
+        /// the grid, each row opening every one of them, on its node, in the viewer.  The card's
+        /// summary is cut short and the tooltip cannot be clicked; this is where a combined warning is
+        /// read in full without leaving for the Warnings tab.
+        /// </summary>
+        private void AddCombinedWarnings()
+        {
+            if (_statement is null) return;
+
+            var insights = _node?.Operator is { } op
+                ? PlanInsights.ForOperator(op, _statement)
+                : PlanInsights.ForStatement(_statement);
+
+            foreach (var insight in insights.Where(i => i.IsCombinedWarning))
+            {
+                var title = insight.Text.Split('\n')[0];
+
+                var heading = _grid.Rows.Add("Warnings", string.Empty);
+                _grid.Rows[heading].DefaultCellStyle.Font = _boldFont ??= new Font(Font, FontStyle.Bold);
+
+                var value = insight.WarningCount.ToString(CultureInfo.CurrentCulture) + " - click to see each";
+                var row = _grid.Rows.Add("    " + title, value);
+                _grid.Rows[row].Tag = new RowInfo
+                {
+                    Title = title,
+                    FullText = insight.FullText,
+                    AlwaysLink = true
+                };
+                _grid.Rows[row].Cells[ValueColumnIndex].ToolTipText = "Click to see every one of these warnings, on its node.";
+            }
+        }
+
         private RowInfo InfoAt(int rowIndex) =>
             rowIndex >= 0 && rowIndex < _grid.Rows.Count ? _grid.Rows[rowIndex].Tag as RowInfo : null;
 
@@ -364,8 +399,16 @@ namespace DBADashGUI.QueryPlans
             _grid.Cursor = link ? Cursors.Hand : Cursors.Default;
         }
 
-        private static void ShowFull(RowInfo info) =>
-            CommonShared.ShowCodeViewer(info.FullText, info.Title, CodeEditor.CodeEditorModes.SQL);
+        /// <summary>
+        /// The whole value in the code viewer, with the plan's own expressions that it refers to
+        /// written out underneath: a predicate testing Expr1011 is unreadable until something says
+        /// what Expr1011 is, and here there is room to say it.
+        /// </summary>
+        private void ShowFull(RowInfo info) =>
+            CommonShared.ShowCodeViewer(
+                info.FullText + PlanScripts.ExpressionsUsedIn(_statement, info.FullText),
+                info.Title,
+                CodeEditor.CodeEditorModes.SQL);
 
         private static void ShowScript(string script) =>
             CommonShared.ShowCodeViewer(script, "Missing Index", CodeEditor.CodeEditorModes.SQL);
@@ -587,7 +630,7 @@ namespace DBADashGUI.QueryPlans
             _cards.Clear();
             _cardPanel.Controls.Clear();
 
-            foreach (var (severity, text, actions) in CardsFor())
+            foreach (var (severity, text, actions, tooltips) in CardsFor())
             {
                 var card = new InsightCard
                 {
@@ -597,7 +640,7 @@ namespace DBADashGUI.QueryPlans
                     Icon = severity
                 };
 
-                var label = InsightCard.CreateContentLabel(text, actions);
+                var label = InsightCard.CreateContentLabel(text, actions, tooltips);
                 label.AutoSize = false;
                 label.Dock = DockStyle.Fill;
                 label.BackColor = card.FillColor;
@@ -613,7 +656,18 @@ namespace DBADashGUI.QueryPlans
             _cardPanel.Visible = _cards.Count > 0;
         }
 
-        private IEnumerable<(InsightCard.CardIcon Severity, string Text, Dictionary<string, Action> Actions)> CardsFor()
+        /// <summary>
+        /// The most operators a card offers to go to.  A card that covers a dozen of them is a card
+        /// with a dozen links on it, which is the wall of text combining them was meant to avoid; the
+        /// text already says how many there are.
+        /// </summary>
+        private const int MaxGoToLinks = 5;
+
+        /// <summary>What a link's tooltip shows of an expression before the viewer is needed.</summary>
+        private const int TooltipExpressionLength = 160;
+
+        private IEnumerable<(InsightCard.CardIcon Severity, string Text, Dictionary<string, Action> Actions,
+            Dictionary<string, string> Tooltips)> CardsFor()
         {
             if (_statement is null) yield break;
 
@@ -625,6 +679,7 @@ namespace DBADashGUI.QueryPlans
             foreach (var insight in insights)
             {
                 var actions = new Dictionary<string, Action>();
+                var tooltips = new Dictionary<string, string>();
                 var links = new List<string>();
 
                 if (insight.MissingIndex is { } index)
@@ -636,28 +691,122 @@ namespace DBADashGUI.QueryPlans
                     links.Add("[Copy T-SQL](action:copy)");
                 }
 
-                // On the overview, where the card is not already about the selected operator.
-                if (overview && insight.Operator is { } target)
+                // On the overview, where the card is not already about the selected operator.  One
+                // that covers several operators offers each of them: it is one card because the
+                // warning is one thing to know, but going to look means going to one of them.
+                if (overview)
                 {
-                    actions["go"] = () => OperatorRequested?.Invoke(this, target);
-                    links.Add("[Go to " + target.DisplayName + " (node " + target.NodeId.ToString(CultureInfo.InvariantCulture) + ")](action:go)");
+                    foreach (var target in insight.Operators.Take(MaxGoToLinks))
+                    {
+                        var node = target.NodeId.ToString(CultureInfo.InvariantCulture);
+                        var key = "go-" + node;
+
+                        actions[key] = () => OperatorRequested?.Invoke(this, target);
+                        links.Add("[" +
+                                  (insight.Operators.Count == 1
+                                      ? "Go to " + target.DisplayName + " (node " + node + ")"
+                                      : links.Count == 0 ? "Go to node " + node : "node " + node) +
+                                  "](" + InsightCard.ActionScheme + key + ")");
+                    }
+                }
+
+                var text = LinkExpressions(insight.Text, actions, tooltips);
+
+                // The card only has room for the first couple of a combined warning's details; the
+                // rest are otherwise only on the Warnings tab.  A link opens every one, on its node,
+                // in the viewer.
+                if (insight.IsCombinedWarning)
+                {
+                    var full = insight.FullText!;
+                    actions["all"] = () => CommonShared.ShowCodeViewer(full, insight.Text.Split('\n')[0], CodeEditor.CodeEditorModes.None);
+                    links.Add("[Show all " + insight.WarningCount.ToString(CultureInfo.InvariantCulture) + "](" +
+                              InsightCard.ActionScheme + "all)");
                 }
 
                 // A bare "\n": LinkLabel places links after a "\r\n" one character late.
-                var text = links.Count == 0 ? insight.Text : insight.Text + "\n" + string.Join("   ", links);
-                yield return (IconFor(insight.Severity), text, actions);
+                if (links.Count > 0) text += "\n" + string.Join("   ", links);
+
+                yield return (IconFor(insight.Severity), text, actions, tooltips);
             }
 
             if (overview && insights.Count == 0)
             {
-                yield return (InsightCard.CardIcon.Information, "No warnings or missing indexes in this statement.", null);
+                yield return (InsightCard.CardIcon.Information, "No warnings or missing indexes in this statement.", null, null);
             }
 
             if (!overview && _showDescriptions)
             {
-                yield return (InsightCard.CardIcon.Information, PlanOperatorDescriptions.For(_node.Operator), null);
+                yield return (InsightCard.CardIcon.Information, PlanOperatorDescriptions.For(_node.Operator), null, null);
             }
         }
+
+        /// <summary>
+        /// Every name of the plan's own - [Expr1011] - in <paramref name="text"/>, as a link to what
+        /// it means.
+        ///
+        /// A warning about a conversion names the value it converted and nothing else, and the value
+        /// is one the optimiser invented: the reader is told the estimate is wrong because of
+        /// Expr1011 and has no way, from the card, to find out what Expr1011 is.  Hovering gives the
+        /// definition, and clicking opens it with everything it is built from written out.
+        /// </summary>
+        private string LinkExpressions(string text, IDictionary<string, Action> actions, IDictionary<string, string> tooltips)
+        {
+            if (_statement is null || _statement.Expressions.Count == 0 || string.IsNullOrEmpty(text)) return text;
+
+            var linked = new StringBuilder();
+            var copied = 0;
+
+            foreach (var (index, length, name) in PlanExpressions.ReferencesIn(text))
+            {
+                if (_statement.ExpressionNamed(name) is not { } expression) continue;
+
+                linked.Append(text, copied, index - copied);
+                copied = index + length;
+
+                var key = "expression-" + name;
+                actions[key] = () => ShowExpression(expression);
+                tooltips[InsightCard.ActionScheme + key] = ExpressionTooltip(expression);
+
+                // The brackets go with the link: what is left is the name, underlined, which is what
+                // reads as something to click.
+                linked.Append('[').Append(name).Append("](").Append(InsightCard.ActionScheme).Append(key).Append(')');
+            }
+
+            return linked.Append(text, copied, text.Length - copied).ToString();
+        }
+
+        /// <summary>What hovering an expression link says: what it is, and where it comes from.</summary>
+        private static string ExpressionTooltip(PlanExpression expression)
+        {
+            var tip = new StringBuilder(expression.Name)
+                .Append(" = ")
+                .AppendLine(Shorten(expression.Definition, TooltipExpressionLength));
+
+            if (expression.IsNested)
+            {
+                tip.Append("In full: ").AppendLine(Shorten(expression.Expanded, TooltipExpressionLength));
+            }
+
+            if (expression.DefinedByDescription is { Length: > 0 } definedBy)
+            {
+                tip.Append("Worked out by ").AppendLine(definedBy);
+            }
+
+            return tip.Append("Click to see it in full.").ToString();
+        }
+
+        /// <summary>One line of at most <paramref name="maxLength"/> characters, for a tooltip.</summary>
+        private static string Shorten(string text, int maxLength)
+        {
+            var line = string.Join(' ', text.Split((char[])null, StringSplitOptions.RemoveEmptyEntries));
+            return line.Length <= maxLength ? line : line[..maxLength] + "...";
+        }
+
+        private static void ShowExpression(PlanExpression expression) =>
+            CommonShared.ShowCodeViewer(
+                PlanScripts.Expression(expression),
+                "Expression " + expression.DisplayName,
+                CodeEditor.CodeEditorModes.SQL);
 
         private static InsightCard.CardIcon IconFor(PlanWarningSeverity severity) => severity switch
         {

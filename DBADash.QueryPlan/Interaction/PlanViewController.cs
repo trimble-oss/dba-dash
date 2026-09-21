@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using DBADash.QueryPlan.Layout;
 using DBADash.QueryPlan.Model;
@@ -742,8 +743,15 @@ namespace DBADash.QueryPlan.Interaction
                 return;
             }
 
+            // A number is very likely a node id - the cards, the lists and the properties panel all
+            // name operators by one - so it finds that node as well as any text that happens to
+            // contain the digits.  Parsed once rather than once per node.
+            var nodeId = int.TryParse(_searchText, NumberStyles.Integer, CultureInfo.InvariantCulture, out var id)
+                ? id
+                : (int?)null;
+
             _matches = Layout.Nodes
-                .Where(node => IsMatch(node, _searchText))
+                .Where(node => IsMatch(node, _searchText, nodeId))
                 .OrderBy(node => node.Depth)
                 .ThenBy(node => node.Bounds.Top)
                 .ToList();
@@ -751,8 +759,10 @@ namespace DBADash.QueryPlan.Interaction
             _matchIndex = -1;
         }
 
-        private static bool IsMatch(PlanNode node, string text)
+        private static bool IsMatch(PlanNode node, string text, int? nodeId)
         {
+            if (nodeId is { } id && node.Operator?.NodeId == id) return true;
+
             if (Contains(node.Title, text) || Contains(node.Subtitle, text)) return true;
 
             // The statement root is matched on its caption alone, deliberately not on the statement

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -12,11 +13,24 @@ namespace DBADash.QueryPlan.Model
     public sealed class PlanInsight
     {
         internal PlanInsight(PlanWarningSeverity severity, string text, PlanOperator? op = null, PlanMissingIndex? missingIndex = null)
+            : this(severity, text, op is null ? [] : new[] { op }, missingIndex)
+        {
+        }
+
+        internal PlanInsight(
+            PlanWarningSeverity severity,
+            string text,
+            IReadOnlyList<PlanOperator> operators,
+            PlanMissingIndex? missingIndex = null,
+            string? fullText = null,
+            int warningCount = 0)
         {
             Severity = severity;
             Text = text;
-            Operator = op;
+            Operators = operators;
             MissingIndex = missingIndex;
+            FullText = fullText;
+            WarningCount = warningCount;
         }
 
         public PlanWarningSeverity Severity { get; }
@@ -24,11 +38,35 @@ namespace DBADash.QueryPlan.Model
         /// <summary>What was found, as plain text.</summary>
         public string Text { get; }
 
-        /// <summary>The operator it is about, for the reader to go to, or null for the statement.</summary>
-        public PlanOperator? Operator { get; }
+        /// <summary>
+        /// The operators it is about, for the reader to go to.  Empty for something about the
+        /// statement as a whole, and more than one where several operators reported the same thing
+        /// and it is said once - see <see cref="PlanInsights.CombineWarningsFrom"/>.
+        /// </summary>
+        public IReadOnlyList<PlanOperator> Operators { get; }
+
+        /// <summary>The operator it is about, or the first of them, or null for the statement.</summary>
+        public PlanOperator? Operator => Operators.Count > 0 ? Operators[0] : null;
 
         /// <summary>The recommendation, for its CREATE INDEX statement, when this is a missing index.</summary>
         public PlanMissingIndex? MissingIndex { get; }
+
+        /// <summary>
+        /// The whole of a combined warning, one line per warning with the node it is on, for the
+        /// reader to open when the card's summary is cut short - see
+        /// <see cref="PlanInsights.CombineWarningsFrom"/>.  Null for anything that is not a combined
+        /// warning, where <see cref="Text"/> already says everything.
+        /// </summary>
+        public string? FullText { get; }
+
+        /// <summary>
+        /// How many warnings a combined one stands for, or zero when this insight is not a combined
+        /// warning.  <see cref="FullText"/> is set exactly when this is above one.
+        /// </summary>
+        public int WarningCount { get; }
+
+        /// <summary>True when this is several warnings said once, with a <see cref="FullText"/> list.</summary>
+        public bool IsCombinedWarning => FullText is not null;
 
         public override string ToString() => Text;
     }
@@ -52,12 +90,7 @@ namespace DBADash.QueryPlan.Model
         {
             var insights = new List<PlanInsight>();
 
-            insights.AddRange(statement.Warnings.Select(w => new PlanInsight(w.Severity, w.ToString())));
-
-            foreach (var op in statement.Operators)
-            {
-                insights.AddRange(op.Warnings.Select(w => new PlanInsight(w.Severity, w.ToString(), op)));
-            }
+            insights.AddRange(Grouped(WarningsIn(statement), onOneOperator: false));
 
             foreach (var index in statement.MissingIndexes.OrderByDescending(i => i.Impact))
             {
@@ -121,14 +154,162 @@ namespace DBADash.QueryPlan.Model
             return insights.OrderByDescending(i => i.Severity).ToList();
         }
 
-        /// <summary>One operator's warnings, worst first, then the missing indexes on the table it reads.</summary>
-        public static IReadOnlyList<PlanInsight> ForOperator(PlanOperator op, PlanStatement statement) =>
-            op.Warnings
-                .OrderByDescending(w => w.Severity)
-                .Select(w => new PlanInsight(w.Severity, w.ToString(), op))
+        /// <summary>
+        /// One operator's warnings, worst first, then the missing indexes on the table it reads.
+        ///
+        /// Its own warnings and the plan level ones that happen in it - see
+        /// <see cref="PlanStatement.WarningsFor"/> - because a conversion showplan reported against
+        /// the statement is still something this operator is doing, and the reader who selected it
+        /// after seeing its warning marker came here to find out what that marker was about.
+        /// </summary>
+        public static IReadOnlyList<PlanInsight> ForOperator(PlanOperator op, PlanStatement statement)
+        {
+            IReadOnlyList<PlanOperator> here = [op];
+
+            return Grouped(
+                    op.Warnings.Concat(statement.WarningsFor(op)).Select(w => (Warning: w, Operators: here)).ToList(),
+                    onOneOperator: true)
+                .OrderByDescending(i => i.Severity)
                 .Concat(statement.MissingIndexesFor(op)
                     .Select(index => new PlanInsight(PlanWarningSeverity.Warning, MissingIndexText(index), op, index)))
                 .ToList();
+        }
+
+        /// <summary>
+        /// The point at which several warnings of the same kind stop being worth a card each.
+        ///
+        /// One implicit conversion is something to go and look at; fourteen of them are one thing to
+        /// know about the query, and fourteen cards of it push everything else off the panel - the
+        /// spill, the missing index, the estimate that was out by a thousand - which is the opposite
+        /// of what the cards are for.
+        /// </summary>
+        public const int CombineWarningsFrom = 4;
+
+        /// <summary>The most of a combined warning's own text named before the rest is counted.</summary>
+        private const int MaxCombinedDetails = 2;
+
+        /// <summary>The most nodes a combined warning names.</summary>
+        private const int MaxCombinedNodes = 3;
+
+        /// <summary>
+        /// What one of those named details is cut to.  A plan affecting convert carries the
+        /// expression it is about, and a generated one runs to hundreds of characters; the whole of
+        /// it is in the warnings list, and on the card for that operator on its own.
+        /// </summary>
+        private const int MaxCombinedDetailLength = 200;
+
+        /// <summary>
+        /// Every warning in the statement with the operators it is about: the plan's own first, as
+        /// SSMS lists them, each pointed at the operators it was traced to, then each operator's own.
+        /// </summary>
+        private static IEnumerable<(PlanWarning Warning, IReadOnlyList<PlanOperator> Operators)> WarningsIn(PlanStatement statement)
+        {
+            foreach (var warning in statement.Warnings) yield return (warning, warning.Operators);
+
+            foreach (var op in statement.Operators)
+            {
+                IReadOnlyList<PlanOperator> here = [op];
+                foreach (var warning in op.Warnings) yield return (warning, here);
+            }
+        }
+
+        /// <summary>
+        /// One insight for each warning, except where the same one turns up
+        /// <see cref="CombineWarningsFrom"/> times or more - then one for all of them, saying how
+        /// many there are, which nodes they are on, and what they say.
+        /// </summary>
+        private static IEnumerable<PlanInsight> Grouped(
+            IEnumerable<(PlanWarning Warning, IReadOnlyList<PlanOperator> Operators)> found,
+            bool onOneOperator)
+        {
+            foreach (var group in found.GroupBy(f => f.Warning.Title, StringComparer.Ordinal))
+            {
+                var items = group.ToList();
+
+                if (items.Count < CombineWarningsFrom)
+                {
+                    foreach (var (warning, operators) in items.OrderByDescending(i => i.Warning.Severity))
+                    {
+                        yield return new PlanInsight(warning.Severity, warning.ToString(), operators);
+                    }
+
+                    continue;
+                }
+
+                // In node order, which is roughly the order they appear in the plan, rather than the
+                // order showplan happened to list the warnings in.
+                var nodes = items.SelectMany(i => i.Operators).Distinct().OrderBy(op => op.NodeId).ToList();
+
+                var text = new StringBuilder(group.Key)
+                    .Append(": ")
+                    .Append(items.Count.ToString(CultureInfo.CurrentCulture))
+                    .Append(onOneOperator
+                        ? " on this operator."
+
+                        // Nothing in the plan matched, so there is nowhere to send the reader - which
+                        // is worth saying by omission rather than by naming a node that is a guess.
+                        : nodes.Count == 0 ? " in this statement." : " in this statement, on " + Nodes(nodes) + ".");
+
+                // What each one said, on a line of its own: which expressions were converted, which
+                // columns had no statistics.  Distinct, because the same conversion reported by four
+                // operators is one thing to read.
+                var details = items
+                    .Select(i => i.Warning.Detail)
+                    .Where(detail => !string.IsNullOrEmpty(detail))
+                    .Distinct(StringComparer.Ordinal)
+                    .Select(detail => PlanFormat.SingleLine(detail!, MaxCombinedDetailLength))
+                    .ToList();
+
+                // A bare newline: a card's label counts a "\r\n" as two characters and draws it as
+                // one, which moves every link after it along by one.
+                if (details.Count > 0) text.Append('\n').Append(PlanFormat.List(details, MaxCombinedDetails)).Append('.');
+
+                yield return new PlanInsight(
+                    items.Max(i => i.Warning.Severity),
+                    text.ToString(),
+                    nodes,
+                    fullText: CombinedFullText(group.Key, items),
+                    warningCount: items.Count);
+            }
+        }
+
+        /// <summary>
+        /// Every warning a combined card stands for, written out in full: a heading with the title
+        /// and the count, then one line per warning with the node it is on and what it said.  What
+        /// the card's "Show all" link and the properties grid open, so nothing is only reachable from
+        /// the Warnings tab.
+        /// </summary>
+        private static string CombinedFullText(
+            string title,
+            IReadOnlyList<(PlanWarning Warning, IReadOnlyList<PlanOperator> Operators)> items)
+        {
+            var text = new StringBuilder(title)
+                .Append(" (")
+                .Append(items.Count.ToString(CultureInfo.CurrentCulture))
+                .AppendLine(")")
+                .AppendLine();
+
+            foreach (var (warning, operators) in items.OrderBy(i => i.Operators.Count > 0 ? i.Operators[0].NodeId : int.MaxValue))
+            {
+                if (operators.Count > 0)
+                {
+                    text.Append(operators.Count == 1 ? "Node " : "Nodes ")
+                        .Append(string.Join(", ", operators.Select(op => op.NodeId.ToString(CultureInfo.CurrentCulture))))
+                        .Append(": ");
+                }
+
+                text.AppendLine(string.IsNullOrEmpty(warning.Detail) ? warning.Title : warning.Detail);
+            }
+
+            return text.ToString();
+        }
+
+        /// <summary>The nodes a combined warning is on, as a sentence says them.</summary>
+        private static string Nodes(IReadOnlyList<PlanOperator> operators) =>
+            (operators.Count == 1 ? "node " : "nodes ") +
+            PlanFormat.List(
+                operators.Select(op => op.NodeId.ToString(CultureInfo.CurrentCulture)).ToList(),
+                MaxCombinedNodes);
 
         private static string MissingIndexText(PlanMissingIndex index)
         {

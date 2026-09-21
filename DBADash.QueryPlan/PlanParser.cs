@@ -361,13 +361,31 @@ namespace DBADash.QueryPlan
             // Own times are derived the same way, from the children's figures.
             PlanOperatorTiming.Apply(statement.RootOperator, statement.ExclusiveProfileTimeActive == true);
 
+            // Before the properties, so that a property list can say what a name means - an output
+            // list of Expr1033 says nothing without the expression beside it.
+            foreach (var (node, _, body) in elements)
+            {
+                node.DefinedExpressions = ParseDefinedExpressions(node, body).ToList();
+            }
+
+            statement.Expressions = PlanExpressions.Resolve(
+                elements.SelectMany(e => e.Node.DefinedExpressions).ToList());
+
             // The property lists are built last, because they show the derived cost and times - and
             // those can only be derived once the children have been parsed.  Built during the parse,
             // every operator reported a cost of zero.
             foreach (var (node, relOp, body) in elements)
             {
-                node.Properties = BuildOperatorProperties(node, relOp, body);
+                node.Properties = BuildOperatorProperties(node, relOp, body, statement);
             }
+
+            // And where each expression is used, after the properties, because that is what is
+            // searched for the names - see PlanExpressions.
+            PlanExpressions.ApplyUsage(statement.Expressions, statement.Operators);
+
+            // Same again for the warnings showplan reported against the statement: which operator a
+            // conversion happens in is in its properties, and nowhere else.
+            PlanWarningLocator.Locate(statement);
 
             NameTempTablesAsTheQueryDoes(statement);
         }
@@ -884,7 +902,8 @@ namespace DBADash.QueryPlan
         private static IReadOnlyList<PlanProperty> BuildOperatorProperties(
             PlanOperator node,
             XElement relOp,
-            XElement? body)
+            XElement? body,
+            PlanStatement statement)
         {
             var properties = new List<PlanProperty>
             {
@@ -1017,10 +1036,17 @@ namespace DBADash.QueryPlan
 
             if (node.OutputList.Count > 0)
             {
+                // Each column with what it means beside it, where it is one of the plan's own names:
+                // an output list reading Expr1033, Expr1034, Expr1035 is the commonest place a reader
+                // meets a generated name, and on its own it says nothing at all.
                 properties.Add(new PlanProperty(
                     "Output List",
                     node.OutputList.Count.ToString(CultureInfo.InvariantCulture) + " columns",
-                    node.OutputList.Select(c => new PlanProperty(c.ToString(), null)).ToList()));
+                    node.OutputList
+                        .Select(c => DefinitionOf(c, node, statement) is { } definition
+                            ? new PlanProperty(c.ToString(), definition, isExpression: true)
+                            : new PlanProperty(c.ToString(), null))
+                        .ToList()));
             }
 
             if (node.Warnings.Count > 0)
@@ -1141,6 +1167,52 @@ namespace DBADash.QueryPlan
             "PREFIX" => "=",
             _ => scanType ?? "="
         };
+
+        /// <summary>
+        /// What an output column means, where it is one of the plan's own names: this operator's own
+        /// definition of it when it is the one that works it out, and otherwise the definition it was
+        /// given further down - which for a name carried up through an aggregate is the expression
+        /// rather than the ANY that carries it.  Null for a column of a table, which says what it is.
+        /// </summary>
+        private static string? DefinitionOf(PlanColumnReference column, PlanOperator node, PlanStatement statement)
+        {
+            if ((column.Column ?? column.ComputedColumn) is not { } name || !PlanExpressions.IsGeneratedName(name)) return null;
+
+            var own = node.DefinedExpressions.FirstOrDefault(e =>
+                e.IsGenerated && string.Equals(e.Name, name, StringComparison.OrdinalIgnoreCase));
+
+            return own?.Definition ?? statement.ExpressionNamed(name)?.Definition;
+        }
+
+        /// <summary>
+        /// The values <paramref name="op"/> works out and names, as the things they are rather than
+        /// as the text the properties panel shows.
+        ///
+        /// Only the ones with an expression behind them: a DefinedValue is also how showplan says an
+        /// operator hands a column through untouched, and a column that is passed on unchanged is not
+        /// something the plan computed.
+        /// </summary>
+        private static IEnumerable<PlanExpression> ParseDefinedExpressions(PlanOperator op, XElement? body)
+        {
+            if (body is null) yield break;
+
+            foreach (var defined in ChildElements(body, "DefinedValues")
+                         .SelectMany(d => ChildElements(d, "DefinedValue")))
+            {
+                if (ScalarString(defined) is not { Length: > 0 } expression) continue;
+                if (ChildElements(defined, "ColumnReference").FirstOrDefault() is not { } column) continue;
+
+                var name = Attribute(column, "Column") ?? Attribute(column, "ComputedColumn");
+                if (string.IsNullOrEmpty(name)) continue;
+
+                // The alias the query gave, or the table, for the defined values that are real
+                // columns - a computed column's definition, or the value an update writes.
+                var qualifier = PlanObjectReference.Unquote(Attribute(column, "Alias")) ??
+                                PlanObjectReference.Unquote(Attribute(column, "Table"));
+
+                yield return new PlanExpression(name!, qualifier, expression, op);
+            }
+        }
 
         private static string? DescribeDefinedValues(XElement body)
         {
