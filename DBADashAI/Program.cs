@@ -657,9 +657,17 @@ ApplyAuthAndRateLimit(app.MapPost("/api/ai/analyse-deadlock", async (
 
         var analysis = result.Text;
 
-        await store.SaveAsync(request.Signature, model, payloadVersion, analysis, request.InstanceId,
-            request.SignatureVersion, request.GraphXml, conversationId, turnNumber, request.Question,
-            cancellationToken);
+        // The opening analysis is shared and is this service's to record.  A follow-up is its asker's
+        // and is kept on their machine instead, so a copy written here would put in the shared table
+        // the very thing the viewer took out of it.
+        var clientStores = request.ClientStoresTurn && turnNumber > 1;
+
+        if (!clientStores)
+        {
+            await store.SaveAsync(request.Signature, model, payloadVersion, analysis, request.InstanceId,
+                request.SignatureVersion, request.GraphXml, conversationId, turnNumber, request.Question,
+                cancellationToken);
+        }
 
         totalSw.Stop();
         telemetry.Complete(requestId, "deadlock-analysis", 1, 0, totalSw.ElapsedMilliseconds, 0, "n/a");
@@ -743,9 +751,17 @@ ApplyAuthAndRateLimit(app.MapPost("/api/ai/analyse-plan", async (
 
         var analysis = result.Text;
 
-        await store.SaveAsync(request.Signature, request.PlanHash, model, payloadVersion, analysis,
-            request.InstanceId, request.StatementText, conversationId, turnNumber, request.Question,
-            cancellationToken);
+        // The opening analysis is shared and is this service's to record.  A follow-up is its asker's
+        // and is kept on their machine instead, so a copy written here would put in the shared table
+        // the very thing the viewer took out of it.
+        var clientStores = request.ClientStoresTurn && turnNumber > 1;
+
+        if (!clientStores)
+        {
+            await store.SaveAsync(request.Signature, request.PlanHash, model, payloadVersion, analysis,
+                request.InstanceId, request.StatementText, conversationId, turnNumber, request.Question,
+                cancellationToken);
+        }
 
         totalSw.Stop();
         telemetry.Complete(requestId, "plan-analysis", 1, 0, totalSw.ElapsedMilliseconds, 0, "n/a");

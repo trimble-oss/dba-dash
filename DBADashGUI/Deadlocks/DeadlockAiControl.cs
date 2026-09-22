@@ -1,6 +1,7 @@
 using DBADash.Deadlock.Analysis;
 using DBADash.Deadlock.Model;
 using DBADashGUI.AgentJobs;
+using DBADash;
 using DBADashGUI.AI;
 using System;
 using System.Collections.Generic;
@@ -113,6 +114,17 @@ namespace DBADashGUI.Deadlocks
 
             _options.DropDownItems.Add(_showRequest);
             _options.DropDownItems.Add(_includeSchema);
+
+            // Follow-up questions stay on this machine, which is what makes them private and also what
+            // means they need moving by hand.  The dialog lives with the feature it belongs to.
+            _options.DropDownItems.Add(new ToolStripSeparator());
+            _options.DropDownItems.Add(new ToolStripMenuItem(
+                "My AI conversations...", null,
+                async (_, _) => await AiConversationsForm.OpenAsync(FindForm()))
+            {
+                ToolTipText = "Your follow-up questions and answers are saved on this computer only.  " +
+                              "Export them before it is replaced."
+            });
             UpdateOptionsVisibility();
 
             var toolbar = new ToolStrip { GripStyle = ToolStripGripStyle.Hidden };
@@ -389,10 +401,33 @@ namespace DBADashGUI.Deadlocks
                     result.Model,
                     result.GeneratedUtc ?? DateTime.UtcNow));
 
+                // A follow-up is the reader's own and is kept on their machine rather than in the
+                // repository - see AiLocalConversationStore.  The opening analysis is shared and the
+                // service has already recorded it.
+                //
+                // Keyed on the occurrence hash as well as the signature: a signature version change
+                // moves the repository's rows and cannot move these, so the hash is what still finds
+                // this conversation afterwards.
+                var storeNote = question is null
+                    ? null
+                    : await AiLocalConversationStore.AppendTurnAsync(
+                        conversation.Id,
+                        AiLocalConversationStore.Artifact.Deadlock,
+                        _payload.Signature,
+                        _payload.DeadlockHash,
+                        _instance,
+                        null,
+                        _payload.Version,
+                        new AiLocalConversationStore.StoredTurn(
+                            question,
+                            result.Analysis ?? string.Empty,
+                            result.Model,
+                            result.GeneratedUtc ?? DateTime.UtcNow));
+
                 if (!await ShowConversationAsync(conversation, graph)) return;
 
-                _analysisNote = Describe(result);
-                _statusColour = DashColors.Success;
+                _analysisNote = Describe(result) + (storeNote is null ? string.Empty : "  " + storeNote);
+                _statusColour = storeNote is null ? DashColors.Success : DashColors.Warning;
                 UpdateStatus();
 
                 // The conversation just stored joins the list, alongside the ones it didn't replace.  Nothing
