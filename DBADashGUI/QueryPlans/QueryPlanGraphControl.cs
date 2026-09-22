@@ -83,6 +83,12 @@ namespace DBADashGUI.QueryPlans
         /// <summary>Raised when the selected node changes, so the host can follow it elsewhere.</summary>
         public event EventHandler<PlanNode> SelectionChanged;
 
+        /// <summary>
+        /// Raised when Follow Data Path is turned on or off, so the host can keep its toolbar button
+        /// in step - the mode is also left from inside the control, by pressing Escape.
+        /// </summary>
+        public event EventHandler FollowDataPathChanged;
+
         /// <summary>Raised when a node is double clicked, for the host to drill into.</summary>
         public event EventHandler<PlanNode> NodeActivated;
 
@@ -306,6 +312,9 @@ namespace DBADashGUI.QueryPlans
         /// Fade everything off the selected node's path back to the root, so one path through a wide
         /// plan can be followed.  Off by default - a plan is read whole far more often than one path
         /// through it is.
+        ///
+        /// Engaging with nothing selected would fade nothing and look like it did nothing, so the
+        /// root is selected as a starting point the reader can then walk.
         /// </summary>
         [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
         public bool FollowDataPath
@@ -316,7 +325,14 @@ namespace DBADashGUI.QueryPlans
                 if (_renderer.FadeOffPath == value) return;
 
                 _renderer.FadeOffPath = value;
+
+                if (value && _controller?.SelectedNode is null && PlanLayout?.Root is { } root)
+                {
+                    _controller.Select(root);
+                }
+
                 _canvas.Invalidate();
+                FollowDataPathChanged?.Invoke(this, EventArgs.Empty);
             }
         }
 
@@ -356,6 +372,12 @@ namespace DBADashGUI.QueryPlans
             {
                 _controller.SetViewport(new LayoutSize(_canvas.ClientSize.Width, _canvas.ClientSize.Height));
             }
+
+            // The new controller starts with nothing selected, so Follow Data Path - which fades off
+            // the selected node's path - would leave this plan drawn whole while the mode still reads
+            // as on.  A statement change is a fresh start, so the mode is simply turned off (which
+            // notifies the host to uncheck the toolbar) rather than re-rooted onto the new plan.
+            FollowDataPath = false;
 
             _canvas.Invalidate();
         }
@@ -596,7 +618,14 @@ namespace DBADashGUI.QueryPlans
                     return;
                 }
 
-                _controller.SelectAt(ToLayoutPoint(e));
+                // While following a data path, a click on empty space pans without dropping the
+                // followed node, so a wide plan can be scrolled and keep its path.  Clicking another
+                // node still re-roots the path onto it.
+                var hit = _controller.HitTest(ToLayoutPoint(e));
+                if (hit is not null || !FollowDataPath)
+                {
+                    _controller.Select(hit);
+                }
             }
 
             // Left on empty space or middle anywhere pans.  Nodes are not draggable: the tree is
@@ -729,7 +758,10 @@ namespace DBADashGUI.QueryPlans
                     break;
 
                 case Keys.Escape:
+                    // Escape leaves Follow Data Path as well as clearing the selection, so there is
+                    // one easy key that puts the whole plan back the way it was.
                     _controller.ClearSelection();
+                    FollowDataPath = false;
                     break;
 
                 default:
@@ -804,6 +836,17 @@ namespace DBADashGUI.QueryPlans
                 // holds about this operator, which makes it the one thing worth pasting elsewhere.
                 menu.Items.Add(new ToolStripMenuItem("Copy Details", Properties.Resources.ASX_Copy_blue_16x,
                     (_, _) => CopyText(PlanTooltipBuilder.Build(node, int.MaxValue, OperatorTimeMode).ToString())));
+
+                // Follow Data Path is engaged here, on a node, rather than left on all the time:
+                // right clicking a node and following it fades the rest of the plan back from that
+                // node at once, instead of arming a mode that does nothing until something is picked.
+                menu.Items.Add(new ToolStripMenuItem(
+                    FollowDataPath ? "Stop Following Data Path" : "Follow Data Path",
+                    Properties.Resources.NavigationPathLeft_16x,
+                    (_, _) => FollowDataPath = !FollowDataPath)
+                {
+                    ToolTipText = "Fade everything off this operator's path back to the root.  Escape leaves it."
+                });
             }
 
             ContextMenuBuilding?.Invoke(this, new QueryPlanMenuEventArgs(node, menu.Items));
