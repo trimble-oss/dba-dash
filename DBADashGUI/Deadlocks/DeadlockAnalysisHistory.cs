@@ -1,5 +1,7 @@
 #nullable enable
+using DBADash;
 using DBADash.Deadlock.Analysis;
+using DBADashGUI.AI;
 using Microsoft.Data.SqlClient;
 using Serilog;
 using System;
@@ -26,6 +28,10 @@ namespace DBADashGUI.Deadlocks
     ///
     /// Reading the repository directly rather than going through the AI service means a deadlock's
     /// history is there even when no AI service is configured any more.
+    ///
+    /// A conversation comes from two places.  Its opening analysis is shared and lives in the
+    /// repository; the reader's own follow-ups are private and live on their machine
+    /// (<see cref="AiLocalConversationStore"/>).  They are put back together here, by conversation id.
     /// </summary>
     internal static class DeadlockAnalysisHistory
     {
@@ -69,10 +75,24 @@ namespace DBADashGUI.Deadlocks
             string? deadlockHash,
             CancellationToken cancellationToken = default)
         {
-            if (string.IsNullOrWhiteSpace(signature) || string.IsNullOrWhiteSpace(Common.ConnectionString))
-            {
-                return Array.Empty<Entry>();
-            }
+            if (string.IsNullOrWhiteSpace(signature)) return Array.Empty<Entry>();
+
+            var shared = await FetchSharedAsync(signature, deadlockHash, cancellationToken);
+            var local = await AiLocalConversationStore.ForDeadlockAsync(signature, deadlockHash, cancellationToken);
+
+            return Merge(shared, local, deadlockHash);
+        }
+
+        /// <summary>
+        /// The conversations the whole team can see: one opening analysis each, plus any follow-ups
+        /// stored back when follow-ups went to the repository.
+        /// </summary>
+        private static async Task<List<Entry>> FetchSharedAsync(
+            string signature,
+            string? deadlockHash,
+            CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(Common.ConnectionString)) return new List<Entry>();
 
             try
             {
@@ -126,11 +146,68 @@ namespace DBADashGUI.Deadlocks
             }
             catch (Exception ex)
             {
+                // The reader's own conversations are unaffected - they are not in there.
                 // An older repository without the table, or a user without the grant: the viewer works
                 // the same, it just cannot offer what was found before.
                 Log.Debug(ex, "Could not read deadlock analysis history for {signature}", signature);
-                return Array.Empty<Entry>();
+                return new List<Entry>();
             }
+        }
+
+        /// <summary>
+        /// Puts the two halves of each conversation back together: the shared opening analysis from the
+        /// repository, then the reader's own follow-ups from this machine.
+        ///
+        /// A local conversation whose opener is missing is still shown, as itself - the analysis was
+        /// never recorded, and the reader's half of an exchange is worth more than hiding it.
+        /// </summary>
+        private static IReadOnlyList<Entry> Merge(
+            List<Entry> shared,
+            IReadOnlyList<AiLocalConversationStore.StoredConversation> local,
+            string? deadlockHash)
+        {
+            var merged = new List<Entry>(shared);
+
+            var index = new Dictionary<Guid, int>();
+            for (var i = 0; i < merged.Count; i++)
+            {
+                if (merged[i].ConversationId is { } id) index[id] = i;
+            }
+
+            foreach (var conversation in local)
+            {
+                var turns = conversation.Turns
+                    .Select(t => new Turn(
+                        0, // No repository row, so no id - nothing reads it.
+                        t.Question,
+                        t.Answer,
+                        t.Model ?? string.Empty,
+                        conversation.PayloadVersion ?? string.Empty,
+                        t.GeneratedUtc))
+                    .ToList();
+
+                if (index.TryGetValue(conversation.ConversationId, out var at))
+                {
+                    merged[at] = merged[at] with { Turns = merged[at].Turns.Concat(turns).ToList() };
+                }
+                else
+                {
+                    merged.Add(new Entry(
+                        "local:" + conversation.ConversationId,
+                        conversation.ConversationId,
+                        turns,
+                        conversation.Instance,
+                        string.Equals(conversation.ArtifactHash, deadlockHash, StringComparison.OrdinalIgnoreCase)));
+                }
+            }
+
+            // The procedure ordered what it returned; a local conversation has to be placed among it,
+            // so the whole list is ordered again on the same two keys.
+            return merged
+                .Where(c => c.Turns.Count > 0)
+                .OrderByDescending(c => c.IsThisDeadlock)
+                .ThenByDescending(c => c.GeneratedUtc)
+                .ToList();
         }
     }
 }

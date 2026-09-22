@@ -39,6 +39,14 @@ namespace DBADashGUI.Deadlocks
             /// </summary>
             public Guid? ConversationId { get; init; }
 
+
+            /// <summary>
+            /// Where in the conversation this answer sits, as the service numbered it.  Taken from the
+            /// service rather than counted here, so the turn the viewer stores is the turn the service
+            /// thinks it produced.
+            /// </summary>
+            public int? TurnNumber { get; init; }
+
             public string? Error { get; init; }
 
             public bool Success => Error is null;
@@ -99,7 +107,11 @@ namespace DBADashGUI.Deadlocks
                     modelOverride,
                     conversationId = conversation?.Id,
                     history,
-                    question
+                    question,
+                    // A follow-up is kept on this machine, not by the service: it belongs to whoever
+                    // asked it.  See AiLocalConversationStore.  The opening analysis is shared and
+                    // stays the service's.
+                    clientStoresTurn = question is not null
                 },
                 new JsonSerializerOptions { WriteIndented = true });
         }
@@ -156,6 +168,10 @@ namespace DBADashGUI.Deadlocks
                     ConversationId = document.RootElement.TryGetProperty("conversationId", out var id) &&
                                      id.TryGetGuid(out var conversationId)
                         ? conversationId
+                        : null,
+                    TurnNumber = document.RootElement.TryGetProperty("turnNumber", out var turn) &&
+                                 turn.TryGetInt32(out var turnNumber)
+                        ? turnNumber
                         : null
                 };
             }

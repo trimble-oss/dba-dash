@@ -1,4 +1,6 @@
 #nullable enable
+using DBADash;
+using DBADashGUI.AI;
 using Microsoft.Data.SqlClient;
 using Serilog;
 using System;
@@ -21,6 +23,12 @@ namespace DBADashGUI.QueryPlans
     ///
     /// Reading the repository directly rather than going through the AI service means a plan's history
     /// is there even when no AI service is configured any more.
+    ///
+    /// A conversation comes from two places.  Its opening analysis is shared and lives in the
+    /// repository; the reader's own follow-ups are private and live on their machine
+    /// (<see cref="AiLocalConversationStore"/>).  They are put back together here, by conversation id,
+    /// so what reaches the viewer is one exchange rather than two halves - and so a reader with no
+    /// repository to reach still sees their own.
     /// </summary>
     internal static class PlanAnalysisHistory
     {
@@ -64,10 +72,24 @@ namespace DBADashGUI.QueryPlans
             string? planHash,
             CancellationToken cancellationToken = default)
         {
-            if (string.IsNullOrWhiteSpace(signature) || string.IsNullOrWhiteSpace(Common.ConnectionString))
-            {
-                return Array.Empty<Entry>();
-            }
+            if (string.IsNullOrWhiteSpace(signature)) return Array.Empty<Entry>();
+
+            var shared = await FetchSharedAsync(signature, planHash, cancellationToken);
+            var local = await AiLocalConversationStore.ForPlanAsync(signature, planHash, cancellationToken);
+
+            return Merge(shared, local, planHash);
+        }
+
+        /// <summary>
+        /// The conversations the whole team can see: one opening analysis each, plus any follow-ups
+        /// stored back when follow-ups went to the repository.
+        /// </summary>
+        private static async Task<List<Entry>> FetchSharedAsync(
+            string signature,
+            string? planHash,
+            CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(Common.ConnectionString)) return new List<Entry>();
 
             try
             {
@@ -121,10 +143,68 @@ namespace DBADashGUI.QueryPlans
             catch (Exception ex)
             {
                 // An older repository without the table, or a user without the grant: the viewer works
-                // the same, it just cannot offer what was found before.
+                // the same, it just cannot offer what was found before.  The reader's own conversations
+                // are unaffected - they are not in there.
                 Log.Debug(ex, "Could not read query plan analysis history for {signature}", signature);
-                return Array.Empty<Entry>();
+                return new List<Entry>();
             }
+        }
+
+        /// <summary>
+        /// Puts the two halves of each conversation back together: the shared opening analysis from the
+        /// repository, then the reader's own follow-ups from this machine.
+        ///
+        /// A local conversation whose opener is missing is still shown, as itself.  That happens when
+        /// the analysis was never recorded - the service's write is best effort - and the reader's half
+        /// of an exchange is worth more than the tidiness of hiding it.
+        /// </summary>
+        private static IReadOnlyList<Entry> Merge(
+            List<Entry> shared,
+            IReadOnlyList<AiLocalConversationStore.StoredConversation> local,
+            string? planHash)
+        {
+            var merged = new List<Entry>(shared);
+
+            var index = new Dictionary<Guid, int>();
+            for (var i = 0; i < merged.Count; i++)
+            {
+                if (merged[i].ConversationId is { } id) index[id] = i;
+            }
+
+            foreach (var conversation in local)
+            {
+                var turns = conversation.Turns
+                    .Select(t => new Turn(
+                        0, // No repository row, so no id - nothing reads it.
+                        t.Question,
+                        t.Answer,
+                        t.Model ?? string.Empty,
+                        conversation.PayloadVersion ?? string.Empty,
+                        t.GeneratedUtc))
+                    .ToList();
+
+                if (index.TryGetValue(conversation.ConversationId, out var at))
+                {
+                    merged[at] = merged[at] with { Turns = merged[at].Turns.Concat(turns).ToList() };
+                }
+                else
+                {
+                    merged.Add(new Entry(
+                        "local:" + conversation.ConversationId,
+                        conversation.ConversationId,
+                        turns,
+                        conversation.Instance,
+                        string.Equals(conversation.ArtifactHash, planHash, StringComparison.OrdinalIgnoreCase)));
+                }
+            }
+
+            // The procedure ordered what it returned; a local conversation has to be placed among it,
+            // so the whole list is ordered again on the same two keys.
+            return merged
+                .Where(c => c.Turns.Count > 0)
+                .OrderByDescending(c => c.IsThisPlan)
+                .ThenByDescending(c => c.GeneratedUtc)
+                .ToList();
         }
     }
 }

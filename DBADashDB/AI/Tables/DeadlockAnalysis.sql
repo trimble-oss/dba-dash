@@ -6,11 +6,19 @@
 	otherwise the newest answer about its pattern (Signature, see DeadlockSignature in DBADash.Deadlock) - so
 	nobody pays for the same answer twice without meaning to.  The rest are a drop-down away.
 
-	A row is one answer, and a conversation is a run of them: ConversationID groups them and TurnNumber
-	orders them, with the reader's question on every turn after the first - on the first the question is
-	the deadlock, which is stored anyway.  Storing the turns rather than the exchange as a whole keeps the
-	table one shape, keeps a follow-up as cheap to write as the analysis it follows, and means an
-	interrupted conversation stores what it got.
+	A row is one answer, and it is the opening one.  What follows it belongs to the person who asked and
+	is kept on their own machine instead, encrypted to their Windows account (see
+	AiLocalConversationStore in the GUI).  Nothing anyone can read here is anybody's private
+	conversation, and that is the point.
+
+	ConversationID is what joins the two halves back together: the viewer reads this row, finds its own
+	follow-ups under the same id locally, and shows one exchange.  It is load-bearing for that.
+
+	TurnNumber and Question are what remains of the arrangement before that - follow-ups were stored
+	here, as further rows of the same conversation.  Rows like that still exist and are still read back,
+	which is why both columns are still here and why AI.DeadlockAnalysisHistory_Get still reassembles a
+	conversation from several rows.  Nothing writes them any more: AI.DeadlockAnalysis_Upd refuses a turn
+	after the first, whatever asks it to.
 
 	History rather than replacement: every answer has been paid for, two runs of one model over one graph
 	rarely say the same thing, and asking again is often a search for a better answer rather than a
@@ -42,11 +50,14 @@ CREATE TABLE AI.DeadlockAnalysis
 	/* The graph's occurrence identity, as dbo.Deadlocks.DeadlockHash - computed the same way (DBADash.Deadlock.Analysis.DeadlockHash),
 	   so a graph opened from a file matches too.  NULL for answers stored before it was recorded. */
 	DeadlockHash BINARY(16) NULL,
-	/* The exchange this answer belongs to, and where in it.  NULL for answers stored before follow-up
-	   questions existed, which are conversations of one turn read back as themselves. */
+	/* The exchange this answer opens.  The viewer finds the reader's own follow-ups under this id on
+	   their machine, so this is how the two halves of a conversation find each other.  NULL on answers
+	   stored before conversations existed, which are conversations of one turn read back as themselves. */
 	ConversationID UNIQUEIDENTIFIER NULL,
+	/* Always 1 or NULL on anything written now - see the header.  Still ordered by, because rows
+	   written when follow-ups lived here are still read back. */
 	TurnNumber SMALLINT NULL,
-	/* The follow-up that was asked.  NULL on the opening turn of a conversation. */
+	/* The follow-up that was asked, on rows old enough to have one.  Never written now. */
 	Question NVARCHAR(MAX) NULL,
 	CONSTRAINT PK_DeadlockAnalysis PRIMARY KEY CLUSTERED (DeadlockAnalysisID)
 );

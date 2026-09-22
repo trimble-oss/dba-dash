@@ -10,9 +10,20 @@
 	    different problem, and often precisely the problem.
 	See PlanIdentity in DBADash.QueryPlan, which also computes both for a plan that carried neither.
 
-	A row is one answer, and a conversation is a run of them: ConversationID groups them and TurnNumber
-	orders them, with the reader's question on every turn after the first - on the first the question is
-	the plan, which the viewer has in front of it.
+	A row is one answer, and it is the opening one.  What follows it - the reader asking why, and what
+	about this index, and what if the join order changed - belongs to the person who asked and is kept
+	on their own machine instead, encrypted to their Windows account (see AiLocalConversationStore in
+	the GUI).  Nothing anyone can read here is anybody's private conversation, and that is the point.
+
+	ConversationID is what joins the two halves back together: the viewer reads this row, finds its own
+	follow-ups under the same id locally, and shows one exchange.  It is load-bearing for that and not
+	merely descriptive.
+
+	TurnNumber and Question are what remains of the arrangement before that - follow-ups were stored
+	here, as further rows of the same conversation.  Rows like that still exist and are still read back,
+	which is why both columns are still here and why AI.QueryPlanAnalysisHistory_Get still reassembles a
+	conversation from several rows.  Nothing writes them any more: AI.QueryPlanAnalysis_Upd refuses a
+	turn after the first, whatever asks it to.
 
 	The plan itself is not stored.  Unlike a deadlock graph, whose signature is computed by us and so has
 	to be recomputable, a plan's identities come from SQL Server or from a stable hash of the plan's own
@@ -37,10 +48,13 @@ CREATE TABLE AI.QueryPlanAnalysis
 	/* What the query was, so a stored answer can be described rather than listed as a hash. */
 	StatementText NVARCHAR(MAX) NULL,
 	GeneratedUtc DATETIME2(3) NOT NULL CONSTRAINT DF_QueryPlanAnalysis_GeneratedUtc DEFAULT SYSUTCDATETIME(),
-	/* The exchange this answer belongs to, and where in it. */
+	/* The exchange this answer opens.  The viewer finds the reader's own follow-ups under this id on
+	   their machine, so this is how the two halves of a conversation find each other. */
 	ConversationID UNIQUEIDENTIFIER NULL,
+	/* Always 1 or NULL on anything written now - see the header.  Still ordered by, because rows
+	   written when follow-ups lived here are still read back. */
 	TurnNumber SMALLINT NULL,
-	/* The follow-up that was asked.  NULL on the opening turn of a conversation. */
+	/* The follow-up that was asked, on rows old enough to have one.  Never written now. */
 	Question NVARCHAR(MAX) NULL,
 	CONSTRAINT PK_QueryPlanAnalysis PRIMARY KEY CLUSTERED (QueryPlanAnalysisID)
 );

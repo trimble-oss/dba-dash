@@ -120,6 +120,19 @@ namespace DBADashAI.Models
         public Guid? ConversationId { get; set; }
 
         /// <summary>
+        /// True when the caller will store this turn itself, which the viewer does for follow-ups.
+        ///
+        /// A follow-up belongs to the person who asked it, and it is kept on their own machine rather
+        /// than in the repository - encrypted to their Windows account, where nobody administering the
+        /// repository can read it.  So the viewer keeps its own follow-ups and sets this, and the
+        /// service records only the opening analysis, which is shared and belongs to nobody.
+        ///
+        /// Default false so an older viewer, which sends nothing here and stores nothing itself, keeps
+        /// having its follow-ups recorded the way it always did.
+        /// </summary>
+        public bool ClientStoresTurn { get; set; }
+
+        /// <summary>
         /// A ceiling on the summary lists regardless of what the caller sends.  Each is capped by the
         /// viewer already; this is the total, because a plan of a thousand operators would otherwise
         /// arrive as a thousand lines of prose ahead of the XML.

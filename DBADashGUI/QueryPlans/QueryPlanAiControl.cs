@@ -1,5 +1,6 @@
 using DBADash.QueryPlan.Analysis;
 using DBADash.QueryPlan.Model;
+using DBADash;
 using DBADashGUI.AI;
 using System;
 using System.Drawing;
@@ -136,6 +137,17 @@ namespace DBADashGUI.QueryPlans
 
             _options.DropDownItems.Add(_showRequest);
             _options.DropDownItems.Add(_includePlanXml);
+
+            // Follow-up questions stay on this machine, which is what makes them private and also what
+            // means they need moving by hand.  The dialog lives with the feature it belongs to.
+            _options.DropDownItems.Add(new ToolStripSeparator());
+            _options.DropDownItems.Add(new ToolStripMenuItem(
+                "My AI conversations...", null,
+                async (_, _) => await AiConversationsForm.OpenAsync(FindForm()))
+            {
+                ToolTipText = "Your follow-up questions and answers are saved on this computer only.  " +
+                              "Export them before it is replaced."
+            });
 
             var toolbar = new ToolStrip { GripStyle = ToolStripGripStyle.Hidden };
             toolbar.Items.Add(_submit);
@@ -457,11 +469,31 @@ namespace DBADashGUI.QueryPlans
                 // than the artifact this exchange is about.
                 _conversationPayload = payload;
 
+                // A follow-up is the reader's own and is kept on their machine rather than in the
+                // repository - see AiLocalConversationStore.  The opening analysis is shared and the
+                // service has already recorded it.
+                var storeNote = question is null
+                    ? null
+                    : await AiLocalConversationStore.AppendTurnAsync(
+                        conversation.Id,
+                        AiLocalConversationStore.Artifact.QueryPlan,
+                        payload.Signature,
+                        payload.PlanHash,
+                        _instance,
+                        payload.StatementText,
+                        payload.Version,
+                        new AiLocalConversationStore.StoredTurn(
+                            question,
+                            result.Analysis ?? string.Empty,
+                            result.Model,
+                            result.GeneratedUtc ?? DateTime.UtcNow));
+
                 if (!await ShowConversationAsync(conversation, statement)) return;
 
                 _analysisNote = $"Analysed by {result.Model ?? "the configured model"}.  " +
-                                "Generated advice - check it against the plan before acting on it.";
-                _statusColour = DashColors.Success;
+                                "Generated advice - check it against the plan before acting on it." +
+                                (storeNote is null ? string.Empty : "  " + storeNote);
+                _statusColour = storeNote is null ? DashColors.Success : DashColors.Warning;
                 UpdateStatus();
 
                 // The conversation just stored joins the list, alongside the ones it didn't replace.
