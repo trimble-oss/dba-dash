@@ -89,6 +89,10 @@ namespace DBADashGUI.QueryPlans
         private readonly TabPage _parametersTab;
         private readonly TabPage _waitsTab;
 
+        // Every tab in the order they belong, so a tab hidden when it has nothing to show can be put
+        // back in its place rather than at the end - see SetTabVisible.
+        private readonly List<TabPage> _orderedTabs = new();
+
         private readonly CodeEditor _queryText;
         private readonly ElementHost _queryHost = new() { Dock = DockStyle.Fill };
         private readonly CodeEditor _xmlText;
@@ -264,6 +268,9 @@ namespace DBADashGUI.QueryPlans
             _tabs.TabPages.Add(NewPage("AI Analysis", _ai));
             _tabs.TabPages.Add(NewPage("XML", _xmlHost));
 
+            // The intended order of every tab, so the ones hidden while empty go back in their place.
+            _orderedTabs.AddRange(_tabs.TabPages.Cast<TabPage>());
+
             Controls.Add(_tabs);
             Controls.Add(BuildToolbar());
             Controls.Add(BuildStatusBar());
@@ -365,6 +372,32 @@ namespace DBADashGUI.QueryPlans
             var page = new TabPage(text);
             page.Controls.Add(content);
             return page;
+        }
+
+        /// <summary>
+        /// Shows or hides a tab that has nothing to show - Waits on an estimated plan, Parameters
+        /// without any, and the rest.  A hidden tab is put back in its place using
+        /// <see cref="_orderedTabs"/> rather than at the end, so the tab strip keeps its order.
+        /// </summary>
+        private void SetTabVisible(TabPage tab, bool visible)
+        {
+            var present = _tabs.TabPages.Contains(tab);
+            if (visible == present) return;
+
+            if (!visible)
+            {
+                _tabs.TabPages.Remove(tab);
+                return;
+            }
+
+            var index = 0;
+            foreach (var ordered in _orderedTabs)
+            {
+                if (ReferenceEquals(ordered, tab)) break;
+                if (_tabs.TabPages.Contains(ordered)) index++;
+            }
+
+            _tabs.TabPages.Insert(index, tab);
         }
 
         private static CodeEditor NewScriptEditor() => new()
@@ -1730,6 +1763,7 @@ namespace DBADashGUI.QueryPlans
             }
 
             _warningsTab.Text = count == 0 ? "Warnings" : "Warnings (" + count.ToString(CultureInfo.InvariantCulture) + ")";
+            SetTabVisible(_warningsTab, count > 0);
         }
 
         private void AddWarningRow(string severity, string source, string title, string detail, int? nodeId)
@@ -1785,6 +1819,7 @@ namespace DBADashGUI.QueryPlans
             _missingIndexTab.Text = statement.MissingIndexes.Count == 0
                 ? "Missing Indexes"
                 : "Missing Indexes (" + statement.MissingIndexes.Count.ToString(CultureInfo.InvariantCulture) + ")";
+            SetTabVisible(_missingIndexTab, statement.MissingIndexes.Count > 0);
 
             ShowScript(_missingIndexScript, _missingIndexScriptSplit, PlanScripts.MissingIndexes(statement));
         }
@@ -1866,6 +1901,7 @@ namespace DBADashGUI.QueryPlans
             _expressionsTab.Text = statement.Expressions.Count == 0
                 ? "Expressions"
                 : "Expressions (" + statement.Expressions.Count.ToString(CultureInfo.InvariantCulture) + ")";
+            SetTabVisible(_expressionsTab, statement.Expressions.Count > 0);
 
             var nested = statement.Expressions.Count(e => e.IsNested);
             _expressionsTab.ToolTipText = statement.Expressions.Count == 0
@@ -2020,6 +2056,7 @@ namespace DBADashGUI.QueryPlans
             _parametersTab.Text = statement.Parameters.Count == 0
                 ? "Parameters"
                 : "Parameters (" + statement.Parameters.Count.ToString(CultureInfo.InvariantCulture) + ")";
+            SetTabVisible(_parametersTab, statement.Parameters.Count > 0);
 
             _parametersTab.ToolTipText = differing == 0
                 ? string.Empty
@@ -2074,6 +2111,7 @@ namespace DBADashGUI.QueryPlans
             _waitsTab.Text = statement.WaitStats.Count == 0
                 ? "Waits"
                 : "Waits (" + statement.WaitStats.Count.ToString(CultureInfo.InvariantCulture) + ")";
+            SetTabVisible(_waitsTab, statement.WaitStats.Count > 0);
 
             _waitsTab.ToolTipText = total == 0
                 ? string.Empty
