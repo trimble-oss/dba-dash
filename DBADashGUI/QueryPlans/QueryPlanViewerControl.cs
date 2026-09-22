@@ -278,6 +278,9 @@ namespace DBADashGUI.QueryPlans
             };
             _graphControl.NodeActivated += GraphControl_NodeActivated;
             _graphControl.ContextMenuBuilding += GraphControl_ContextMenuBuilding;
+            // Follow Data Path can be turned on from a node's menu and left with Escape, so the
+            // toolbar button follows the control's state rather than only setting it.
+            _graphControl.FollowDataPathChanged += (_, _) => _dataPathButton.Checked = _graphControl.FollowDataPath;
             _properties.OperatorRequested += (_, op) => _graphControl.SelectOperator(op);
             _warningsGrid.CellDoubleClick += (_, e) => SelectFromGrid(_warningsGrid, e.RowIndex);
             _missingIndexGrid.CellDoubleClick += MissingIndexGrid_CellDoubleClick;
@@ -440,7 +443,7 @@ namespace DBADashGUI.QueryPlans
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Image,
                 CheckOnClick = true,
-                ToolTipText = "Fade everything off the selected operator's path back to the root."
+                ToolTipText = "Fade everything off the selected operator's path back to the root.  Right click a node to follow its path; Escape leaves it."
             };
             toolbar.Items.Add(_dataPathButton);
 
@@ -1513,11 +1516,16 @@ namespace DBADashGUI.QueryPlans
             e.Items.Add(Mirror("Column Spacing", _columnSpacingMenu));
             e.Items.Add(Mirror("Plan Shape", _verticalLayoutMenu));
 
-            e.Items.Add(new ToolStripMenuItem("Follow Data Path", Properties.Resources.NavigationPathLeft_16x, (_, _) => _dataPathButton.PerformClick())
+            // Following a data path is engaged on a node - the graph control adds that item to a
+            // node's own menu.  Off a node there is nothing to follow, so this only offers to leave
+            // the mode when it is on.
+            if (e.Node is null && _dataPathButton.Checked)
             {
-                Checked = _dataPathButton.Checked,
-                ToolTipText = _dataPathButton.ToolTipText
-            });
+                e.Items.Add(new ToolStripMenuItem("Stop Following Data Path", Properties.Resources.NavigationPathLeft_16x, (_, _) => _dataPathButton.PerformClick())
+                {
+                    ToolTipText = _dataPathButton.ToolTipText
+                });
+            }
 
             e.Items.Add(new ToolStripMenuItem("Show Operator Descriptions", null, (_, _) => _descriptionsItem.Checked = !_descriptionsItem.Checked)
             {
