@@ -294,6 +294,7 @@ namespace DBADashGUI.QueryPlans
             _expressionsGrid.CellDoubleClick += ExpressionsGrid_CellDoubleClick;
             _expressionsGrid.CellContentClick += ExpressionsGrid_CellContentClick;
             _waitsGrid.CellContentClick += WaitsGrid_CellContentClick;
+            _waitsGrid.CellPainting += WaitsGrid_CellPainting;
 
             // Top of the Parameters list's right click menus - on a row, and on the empty space below the
             // rows, which is most of the list for a statement with one or two parameters.
@@ -2078,7 +2079,16 @@ namespace DBADashGUI.QueryPlans
         {
             ResetGrid(_waitsGrid);
 
-            _waitsGrid.Columns.Add("WaitType", "Wait Type");
+            // Rows tall enough for a bar under the figure, which is drawn along the bottom of the cell
+            // with the text at the top - see WaitsGrid_CellPainting.
+            _waitsGrid.RowTemplate.Height = _waitsGrid.Font.Height + 14;
+
+            _waitsGrid.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "WaitType",
+                HeaderText = "Wait Type",
+                DefaultCellStyle = { Alignment = DataGridViewContentAlignment.TopLeft }
+            });
             AddNumberColumn(_waitsGrid, "WaitTimeMs", "Wait Time (ms)", typeof(long), "N0");
             AddNumberColumn(_waitsGrid, "WaitCount", "Wait Count", typeof(long), "N0");
             AddNumberColumn(_waitsGrid, "AverageWaitMs", "Avg Wait (ms)", typeof(double), "N1");
@@ -2093,10 +2103,12 @@ namespace DBADashGUI.QueryPlans
                 HeaderText = "Help",
                 Text = "Help",
                 UseColumnTextForLinkValue = true,
-                ToolTipText = "What this wait type means (SQLskills)"
+                ToolTipText = "What this wait type means (SQLskills)",
+                DefaultCellStyle = { Alignment = DataGridViewContentAlignment.TopLeft }
             });
 
             var total = statement.WaitStats.Sum(w => w.WaitTimeMs);
+            _longestWaitMs = statement.WaitStats.Count == 0 ? 0 : statement.WaitStats.Max(w => w.WaitTimeMs);
 
             foreach (var wait in statement.WaitStats)
             {
@@ -2116,6 +2128,30 @@ namespace DBADashGUI.QueryPlans
             _waitsTab.ToolTipText = total == 0
                 ? string.Empty
                 : total.ToString("N0", CultureInfo.InvariantCulture) + " ms waiting in total.";
+        }
+
+        // The largest wait time of the statement shown, which a wait's bar is measured against so the
+        // one the query spent longest on has the full bar.
+        private long _longestWaitMs;
+
+        /// <summary>
+        /// A bar under Wait Time, against the longest wait, and under % of Wait Time, at its share of
+        /// all of them.  The bar is read from the row's own cells, so it stays with its row when the
+        /// list is sorted.
+        /// </summary>
+        private void WaitsGrid_CellPainting(object sender, DataGridViewCellPaintingEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.ColumnIndex < 0) return;
+
+            switch (_waitsGrid.Columns[e.ColumnIndex].Name)
+            {
+                case "WaitTimeMs":
+                    PlanGridBars.Paint(e, PlanGridBars.Share(e.Value, _longestWaitMs));
+                    break;
+                case "Share":
+                    PlanGridBars.Paint(e, PlanGridBars.Share(e.Value, 1));
+                    break;
+            }
         }
 
         private void WaitsGrid_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -2153,7 +2189,8 @@ namespace DBADashGUI.QueryPlans
                 Name = name,
                 HeaderText = header,
                 ValueType = valueType,
-                DefaultCellStyle = { Format = format, Alignment = DataGridViewContentAlignment.MiddleRight }
+                MinimumWidth = 110,
+                DefaultCellStyle = { Format = format, Alignment = DataGridViewContentAlignment.TopRight }
             });
         }
 
