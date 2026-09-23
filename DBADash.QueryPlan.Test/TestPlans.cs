@@ -28,6 +28,12 @@ namespace DBADash.QueryPlan.Test
         /// </summary>
         public const string Expressions = "Expressions";
 
+        /// <summary>
+        /// A predicate on the output of a Concatenation, whose defined value is columns from each
+        /// input rather than an expression - the shape a Merge Interval's range seek is fed by.
+        /// </summary>
+        public const string Concatenation = "Concatenation";
+
         public static string Xml(string name)
         {
             var assembly = Assembly.GetExecutingAssembly();

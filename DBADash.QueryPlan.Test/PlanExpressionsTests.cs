@@ -229,6 +229,38 @@ namespace DBADash.QueryPlan.Test
         }
 
         [TestMethod]
+        public void AConcatenationsOutputColumn_IsAnExpressionMadeOfItsInputs()
+        {
+            var statement = TestPlans.Statement(TestPlans.Concatenation);
+
+            var concatenated = statement.ExpressionNamed("Expr1041");
+            Assert.IsNotNull(concatenated, "Showplan gives the concatenated column no expression, but it still has a meaning.");
+            Assert.AreEqual("Concatenation of [Expr1036], [Expr1039]", concatenated.Definition);
+            Assert.AreEqual(1, TestPlans.Operator(statement, 1).DefinedExpressions.Count);
+
+            // Written out down to what the inputs supply.
+            Assert.AreEqual("Concatenation of (NULL), ([@p])", concatenated.Expanded);
+
+            // So a predicate on it lists it, and what it is made of.
+            var predicate = TestPlans.Operator(statement, 0).Predicate;
+            CollectionAssert.AreEqual(
+                new[] { "Expr1041" },
+                PlanScripts.ExpressionsIn(statement, predicate).Select(e => e.Name).ToArray());
+        }
+
+        [TestMethod]
+        public void ExpressionsIn_ListsEachValueTheTextRefersToOnce()
+        {
+            var statement = TestPlans.Statement(TestPlans.Expressions);
+
+            var used = PlanScripts.ExpressionsIn(statement, "[Expr1002] > (10) OR [Expr1002] < (0) OR Expr1001 IS NULL");
+
+            CollectionAssert.AreEqual(new[] { "Expr1002", "Expr1001" }, used.Select(e => e.Name).ToArray());
+            Assert.AreEqual(0, PlanScripts.ExpressionsIn(statement, "[Sales].[dbo].[Orders].[Total]>(100)").Count);
+            Assert.AreEqual(0, PlanScripts.ExpressionsIn(null, "[Expr1002] > (10)").Count);
+        }
+
+        [TestMethod]
         public void OneExpressionWrittenOut_SaysWhereItComesFromAndWhereItGoes()
         {
             var statement = TestPlans.Statement(TestPlans.Expressions);

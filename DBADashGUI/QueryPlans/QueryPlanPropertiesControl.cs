@@ -103,6 +103,12 @@ namespace DBADashGUI.QueryPlans
             /// </summary>
             public bool AlwaysLink { get; init; }
 
+            /// <summary>
+            /// <see cref="FullText"/> already says what the expressions in it are, so the notes the
+            /// viewer adds beneath a value are left off.
+            /// </summary>
+            public bool NotesIncluded { get; init; }
+
             /// <summary>More than the row's height shows - set each time the rows are sized.</summary>
             public bool Clipped { get; set; }
 
@@ -294,6 +300,11 @@ namespace DBADashGUI.QueryPlans
                     AlwaysLink = property.IsExpression
                 };
 
+                if (property.IsExpression && ShowsExpressionValues(property.Name))
+                {
+                    AddExpressionValues(property, depth + 1);
+                }
+
                 // A heading with no value of its own carries the emphasis instead, so the groups are
                 // findable when scrolling a long list.
                 if (!property.HasChildren) continue;
@@ -302,6 +313,56 @@ namespace DBADashGUI.QueryPlans
 
                 Add(property.Children, depth + 1);
             }
+        }
+
+        /// <summary>
+        /// The most values listed under one predicate before the rest are left to the viewer, which
+        /// lists them all.  A generated predicate can refer to dozens, and a grid that lists every one
+        /// pushes the operator's other properties off the panel.
+        /// </summary>
+        private const int MaxInlineExpressionValues = 8;
+
+        /// <summary>
+        /// The properties whose Expr names are listed under them.  A predicate reading
+        /// [Expr1014] IS NOT NULL says nothing until the value is beside it; the other expression
+        /// properties are definitions or lists of columns, which read fine without.
+        /// </summary>
+        private static bool ShowsExpressionValues(string name) =>
+            name is "Predicate" or "Seek Predicates";
+
+        /// <summary>
+        /// Under a predicate, the plan's own values it refers to - the same ones the viewer writes out
+        /// beneath it (see <see cref="PlanScripts.ExpressionsUsedIn"/>) - one row each, so the
+        /// predicate reads in full without a click.
+        /// </summary>
+        private void AddExpressionValues(PlanProperty property, int depth)
+        {
+            var used = PlanScripts.ExpressionsIn(_statement, property.Value);
+
+            foreach (var expression in used.Take(MaxInlineExpressionValues))
+            {
+                var row = _grid.Rows.Add(new string(' ', depth * 4) + expression.Name, expression.DefinitionOneLine);
+                _grid.Rows[row].Tag = new RowInfo
+                {
+                    Title = expression.DisplayName,
+                    FullText = PlanScripts.Expression(expression),
+                    NotesIncluded = true
+                };
+            }
+
+            if (used.Count <= MaxInlineExpressionValues) return;
+
+            // The rest are in the viewer, which opens on the predicate with every value under it.
+            var more = _grid.Rows.Add(
+                new string(' ', depth * 4) + "...",
+                (used.Count - MaxInlineExpressionValues).ToString(CultureInfo.CurrentCulture) + " more - click to see all");
+
+            _grid.Rows[more].Tag = new RowInfo
+            {
+                Title = ViewerTitle(property.Name),
+                FullText = property.ReadableValue,
+                AlwaysLink = true
+            };
         }
 
         /// <summary>The viewer's title: the property, and the operator it belongs to.</summary>
@@ -406,7 +467,7 @@ namespace DBADashGUI.QueryPlans
         /// </summary>
         private void ShowFull(RowInfo info) =>
             CommonShared.ShowCodeViewer(
-                info.FullText + PlanScripts.ExpressionsUsedIn(_statement, info.FullText),
+                info.NotesIncluded ? info.FullText : info.FullText + PlanScripts.ExpressionsUsedIn(_statement, info.FullText),
                 info.Title,
                 CodeEditor.CodeEditorModes.SQL);
 

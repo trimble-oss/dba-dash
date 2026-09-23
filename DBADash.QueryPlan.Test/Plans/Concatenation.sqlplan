@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-16"?>
+<ShowPlanXML xmlns="http://schemas.microsoft.com/sqlserver/2004/07/showplan" Version="1.564" Build="16.0.4175.1">
+  <BatchSequence>
+    <Batch>
+      <Statements>
+        <StmtSimple StatementCompId="1" StatementEstRows="2" StatementId="1" StatementOptmLevel="FULL" StatementSubTreeCost="0.01" StatementText="SELECT 1 WHERE @p IS NOT NULL OR NULL IS NOT NULL" StatementType="SELECT" CardinalityEstimationModelVersion="160">
+          <QueryPlan CachedPlanSize="16" CompileTime="1" CompileCPU="1" CompileMemory="100">
+            <RelOp AvgRowSize="11" EstimateCPU="0" EstimateIO="0" EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row" EstimateRows="2" LogicalOp="Filter" NodeId="0" Parallel="false" PhysicalOp="Filter" EstimatedTotalSubtreeCost="0.01">
+              <OutputList>
+                <ColumnReference Column="Expr1041" />
+              </OutputList>
+              <Filter StartupExpression="false">
+                <RelOp AvgRowSize="11" EstimateCPU="0" EstimateIO="0" EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row" EstimateRows="2" LogicalOp="Concatenation" NodeId="1" Parallel="false" PhysicalOp="Concatenation" EstimatedTotalSubtreeCost="0">
+                  <OutputList>
+                    <ColumnReference Column="Expr1041" />
+                  </OutputList>
+                  <Concat>
+                    <DefinedValues>
+                      <DefinedValue>
+                        <ColumnReference Column="Expr1041" />
+                        <ColumnReference Column="Expr1036" />
+                        <ColumnReference Column="Expr1039" />
+                      </DefinedValue>
+                    </DefinedValues>
+                    <RelOp AvgRowSize="11" EstimateCPU="0" EstimateIO="0" EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row" EstimateRows="1" LogicalOp="Compute Scalar" NodeId="2" Parallel="false" PhysicalOp="Compute Scalar" EstimatedTotalSubtreeCost="0">
+                      <OutputList>
+                        <ColumnReference Column="Expr1036" />
+                      </OutputList>
+                      <ComputeScalar>
+                        <DefinedValues>
+                          <DefinedValue>
+                            <ColumnReference Column="Expr1036" />
+                            <ScalarOperator ScalarString="NULL">
+                              <Const ConstValue="NULL" />
+                            </ScalarOperator>
+                          </DefinedValue>
+                        </DefinedValues>
+                        <RelOp AvgRowSize="0" EstimateCPU="0" EstimateIO="0" EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row" EstimateRows="1" LogicalOp="Constant Scan" NodeId="3" Parallel="false" PhysicalOp="Constant Scan" EstimatedTotalSubtreeCost="0">
+                          <OutputList />
+                          <ConstantScan />
+                        </RelOp>
+                      </ComputeScalar>
+                    </RelOp>
+                    <RelOp AvgRowSize="11" EstimateCPU="0" EstimateIO="0" EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row" EstimateRows="1" LogicalOp="Compute Scalar" NodeId="4" Parallel="false" PhysicalOp="Compute Scalar" EstimatedTotalSubtreeCost="0">
+                      <OutputList>
+                        <ColumnReference Column="Expr1039" />
+                      </OutputList>
+                      <ComputeScalar>
+                        <DefinedValues>
+                          <DefinedValue>
+                            <ColumnReference Column="Expr1039" />
+                            <ScalarOperator ScalarString="[@p]">
+                              <Identifier>
+                                <ColumnReference Column="@p" />
+                              </Identifier>
+                            </ScalarOperator>
+                          </DefinedValue>
+                        </DefinedValues>
+                        <RelOp AvgRowSize="0" EstimateCPU="0" EstimateIO="0" EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row" EstimateRows="1" LogicalOp="Constant Scan" NodeId="5" Parallel="false" PhysicalOp="Constant Scan" EstimatedTotalSubtreeCost="0">
+                          <OutputList />
+                          <ConstantScan />
+                        </RelOp>
+                      </ComputeScalar>
+                    </RelOp>
+                  </Concat>
+                </RelOp>
+                <Predicate>
+                  <ScalarOperator ScalarString="[Expr1041] IS NOT NULL">
+                    <Compare CompareOp="IS NOT">
+                      <ScalarOperator>
+                        <Identifier>
+                          <ColumnReference Column="Expr1041" />
+                        </Identifier>
+                      </ScalarOperator>
+                      <ScalarOperator>
+                        <Const ConstValue="NULL" />
+                      </ScalarOperator>
+                    </Compare>
+                  </ScalarOperator>
+                </Predicate>
+              </Filter>
+            </RelOp>
+          </QueryPlan>
+        </StmtSimple>
+      </Statements>
+    </Batch>
+  </BatchSequence>
+</ShowPlanXML>
