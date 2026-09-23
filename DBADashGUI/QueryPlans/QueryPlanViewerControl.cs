@@ -511,11 +511,7 @@ namespace DBADashGUI.QueryPlans
                 ToolTipText = "Open query plans (.sqlplan) from disk, each on a tab of its own."
             });
             toolbar.Items.Add(BuildCopyMenu());
-            toolbar.Items.Add(new ToolStripButton("Save As...", Properties.Resources.Save_16x, (_, _) => SaveAs())
-            {
-                DisplayStyle = ToolStripItemDisplayStyle.Image,
-                ToolTipText = "Save the plan XML or a picture of the plan."
-            });
+            toolbar.Items.Add(BuildSaveMenu());
 
             // Keeps its caption where the rest of the toolbar is icons only: the icon can say the
             // plan leaves for another application, but not which one.
@@ -2260,14 +2256,62 @@ namespace DBADashGUI.QueryPlans
             }
         }
 
-        private void SaveAs()
+        /// <summary>
+        /// Save As, in three: the plan as it was opened, the statement being looked at as a plan of
+        /// its own, and a picture.  A drop down rather than one dialog with a file type list because
+        /// the statement is a different thing to save, not a different format of the same thing - and
+        /// a file type list gives no room to say so.
+        /// </summary>
+        private ToolStripDropDownButton BuildSaveMenu()
         {
+            var menu = new ToolStripDropDownButton("Save As", Properties.Resources.Save_16x)
+            {
+                DisplayStyle = ToolStripItemDisplayStyle.Image,
+                ToolTipText = "Save the plan, the selected statement, or a picture of the plan."
+            };
+
+            menu.DropDownItems.Add(new ToolStripMenuItem("Plan XML...", null, (_, _) => SavePlanXml(statementOnly: false))
+            {
+                ToolTipText = "The whole plan, every statement, as a .sqlplan file."
+            });
+
+            var statement = new ToolStripMenuItem("Statement Plan XML...", null, (_, _) => SavePlanXml(statementOnly: true))
+            {
+                ToolTipText = "Only the statement selected in the plan, as a .sqlplan file of its own."
+            };
+            menu.DropDownItems.Add(statement);
+
+            menu.DropDownItems.Add(new ToolStripMenuItem("Image...", null, (_, _) => SaveImage())
+            {
+                ToolTipText = "A picture of the whole plan at full size, as a PNG."
+            });
+
+            // Nothing to offer until there is a statement with a plan of its own to take out.
+            menu.DropDownOpening += (_, _) => statement.Enabled = !string.IsNullOrEmpty(_current?.Xml);
+
+            return menu;
+        }
+
+        private string SuggestedFileName(bool statementOnly)
+        {
+            var name = Path.GetFileNameWithoutExtension(_fileName) is { Length: > 0 } file ? file : "QueryPlan";
+            if (!statementOnly) return name;
+
+            var number = _plan.Statements.ToList().IndexOf(_current) + 1;
+            return name + " - statement " + number.ToString(CultureInfo.InvariantCulture);
+        }
+
+        /// <summary>
+        /// Save the plan XML: everything that was opened, or just the statement shown.
+        /// </summary>
+        private void SavePlanXml(bool statementOnly)
+        {
+            if (statementOnly && string.IsNullOrEmpty(_current?.Xml)) return;
+
             using var dialog = new SaveFileDialog
             {
-                Filter = "Query plan (*.sqlplan)|*.sqlplan|PNG image (*.png)|*.png",
-                FileName = Path.GetFileNameWithoutExtension(_fileName) is { Length: > 0 } name
-                    ? name
-                    : "QueryPlan",
+                Filter = "Query plan (*.sqlplan)|*.sqlplan",
+                FileName = SuggestedFileName(statementOnly),
                 AddExtension = true
             };
 
@@ -2275,10 +2319,10 @@ namespace DBADashGUI.QueryPlans
 
             try
             {
-                if (dialog.FilterIndex == 2)
+                string xml;
+                if (statementOnly)
                 {
-                    using var bitmap = _graphControl.RenderWholePlanToBitmap();
-                    bitmap?.Save(dialog.FileName, System.Drawing.Imaging.ImageFormat.Png);
+                    xml = PlanParser.ExtractStatementXml(_sourceXml, _current);
                 }
                 else
                 {
@@ -2286,13 +2330,35 @@ namespace DBADashGUI.QueryPlans
                     // extended events envelope is saved without it - see
                     // <see cref="Common.WriteQueryPlanTempFile"/>.  Whatever cannot be lifted out is
                     // saved as it stands rather than refused, since the user asked for this file.
-                    var xml = PlanParser.TryExtractShowPlanXml(_sourceXml, out var showPlanXml)
+                    xml = PlanParser.TryExtractShowPlanXml(_sourceXml, out var showPlanXml)
                         ? showPlanXml
                         : _sourceXml ?? string.Empty;
-
-                    File.WriteAllText(dialog.FileName, xml, Encoding.Unicode);
                 }
 
+                File.WriteAllText(dialog.FileName, xml, Encoding.Unicode);
+                SetSummary("Saved " + dialog.FileName);
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex, "Save failed");
+            }
+        }
+
+        private void SaveImage()
+        {
+            using var dialog = new SaveFileDialog
+            {
+                Filter = "PNG image (*.png)|*.png",
+                FileName = SuggestedFileName(statementOnly: false),
+                AddExtension = true
+            };
+
+            if (dialog.ShowDialog(this) != DialogResult.OK) return;
+
+            try
+            {
+                using var bitmap = _graphControl.RenderWholePlanToBitmap();
+                bitmap?.Save(dialog.FileName, System.Drawing.Imaging.ImageFormat.Png);
                 SetSummary("Saved " + dialog.FileName);
             }
             catch (Exception ex)

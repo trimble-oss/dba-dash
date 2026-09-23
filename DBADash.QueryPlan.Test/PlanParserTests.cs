@@ -589,6 +589,81 @@ namespace DBADash.QueryPlan.Test
         }
 
         [TestMethod]
+        public void ExtractStatementXml_HoldsOnlyThatStatement_AsAPlanInItsOwnRight()
+        {
+            var source = TestPlans.Xml(TestPlans.Batch);
+            var plan = PlanParser.Parse(source);
+            Assert.IsTrue(plan.Statements.Count > 1, "The batch sample needs several statements for this test.");
+
+            foreach (var statement in plan.Statements)
+            {
+                var xml = PlanParser.ExtractStatementXml(source, statement);
+                var reparsed = PlanParser.Parse(xml);
+
+                Assert.AreEqual(statement.StatementText, reparsed.Statements[0].StatementText);
+                Assert.AreEqual(statement.StatementSubTreeCost, reparsed.Statements[0].StatementSubTreeCost);
+            }
+        }
+
+        [TestMethod]
+        public void ExtractStatementXml_KeepsTheDocumentsVersionAndNamespace()
+        {
+            var source = TestPlans.Xml(TestPlans.KeyLookupSeek);
+            var statement = PlanParser.Parse(source).Statements[0];
+
+            var xml = PlanParser.ExtractStatementXml(source, statement);
+
+            StringAssert.StartsWith(xml, "<ShowPlanXML");
+            StringAssert.Contains(xml, "schemas.microsoft.com/sqlserver/2004/07/showplan");
+
+            var original = PlanParser.Parse(source);
+            var reparsed = PlanParser.Parse(xml);
+
+            Assert.AreEqual(original.Version, reparsed.Version);
+            Assert.AreEqual(original.Build, reparsed.Build);
+            Assert.AreEqual(statement.StatementText, reparsed.Statements[0].StatementText);
+            Assert.AreEqual(statement.Operators.Count(), reparsed.Statements[0].Operators.Count());
+        }
+
+        [TestMethod]
+        public void ExtractStatementXml_OfOneStatementOfABatch_LeavesTheOthersOut()
+        {
+            var source = TestPlans.Xml(TestPlans.Batch);
+            var plan = PlanParser.Parse(source);
+            var last = plan.Statements[^1];
+
+            var reparsed = PlanParser.Parse(PlanParser.ExtractStatementXml(source, last));
+
+            Assert.IsTrue(reparsed.Statements.Count < plan.Statements.Count);
+            Assert.AreEqual(last.StatementText, reparsed.Statements[0].StatementText);
+        }
+
+        [TestMethod]
+        public void ExtractStatementXml_WorksWhenThePlanArrivedInAnEnvelope()
+        {
+            var bare = TestPlans.Xml(TestPlans.KeyLookupSeek);
+            var wrapped = "<event name=\"x\"><data name=\"showplan_xml\"><value>" +
+                          bare.Replace("<?xml version=\"1.0\" encoding=\"utf-8\"?>", string.Empty) +
+                          "</value></data></event>";
+
+            var statement = PlanParser.Parse(wrapped).Statements[0];
+            var xml = PlanParser.ExtractStatementXml(wrapped, statement);
+
+            StringAssert.StartsWith(xml, "<ShowPlanXML");
+            Assert.AreEqual(1, PlanParser.Parse(xml).Statements.Count);
+        }
+
+        [TestMethod]
+        public void ExtractStatementXml_WithNoReadableSource_StillBuildsADocument()
+        {
+            var statement = PlanParser.Parse(TestPlans.Xml(TestPlans.KeyLookupSeek)).Statements[0];
+
+            var reparsed = PlanParser.Parse(PlanParser.ExtractStatementXml(null, statement));
+
+            Assert.AreEqual(statement.StatementText, reparsed.Statements[0].StatementText);
+        }
+
+        [TestMethod]
         public void LooksLikeExecutionPlan_AnswersWithoutParsing()
         {
             Assert.IsTrue(PlanParser.LooksLikeExecutionPlan(TestPlans.Xml(TestPlans.Batch)));

@@ -190,6 +190,49 @@ namespace DBADash.QueryPlan
         }
 
         /// <summary>
+        /// A showplan document holding only <paramref name="statement"/>: the source's own
+        /// ShowPlanXML element, version and build included, around just that statement.  For saving
+        /// the one statement of a large batch that is being looked at as a plan of its own.
+        ///
+        /// The statement is taken from <see cref="PlanStatement.Xml"/>, which is what it was parsed
+        /// from, so this holds exactly what the viewer shows.  A statement that contains others - a
+        /// conditional, holding the statements of its branches - keeps them, since they are part of
+        /// it.  When the source cannot be read the document is built without its version and build
+        /// rather than refused, since the statement itself is in hand.
+        /// </summary>
+        /// <exception cref="ArgumentException">The statement was not parsed from a document, so has no XML.</exception>
+        public static string ExtractStatementXml(string? sourceXml, PlanStatement statement)
+        {
+            ArgumentNullException.ThrowIfNull(statement);
+
+            if (string.IsNullOrEmpty(statement.Xml))
+            {
+                throw new ArgumentException("The statement has no XML of its own.", nameof(statement));
+            }
+
+            var element = XElement.Parse(statement.Xml);
+
+            XElement? source = null;
+            if (TryExtractShowPlanXml(sourceXml, out var showPlanXml) && showPlanXml is not null)
+            {
+                source = XDocument.Parse(StripLeadingByteOrderMark(showPlanXml)).Root;
+            }
+
+            // Wrappers in the namespace the statement itself is in, so the document is consistent
+            // whether it arrived with the showplan namespace declared or without.
+            var ns = element.Name.Namespace;
+
+            var root = new XElement(
+                ns + "ShowPlanXML",
+                source?.Attributes().Where(a => a.IsNamespaceDeclaration || a.Name.LocalName is "Version" or "Build") ?? [],
+                new XElement(ns + "BatchSequence",
+                    new XElement(ns + "Batch",
+                        new XElement(ns + "Statements", element))));
+
+            return root.ToString();
+        }
+
+        /// <summary>
         /// A cheap check that a string looks like a plan, for deciding whether to offer the viewer at
         /// all.  Looks at the text rather than parsing, because this is asked about grid cells and
         /// clipboard contents where the answer is usually no.
