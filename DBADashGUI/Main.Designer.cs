@@ -646,7 +646,7 @@ namespace DBADashGUI
             // 
             // openDeadlockxdlToolStripMenuItem
             // 
-            openDeadlockxdlToolStripMenuItem.Image = Properties.Resources.FolderOpened_16x;
+            openDeadlockxdlToolStripMenuItem.Image = Properties.Resources.Deadlock_16x;
             openDeadlockxdlToolStripMenuItem.Name = "openDeadlockxdlToolStripMenuItem";
             openDeadlockxdlToolStripMenuItem.Size = new System.Drawing.Size(280, 26);
             openDeadlockxdlToolStripMenuItem.Text = "Open Deadlock Graph | *.xdl";
@@ -655,7 +655,7 @@ namespace DBADashGUI
             //
             // openQueryPlanToolStripMenuItem
             //
-            openQueryPlanToolStripMenuItem.Image = Properties.Resources.FolderOpened_16x;
+            openQueryPlanToolStripMenuItem.Image = Properties.Resources.PlanViewer_16x;
             openQueryPlanToolStripMenuItem.Name = "openQueryPlanToolStripMenuItem";
             openQueryPlanToolStripMenuItem.Size = new System.Drawing.Size(280, 26);
             openQueryPlanToolStripMenuItem.Text = "Open Query Plan | *.sqlplan";

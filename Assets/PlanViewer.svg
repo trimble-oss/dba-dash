@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <style>
+      .canvas{fill: none; opacity: 0;}
+      .trimble-blue{fill: #0063a3;}
+      .trimble-grey-stroke{fill: none; stroke: #5b6670; stroke-width: 5;}
+    </style>
+  </defs>
+  <title>PlanViewer</title>
+  <g id="canvas" class="canvas">
+    <path class="canvas" d="M64,64H0V0H64Z" />
+  </g>
+  <g id="level-1">
+    <!--
+      An execution plan is a tree of operators, read from the root on the left out to the leaves on
+      the right - the layout the viewer itself draws.  So the icon is that tree at its smallest: the
+      root operator, and two operators feeding it.
+
+      The operators are blue, like the live session in the deadlock icon.  The connector is a mid
+      grey rather than the near black of the deadlock icon: the menus and toolbars this is drawn on
+      can be light or dark, and near black disappears on a dark one.
+
+      The connector is a bracket: a stub out of the root, a spine, and a stub into each child.  All
+      the strokes are 5 wide with butt ends.  The spine runs half a stroke past the centre line of
+      each child so that its ends are flush with the outer edge of the stubs and the corners come
+      out square.  The operators are drawn after the connector so the stub ends are hidden inside
+      them.
+    -->
+    <path class="trimble-grey-stroke" d="M24,32H34M34,9.5V54.5M34,12H40M34,52H40" />
+    <rect class="trimble-blue" x="3" y="20" width="24" height="24" rx="4" />
+    <rect class="trimble-blue" x="38" y="2" width="24" height="20" rx="4" />
+    <rect class="trimble-blue" x="38" y="42" width="24" height="20" rx="4" />
+  </g>
+</svg>

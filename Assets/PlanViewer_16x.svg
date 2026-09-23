@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+  <defs>
+    <style>
+      .canvas{fill: none; opacity: 0;}
+      .trimble-blue{fill: #0063a3;}
+      .trimble-grey-stroke{fill: none; stroke: #5b6670; stroke-width: 2;}
+    </style>
+  </defs>
+  <title>IconLightPlanViewer</title>
+  <g id="canvas" class="canvas">
+    <path class="canvas" d="M16,16H0V0H16Z" />
+  </g>
+  <g id="level-1">
+    <!--
+      The 16 pixel form of Assets/PlanViewer.svg: the root operator on the left, and two operators
+      feeding it.
+
+      The connector is a mid grey rather than the near black of the deadlock icon.  The menus and
+      toolbars this is drawn on can be light or dark, and near black disappears on a dark one.
+
+      Every edge sits on a pixel boundary.  The operators are 6 pixels high and the connector is 2
+      wide, so a stroke centred on a whole number covers exactly two pixel rows or columns and
+      nothing blurs.  The operators are squares with a 1 pixel corner radius, which at this size
+      only takes the point off the corners without leaving a grey fringe.
+
+      The spine runs a pixel past the centre of each child so the outer corners of the bracket are
+      filled.  The connector is drawn first and the operators over it, so the ends of the strokes
+      are hidden.
+    -->
+    <path class="trimble-grey-stroke" d="M6,8H8M8,2V14M8,3H10M8,13H10" />
+    <rect class="trimble-blue" x="0" y="5" width="6" height="6" rx="1" />
+    <rect class="trimble-blue" x="10" y="0" width="6" height="6" rx="1" />
+    <rect class="trimble-blue" x="10" y="10" width="6" height="6" rx="1" />
+  </g>
+</svg>
