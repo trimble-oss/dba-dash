@@ -53,6 +53,27 @@ namespace DBADashGUI.Deadlocks
         private readonly DBADashDataGridView _processGrid = NewGrid();
         private readonly DBADashDataGridView _resourceGrid = NewGrid();
 
+        /// <summary>
+        /// The graph beside a properties panel: selecting a node fills the panel with its detail - the
+        /// full execution stack for a process, the owners and waiters for a resource - which is more
+        /// than the node or the status bar has room for.  Collapsed until a node is chosen, so the
+        /// graph opens with the whole width to itself.
+        /// </summary>
+        private readonly SplitContainer _graphSplit = new()
+        {
+            Dock = DockStyle.Fill,
+            Orientation = Orientation.Vertical,
+            Panel2Collapsed = true
+        };
+
+        private readonly PropertyGrid _nodeProperties = new()
+        {
+            Dock = DockStyle.Fill,
+            ToolbarVisible = false,
+            PropertySort = PropertySort.Categorized,
+            HelpVisible = true
+        };
+
         /// <summary>Its items are rebuilt each time it opens - see <see cref="BuildOpenWithMenu"/>.</summary>
         private ToolStripDropDownButton _openWith;
 
@@ -101,6 +122,9 @@ namespace DBADashGUI.Deadlocks
         /// <summary>Set once the plans panel has been given a starting height, so a drag isn't undone.</summary>
         private bool _splitterPlaced;
 
+        /// <summary>Set once the node properties panel has been given a starting width, so a drag isn't undone.</summary>
+        private bool _nodePropertiesPlaced;
+
         // The two link columns on the process grid, and the hidden columns feeding them.
         private const string PlansColumn = "Plans";
 
@@ -110,9 +134,14 @@ namespace DBADashGUI.Deadlocks
         private const string ModuleObjectColumn = "ModuleObject";
         private const string PlanDatabaseColumn = "PlanDatabase";
 
+        // The process's position in graph.Processes, carried on the row so a row can be matched back
+        // to its DeadlockProcess for the properties view - SPID/ECID would collide across parallel
+        // workers, and the grid is sortable so a row index is no use.
+        private const string ProcessIndexColumn = "ProcessIndex";
+
         private static readonly string[] HiddenProcessColumns =
         {
-            SqlHandleColumn, StatementStartColumn, ModuleObjectColumn, PlanDatabaseColumn
+            SqlHandleColumn, StatementStartColumn, ModuleObjectColumn, PlanDatabaseColumn, ProcessIndexColumn
         };
 
         /// <summary>
@@ -167,7 +196,10 @@ namespace DBADashGUI.Deadlocks
             _processesTab = NewPage("Processes", _processSplit);
             _resourcesTab = NewPage("Resources", _resourceGrid);
 
-            _tabs.TabPages.Add(NewPage("Graph", _graphControl));
+            _graphSplit.Panel1.Controls.Add(_graphControl);
+            _graphSplit.Panel2.Controls.Add(_nodeProperties);
+
+            _tabs.TabPages.Add(NewPage("Graph", _graphSplit));
             _tabs.TabPages.Add(_findingsTab);
             _tabs.TabPages.Add(_processesTab);
             _tabs.TabPages.Add(_resourcesTab);
@@ -378,6 +410,10 @@ namespace DBADashGUI.Deadlocks
             // The plans panel belongs to a statement in the deadlock being replaced, so it goes away with it.
             _processSplit.Panel2Collapsed = true;
 
+            // The node properties belong to a node in the deadlock being replaced, so they go too.
+            _nodeProperties.SelectedObject = null;
+            _graphSplit.Panel2Collapsed = true;
+
             _processGrid.DataSource = BuildProcessTable(graph, _canLookup);
             _resourceGrid.DataSource = BuildResourceTable(graph);
             _xmlText.Text = graph.Xml;
@@ -456,10 +492,13 @@ namespace DBADashGUI.Deadlocks
             table.Columns.Add(StatementStartColumn, typeof(int));
             table.Columns.Add(ModuleObjectColumn, typeof(string));
             table.Columns.Add(PlanDatabaseColumn, typeof(string));
+            table.Columns.Add(ProcessIndexColumn, typeof(int));
 
-            foreach (var p in graph.Processes)
+            for (var processIndex = 0; processIndex < graph.Processes.Count; processIndex++)
             {
+                var p = graph.Processes[processIndex];
                 var row = table.NewRow();
+                row[ProcessIndexColumn] = processIndex;
                 row["Victim"] = p.IsVictim;
                 row["SPID"] = (object)p.Spid ?? DBNull.Value;
                 row["Ecid"] = (object)p.Ecid ?? DBNull.Value;
@@ -745,7 +784,14 @@ namespace DBADashGUI.Deadlocks
         private void ProcessGrid_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0 || e.ColumnIndex < 0) return;
-            if (_processGrid.Columns[e.ColumnIndex].Name != "Statement") return;
+
+            if (_processGrid.Columns[e.ColumnIndex].Name != "Statement")
+            {
+                // Double clicking anywhere else on the row opens its full detail, the execution stack
+                // included - the grid shows only the innermost frame.
+                ShowProcessProperties(ProcessOf(_processGrid.Rows[e.RowIndex]));
+                return;
+            }
 
             var sql = _processGrid.Rows[e.RowIndex].Cells[e.ColumnIndex].Value as string;
             if (string.IsNullOrWhiteSpace(sql)) return;
@@ -753,6 +799,33 @@ namespace DBADashGUI.Deadlocks
             using var frm = new CodeEditorForm { Code = sql, Syntax = CodeEditor.CodeEditorModes.SQL };
             frm.EditEnabled = false;
             frm.ShowDialog();
+        }
+
+        /// <summary>
+        /// The process a grid row was built from, matched by the hidden index column.  Null when the
+        /// row carries no index - a header row, or a grid bound to something else.
+        /// </summary>
+        private DeadlockProcess ProcessOf(DataGridViewRow row)
+        {
+            if (row?.DataBoundItem is not DataRowView view) return null;
+            if (view.Row[ProcessIndexColumn] is not int index) return null;
+            return index >= 0 && index < _current.Processes.Count ? _current.Processes[index] : null;
+        }
+
+        /// <summary>
+        /// Opens the read-only property view of a process, which carries the fields and the full
+        /// execution stack the grid has no room for.
+        /// </summary>
+        private void ShowProcessProperties(DeadlockProcess process)
+        {
+            if (process is null) return;
+
+            using var frm = new PropertyGridDialog
+            {
+                Title = $"Process - {process.DisplayName}",
+                SelectedObject = new DeadlockProcessProperties(process)
+            };
+            frm.ShowDialog(this);
         }
 
         /// <summary>
@@ -779,7 +852,53 @@ namespace DBADashGUI.Deadlocks
                 SelectGridRow(_resourceGrid, FindResourceRow(resourceNode.Resource));
             }
 
+            ShowNodeProperties(node);
             _summary.Text = DescribeSelection(node) ?? _graphSummary;
+        }
+
+        /// <summary>
+        /// Fills the docked panel beside the graph with the selected node's detail, opening the panel
+        /// the first time there is something to show.  Clearing the selection leaves the last node's
+        /// properties in place rather than blanking the panel - the panel is closed with its own
+        /// splitter, not by clicking away from a node.
+        /// </summary>
+        private void ShowNodeProperties(DeadlockNode node)
+        {
+            object properties = node switch
+            {
+                DeadlockProcessNode processNode when processNode.Process is not null
+                    => new DeadlockProcessProperties(processNode.Process),
+                DeadlockResourceNode resourceNode when resourceNode.Resource is not null
+                    => new DeadlockResourceProperties(resourceNode.Resource),
+                _ => null
+            };
+
+            if (properties is null) return;
+
+            _nodeProperties.SelectedObject = properties;
+            ExpandNodePropertiesPanel();
+        }
+
+        /// <summary>
+        /// Opens the properties panel, giving it the right third on first use and leaving the splitter
+        /// alone afterwards so a position the user has dragged survives the next selection.
+        /// </summary>
+        private void ExpandNodePropertiesPanel()
+        {
+            if (!_graphSplit.Panel2Collapsed) return;
+
+            _graphSplit.Panel2Collapsed = false;
+            if (_nodePropertiesPlaced) return;
+
+            // SplitterDistance throws rather than clamping when it doesn't fit, so this only moves the
+            // splitter when there is genuinely room for both panels.
+            var distance = _graphSplit.Width * 2 / 3;
+            var maximum = _graphSplit.Width - _graphSplit.Panel2MinSize - _graphSplit.SplitterWidth;
+            if (distance >= _graphSplit.Panel1MinSize && distance <= maximum)
+            {
+                _graphSplit.SplitterDistance = distance;
+                _nodePropertiesPlaced = true;
+            }
         }
 
         /// <summary>
@@ -931,6 +1050,9 @@ namespace DBADashGUI.Deadlocks
 
             items.Add(new ToolStripMenuItem("Show in Processes Grid", Properties.Resources.DataTable_16x,
                 (_, _) => ShowInGrid(_processesTab, _processGrid, () => FindProcessRow(process))));
+
+            items.Add(new ToolStripMenuItem("Properties", Properties.Resources.Information_blue_6227_16x16,
+                (_, _) => RunAction("Properties", () => ShowProcessProperties(process))));
         }
 
         /// <summary>
