@@ -325,18 +325,7 @@ namespace DBADash.QueryPlan.Skia
             }
         }
 
-        private static string CategoryName(PlanOperatorCategory category) => category switch
-        {
-            PlanOperatorCategory.Root => "Statement",
-            PlanOperatorCategory.DataAccess => "Reading data",
-            PlanOperatorCategory.Join => "Joins",
-            PlanOperatorCategory.Transform => "Aggregating, sorting and shaping",
-            PlanOperatorCategory.Spool => "Spools",
-            PlanOperatorCategory.Parallelism => "Parallelism",
-            PlanOperatorCategory.DataModification => "Changing data",
-            PlanOperatorCategory.Compute => "Computing and checking",
-            _ => "Other"
-        };
+        private static string CategoryName(PlanOperatorCategory category) => PlanOperatorClassifier.CategoryName(category);
 
         /// <summary>
         /// The renderer's two tone recolouring as an SVG filter: the same matrix, taking how red a

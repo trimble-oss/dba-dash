@@ -504,6 +504,14 @@ namespace DBADashGUI.QueryPlans
 
             toolbar.Items.Add(new ToolStripSeparator());
             toolbar.Items.Add(BuildSettingsMenu());
+
+            // Captioned, unlike the other icons: a reader who does not know what a marker means is the
+            // reader least likely to guess which icon explains it.
+            toolbar.Items.Add(new ToolStripButton("Legend", Properties.Resources.LegendHS, (_, _) => ShowLegend())
+            {
+                DisplayStyle = ToolStripItemDisplayStyle.Image,
+                ToolTipText = "What the icons, markers, arrows and bars on the plan mean, and the keys and mouse actions (F1)."
+            });
             toolbar.Items.Add(new ToolStripSeparator());
             toolbar.Items.Add(new ToolStripButton("Open...", Properties.Resources.FolderOpened_16x, (_, _) => Common.OpenQueryPlanFile(FindForm()))
             {
@@ -1064,7 +1072,7 @@ namespace DBADashGUI.QueryPlans
         /// </summary>
         private ToolStripDropDownButton BuildSettingsMenu()
         {
-            var menu = new ToolStripDropDownButton("Settings") { ToolTipText = "Viewer and file association settings." };
+            var menu = new ToolStripDropDownButton("Settings") { ToolTipText = "Viewer and file association settings.", Image = Properties.Resources.SettingsOutline_16x, DisplayStyle = ToolStripItemDisplayStyle.Image };
 
             // For readers still learning the operators; those who know them can have the figures alone.
             var descriptions = _descriptionsItem = new ToolStripMenuItem("Show Operator Descriptions")
@@ -2461,7 +2469,15 @@ namespace DBADashGUI.QueryPlans
                 return true;
             }
 
+            if (keyData == Keys.F1)
+            {
+                ShowLegend();
+                return true;
+            }
+
             return base.ProcessCmdKey(ref msg, keyData);
         }
+
+        private void ShowLegend() => QueryPlanLegendForm.ShowLegend(FindForm());
     }
 }
