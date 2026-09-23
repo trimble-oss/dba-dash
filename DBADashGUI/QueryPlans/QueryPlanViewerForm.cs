@@ -2,7 +2,6 @@ using DBADash.QueryPlan.Model;
 using DBADashGUI.Controls;
 using DBADashGUI.Theme;
 using System;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
@@ -29,19 +28,7 @@ namespace DBADashGUI.QueryPlans
         {
             Text = "Query Plan";
 
-            // The application's own icon, taken from the executable rather than added as another
-            // copy in the resources.  It matters most when the viewer is standalone - a plan opened
-            // from Explorer should look like it came from DBA Dash - and a window with the default
-            // form icon looks like a dialog nobody meant to ship.
-            try
-            {
-                Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
-            }
-            catch (Exception ex)
-            {
-                // Not worth failing to open a plan over.
-                System.Diagnostics.Debug.WriteLine(ex);
-            }
+            Icon = Properties.Resources.PlanViewerIcon;
 
             Width = 1300;
             Height = 820;
