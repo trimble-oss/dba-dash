@@ -78,7 +78,9 @@ namespace DBADashAI.Services
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Could not record the query plan analysis for {signature}", signature);
+                // Strip line breaks so a crafted signature cannot forge additional log entries.
+                var sanitizedSignature = signature?.Replace("\r", string.Empty).Replace("\n", string.Empty);
+                _logger.LogWarning(ex, "Could not record the query plan analysis for {signature}", sanitizedSignature);
             }
         }
     }
