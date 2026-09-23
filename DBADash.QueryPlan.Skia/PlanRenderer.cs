@@ -21,7 +21,7 @@ namespace DBADash.QueryPlan.Skia
     /// Holds no framework types beyond Skia, and no state except the palette and style, so a host is
     /// a paint handler and nothing more.
     /// </summary>
-    public sealed class PlanRenderer : IDisposable
+    public sealed partial class PlanRenderer : IDisposable
     {
         private readonly PlanFonts _fonts;
         private readonly PlanRenderStyle _style;
@@ -264,14 +264,16 @@ namespace DBADash.QueryPlan.Skia
         /// How many operators the collapsed node is hiding, as a "+N" pill over the edge of the
         /// stack.  The tooltip has the exact number; this is for reading it off the plan.
         /// </summary>
-        private void DrawHiddenCount(SKCanvas canvas, PlanNode node, float fade)
+        private void DrawHiddenCount(SKCanvas canvas, PlanNode node, float fade) =>
+            DrawHiddenCount(canvas, ToSk(node.Bounds), node.HiddenDescendantCount, fade);
+
+        private void DrawHiddenCount(SKCanvas canvas, SKRect bounds, int hidden, float fade)
         {
-            var text = node.HiddenDescendantCount > 99 ? "99+" : "+" + node.HiddenDescendantCount;
+            var text = hidden > 99 ? "99+" : "+" + hidden;
             var font = _fonts.Metric;
 
             var width = font.MeasureText(text, (SKPaint?)null) + 10;
             var height = font.Size + 6;
-            var bounds = ToSk(node.Bounds);
 
             var pill = new SKRect(
                 bounds.Right + (StackStep * 2) - (width / 2),
@@ -317,19 +319,23 @@ namespace DBADash.QueryPlan.Skia
             using (var clip = new SKRoundRect(ToSk(node.Bounds), radius, radius))
             {
                 canvas.ClipRoundRect(clip, antialias: true);
-
-                _fill.Color = Faded(Palette.MetricBarTrack, fade);
-                canvas.DrawRect(bar, _fill);
-
-                if (fraction > 0)
-                {
-                    var filled = new SKRect(bar.Left, bar.Top, bar.Left + (float)(bar.Width * fraction), bar.Bottom);
-                    _fill.Color = Faded(Palette.MetricBarColour(fraction), fade);
-                    canvas.DrawRect(filled, _fill);
-                }
+                DrawBarFill(canvas, bar, fraction, fade);
             }
 
             canvas.Restore();
+        }
+
+        /// <summary>The track, and the share of it filled in the colour that share earns.</summary>
+        private void DrawBarFill(SKCanvas canvas, SKRect bar, double fraction, float fade)
+        {
+            _fill.Color = Faded(Palette.MetricBarTrack, fade);
+            canvas.DrawRect(bar, _fill);
+
+            if (fraction <= 0) return;
+
+            var filled = new SKRect(bar.Left, bar.Top, bar.Left + (float)(bar.Width * fraction), bar.Bottom);
+            _fill.Color = Faded(Palette.MetricBarColour(fraction), fade);
+            canvas.DrawRect(filled, _fill);
         }
 
         /// <summary>
@@ -338,10 +344,12 @@ namespace DBADash.QueryPlan.Skia
         /// The symbol is drawn under a canvas transform that maps its 24 unit grid onto the chip,
         /// rather than by scaling the path, so the cached paths stay immutable and shared.
         /// </summary>
-        private void DrawGlyph(SKCanvas canvas, PlanNode node, float fade)
+        private void DrawGlyph(SKCanvas canvas, PlanNode node, float fade) =>
+            DrawChip(canvas, node.Kind, node.Category, ToSk(node.IconBounds), fade);
+
+        private void DrawChip(SKCanvas canvas, PlanOperatorKind kind, PlanOperatorCategory category, SKRect chip, float fade)
         {
-            var chip = ToSk(node.IconBounds);
-            var svg = PlanOperatorIcons.SvgFor(node.Kind);
+            var svg = PlanOperatorIcons.SvgFor(kind);
 
             // A full colour SVG is the whole icon, with no chip behind it - see PlanIconStyle.
             if (svg is { Style: PlanIconStyle.FullColourSvg })
@@ -350,7 +358,7 @@ namespace DBADash.QueryPlan.Skia
                 return;
             }
 
-            _fill.Color = Faded(Palette.IconFor(node.Category), fade);
+            _fill.Color = Faded(Palette.IconFor(category), fade);
             canvas.DrawRoundRect(chip, _style.IconCornerRadius, _style.IconCornerRadius, _fill);
 
             // The symbol is inset from the chip edge, so the grid it was drawn on maps onto the
@@ -366,7 +374,7 @@ namespace DBADash.QueryPlan.Skia
                 return;
             }
 
-            var (strokePath, fillPath, accentPath) = PlanOperatorGlyphs.PathsFor(node.Kind);
+            var (strokePath, fillPath, accentPath) = PlanOperatorGlyphs.PathsFor(kind);
             var scale = (chip.Width - (inset * 2)) / PlanOperatorGlyphs.GlyphExtent;
 
             canvas.Save();
@@ -490,38 +498,41 @@ namespace DBADash.QueryPlan.Skia
 
             foreach (var badge in PlanBadges.Ordered(node.Badges))
             {
-                var (colour, symbol, filled, stroke) = BadgeStyle(badge);
-
-                var circle = new SKRect(x, y, x + size, y + size);
-
-                // A ring in the card's own colour, so a badge sitting across the border reads as
-                // pinned to the card rather than as a dot the border was drawn through.
-                _fill.Color = Faded(Palette.NodeFill, fade);
-                canvas.DrawOval(SKRect.Inflate(circle, 1.5f, 1.5f), _fill);
-
-                _fill.Color = Faded(colour, fade);
-                canvas.DrawOval(circle, _fill);
-
-                canvas.Save();
-                canvas.Translate(circle.Left, circle.Top);
-                canvas.Scale(size / BadgeGlyphExtent);
-
-                if (filled)
-                {
-                    _fill.Color = Faded(Palette.IconSymbol, fade);
-                    canvas.DrawPath(symbol, _fill);
-                }
-                else
-                {
-                    _glyph.Color = Faded(Palette.IconSymbol, fade);
-                    _glyph.StrokeWidth = stroke;
-                    canvas.DrawPath(symbol, _glyph);
-                }
-
-                canvas.Restore();
-
+                DrawBadge(canvas, badge, new SKRect(x, y, x + size, y + size), fade);
                 x -= step;
             }
+        }
+
+        /// <summary>One badge in <paramref name="circle"/>: the ring, the colour and the symbol on it.</summary>
+        private void DrawBadge(SKCanvas canvas, PlanNodeBadges badge, SKRect circle, float fade)
+        {
+            var (colour, symbol, filled, stroke) = BadgeStyle(badge);
+
+            // A ring in the card's own colour, so a badge sitting across the border reads as
+            // pinned to the card rather than as a dot the border was drawn through.
+            _fill.Color = Faded(Palette.NodeFill, fade);
+            canvas.DrawOval(SKRect.Inflate(circle, 1.5f, 1.5f), _fill);
+
+            _fill.Color = Faded(colour, fade);
+            canvas.DrawOval(circle, _fill);
+
+            canvas.Save();
+            canvas.Translate(circle.Left, circle.Top);
+            canvas.Scale(circle.Width / BadgeGlyphExtent);
+
+            if (filled)
+            {
+                _fill.Color = Faded(Palette.IconSymbol, fade);
+                canvas.DrawPath(symbol, _fill);
+            }
+            else
+            {
+                _glyph.Color = Faded(Palette.IconSymbol, fade);
+                _glyph.StrokeWidth = stroke;
+                canvas.DrawPath(symbol, _glyph);
+            }
+
+            canvas.Restore();
         }
 
         /// <summary>
@@ -543,6 +554,12 @@ namespace DBADash.QueryPlan.Skia
                 bounds = SKRect.Create(bounds.MidX - (grownWidth / 2), bounds.MidY - (grownHeight / 2), grownWidth, grownHeight);
             }
 
+            DrawWarningTriangle(canvas, bounds, node.Badges.HasFlag(PlanNodeBadges.CriticalWarning), fade);
+        }
+
+        /// <summary>The triangle itself, drawn to fill <paramref name="bounds"/>.</summary>
+        private void DrawWarningTriangle(SKCanvas canvas, SKRect bounds, bool critical, float fade)
+        {
             // Everything is proportioned to the triangle's width, so it keeps its shape at any size.
             var unit = bounds.Width / 14f;
 
@@ -557,7 +574,7 @@ namespace DBADash.QueryPlan.Skia
             _marker.StrokeWidth = 4f * unit;
             canvas.DrawPath(triangle, _marker);
 
-            var colour = node.Badges.HasFlag(PlanNodeBadges.CriticalWarning) ? Palette.Critical : Palette.Warning;
+            var colour = critical ? Palette.Critical : Palette.Warning;
 
             // Filled, then stroked in the same colour, which is what rounds the corners off.
             _fill.Color = Faded(colour, fade);
@@ -604,10 +621,11 @@ namespace DBADash.QueryPlan.Skia
         /// The control on the left edge of a node that hides or shows its inputs, drawn as the plus
         /// or minus box a tree view uses - which is what it is, and so needs no explaining.
         /// </summary>
-        private void DrawCollapseToggle(SKCanvas canvas, PlanNode node, LayoutRect toggle, float fade)
-        {
-            var box = ToSk(toggle);
+        private void DrawCollapseToggle(SKCanvas canvas, PlanNode node, LayoutRect toggle, float fade) =>
+            DrawToggleBox(canvas, ToSk(toggle), node.IsCollapsed, fade);
 
+        private void DrawToggleBox(SKCanvas canvas, SKRect box, bool collapsed, float fade)
+        {
             _fill.Color = Faded(Palette.NodeFill, fade);
             canvas.DrawRoundRect(box, 3, 3, _fill);
 
@@ -623,7 +641,7 @@ namespace DBADash.QueryPlan.Skia
             canvas.DrawLine(box.Left + inset, centre, box.Right - inset, centre, _glyph);
 
             // A collapsed node shows a plus, because that is what the click will do next.
-            if (node.IsCollapsed)
+            if (collapsed)
             {
                 canvas.DrawLine(box.MidX, box.Top + inset, box.MidX, box.Bottom - inset, _glyph);
             }
@@ -675,12 +693,31 @@ namespace DBADash.QueryPlan.Skia
                     : MissColour(edge)
                         ?? (edge.IsActual ? Palette.EdgeActual : Palette.Edge);
 
-            var thickness = (float)edge.Thickness;
+            (float Width, SKColor Colour)? estimate =
+                edge.EstimateThickness is { } estimateWidth && edge.EstimateAccuracy is { } accuracy
+                    ? ((float)estimateWidth, Palette.ColourFor(accuracy))
+                    : null;
 
+            DrawArrow(canvas, edge.Points, (float)edge.Thickness, colour, fade, estimate, controller.Zoom);
+        }
+
+        /// <summary>
+        /// One arrow: the body and its head, and the estimate outlined over it where there is one.
+        /// Apart from <see cref="DrawEdge"/> so the legend draws its samples with the same code.
+        /// </summary>
+        private void DrawArrow(
+            SKCanvas canvas,
+            IReadOnlyList<LayoutPoint> points,
+            float thickness,
+            SKColor colour,
+            float fade,
+            (float Width, SKColor Colour)? estimate,
+            double zoom)
+        {
             // The head is drawn as a triangle, so the body stops short of the node to leave room for
             // it - otherwise the head sits on top of the last stretch of the body and a thin arrow
             // ends up with a visible notch.
-            using var body = BuildEdgePath(edge, _style.ArrowLength);
+            using var body = BuildEdgePath(points, _style.ArrowLength);
 
             // A halo in the background colour first, so an arrow crossing another reads as passing
             // over it.  Arrows are routed thickest first, so the thin one crossing a thick one is
@@ -694,11 +731,11 @@ namespace DBADash.QueryPlan.Skia
             _edge.StrokeWidth = thickness;
             canvas.DrawPath(body, _edge);
 
-            DrawArrowHead(canvas, edge, Faded(colour, fade), thickness);
+            DrawArrowHead(canvas, points, Faded(colour, fade), thickness);
 
-            if (edge.EstimateThickness is { } estimate && edge.EstimateAccuracy is { } accuracy)
+            if (estimate is { } outline)
             {
-                DrawEstimateOutline(canvas, body, (float)estimate, Faded(Palette.ColourFor(accuracy), fade), controller);
+                DrawEstimateOutline(canvas, body, outline.Width, Faded(outline.Colour, fade), zoom);
             }
         }
 
@@ -728,7 +765,7 @@ namespace DBADash.QueryPlan.Skia
         /// than layout units: in layout units they thin to nothing at the zoom a whole plan fits at,
         /// which is where a reader scans for the red ones.
         /// </summary>
-        private void DrawEstimateOutline(SKCanvas canvas, SKPath body, float width, SKColor colour, PlanViewController controller)
+        private void DrawEstimateOutline(SKCanvas canvas, SKPath body, float width, SKColor colour, double zoom)
         {
             using var sleeve = new SKPaint
             {
@@ -741,7 +778,7 @@ namespace DBADash.QueryPlan.Skia
             using var outline = new SKPath();
             if (!sleeve.GetFillPath(body, outline)) return;
 
-            var perPixel = 1 / (float)Math.Max(controller.Zoom, 0.01);
+            var perPixel = 1 / (float)Math.Max(zoom, 0.01);
 
             using var dash = SKPathEffect.CreateDash(
                 [_style.EstimateDashLength * perPixel, _style.EstimateDashGap * perPixel], 0);
@@ -761,9 +798,9 @@ namespace DBADash.QueryPlan.Skia
         /// mistake, and because the radius is what makes a thick arrow look like a pipe carrying
         /// rows rather than a drawn rectangle.
         /// </summary>
-        private SKPath BuildEdgePath(PlanEdge edge, float trim)
+        private SKPath BuildEdgePath(IReadOnlyList<LayoutPoint> route, float trim)
         {
-            var points = edge.Points.Select(ToSk).ToList();
+            var points = route.Select(ToSk).ToList();
 
             // Pull the last point back along the final segment by the trim distance.
             if (points.Count >= 2 && trim > 0)
@@ -810,10 +847,10 @@ namespace DBADash.QueryPlan.Skia
             return path;
         }
 
-        private void DrawArrowHead(SKCanvas canvas, PlanEdge edge, SKColor colour, float thickness)
+        private void DrawArrowHead(SKCanvas canvas, IReadOnlyList<LayoutPoint> route, SKColor colour, float thickness)
         {
-            var tip = ToSk(edge.Points[^1]);
-            var from = ToSk(edge.Points[^2]);
+            var tip = ToSk(route[^1]);
+            var from = ToSk(route[^2]);
 
             var dx = tip.X - from.X;
             var dy = tip.Y - from.Y;

@@ -38,19 +38,19 @@ namespace DBADash.QueryPlan.Layout
         /// worth designing against, because the badge is there to catch the estimate that caused a
         /// bad plan choice.
         /// </summary>
-        private const double EstimateMismatchThreshold = 10;
+        internal const double EstimateMismatchThreshold = 10;
 
         /// <summary>
         /// How far an arrow's estimate has to be out before it is coloured critical rather than a
         /// warning: two orders of magnitude, against the badge's one.
         /// </summary>
-        private const double EstimateCriticalThreshold = 100;
+        internal const double EstimateCriticalThreshold = 100;
 
         /// <summary>
         /// Rows thrown away by a residual predicate before it is worth saying so: more discarded
         /// than kept, and enough of them to matter.
         /// </summary>
-        private const long DiscardedRowsThreshold = 100;
+        internal const long DiscardedRowsThreshold = 100;
 
         /// <summary>
         /// How many times the overlap relaxation runs before giving up.  Each pass only moves nodes

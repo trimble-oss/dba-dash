@@ -235,6 +235,20 @@ namespace DBADash.QueryPlan.Model
             _ => PlanOperatorCategory.Other
         };
 
+        /// <summary>What a colour family is called to a reader - the heading the operator reference and the legend group by.</summary>
+        public static string CategoryName(PlanOperatorCategory category) => category switch
+        {
+            PlanOperatorCategory.Root => "Statement",
+            PlanOperatorCategory.DataAccess => "Reading data",
+            PlanOperatorCategory.Join => "Joins",
+            PlanOperatorCategory.Transform => "Aggregating, sorting and shaping",
+            PlanOperatorCategory.Spool => "Spools",
+            PlanOperatorCategory.Parallelism => "Parallelism",
+            PlanOperatorCategory.DataModification => "Changing data",
+            PlanOperatorCategory.Compute => "Computing and checking",
+            _ => "Other"
+        };
+
         /// <summary>
         /// True when the logical operator names an aggregation, which is what separates the two jobs
         /// a Hash Match does.
