@@ -84,7 +84,10 @@ namespace DBADash.QueryPlan.Interaction
                         node.HiddenWarningCount == 1
                             ? "1 hidden operator has warnings"
                             : node.HiddenWarningCount.ToString(CultureInfo.InvariantCulture) + " hidden operators have warnings",
-                        true));
+                        true,
+                        severity: node.Badges.HasFlag(PlanNodeBadges.CriticalWarning)
+                            ? PlanWarningSeverity.Critical
+                            : PlanWarningSeverity.Warning));
                 }
             }
 
@@ -279,7 +282,8 @@ namespace DBADash.QueryPlan.Interaction
                             warning.Title,
                             warning.Detail is null ? "Yes" : PlanFormat.SingleLine(warning.Detail, maxPredicateLength),
                             warning.Severity != PlanWarningSeverity.Information,
-                            wraps: true);
+                            wraps: true,
+                            severity: warning.Severity);
                     }
 
                     continue;
@@ -297,11 +301,14 @@ namespace DBADash.QueryPlan.Interaction
                 var value = found.Count.ToString(CultureInfo.InvariantCulture) + " of them";
                 if (details.Count > 0) value += ": " + PlanFormat.List(details, MaxCombinedWarningDetails);
 
+                var worst = found.Max(w => w.Severity);
+
                 yield return new PlanTooltipRow(
                     group.Key,
                     value,
-                    found.Max(w => w.Severity) != PlanWarningSeverity.Information,
-                    wraps: true);
+                    worst != PlanWarningSeverity.Information,
+                    wraps: true,
+                    severity: worst);
             }
         }
 

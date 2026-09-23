@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using DBADash.QueryPlan.Interaction;
 using DBADash.QueryPlan.Layout;
+using DBADash.QueryPlan.Model;
 using SkiaSharp;
 
 namespace DBADash.QueryPlan.Skia
@@ -898,7 +899,9 @@ namespace DBADash.QueryPlan.Skia
                 _text.Color = Palette.TooltipLabelText;
                 DrawElided(canvas, row.Label, x, y, labelWidth, _fonts.TooltipLabel);
 
-                _text.Color = row.IsEmphasised ? Palette.Warning : Palette.TooltipValueText;
+                _text.Color = row.Severity == PlanWarningSeverity.Critical ? Palette.Critical
+                    : row.IsEmphasised ? Palette.Warning
+                    : Palette.TooltipValueText;
 
                 foreach (var line in valueLines[i])
                 {
