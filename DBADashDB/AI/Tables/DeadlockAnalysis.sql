@@ -14,11 +14,11 @@
 	ConversationID is what joins the two halves back together: the viewer reads this row, finds its own
 	follow-ups under the same id locally, and shows one exchange.  It is load-bearing for that.
 
-	TurnNumber and Question are what remains of the arrangement before that - follow-ups were stored
-	here, as further rows of the same conversation.  Rows like that still exist and are still read back,
-	which is why both columns are still here and why AI.DeadlockAnalysisHistory_Get still reassembles a
-	conversation from several rows.  Nothing writes them any more: AI.DeadlockAnalysis_Upd refuses a turn
-	after the first, whatever asks it to.
+	A row is exactly one opening analysis.  Follow-ups were once stored here too, as further rows of the
+	same conversation, but they belonged to the person who asked and are now kept only on that person's
+	own machine.  Any that had reached this shared table were deleted, and the TurnNumber and Question
+	columns that carried them removed, when this arrangement came in (see Script.PreDeployment1.sql) - so
+	nothing anyone can read here is anybody's private conversation, and that is the point.
 
 	History rather than replacement: every answer has been paid for, two runs of one model over one graph
 	rarely say the same thing, and asking again is often a search for a better answer rather than a
@@ -54,11 +54,6 @@ CREATE TABLE AI.DeadlockAnalysis
 	   their machine, so this is how the two halves of a conversation find each other.  NULL on answers
 	   stored before conversations existed, which are conversations of one turn read back as themselves. */
 	ConversationID UNIQUEIDENTIFIER NULL,
-	/* Always 1 or NULL on anything written now - see the header.  Still ordered by, because rows
-	   written when follow-ups lived here are still read back. */
-	TurnNumber SMALLINT NULL,
-	/* The follow-up that was asked, on rows old enough to have one.  Never written now. */
-	Question NVARCHAR(MAX) NULL,
 	CONSTRAINT PK_DeadlockAnalysis PRIMARY KEY CLUSTERED (DeadlockAnalysisID)
 );
 GO
@@ -77,7 +72,7 @@ CREATE NONCLUSTERED INDEX IX_DeadlockAnalysis_SignatureVersion
 	ON AI.DeadlockAnalysis (SignatureVersion);
 GO
 
-/* Reads a conversation back in order once one of its turns has been found by signature or hash. */
+/* Finds a conversation once one has been matched by signature or hash. */
 CREATE NONCLUSTERED INDEX IX_DeadlockAnalysis_Conversation
-	ON AI.DeadlockAnalysis (ConversationID, TurnNumber)
+	ON AI.DeadlockAnalysis (ConversationID)
 	WHERE ConversationID IS NOT NULL;

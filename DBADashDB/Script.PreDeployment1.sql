@@ -98,4 +98,20 @@ BEGIN
 		WHERE rnum>1
 
 	END
+/*
+	AI follow-up turns used to be stored in the shared analysis tables as further rows of a
+	conversation.  They belong to the person who asked them and now live encrypted on that person's
+	own machine (see AiLocalConversationStore), so any that reached the repository under the old
+	arrangement are deleted here - erring on the side of privacy - before the TurnNumber and Question
+	columns that carried them are dropped.  Guarded on the column still existing so it runs once, on
+	the upgrade that removes it, and never afterwards.
+*/
+IF COLUMNPROPERTY(OBJECT_ID('AI.DeadlockAnalysis'), 'TurnNumber', 'ColumnId') IS NOT NULL
+BEGIN
+	DELETE FROM AI.DeadlockAnalysis WHERE TurnNumber > 1
+END
+IF COLUMNPROPERTY(OBJECT_ID('AI.QueryPlanAnalysis'), 'TurnNumber', 'ColumnId') IS NOT NULL
+BEGIN
+	DELETE FROM AI.QueryPlanAnalysis WHERE TurnNumber > 1
+END
 END

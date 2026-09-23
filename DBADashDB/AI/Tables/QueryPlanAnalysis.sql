@@ -19,11 +19,11 @@
 	follow-ups under the same id locally, and shows one exchange.  It is load-bearing for that and not
 	merely descriptive.
 
-	TurnNumber and Question are what remains of the arrangement before that - follow-ups were stored
-	here, as further rows of the same conversation.  Rows like that still exist and are still read back,
-	which is why both columns are still here and why AI.QueryPlanAnalysisHistory_Get still reassembles a
-	conversation from several rows.  Nothing writes them any more: AI.QueryPlanAnalysis_Upd refuses a
-	turn after the first, whatever asks it to.
+	A row is exactly one opening analysis.  Follow-ups were once stored here too, as further rows of the
+	same conversation, but they belonged to the person who asked and are now kept only on that person's
+	own machine.  Any that had reached this shared table were deleted, and the TurnNumber and Question
+	columns that carried them removed, when this arrangement came in (see Script.PreDeployment1.sql) - so
+	nothing anyone can read here is anybody's private conversation, and that is the point.
 
 	The plan itself is not stored.  Unlike a deadlock graph, whose signature is computed by us and so has
 	to be recomputable, a plan's identities come from SQL Server or from a stable hash of the plan's own
@@ -51,11 +51,6 @@ CREATE TABLE AI.QueryPlanAnalysis
 	/* The exchange this answer opens.  The viewer finds the reader's own follow-ups under this id on
 	   their machine, so this is how the two halves of a conversation find each other. */
 	ConversationID UNIQUEIDENTIFIER NULL,
-	/* Always 1 or NULL on anything written now - see the header.  Still ordered by, because rows
-	   written when follow-ups lived here are still read back. */
-	TurnNumber SMALLINT NULL,
-	/* The follow-up that was asked, on rows old enough to have one.  Never written now. */
-	Question NVARCHAR(MAX) NULL,
 	CONSTRAINT PK_QueryPlanAnalysis PRIMARY KEY CLUSTERED (QueryPlanAnalysisID)
 );
 GO
@@ -69,7 +64,7 @@ CREATE NONCLUSTERED INDEX IX_QueryPlanAnalysis_PlanHash
 	WHERE PlanHash IS NOT NULL;
 GO
 
-/* Reads a conversation back in order once one of its turns has been found by query or plan. */
+/* Finds a conversation once one has been matched by query or plan. */
 CREATE NONCLUSTERED INDEX IX_QueryPlanAnalysis_Conversation
-	ON AI.QueryPlanAnalysis (ConversationID, TurnNumber)
+	ON AI.QueryPlanAnalysis (ConversationID)
 	WHERE ConversationID IS NOT NULL;

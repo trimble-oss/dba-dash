@@ -42,7 +42,8 @@ SET NOCOUNT ON
 
 	Written as a guard rather than by removing the parameters: an old viewer passes them on every call,
 	including the opening analysis, and a procedure that would not accept them would stop storing that
-	too.
+	too.  The values themselves are no longer stored - the columns that held them are gone - so @Question
+	is accepted and ignored, and @TurnNumber only decides whether the row is stored at all.
 
 	NULL is an opening turn - answers predate the column, and callers that know nothing of conversations
 	do not pass it.  NULL > 1 is unknown, so those fall through and are stored, which is correct.
@@ -60,9 +61,7 @@ INSERT INTO AI.DeadlockAnalysis
 	SignatureVersion,
 	DeadlockXmlCompressed,
 	DeadlockHash,
-	ConversationID,
-	TurnNumber,
-	Question
+	ConversationID
 )
 /* Callers pass the signature as the familiar "0x..." hex string; store it in its 8-byte binary form
    (style 1 parses the leading 0x).  COMPRESS of an NVARCHAR is gzipped UTF-16 - the same form
@@ -75,6 +74,4 @@ SELECT	CONVERT(BINARY(8), @Signature, 1),
 		@SignatureVersion,
 		COMPRESS(NULLIF(@GraphXml, N'')),
 		@DeadlockHash,
-		@ConversationID,
-		@TurnNumber,
-		NULLIF(@Question, N'')
+		@ConversationID

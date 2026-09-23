@@ -81,8 +81,7 @@ namespace DBADashGUI.QueryPlans
         }
 
         /// <summary>
-        /// The conversations the whole team can see: one opening analysis each, plus any follow-ups
-        /// stored back when follow-ups went to the repository.
+        /// The conversations the whole team can see: one opening analysis each.
         /// </summary>
         private static async Task<List<Entry>> FetchSharedAsync(
             string signature,
@@ -129,7 +128,7 @@ namespace DBADashGUI.QueryPlans
 
                     list.Add(new Turn(
                         (long)reader["QueryPlanAnalysisID"],
-                        reader["Question"] as string,
+                        null, // The shared opening analysis has no follow-up question; those live locally.
                         (string)reader["Analysis"],
                         (string)reader["Model"],
                         (string)reader["PayloadVersion"],

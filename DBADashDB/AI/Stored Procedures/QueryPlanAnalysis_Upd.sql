@@ -38,7 +38,8 @@ SET NOCOUNT ON
 
 	Written as a guard rather than by removing the parameters: an old viewer passes them on every call,
 	including the opening analysis, and a procedure that would not accept them would stop storing that
-	too.
+	too.  The values themselves are no longer stored - the columns that held them are gone - so @Question
+	is accepted and ignored, and @TurnNumber only decides whether the row is stored at all.
 
 	NULL is an opening turn - answers predate the column, and callers that know nothing of conversations
 	do not pass it.  NULL > 1 is unknown, so those fall through and are stored, which is correct.
@@ -55,9 +56,7 @@ INSERT INTO AI.QueryPlanAnalysis
 	Analysis,
 	InstanceID,
 	StatementText,
-	ConversationID,
-	TurnNumber,
-	Question
+	ConversationID
 )
 /* Callers pass the identities as the familiar "0x..." hex strings; store them in their 8-byte binary
    form (style 1 parses the leading 0x). */
@@ -68,6 +67,4 @@ SELECT	CONVERT(BINARY(8), @Signature, 1),
 		@Analysis,
 		@InstanceID,
 		NULLIF(@StatementText, N''),
-		@ConversationID,
-		@TurnNumber,
-		NULLIF(@Question, N'')
+		@ConversationID
