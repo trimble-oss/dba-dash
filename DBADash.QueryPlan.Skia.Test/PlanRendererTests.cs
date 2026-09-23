@@ -186,6 +186,50 @@ namespace DBADash.QueryPlan.Skia.Test
             Assert.IsTrue(fixture.DrawnPixelCount() > 100);
         }
 
+        /// <summary>Pixels that are not background in the strip just right of a node, where the stack behind a collapsed one peeks out.</summary>
+        private static int PixelsBesideNode(RenderFixture fixture, string nodeId)
+        {
+            var node = fixture.Controller.Layout.Nodes.Single(n => n.Id == nodeId);
+            var strip = fixture.Controller.ToScreen(new LayoutRect(node.Bounds.Right + 1, node.Bounds.Top + 6, 12, 12));
+
+            using var bitmap = fixture.Snapshot();
+            var background = fixture.Renderer.Palette.Background;
+            var count = 0;
+
+            for (var x = (int)strip.Left; x < (int)Math.Ceiling(strip.Right); x++)
+            {
+                for (var y = (int)strip.Top; y < (int)Math.Ceiling(strip.Bottom); y++)
+                {
+                    if (bitmap.GetPixel(x, y) != background) count++;
+                }
+            }
+
+            return count;
+        }
+
+        [TestMethod]
+        public void Render_ShowsACollapsedNodeAsAStackAtEveryZoom()
+        {
+            foreach (var zoom in new[] { 1.0, 0.2 })
+            {
+                using var fixture = new RenderFixture();
+                fixture.Controller.SetZoom(zoom, new LayoutPoint(0, 0));
+
+                var withInputs = fixture.Layout.Nodes.First(n => n.Operator?.Children.Count > 0);
+                var id = withInputs.Id;
+
+                fixture.Render();
+                var expanded = PixelsBesideNode(fixture, id);
+
+                fixture.Controller.ToggleCollapse(withInputs);
+                fixture.Render();
+                var collapsed = PixelsBesideNode(fixture, id);
+
+                Assert.IsTrue(collapsed > expanded,
+                    $"At zoom {zoom} the cards behind a collapsed node should show: {collapsed} pixels beside it collapsed, {expanded} expanded.");
+            }
+        }
+
         [TestMethod]
         public void Render_KeepsWarningsVisibleWhenZoomedFarOut()
         {
