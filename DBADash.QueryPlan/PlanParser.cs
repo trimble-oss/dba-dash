@@ -267,12 +267,17 @@ namespace DBADash.QueryPlan
                     results.Add(statement);
                 }
 
-                foreach (var operation in cursorPlans)
+                for (var i = 0; i < cursorPlans.Count; i++)
                 {
+                    var operation = cursorPlans[i];
                     var queryPlan = ChildElements(operation, "QueryPlan").FirstOrDefault();
                     if (queryPlan is null) continue;
 
                     var operationStatement = BuildStatement(element, level + 1);
+
+                    // Its own XML is the cursor with only this operation left in it, so saving or
+                    // analysing the statement shown gives that operation's plan and not all of them.
+                    operationStatement.Xml = XmlForOperation(element, i);
                     operationStatement.StatementType = Attribute(operation, "OperationType") ?? "Cursor Operation";
                     ApplyQueryPlan(operationStatement, queryPlan);
                     results.Add(operationStatement);
@@ -288,6 +293,28 @@ namespace DBADash.QueryPlan
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// A cursor statement's element with every operation but the one at
+        /// <paramref name="operationIndex"/> removed, in the order CollectStatements lists them.
+        /// Read back it is the cursor with a single operation, which is listed as that operation's
+        /// statement and nothing else.
+        /// </summary>
+        private static string XmlForOperation(XElement cursor, int operationIndex)
+        {
+            var copy = new XElement(cursor);
+
+            var operations = ChildElements(copy, "CursorPlan")
+                .SelectMany(plan => ChildElements(plan, "Operation"))
+                .ToList();
+
+            for (var i = 0; i < operations.Count; i++)
+            {
+                if (i != operationIndex) operations[i].Remove();
+            }
+
+            return copy.ToString(SaveOptions.DisableFormatting);
         }
 
         private static PlanStatement BuildStatement(XElement element, int level)

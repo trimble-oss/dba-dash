@@ -85,7 +85,7 @@ namespace DBADash.QueryPlan.Interaction
                             ? "1 hidden operator has warnings"
                             : node.HiddenWarningCount.ToString(CultureInfo.InvariantCulture) + " hidden operators have warnings",
                         true,
-                        severity: node.Badges.HasFlag(PlanNodeBadges.CriticalWarning)
+                        severity: node.HiddenWarningsAreCritical
                             ? PlanWarningSeverity.Critical
                             : PlanWarningSeverity.Warning));
                 }

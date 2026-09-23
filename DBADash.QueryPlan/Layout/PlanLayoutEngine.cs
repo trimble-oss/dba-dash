@@ -219,7 +219,14 @@ namespace DBADash.QueryPlan.Layout
                 // visible node - see BuildBadges - otherwise collapsing an ancestor loses the marker
                 // for a conversion showplan reported against the statement.
                 planNode.HiddenWarningCount = hidden.Count(op => op.Warnings.Count > 0 || statement.WarningsFor(op).Any());
-                planNode.Badges |= WarningBadges(hidden.SelectMany(op => op.Warnings.Concat(statement.WarningsFor(op))));
+
+                var hiddenWarnings = hidden.SelectMany(op => op.Warnings.Concat(statement.WarningsFor(op))).ToList();
+
+                // Kept apart from the badges, which are the node's own warnings and the hidden ones
+                // together: the tooltip row that counts only the hidden ones has to be coloured by
+                // only the hidden ones.
+                planNode.HiddenWarningsAreCritical = hiddenWarnings.Any(w => w.Severity == PlanWarningSeverity.Critical);
+                planNode.Badges |= WarningBadges(hiddenWarnings);
                 return planNode;
             }
 

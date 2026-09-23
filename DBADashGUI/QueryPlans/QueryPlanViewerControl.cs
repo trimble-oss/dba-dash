@@ -2287,10 +2287,16 @@ namespace DBADashGUI.QueryPlans
             });
 
             // Nothing to offer until there is a statement with a plan of its own to take out.
-            menu.DropDownOpening += (_, _) => statement.Enabled = !string.IsNullOrEmpty(_current?.Xml);
+            menu.DropDownOpening += (_, _) => statement.Enabled = CanSaveStatement;
 
             return menu;
         }
+
+        /// <summary>
+        /// The statement shown has a plan to save.  A control flow statement - an IF, a WHILE - has
+        /// XML but no plan of its own, and a .sqlplan holding one opens as nothing.
+        /// </summary>
+        private bool CanSaveStatement => _current is { HasPlan: true } && !string.IsNullOrEmpty(_current.Xml);
 
         private string SuggestedFileName(bool statementOnly)
         {
@@ -2306,7 +2312,7 @@ namespace DBADashGUI.QueryPlans
         /// </summary>
         private void SavePlanXml(bool statementOnly)
         {
-            if (statementOnly && string.IsNullOrEmpty(_current?.Xml)) return;
+            if (statementOnly && !CanSaveStatement) return;
 
             using var dialog = new SaveFileDialog
             {
