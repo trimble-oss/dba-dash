@@ -343,8 +343,12 @@ namespace DBADash.QueryPlan
                 })
                 .ToList();
 
+            statement.SetOptions = FindElement(queryPlan, "StatementSetOptions")?.Attributes()
+                .Select(a => new KeyValuePair<string, string>(a.Name.LocalName, a.Value))
+                .ToList() ?? [];
+
             statement.MissingIndexes = ParseMissingIndexes(queryPlan);
-            statement.Warnings = ParseWarnings(ChildElements(queryPlan, "Warnings").FirstOrDefault());
+            statement.Warnings =ParseWarnings(ChildElements(queryPlan, "Warnings").FirstOrDefault());
             statement.Properties = BuildStatementProperties(statement, queryPlan);
 
             var rootRelOp = ChildElements(queryPlan, "RelOp").FirstOrDefault();
@@ -778,6 +782,17 @@ namespace DBADash.QueryPlan
 
         // ---------------------------------------------------------------- properties
 
+        /// <summary>
+        /// A statement level element by name.  Showplan puts the set options and hardware properties
+        /// on the statement, beside the query plan, while some producers put them inside it; either
+        /// is found.  Null when the query plan has no statement around it and the element is not in it.
+        /// </summary>
+        private static XElement? FindElement(XElement queryPlan, string name) =>
+            queryPlan.Parent is null
+                ? null
+                : ChildElements(queryPlan.Parent, name).FirstOrDefault()
+                  ?? ChildElements(queryPlan, name).FirstOrDefault();
+
         private static IReadOnlyList<PlanProperty> BuildStatementProperties(
             PlanStatement statement,
             XElement queryPlan)
@@ -870,10 +885,7 @@ namespace DBADash.QueryPlan
             // is very often explained by one of them.
             foreach (var name in new[] { "StatementSetOptions", "OptimizerHardwareDependentProperties" })
             {
-                var element = queryPlan.Parent is null
-                    ? null
-                    : ChildElements(queryPlan.Parent, name).FirstOrDefault()
-                      ?? ChildElements(queryPlan, name).FirstOrDefault();
+                var element = FindElement(queryPlan, name);
 
                 if (element is null) continue;
 
@@ -881,7 +893,12 @@ namespace DBADash.QueryPlan
                     .Select(a => new PlanProperty(SplitCamelCase(a.Name.LocalName), a.Value))
                     .ToList();
 
-                if (children.Count > 0) properties.Add(new PlanProperty(SplitCamelCase(name), null, children));
+                if (children.Count == 0) continue;
+
+                // The set options can be run in front of the query to compile it the way the
+                // application did.
+                var script = name == "StatementSetOptions" ? PlanScripts.SetOptions(statement) : string.Empty;
+                properties.Add(new PlanProperty(SplitCamelCase(name), null, children, script: script.Length == 0 ? null : script));
             }
 
             var traceFlags = ChildElements(queryPlan, "TraceFlags")

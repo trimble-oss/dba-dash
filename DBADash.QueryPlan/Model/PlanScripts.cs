@@ -306,6 +306,46 @@ namespace DBADash.QueryPlan.Model
             return script.ToString();
         }
 
+        // The options showplan reports on StatementSetOptions that are also SET statements, in the order
+        // SSMS lists them.  A whitelist rather than whatever attributes the plan carries: the names go
+        // into T-SQL the reader runs, and one that is not a SET option would only make the script fail.
+        private static readonly string[] SetOptionNames =
+        [
+            "ANSI_NULLS", "ANSI_PADDING", "ANSI_WARNINGS", "ARITHABORT",
+            "CONCAT_NULL_YIELDS_NULL", "NUMERIC_ROUNDABORT", "QUOTED_IDENTIFIER"
+        ];
+
+        /// <summary>
+        /// The SET options the statement was compiled with as SET statements, to run in front of the
+        /// query in SSMS so it compiles under the same settings as the application did.  Options
+        /// differ between SSMS and most applications (ARITHABORT above all), plans are cached per
+        /// combination, and so a query that is slow from the application but fast in SSMS is often
+        /// just a different plan.  Empty when the plan records none.
+        /// </summary>
+        public static string SetOptions(PlanStatement statement)
+        {
+            var settings = SetOptionNames
+                .Select(name => statement.SetOptions.FirstOrDefault(o => string.Equals(o.Key, name, StringComparison.OrdinalIgnoreCase)))
+                .Where(o => o.Key is not null)
+                .ToList();
+
+            if (settings.Count == 0) return string.Empty;
+
+            var script = new StringBuilder()
+                .AppendLine("/*").AppendLine("   The SET options this statement was compiled with.");
+            script.AppendLine("*/");
+
+            foreach (var (name, value) in settings)
+            {
+                script.Append("SET ").Append(name.ToUpperInvariant()).Append(IsOn(value) ? " ON;" : " OFF;").AppendLine();
+            }
+
+            return script.ToString();
+
+            static bool IsOn(string value) =>
+                string.Equals(value, "true", StringComparison.OrdinalIgnoreCase) || value == "1";
+        }
+
         /// <summary>
         /// Why an index on a temp table is better declared on the CREATE TABLE, and the line to paste
         /// there.  The CREATE INDEX below it still runs, because the reader cannot always reach the
