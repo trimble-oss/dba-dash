@@ -706,8 +706,8 @@ namespace DBADashGUI
                 throw new InvalidOperationException("Invalid deadlock graph: " + ex.Message, ex);
             }
 
-            var frm = new Deadlocks.DeadlockViewerForm(graphs, dlGraph, fileName, context);
-            frm.Show();
+            // On a tab of the deadlock window already open, if there is one, so deadlocks can be compared.
+            OnUIThread(() => Deadlocks.DeadlockViewerForm.Open(graphs, dlGraph, fileName, context));
         }
 
         /// <summary>
@@ -719,20 +719,21 @@ namespace DBADashGUI
             "Deadlock graph (*.xdl)|*.xdl|XML (*.xml)|*.xml|All files (*.*)|*.*";
 
         /// <summary>
-        /// Prompts for a .xdl and opens it in the viewer.  Needs no repository connection and no
-        /// monitored instance - a graph someone emailed you opens the same as one from a report,
-        /// minus the actions that go back to the source instance.
+        /// Prompts for .xdl files and opens them in the viewer, a tab each.  Needs no repository
+        /// connection and no monitored instance - a graph someone emailed you opens the same as one
+        /// from a report, minus the actions that go back to the source instance.
         /// </summary>
         public static void OpenDeadlockGraphFile(IWin32Window owner = null)
         {
             using var dialog = new OpenFileDialog
             {
                 Filter = DeadlockFileFilter,
-                Title = @"Open Deadlock Graph"
+                Title = @"Open Deadlock Graph",
+                Multiselect = true
             };
 
             if (dialog.ShowDialog(owner) != DialogResult.OK) return;
-            ShowDeadlockGraphFile(dialog.FileName, owner);
+            foreach (var file in dialog.FileNames) ShowDeadlockGraphFile(file, owner);
         }
 
         /// <summary>Opens a deadlock graph file in the viewer, reporting a bad file rather than throwing.</summary>
