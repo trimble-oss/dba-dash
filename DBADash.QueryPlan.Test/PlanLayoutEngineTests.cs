@@ -870,6 +870,41 @@ namespace DBADash.QueryPlan.Test
         }
 
         [TestMethod]
+        public void Tooltip_WarningSeverityMatchesTheBadgeColour()
+        {
+            // The marker on a node is red when any of its warnings is critical, and the tooltip rows
+            // are coloured from the severity they carry: the two must never disagree.
+            var batch = TestPlans.Load(TestPlans.Batch).Statements.Single(s => s.Warnings.Count > 0);
+            var layouts = new[]
+            {
+                new PlanLayoutEngine(new FakeTextMeasurer()).Layout(batch),
+                Layout(TestPlans.ParallelSpill)
+            };
+
+            var checkedNodes = 0;
+
+            foreach (var node in layouts.SelectMany(l => l.Nodes).Where(n => n.HasWarnings))
+            {
+                var rows = PlanTooltipBuilder.Build(node).Rows.Where(r => r.Severity is not null).ToList();
+                Assert.IsTrue(rows.Count > 0, "A node with a warning marker has a warning in its tooltip.");
+
+                Assert.AreEqual(
+                    node.Badges.HasFlag(PlanNodeBadges.CriticalWarning),
+                    rows.Any(r => r.Severity == PlanWarningSeverity.Critical),
+                    "The tooltip is critical exactly when the marker is.");
+
+                checkedNodes++;
+            }
+
+            Assert.IsTrue(checkedNodes > 0);
+
+            // No join predicate is the reported case: red on the operator, so red in its tooltip.
+            var noJoinPredicate = PlanTooltipBuilder.Build(layouts[0].Root).Rows
+                .Single(r => r.Label == batch.Warnings.First(w => w.Kind == PlanWarningKind.NoJoinPredicate).Title);
+            Assert.AreEqual(PlanWarningSeverity.Critical, noJoinPredicate.Severity);
+        }
+
+        [TestMethod]
         public void Layout_RaisesHiddenWarningsOnACollapsedNode()
         {
             var layout = Layout(TestPlans.ParallelSpill);

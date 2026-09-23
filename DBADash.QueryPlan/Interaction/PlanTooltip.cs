@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Text;
+using DBADash.QueryPlan.Model;
 
 namespace DBADash.QueryPlan.Interaction
 {
@@ -8,12 +9,18 @@ namespace DBADash.QueryPlan.Interaction
     /// </summary>
     public readonly struct PlanTooltipRow
     {
-        public PlanTooltipRow(string label, string value, bool isEmphasised = false, bool wraps = false)
+        public PlanTooltipRow(
+            string label,
+            string value,
+            bool isEmphasised = false,
+            bool wraps = false,
+            PlanWarningSeverity? severity = null)
         {
             Label = label;
             Value = value;
             IsEmphasised = isEmphasised;
             Wraps = wraps;
+            Severity = severity;
         }
 
         public string Label { get; }
@@ -21,11 +28,20 @@ namespace DBADash.QueryPlan.Interaction
         public string Value { get; }
 
         /// <summary>
-        /// Drawn in the warning colour.  Used for the figures that are the reason the reader is
-        /// hovering - a spill, an estimate that was out by orders of magnitude - so the answer is
-        /// visible without reading every row.
+        /// Drawn in the warning colour, or the critical one when <see cref="Severity"/> says so.  Used
+        /// for the figures that are the reason the reader is hovering - a spill, an estimate that was
+        /// out by orders of magnitude - so the answer is visible without reading every row.
         /// </summary>
         public bool IsEmphasised { get; }
+
+        /// <summary>
+        /// The severity of the warning this row reports, or null for a row that is not a warning.
+        ///
+        /// Carried on the row so the tooltip colours it from the same severity the badge on the node
+        /// is coloured from - a critical warning is red in both, rather than red on the node and
+        /// amber in its own tooltip.
+        /// </summary>
+        public PlanWarningSeverity? Severity { get; }
 
         /// <summary>
         /// Wrapped onto as many lines as it needs, up to a limit, rather than cut short at the edge of
