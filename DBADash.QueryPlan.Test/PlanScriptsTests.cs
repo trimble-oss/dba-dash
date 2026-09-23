@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Text.RegularExpressions;
 using DBADash.QueryPlan.Model;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -205,6 +206,61 @@ namespace DBADash.QueryPlan.Test
             Assert.AreEqual("(1)+(2)", PlanScripts.Literal("(1)+(2)"));
             Assert.AreEqual("N'x'", PlanScripts.Literal("N'x'"));
             Assert.AreEqual("NULL", PlanScripts.Literal("NULL"));
+        }
+
+        private static PlanStatement WithSetOptions(string attributes) =>
+            Parse($"<StatementSetOptions {attributes} />" + Op(1, "Table Scan", "Table Scan", ""));
+
+        [TestMethod]
+        public void SetOptions_AreScriptedAsSetStatements_InSsmsOrder()
+        {
+            var statement = WithSetOptions(
+                """QUOTED_IDENTIFIER="true" ARITHABORT="false" CONCAT_NULL_YIELDS_NULL="true" ANSI_NULLS="true" ANSI_PADDING="true" ANSI_WARNINGS="true" NUMERIC_ROUNDABORT="false" """);
+
+            var script = PlanScripts.SetOptions(statement);
+
+            var sets = script.Split('\n', System.StringSplitOptions.RemoveEmptyEntries | System.StringSplitOptions.TrimEntries)
+                .Where(l => l.StartsWith("SET ")).ToList();
+
+            CollectionAssert.AreEqual(
+                new[]
+                {
+                    "SET ANSI_NULLS ON;", "SET ANSI_PADDING ON;", "SET ANSI_WARNINGS ON;", "SET ARITHABORT OFF;",
+                    "SET CONCAT_NULL_YIELDS_NULL ON;", "SET NUMERIC_ROUNDABORT OFF;", "SET QUOTED_IDENTIFIER ON;"
+                },
+                sets);
+        }
+
+        [TestMethod]
+        public void SetOptions_ExplainArithAbort_OnlyWhenItWasOff()
+        {
+            StringAssert.Contains(PlanScripts.SetOptions(WithSetOptions("""ARITHABORT="false" """)), "ARITHABORT was OFF");
+            Assert.IsFalse(PlanScripts.SetOptions(WithSetOptions("""ARITHABORT="true" """)).Contains("was OFF"));
+        }
+
+        [TestMethod]
+        public void SetOptions_IgnoreAttributesThatAreNotSetOptions()
+        {
+            // The names go into a script the reader runs, so only ones known to be SET options do.
+            var script = PlanScripts.SetOptions(WithSetOptions("""ANSI_NULLS="true" EVIL="1; DROP TABLE x" """));
+
+            StringAssert.Contains(script, "SET ANSI_NULLS ON;");
+            Assert.IsFalse(script.Contains("EVIL") || script.Contains("DROP"));
+        }
+
+        [TestMethod]
+        public void SetOptions_WithNoneRecorded_AreEmpty()
+        {
+            Assert.AreEqual(string.Empty, PlanScripts.SetOptions(Parse(Op(1, "Table Scan", "Table Scan", ""))));
+        }
+
+        [TestMethod]
+        public void SetOptionsProperty_CarriesTheScript_ForTheViewerToOffer()
+        {
+            var property = TestPlans.Statement(TestPlans.KeyLookupSeek).Properties.Single(p => p.Name == "Statement Set Options");
+
+            StringAssert.Contains(property.Script, "SET ARITHABORT ON;");
+            Assert.AreEqual(7, property.Children.Count);
         }
     }
 }

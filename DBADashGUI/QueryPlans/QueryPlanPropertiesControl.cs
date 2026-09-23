@@ -291,14 +291,33 @@ namespace DBADashGUI.QueryPlans
         {
             foreach (var property in properties)
             {
-                var index = _grid.Rows.Add(new string(' ', depth * 4) + property.Name, property.Value ?? string.Empty);
+                var hasScript = !string.IsNullOrEmpty(property.Script);
+                var index = _grid.Rows.Add(
+                    new string(' ', depth * 4) + property.Name,
+                    hasScript ? "View Script" : property.Value ?? string.Empty);
 
-                _grid.Rows[index].Tag = new RowInfo
+                // A heading with a script - the set options - is a link to it, the way the missing
+                // index's T-SQL row is.  The script says what it is for, so no notes go beneath it.
+                _grid.Rows[index].Tag = hasScript
+                    ? new RowInfo
+                    {
+                        Title = ViewerTitle(property.Name),
+                        FullText = property.Script,
+                        AlwaysLink = true,
+                        NotesIncluded = true
+                    }
+                    : new RowInfo
+                    {
+                        Title = ViewerTitle(property.Name),
+                        FullText = property.ReadableValue,
+                        AlwaysLink = property.IsExpression
+                    };
+
+                if (hasScript)
                 {
-                    Title = ViewerTitle(property.Name),
-                    FullText = property.ReadableValue,
-                    AlwaysLink = property.IsExpression
-                };
+                    _grid.Rows[index].Cells[ValueColumnIndex].ToolTipText =
+                        "Click to open the SET statements that reproduce these options, to run in SSMS.";
+                }
 
                 if (property.IsExpression && ShowsExpressionValues(property.Name))
                 {

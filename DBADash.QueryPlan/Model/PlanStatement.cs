@@ -186,6 +186,12 @@ namespace DBADash.QueryPlan.Model
         /// </summary>
         public IReadOnlyList<PlanExpression> Expressions { get; internal set; } = [];
 
+        /// <summary>
+        /// The SET options the statement was compiled with - ANSI_NULLS, ARITHABORT and the rest - as
+        /// showplan names them and the values it gives them.  Empty when the plan records none.
+        /// </summary>
+        public IReadOnlyList<KeyValuePair<string, string>> SetOptions { get; internal set; } = [];
+
         /// <summary>Set options, trace flags and the rest, for the properties panel.</summary>
         public IReadOnlyList<PlanProperty> Properties { get; internal set; } = [];
 

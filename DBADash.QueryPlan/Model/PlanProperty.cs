@@ -15,13 +15,20 @@ namespace DBADash.QueryPlan.Model
     /// </summary>
     public sealed class PlanProperty
     {
-        internal PlanProperty(string name, string? value, IReadOnlyList<PlanProperty>? children = null, bool isExpression = false)
+        internal PlanProperty(string name, string? value, IReadOnlyList<PlanProperty>? children = null, bool isExpression = false, string? script = null)
         {
             Name = name;
             Value = value;
             Children = children ?? [];
             IsExpression = isExpression;
+            Script = script;
         }
+
+        /// <summary>
+        /// T-SQL that acts on this property - the SET statements for the set options - for a viewer
+        /// to offer as a View Script action.  Null when there is none.
+        /// </summary>
+        public string? Script { get; }
 
         public string Name { get; }
 
