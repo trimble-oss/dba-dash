@@ -513,7 +513,7 @@ namespace DBADashGUI.QueryPlans
         }
 
         /// <summary>
-        /// The cost, time and row cells carry a bar under the number, so the dear or slow statement
+        /// The cost, time and row cells carry a bar under the number, so the expensive or slow statement
         /// stands out in a long list without reading every figure.  Cost % and Elapsed are drawn to
         /// their hidden share columns, the others to the largest in the list.
         /// </summary>

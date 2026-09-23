@@ -204,6 +204,13 @@ namespace DBADash.QueryPlan.Layout
         /// </summary>
         public int HiddenWarningCount { get; internal set; }
 
+        /// <summary>
+        /// True when any of the hidden operators' warnings is critical.  Separate from the node's
+        /// badges, which also carry the node's own warnings and so cannot say which side a critical
+        /// one came from.
+        /// </summary>
+        public bool HiddenWarningsAreCritical { get; internal set; }
+
         /// <summary>True when the node, or anything collapsed under it, carries a warning.</summary>
         public bool HasWarnings => Badges.HasFlag(PlanNodeBadges.Warning);
 

@@ -1207,6 +1207,35 @@ namespace DBADash.QueryPlan.Test
         }
 
         [TestMethod]
+        public void HiddenWarningsRow_IsColouredByTheHiddenWarnings_NotTheNodesOwn()
+        {
+            // The join is critical itself; the scan under it only has an ordinary warning.  Collapsed,
+            // the row that counts the hidden warnings describes the scan's, so it is not red.
+            var statement = InlinePlan.Parse(
+                """
+                <RelOp NodeId="0" PhysicalOp="Nested Loops" LogicalOp="Inner Join" EstimateRows="1" AvgRowSize="9" EstimatedTotalSubtreeCost="1">
+                  <Warnings NoJoinPredicate="true" />
+                  <Body>
+                    <RelOp NodeId="1" PhysicalOp="Table Scan" LogicalOp="Table Scan" EstimateRows="1" AvgRowSize="9" EstimatedTotalSubtreeCost="1">
+                      <Warnings><PlanAffectingConvert ConvertIssue="Cardinality Estimate" Expression="CONVERT_IMPLICIT(int,[c],0)" /></Warnings>
+                      <Body />
+                    </RelOp>
+                  </Body>
+                </RelOp>
+                """);
+
+            var layout = Layout(statement);
+            layout.ToggleCollapse(layout.Nodes.Single(n => n.Operator?.NodeId == 0));
+            var collapsed = layout.Nodes.Single(n => n.Operator?.NodeId == 0);
+
+            Assert.IsTrue(collapsed.Badges.HasFlag(PlanNodeBadges.CriticalWarning), "The join's own warning is critical.");
+            Assert.IsFalse(collapsed.HiddenWarningsAreCritical);
+
+            var row = PlanTooltipBuilder.Build(collapsed).Rows.Single(r => r.Label == "Hidden warnings");
+            Assert.AreEqual(PlanWarningSeverity.Warning, row.Severity);
+        }
+
+        [TestMethod]
         public void ToggleCollapse_HidesTheInputsAndSaysHowMany()
         {
             var layout = Layout(TestPlans.ParallelSpill);

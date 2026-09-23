@@ -654,6 +654,39 @@ namespace DBADash.QueryPlan.Test
         }
 
         [TestMethod]
+        public void ExtractStatementXml_OfACursorOperation_HoldsOnlyThatOperation()
+        {
+            static string Operation(string type, int nodeId) =>
+                $"""
+                 <Operation OperationType="{type}">
+                   <QueryPlan>
+                     <RelOp NodeId="{nodeId}" PhysicalOp="Table Scan" LogicalOp="Table Scan" EstimateRows="1" AvgRowSize="9" EstimatedTotalSubtreeCost="1"><Body /></RelOp>
+                   </QueryPlan>
+                 </Operation>
+                 """;
+
+            var source = $"""
+                <ShowPlanXML xmlns="http://schemas.microsoft.com/sqlserver/2004/07/showplan" Version="1.564" Build="16.0.4222.2">
+                  <BatchSequence><Batch><Statements>
+                    <StmtCursor StatementId="1" StatementText="DECLARE c CURSOR FOR SELECT 1" StatementType="DECLARE CURSOR">
+                      <CursorPlan CursorName="c">{Operation("FetchQuery", 7)}{Operation("PopulateQuery", 8)}</CursorPlan>
+                    </StmtCursor>
+                  </Statements></Batch></BatchSequence>
+                </ShowPlanXML>
+                """;
+
+            var plan = PlanParser.Parse(source);
+            var populate = plan.Statements.Single(s => s.StatementType == "PopulateQuery");
+
+            var reparsed = PlanParser.Parse(PlanParser.ExtractStatementXml(source, populate));
+
+            // One statement, and it is the operation that was chosen rather than the first or all.
+            var only = reparsed.Statements.Single();
+            Assert.AreEqual("PopulateQuery", only.StatementType);
+            Assert.AreEqual(8, only.RootOperator!.NodeId);
+        }
+
+        [TestMethod]
         public void ExtractStatementXml_WithNoReadableSource_StillBuildsADocument()
         {
             var statement = PlanParser.Parse(TestPlans.Xml(TestPlans.KeyLookupSeek)).Statements[0];
