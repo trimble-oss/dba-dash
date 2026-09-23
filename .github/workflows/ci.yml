@@ -13,7 +13,7 @@ jobs:
       fail-fast: false
       matrix:
         language: [csharp]
-        sql-version: [2019, 2022, 2025]
+        sql-version: [2016, 2017, 2019, 2022, 2025]
         sql-collation: [Latin1_General_BIN]
 
     steps:
@@ -70,7 +70,7 @@ jobs:
           Compress-Archive -Path "DBADashBuild\DBADashGUIOnly\*" -DestinationPath $guiZipPath
 
       - name: Install SQL Server ${{ matrix.sql-version }}
-        uses: potatoqualitee/mssqlsuite@v1.12
+        uses: potatoqualitee/mssqlsuite@v2
         with:
           install: sqlengine
           version: ${{ matrix.sql-version }}
