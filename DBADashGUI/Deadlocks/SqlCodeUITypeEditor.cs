@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.Drawing.Design;
+using System.Windows.Forms.Design;
 using DBADashGUI.SchemaCompare;
 
 namespace DBADashGUI.Deadlocks
@@ -26,7 +27,17 @@ namespace DBADashGUI.Deadlocks
                     Syntax = CodeEditor.CodeEditorModes.SQL,
                     EditEnabled = false
                 };
-                frm.ShowDialog();
+
+                // Shown through the PropertyGrid's editor service so it opens modally over the grid's
+                // host rather than potentially behind the main form.
+                if (provider?.GetService(typeof(IWindowsFormsEditorService)) is IWindowsFormsEditorService editorService)
+                {
+                    editorService.ShowDialog(frm);
+                }
+                else
+                {
+                    frm.ShowDialog();
+                }
             }
 
             return value;

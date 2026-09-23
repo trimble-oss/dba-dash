@@ -33,7 +33,7 @@ namespace DBADashGUI.Deadlocks
         [Category("Resource"), DisplayName("Database")]
         public string Database => _resource.DatabaseName;
 
-        [Category("Resource"), DisplayName("Database Id")]
+        [Category("Resource"), DisplayName("Database ID")]
         public int? DatabaseId => _resource.DatabaseId;
 
         [Category("Resource"), DisplayName("Mode")]
@@ -44,10 +44,10 @@ namespace DBADashGUI.Deadlocks
                      + "DBCC PAGE takes it.  Null for resources that are not page based.")]
         public string Page => _resource.PageKey;
 
-        [Category("Resource"), DisplayName("HoBt Id")]
+        [Category("Resource"), DisplayName("HoBt ID")]
         public long? HobtId => _resource.HobtId;
 
-        [Category("Resource"), DisplayName("Associated Object Id")]
+        [Category("Resource"), DisplayName("Associated Object ID")]
         public long? AssociatedObjectId => _resource.AssociatedObjectId;
 
         [Category("Participants"), DisplayName("Owners"),
