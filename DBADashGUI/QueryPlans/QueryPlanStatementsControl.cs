@@ -17,7 +17,7 @@ namespace DBADashGUI.QueryPlans
     /// between statements.
     ///
     /// A batch or a procedure can hold dozens of statements and the question is nearly always which
-    /// one matters - so the list is sortable, the cost and elapsed columns carry bars, and the
+    /// one matters - so the list is sortable, the cost, time and row columns carry bars, and the
     /// statement text wraps over several lines so a row says what the statement is rather than
     /// only how it starts.  Choosing a row shows that statement's plan.
     /// </summary>
@@ -118,6 +118,7 @@ namespace DBADashGUI.QueryPlans
             _syncing = true;
             try
             {
+                BuildScales(summaries);
                 _grid.DataSource = BuildTable(summaries);
                 HideEmptyColumns(summaries);
                 FitHeaderWidths();
@@ -512,8 +513,9 @@ namespace DBADashGUI.QueryPlans
         }
 
         /// <summary>
-        /// The Cost % and Elapsed cells carry a bar under the number, so the dear or slow statement
-        /// stands out in a long list without reading every figure.
+        /// The cost, time and row cells carry a bar under the number, so the dear or slow statement
+        /// stands out in a long list without reading every figure.  Cost % and Elapsed are drawn to
+        /// their hidden share columns, the others to the largest in the list.
         /// </summary>
         private void Grid_CellPainting(object sender, DataGridViewCellPaintingEventArgs e)
         {
@@ -527,37 +529,41 @@ namespace DBADashGUI.QueryPlans
                 _ => null
             };
 
-            if (shareColumn is null) return;
-
-            // Below half a percent there is no bar worth drawing, and a two pixel stub under "0.0"
-            // reads as a smudge rather than a measurement.
-            if (_grid.Rows[e.RowIndex].Cells[shareColumn].Value is not double share || share < 0.005) return;
-
-            e.PaintBackground(e.CellBounds, true);
-
-            var inner = e.CellBounds;
-            var width = (int)Math.Round((inner.Width - 8) * Math.Min(1, share));
-            var bar = new Rectangle(inner.X + 4, inner.Bottom - 9, Math.Max(2, width), 5);
-
-            using (var brush = new SolidBrush(BarColour(share)))
+            if (shareColumn is not null)
             {
-                e.Graphics.FillRectangle(brush, bar);
+                var share = _grid.Rows[e.RowIndex].Cells[shareColumn].Value as double?;
+                PlanGridBars.Paint(e, share);
+                return;
             }
 
-            e.PaintContent(e.CellBounds);
-            e.Handled = true;
+            // The figure columns, against the largest in the list.
+            if (_scales.TryGetValue(name, out var scale))
+            {
+                var share = PlanGridBars.Share(_grid.Rows[e.RowIndex].Cells[name].Value, scale.Max);
+                PlanGridBars.Paint(e, share, scale.Neutral ? DashColors.BlueLight : null);
+            }
         }
 
         /// <summary>
-        /// The same low-to-high run the node bars on the plan use, so a colour means the same thing
-        /// in both places.
+        /// What the bar in a figure column is measured against, and whether it is coloured by size.
+        /// Estimated and actual rows share a scale - the pair is compared, and bars of different
+        /// lengths for the same number of rows would say something that is not true.  Rows are a
+        /// volume rather than a cost, so they stay one colour; cost and CPU run from blue to red.
         /// </summary>
-        private static Color BarColour(double share) => share switch
+        private readonly Dictionary<string, (double Max, bool Neutral)> _scales = [];
+
+        private void BuildScales(IReadOnlyList<PlanStatementSummary> summaries)
         {
-            >= 0.5 => DashColors.Fail,
-            >= 0.2 => DashColors.Warning,
-            _ => DashColors.BlueLight
-        };
+            _scales.Clear();
+            if (summaries.Count == 0) return;
+
+            _scales["EstimatedCost"] = (summaries.Max(s => s.EstimatedCost), false);
+            _scales["Cpu"] = (summaries.Max(s => (double)(s.CpuMs ?? 0)), false);
+
+            var rows = summaries.Max(s => Math.Max(s.EstimatedRows ?? 0, s.ActualRows ?? 0));
+            _scales["EstimatedRows"] = (rows, true);
+            _scales["ActualRows"] = (rows, true);
+        }
 
         private void Grid_CellToolTipTextNeeded(object sender, DataGridViewCellToolTipTextNeededEventArgs e)
         {
