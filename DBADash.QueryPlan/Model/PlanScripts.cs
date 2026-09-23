@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -168,26 +169,35 @@ namespace DBADash.QueryPlan.Model
         /// </summary>
         public static string ExpressionsUsedIn(PlanStatement? statement, string? text)
         {
-            if (statement is null || string.IsNullOrEmpty(text)) return string.Empty;
-
-            var used = PlanExpressions.NamesIn(text)
-                .Select(statement.ExpressionNamed)
-                .Where(expression => expression is not null)
-                .Distinct()
-                .ToList();
-
+            var used = ExpressionsIn(statement, text);
             if (used.Count == 0) return string.Empty;
 
             var notes = new StringBuilder("The values the plan works out that the text above refers to.").AppendLine();
 
             foreach (var expression in used)
             {
-                notes.Append("   ").Append(expression!.Name).Append(" = ").AppendLine(expression.DefinitionOneLine);
+                notes.Append("   ").Append(expression.Name).Append(" = ").AppendLine(expression.DefinitionOneLine);
 
                 if (expression.IsNested) notes.Append("      in full: ").AppendLine(expression.ExpandedOneLine);
             }
 
             return Environment.NewLine + "/* " + Commented(notes.ToString()) + "*/" + Environment.NewLine;
+        }
+
+        /// <summary>
+        /// The plan's own values that <paramref name="text"/> refers to, each once, in the order they
+        /// first appear - what <see cref="ExpressionsUsedIn"/> writes out, for a caller that lays
+        /// them out itself.
+        /// </summary>
+        public static IReadOnlyList<PlanExpression> ExpressionsIn(PlanStatement? statement, string? text)
+        {
+            if (statement is null || string.IsNullOrEmpty(text)) return [];
+
+            return PlanExpressions.NamesIn(text)
+                .Select(statement.ExpressionNamed)
+                .OfType<PlanExpression>()
+                .Distinct()
+                .ToList();
         }
 
         /// <summary>An operator as a note names it: what it is, and which node, since a plan has several of each.</summary>

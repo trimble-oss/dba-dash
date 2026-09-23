@@ -1199,8 +1199,8 @@ namespace DBADash.QueryPlan
             foreach (var defined in ChildElements(body, "DefinedValues")
                          .SelectMany(d => ChildElements(d, "DefinedValue")))
             {
-                if (ScalarString(defined) is not { Length: > 0 } expression) continue;
                 if (ChildElements(defined, "ColumnReference").FirstOrDefault() is not { } column) continue;
+                if ((ScalarString(defined) ?? ConcatenationDefinition(body, defined)) is not { Length: > 0 } expression) continue;
 
                 var name = Attribute(column, "Column") ?? Attribute(column, "ComputedColumn");
                 if (string.IsNullOrEmpty(name)) continue;
@@ -1212,6 +1212,29 @@ namespace DBADash.QueryPlan
 
                 yield return new PlanExpression(name!, qualifier, expression, op);
             }
+        }
+
+        /// <summary>
+        /// What a Concatenation's output column is: showplan gives it no expression, only the column
+        /// followed by the column each input supplies it from, so it is written as what it is - the
+        /// value from whichever input the row came from.
+        ///
+        /// Without this a range seek on a Merge Interval's output - CreatedByID &gt; [Expr1041] - has
+        /// a name with no meaning, when the meaning is the two branches that were concatenated.  Null
+        /// for anything else, where a DefinedValue with no expression is a column passed through.
+        /// </summary>
+        private static string? ConcatenationDefinition(XElement body, XElement defined)
+        {
+            if (body.Name.LocalName != "Concat") return null;
+
+            var inputs = ChildElements(defined, "ColumnReference")
+                .Skip(1)
+                .Select(c => Attribute(c, "Column") ?? Attribute(c, "ComputedColumn"))
+                .Where(name => !string.IsNullOrEmpty(name))
+                .Select(name => PlanExpressions.IsGeneratedName(name) ? "[" + name + "]" : name!)
+                .ToList();
+
+            return inputs.Count == 0 ? null : "Concatenation of " + string.Join(", ", inputs);
         }
 
         private static string? DescribeDefinedValues(XElement body)
