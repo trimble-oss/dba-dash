@@ -150,6 +150,13 @@ namespace DBADash.QueryPlan.Skia
             var bounds = ToSk(node.Bounds);
             var radius = _style.NodeCornerRadius;
 
+            // Behind the card and at every zoom, so a collapsed node is recognisable in a plan
+            // zoomed out to fit, where the toggle and the count are too small to read.
+            if (node.IsCollapsed && node.HiddenDescendantCount > 0)
+            {
+                DrawCollapsedStack(canvas, bounds, radius, fade);
+            }
+
             _fill.Color = Faded(Palette.NodeFill, fade);
             canvas.DrawRoundRect(bounds, radius, radius, _fill);
 
@@ -206,7 +213,84 @@ namespace DBADash.QueryPlan.Skia
                 {
                     DrawCollapseToggle(canvas, node, toggle, fade);
                 }
+
+                if (node.IsCollapsed && node.HiddenDescendantCount > 0)
+                {
+                    DrawHiddenCount(canvas, node, fade);
+                }
             }
+        }
+
+        // How far each card of the stack behind a collapsed node peeks out to the right, and how
+        // much shorter it is at top and bottom.  Small enough to stay inside the narrowest column
+        // spacing along with the count.
+        private const float StackStep = 5f;
+        private const float StackInset = 3f;
+
+        /// <summary>
+        /// Two more cards behind a collapsed node, peeking out on the side its inputs would be on -
+        /// the shape of a pile, which says there is more under it without needing to be read.
+        /// </summary>
+        private void DrawCollapsedStack(SKCanvas canvas, SKRect bounds, float radius, float fade)
+        {
+            // Everything but the card itself: a node that is faded is see-through, and the cards
+            // would show through it.
+            canvas.Save();
+            using (var card = new SKRoundRect(bounds, radius, radius))
+            {
+                canvas.ClipRoundRect(card, SKClipOperation.Difference, antialias: true);
+            }
+
+            for (var layer = 2; layer >= 1; layer--)
+            {
+                var card = new SKRect(
+                    bounds.Left + (StackStep * layer),
+                    bounds.Top + (StackInset * layer),
+                    bounds.Right + (StackStep * layer),
+                    bounds.Bottom - (StackInset * layer));
+
+                _fill.Color = Faded(Palette.NodeFill, fade);
+                canvas.DrawRoundRect(card, radius, radius, _fill);
+
+                _stroke.Color = Faded(Palette.DetailText, fade);
+                _stroke.StrokeWidth = 1;
+                canvas.DrawRoundRect(card, radius, radius, _stroke);
+            }
+
+            canvas.Restore();
+        }
+
+        /// <summary>
+        /// How many operators the collapsed node is hiding, as a "+N" pill over the edge of the
+        /// stack.  The tooltip has the exact number; this is for reading it off the plan.
+        /// </summary>
+        private void DrawHiddenCount(SKCanvas canvas, PlanNode node, float fade)
+        {
+            var text = node.HiddenDescendantCount > 99 ? "99+" : "+" + node.HiddenDescendantCount;
+            var font = _fonts.Metric;
+
+            var width = font.MeasureText(text, (SKPaint?)null) + 10;
+            var height = font.Size + 6;
+            var bounds = ToSk(node.Bounds);
+
+            var pill = new SKRect(
+                bounds.Right + (StackStep * 2) - (width / 2),
+                bounds.MidY - (height / 2),
+                bounds.Right + (StackStep * 2) + (width / 2),
+                bounds.MidY + (height / 2));
+
+            _fill.Color = Faded(Palette.DetailText, fade);
+            canvas.DrawRoundRect(pill, height / 2, height / 2, _fill);
+
+            // The card's own colour on the pill: the two are the light and dark of every theme, so
+            // one reads against the other in all of them.
+            _text.Color = Faded(Palette.NodeFill, fade);
+            canvas.DrawText(
+                text,
+                pill.Left + 5,
+                pill.MidY - ((font.Metrics.Ascent + font.Metrics.Descent) / 2),
+                font,
+                _text);
         }
 
         /// <summary>
