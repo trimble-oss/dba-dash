@@ -85,9 +85,13 @@ namespace DBADashGUI.Deadlocks
 
         private void AddTab(IReadOnlyList<DeadlockGraph> graphs, string sourceXml, string fileName, DBADashContext context)
         {
-            var open = _documents.TabPages.Cast<TabPage>()
-                .FirstOrDefault(p => p.Controls.Count > 0 && p.Controls[0] is DeadlockViewerControl viewer &&
-                                     string.Equals(viewer.SourceXml, sourceXml, StringComparison.Ordinal));
+            // Only fold into an existing tab when there is a real key to match on: two graphs opened
+            // without a source (null/blank) are not the same graph, and must not collapse into one.
+            var open = string.IsNullOrWhiteSpace(sourceXml)
+                ? null
+                : _documents.TabPages.Cast<TabPage>()
+                    .FirstOrDefault(p => p.Controls.Count > 0 && p.Controls[0] is DeadlockViewerControl viewer &&
+                                         string.Equals(viewer.SourceXml, sourceXml, StringComparison.Ordinal));
 
             if (open is not null)
             {
@@ -128,7 +132,8 @@ namespace DBADashGUI.Deadlocks
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
             // Close the deadlock in front, as in a browser or an editor.
-            if (keyData is (Keys.Control | Keys.W) or (Keys.Control | Keys.F4) && _documents.SelectedTab is { } page)
+            var isCloseHotkey = keyData is (Keys.Control | Keys.W) or (Keys.Control | Keys.F4);
+            if (isCloseHotkey && _documents.SelectedTab is { } page)
             {
                 CloseTab(page);
                 return true;

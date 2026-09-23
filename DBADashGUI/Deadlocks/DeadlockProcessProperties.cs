@@ -21,7 +21,7 @@ namespace DBADashGUI.Deadlocks
         {
             _process = process ?? throw new ArgumentNullException(nameof(process));
             ExecutionStack = process.ExecutionStack
-                .Select((frame, i) => new DeadlockFrameProperties(frame, i, ReferenceEquals(frame, process.PrimaryFrame)))
+                .Select(frame => new DeadlockFrameProperties(frame, ReferenceEquals(frame, process.PrimaryFrame)))
                 .ToArray();
         }
 
@@ -107,13 +107,11 @@ namespace DBADashGUI.Deadlocks
     public sealed class DeadlockFrameProperties
     {
         private readonly DeadlockFrame _frame;
-        private readonly int _index;
         private readonly bool _isPrimary;
 
-        public DeadlockFrameProperties(DeadlockFrame frame, int index, bool isPrimary)
+        public DeadlockFrameProperties(DeadlockFrame frame, bool isPrimary)
         {
             _frame = frame ?? throw new ArgumentNullException(nameof(frame));
-            _index = index;
             _isPrimary = isPrimary;
         }
 
