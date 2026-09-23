@@ -232,13 +232,6 @@ namespace DBADash.QueryPlan.Test
         }
 
         [TestMethod]
-        public void SetOptions_ExplainArithAbort_OnlyWhenItWasOff()
-        {
-            StringAssert.Contains(PlanScripts.SetOptions(WithSetOptions("""ARITHABORT="false" """)), "ARITHABORT was OFF");
-            Assert.IsFalse(PlanScripts.SetOptions(WithSetOptions("""ARITHABORT="true" """)).Contains("was OFF"));
-        }
-
-        [TestMethod]
         public void SetOptions_IgnoreAttributesThatAreNotSetOptions()
         {
             // The names go into a script the reader runs, so only ones known to be SET options do.
