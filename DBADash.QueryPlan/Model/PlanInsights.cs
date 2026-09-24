@@ -108,13 +108,9 @@ namespace DBADash.QueryPlan.Model
                     "The query waited " + Milliseconds(wait) + " for its memory grant before it could start running."));
             }
 
-            if (statement.QueryTimeStats is { UdfElapsedMs: > 0 } times)
+            if (ScalarUdfInsight(statement) is { } udfInsight)
             {
-                insights.Add(new PlanInsight(
-                    PlanWarningSeverity.Warning,
-                    "Scalar user-defined functions took " + Milliseconds(times.UdfElapsedMs!.Value) +
-                    (times.ElapsedMs is { } elapsed ? " of the statement's " + Milliseconds(elapsed) : string.Empty) +
-                    ". The work they do is not shown in this plan."));
+                insights.Add(udfInsight);
             }
 
             var changed = statement.Parameters.Where(p => p.CompiledValueDiffers).ToList();
@@ -136,7 +132,8 @@ namespace DBADash.QueryPlan.Model
                         .Select(w => w.WaitType + " (" + Milliseconds(w.WaitTimeMs) + ")")) + "."));
             }
 
-            if (!string.IsNullOrEmpty(statement.NonParallelPlanReason))
+            // Said above, as part of the scalar UDF card, rather than repeated here as a plain reason code.
+            if (!IsUdfNonParallelReason(statement.NonParallelPlanReason) && !string.IsNullOrEmpty(statement.NonParallelPlanReason))
             {
                 insights.Add(new PlanInsight(
                     PlanWarningSeverity.Information,
@@ -342,6 +339,52 @@ namespace DBADash.QueryPlan.Model
         };
 
         private static string Milliseconds(long ms) => ms.ToString("N0", CultureInfo.CurrentCulture) + " ms";
+
+        /// <summary>
+        /// One card for everything a scalar UDF is worth saying, rather than one about its time and
+        /// another about it blocking parallelism - both are the same UDF, and a reader should not
+        /// have to work that out from two separate cards.  Null when neither is true.
+        /// </summary>
+        private static PlanInsight? ScalarUdfInsight(PlanStatement statement)
+        {
+            var times = statement.QueryTimeStats;
+            var udfTimes = new List<string>();
+            if (times?.UdfElapsedMs is { } udfElapsed and > 0) udfTimes.Add(Milliseconds(udfElapsed) + " elapsed");
+            if (times?.UdfCpuMs is { } udfCpu and > 0) udfTimes.Add(Milliseconds(udfCpu) + " CPU");
+
+            // Reported by the optimiser itself at compile time, so this is true even when there is no
+            // actual run to measure the times above against.
+            var blocksParallelism = IsUdfNonParallelReason(statement.NonParallelPlanReason);
+
+            if (udfTimes.Count == 0 && !blocksParallelism) return null;
+
+            var text = new StringBuilder("Scalar user-defined functions");
+
+            if (udfTimes.Count > 0)
+            {
+                text.Append(" took ").Append(string.Join(", ", udfTimes));
+                if (times?.ElapsedMs is { } elapsed) text.Append(" of the statement's ").Append(Milliseconds(elapsed));
+                if (blocksParallelism) text.Append(", and force this plan to run on a single thread");
+            }
+            else
+            {
+                text.Append(" force this plan to run on a single thread");
+            }
+
+            text.Append(". They run once per row")
+                .Append(blocksParallelism ? " and block parallelism" : string.Empty)
+                .Append("; the work they do is not shown in this plan")
+                .Append(blocksParallelism ? " - consider an inline table-valued function or rewriting the logic without a UDF" : string.Empty)
+                .Append('.');
+
+            return new PlanInsight(PlanWarningSeverity.Critical, text.ToString());
+        }
+
+        /// <summary>The reason code showplan uses when a T-SQL UDF stops a plan going parallel.</summary>
+        private const string TSqlUdfNonParallelReason = "TSQLUserDefinedFunctionsNotParallelizable";
+
+        private static bool IsUdfNonParallelReason(string? reason) =>
+            string.Equals(reason, TSqlUdfNonParallelReason, StringComparison.OrdinalIgnoreCase);
 
         /// <summary>
         /// Showplan's reason codes as words - MaxDOPSetToOne as "max DOP set to one" - keeping runs
