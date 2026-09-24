@@ -811,11 +811,26 @@ namespace DBADash.QueryPlan
                         break;
 
                     case "PlanAffectingConvert":
-                        results.Add(new PlanWarning(
-                            PlanWarningKind.PlanAffectingConvert,
-                            Attribute(element, "ConvertIssue") ?? "Plan affecting conversion",
-                            Attribute(element, "Expression"),
-                            PlanWarningSeverity.Warning));
+                        {
+                            // ConvertIssue tells us what the implicit conversion cost.  "Seek Plan"
+                            // means it stopped an index seek - the column, not a scalar, is the side
+                            // being converted, so the predicate is no longer sargable - which is
+                            // often the answer to "why is this slow".  "Cardinality Estimate"
+                            // only skews the row estimate. 
+                            var convertIssue = Attribute(element, "ConvertIssue");
+                            var stopsSeek = string.Equals(
+                                convertIssue?.Replace(" ", string.Empty),
+                                "SeekPlan",
+                                StringComparison.OrdinalIgnoreCase);
+
+                            results.Add(new PlanWarning(
+                                PlanWarningKind.PlanAffectingConvert,
+                                stopsSeek
+                                    ? "Implicit conversion might be preventing an index seek"
+                                    : convertIssue ?? "Plan affecting conversion",
+                                Attribute(element, "Expression"),
+                                stopsSeek ? PlanWarningSeverity.Critical : PlanWarningSeverity.Warning));
+                        }
                         break;
 
                     case "MemoryGrantWarning":

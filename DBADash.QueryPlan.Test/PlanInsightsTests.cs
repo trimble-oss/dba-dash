@@ -73,6 +73,91 @@ namespace DBADash.QueryPlan.Test
         }
 
         [TestMethod]
+        public void ScalarUdfBlockingParallelism_IsCalledOutSpecifically()
+        {
+            // The optimiser's own reason code for going serial because of a scalar UDF - reported
+            // at compile time, so this catches the UDF even on an estimated plan with no run to
+            // measure UdfElapsedMs against.
+            var statement = Parse(
+                Op(1, "Table Scan", "Table Scan", ""),
+                queryPlanAttributes: "NonParallelPlanReason=\"TSQLUserDefinedFunctionsNotParallelizable\"");
+
+            var insights = PlanInsights.ForStatement(statement);
+
+            var udf = insights.Single(i => i.Text.StartsWith("Scalar user-defined functions"));
+            Assert.AreEqual(PlanWarningSeverity.Critical, udf.Severity);
+            StringAssert.Contains(udf.Text, "force this plan to run on a single thread");
+            Assert.IsFalse(
+                insights.Any(i => i.Text.StartsWith("The plan runs on a single thread")),
+                "The specific UDF card replaces the generic single-thread one, rather than both saying it.");
+        }
+
+        [TestMethod]
+        public void OtherNonParallelReasons_StillGetTheGenericCard()
+        {
+            var statement = Parse(Op(1, "Table Scan", "Table Scan", ""), queryPlanAttributes: "NonParallelPlanReason=\"MaxDOPSetToOne\"");
+
+            var insight = PlanInsights.ForStatement(statement).Single(i => i.Text.StartsWith("The plan runs on a single thread"));
+
+            Assert.AreEqual(PlanWarningSeverity.Information, insight.Severity);
+            StringAssert.Contains(insight.Text, "max DOP set to one");
+        }
+
+        [TestMethod]
+        public void ScalarUdfTime_IsCalledOut_WithElapsedAndCpu()
+        {
+            var statement = Parse(
+                Op(1, "Table Scan", "Table Scan", Rows(10)) +
+                """<QueryTimeStats ElapsedTime="900" CpuTime="850" UdfElapsedTime="400" UdfCpuTime="300" />""");
+
+            var insight = PlanInsights.ForStatement(statement)
+                .Single(i => i.Text.StartsWith("Scalar user-defined functions took"));
+
+            Assert.AreEqual(PlanWarningSeverity.Critical, insight.Severity);
+            StringAssert.Contains(insight.Text, "400 ms elapsed");
+            StringAssert.Contains(insight.Text, "300 ms CPU");
+            StringAssert.Contains(insight.Text, "of the statement's 900 ms");
+        }
+
+        [TestMethod]
+        public void ScalarUdfTime_CpuOnly_StillCalledOut()
+        {
+            // SQL Server always reports both together in practice, but the message should stand on
+            // whichever figure is actually present rather than assume both.
+            var statement = Parse(
+                Op(1, "Table Scan", "Table Scan", Rows(10)) +
+                """<QueryTimeStats ElapsedTime="900" CpuTime="850" UdfCpuTime="300" />""");
+
+            var insight = PlanInsights.ForStatement(statement)
+                .Single(i => i.Text.StartsWith("Scalar user-defined functions took"));
+
+            StringAssert.Contains(insight.Text, "300 ms CPU");
+            Assert.IsFalse(insight.Text.Contains("elapsed"), "No elapsed figure was reported, so none is claimed.");
+        }
+
+        [TestMethod]
+        public void ScalarUdfTimeAndParallelismBlock_AreOneCard_NotTwo()
+        {
+            // Both facts are about the same UDF, so the reader gets one card rather than two saying
+            // related things separately.
+            var statement = Parse(
+                Op(1, "Table Scan", "Table Scan", Rows(10)) +
+                """<QueryTimeStats ElapsedTime="900" CpuTime="850" UdfElapsedTime="400" UdfCpuTime="300" />""",
+                queryPlanAttributes: "NonParallelPlanReason=\"TSQLUserDefinedFunctionsNotParallelizable\"");
+
+            var insights = PlanInsights.ForStatement(statement);
+            var udfInsights = insights.Where(i => i.Text.StartsWith("Scalar user-defined functions")).ToList();
+
+            Assert.AreEqual(1, udfInsights.Count, "One card says everything about the UDF, rather than two.");
+
+            var udf = udfInsights.Single();
+            StringAssert.Contains(udf.Text, "400 ms elapsed");
+            StringAssert.Contains(udf.Text, "300 ms CPU");
+            StringAssert.Contains(udf.Text, "force this plan to run on a single thread");
+            Assert.IsFalse(insights.Any(i => i.Text.StartsWith("The plan runs on a single thread")));
+        }
+
+        [TestMethod]
         public void Operator_WithNothingToSay_HasNoInsights()
         {
             var statement = Parse(Op(1, "Table Scan", "Table Scan", Rows(10)));
@@ -173,6 +258,26 @@ namespace DBADash.QueryPlan.Test
         }
 
         [TestMethod]
+        public void AnImplicitConversionThatStopsASeek_IsCritical_AndSaysItPreventsTheSeek()
+        {
+            // Showplan reports ConvertIssue="Seek Plan" when the column - not a scalar - is the side
+            // being converted, so the predicate is no longer sargable and the index can only be
+            // scanned.  That is a bigger deal than a skewed estimate, so it is called out plainly
+            // and ranked Critical.
+            var statement = Parse(
+                SeekPlanConvert("CONVERT_IMPLICIT(nvarchar(50),[db].[dbo].[T].[Reference],0)=[@p1]") +
+                Op(0, "Index Scan", "Index Scan", Rows(10),
+                    Predicate("CONVERT_IMPLICIT(nvarchar(50),[db].[dbo].[T].[Reference],0)=[@p1]")));
+
+            var insight = PlanInsights.ForStatement(statement)
+                .Single(i => i.Text.StartsWith("Implicit conversion might be preventing an index seek"));
+
+            Assert.AreEqual(PlanWarningSeverity.Critical, insight.Severity,
+                "A conversion that stops a seek is almost always the answer to why the query is slow.");
+            StringAssert.Contains(insight.Text, "CONVERT_IMPLICIT(nvarchar(50),[db].[dbo].[T].[Reference],0)");
+        }
+
+        [TestMethod]
         public void AConversionReportedAgainstTheStatement_IsTracedToTheOperatorThatEvaluatesIt()
         {
             // Showplan reports a plan affecting convert against the statement, not against an
@@ -260,6 +365,13 @@ namespace DBADash.QueryPlan.Test
             string.Concat(expressions.Select(expression =>
                 $"""<PlanAffectingConvert ConvertIssue="Cardinality Estimate" Expression="{expression}" />""")) +
             "</Warnings>";
+
+        /// <summary>
+        /// A plan affecting convert showplan reports as "Seek Plan": the conversion is on the column
+        /// itself, so it stops the index seek - the sargability case.
+        /// </summary>
+        private static string SeekPlanConvert(string expression) =>
+            $"""<Warnings><PlanAffectingConvert ConvertIssue="Seek Plan" Expression="{expression}" /></Warnings>""";
 
         /// <summary>A residual predicate, which is where a conversion shows up in an operator.</summary>
         private static string Predicate(string expression) =>
