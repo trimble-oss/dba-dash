@@ -90,27 +90,42 @@ DECLARE @LastMemoryDump DATETIMEOFFSET
 DECLARE @DumpCount INT
 IF OBJECT_ID('sys.dm_server_memory_dumps') IS NOT NULL
 BEGIN
-	select @LastMemoryDump=MAX(creation_time),@DumpCount=COUNT(*) 
-	from sys.dm_server_memory_dumps
+	SELECT @LastMemoryDump=MAX(creation_time),@DumpCount=COUNT(*) 
+	FROM sys.dm_server_memory_dumps
 END
 
 DECLARE @DBMailStatus NVARCHAR(500)
-DECLARE @SysMailHelpStatus TABLE(
-	Status NVARCHAR(7) NULL
+/*
+	sysmail_help_status_sp writes an error to the error log if Database Mail XPs is disabled - avoid additional noise in the error log by checking the configuration first.
+	15281| prefix is kept for backward compatibility with existing rules that exclude this error status.
+*/
+IF EXISTS (
+    SELECT 1 
+    FROM sys.configurations 
+    WHERE name = 'Database Mail XPs' 
+    AND value_in_use = 1
 )
-BEGIN TRY
-	INSERT INTO @SysMailHelpStatus
-	(
-		Status
-	)
-	EXEC msdb.dbo.sysmail_help_status_sp
+BEGIN
+    BEGIN TRY
+        DECLARE @SysMailHelpStatus TABLE (
+            Status NVARCHAR(7) NULL
+        );
 
-	SELECT @DBMailStatus = Status  
-	FROM @SysMailHelpStatus
-END TRY
-BEGIN CATCH
-	SET @DBMailStatus =CAST(ERROR_NUMBER() AS NVARCHAR(MAX)) + '|' + ERROR_MESSAGE()
-END CATCH
+        -- Use dynamic SQL to prevent compile-time validation errors when disabled
+        INSERT INTO @SysMailHelpStatus (Status)
+        EXEC sp_executesql N'EXEC msdb.dbo.sysmail_help_status_sp;';
+
+        SELECT TOP (1) @DBMailStatus = Status 
+        FROM @SysMailHelpStatus;
+    END TRY
+    BEGIN CATCH
+        SET @DBMailStatus = CAST(ERROR_NUMBER() AS NVARCHAR(10)) + '|' + ERROR_MESSAGE();
+    END CATCH
+END
+ELSE
+BEGIN
+    SET @DBMailStatus = '15281|Database Mail XPs component is turned off in sp_configure.';
+END
 
 SELECT @ActivePowerPlan ActivePowerPlanGUID,
        CASE
