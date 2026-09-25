@@ -27,6 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="AsyncKeyedLock" />
     <PackageReference Include="AvalonEdit" />
     <PackageReference Include="ClosedXML" />
     <PackageReference Include="DiffPlex" />
@@ -41,13 +42,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DBADash\DBADash.csproj" />
+    <ProjectReference Include="..\DBADashCommon\DBADashCommon.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="About.cs">
-      <SubType>Form</SubType>
-    </Compile>
     <Compile Update="CodeEditor\CodeEditorForm.cs">
       <SubType>Form</SubType>
     </Compile>

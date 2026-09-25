@@ -91,6 +91,7 @@
     <PackageReference Include="System.ServiceProcess.ServiceController" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DBADashCoreGUI\DBADashCoreGUI.csproj" />
     <ProjectReference Include="..\DBADashSharedGUI\DBADashSharedGUI.csproj" />
     <ProjectReference Include="..\DBADash\DBADash.csproj" />
   </ItemGroup>

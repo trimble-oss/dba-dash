@@ -211,6 +211,7 @@
     <ProjectReference Include="..\DBADash.Deadlock.Skia\DBADash.Deadlock.Skia.csproj" />
     <ProjectReference Include="..\DBADash.QueryPlan\DBADash.QueryPlan.csproj" />
     <ProjectReference Include="..\DBADash.QueryPlan.Skia\DBADash.QueryPlan.Skia.csproj" />
+    <ProjectReference Include="..\DBADashCoreGUI\DBADashCoreGUI.csproj" />
     <ProjectReference Include="..\DBADashSharedGUI\DBADashSharedGUI.csproj" />
     <ProjectReference Include="..\DBADash\DBADash.csproj" />
   </ItemGroup>

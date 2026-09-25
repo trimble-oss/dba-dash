@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net10.0-windows7.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <Configurations>Debug;Release;CLI</Configurations>
+    <NoWarn>$(NoWarn);NU1701</NoWarn>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+
+    <!--
+      GUI pieces that need the DBADash collection/upgrade code (About, upgrade prompts), shared by the GUI and the
+      service config tool.  Kept out of DBADashSharedGUI so that project doesn't depend on DBADash and can be used by
+      a GUI app that doesn't ship the collection service.
+    -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\GlobalAssemblyInfo.cs" Link="Properties\GlobalAssemblyInfo.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Octokit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DBADash\DBADash.csproj" />
+    <ProjectReference Include="..\DBADashSharedGUI\DBADashSharedGUI.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="About.cs">
+      <SubType>Form</SubType>
+    </Compile>
+  </ItemGroup>
+
+</Project>

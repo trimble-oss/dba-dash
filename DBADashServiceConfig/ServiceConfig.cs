@@ -1,4 +1,5 @@
-﻿using DBADash;
+﻿using DBADashCoreGUI;
+using DBADash;
 using DBADash.InstanceMetadata;
 using DBADash.Messaging;
 using DBADashGUI.Theme;
@@ -790,7 +791,7 @@ namespace DBADashServiceConfig
             cboDeleteAction.SelectedIndex = 0;
             dgvConnections.ColumnHeaderMouseClick += dgvConnections_ColumnHeaderMouseClick;
 
-            await CommonShared.CheckForIncompleteUpgrade();
+            await AboutHelper.CheckForIncompleteUpgrade();
             if (Upgrade.IsUpgradeIncomplete) return;
 
             cboIOLevel.DataSource = Enum.GetValues(typeof(DBADashSource.IOCollectionLevels));
@@ -2528,11 +2529,11 @@ namespace DBADashServiceConfig
         {
             if (collectionConfig.DestinationConnection.Type == ConnectionType.SQL)
             {
-                CommonShared.ShowAbout(collectionConfig.DestinationConnection.ConnectionString, this, false, collectionConfig.UpgradeAllowPreRelease);
+                AboutHelper.ShowAbout(collectionConfig.DestinationConnection.ConnectionString, this, false, collectionConfig.UpgradeAllowPreRelease);
             }
             else
             {
-                CommonShared.ShowAbout(this, false, collectionConfig.UpgradeAllowPreRelease);
+                AboutHelper.ShowAbout(this, false, collectionConfig.UpgradeAllowPreRelease);
             }
         }
 

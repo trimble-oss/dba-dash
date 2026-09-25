@@ -1,4 +1,5 @@
-﻿using DBADash;
+﻿using DBADashCoreGUI;
+using DBADash;
 using DBADash.Messaging;
 using DBADashGUI.AI;
 using DBADashGUI.AgentJobs;
@@ -508,7 +509,7 @@ namespace DBADashGUI
         {
             tvBoldFont = new Font(tv1.Font, FontStyle.Bold);
             AllTabs = tabs.TabPages.OfType<TabPage>().ToArray();
-            await CommonShared.CheckForIncompleteUpgrade();
+            await AboutHelper.CheckForIncompleteUpgrade();
             if (Upgrade.IsUpgradeIncomplete) return;
             if (Properties.Settings.Default.SettingsUpgradeRequired)
             {
@@ -2387,7 +2388,7 @@ namespace DBADashGUI
 
         private void AboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            CommonShared.ShowAbout(Common.ConnectionString, this, true);
+            AboutHelper.ShowAbout(Common.ConnectionString, this, true);
         }
 
         private async void BttnSearch_Click(object sender, EventArgs e)
