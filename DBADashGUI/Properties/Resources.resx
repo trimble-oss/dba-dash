@@ -154,12 +154,6 @@
   <data name="Alert_OK" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Alert_OK.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="AutosizeStretch_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\AutosizeStretch_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="SaveTable_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\SaveTable_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="StopTime_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\StopTime_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -177,9 +171,6 @@
   </data>
   <data name="WordWrap_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\WordWrap_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="DeleteColumn_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\DeleteColumn_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Event_594" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Event_594.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -202,17 +193,11 @@
   <data name="Percentage_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Percentage_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="JsonFile" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\JsonFile.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="ZoomToFit" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\ZoomToFit.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="ServiceConfigToolName" xml:space="preserve">
     <value>DBADashServiceConfigTool.exe</value>
-  </data>
-  <data name="PrettyCode" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\PrettyCode.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="arrow_Forward_16xLG" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\arrow_Forward_16xLG.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -298,9 +283,6 @@
   <data name="SettingsOutline_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\SettingsOutline_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="StopFilter_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\StopFilter_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="Database_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Database_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -352,9 +334,6 @@
   <data name="AddComputedField_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\AddComputedField_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="SelectCell_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\SelectCell_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="FilteredTextBox_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\FilteredTextBox_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -378,9 +357,6 @@
   </data>
   <data name="StatusOK_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\StatusOK_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="zippedFile" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\zippedFile.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Select" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Select.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -412,9 +388,6 @@
   <data name="LineChart_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\LineChart_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="MarkdownFile" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\MarkdownFile.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="Tick_Blue_32x32_72" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\112_Tick_Blue_32x32_72.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -424,17 +397,8 @@
   <data name="history" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\history.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="SelectTable" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\SelectTable.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="TableScript_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\TableScript_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="PivotTable" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\PivotTable.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="XmlFile" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\XmlFile.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Inline_16x1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Inline_16x1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -447,9 +411,6 @@
   </data>
   <data name="ASX_Copy_yellow_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\ASX_Copy_yellow_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="EditFilter_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\EditFilter_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="StatusCriticalError_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\StatusCriticalError_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -504,12 +465,6 @@
   </data>
   <data name="Next_grey_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Next_grey_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="FreezeColumn_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\FreezeColumn_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="TextLeft" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\TextLeft.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="toolbox_16xLG" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\toolbox_16xLG.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>

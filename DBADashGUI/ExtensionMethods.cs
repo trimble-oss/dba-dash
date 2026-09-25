@@ -284,47 +284,10 @@ namespace DBADashGUI
             Process.Start(psi);
         }
 
-        public static List<ISelectable> ToSelectableList(this DataGridViewColumnCollection columns) => columns
-            .Cast<DataGridViewColumn>()
-            .Select(column => new SelectableColumn(column) as ISelectable)
-            .ToList();
-
-        public static void ApplyVisibility(this DataGridViewColumnCollection columns, List<ISelectable> selectables)
-        {
-            // Columns are keyed by HeaderText, which is not guaranteed unique (e.g. a visible column aliased to the
-            // same header as a hidden backing column).  Keep the first occurrence rather than throwing on duplicates.
-            var columnDict = new Dictionary<string, DataGridViewColumn>();
-            foreach (var c in columns.Cast<DataGridViewColumn>())
-            {
-                columnDict.TryAdd(c.HeaderText, c);
-            }
-
-            foreach (var selectable in selectables)
-            {
-                if (columnDict.TryGetValue(selectable.Name, out var column))
-                {
-                    column.Visible = selectable.IsVisible;
-                }
-            }
-        }
-
         public static void ApplyVisibility(this Dictionary<string, ColumnMetaData> metrics,
             List<ISelectable> selectables) => selectables.Where(s => metrics.ContainsKey(s.Name))
             .ToList()
             .ForEach(s => metrics[s.Name].IsVisible = s.IsVisible);
-
-        public static DialogResult PromptColumnSelection(this DataGridView dgv)
-        {
-            using var frm = new SelectColumns() { Items = dgv.Columns.ToSelectableList() };
-            frm.ApplyTheme(DBADashUser.SelectedTheme);
-            frm.ShowDialog(dgv);
-            if (frm.DialogResult == DialogResult.OK)
-            {
-                dgv.Columns.ApplyVisibility(frm.Items);
-            }
-
-            return frm.DialogResult;
-        }
 
         public static double RoundUpToSignificantFigures(this double num, int n = 1)
         {
@@ -336,16 +299,6 @@ namespace DBADashGUI
             double magnitude = Math.Pow(10, power);
             long shifted = Convert.ToInt64(Math.Ceiling(num * magnitude));
             return shifted / magnitude;
-        }
-
-        public static List<ISelectable> ToSelectableList(this List<string> list)
-        {
-            return list.Select(s => new SelectableString(s) as ISelectable).ToList();
-        }
-
-        public static object DBNullToNull(this object obj)
-        {
-            return obj == DBNull.Value ? null : obj;
         }
 
         // Read a DataRow cell as an int, treating DBNull/null as 0.
@@ -432,25 +385,6 @@ namespace DBADashGUI
 
             // If the key does not exist or the value is not a double, return the default value
             return defaultValue;
-        }
-
-        public static bool IsNumericType(this Type type)
-        {
-            return Type.GetTypeCode(type) switch
-            {
-                TypeCode.Byte => true,
-                TypeCode.Decimal => true,
-                TypeCode.Double => true,
-                TypeCode.Int16 => true,
-                TypeCode.Int32 => true,
-                TypeCode.Int64 => true,
-                TypeCode.SByte => true,
-                TypeCode.Single => true,
-                TypeCode.UInt16 => true,
-                TypeCode.UInt32 => true,
-                TypeCode.UInt64 => true,
-                _ => false
-            };
         }
 
         public static SqlParameter Clone(this SqlParameter original)
@@ -581,17 +515,6 @@ namespace DBADashGUI
             }
 
             return Color.FromArgb((int)(r * 255), (int)(g * 255), (int)(b * 255));
-        }
-
-        public static string StripInvalidXmlChars(this string text)
-        {
-            var validXml = new StringBuilder();
-            foreach (var c in text.Where(XmlConvert.IsXmlChar))
-            {
-                validXml.Append(c);
-            }
-
-            return validXml.ToString();
         }
 
         public static string RemoveHexPrefix(this string hexString)
@@ -817,26 +740,6 @@ namespace DBADashGUI
                 SqlDbType.Xml => typeof(string), // For XML data, string is a common choice, but you might want to use XmlDocument or XDocument in some cases.
                 _ => throw new ArgumentOutOfRangeException(nameof(sqlDbType), $"Unsupported SqlDbType: {sqlDbType}")
             };
-        }
-
-        /// <summary>
-        /// Infers the data type of a DataGridViewColumn based on the first non-null value in the column, or uses ValueType of the column where available.
-        /// </summary>
-        /// <param name="column">The DataGridViewColumn to infer the type for.</param>
-        /// <returns>The inferred data type, or typeof(string) if the column is empty or the DataGridView is not set.</returns>
-        public static Type InferColumnType(this DataGridViewColumn column)
-        {
-            if (column.ValueType != null)
-            {
-                return column.ValueType;
-            }
-            var dgv = column.DataGridView;
-            if (dgv == null) return typeof(string);
-            var firstNonNullValue = dgv.Rows.Cast<DataGridViewRow>()
-                .Select(row => row.Cells[column.Name].Value)
-                .FirstOrDefault(value => value != null);
-
-            return firstNonNullValue?.GetType() ?? typeof(string);
         }
 
         public static void ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing(this DataGridViewColumnCollection columns)
