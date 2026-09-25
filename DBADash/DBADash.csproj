@@ -188,6 +188,7 @@
   </ItemGroup>
   <ItemGroup>
     <!-- Deadlock parsing / signature for the deadlock collection.  Platform neutral and dependency free. -->
+    <ProjectReference Include="..\DBADashCommon\DBADashCommon.csproj" />
     <ProjectReference Include="..\DBADash.Deadlock\DBADash.Deadlock.csproj" />
   </ItemGroup>
   <ItemGroup>

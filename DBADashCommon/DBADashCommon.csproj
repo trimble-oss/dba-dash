@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Library</OutputType>
+    <Deterministic>True</Deterministic>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <NeutralLanguage>en-GB</NeutralLanguage>
+    <Configurations>Debug;Release;CLI</Configurations>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <IsPackable>false</IsPackable>
+
+    <!--
+      Small, dependency-light helpers used by both the collection service and the GUI projects.  The GUI projects
+      reference this rather than the whole of DBADash, so a GUI app that doesn't need the collection service (e.g. a
+      stand-alone viewer) doesn't have to ship it.  Keep this project free of heavy dependencies and of UI.
+    -->
+    <UseWindowsForms>false</UseWindowsForms>
+    <UseWPF>false</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\GlobalAssemblyInfo.cs" Link="Properties\GlobalAssemblyInfo.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" />
+  </ItemGroup>
+
+</Project>

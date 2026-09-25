@@ -5,7 +5,6 @@ using DBADash;
 using DBADashGUI;
 using DBADashGUI.SchemaCompare;
 using DBADashGUI.Theme;
-using Microsoft.SqlServer.Management.Common;
 using System.Data;
 using System.Diagnostics;
 using System.IO;
@@ -26,7 +25,7 @@ namespace DBADashSharedGUI
         {
             if (!IsValidUrl(url))
             {
-                throw new InvalidArgumentException("Invalid URL: " + url);
+                throw new ArgumentException("Invalid URL: " + url, nameof(url));
             }
 
             var psi = new ProcessStartInfo(url) { UseShellExecute = true };
@@ -72,42 +71,6 @@ namespace DBADashSharedGUI
         }
 
         [SupportedOSPlatform("windows")]
-        public static void ShowAbout(IWin32Window owner, bool StartGUIOnUpgrade, bool includePreRelease = false)
-        {
-            using About frm = new()
-            {
-                DBVersion = new Version(),
-                StartGUIOnUpgrade = StartGUIOnUpgrade,
-                IncludePreRelease = includePreRelease
-            };
-            frm.ShowDialog(owner);
-        }
-
-        [SupportedOSPlatform("windows")]
-        public static void ShowAbout(string connectionString, IWin32Window owner, bool StartGUIOnUpgrade, bool includePreRelease = false)
-        {
-            Version dbVersion = new();
-            if (!string.IsNullOrEmpty(connectionString))
-            {
-                try
-                {
-                    dbVersion = DBValidations.GetDBVersion(connectionString).Version;
-                }
-                catch (Exception ex)
-                {
-                    ShowExceptionDialog(ex, @"Error getting repository version");
-                }
-            }
-            using About frm = new()
-            {
-                DBVersion = dbVersion,
-                StartGUIOnUpgrade = StartGUIOnUpgrade,
-                IncludePreRelease = includePreRelease
-            };
-            frm.ShowDialog(owner);
-        }
-
-        [SupportedOSPlatform("windows")]
         public static void StyleGrid(ref DataGridView dgv)
         {
             foreach (DataGridViewColumn col in dgv.Columns)
@@ -118,22 +81,6 @@ namespace DBADashSharedGUI
                     linkCol.LinkColor = DashColors.LinkColor;
                 }
             }
-        }
-
-        [SupportedOSPlatform("windows")]
-        public static async Task CheckForIncompleteUpgrade()
-        {
-            if (!Upgrade.IsUpgradeIncomplete) return;
-
-            MessageBox.Show(Upgrade.IncompleteUpgradeMessage, "Error", MessageBoxButtons.OK,
-                MessageBoxIcon.Error);
-            if (MessageBox.Show("Retry upgrade?", "Retry", MessageBoxButtons.YesNo, MessageBoxIcon.Question) ==
-                DialogResult.Yes)
-            {
-                await Upgrade.UpgradeDBADashAsync();
-            }
-
-            Application.Exit();
         }
 
         [SupportedOSPlatform("windows")]
