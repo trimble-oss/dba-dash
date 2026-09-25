@@ -56,7 +56,6 @@ namespace DBADashGUI
             return dt;
         }
 
-        public static SKColor ToSKColor(this Color color) => new SKColor(color.R, color.G, color.B, color.A);
 
         public static Color GetBackColor(this DBADashStatusEnum value)
         {

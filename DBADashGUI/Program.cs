@@ -16,6 +16,7 @@ using System.Windows.Forms;
 using DBADash.Alert;
 using DBADashGUI.DBADashAlerts;
 using Serilog;
+using DBADashGUI.Viewers;
 
 namespace DBADashGUI
 {
@@ -34,6 +35,9 @@ namespace DBADashGUI
             Common.IsApplicationRunning = true;
             // Default export file names use the time zone the user has chosen in the app.
             CommonShared.AppNow = () => DateHelper.AppNow;
+            // The plan and deadlock viewers keep their settings with the GUI's, and offer what needs the repository.
+            ViewerSettings.Store = new GuiViewerSettingsStore();
+            ViewerLauncher.DefaultHost = new DBADashViewerHost();
             ConfigureLogging();
             try
             {
@@ -177,11 +181,11 @@ namespace DBADashGUI
                 if (Path.GetExtension(file).Equals(FileAssociation.QueryPlan.Extension,
                         StringComparison.OrdinalIgnoreCase))
                 {
-                    Common.ShowQueryPlanFile(file);
+                    ViewerLauncher.ShowQueryPlanFile(file);
                 }
                 else
                 {
-                    Common.ShowDeadlockGraphFile(file);
+                    ViewerLauncher.ShowDeadlockGraphFile(file);
                 }
             }
         }

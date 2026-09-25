@@ -807,13 +807,13 @@ namespace DBADashGUI.QueryPlans
             {
                 if (op.PrimaryObject is { } target)
                 {
-                    menu.Items.Add(new ToolStripMenuItem("Copy Object Name", Properties.Resources.ASX_Copy_blue_16x,
+                    menu.Items.Add(new ToolStripMenuItem("Copy Object Name", Resources.ASX_Copy_blue_16x,
                         (_, _) => CopyText(target.ToString())));
                 }
 
                 if (op.Predicate is not null || op.SeekPredicate is not null)
                 {
-                    menu.Items.Add(new ToolStripMenuItem("Copy Predicate", Properties.Resources.ASX_Copy_blue_16x,
+                    menu.Items.Add(new ToolStripMenuItem("Copy Predicate", Resources.ASX_Copy_blue_16x,
                         (_, _) => CopyText(op.SeekPredicate is null
                             ? op.Predicate
                             : op.Predicate is null
@@ -834,7 +834,7 @@ namespace DBADashGUI.QueryPlans
             {
                 // What the tooltip shows, untruncated: already the summary of everything the plan
                 // holds about this operator, which makes it the one thing worth pasting elsewhere.
-                menu.Items.Add(new ToolStripMenuItem("Copy Details", Properties.Resources.ASX_Copy_blue_16x,
+                menu.Items.Add(new ToolStripMenuItem("Copy Details", Resources.ASX_Copy_blue_16x,
                     (_, _) => CopyText(PlanTooltipBuilder.Build(node, int.MaxValue, OperatorTimeMode).ToString())));
 
                 // Follow Data Path is engaged here, on a node, rather than left on all the time:
@@ -842,7 +842,7 @@ namespace DBADashGUI.QueryPlans
                 // node at once, instead of arming a mode that does nothing until something is picked.
                 menu.Items.Add(new ToolStripMenuItem(
                     FollowDataPath ? "Stop Following Data Path" : "Follow Data Path",
-                    Properties.Resources.NavigationPathLeft_16x,
+                    Resources.NavigationPathLeft_16x,
                     (_, _) => FollowDataPath = !FollowDataPath)
                 {
                     ToolTipText = "Fade everything off this operator's path back to the root.  Escape leaves it."
@@ -860,7 +860,7 @@ namespace DBADashGUI.QueryPlans
             }
 
             if (menu.Items.Count > 0) menu.Items.Add(new ToolStripSeparator());
-            menu.Items.Add(new ToolStripMenuItem("Fit to Window", Properties.Resources.ZoomToFit,
+            menu.Items.Add(new ToolStripMenuItem("Fit to Window", Resources.ZoomToFit,
                 (_, _) => ZoomToFit()));
 
             // The theme's menu renderer, the same one the toolbars use - a context menu is a ToolStrip.

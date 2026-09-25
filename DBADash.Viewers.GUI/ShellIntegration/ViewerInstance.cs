@@ -29,7 +29,7 @@ namespace DBADashGUI.ShellIntegration
     /// process, to one in another Windows session whose windows could not be seen from this one, or to
     /// a different install that may be another version.
     /// </summary>
-    internal sealed class ViewerInstance : IDisposable
+    public sealed class ViewerInstance : IDisposable
     {
         /// <summary>
         /// How long a copy waits to reach the primary.  The primary may itself have only just started,

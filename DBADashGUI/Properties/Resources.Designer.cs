@@ -411,16 +411,6 @@ namespace DBADashGUI.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
-        /// </summary>
-        internal static System.Drawing.Icon DeadlockIcon {
-            get {
-                object obj = ResourceManager.GetObject("DeadlockIcon", resourceCulture);
-                return ((System.Drawing.Icon)(obj));
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap Deadlock_16x {
@@ -436,26 +426,6 @@ namespace DBADashGUI.Properties {
         internal static System.Drawing.Bitmap DeadlockAnalyse_16x {
             get {
                 object obj = ResourceManager.GetObject("DeadlockAnalyse_16x", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap DeadlockLayoutColumns_16x {
-            get {
-                object obj = ResourceManager.GetObject("DeadlockLayoutColumns_16x", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap DeadlockLayoutRing_16x {
-            get {
-                object obj = ResourceManager.GetObject("DeadlockLayoutRing_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -536,16 +506,6 @@ namespace DBADashGUI.Properties {
         internal static System.Drawing.Bitmap Filter_16x {
             get {
                 object obj = ResourceManager.GetObject("Filter_16x", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap NavigationPathLeft_16x {
-            get {
-                object obj = ResourceManager.GetObject("NavigationPathLeft_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -783,16 +743,6 @@ namespace DBADashGUI.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap Open_16x {
-            get {
-                object obj = ResourceManager.GetObject("Open_16x", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap Percentage_16x {
             get {
                 object obj = ResourceManager.GetObject("Percentage_16x", resourceCulture);
@@ -811,15 +761,6 @@ namespace DBADashGUI.Properties {
         }
         
 
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
-        /// </summary>
-        internal static System.Drawing.Icon PlanViewerIcon {
-            get {
-                object obj = ResourceManager.GetObject("PlanViewerIcon", resourceCulture);
-                return ((System.Drawing.Icon)(obj));
-            }
-        }
 
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
@@ -1240,34 +1181,5 @@ namespace DBADashGUI.Properties {
             }
         }
         
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap ZoomIn_16x {
-            get {
-                object obj = ResourceManager.GetObject("ZoomIn_16x", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap ZoomOut_16x {
-            get {
-                object obj = ResourceManager.GetObject("ZoomOut_16x", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap ZoomToFit {
-            get {
-                object obj = ResourceManager.GetObject("ZoomToFit", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
     }
 }

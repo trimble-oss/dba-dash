@@ -14,10 +14,10 @@ namespace DBADashGUI.ShellIntegration
     /// runtime can't wrap the handler objects (Marshal.GetObjectForIUnknown fails with RPC_E_UNEXPECTED), and this
     /// way no COM object outlives the call that uses it - opening a handler enumerates again and finds it by name.
     /// </summary>
-    internal static class ShellFileHandlers
+    public static class ShellFileHandlers
     {
         /// <summary>One application able to open the file type.  Name is the exe path for a desktop application.</summary>
-        internal sealed record Handler(string Name, string DisplayName, Image Image);
+        public sealed record Handler(string Name, string DisplayName, Image Image);
 
         /// <summary>The recommended handlers for an extension, e.g. ".xdl".</summary>
         public static List<Handler> Get(string extension)

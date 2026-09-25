@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net10.0-windows7.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <UseWPF>true</UseWPF>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <Configurations>Debug;Release;CLI</Configurations>
+    <NoWarn>$(NoWarn);NU1701;CA1416</NoWarn>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <IsPackable>false</IsPackable>
+
+    <!--
+      The query plan and deadlock viewers, as controls and windows.  Everything here has to work with no DBA Dash
+      repository and no monitored instance - a plan or deadlock graph someone emailed you opens the same as one from a
+      report - so this project references DBADashSharedGUI and the viewer model / rendering libraries, and never DBADash
+      or DBADashGUI.  What the viewers can do only when they know where the artifact came from (AI analysis, collecting
+      the current plan from the instance, the Query Store lookup) is offered by the host through IViewerHost.
+    -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\GlobalAssemblyInfo.cs" Link="Properties\GlobalAssemblyInfo.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="DBADashSharedGUI" />
+    <Using Include="DBADash.Viewers.GUI.Properties.Resources" Alias="Resources" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Serilog" />
+    <PackageReference Include="SkiaSharp.Views.WindowsForms" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DBADash.Deadlock\DBADash.Deadlock.csproj" />
+    <ProjectReference Include="..\DBADash.Deadlock.Skia\DBADash.Deadlock.Skia.csproj" />
+    <ProjectReference Include="..\DBADash.QueryPlan\DBADash.QueryPlan.csproj" />
+    <ProjectReference Include="..\DBADash.QueryPlan.Skia\DBADash.QueryPlan.Skia.csproj" />
+    <ProjectReference Include="..\DBADashCommon\DBADashCommon.csproj" />
+    <ProjectReference Include="..\DBADashSharedGUI\DBADashSharedGUI.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,3 +1,4 @@
+using DBADashGUI.Viewers;
 using DBADash.Deadlock.Analysis;
 using DBADash.Deadlock.Model;
 using DBADashGUI.AgentJobs;
@@ -31,7 +32,7 @@ namespace DBADashGUI.Deadlocks
     /// stored and shown again next time the deadlock is opened.  Each follow-up carries the deadlock
     /// and everything said so far back to the service, which holds no conversation state of its own.
     /// </summary>
-    internal sealed class DeadlockAiControl : UserControl
+    internal sealed class DeadlockAiControl : UserControl, IDeadlockAiPanel
     {
         private readonly TextBox _preview;
         private readonly AiConversationView _conversation = new() { Dock = DockStyle.Fill };
@@ -76,8 +77,12 @@ namespace DBADashGUI.Deadlocks
         private Color _statusColour = DashColors.Information;
         private IReadOnlyList<DeadlockObjectDefinition> _schema = Array.Empty<DeadlockObjectDefinition>();
 
-        internal DeadlockAiControl()
+        /// <summary>The instance the graph came from, where known.  Null for a graph opened from a file.</summary>
+        private readonly DBADashContext _context;
+
+        internal DeadlockAiControl(DBADashContext context)
         {
+            _context = context;
             _preview = NewTextBox();
 
             // Image and text: the caption is what says whether this is the first run or another one,
@@ -168,6 +173,10 @@ namespace DBADashGUI.Deadlocks
         /// Builds the payload for a graph and shows it.  Deliberately does not contact anything: the
         /// tab can be opened, read and closed again without a byte leaving the machine.
         /// </summary>
+        Control IDeadlockAiPanel.Control => this;
+
+        void IDeadlockAiPanel.Show(DeadlockGraph graph) => Show(graph, _context?.InstanceName, _context);
+
         internal void Show(DeadlockGraph graph, string instance, DBADashContext context)
         {
             _graph = graph;

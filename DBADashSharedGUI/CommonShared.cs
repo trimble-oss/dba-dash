@@ -61,6 +61,25 @@ namespace DBADashSharedGUI
             }
         }
 
+        public static string GetFilePath(string fileName, string extension)
+        {
+            // Ensure the extension is correctly formatted.
+            extension = extension.StartsWith(".") ? extension : $".{extension}";
+
+            var tempFileName = string.IsNullOrEmpty(fileName) ? Path.GetTempFileName() : null;
+
+            // Determine the directory based on whether a temp file was needed.
+            var directory = Path.GetDirectoryName(tempFileName ?? string.Empty) ?? Path.GetTempPath();
+
+            // If fileName is not provided, use the tempFileName with the correct extension.
+            // Otherwise, check if fileName ends with the extension, and append the extension if necessary.
+            fileName = string.IsNullOrEmpty(fileName)
+                ? $"{Path.GetFileNameWithoutExtension(tempFileName)}{extension}"
+                : fileName.EndsWith(extension, StringComparison.OrdinalIgnoreCase) ? fileName : $"{fileName}{extension}";
+
+            return Path.Combine(directory, fileName);
+        }
+
         public static bool IsValidUrl(string url)
         {
             if (string.IsNullOrWhiteSpace(url)) return false;

@@ -1,3 +1,4 @@
+using DBADashGUI.Viewers;
 using DBADash.Deadlock.Model;
 using DBADashGUI.Controls;
 using DBADashGUI.Theme;
@@ -29,7 +30,7 @@ namespace DBADashGUI.Deadlocks
         private DeadlockViewerForm()
         {
             Text = "Deadlock";
-            Icon = Properties.Resources.DeadlockIcon;
+            Icon = Resources.DeadlockIcon;
             Width = 1100;
             Height = 780;
 
@@ -47,7 +48,7 @@ namespace DBADashGUI.Deadlocks
             DragDrop += (_, e) =>
             {
                 _current = this;
-                foreach (var file in DeadlockFiles(e.Data)) Common.ShowDeadlockGraphFile(file);
+                foreach (var file in DeadlockFiles(e.Data)) ViewerLauncher.ShowDeadlockGraphFile(file);
             };
 
             Activated += (_, _) => _current = this;
@@ -58,32 +59,32 @@ namespace DBADashGUI.Deadlocks
         /// Set when the viewer is all that is running - a graph opened from Explorer rather than from
         /// the GUI.
         /// </summary>
-        internal static bool IsStandalone { get; set; }
+        public static bool IsStandalone { get; set; }
 
         /// <summary>
         /// Show a deadlock source on a tab of the deadlock window, opening the window if there is none.
         /// A source that is already open is brought to the front rather than opened a second time.
         /// </summary>
         public static void Open(IReadOnlyList<DeadlockGraph> graphs, string sourceXml, string fileName = null,
-            DBADashContext context = null)
+            IViewerHost host = null)
         {
             var window = _current is { IsDisposed: false } ? _current : null;
 
             if (window is null)
             {
                 window = _current = new DeadlockViewerForm();
-                window.AddTab(graphs, sourceXml, fileName, context);
+                window.AddTab(graphs, sourceXml, fileName, host);
                 window.Show();
                 return;
             }
 
-            window.AddTab(graphs, sourceXml, fileName, context);
+            window.AddTab(graphs, sourceXml, fileName, host);
 
             if (window.WindowState == FormWindowState.Minimized) window.WindowState = FormWindowState.Normal;
             window.Activate();
         }
 
-        private void AddTab(IReadOnlyList<DeadlockGraph> graphs, string sourceXml, string fileName, DBADashContext context)
+        private void AddTab(IReadOnlyList<DeadlockGraph> graphs, string sourceXml, string fileName, IViewerHost host)
         {
             // Only fold into an existing tab when there is a real key to match on: two graphs opened
             // without a source (null/blank) are not the same graph, and must not collapse into one.
@@ -99,7 +100,7 @@ namespace DBADashGUI.Deadlocks
                 return;
             }
 
-            var viewer = new DeadlockViewerControl(graphs, sourceXml, fileName, context) { Dock = DockStyle.Fill };
+            var viewer = new DeadlockViewerControl(graphs, sourceXml, fileName, host) { Dock = DockStyle.Fill };
             var page = new TabPage(viewer.Title) { ToolTipText = viewer.TabToolTip };
             page.Controls.Add(viewer);
 

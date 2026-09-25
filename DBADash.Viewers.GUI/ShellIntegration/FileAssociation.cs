@@ -36,7 +36,7 @@ namespace DBADashGUI.ShellIntegration
     /// deleting the others' entries on unregister, and the bug would only show up once a second
     /// viewer existed.
     /// </summary>
-    internal sealed class FileAssociation
+    public sealed class FileAssociation
     {
         /// <summary>SQL Server deadlock graphs, opened in the deadlock viewer.</summary>
         public static readonly FileAssociation DeadlockGraph = new(

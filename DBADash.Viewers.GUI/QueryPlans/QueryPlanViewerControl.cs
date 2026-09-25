@@ -1,3 +1,4 @@
+using DBADashGUI.Viewers;
 using DBADash.QueryPlan;
 using DBADash.QueryPlan.Layout;
 using DBADash.QueryPlan.Model;
@@ -40,7 +41,7 @@ namespace DBADashGUI.QueryPlans
         /// the call sites that have no context to hand - the viewer works the same either way; an
         /// AI analysis is simply recorded without an instance against it.
         /// </summary>
-        private readonly DBADashContext _context;
+        private readonly IViewerHost _host;
 
         private readonly QueryPlanGraphControl _graphControl = new() { Dock = DockStyle.Fill };
         private readonly QueryPlanPropertiesControl _properties = new() { Dock = DockStyle.Fill };
@@ -107,7 +108,8 @@ namespace DBADashGUI.QueryPlans
 
         private readonly QueryPlanStatementsControl _statements = new() { Dock = DockStyle.Fill };
 
-        private readonly QueryPlanAiControl _ai = new() { Dock = DockStyle.Fill };
+        // Null when the host has no AI analysis to offer, which leaves the tab out.
+        private readonly IPlanAiPanel _ai;
 
         /// <summary>
         /// The statement list above the plan.  Above rather than on a tab of its own, because moving
@@ -201,14 +203,16 @@ namespace DBADashGUI.QueryPlans
         // one table differ only by node id - and the grids are sortable, so a row index is no use.
         private const string NodeIdColumn = "NodeId";
 
-        public QueryPlanViewerControl(ExecutionPlan plan, string sourceXml, string fileName = null, DBADashContext context = null)
+        public QueryPlanViewerControl(ExecutionPlan plan, string sourceXml, string fileName = null, IViewerHost host = null)
         {
             _plan = plan ?? throw new ArgumentNullException(nameof(plan));
             if (plan.Statements.Count == 0) throw new ArgumentException("No statements to show.", nameof(plan));
 
             _sourceXml = sourceXml;
             _fileName = fileName;
-            _context = context;
+            _host = host;
+            _ai = host?.CreatePlanAiPanel();
+            if (_ai != null) _ai.Control.Dock = DockStyle.Fill;
 
             // Statements with no plan still appear: the text is often the only reason the file was
             // opened, and dropping them silently would make a batch look shorter than it is.  Set
@@ -237,13 +241,13 @@ namespace DBADashGUI.QueryPlans
             _graphControl.EdgeWidthBasis = LoadEdgeWidthBasis();
             _graphControl.OperatorTimeMode = LoadTimeMode();
             _graphControl.NodeWidth = LoadNodeWidth();
-            _graphControl.UniformColumnWidths = Properties.Settings.Default.QueryPlanUniformColumnWidths;
-            _graphControl.WrapObjectNames = Properties.Settings.Default.QueryPlanWrapObjectNames;
-            _graphControl.ShowNodeIds = Properties.Settings.Default.QueryPlanShowNodeIds;
+            _graphControl.UniformColumnWidths = ViewerSettings.QueryPlanUniformColumnWidths;
+            _graphControl.WrapObjectNames = ViewerSettings.QueryPlanWrapObjectNames;
+            _graphControl.ShowNodeIds = ViewerSettings.QueryPlanShowNodeIds;
             _graphControl.ColumnSpacing = LoadColumnSpacing();
             _graphControl.VerticalLayout = LoadVerticalLayout();
             _graphControl.MinAutoFitZoom = LoadMinFitZoom();
-            ShowOperatorDescriptions(Properties.Settings.Default.QueryPlanShowOperatorDescriptions);
+            ShowOperatorDescriptions(ViewerSettings.QueryPlanShowOperatorDescriptions);
 
             _graphSplit.Panel1.Controls.Add(_graphControl);
             _graphSplit.Panel2.Controls.Add(_properties);
@@ -265,7 +269,7 @@ namespace DBADashGUI.QueryPlans
             _tabs.TabPages.Add(_parametersTab);
             _tabs.TabPages.Add(_waitsTab);
             _tabs.TabPages.Add(NewPage("Query", _queryHost));
-            _tabs.TabPages.Add(NewPage("AI Analysis", _ai));
+            if (_ai != null) _tabs.TabPages.Add(NewPage("AI Analysis", _ai.Control));
             _tabs.TabPages.Add(NewPage("XML", _xmlHost));
 
             // The intended order of every tab, so the ones hidden while empty go back in their place.
@@ -473,7 +477,7 @@ namespace DBADashGUI.QueryPlans
             toolbar.Items.Add(_timeMenu);
 
             toolbar.Items.Add(new ToolStripSeparator());
-            _dataPathButton = new ToolStripButton("Data Path", Properties.Resources.NavigationPathLeft_16x, (_, _) => ToggleDataPath())
+            _dataPathButton = new ToolStripButton("Data Path", Resources.NavigationPathLeft_16x, (_, _) => ToggleDataPath())
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Image,
                 CheckOnClick = true,
@@ -507,13 +511,13 @@ namespace DBADashGUI.QueryPlans
 
             // Captioned, unlike the other icons: a reader who does not know what a marker means is the
             // reader least likely to guess which icon explains it.
-            toolbar.Items.Add(new ToolStripButton("Legend", Properties.Resources.LegendHS, (_, _) => ShowLegend())
+            toolbar.Items.Add(new ToolStripButton("Legend", Resources.LegendHS, (_, _) => ShowLegend())
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Image,
                 ToolTipText = "What the icons, markers, arrows and bars on the plan mean, and the keys and mouse actions (F1)."
             });
             toolbar.Items.Add(new ToolStripSeparator());
-            toolbar.Items.Add(new ToolStripButton("Open...", Properties.Resources.FolderOpened_16x, (_, _) => Common.OpenQueryPlanFile(FindForm()))
+            toolbar.Items.Add(new ToolStripButton("Open...", Resources.FolderOpened_16x, (_, _) => ViewerLauncher.OpenQueryPlanFile(FindForm()))
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Image,
                 ToolTipText = "Open query plans (.sqlplan) from disk, each on a tab of its own."
@@ -523,7 +527,7 @@ namespace DBADashGUI.QueryPlans
 
             // Keeps its caption where the rest of the toolbar is icons only: the icon can say the
             // plan leaves for another application, but not which one.
-            _openWith = new ToolStripDropDownButton("Open With", Properties.Resources.Open_16x)
+            _openWith = new ToolStripDropDownButton("Open With", Resources.Open_16x)
             {
                 ToolTipText = "Open the plan in another application registered for .sqlplan files (e.g. SSMS)",
                 Alignment = ToolStripItemAlignment.Right
@@ -577,7 +581,7 @@ namespace DBADashGUI.QueryPlans
             {
                 _graphControl.EdgeWidthMetric = metric;
                 ShowCurrentLineWidth();
-                SaveSetting(() => Properties.Settings.Default.QueryPlanEdgeWidth = metric.ToString());
+                SaveSetting(() => ViewerSettings.QueryPlanEdgeWidth = metric.ToString());
             };
 
             _lineWidthMetricItems[metric] = item;
@@ -592,7 +596,7 @@ namespace DBADashGUI.QueryPlans
             {
                 _graphControl.EdgeWidthBasis = basis;
                 ShowCurrentLineWidth();
-                SaveSetting(() => Properties.Settings.Default.QueryPlanEdgeWidthBasis = basis.ToString());
+                SaveSetting(() => ViewerSettings.QueryPlanEdgeWidthBasis = basis.ToString());
             };
 
             _lineWidthBasisItems[basis] = item;
@@ -634,12 +638,12 @@ namespace DBADashGUI.QueryPlans
         /// a file as well as from the repository, so it cannot depend on being connected to one.
         /// </summary>
         private static PlanEdgeWidthMetric LoadEdgeWidth() =>
-            Enum.TryParse<PlanEdgeWidthMetric>(Properties.Settings.Default.QueryPlanEdgeWidth, out var metric)
+            Enum.TryParse<PlanEdgeWidthMetric>(ViewerSettings.QueryPlanEdgeWidth, out var metric)
                 ? metric
                 : PlanEdgeWidthMetric.Rows;
 
         private static PlanEdgeWidthBasis LoadEdgeWidthBasis() =>
-            Enum.TryParse<PlanEdgeWidthBasis>(Properties.Settings.Default.QueryPlanEdgeWidthBasis, out var basis)
+            Enum.TryParse<PlanEdgeWidthBasis>(ViewerSettings.QueryPlanEdgeWidthBasis, out var basis)
                 ? basis
                 : PlanEdgeWidthBasis.Actual;
 
@@ -648,7 +652,7 @@ namespace DBADashGUI.QueryPlans
             try
             {
                 set();
-                Properties.Settings.Default.Save();
+                ViewerSettings.Save();
             }
             catch (Exception ex)
             {
@@ -684,7 +688,7 @@ namespace DBADashGUI.QueryPlans
             {
                 _graphControl.OperatorTimeMode = mode;
                 ShowCurrentTimeMode();
-                SaveSetting(() => Properties.Settings.Default.QueryPlanOperatorTime = mode.ToString());
+                SaveSetting(() => ViewerSettings.QueryPlanOperatorTime = mode.ToString());
             };
 
             _timeMenu.DropDownItems.Add(item);
@@ -718,7 +722,7 @@ namespace DBADashGUI.QueryPlans
         }
 
         private static OperatorTimeMode LoadTimeMode() =>
-            Enum.TryParse<OperatorTimeMode>(Properties.Settings.Default.QueryPlanOperatorTime, out var mode)
+            Enum.TryParse<OperatorTimeMode>(ViewerSettings.QueryPlanOperatorTime, out var mode)
                 ? mode
                 : OperatorTimeMode.Own;
 
@@ -779,7 +783,7 @@ namespace DBADashGUI.QueryPlans
             uniform.CheckedChanged += (_, _) =>
             {
                 _graphControl.UniformColumnWidths = uniform.Checked;
-                SaveSetting(() => Properties.Settings.Default.QueryPlanUniformColumnWidths = uniform.Checked);
+                SaveSetting(() => ViewerSettings.QueryPlanUniformColumnWidths = uniform.Checked);
             };
 
             _operatorWidthMenu.DropDownItems.Add(uniform);
@@ -794,7 +798,7 @@ namespace DBADashGUI.QueryPlans
             wrapNames.CheckedChanged += (_, _) =>
             {
                 _graphControl.WrapObjectNames = wrapNames.Checked;
-                SaveSetting(() => Properties.Settings.Default.QueryPlanWrapObjectNames = wrapNames.Checked);
+                SaveSetting(() => ViewerSettings.QueryPlanWrapObjectNames = wrapNames.Checked);
             };
 
             _operatorWidthMenu.DropDownItems.Add(wrapNames);
@@ -811,7 +815,7 @@ namespace DBADashGUI.QueryPlans
             {
                 _graphControl.NodeWidth = width;
                 ShowCurrentOperatorWidth();
-                SaveSetting(() => Properties.Settings.Default.QueryPlanNodeWidth = width.ToString());
+                SaveSetting(() => ViewerSettings.QueryPlanNodeWidth = width.ToString());
             };
 
             _operatorWidthMenu.DropDownItems.Add(item);
@@ -851,7 +855,7 @@ namespace DBADashGUI.QueryPlans
         }
 
         private static PlanNodeWidth LoadNodeWidth() =>
-            Enum.TryParse<PlanNodeWidth>(Properties.Settings.Default.QueryPlanNodeWidth, out var width)
+            Enum.TryParse<PlanNodeWidth>(ViewerSettings.QueryPlanNodeWidth, out var width)
                 ? width
                 : PlanNodeWidth.Normal;
 
@@ -877,7 +881,7 @@ namespace DBADashGUI.QueryPlans
             {
                 _graphControl.ColumnSpacing = spacing;
                 ShowCurrentColumnSpacing();
-                SaveSetting(() => Properties.Settings.Default.QueryPlanColumnSpacing = spacing.ToString());
+                SaveSetting(() => ViewerSettings.QueryPlanColumnSpacing = spacing.ToString());
             };
 
             _columnSpacingMenu.DropDownItems.Add(item);
@@ -926,7 +930,7 @@ namespace DBADashGUI.QueryPlans
                 {
                     _graphControl.VerticalLayout = layout;
                     ShowCurrentVerticalLayout();
-                    SaveSetting(() => Properties.Settings.Default.QueryPlanVerticalLayout = layout.ToString());
+                    SaveSetting(() => ViewerSettings.QueryPlanVerticalLayout = layout.ToString());
                 };
 
                 _verticalLayoutMenu.DropDownItems.Add(item);
@@ -947,7 +951,7 @@ namespace DBADashGUI.QueryPlans
         }
 
         private static PlanVerticalLayout LoadVerticalLayout() =>
-            Enum.TryParse<PlanVerticalLayout>(Properties.Settings.Default.QueryPlanVerticalLayout, out var layout)
+            Enum.TryParse<PlanVerticalLayout>(ViewerSettings.QueryPlanVerticalLayout, out var layout)
                 ? layout
                 : PlanVerticalLayout.FirstChildAligned;
 
@@ -983,7 +987,7 @@ namespace DBADashGUI.QueryPlans
                 {
                     _graphControl.MinAutoFitZoom = percent / 100.0;
                     ShowCurrentOpeningZoom();
-                    SaveSetting(() => Properties.Settings.Default.QueryPlanMinFitZoom = percent);
+                    SaveSetting(() => ViewerSettings.QueryPlanMinFitZoom = percent);
                 };
 
                 _openingZoomMenu.DropDownItems.Add(item);
@@ -1005,12 +1009,12 @@ namespace DBADashGUI.QueryPlans
 
         private static double LoadMinFitZoom()
         {
-            var percent = Properties.Settings.Default.QueryPlanMinFitZoom;
+            var percent = ViewerSettings.QueryPlanMinFitZoom;
             return OpeningZooms.Any(z => z.Percent == percent) ? percent / 100.0 : 1.0;
         }
 
         private static PlanColumnSpacing LoadColumnSpacing() =>
-            Enum.TryParse<PlanColumnSpacing>(Properties.Settings.Default.QueryPlanColumnSpacing, out var spacing)
+            Enum.TryParse<PlanColumnSpacing>(ViewerSettings.QueryPlanColumnSpacing, out var spacing)
                 ? spacing
                 : PlanColumnSpacing.Normal;
 
@@ -1021,7 +1025,7 @@ namespace DBADashGUI.QueryPlans
         /// </summary>
         private ToolStripDropDownButton BuildCopyMenu()
         {
-            var menu = new ToolStripDropDownButton("Copy", Properties.Resources.ASX_Copy_blue_16x)
+            var menu = new ToolStripDropDownButton("Copy", Resources.ASX_Copy_blue_16x)
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Image,
                 ToolTipText = "Copy the plan, a picture of it, or T-SQL from it."
@@ -1072,7 +1076,7 @@ namespace DBADashGUI.QueryPlans
         /// </summary>
         private ToolStripDropDownButton BuildSettingsMenu()
         {
-            var menu = new ToolStripDropDownButton("Settings") { ToolTipText = "Viewer and file association settings.", Image = Properties.Resources.SettingsOutline_16x, DisplayStyle = ToolStripItemDisplayStyle.Image };
+            var menu = new ToolStripDropDownButton("Settings") { ToolTipText = "Viewer and file association settings.", Image = Resources.SettingsOutline_16x, DisplayStyle = ToolStripItemDisplayStyle.Image };
 
             // For readers still learning the operators; those who know them can have the figures alone.
             var descriptions = _descriptionsItem = new ToolStripMenuItem("Show Operator Descriptions")
@@ -1085,7 +1089,7 @@ namespace DBADashGUI.QueryPlans
             descriptions.CheckedChanged += (_, _) =>
             {
                 ShowOperatorDescriptions(descriptions.Checked);
-                SaveSetting(() => Properties.Settings.Default.QueryPlanShowOperatorDescriptions = descriptions.Checked);
+                SaveSetting(() => ViewerSettings.QueryPlanShowOperatorDescriptions = descriptions.Checked);
             };
 
             // Beside the descriptions: both are about what the operators say rather than how the plan
@@ -1100,7 +1104,7 @@ namespace DBADashGUI.QueryPlans
             nodeIds.CheckedChanged += (_, _) =>
             {
                 _graphControl.ShowNodeIds = nodeIds.Checked;
-                SaveSetting(() => Properties.Settings.Default.QueryPlanShowNodeIds = nodeIds.Checked);
+                SaveSetting(() => ViewerSettings.QueryPlanShowNodeIds = nodeIds.Checked);
             };
 
             menu.DropDownItems.Add(descriptions);
@@ -1219,7 +1223,7 @@ namespace DBADashGUI.QueryPlans
                 var width = OperatorWidths[_widthSlider.Value].Width;
                 _graphControl.NodeWidth = width;
                 ShowCurrentOperatorWidth();
-                SaveSetting(() => Properties.Settings.Default.QueryPlanNodeWidth = width.ToString());
+                SaveSetting(() => ViewerSettings.QueryPlanNodeWidth = width.ToString());
             };
 
             _spacingSlider.ValueChanged += (_, _) =>
@@ -1229,7 +1233,7 @@ namespace DBADashGUI.QueryPlans
                 var spacing = ColumnSpacings[_spacingSlider.Value].Spacing;
                 _graphControl.ColumnSpacing = spacing;
                 ShowCurrentColumnSpacing();
-                SaveSetting(() => Properties.Settings.Default.QueryPlanColumnSpacing = spacing.ToString());
+                SaveSetting(() => ViewerSettings.QueryPlanColumnSpacing = spacing.ToString());
             };
 
             // First, at the left.  A status bar drops the items it has no room for off its right hand
@@ -1241,7 +1245,7 @@ namespace DBADashGUI.QueryPlans
 
             // Beside the slider, where the zoom is being set: fitting the whole plan is the one zoom
             // nobody wants to find by dragging.
-            status.Items.Add(new ToolStripButton("Fit", Properties.Resources.ZoomToFit, (_, _) => _graphControl.ZoomToFit())
+            status.Items.Add(new ToolStripButton("Fit", Resources.ZoomToFit, (_, _) => _graphControl.ZoomToFit())
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Image,
                 ToolTipText = "Fit the whole plan in the window (0)"
@@ -1433,7 +1437,7 @@ namespace DBADashGUI.QueryPlans
 
             // The AI tab is about one statement, so it follows the selector.  It contacts nothing until
             // the reader presses its own button - moving between statements costs nothing.
-            _ai.Show(_plan, statement, _fileName, _context);
+            _ai?.Show(_plan, statement, _fileName);
 
             SetSummary(Summarise(statement, _graphControl.PlanLayout));
 
@@ -1559,7 +1563,7 @@ namespace DBADashGUI.QueryPlans
             // the mode when it is on.
             if (e.Node is null && _dataPathButton.Checked)
             {
-                e.Items.Add(new ToolStripMenuItem("Stop Following Data Path", Properties.Resources.NavigationPathLeft_16x, (_, _) => _dataPathButton.PerformClick())
+                e.Items.Add(new ToolStripMenuItem("Stop Following Data Path", Resources.NavigationPathLeft_16x, (_, _) => _dataPathButton.PerformClick())
                 {
                     ToolTipText = _dataPathButton.ToolTipText
                 });
@@ -2272,7 +2276,7 @@ namespace DBADashGUI.QueryPlans
         /// </summary>
         private ToolStripDropDownButton BuildSaveMenu()
         {
-            var menu = new ToolStripDropDownButton("Save As", Properties.Resources.Save_16x)
+            var menu = new ToolStripDropDownButton("Save As", Resources.Save_16x)
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Image,
                 ToolTipText = "Save the plan, the selected statement, or a picture of the plan."
@@ -2342,7 +2346,7 @@ namespace DBADashGUI.QueryPlans
                 {
                     // A .sqlplan is for the tools that read one, so a plan that arrived inside an
                     // extended events envelope is saved without it - see
-                    // <see cref="Common.WriteQueryPlanTempFile"/>.  Whatever cannot be lifted out is
+                    // <see cref="ViewerLauncher.WriteQueryPlanTempFile"/>.  Whatever cannot be lifted out is
                     // saved as it stands rather than refused, since the user asked for this file.
                     xml = PlanParser.TryExtractShowPlanXml(_sourceXml, out var showPlanXml)
                         ? showPlanXml
@@ -2443,7 +2447,7 @@ namespace DBADashGUI.QueryPlans
         {
             try
             {
-                open(Common.WriteQueryPlanTempFile(_sourceXml, _fileName));
+                open(ViewerLauncher.WriteQueryPlanTempFile(_sourceXml, _fileName));
             }
             catch (Exception ex)
             {

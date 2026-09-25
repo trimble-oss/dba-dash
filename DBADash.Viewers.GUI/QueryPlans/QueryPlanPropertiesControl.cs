@@ -1,3 +1,4 @@
+using DBADashGUI.Viewers;
 using DBADash.QueryPlan.Layout;
 using DBADash.QueryPlan.Model;
 using DBADashGUI.Controls;
@@ -141,7 +142,7 @@ namespace DBADashGUI.QueryPlans
         private const TextFormatFlags SingleLineFlags =
             TextFormatFlags.SingleLine | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix;
 
-        private Color _linkColor = DBADashUser.SelectedTheme.LinkColor;
+        private Color _linkColor = ThemeExtensions.CurrentTheme.LinkColor;
 
         /// <summary>Underlined versions of the fonts links are drawn in, made once each.</summary>
         private readonly Dictionary<Font, Font> _linkFonts = new();
@@ -669,8 +670,8 @@ namespace DBADashGUI.QueryPlans
 
             try
             {
-                Properties.Settings.Default.QueryPlanPropertyRowLines = lines;
-                Properties.Settings.Default.Save();
+                ViewerSettings.QueryPlanPropertyRowLines = lines;
+                ViewerSettings.Save();
             }
             catch (Exception ex)
             {
@@ -681,7 +682,7 @@ namespace DBADashGUI.QueryPlans
 
         private static int LoadRowLines()
         {
-            var lines = Properties.Settings.Default.QueryPlanPropertyRowLines;
+            var lines = ViewerSettings.QueryPlanPropertyRowLines;
             return RowLineChoices.Any(c => c.Lines == lines) ? lines : 3;
         }
 

@@ -1,3 +1,4 @@
+using DBADashGUI.Viewers;
 using DBADash.QueryPlan.Analysis;
 using DBADash.QueryPlan.Model;
 using DBADash;
@@ -30,7 +31,7 @@ namespace DBADashGUI.QueryPlans
     /// ask the next one, and the whole exchange is stored against the query and shown again next time it
     /// turns up.
     /// </summary>
-    internal sealed class QueryPlanAiControl : UserControl
+    internal sealed class QueryPlanAiControl : UserControl, IPlanAiPanel
     {
         private readonly TextBox _preview;
         private readonly AiConversationView _conversation = new() { Dock = DockStyle.Fill };
@@ -99,8 +100,12 @@ namespace DBADashGUI.QueryPlans
 
         private Color _statusColour = DashColors.Information;
 
-        internal QueryPlanAiControl()
+        /// <summary>The instance the plan came from, where known.  Null for a plan opened from a file.</summary>
+        private readonly DBADashContext _context;
+
+        internal QueryPlanAiControl(DBADashContext context)
         {
+            _context = context;
             _preview = NewTextBox();
 
             // Image and text: the caption is what says whether this is the first run or another one, and
@@ -194,6 +199,11 @@ namespace DBADashGUI.QueryPlans
         /// Called again whenever the reader picks a different statement, which makes it a different
         /// question - so anything on screen about the last one goes.
         /// </summary>
+        Control IPlanAiPanel.Control => this;
+
+        void IPlanAiPanel.Show(ExecutionPlan plan, PlanStatement statement, string fileName) =>
+            Show(plan, statement, fileName, _context);
+
         internal void Show(ExecutionPlan plan, PlanStatement statement, string fileName, DBADashContext context)
         {
             _plan = plan;

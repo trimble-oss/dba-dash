@@ -1,3 +1,4 @@
+using DBADashGUI.Viewers;
 using DBADash.QueryPlan.Model;
 using DBADashGUI.Controls;
 using DBADashGUI.Theme;
@@ -28,7 +29,7 @@ namespace DBADashGUI.QueryPlans
         {
             Text = "Query Plan";
 
-            Icon = Properties.Resources.PlanViewerIcon;
+            Icon = Resources.PlanViewerIcon;
 
             Width = 1300;
             Height = 820;
@@ -47,7 +48,7 @@ namespace DBADashGUI.QueryPlans
             DragDrop += (_, e) =>
             {
                 _current = this;
-                foreach (var file in PlanFiles(e.Data)) Common.ShowQueryPlanFile(file);
+                foreach (var file in PlanFiles(e.Data)) ViewerLauncher.ShowQueryPlanFile(file);
             };
 
             Activated += (_, _) => _current = this;
@@ -58,31 +59,31 @@ namespace DBADashGUI.QueryPlans
         /// Set when the viewer is all that is running - a plan opened from Explorer rather than from
         /// the GUI.
         /// </summary>
-        internal static bool IsStandalone { get; set; }
+        public static bool IsStandalone { get; set; }
 
         /// <summary>
         /// Show a plan on a tab of the plan window, opening the window if there is none.  A plan that
         /// is already open is brought to the front rather than opened a second time.
         /// </summary>
-        public static void Open(ExecutionPlan plan, string sourceXml, string fileName = null, DBADashContext context = null)
+        public static void Open(ExecutionPlan plan, string sourceXml, string fileName = null, IViewerHost host = null)
         {
             var window = _current is { IsDisposed: false } ? _current : null;
 
             if (window is null)
             {
                 window = _current = new QueryPlanViewerForm();
-                window.AddTab(plan, sourceXml, fileName, context);
+                window.AddTab(plan, sourceXml, fileName, host);
                 window.Show();
                 return;
             }
 
-            window.AddTab(plan, sourceXml, fileName, context);
+            window.AddTab(plan, sourceXml, fileName, host);
 
             if (window.WindowState == FormWindowState.Minimized) window.WindowState = FormWindowState.Normal;
             window.Activate();
         }
 
-        private void AddTab(ExecutionPlan plan, string sourceXml, string fileName, DBADashContext context)
+        private void AddTab(ExecutionPlan plan, string sourceXml, string fileName, IViewerHost host)
         {
             var open = _documents.TabPages.Cast<TabPage>()
                 .FirstOrDefault(p => p.Controls.Count > 0 && p.Controls[0] is QueryPlanViewerControl viewer &&
@@ -94,7 +95,7 @@ namespace DBADashGUI.QueryPlans
                 return;
             }
 
-            var viewer = new QueryPlanViewerControl(plan, sourceXml, fileName, context) { Dock = DockStyle.Fill };
+            var viewer = new QueryPlanViewerControl(plan, sourceXml, fileName, host) { Dock = DockStyle.Fill };
             var page = new TabPage(viewer.Title) { ToolTipText = viewer.TabToolTip };
             page.Controls.Add(viewer);
 

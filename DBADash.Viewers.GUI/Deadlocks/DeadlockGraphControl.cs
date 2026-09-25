@@ -512,7 +512,7 @@ namespace DBADashGUI.Deadlocks
             // Last, and offered even on empty space: once boxes can be dragged, the way back to the
             // arrangement the engine chose has to be somewhere obvious.
             if (menu.Items.Count > 0) menu.Items.Add(new ToolStripSeparator());
-            menu.Items.Add(new ToolStripMenuItem("Reset Layout", Properties.Resources.ZoomToFit,
+            menu.Items.Add(new ToolStripMenuItem("Reset Layout", Resources.ZoomToFit,
                 (_, _) => ResetLayout()));
 
             // The theme's menu renderer, the same one the toolbars use - a context menu is a ToolStrip.
@@ -530,18 +530,18 @@ namespace DBADashGUI.Deadlocks
                 // drawn as a link then: an action that opens nothing is worse than no action.
                 if (_controller.StatementLinksEnabled)
                 {
-                    menu.Items.Add(new ToolStripMenuItem("View Statement", Properties.Resources.SQLScript_16x,
+                    menu.Items.Add(new ToolStripMenuItem("View Statement", Resources.SQLScript_16x,
                         (_, _) => _controller.ActivateStatement(node)));
                 }
 
-                menu.Items.Add(new ToolStripMenuItem("Copy Statement", Properties.Resources.ASX_Copy_blue_16x,
+                menu.Items.Add(new ToolStripMenuItem("Copy Statement", Resources.ASX_Copy_blue_16x,
                     (_, _) => CopyText(statement)));
             }
 
             if (node.Process.Spid is { } spid)
             {
                 // The bare number, not "SPID 61": what this is for is pasting into a query.
-                menu.Items.Add(new ToolStripMenuItem("Copy SPID", Properties.Resources.ASX_Copy_blue_16x,
+                menu.Items.Add(new ToolStripMenuItem("Copy SPID", Resources.ASX_Copy_blue_16x,
                     (_, _) => CopyText(spid.ToString(CultureInfo.InvariantCulture))));
             }
 
@@ -553,7 +553,7 @@ namespace DBADashGUI.Deadlocks
             var objectName = node.Resource.ObjectName;
             if (!string.IsNullOrWhiteSpace(objectName))
             {
-                menu.Items.Add(new ToolStripMenuItem("Copy Object Name", Properties.Resources.ASX_Copy_blue_16x,
+                menu.Items.Add(new ToolStripMenuItem("Copy Object Name", Resources.ASX_Copy_blue_16x,
                     (_, _) => CopyText(objectName)));
             }
 
@@ -567,7 +567,7 @@ namespace DBADashGUI.Deadlocks
         /// </summary>
         private void AddCopyDetailsItem(ContextMenuStrip menu, DeadlockNode node)
         {
-            menu.Items.Add(new ToolStripMenuItem("Copy Details", Properties.Resources.ASX_Copy_blue_16x,
+            menu.Items.Add(new ToolStripMenuItem("Copy Details", Resources.ASX_Copy_blue_16x,
                 (_, _) => CopyText(DeadlockTooltipBuilder.Build(node, int.MaxValue).ToString())));
         }
 

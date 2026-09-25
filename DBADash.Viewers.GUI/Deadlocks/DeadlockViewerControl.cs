@@ -1,10 +1,11 @@
+using DBADashGUI.Performance;
+using DBADashGUI.Viewers;
 using DBADash;
 using DBADash.Deadlock.Analysis;
 using DBADash.Deadlock.Interaction;
 using DBADash.Deadlock.Layout;
 using DBADash.Deadlock.Model;
 using DBADashGUI.CustomReports;
-using DBADashGUI.Performance;
 using DBADashGUI.SchemaCompare;
 using DBADashGUI.ShellIntegration;
 using DBADashGUI.Theme;
@@ -44,13 +45,16 @@ namespace DBADashGUI.Deadlocks
         /// from a context that isn't instance-scoped, in which case the lookups that go back to the source
         /// instance aren't offered.
         /// </summary>
-        private readonly DBADashContext _context;
+        private readonly IViewerHost _host;
 
         /// <summary>
-        /// Evaluated once: <see cref="DBADashContext.CanMessage"/> hits the repository the first time it is
+        /// Evaluated once: <see cref="IViewerHost.CanLookupPlans"/> can hit the repository the first time it is
         /// asked, and the answer can't change while the viewer is open.
         /// </summary>
         private readonly bool _canLookup;
+
+        /// <summary>Whether the host can open Query Store for a module.  Evaluated once, as <see cref="_canLookup"/> is.</summary>
+        private readonly bool _canShowQueryStore;
 
         private readonly DeadlockGraphControl _graphControl = new() { Dock = DockStyle.Fill };
         private readonly DBADashDataGridView _processGrid = NewGrid();
@@ -96,11 +100,12 @@ namespace DBADashGUI.Deadlocks
         };
 
         /// <summary>Null when the source instance can't be reached - there is nothing to load.</summary>
-        private readonly DeadlockPlansControl _plansControl;
+        private readonly IDeadlockPlansPanel _plansControl;
 
         private readonly DeadlockFindingsControl _findings = new() { Dock = DockStyle.Fill };
 
-        private readonly DeadlockAiControl _ai = new() { Dock = DockStyle.Fill };
+        // Null when the host has no AI analysis to offer, which leaves the tab out.
+        private readonly IDeadlockAiPanel _ai;
 
         /// <summary>Kept so the caption can carry the count, which is what makes the tab worth opening.</summary>
         private readonly TabPage _findingsTab;
@@ -158,15 +163,18 @@ namespace DBADashGUI.Deadlocks
         private const string PlansText = "Plans";
 
         public DeadlockViewerControl(IReadOnlyList<DeadlockGraph> graphs, string sourceXml, string fileName = null,
-            DBADashContext context = null)
+            IViewerHost host = null)
         {
             _graphs = graphs ?? throw new ArgumentNullException(nameof(graphs));
             if (graphs.Count == 0) throw new ArgumentException("No deadlocks to show.", nameof(graphs));
 
             _sourceXml = sourceXml;
             _fileName = fileName;
-            _context = context;
-            _canLookup = DeadlockPlansControl.CanShow(context);
+            _host = host;
+            _canLookup = host is { CanLookupPlans: true };
+            _canShowQueryStore = host is { CanShowQueryStore: true };
+            _ai = host?.CreateDeadlockAiPanel();
+            if (_ai != null) _ai.Control.Dock = DockStyle.Fill;
 
             _xmlText = new CodeEditor
             {
@@ -183,9 +191,13 @@ namespace DBADashGUI.Deadlocks
             _processSplit.Panel1.Controls.Add(_processGrid);
             if (_canLookup)
             {
-                _plansControl = new DeadlockPlansControl(_context, _summary) { Dock = DockStyle.Fill };
-                _plansControl.CloseRequested += (_, _) => _processSplit.Panel2Collapsed = true;
-                _processSplit.Panel2.Controls.Add(_plansControl);
+                _plansControl = _host.CreateDeadlockPlansPanel(_summary);
+                if (_plansControl != null)
+                {
+                    _plansControl.Control.Dock = DockStyle.Fill;
+                    _plansControl.CloseRequested += (_, _) => _processSplit.Panel2Collapsed = true;
+                    _processSplit.Panel2.Controls.Add(_plansControl.Control);
+                }
             }
 
             _findingsTab = NewPage("Findings", _findings);
@@ -199,7 +211,7 @@ namespace DBADashGUI.Deadlocks
             _tabs.TabPages.Add(_findingsTab);
             _tabs.TabPages.Add(_processesTab);
             _tabs.TabPages.Add(_resourcesTab);
-            _tabs.TabPages.Add(NewPage("AI Analysis", _ai));
+            if (_ai != null) _tabs.TabPages.Add(NewPage("AI Analysis", _ai.Control));
             _tabs.TabPages.Add(NewPage("XML", _xmlHost));
 
             Controls.Add(_tabs);
@@ -273,17 +285,17 @@ namespace DBADashGUI.Deadlocks
 
             toolbar.Items.Add(BuildLayoutMenu());
             toolbar.Items.Add(new ToolStripSeparator());
-            toolbar.Items.Add(new ToolStripButton("Fit", Properties.Resources.ZoomToFit, (_, _) => _graphControl.ZoomToFit()) { DisplayStyle = ToolStripItemDisplayStyle.Image });
-            toolbar.Items.Add(new ToolStripButton("Zoom In", Properties.Resources.ZoomIn_16x, (_, _) => _graphControl.ZoomIn()) { DisplayStyle = ToolStripItemDisplayStyle.Image });
-            toolbar.Items.Add(new ToolStripButton("Zoom Out", Properties.Resources.ZoomOut_16x, (_, _) => _graphControl.ZoomOut()) { DisplayStyle = ToolStripItemDisplayStyle.Image });
+            toolbar.Items.Add(new ToolStripButton("Fit", Resources.ZoomToFit, (_, _) => _graphControl.ZoomToFit()) { DisplayStyle = ToolStripItemDisplayStyle.Image });
+            toolbar.Items.Add(new ToolStripButton("Zoom In", Resources.ZoomIn_16x, (_, _) => _graphControl.ZoomIn()) { DisplayStyle = ToolStripItemDisplayStyle.Image });
+            toolbar.Items.Add(new ToolStripButton("Zoom Out", Resources.ZoomOut_16x, (_, _) => _graphControl.ZoomOut()) { DisplayStyle = ToolStripItemDisplayStyle.Image });
             toolbar.Items.Add(new ToolStripSeparator());
-            toolbar.Items.Add(new ToolStripButton("Open...", Properties.Resources.FolderOpened_16x, (_, _) => Common.OpenDeadlockGraphFile(this))
+            toolbar.Items.Add(new ToolStripButton("Open...", Resources.FolderOpened_16x, (_, _) => ViewerLauncher.OpenDeadlockGraphFile(this))
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Image,
                 ToolTipText = "Open a deadlock graph (.xdl) from disk in a new window."
             });
-            toolbar.Items.Add(new ToolStripButton("Copy Image", Properties.Resources.ASX_Copy_blue_16x, (_, _) => CopyImage()) { DisplayStyle = ToolStripItemDisplayStyle.Image });
-            toolbar.Items.Add(new ToolStripButton("Save As...", Properties.Resources.Save_16x, (_, _) => SaveAs()) { DisplayStyle = ToolStripItemDisplayStyle.Image });
+            toolbar.Items.Add(new ToolStripButton("Copy Image", Resources.ASX_Copy_blue_16x, (_, _) => CopyImage()) { DisplayStyle = ToolStripItemDisplayStyle.Image });
+            toolbar.Items.Add(new ToolStripButton("Save As...", Resources.Save_16x, (_, _) => SaveAs()) { DisplayStyle = ToolStripItemDisplayStyle.Image });
             toolbar.Items.Add(new ToolStripSeparator());
             toolbar.Items.Add(BuildSettingsMenu());
             toolbar.Items.Add(new ToolStripSeparator());
@@ -294,7 +306,7 @@ namespace DBADashGUI.Deadlocks
             });
             // Keeps its caption where the rest of the toolbar is icons only: the icon can say the
             // graph leaves for another application, but not which one.
-            _openWith = new ToolStripDropDownButton("Open With", Properties.Resources.Open_16x)
+            _openWith = new ToolStripDropDownButton("Open With", Resources.Open_16x)
             {
                 ToolTipText = "Open the graph in another application registered for .xdl files (e.g. SSMS)",
                 Alignment = ToolStripItemAlignment.Right
@@ -347,8 +359,8 @@ namespace DBADashGUI.Deadlocks
 
         private static Image LayoutImage(DeadlockLayoutStyle style) =>
             style == DeadlockLayoutStyle.Layered
-                ? Properties.Resources.DeadlockLayoutColumns_16x
-                : Properties.Resources.DeadlockLayoutRing_16x;
+                ? Resources.DeadlockLayoutColumns_16x
+                : Resources.DeadlockLayoutRing_16x;
 
         private void AddLayoutOption(ToolStripDropDownButton menu, DeadlockLayoutStyle style, string text, string tip)
         {
@@ -385,7 +397,7 @@ namespace DBADashGUI.Deadlocks
         /// file as well as from the repository, so it can't depend on being connected to one.
         /// </summary>
         private static DeadlockLayoutStyle LoadLayoutStyle() =>
-            Enum.TryParse<DeadlockLayoutStyle>(Properties.Settings.Default.DeadlockLayoutStyle, out var style)
+            Enum.TryParse<DeadlockLayoutStyle>(ViewerSettings.DeadlockLayoutStyle, out var style)
                 ? style
                 : DeadlockLayoutStyle.Ring;
 
@@ -393,8 +405,8 @@ namespace DBADashGUI.Deadlocks
         {
             try
             {
-                Properties.Settings.Default.DeadlockLayoutStyle = style.ToString();
-                Properties.Settings.Default.Save();
+                ViewerSettings.DeadlockLayoutStyle = style.ToString();
+                ViewerSettings.Save();
             }
             catch (Exception ex)
             {
@@ -448,7 +460,7 @@ namespace DBADashGUI.Deadlocks
 
             // Builds the payload and shows it.  Nothing is contacted, and nothing is sent, until the
             // user asks for it on that tab.
-            _ai.Show(graph, _context?.InstanceName, _context);
+            _ai?.Show(graph);
 
             HighlightVictimRows();
             _graphSummary = Summarise(graph, _graphControl.GraphLayout);
@@ -653,7 +665,7 @@ namespace DBADashGUI.Deadlocks
             var procedure = _processGrid.Columns[ProcedureColumn];
             if (procedure != null)
             {
-                procedure.ToolTipText = _canLookup
+                procedure.ToolTipText = _canShowQueryStore
                     ? "Find this module in Query Store."
                     : "The module the deadlocking statement ran in.";
             }
@@ -661,7 +673,7 @@ namespace DBADashGUI.Deadlocks
             // Next to the process identity rather than out past the statement text, which is wide enough to
             // push anything after it off screen.
             if (_canLookup) LinkifyColumn(PlansColumn);
-            if (_canLookup) LinkifyColumn(ProcedureColumn);
+            if (_canShowQueryStore) LinkifyColumn(ProcedureColumn);
 
             SetDisplayIndex(PlansColumn, 3);
             SetDisplayIndex(ProcedureColumn, 4);
@@ -795,13 +807,7 @@ namespace DBADashGUI.Deadlocks
             var objectName = row[ModuleObjectColumn] as string;
             if (string.IsNullOrEmpty(objectName)) return;
 
-            var context = _context.DeepCopy();
-            context.DatabaseName = row[PlanDatabaseColumn] as string;
-            context.ObjectName = objectName;
-            context.Type = SQLTreeItem.TreeType.StoredProcedure;
-
-            var frm = new QueryStoreViewer { Context = context };
-            frm.ShowSingleInstance();
+            _host?.ShowQueryStore(row[PlanDatabaseColumn] as string, objectName);
         }
 
         private void ProcessGrid_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
@@ -1036,7 +1042,7 @@ namespace DBADashGUI.Deadlocks
 
                 case DeadlockResourceNode resourceNode:
                     var resource = resourceNode.Resource;
-                    e.Items.Add(new ToolStripMenuItem("Show in Resources Grid", Properties.Resources.DataTable_16x,
+                    e.Items.Add(new ToolStripMenuItem("Show in Resources Grid", Resources.DataTable_16x,
                         (_, _) => ShowInGrid(_resourcesTab, _resourceGrid, () => FindResourceRow(resource))));
                     break;
             }
@@ -1046,9 +1052,9 @@ namespace DBADashGUI.Deadlocks
             if (start > 0 && e.Items.Count > start) e.Items.Insert(start, new ToolStripSeparator());
             if (e.Items.Count > 0) e.Items.Add(new ToolStripSeparator());
 
-            e.Items.Add(new ToolStripMenuItem("Copy Image", Properties.Resources.ASX_Copy_blue_16x,
+            e.Items.Add(new ToolStripMenuItem("Copy Image", Resources.ASX_Copy_blue_16x,
                 (_, _) => CopyImage()));
-            e.Items.Add(new ToolStripMenuItem("Zoom to Fit", Properties.Resources.ZoomToFit,
+            e.Items.Add(new ToolStripMenuItem("Zoom to Fit", Resources.ZoomToFit,
                 (_, _) => _graphControl.ZoomToFit()));
         }
 
@@ -1061,20 +1067,20 @@ namespace DBADashGUI.Deadlocks
             // a real module to look up in Query Store.
             if (_canLookup && row[PlansColumn] as string == PlansText)
             {
-                items.Add(new ToolStripMenuItem("Plans", Properties.Resources.query_plan,
+                items.Add(new ToolStripMenuItem("Plans", Resources.query_plan,
                     async (_, _) => await RunActionAsync("Plans", () => ShowPlansForAsync(process, row))));
             }
 
-            if (_canLookup && !string.IsNullOrEmpty(row[ModuleObjectColumn] as string))
+            if (_canShowQueryStore && !string.IsNullOrEmpty(row[ModuleObjectColumn] as string))
             {
-                items.Add(new ToolStripMenuItem("Query Store", Properties.Resources.history,
+                items.Add(new ToolStripMenuItem("Query Store", Resources.history,
                     (_, _) => RunAction("Query Store", () => ShowQueryStore(row))));
             }
 
-            items.Add(new ToolStripMenuItem("Show in Processes Grid", Properties.Resources.DataTable_16x,
+            items.Add(new ToolStripMenuItem("Show in Processes Grid", Resources.DataTable_16x,
                 (_, _) => ShowInGrid(_processesTab, _processGrid, () => FindProcessRow(process))));
 
-            items.Add(new ToolStripMenuItem("Properties", Properties.Resources.Information_blue_6227_16x16,
+            items.Add(new ToolStripMenuItem("Properties", Resources.Information_blue_6227_16x16,
                 (_, _) => RunAction("Properties", () => ShowProcessProperties(process))));
         }
 
@@ -1218,7 +1224,7 @@ namespace DBADashGUI.Deadlocks
         /// </summary>
         private static ToolStripDropDownButton BuildSettingsMenu()
         {
-            var settings = new ToolStripDropDownButton("Settings", Properties.Resources.SettingsOutline_16x)
+            var settings = new ToolStripDropDownButton("Settings", Resources.SettingsOutline_16x)
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Image,
                 ToolTipText = "Settings"
@@ -1329,7 +1335,7 @@ namespace DBADashGUI.Deadlocks
             {
                 // The whole source document, not just the selected deadlock, so what opens externally
                 // matches what was handed to the viewer.
-                open(Common.WriteDeadlockGraphTempFile(_sourceXml ?? _current.Xml, _fileName));
+                open(ViewerLauncher.WriteDeadlockGraphTempFile(_sourceXml ?? _current.Xml, _fileName));
             }
             catch (Exception ex)
             {
@@ -1341,7 +1347,7 @@ namespace DBADashGUI.Deadlocks
         /// Set when the viewer is all that is running - a graph opened from Explorer rather than from the GUI.
         /// The process then ends once its last window closes - see Program.RunDeadlockViewer.
         /// </summary>
-        internal static bool IsStandalone
+        public static bool IsStandalone
         {
             get => DeadlockViewerForm.IsStandalone;
             set => DeadlockViewerForm.IsStandalone = value;

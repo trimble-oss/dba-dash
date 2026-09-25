@@ -1,3 +1,4 @@
+using DBADashGUI.Viewers;
 using DBADash;
 using DBADash.Messaging;
 using DBADashGUI.CustomReports;
@@ -28,7 +29,7 @@ namespace DBADashGUI.Deadlocks
     /// plan path already knows how to collect, so <see cref="QueryPlanActions"/> does that work and the plan
     /// lands in the repository on the way past, exactly as it does from the running queries screen.
     /// </summary>
-    internal sealed class DeadlockPlansControl : UserControl
+    internal sealed class DeadlockPlansControl : UserControl, IDeadlockPlansPanel
     {
         private readonly DBADashContext _context;
         private readonly ToolStripStatusLabel _status;
@@ -50,6 +51,17 @@ namespace DBADashGUI.Deadlocks
 
         /// <summary>Raised when the user closes the panel, so the host can collapse it.</summary>
         internal event EventHandler CloseRequested;
+
+        Control IDeadlockPlansPanel.Control => this;
+
+        event EventHandler IDeadlockPlansPanel.CloseRequested
+        {
+            add => CloseRequested += value;
+            remove => CloseRequested -= value;
+        }
+
+        Task IDeadlockPlansPanel.ShowStatementAsync(string sqlHandle, int statementStart, string databaseName, string caption) =>
+            ShowStatementAsync(sqlHandle, statementStart, databaseName, caption);
 
         // Columns added on top of what the instance returns, so that each row carries everything
         // QueryPlanActions reads.

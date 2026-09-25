@@ -1,4 +1,5 @@
-﻿using DBADashCoreGUI;
+﻿using DBADashGUI.Viewers;
+using DBADashCoreGUI;
 using DBADash;
 using DBADash.Messaging;
 using DBADashGUI.AI;
@@ -3381,12 +3382,12 @@ namespace DBADashGUI
 
         private void OpenDeadlockxdlToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Common.OpenDeadlockGraphFile(this);
+            ViewerLauncher.OpenDeadlockGraphFile(this);
         }
 
         private void OpenQueryPlanToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Common.OpenQueryPlanFile(this);
+            ViewerLauncher.OpenQueryPlanFile(this);
         }
     }
 }
