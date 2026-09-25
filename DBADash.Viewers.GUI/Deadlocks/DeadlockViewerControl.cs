@@ -1237,6 +1237,7 @@ namespace DBADashGUI.Deadlocks
                 ToolTipText = $"Windows only allows the default app to be changed from Settings.  This opens Default apps - choose {appName} for .xdl."
             };
             settings.DropDownItems.AddRange(new ToolStripItem[] { openXdlFiles, makeDefault });
+            ViewerApp.AddSettingsMenuItems(settings.DropDownItems);
 
             settings.DropDownOpening += (_, _) =>
             {

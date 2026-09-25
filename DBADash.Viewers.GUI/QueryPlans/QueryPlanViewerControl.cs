@@ -1124,6 +1124,7 @@ namespace DBADashGUI.QueryPlans
 
             menu.DropDownItems.Add(offer);
             menu.DropDownItems.Add(makeDefault);
+            ViewerApp.AddSettingsMenuItems(menu.DropDownItems);
 
             // Read as the menu opens: the registration can be changed from another copy of DBA Dash,
             // or by the user in Default Apps, while this window is sitting open.

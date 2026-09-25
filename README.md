@@ -6,6 +6,10 @@
 
 [Download](https://github.com/trimble-oss/dba-dash/releases)
 
+## DBA Dash Visualizer
+
+A small stand-alone app for viewing SQL Server execution plans (`.sqlplan`) and deadlock graphs (`.xdl`) - no DBA Dash installation or repository needed.  Download `DBADash_Visualizer_<version>.zip` from the [releases](https://github.com/trimble-oss/dba-dash/releases) page.  See [Docs/Visualizer.md](Docs/Visualizer.md).
+
 ## [Website](https://dbadash.com) 
 
 Documentation is now available on [dbadash.com](https://dbadash.com), including an easy to follow [quick start](https://dbadash.com/docs/setup/quick-start/) guide.

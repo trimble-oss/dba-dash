@@ -37,6 +37,12 @@ jobs:
       - name: Build GUI
         run: dotnet build DBADashGUI -o DBADashBuild\DBADashGUIOnly
 
+      # Publishes the stand-alone viewer and fails if anything belonging to the rest of DBA Dash (the service, SMO, the AWS
+      # SDK...) has found its way in - it is meant to be small, and needs no repository.
+      - name: Publish Visualizer
+        shell: pwsh
+        run: ./Scripts/Publish-Visualizer.ps1 -NoZip
+
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v3
         
@@ -45,6 +51,9 @@ jobs:
 
       - name: Test
         run: dotnet test DBADash.Test/DBADash.Test.csproj --verbosity normal
+
+      - name: Test Viewers
+        run: dotnet test DBADash.Viewers.GUI.Test/DBADash.Viewers.GUI.Test.csproj --verbosity normal
 
       - name: Get Version
         id: GetVersion 

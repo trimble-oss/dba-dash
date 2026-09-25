@@ -40,6 +40,21 @@ namespace DBADashGUI.Viewers
             true);
 
         /// <summary>
+        /// Items the host adds to the end of each viewer's Settings menu - the stand-alone viewer's About and Check for
+        /// Updates, say.  Each is made afresh for the menu it goes in, as an item can only be in one menu.
+        /// </summary>
+        public static IList<Func<ToolStripItem>> SettingsMenuItems { get; } = new List<Func<ToolStripItem>>();
+
+        /// <summary>Adds the host's <see cref="SettingsMenuItems"/> to a Settings menu, after a separator.</summary>
+        internal static void AddSettingsMenuItems(ToolStripItemCollection items)
+        {
+            if (SettingsMenuItems.Count == 0) return;
+
+            items.Add(new ToolStripSeparator());
+            foreach (var create in SettingsMenuItems) items.Add(create());
+        }
+
+        /// <summary>
         /// The files the viewers open, for the Open dialog: .sqlplan and .xdl, and the .xml either of them is also saved
         /// as.
         /// </summary>

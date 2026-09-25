@@ -24,6 +24,8 @@ namespace DBADashVisualizer
 
         private static string SettingsPath => Path.Combine(DataFolder, "Visualizer", "settings.json");
 
+        private static UpdateUi _updates;
+
         [STAThread]
         private static int Main(string[] args)
         {
@@ -46,6 +48,9 @@ namespace DBADashVisualizer
 
                 ViewerSettings.Store = new JsonFileSettingsStore(SettingsPath);
                 ApplyTheme();
+
+                _updates = new UpdateUi(AppName, ViewerSettings.Store);
+                foreach (var item in _updates.MenuItems()) ViewerApp.SettingsMenuItems.Add(item);
 
                 return Run(args);
             }
@@ -101,6 +106,9 @@ namespace DBADashVisualizer
             // Started with no file - from the Start menu, say - so ask for one.  Closing the dialog ends the app.
             if (files.Count == 0) files = ViewerApp.PromptForFiles().ToList();
             if (files.Count == 0) return 0;
+
+            // Looks for a newer version once the viewer is up - at most once a day, and never if the user has switched it off.
+            _updates.CheckAtStartUp();
 
             ViewerApp.Run(files);
             return 0;
