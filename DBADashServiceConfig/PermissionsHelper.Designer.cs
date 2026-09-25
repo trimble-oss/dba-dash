@@ -33,8 +33,8 @@
             label1 = new System.Windows.Forms.Label();
             errorProvider1 = new System.Windows.Forms.ErrorProvider(components);
             bttnGrant = new System.Windows.Forms.Button();
-            dgvPermissions = new System.Windows.Forms.DataGridView();
-            dgvInstances = new System.Windows.Forms.DataGridView();
+            dgvPermissions = new DBADashGUI.CustomReports.DBADashDataGridView();
+            dgvInstances = new DBADashGUI.CustomReports.DBADashDataGridView();
             label2 = new System.Windows.Forms.Label();
             label3 = new System.Windows.Forms.Label();
             bttnClose = new System.Windows.Forms.Button();
@@ -252,8 +252,8 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ErrorProvider errorProvider1;
         private System.Windows.Forms.Button bttnGrant;
-        private System.Windows.Forms.DataGridView dgvPermissions;
-        private System.Windows.Forms.DataGridView dgvInstances;
+        private DBADashGUI.CustomReports.DBADashDataGridView dgvPermissions;
+        private DBADashGUI.CustomReports.DBADashDataGridView dgvInstances;
         private System.Windows.Forms.Button bttnClose;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label2;

@@ -30,7 +30,7 @@
         {
             components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PerformanceCounters));
-            dgv = new System.Windows.Forms.DataGridView();
+            dgv = new DBADashGUI.CustomReports.DBADashDataGridView();
             colObjectName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             colCounterName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             colInstanceName = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -44,7 +44,7 @@
             bttnSave = new System.Windows.Forms.Button();
             splitContainer1 = new System.Windows.Forms.SplitContainer();
             splitContainer2 = new System.Windows.Forms.SplitContainer();
-            dgvAvailable = new System.Windows.Forms.DataGridView();
+            dgvAvailable = new DBADashGUI.CustomReports.DBADashDataGridView();
             toolStrip2 = new System.Windows.Forms.ToolStrip();
             tsChangeConnection = new System.Windows.Forms.ToolStripButton();
             toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
@@ -433,7 +433,7 @@
 
         #endregion
 
-        private System.Windows.Forms.DataGridView dgv;
+        private DBADashGUI.CustomReports.DBADashDataGridView dgv;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Button bttnCancel;
         private System.Windows.Forms.Button bttnSave;
@@ -451,7 +451,7 @@
         private System.Windows.Forms.Label lblCounterName;
         private System.Windows.Forms.ToolStrip toolStrip2;
         private System.Windows.Forms.ToolStripLabel toolStripLabel2;
-        private System.Windows.Forms.DataGridView dgvAvailable;
+        private DBADashGUI.CustomReports.DBADashDataGridView dgvAvailable;
         private System.Windows.Forms.ToolStripLabel lblSearch;
         private System.Windows.Forms.ToolStripTextBox txtSearch;
         private System.Windows.Forms.Button bttnReset;

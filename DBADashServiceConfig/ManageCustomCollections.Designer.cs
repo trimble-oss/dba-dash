@@ -38,7 +38,7 @@
             numTimeout = new System.Windows.Forms.NumericUpDown();
             chkDefaultTimeout = new System.Windows.Forms.CheckBox();
             label3 = new System.Windows.Forms.Label();
-            dgvCustom = new System.Windows.Forms.DataGridView();
+            dgvCustom = new DBADashGUI.CustomReports.DBADashDataGridView();
             bttnAdd = new System.Windows.Forms.Button();
             chkRunOnStart = new System.Windows.Forms.CheckBox();
             bttnUpdate = new System.Windows.Forms.Button();
@@ -277,7 +277,7 @@
         private System.Windows.Forms.NumericUpDown numTimeout;
         private System.Windows.Forms.CheckBox chkDefaultTimeout;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.DataGridView dgvCustom;
+        private DBADashGUI.CustomReports.DBADashDataGridView dgvCustom;
         private System.Windows.Forms.Button bttnAdd;
         private System.Windows.Forms.CheckBox chkRunOnStart;
         private System.Windows.Forms.Button bttnUpdate;

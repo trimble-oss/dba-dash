@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DBADashGUI.CustomReports;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -792,7 +793,7 @@ ORDER BY ProcName", cn);
                 Height = 600
             };
 
-            var dgv = new DataGridView
+            var dgv = new DBADashDataGridView
             {
                 Dock = DockStyle.Fill,
                 DataSource = dt,

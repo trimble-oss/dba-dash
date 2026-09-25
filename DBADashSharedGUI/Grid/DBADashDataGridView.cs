@@ -193,6 +193,8 @@ namespace DBADashGUI.CustomReports
 
         private void DBADashDataGridView_DataError(object sender, DataGridViewDataErrorEventArgs e)
         {
+            // Not every error belongs to a cell (e.g. a column header), and there is no cell to flag then.
+            if (e.RowIndex < 0 || e.ColumnIndex < 0) return;
             this.Rows[e.RowIndex].Cells[e.ColumnIndex].ErrorText =
                 $"Grid Data Error on `{e.Context.ToString()}`: {e.Exception}";
         }

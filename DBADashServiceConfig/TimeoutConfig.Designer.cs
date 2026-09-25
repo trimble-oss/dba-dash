@@ -30,7 +30,7 @@
         {
             components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TimeoutConfig));
-            dgv = new System.Windows.Forms.DataGridView();
+            dgv = new DBADashGUI.CustomReports.DBADashDataGridView();
             colCollectionType = new System.Windows.Forms.DataGridViewTextBoxColumn();
             colTimeout = new System.Windows.Forms.DataGridViewTextBoxColumn();
             colDelete = new System.Windows.Forms.DataGridViewLinkColumn();
@@ -403,7 +403,7 @@
 
         #endregion
 
-        private System.Windows.Forms.DataGridView dgv;
+        private DBADashGUI.CustomReports.DBADashDataGridView dgv;
         private System.Windows.Forms.TextBox txtTimeout;
         private System.Windows.Forms.ComboBox cboCollection;
         private System.Windows.Forms.Label label1;

@@ -1,3 +1,4 @@
+using DBADashGUI.CustomReports;
 using DBADash;
 using DBADashGUI.Theme;
 using System;
@@ -33,8 +34,8 @@ namespace DBADashServiceConfig
 
         private TextBox txtHost;
         private TextBox txtSearch;
-        private DataGridView dgvAvailable;
-        private DataGridView dgvSelected;
+        private DBADashDataGridView dgvAvailable;
+        private DBADashDataGridView dgvSelected;
         private ComboBox cboInstance;
         private ComboBox cboObjectFilter;
         private CheckBox chkAllInstances;
@@ -124,7 +125,7 @@ namespace DBADashServiceConfig
             tlp.Controls.Add(pnlTop, 0, 1);
 
             // Row 2 - available counters grid
-            dgvAvailable = new DataGridView
+            dgvAvailable = new DBADashDataGridView
             {
                 Dock = DockStyle.Fill,
                 AutoGenerateColumns = false,
@@ -154,7 +155,7 @@ namespace DBADashServiceConfig
             tlp.Controls.Add(pnlAdd, 0, 3);
 
             // Row 4 - selected counters grid
-            dgvSelected = new DataGridView
+            dgvSelected = new DBADashDataGridView
             {
                 Dock = DockStyle.Fill,
                 AutoGenerateColumns = false,
