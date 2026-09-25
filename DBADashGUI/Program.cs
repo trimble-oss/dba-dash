@@ -32,6 +32,8 @@ namespace DBADashGUI
             ApplicationConfiguration.Initialize();
             AddEditors();
             Common.IsApplicationRunning = true;
+            // Default export file names use the time zone the user has chosen in the app.
+            CommonShared.AppNow = () => DateHelper.AppNow;
             ConfigureLogging();
             try
             {

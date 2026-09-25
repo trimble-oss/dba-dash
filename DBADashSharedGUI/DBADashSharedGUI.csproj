@@ -28,6 +28,7 @@
 
   <ItemGroup>
     <PackageReference Include="AvalonEdit" />
+    <PackageReference Include="ClosedXML" />
     <PackageReference Include="DiffPlex" />
     <PackageReference Include="DiffPlex.Wpf" />
     <PackageReference Include="Markdig" />
@@ -66,6 +67,9 @@
     </Compile>
     <Compile Update="WebView2Wrapper.cs">
       <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Pickers\SelectColumns.cs">
+      <SubType>Form</SubType>
     </Compile>
     <Compile Update="Pickers\DurationDropDown.cs">
       <SubType>UserControl</SubType>

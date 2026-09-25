@@ -233,16 +233,6 @@ namespace DBADashGUI.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap AutosizeStretch_16x {
-            get {
-                object obj = ResourceManager.GetObject("AutosizeStretch_16x", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap AutoSum_16x {
             get {
                 object obj = ResourceManager.GetObject("AutoSum_16x", resourceCulture);
@@ -473,16 +463,6 @@ namespace DBADashGUI.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap DeleteColumn_16x {
-            get {
-                object obj = ResourceManager.GetObject("DeleteColumn_16x", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap DeleteDatabase_16x {
             get {
                 object obj = ResourceManager.GetObject("DeleteDatabase_16x", resourceCulture);
@@ -496,16 +476,6 @@ namespace DBADashGUI.Properties {
         internal static System.Drawing.Bitmap Diff_16x {
             get {
                 object obj = ResourceManager.GetObject("Diff_16x", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap EditFilter_16x {
-            get {
-                object obj = ResourceManager.GetObject("EditFilter_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -633,16 +603,6 @@ namespace DBADashGUI.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap FreezeColumn_16x {
-            get {
-                object obj = ResourceManager.GetObject("FreezeColumn_16x", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap GradientLinear_18x16 {
             get {
                 object obj = ResourceManager.GetObject("GradientLinear_18x16", resourceCulture);
@@ -743,16 +703,6 @@ namespace DBADashGUI.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap JsonFile {
-            get {
-                object obj = ResourceManager.GetObject("JsonFile", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap LegendHS {
             get {
                 object obj = ResourceManager.GetObject("LegendHS", resourceCulture);
@@ -776,16 +726,6 @@ namespace DBADashGUI.Properties {
         internal static System.Drawing.Bitmap List_NumberedHS {
             get {
                 object obj = ResourceManager.GetObject("List_NumberedHS", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap MarkdownFile {
-            get {
-                object obj = ResourceManager.GetObject("MarkdownFile", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -870,15 +810,6 @@ namespace DBADashGUI.Properties {
             }
         }
         
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap PivotTable {
-            get {
-                object obj = ResourceManager.GetObject("PivotTable", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
 
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
@@ -900,16 +831,6 @@ namespace DBADashGUI.Properties {
             }
         }
 
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap PrettyCode {
-            get {
-                object obj = ResourceManager.GetObject("PrettyCode", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
@@ -1003,16 +924,6 @@ namespace DBADashGUI.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap SaveTable_16x {
-            get {
-                object obj = ResourceManager.GetObject("SaveTable_16x", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap ScrollViewer {
             get {
                 object obj = ResourceManager.GetObject("ScrollViewer", resourceCulture);
@@ -1033,16 +944,6 @@ namespace DBADashGUI.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap SelectCell_16x {
-            get {
-                object obj = ResourceManager.GetObject("SelectCell_16x", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap SelectColumns {
             get {
                 object obj = ResourceManager.GetObject("SelectColumns", resourceCulture);
@@ -1056,16 +957,6 @@ namespace DBADashGUI.Properties {
         internal static System.Drawing.Bitmap SelectRows {
             get {
                 object obj = ResourceManager.GetObject("SelectRows", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap SelectTable {
-            get {
-                object obj = ResourceManager.GetObject("SelectTable", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -1212,16 +1103,6 @@ namespace DBADashGUI.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap StopFilter_16x {
-            get {
-                object obj = ResourceManager.GetObject("StopFilter_16x", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap StopLog_16x {
             get {
                 object obj = ResourceManager.GetObject("StopLog_16x", resourceCulture);
@@ -1275,16 +1156,6 @@ namespace DBADashGUI.Properties {
         internal static System.Drawing.Bitmap TableScript_16x {
             get {
                 object obj = ResourceManager.GetObject("TableScript_16x", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap TextLeft {
-            get {
-                object obj = ResourceManager.GetObject("TextLeft", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -1365,26 +1236,6 @@ namespace DBADashGUI.Properties {
         internal static System.Drawing.Bitmap WordWrap_16x {
             get {
                 object obj = ResourceManager.GetObject("WordWrap_16x", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap XmlFile {
-            get {
-                object obj = ResourceManager.GetObject("XmlFile", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap zippedFile {
-            get {
-                object obj = ResourceManager.GetObject("zippedFile", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

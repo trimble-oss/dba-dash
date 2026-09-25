@@ -1,4 +1,9 @@
-﻿using AsyncKeyedLock;
+﻿using DBADashGUI.Theme;
+using DBADashGUI.Pickers;
+using DBADashGUI;
+using System.Data;
+using System.Xml;
+using AsyncKeyedLock;
 using System.Collections.Concurrent;
 using System.Data.Common;
 using System.Security.Cryptography;
@@ -265,6 +270,103 @@ namespace DBADashSharedGUI
             }
 
             form.Show();
+        }
+
+        public static bool IsNumericType(this Type type)
+        {
+            return Type.GetTypeCode(type) switch
+            {
+                TypeCode.Byte => true,
+                TypeCode.Decimal => true,
+                TypeCode.Double => true,
+                TypeCode.Int16 => true,
+                TypeCode.Int32 => true,
+                TypeCode.Int64 => true,
+                TypeCode.SByte => true,
+                TypeCode.Single => true,
+                TypeCode.UInt16 => true,
+                TypeCode.UInt32 => true,
+                TypeCode.UInt64 => true,
+                _ => false
+            };
+        }
+
+        public static string StripInvalidXmlChars(this string text)
+        {
+            var validXml = new StringBuilder();
+            foreach (var c in text.Where(XmlConvert.IsXmlChar))
+            {
+                validXml.Append(c);
+            }
+
+            return validXml.ToString();
+        }
+
+        public static List<ISelectable> ToSelectableList(this DataGridViewColumnCollection columns) => columns
+            .Cast<DataGridViewColumn>()
+            .Select(column => new SelectableColumn(column) as ISelectable)
+            .ToList();
+
+        public static void ApplyVisibility(this DataGridViewColumnCollection columns, List<ISelectable> selectables)
+        {
+            // Columns are keyed by HeaderText, which is not guaranteed unique (e.g. a visible column aliased to the
+            // same header as a hidden backing column).  Keep the first occurrence rather than throwing on duplicates.
+            var columnDict = new Dictionary<string, DataGridViewColumn>();
+            foreach (var c in columns.Cast<DataGridViewColumn>())
+            {
+                columnDict.TryAdd(c.HeaderText, c);
+            }
+
+            foreach (var selectable in selectables)
+            {
+                if (columnDict.TryGetValue(selectable.Name, out var column))
+                {
+                    column.Visible = selectable.IsVisible;
+                }
+            }
+        }
+
+        public static DialogResult PromptColumnSelection(this DataGridView dgv)
+        {
+            using var frm = new SelectColumns() { Items = dgv.Columns.ToSelectableList() };
+            frm.ApplyTheme(ThemeExtensions.CurrentTheme);
+            frm.ShowDialog(dgv);
+            if (frm.DialogResult == DialogResult.OK)
+            {
+                dgv.Columns.ApplyVisibility(frm.Items);
+            }
+
+            return frm.DialogResult;
+        }
+
+        public static List<ISelectable> ToSelectableList(this List<string> list)
+        {
+            return list.Select(s => new SelectableString(s) as ISelectable).ToList();
+        }
+
+        public static object DBNullToNull(this object obj)
+        {
+            return obj == DBNull.Value ? null : obj;
+        }
+
+        /// <summary>
+        /// Infers the data type of a DataGridViewColumn based on the first non-null value in the column, or uses ValueType of the column where available.
+        /// </summary>
+        /// <param name="column">The DataGridViewColumn to infer the type for.</param>
+        /// <returns>The inferred data type, or typeof(string) if the column is empty or the DataGridView is not set.</returns>
+        public static Type InferColumnType(this DataGridViewColumn column)
+        {
+            if (column.ValueType != null)
+            {
+                return column.ValueType;
+            }
+            var dgv = column.DataGridView;
+            if (dgv == null) return typeof(string);
+            var firstNonNullValue = dgv.Rows.Cast<DataGridViewRow>()
+                .Select(row => row.Cells[column.Name].Value)
+                .FirstOrDefault(value => value != null);
+
+            return firstNonNullValue?.GetType() ?? typeof(string);
         }
     }
 }

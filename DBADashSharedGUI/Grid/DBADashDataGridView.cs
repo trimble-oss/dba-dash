@@ -1,3 +1,4 @@
+using DBADashSharedGUI;
 using DBADash;
 using DBADashGUI.SchemaCompare;
 using DBADashGUI.Theme;
@@ -18,6 +19,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Windows.Forms;
 using Font = System.Drawing.Font;
+using Resources = DBADashSharedGUI.Properties.Resources;
 
 namespace DBADashGUI.CustomReports
 {
@@ -48,35 +50,35 @@ namespace DBADashGUI.CustomReports
         public bool GroupByDefaultCountPercent { get; set; }
 
         private ToolStripMenuItem GetCopyGridMenuItem() =>
-            new("Grid", Properties.Resources.Table_16x, (_, _) => CopyGrid());
+            new("Grid", Resources.Table_16x, (_, _) => CopyGrid());
 
         private ToolStripMenuItem GetCopyColumnMenuItem() =>
-            new("Column", Properties.Resources.SelectColumns, (_, _) => CopyColumn());
+            new("Column", Resources.SelectColumns, (_, _) => CopyColumn());
 
         private ToolStripMenuItem GetCopySelectedMenuItem() =>
-            new("Selected", Properties.Resources.SelectRows, (_, _) => CopySelected());
+            new("Selected", Resources.SelectRows, (_, _) => CopySelected());
 
-        private ToolStripMenuItem GetExportToExcelMenuItem() => new("Export Excel", Properties.Resources.excel16x16,
+        private ToolStripMenuItem GetExportToExcelMenuItem() => new("Export Excel", Resources.excel16x16,
             (_, _) => ExportToExcel());
 
         private ToolStripMenuItem GetExportToFileMenuItem()
         {
-            var menuItem = new ToolStripMenuItem("Export File", Properties.Resources.Save_16x)
+            var menuItem = new ToolStripMenuItem("Export File", Resources.Save_16x)
             { ToolTipText = "Save the grid data to a JSON or XML file that can be re-opened" };
             menuItem.DropDownItems.AddRange(new ToolStripItem[]
             {
                 // Re-loadable data formats (round-trip back into a grid via the XE file viewer).
-                new ToolStripMenuItem("As JSON", Properties.Resources.JsonFile, (_, _) => ExportToFile(GridSerializer.JsonExtension)),
-                new ToolStripMenuItem("As Compressed JSON", Properties.Resources.zippedFile, (_, _) => ExportToFile(GridSerializer.CompressedJsonExtension)),
-                new ToolStripMenuItem("As XML", Properties.Resources.XmlFile, (_, _) => ExportToFile(GridSerializer.XmlExtension)),
-                new ToolStripMenuItem("As Compressed XML", Properties.Resources.zippedFile, (_, _) => ExportToFile(GridSerializer.CompressedXmlExtension)),
+                new ToolStripMenuItem("As JSON", Resources.JsonFile, (_, _) => ExportToFile(GridSerializer.JsonExtension)),
+                new ToolStripMenuItem("As Compressed JSON", Resources.zippedFile, (_, _) => ExportToFile(GridSerializer.CompressedJsonExtension)),
+                new ToolStripMenuItem("As XML", Resources.XmlFile, (_, _) => ExportToFile(GridSerializer.XmlExtension)),
+                new ToolStripMenuItem("As Compressed XML", Resources.zippedFile, (_, _) => ExportToFile(GridSerializer.CompressedXmlExtension)),
                 new ToolStripSeparator(),
                 // Presentational formats (export only - the same content the Copy / Script actions produce).
-                new ToolStripMenuItem("As SQL (INSERT)", Properties.Resources.SQLScript_16x,
+                new ToolStripMenuItem("As SQL (INSERT)", Resources.SQLScript_16x,
                     (_, _) => ExportTextToFile(() => ScriptTable(false, true, "#DBADashGrid"), ".sql", "SQL script")),
-                new ToolStripMenuItem("As Markdown", Properties.Resources.MarkdownFile,
+                new ToolStripMenuItem("As Markdown", Resources.MarkdownFile,
                     (_, _) => ExportTextToFile(() => ConvertToMarkdown(true), ".md", "Markdown")),
-                new ToolStripMenuItem("As HTML", Properties.Resources.WebURL_16x,
+                new ToolStripMenuItem("As HTML", Resources.WebURL_16x,
                     (_, _) => ExportTextToFile(ConvertToHtml, ".html", "HTML"))
             });
             return menuItem;
@@ -84,42 +86,42 @@ namespace DBADashGUI.CustomReports
 
         private ToolStripMenuItem GetCopyAsMarkdownMenuItem()
         {
-            var menuItem = new ToolStripMenuItem("As Markdown", Properties.Resources.MarkdownFile);
+            var menuItem = new ToolStripMenuItem("As Markdown", Resources.MarkdownFile);
             menuItem.DropDownItems.AddRange(new ToolStripItem[] {
-                new ToolStripMenuItem("Standard", Properties.Resources.TextLeft, (_, _) => CopyAsMarkdown()),
-                new ToolStripMenuItem("Prettified", Properties.Resources.PrettyCode, (_, _) => CopyAsMarkdown(true))
+                new ToolStripMenuItem("Standard", Resources.TextLeft, (_, _) => CopyAsMarkdown()),
+                new ToolStripMenuItem("Prettified", Resources.PrettyCode, (_, _) => CopyAsMarkdown(true))
             });
             return menuItem;
         }
 
         private ToolStripMenuItem GetSaveTableMenuItem()
         {
-            var tsSave = new ToolStripMenuItem("Save Table", Properties.Resources.SaveTable_16x) { ToolTipText = "Save to table in SQL Server database" };
+            var tsSave = new ToolStripMenuItem("Save Table", Resources.SaveTable_16x) { ToolTipText = "Save to table in SQL Server database" };
             tsSave.DropDownItems.AddRange(new[]{
-                new ToolStripMenuItem("From Data Table", Properties.Resources.DataTable_16x,
+                new ToolStripMenuItem("From Data Table", Resources.DataTable_16x,
                     (_, _) => SaveTable(false)) {ToolTipText = "Save underlying DataTable to table in SQL Server database"},
-                new ToolStripMenuItem("From Grid", Properties.Resources.Table_16x,
+                new ToolStripMenuItem("From Grid", Resources.Table_16x,
                 (_, _) => SaveTable(true)){ ToolTipText = "Save grid to table in SQL Server database" },
-                new ToolStripMenuItem("Script Data Table", Properties.Resources.SQLScript_16x,
+                new ToolStripMenuItem("Script Data Table", Resources.SQLScript_16x,
                     (_, _) => ScriptTable(false)) {ToolTipText = "Script underlying DataTable AS INSERT"},
-                new ToolStripMenuItem("Script Grid", Properties.Resources.TableScript_16x,
+                new ToolStripMenuItem("Script Grid", Resources.TableScript_16x,
                     (_, _) => ScriptTable(true)){ ToolTipText = "Script grid as INSERT" }
             });
             return tsSave;
         }
 
-        private ToolStripMenuItem GetClearFilterMenuItem() => new("Clear Filters", Properties.Resources.Eraser_16x,
+        private ToolStripMenuItem GetClearFilterMenuItem() => new("Clear Filters", Resources.Eraser_16x,
             (_, _) => ClearFilter());
 
-        private ToolStripMenuItem GetColumnsMenuItem() => new("Columns", Properties.Resources.Column_16x,
+        private ToolStripMenuItem GetColumnsMenuItem() => new("Columns", Resources.Column_16x,
             (_, _) => this.PromptColumnSelection());
 
-        private ToolStripMenuItem GetEditFilterMenuItem() => new("Edit Filter", Properties.Resources.EditFilter_16x,
+        private ToolStripMenuItem GetEditFilterMenuItem() => new("Edit Filter", Resources.EditFilter_16x,
             (_, _) => PromptFilter());
 
         private ToolStripMenuItem GetAutoResizeColumns()
         {
-            var tsAutoResize = new ToolStripMenuItem("Auto Resize Columns", Properties.Resources.AutosizeStretch_16x);
+            var tsAutoResize = new ToolStripMenuItem("Auto Resize Columns", Resources.AutosizeStretch_16x);
             tsAutoResize.DropDownItems.AddRange(new[] {
                     new ToolStripMenuItem("[Smart] All", null,
                         (_, _) => this.AutoResizeColumnsWithMaxColumnWidth(DataGridViewAutoSizeColumnsMode.AllCells)),
@@ -141,7 +143,7 @@ namespace DBADashGUI.CustomReports
             return tsAutoResize;
         }
 
-        private ToolStripMenuItem GetFreezeColumnMenuItem() => new("Freeze Column", Properties.Resources.FreezeColumn_16x, (_, _) => FreezeColumn());
+        private ToolStripMenuItem GetFreezeColumnMenuItem() => new("Freeze Column", Resources.FreezeColumn_16x, (_, _) => FreezeColumn());
 
         private void FreezeColumn()
         {
@@ -240,12 +242,12 @@ namespace DBADashGUI.CustomReports
         private void AddColumnContextMenuItems()
         {
             ColumnContextMenu = new();
-            var hideColumn = new ToolStripMenuItem("Hide Column", Properties.Resources.DeleteColumn_16x, (_, _) => Columns[ClickedColumnIndex].Visible = false);
+            var hideColumn = new ToolStripMenuItem("Hide Column", Resources.DeleteColumn_16x, (_, _) => Columns[ClickedColumnIndex].Visible = false);
             var clearFilter = GetClearFilterMenuItem();
             var editFilter = GetEditFilterMenuItem();
             var saveTable = GetSaveTableMenuItem();
             var freezeColumn = GetFreezeColumnMenuItem();
-            var copy = new ToolStripMenuItem("Copy", Properties.Resources.ASX_Copy_blue_16x);
+            var copy = new ToolStripMenuItem("Copy", Resources.ASX_Copy_blue_16x);
             copy.DropDownItems.AddRange(new ToolStripItem[]
             {
                 GetCopyGridMenuItem(),
@@ -301,20 +303,20 @@ namespace DBADashGUI.CustomReports
             CellContextMenu = new();
             var cellClearFilterMenuItem = GetClearFilterMenuItem();
             var filterByValue =
-                new ToolStripMenuItem("Filter By Value", Properties.Resources.Filter_16x, FilterByValue_Click)
+                new ToolStripMenuItem("Filter By Value", Resources.Filter_16x, FilterByValue_Click)
                 { Tag = "=" };
             var excludeValue =
-                new ToolStripMenuItem("Exclude Value", Properties.Resources.StopFilter_16x, FilterByValue_Click)
+                new ToolStripMenuItem("Exclude Value", Resources.StopFilter_16x, FilterByValue_Click)
                 { Tag = "<>" };
-            var inFilter = new ToolStripMenuItem("IN", Properties.Resources.Filter_16x, (_, _) => InFilter());
+            var inFilter = new ToolStripMenuItem("IN", Resources.Filter_16x, (_, _) => InFilter());
             var notInFilter =
-                new ToolStripMenuItem("NOT IN", Properties.Resources.StopFilter_16x, (_, _) => NotInFilter());
-            var copyCell = new ToolStripMenuItem("Cell", Properties.Resources.SelectCell_16x, CopyCell);
-            var copyRow = new ToolStripMenuItem("Row", Properties.Resources.SelectRows, CopyRow);
+                new ToolStripMenuItem("NOT IN", Resources.StopFilter_16x, (_, _) => NotInFilter());
+            var copyCell = new ToolStripMenuItem("Cell", Resources.SelectCell_16x, CopyCell);
+            var copyRow = new ToolStripMenuItem("Row", Resources.SelectRows, CopyRow);
             var editFilter = GetEditFilterMenuItem();
             var filterSeparator = new ToolStripSeparator();
 
-            var allFilters = new ToolStripMenuItem("All Filters", Properties.Resources.FilterDropdown_16x);
+            var allFilters = new ToolStripMenuItem("All Filters", Resources.FilterDropdown_16x);
             var filterLike = new ToolStripMenuItem("Like", null, (_, _) => FilterLike());
             var filterNotLike = new ToolStripMenuItem("Not Like", null, (_, _) => FilterNotLike());
             var greaterThan = new ToolStripMenuItem(">", null, (_, _) => FilterByValueWithPrompt(">"));
@@ -324,12 +326,12 @@ namespace DBADashGUI.CustomReports
             var equal = new ToolStripMenuItem("=", null, (_, _) => FilterByValueWithPrompt("="));
             var notEqual = new ToolStripMenuItem("<>", null, (_, _) => FilterByValueWithPrompt("<>"));
 
-            var transpose = new ToolStripMenuItem("Transpose", Properties.Resources.PivotTable);
-            var transposeGrid = new ToolStripMenuItem("Grid", Properties.Resources.PivotTable,
+            var transpose = new ToolStripMenuItem("Transpose", Resources.PivotTable);
+            var transposeGrid = new ToolStripMenuItem("Grid", Resources.PivotTable,
                 (_, _) => TransposeGrid());
-            var transposeSelected = new ToolStripMenuItem("Selected Rows", Properties.Resources.PivotTable,
+            var transposeSelected = new ToolStripMenuItem("Selected Rows", Resources.PivotTable,
                 (sender, args) => TransposeSelected());
-            var transposeContext = new ToolStripMenuItem("Context Row (Right Click)", Properties.Resources.PivotTable,
+            var transposeContext = new ToolStripMenuItem("Context Row (Right Click)", Resources.PivotTable,
                 (sender, args) => TransposeContextRow());
             transpose.DropDownItems.AddRange(new ToolStripItem[] { transposeContext, transposeSelected, transposeGrid });
 
@@ -337,10 +339,10 @@ namespace DBADashGUI.CustomReports
                 { filterLike, filterNotLike, equal, notEqual, greaterThan, lessThan, greaterThanEqual, lessThanEqual });
             var saveTable = GetSaveTableMenuItem();
 
-            var select = new ToolStripMenuItem("Select", Properties.Resources.Select);
-            var selectRow = new ToolStripMenuItem("Row", Properties.Resources.SelectRows,
+            var select = new ToolStripMenuItem("Select", Resources.Select);
+            var selectRow = new ToolStripMenuItem("Row", Resources.SelectRows,
                 (_, _) => this.Rows[ClickedRowIndex].Selected = true);
-            var selectColumn = new ToolStripMenuItem("Column", Properties.Resources.SelectColumns,
+            var selectColumn = new ToolStripMenuItem("Column", Resources.SelectColumns,
                 (_, _) =>
                 {
                     foreach (var row in Rows.OfType<DataGridViewRow>())
@@ -348,9 +350,9 @@ namespace DBADashGUI.CustomReports
                         row.Cells[ClickedColumnIndex].Selected = true;
                     }
                 });
-            var selectAll = new ToolStripMenuItem("All", Properties.Resources.SelectTable, (_, _) => SelectAll());
+            var selectAll = new ToolStripMenuItem("All", Resources.SelectTable, (_, _) => SelectAll());
             select.DropDownItems.AddRange(new ToolStripItem[] { selectRow, selectColumn, selectAll });
-            var copy = new ToolStripMenuItem("Copy", Properties.Resources.ASX_Copy_blue_16x);
+            var copy = new ToolStripMenuItem("Copy", Resources.ASX_Copy_blue_16x);
             copy.DropDownItems.AddRange(new ToolStripItem[]
             {
                 GetCopyGridMenuItem(),
@@ -548,7 +550,7 @@ namespace DBADashGUI.CustomReports
             Columns.Cast<DataGridViewColumn>().Any(c => c.Visible);
 
         private ToolStripMenuItem GetGroupByMenuItem() =>
-            new("Group By", Properties.Resources.GroupBy_16x, (_, _) => ShowGroupBy());
+            new("Group By", Resources.GroupBy_16x, (_, _) => ShowGroupBy());
 
         private void ShowGroupBy()
         {
@@ -1474,7 +1476,7 @@ namespace DBADashGUI.CustomReports
                 MessageBox.Show("No data to export", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            Common.PromptSaveDataGridView(this);
+            CommonShared.PromptSaveDataGridView(this);
         }
 
         /// <summary>
@@ -1550,7 +1552,7 @@ namespace DBADashGUI.CustomReports
 
         public void CopyGrid()
         {
-            Common.CopyDataGridViewToClipboard(this);
+            CommonShared.CopyDataGridViewToClipboard(this);
         }
 
         private bool IsColumnFiltered(int columnIndex)
@@ -2555,10 +2557,10 @@ GO
 
         private ToolStripMenuItem GetCopyAsJsonMenuItem()
         {
-            var menuItem = new ToolStripMenuItem("As JSON", Properties.Resources.JsonFile);
+            var menuItem = new ToolStripMenuItem("As JSON", Resources.JsonFile);
             menuItem.DropDownItems.AddRange([
-                new ToolStripMenuItem("Compact", Properties.Resources.JsonFile, (_, _) => CopyAsJson(false)),
-                new ToolStripMenuItem("Prettified", Properties.Resources.PrettyCode, (_, _) => CopyAsJson(true))
+                new ToolStripMenuItem("Compact", Resources.JsonFile, (_, _) => CopyAsJson(false)),
+                new ToolStripMenuItem("Prettified", Resources.PrettyCode, (_, _) => CopyAsJson(true))
             ]);
             return menuItem;
         }
