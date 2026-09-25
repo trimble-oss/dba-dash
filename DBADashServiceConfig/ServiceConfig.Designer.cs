@@ -198,7 +198,7 @@ namespace DBADashServiceConfig
             bttnPermissionsHelper = new System.Windows.Forms.Button();
             label12 = new System.Windows.Forms.Label();
             cboDeleteAction = new System.Windows.Forms.ComboBox();
-            dgvConnections = new System.Windows.Forms.DataGridView();
+            dgvConnections = new DBADashGUI.CustomReports.DBADashDataGridView();
             label13 = new System.Windows.Forms.Label();
             txtSearch = new System.Windows.Forms.TextBox();
             tabDest = new System.Windows.Forms.TabPage();
@@ -2587,7 +2587,7 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.CheckBox chkNoWMI;
         private System.Windows.Forms.Button bttnAdd;
         private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.DataGridView dgvConnections;
+        private DBADashGUI.CustomReports.DBADashDataGridView dgvConnections;
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.TextBox txtSearch;
         private System.Windows.Forms.TabPage tabOther;

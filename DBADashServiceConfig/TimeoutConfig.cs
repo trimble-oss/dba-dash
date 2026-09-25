@@ -1,4 +1,5 @@
-﻿using DBADash;
+﻿using DBADashGUI.CustomReports;
+using DBADash;
 using DBADashGUI.Theme;
 using System;
 using System.ComponentModel;
@@ -212,7 +213,7 @@ namespace DBADashServiceConfig
             try
             {
                 var frm = new Form() { Width = this.Width, Height = this.Height, Text = "Effective Timeouts", Icon = this.Icon };
-                var grid = new DataGridView() { Dock = DockStyle.Fill, ReadOnly = true, RowHeadersVisible = false, AllowUserToAddRows = false, AllowUserToDeleteRows = false };
+                var grid = new DBADashDataGridView() { Dock = DockStyle.Fill, ReadOnly = true, RowHeadersVisible = false, AllowUserToAddRows = false, AllowUserToDeleteRows = false };
                 grid.DataSource = new DataView(GetTimeoutResult().CollectionCommandTimeoutsAsDataTable(), null, "CollectionType", DataViewRowState.CurrentRows);
                 frm.Controls.Add(grid);
                 frm.ApplyTheme();

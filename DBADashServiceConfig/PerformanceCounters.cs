@@ -1,4 +1,5 @@
-﻿using DBADash;
+﻿using DBADashGUI.CustomReports;
+using DBADash;
 using DBADashGUI.Theme;
 using Microsoft.Data.SqlClient;
 using System;
@@ -256,7 +257,7 @@ namespace DBADashServiceConfig
                     Width = this.Width,
                     Height = this.Height,
                 };
-                var dgvPreview = new DataGridView()
+                var dgvPreview = new DBADashDataGridView()
                 {
                     Dock = DockStyle.Fill,
                     AllowUserToAddRows = false,

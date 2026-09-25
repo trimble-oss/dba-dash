@@ -30,7 +30,7 @@ namespace DBADashServiceConfig
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ScheduleConfig));
-            dgv = new System.Windows.Forms.DataGridView();
+            dgv = new DBADashGUI.CustomReports.DBADashDataGridView();
             bttnOK = new System.Windows.Forms.Button();
             bttnCancel = new System.Windows.Forms.Button();
             label1 = new System.Windows.Forms.Label();
@@ -213,7 +213,7 @@ namespace DBADashServiceConfig
 
         #endregion
 
-        private System.Windows.Forms.DataGridView dgv;
+        private DBADashGUI.CustomReports.DBADashDataGridView dgv;
         private System.Windows.Forms.Button bttnOK;
         private System.Windows.Forms.Button bttnCancel;
         private System.Windows.Forms.Label label1;
