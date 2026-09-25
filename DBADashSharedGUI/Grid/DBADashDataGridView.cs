@@ -1733,8 +1733,12 @@ namespace DBADashGUI.CustomReports
         /// </summary>
         private void GridFilterByValue(int colIndex, string operatorSymbol, object value)
         {
+            // Clearing the current cell avoids "Row associated with the currency manager's position cannot be made
+            // invisible" on a data-bound grid that isn't bound to a DataView (e.g. a BindingSource over a list).
+            CurrentCell = null;
             foreach (var row in Rows.OfType<DataGridViewRow>())
             {
+                if (row.IsNewRow) continue;
                 row.Visible = operatorSymbol switch
                 {
                     "=" => row.Visible && row.Cells[colIndex].Value.DBNullToNull()?.ToString() == value?.ToString(),
