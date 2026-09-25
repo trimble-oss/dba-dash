@@ -1,3 +1,4 @@
+using DBADashGUI.Viewers;
 using Microsoft.Win32;
 using Serilog;
 using System;
@@ -12,7 +13,7 @@ using System.Windows.Forms;
 namespace DBADashGUI.ShellIntegration
 {
     /// <summary>
-    /// Registers DBA Dash as a handler for the file types it has a viewer for, so one can be opened
+    /// Registers the application as a handler for the file types it has a viewer for, so one can be opened
     /// from Explorer - Open with, or a double click once DBA Dash is the default - straight into the
     /// right viewer.
     ///
@@ -23,7 +24,10 @@ namespace DBADashGUI.ShellIntegration
     /// application make itself the default (the user's choice is protected by a hash), so that is
     /// left to the user in Default Apps.
     ///
-    /// There is one registration however many copies of DBA Dash are on the machine: two entries
+    /// The application - the DBA Dash GUI, or the stand-alone viewer - is named by <see cref="ViewerApp.Identity"/>, and
+    /// registers under its own names.  The two are offered side by side and neither takes over from the other.
+    ///
+    /// There is one registration however many copies of the application are on the machine: two entries
     /// both called "DBA Dash" in Open with could not be told apart, and every copy unzipped for an
     /// upgrade would leave one behind.  Whichever copy registered last holds it - the user can move
     /// it to another copy from a viewer's settings menu - but at startup a copy takes it over when
@@ -41,37 +45,40 @@ namespace DBADashGUI.ShellIntegration
         /// <summary>SQL Server deadlock graphs, opened in the deadlock viewer.</summary>
         public static readonly FileAssociation DeadlockGraph = new(
             ".xdl",
-            "DBADash.DeadlockGraph",
+            "DeadlockGraph",
             "SQL Server Deadlock Graph");
 
         /// <summary>SQL Server execution plans, opened in the query plan viewer.</summary>
         public static readonly FileAssociation QueryPlan = new(
             ".sqlplan",
-            "DBADash.QueryPlan",
+            "QueryPlan",
             "SQL Server Execution Plan");
 
         /// <summary>Every type DBA Dash offers to handle.</summary>
         public static readonly IReadOnlyList<FileAssociation> All = [DeadlockGraph, QueryPlan];
 
         /// <summary>The name under RegisteredApplications - also what Default Apps is asked to navigate to.</summary>
-        private const string RegisteredAppName = "DBADash";
+        private static string RegisteredAppName => ViewerApp.Identity.RegistryName;
 
         private const string ClassesKey = @"Software\Classes";
-        private const string AppKey = @"Software\DBADash";
-        private const string CapabilitiesKey = AppKey + @"\Capabilities";
+        private static string AppKey => @"Software\" + ViewerApp.Identity.RegistryName;
+        private static string CapabilitiesKey => AppKey + @"\Capabilities";
         private const string RegisteredApplicationsKey = @"Software\RegisteredApplications";
 
-        private FileAssociation(string extension, string progId, string typeName)
+        private FileAssociation(string extension, string progIdSuffix, string typeName)
         {
             Extension = extension;
-            ProgId = progId;
+            _progIdSuffix = progIdSuffix;
             TypeName = typeName;
         }
+
+        private readonly string _progIdSuffix;
 
         /// <summary>The extension, with its leading dot - e.g. ".xdl".</summary>
         public string Extension { get; }
 
-        private string ProgId { get; }
+        /// <summary>DBADash.QueryPlan for the DBA Dash GUI - named after the application, so each has its own.</summary>
+        private string ProgId => $"{ViewerApp.Identity.RegistryName}.{_progIdSuffix}";
 
         private string TypeName { get; }
 
@@ -180,7 +187,7 @@ namespace DBADashGUI.ShellIntegration
             // Without a FriendlyAppName that entry reads as the file description, "DBA Dash GUI".
             using (var app = user.CreateSubKey(ApplicationKey))
             {
-                app.SetValue("FriendlyAppName", "DBA Dash");
+                app.SetValue("FriendlyAppName", ViewerApp.Identity.DisplayName);
                 using (var supported = app.CreateSubKey("SupportedTypes"))
                 {
                     supported.SetValue(Extension, "");
@@ -194,9 +201,8 @@ namespace DBADashGUI.ShellIntegration
             // Capabilities + RegisteredApplications are what list DBA Dash in Settings > Default apps.
             using (var capabilities = user.CreateSubKey(CapabilitiesKey))
             {
-                capabilities.SetValue("ApplicationName", "DBA Dash");
-                capabilities.SetValue("ApplicationDescription",
-                    "SQL Server monitoring - includes viewers for deadlock graphs (.xdl) and execution plans (.sqlplan)");
+                capabilities.SetValue("ApplicationName", ViewerApp.Identity.DisplayName);
+                capabilities.SetValue("ApplicationDescription", ViewerApp.Identity.Description);
                 using (var associations = capabilities.CreateSubKey("FileAssociations"))
                 {
                     associations.SetValue(Extension, ProgId);
@@ -256,7 +262,7 @@ namespace DBADashGUI.ShellIntegration
                 registered?.DeleteValue(RegisteredAppName, false);
             }
 
-            // Software\DBADash only holds the capabilities - do not leave it behind empty.
+            // The app's own key only holds the capabilities - do not leave it behind empty.
             bool appKeyEmpty;
             using (var app = user.OpenSubKey(AppKey))
             {

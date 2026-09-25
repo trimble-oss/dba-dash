@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Globalization;
+using System.Runtime.CompilerServices;
 
 namespace DBADashGUI.Viewers
 {
@@ -49,7 +50,13 @@ namespace DBADashGUI.Viewers
         {
             try
             {
-                return Store.Get(name) is T value ? value : fallback;
+                var stored = Store.Get(name);
+                if (stored is T value) return value;
+
+                // A store that keeps settings as text or JSON hands numbers back as another numeric type.
+                return stored is IConvertible
+                    ? (T)Convert.ChangeType(stored, typeof(T), CultureInfo.InvariantCulture)
+                    : fallback;
             }
             catch
             {

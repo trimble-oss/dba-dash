@@ -1230,10 +1230,11 @@ namespace DBADashGUI.Deadlocks
                 ToolTipText = "Settings"
             };
 
-            var openXdlFiles = new ToolStripMenuItem("Open .xdl Files with DBA Dash", null, (_, _) => ToggleFileAssociation());
-            var makeDefault = new ToolStripMenuItem("Make DBA Dash the Default for .xdl Files...", null, (_, _) => OpenDefaultAppsSettings())
+            var appName = ViewerApp.Identity.DisplayName;
+            var openXdlFiles = new ToolStripMenuItem($"Open .xdl Files with {appName}", null, (_, _) => ToggleFileAssociation());
+            var makeDefault = new ToolStripMenuItem($"Make {appName} the Default for .xdl Files...", null, (_, _) => OpenDefaultAppsSettings())
             {
-                ToolTipText = "Windows only allows the default app to be changed from Settings.  This opens Default apps - choose DBA Dash for .xdl."
+                ToolTipText = $"Windows only allows the default app to be changed from Settings.  This opens Default apps - choose {appName} for .xdl."
             };
             settings.DropDownItems.AddRange(new ToolStripItem[] { openXdlFiles, makeDefault });
 
@@ -1244,8 +1245,8 @@ namespace DBADashGUI.Deadlocks
                     var registered = FileAssociation.DeadlockGraph.RegisteredExePath;
                     openXdlFiles.Checked = FileAssociation.DeadlockGraph.IsRegisteredToThisCopy;
                     openXdlFiles.ToolTipText = openXdlFiles.Checked || registered == null
-                        ? "Offer DBA Dash in Explorer's Open with menu for deadlock graph (.xdl) files.  They open in the deadlock viewer without starting the full GUI."
-                        : $"Currently registered to another copy of DBA Dash:\n{registered}\n\nClick to use this copy instead.";
+                        ? $"Offer {appName} in Explorer's Open with menu for deadlock graph (.xdl) files.  They open in the deadlock viewer{(ViewerApp.Identity.IsFullGui ? " without starting the full GUI" : string.Empty)}."
+                        : $"Currently registered to another copy of {appName}:\n{registered}\n\nClick to use this copy instead.";
                     makeDefault.Enabled = !FileAssociation.DeadlockGraph.IsDefaultHandler;
                 }
                 catch (Exception ex)

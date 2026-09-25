@@ -1115,8 +1115,9 @@ namespace DBADashGUI.QueryPlans
             menu.DropDownItems.Add(BuildOpeningZoomMenu());
             menu.DropDownItems.Add(new ToolStripSeparator());
 
-            var offer = new ToolStripMenuItem("Open .sqlplan Files with DBA Dash", null, (_, _) => ToggleFileAssociation());
-            var makeDefault = new ToolStripMenuItem("Make DBA Dash the Default...", null, (_, _) => MakeDefault())
+            var appName = ViewerApp.Identity.DisplayName;
+            var offer = new ToolStripMenuItem($"Open .sqlplan Files with {appName}", null, (_, _) => ToggleFileAssociation());
+            var makeDefault = new ToolStripMenuItem($"Make {appName} the Default...", null, (_, _) => MakeDefault())
             {
                 ToolTipText = "Opens Settings > Default apps.  Windows only lets you choose the default yourself."
             };
@@ -1135,8 +1136,8 @@ namespace DBADashGUI.QueryPlans
 
                     offer.Checked = association.IsRegisteredToThisCopy;
                     offer.ToolTipText = offer.Checked || registered == null
-                        ? "Offer DBA Dash in Explorer's Open with menu for execution plan (.sqlplan) files.  They open in this viewer without starting the full GUI."
-                        : $"Currently registered to another copy of DBA Dash:\n{registered}\n\nClick to use this copy instead.";
+                        ? $"Offer {appName} in Explorer's Open with menu for execution plan (.sqlplan) files.  They open in this viewer{(ViewerApp.Identity.IsFullGui ? " without starting the full GUI" : string.Empty)}."
+                        : $"Currently registered to another copy of {appName}:\n{registered}\n\nClick to use this copy instead.";
 
                     makeDefault.Enabled = !association.IsDefaultHandler;
                 }

@@ -130,67 +130,7 @@ namespace DBADashGUI
         /// reason to make the user sit through the full GUI starting up to read one.  The process ends when the
         /// last window is closed.
         /// </summary>
-        private static void RunViewers(IEnumerable<string> files)
-        {
-            DeadlockViewerForm.IsStandalone = true;
-            QueryPlanViewerForm.IsStandalone = true;
-
-            // Full paths: another copy opening them resolves a relative path against its own folder.
-            var paths = files.Select(Path.GetFullPath).ToList();
-
-            // Explorer starts a copy per file.  The first opens them all - plans on tabs of one window -
-            // and the rest hand their files to it and exit.  See ViewerInstance.
-            using var instance = ViewerInstance.Claim();
-            if (!instance.IsPrimary && instance.Forward(paths)) return;
-
-            var closing = false;
-            instance.Listen(forwarded =>
-            {
-                // Once the last window has closed the process is on its way out, and a file opened now
-                // would vanish with it - the sender opens it instead.
-                if (closing) return false;
-
-                OpenFiles(forwarded);
-                return true;
-            });
-
-            OpenFiles(paths);
-
-            // Nothing opened - each failure has already been reported.
-            if (!AnyVisibleForms()) return;
-
-            // Exit once every window is closed - not just the viewers, as a viewer can open other windows that
-            // would otherwise be closed out from under the user.  Idle runs once the close has been processed.
-            Application.Idle += (_, _) =>
-            {
-                if (AnyVisibleForms()) return;
-
-                closing = true;
-                Application.ExitThread();
-            };
-            Application.Run();
-        }
-
-        private static void OpenFiles(IEnumerable<string> files)
-        {
-            foreach (var file in files)
-            {
-                // Which viewer by extension, falling back to the deadlock viewer for the .xml both file
-                // types also get saved as - it reports a file it cannot read, which is a better answer than
-                // guessing at the content and being confidently wrong about it.
-                if (Path.GetExtension(file).Equals(FileAssociation.QueryPlan.Extension,
-                        StringComparison.OrdinalIgnoreCase))
-                {
-                    ViewerLauncher.ShowQueryPlanFile(file);
-                }
-                else
-                {
-                    ViewerLauncher.ShowDeadlockGraphFile(file);
-                }
-            }
-        }
-
-        private static bool AnyVisibleForms() => Application.OpenForms.Cast<Form>().Any(f => f.Visible);
+        private static void RunViewers(IEnumerable<string> files) => ViewerApp.Run(files);
 
         private static void SetFileAssociation(bool register)
         {

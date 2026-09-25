@@ -1,0 +1,56 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <AssemblyName>DBADashVisualizer</AssemblyName>
+    <TargetFramework>net10.0-windows7.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <UseWPF>true</UseWPF>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <Deterministic>True</Deterministic>
+    <Configurations>Debug;Release;CLI</Configurations>
+    <ApplicationHighDpiMode>SystemAware</ApplicationHighDpiMode>
+    <ApplicationIcon>..\DBADash.Viewers.GUI\Resources\PlanViewer.ico</ApplicationIcon>
+    <NoWarn>$(NoWarn);NU1701;CA1416</NoWarn>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <IsPackable>false</IsPackable>
+
+    <!--
+      64 bit Windows only, and framework dependent - the .NET Desktop Runtime is a prerequisite.  Naming the runtime
+      keeps the native libraries (Skia, HarfBuzz, SqlClient's SNI) to the ones that can run here rather than one set for
+      every platform NuGet knows about, which is most of what would otherwise be in the folder.  English resources only.
+    -->
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>false</SelfContained>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+
+    <!--
+      DBA Dash Visualizer: the query plan and deadlock viewers as an app in their own right, for someone with a plan or a
+      deadlock graph and no DBA Dash.  Deliberately thin - the viewers are in DBADash.Viewers.GUI - and it references
+      nothing else of DBA Dash, so what ships is small and doesn't need a repository, a service or a monitored instance.
+    -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\GlobalAssemblyInfo.cs" Link="Properties\GlobalAssemblyInfo.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE" Link="LICENSE">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Serilog" />
+    <PackageReference Include="Serilog.Sinks.File" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DBADash.Viewers.GUI\DBADash.Viewers.GUI.csproj" />
+    <ProjectReference Include="..\DBADashSharedGUI\DBADashSharedGUI.csproj" />
+  </ItemGroup>
+
+</Project>
