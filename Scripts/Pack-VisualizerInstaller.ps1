@@ -4,9 +4,9 @@
 .DESCRIPTION
     Turns the Visualizer zip of a draft release into what the installer channel needs:
 
-      DBA_Dash_Visualizer_Setup_<version>.exe   the setup program - one click, per user, no elevation
-      DBADashVisualizer-<version>-full.nupkg    the package the updater installs
-      DBADashVisualizer-<version>-delta.nupkg   what changed since the last release, if there was one
+      DBADash_Visualizer_Setup_<version>.exe    the setup program - one click, per user, no elevation
+      DBADash_Visualizer-<version>-full.nupkg   the package the updater installs
+      DBADash_Visualizer-<version>-delta.nupkg  what changed since the last release, if there was one
       releases.win.json, RELEASES, assets.win.json   the feed the installed app reads to find updates
 
     Velopack has to do the signing itself, part way through building the package, so this is not a step after the zips are
@@ -136,7 +136,9 @@ try {
 
     # ---- Pack and sign -----------------------------------------------------------------------------------------------------
     $packArgs = @(
-        "pack", "--packId", "DBADashVisualizer", "--packVersion", $tag, "--packDir", $publish, "--mainExe", "DBADashVisualizer.exe",
+        # The id names the packages (DBADash_Visualizer-<version>-full.nupkg), the install folder and the Installed apps entry, in
+        # the style of the zips.  Changing it makes a different app to Windows: an installed copy would not be updated.
+        "pack", "--packId", "DBADash_Visualizer", "--packVersion", $tag, "--packDir", $publish, "--mainExe", "DBADashVisualizer.exe",
         "--outputDir", $OutputFolder, "--packTitle", "DBA Dash Visualizer", "--packAuthors", "Trimble, Inc.",
         "--icon", $icon, "--framework", "net10.0-x64-desktop", "--runtime", "win-x64",
         # The Start menu, and not the Desktop as well.  The zip has its own portable copy, so no portable package.
@@ -164,9 +166,9 @@ try {
     Invoke-Native $vpk $packArgs
 
     # ---- What came out -----------------------------------------------------------------------------------------------------
-    $setup = Join-Path $OutputFolder "DBADashVisualizer-win-Setup.exe"
+    $setup = Join-Path $OutputFolder "DBADash_Visualizer-win-Setup.exe"
     if (-not (Test-Path $setup)) { throw "vpk didn't produce a setup program." }
-    $setupName = "DBA_Dash_Visualizer_Setup_$tag.exe"
+    $setupName = "DBADash_Visualizer_Setup_$tag.exe"
     Move-Item $setup (Join-Path $OutputFolder $setupName) -Force
     $setup = Join-Path $OutputFolder $setupName
 
@@ -175,7 +177,7 @@ try {
         if ((Get-AuthenticodeSignature $setup).Status -ne "Valid") { $failed += $setupName }
 
         # And inside the package the updater installs.
-        $full = Join-Path $OutputFolder "DBADashVisualizer-$tag-full.nupkg"
+        $full = Join-Path $OutputFolder "DBADash_Visualizer-$tag-full.nupkg"
         $check = Join-Path $work "check"
         Add-Type -AssemblyName System.IO.Compression.FileSystem
         [IO.Compression.ZipFile]::ExtractToDirectory($full, $check)
