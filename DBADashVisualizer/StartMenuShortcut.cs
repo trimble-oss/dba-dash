@@ -7,8 +7,8 @@ namespace DBADashVisualizer
     /// <summary>
     /// A shortcut to the app in the current user's Start menu.
     ///
-    /// The app does this itself - when the user asks - rather than an installer, because a zip and a winget portable
-    /// package have nothing else to do it.  Per user, so it needs no elevation, and there is one shortcut however many copies
+    /// For a copy extracted from the zip, which has no installer to do it: the app does this itself, when the user asks.  A
+    /// copy from the setup program has a shortcut from the installer instead.  Per user, so it needs no elevation, and there is one shortcut however many copies
     /// of the app are on the machine: it points at whichever copy created it last.
     /// </summary>
     internal static class StartMenuShortcut

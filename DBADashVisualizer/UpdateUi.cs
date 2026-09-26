@@ -10,19 +10,14 @@ namespace DBADashVisualizer
     /// <summary>
     /// The About box and the update prompts.  What an update means depends on how the app was installed:
     ///
-    /// - from the setup program: the app downloads it itself, and installs it when the app is next closed;
-    /// - with winget: winget updates it, so the prompt gives the command;
+    /// - from the setup program (which is also what winget installs): the app downloads it itself, and installs it when the
+    ///   app is next closed;
     /// - from the zip: there is a newer zip to download and extract over the old one.
     /// </summary>
     internal sealed class UpdateUi
     {
         private const string Website = "https://dbadash.com";
         private const string Repository = "https://github.com/trimble-oss/dba-dash";
-
-        /// <summary>The package's identifier in winget, for the command that updates a copy installed by it.</summary>
-        internal const string WingetPackageId = "Trimble.DBADashVisualizer";
-
-        private static string WingetUpgradeCommand => $"winget upgrade {WingetPackageId}";
 
         private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromSeconds(15) };
 
@@ -35,8 +30,10 @@ namespace DBADashVisualizer
         /// <summary>What Velopack found the last time it looked, for downloading.  Null when there is nothing newer.</summary>
         private UpdateInfo _pending;
 
-        /// <summary>How this copy was installed, which decides what an update means.</summary>
-        private readonly InstallSource _source;
+        /// <summary>
+        /// True for a copy installed by the setup program, which updates itself.  Otherwise it was extracted from the zip.
+        /// </summary>
+        private readonly bool _installedBySetup;
 
         /// <summary>The version running - 4.19.0.</summary>
         internal static Version CurrentVersion
@@ -52,10 +49,10 @@ namespace DBADashVisualizer
         {
             _appName = appName;
             _installer = CreateInstallerManager();
-            _source = _installer.IsInstalled ? InstallSource.Installer : InstallLocation.Detect(AppContext.BaseDirectory);
+            _installedBySetup = _installer.IsInstalled;
 
             Func<CancellationToken, Task<ReleaseInfo>> getLatest;
-            if (_source == InstallSource.Installer)
+            if (_installedBySetup)
             {
                 getLatest = _ => LatestFromInstallerAsync();
             }
@@ -131,7 +128,7 @@ namespace DBADashVisualizer
         internal IEnumerable<Func<ToolStripItem>> MenuItems()
         {
             // The setup program puts its own shortcut in the Start menu, and takes it away again.
-            if (_source != InstallSource.Installer) yield return StartMenuItem;
+            if (!_installedBySetup) yield return StartMenuItem;
 
             yield return () => new ToolStripMenuItem("Check for Updates...", null, async (_, _) => await CheckNowAsync());
             yield return () => new ToolStripMenuItem($"About {_appName}...", null, (_, _) => ShowAbout());
@@ -217,31 +214,19 @@ namespace DBADashVisualizer
 
         private void Offer(ReleaseInfo release)
         {
-            var viaWinget = _source == InstallSource.Winget;
-            var viaSetup = _source == InstallSource.Installer && _pending != null;
+            var viaSetup = _installedBySetup && _pending != null;
 
             // The first button does the update, or as much of it as this app can.
-            var primary = new TaskDialogButton(viaSetup ? "Install Update" : viaWinget ? "Copy Command" : "Download");
+            var primary = new TaskDialogButton(viaSetup ? "Install Update" : "Download");
             var notes = new TaskDialogButton("Release Notes") { AllowCloseDialog = false };
             var skip = new TaskDialogButton("Skip This Version");
             var later = new TaskDialogButton("Remind Me Later");
 
             notes.Click += (_, _) => Open(release.ReleaseUrl);
 
-            string text;
-            if (viaSetup)
-            {
-                text = $"You are running {CurrentVersion}.\n\nThe update is downloaded now and installed when you close {_appName}.";
-            }
-            else if (viaWinget)
-            {
-                text = $"You are running {CurrentVersion}, installed with winget.\n\nTo update, run:\n{WingetUpgradeCommand}\n\n" +
-                       "A new release can take a little while to reach winget - if it says there is nothing to upgrade, try again later.";
-            }
-            else
-            {
-                text = $"You are running {CurrentVersion}.\n\nDownload the zip and extract it over this folder to update.";
-            }
+            var text = viaSetup
+                ? $"You are running {CurrentVersion}.\n\nThe update is downloaded now and installed when you close {_appName}."
+                : $"You are running {CurrentVersion}.\n\nDownload the zip and extract it over this folder to update.";
 
             var page = new TaskDialogPage
             {
@@ -260,10 +245,6 @@ namespace DBADashVisualizer
                 if (viaSetup)
                 {
                     InstallUpdate(release);
-                }
-                else if (viaWinget)
-                {
-                    CopyToClipboard(WingetUpgradeCommand);
                 }
                 else
                 {
@@ -368,12 +349,9 @@ namespace DBADashVisualizer
             var website = new TaskDialogButton("Website");
             var autoCheck = new TaskDialogVerificationCheckBox("Check for updates automatically", _service.AutoCheck);
 
-            var installedNote = _source switch
-            {
-                InstallSource.Winget => "Installed with winget - update it with winget upgrade.\n\n",
-                InstallSource.Installer => "Installed with the setup program - updates are installed for you.\n\n",
-                _ => string.Empty
-            };
+            var installedNote = _installedBySetup
+                ? "Installed with the setup program - updates are installed for you.\n\n"
+                : string.Empty;
 
             var page = new TaskDialogPage
             {
@@ -404,19 +382,6 @@ namespace DBADashVisualizer
         {
             var owner = Owner;
             return owner != null ? TaskDialog.ShowDialog(owner, page) : TaskDialog.ShowDialog(page);
-        }
-
-        private static void CopyToClipboard(string text)
-        {
-            try
-            {
-                Clipboard.SetText(text);
-            }
-            catch (Exception ex)
-            {
-                // Another app can hold the clipboard.  The command was on screen, so the user isn't left without it.
-                Log.Warning(ex, "Unable to copy to the clipboard");
-            }
         }
 
         private static void Open(string url)

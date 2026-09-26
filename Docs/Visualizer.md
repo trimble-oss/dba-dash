@@ -76,8 +76,8 @@ if there is.  What it does about it depends on how you installed it:
 - **From the setup program:** choose *Install Update*.  It downloads the update, showing progress, and installs it when you close
   the Visualizer - your windows aren't closed to do it.  Only what changed is downloaded when it can be.
 - **From the zip:** choose *Download*, then extract the new zip over the old folder (close the Visualizer first).
-- **With winget:** the same as the setup program, as that is what winget installs.  (A copy unzipped by winget from a portable
-  package instead is told to run `winget upgrade Trimble.DBADashVisualizer`; the package is no longer made that way.)
+- **With winget:** the same as the setup program, as that is what winget installs.  `winget upgrade Trimble.DBADashVisualizer`
+  works as well.
 
 *Skip This Version* stops it mentioning that version again.  Switch the check off in *About*, or look now with *Check for
 Updates* in the Settings menu.
@@ -119,8 +119,7 @@ The Visualizer is released with DBA Dash, at the same version.
 5. **winget.**  Once the release is published, `Scripts/New-WingetManifest.ps1 -Version <version>` downloads the signed setup
    program, works out its hash, writes the manifest under `DBADashBuild\winget` and validates it with `winget validate`.  The
    manifest runs the setup with `--silent` (it installs for the user, and doesn't start the app), finds the install again by its
-   *Installed apps* product code, and depends on the .NET Desktop Runtime.  `-Type Zip` writes the older portable-zip manifest
-   instead: a package has one or the other, as two installers for the same architecture leave winget to choose.  Submit the
+   *Installed apps* product code, and depends on the .NET Desktop Runtime.  Submit the
    result to [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs) as a pull request, or with
    [`wingetcreate submit`](https://github.com/microsoft/winget-create).  The script doesn't submit anything itself.
 
