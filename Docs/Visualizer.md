@@ -14,8 +14,8 @@ Query Store lookup - isn't offered in the Visualizer.
 ## Requirements
 
 - 64 bit Windows 10 or later.
-- The [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0) (x64).  The winget package installs it
-  for you.
+- The [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0) (x64).  The setup program and the
+  winget package install it for you.
 
 ## Install
 
@@ -34,7 +34,9 @@ updates itself.
 winget install Trimble.DBADashVisualizer
 ```
 
-The winget package is added to the winget repository some time after each release.
+The winget package installs the setup program, silently, so it is the same as the setup program: a Start menu entry, an
+*Installed apps* entry, and an app that updates itself - `winget upgrade` works as well.  It is added to the winget repository some
+time after each release.
 
 ## Using it
 
@@ -46,7 +48,7 @@ The winget package is added to the winget repository some time after each releas
   The same can be done from a command line - `DBADashVisualizer.exe --RegisterFileAssociation`, and
   `--UnregisterFileAssociation` to take it away.  This is per user and needs no elevation.
 - Files opened from Explorer, several at once, all open in the one running copy.
-- **Start menu.**  The setup program adds a Start menu entry.  The zip and the winget package don't.  Choose *Show in Start Menu* from the
+- **Start menu.**  The setup program, and so the winget package, adds a Start menu entry.  The zip doesn't.  Choose *Show in Start Menu* from the
   Settings menu of either viewer, or run `DBADashVisualizer.exe --CreateStartMenuShortcut`, to add one for your user; choose it
   again, or use `--RemoveStartMenuShortcut`, to take it away.  If you move the app to another folder, the shortcut is pointed at
   the new one the next time it runs.
@@ -74,8 +76,8 @@ if there is.  What it does about it depends on how you installed it:
 - **From the setup program:** choose *Install Update*.  It downloads the update, showing progress, and installs it when you close
   the Visualizer - your windows aren't closed to do it.  Only what changed is downloaded when it can be.
 - **From the zip:** choose *Download*, then extract the new zip over the old folder (close the Visualizer first).
-- **With winget:** it tells you to run `winget upgrade Trimble.DBADashVisualizer` and offers to copy the command.  A new release
-  can take a little while to reach winget, so if winget says there is nothing to upgrade, try again later.
+- **With winget:** the same as the setup program, as that is what winget installs.  (A copy unzipped by winget from a portable
+  package instead is told to run `winget upgrade Trimble.DBADashVisualizer`; the package is no longer made that way.)
 
 *Skip This Version* stops it mentioning that version again.  Switch the check off in *About*, or look now with *Check for
 Updates* in the Settings menu.
@@ -85,10 +87,13 @@ Updates* in the Settings menu.
 **Setup program:** uninstall *DBA Dash Visualizer* from *Installed apps*.  That removes the app, its Start menu entry and any
 *Open with* entries it added.
 
-**Zip or winget:** if you registered it for files or added it to the Start menu, undo that first - run
-`DBADashVisualizer.exe --UnregisterFileAssociation` and `--RemoveStartMenuShortcut` - as deleting the folder, or
-`winget uninstall Trimble.DBADashVisualizer`, doesn't remove them.  Then delete the folder (or uninstall with winget).  Delete
-`%LOCALAPPDATA%\DBADash\Visualizer` to remove its settings.
+**Winget:** `winget uninstall Trimble.DBADashVisualizer`, which is the same as uninstalling from *Installed apps*.
+
+**Zip:** if you registered it for files or added it to the Start menu, undo that first - run
+`DBADashVisualizer.exe --UnregisterFileAssociation` and `--RemoveStartMenuShortcut` - as deleting the folder doesn't remove them.
+Then delete the folder.
+
+Delete `%LOCALAPPDATA%\DBADash\Visualizer` to remove the settings, whichever way it was installed.
 
 ## For maintainers
 
@@ -111,13 +116,16 @@ The Visualizer is released with DBA Dash, at the same version.
    minute a file, so it signs only those few files - the whole thing takes around 4 minutes.  Try it out without signing or
    uploading using `-ZipPath <zip> -SkipSigning`.
 4. **Publish** the release.  Installed copies find the update from the feed of the latest published release.
-5. **winget.**  Once the release is published, `Scripts/New-WingetManifest.ps1 -Version <version>` downloads the signed zip,
-   works out its hash, writes the manifest under `DBADashBuild\winget` and validates it with `winget validate`.  Submit the
+5. **winget.**  Once the release is published, `Scripts/New-WingetManifest.ps1 -Version <version>` downloads the signed setup
+   program, works out its hash, writes the manifest under `DBADashBuild\winget` and validates it with `winget validate`.  The
+   manifest runs the setup with `--silent` (it installs for the user, and doesn't start the app), finds the install again by its
+   *Installed apps* product code, and depends on the .NET Desktop Runtime.  `-Type Zip` writes the older portable-zip manifest
+   instead: a package has one or the other, as two installers for the same architecture leave winget to choose.  Submit the
    result to [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs) as a pull request, or with
    [`wingetcreate submit`](https://github.com/microsoft/winget-create).  The script doesn't submit anything itself.
 
-The winget package is still the zip.  Whether winget can also manage a copy from the setup program - it updates itself, and
-would be updated by winget as well - hasn't been tried.
+The winget package hasn't been through winget's own review yet, and a `winget upgrade` over a copy that has already updated
+itself hasn't been tried.
 
 To try the installer channel before publishing, build both versions with `Pack-VisualizerInstaller.ps1 -ZipPath <zip>
 -SkipSigning`, install the earlier setup, and set the environment variable `DBADASH_VISUALIZER_UPDATE_FEED` to the folder that

@@ -2,24 +2,35 @@
 .SYNOPSIS
     Creates the winget manifest for a DBA Dash Visualizer release.
 .DESCRIPTION
-    Writes the three manifest files winget wants - version, installer and default locale - for the signed
-    DBADash_Visualizer_<version>.zip of a published GitHub release, and validates them with 'winget validate' when winget
-    is installed.
+    Writes the three manifest files winget wants - version, installer and default locale - for a published GitHub release,
+    and validates them with 'winget validate' when winget is installed.
 
-    Run it after the release has been signed and published: the manifest carries the SHA-256 of the zip that people
-    download, so it has to be the signed one, and the URL has to work.  It works out the hash by downloading the zip from
-    the release, or use -ZipPath to hash a copy you already have.
+    There are two kinds of package, chosen with -Type:
+
+      Setup (the default)  The setup program, DBA_Dash_Visualizer_Setup_<version>.exe.  Winget runs it silently: it installs
+                           for the user only, needs no elevation, adds a Start menu entry and an Installed apps entry, and the
+                           app then keeps itself up to date, as well as winget being able to.
+      Zip                  The portable zip, DBADash_Visualizer_<version>.zip: unzipped by winget into a folder of its own with
+                           the command dbadashvisualizer on the path.  No Start menu entry, and winget does the updating.
+
+    A package has one or the other, not both: two installers for the same architecture leave winget to choose between them.
+
+    Run it after the release has been signed and published: the manifest carries the SHA-256 of the file that people
+    download, so it has to be the signed one, and the URL has to work.  It works out the hash by downloading the file from
+    the release, or use -PackagePath to hash a copy you already have.
 
     It doesn't submit anything.  To publish the package, open a pull request to https://github.com/microsoft/winget-pkgs
     with the files it writes - or run 'wingetcreate submit' on the folder - see Docs/Visualizer.md.
 .PARAMETER Version
     The release, e.g. 4.19.0.  The release's tag is expected to be the same.
+.PARAMETER Type
+    Setup or Zip, as above.  Defaults to Setup.
 .PARAMETER PackageIdentifier
     winget's identifier for the package: Publisher.Package.
 .PARAMETER Repo
     The GitHub owner and repository the release is in.
-.PARAMETER ZipPath
-    A local copy of the release's zip to take the hash from, rather than downloading it.
+.PARAMETER PackagePath
+    A local copy of the release's setup program or zip to take the hash from, rather than downloading it.
 .PARAMETER OutputFolder
     Where to write the manifest.  Defaults to DBADashBuild\winget under the repository.  The files go in the layout
     winget-pkgs uses: manifests\<first letter>\<publisher>\<package>\<version>.
@@ -27,15 +38,20 @@
     The date the release was published, yyyy-MM-dd.  Left out of the manifest if not given.
 .EXAMPLE
     ./Scripts/New-WingetManifest.ps1 -Version 4.19.0
+.EXAMPLE
+    ./Scripts/New-WingetManifest.ps1 -Version 4.19.0 -Type Zip
 #>
 [CmdletBinding()]
 param (
     [Parameter(Mandatory)]
     [ValidatePattern('^\d+\.\d+\.\d+$')]
     [string]$Version,
+    [ValidateSet("Setup", "Zip")]
+    [string]$Type = "Setup",
     [string]$PackageIdentifier = "Trimble.DBADashVisualizer",
     [string]$Repo = "trimble-oss/dba-dash",
-    [string]$ZipPath,
+    [Alias("ZipPath")]
+    [string]$PackagePath,
     [string]$OutputFolder,
     [ValidatePattern('^\d{4}-\d{2}-\d{2}$')]
     [string]$ReleaseDate
@@ -46,21 +62,29 @@ $ErrorActionPreference = "Stop"
 $repoRoot = Split-Path -Parent $PSScriptRoot
 if (-not $OutputFolder) { $OutputFolder = Join-Path $repoRoot "DBADashBuild\winget" }
 
-$zipName = "DBADash_Visualizer_$Version.zip"
-$installerUrl = "https://github.com/$Repo/releases/download/$Version/$zipName"
+$fileName = if ($Type -eq "Setup") { "DBA_Dash_Visualizer_Setup_$Version.exe" } else { "DBADash_Visualizer_$Version.zip" }
+$installerUrl = "https://github.com/$Repo/releases/download/$Version/$fileName"
 $releaseUrl = "https://github.com/$Repo/releases/tag/$Version"
 
 $temp = $null
-if (-not $ZipPath) {
+if (-not $PackagePath) {
     $temp = Join-Path ([IO.Path]::GetTempPath()) ("winget-" + [guid]::NewGuid().ToString("N"))
     New-Item $temp -ItemType Directory | Out-Null
-    $ZipPath = Join-Path $temp $zipName
+    $PackagePath = Join-Path $temp $fileName
     Write-Host "Downloading $installerUrl" -ForegroundColor Cyan
-    Invoke-WebRequest -Uri $installerUrl -OutFile $ZipPath
+    Invoke-WebRequest -Uri $installerUrl -OutFile $PackagePath
 }
 
 try {
-    $sha256 = (Get-FileHash -Path $ZipPath -Algorithm SHA256).Hash.ToUpperInvariant()
+    $sha256 = (Get-FileHash -Path $PackagePath -Algorithm SHA256).Hash.ToUpperInvariant()
+
+    # The setup is signed, and winget's checks include the signature: a setup that isn't is a mistake worth catching here.
+    if ($Type -eq "Setup") {
+        $signature = Get-AuthenticodeSignature -FilePath $PackagePath
+        if ($signature.Status -ne "Valid") {
+            Write-Warning "The setup program isn't validly signed ($($signature.Status)).  Is this the signed one?"
+        }
+    }
 }
 finally {
     if ($temp) { Remove-Item $temp -Recurse -Force -ErrorAction SilentlyContinue }
@@ -82,27 +106,64 @@ ManifestType: version
 ManifestVersion: $manifestVersion
 "@
 
-# A zip holding a portable app: winget unzips it into its own folder and puts the executable on the path.  The app
-# offers itself for .sqlplan / .xdl files when run with --RegisterFileAssociation, or from its Settings menu; a portable
-# package can't do that itself.
 $installerLines = @(
     "# yaml-language-server: `$schema=https://aka.ms/winget-manifest.installer.$manifestVersion.schema.json",
     "PackageIdentifier: $PackageIdentifier",
-    "PackageVersion: $Version",
-    "InstallerType: zip",
-    "NestedInstallerType: portable",
-    "NestedInstallerFiles:",
-    "- RelativeFilePath: DBADashVisualizer.exe",
-    "  PortableCommandAlias: dbadashvisualizer",
-    "MinimumOSVersion: 10.0.19041.0",
-    "Installers:",
-    "- Architecture: x64",
-    "  InstallerUrl: $installerUrl",
-    "  InstallerSha256: $sha256",
-    "Dependencies:",
-    "  PackageDependencies:",
-    "  - PackageIdentifier: Microsoft.DotNet.DesktopRuntime.10"
+    "PackageVersion: $Version"
 )
+
+if ($Type -eq "Setup") {
+    # A Velopack setup.  It isn't one of the installer frameworks winget knows the switches of, so they are given:
+    # --silent hides everything, and doesn't start the app afterwards.  It installs for the user, under
+    # %LOCALAPPDATA%, and registers itself in Installed apps under the id it was packed with - which is how winget finds it
+    # again to upgrade or uninstall.  The .NET Desktop Runtime is a dependency so winget installs it, rather than the setup
+    # having to.
+    $installerLines += @(
+        "InstallerType: exe",
+        "Scope: user",
+        "InstallModes:",
+        "- silent",
+        "- silentWithProgress",
+        "InstallerSwitches:",
+        "  Silent: --silent",
+        "  SilentWithProgress: --silent",
+        "UpgradeBehavior: install",
+        "MinimumOSVersion: 10.0.19041.0",
+        "Installers:",
+        "- Architecture: x64",
+        "  InstallerUrl: $installerUrl",
+        "  InstallerSha256: $sha256",
+        "  ProductCode: DBADashVisualizer",
+        "  AppsAndFeaturesEntries:",
+        "  - DisplayName: DBA Dash Visualizer",
+        "    Publisher: Trimble, Inc.",
+        "    ProductCode: DBADashVisualizer",
+        "Dependencies:",
+        "  PackageDependencies:",
+        "  - PackageIdentifier: Microsoft.DotNet.DesktopRuntime.10"
+    )
+}
+else {
+    # A zip holding a portable app: winget unzips it into its own folder and puts the executable on the path.  The app
+    # offers itself for .sqlplan / .xdl files when run with --RegisterFileAssociation, or from its Settings menu; a portable
+    # package can't do that itself.
+    $installerLines += @(
+        "InstallerType: zip",
+        "NestedInstallerType: portable",
+        "NestedInstallerFiles:",
+        "- RelativeFilePath: DBADashVisualizer.exe",
+        "  PortableCommandAlias: dbadashvisualizer",
+        "MinimumOSVersion: 10.0.19041.0",
+        "Installers:",
+        "- Architecture: x64",
+        "  InstallerUrl: $installerUrl",
+        "  InstallerSha256: $sha256",
+        "Dependencies:",
+        "  PackageDependencies:",
+        "  - PackageIdentifier: Microsoft.DotNet.DesktopRuntime.10"
+    )
+}
+
 if ($releaseDateLine) { $installerLines += $releaseDateLine }
 $installerLines += @("ManifestType: installer", "ManifestVersion: $manifestVersion")
 $installerManifest = $installerLines -join "`n"
@@ -148,8 +209,8 @@ foreach ($name in $files.Keys) {
     [IO.File]::WriteAllText((Join-Path $folder $name), (($files[$name] -replace "`r`n", "`n").TrimEnd() + "`n"), (New-Object Text.UTF8Encoding($false)))
 }
 
-Write-Host "Wrote the manifest for $PackageIdentifier $Version to $folder" -ForegroundColor Green
-Write-Host "  $zipName  SHA-256 $sha256"
+Write-Host "Wrote the $Type manifest for $PackageIdentifier $Version to $folder" -ForegroundColor Green
+Write-Host "  $fileName  SHA-256 $sha256"
 
 if (Get-Command winget -ErrorAction SilentlyContinue) {
     Write-Host "Validating with winget..." -ForegroundColor Cyan
