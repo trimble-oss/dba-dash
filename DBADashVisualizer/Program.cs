@@ -6,6 +6,7 @@ using Microsoft.Win32;
 using Serilog;
 using System.IO;
 using System.Text;
+using Velopack;
 
 namespace DBADashVisualizer
 {
@@ -36,6 +37,13 @@ namespace DBADashVisualizer
                 "DBADashVisualizer",
                 "Viewer for SQL Server execution plans (.sqlplan) and deadlock graphs (.xdl)",
                 IsFullGui: false);
+
+            // A copy from the setup program is started by its installer with a switch to install, update or uninstall it.
+            // Velopack handles that and ends the process; for any other start it does nothing.  It has to come first, and
+            // after the identity, which the clean-up on uninstall needs.
+            VelopackApp.Build()
+                .OnBeforeUninstallFastCallback(_ => RemoveRegistrations())
+                .Run();
 
             ApplicationConfiguration.Initialize();
             ConfigureLogging();
@@ -135,6 +143,25 @@ namespace DBADashVisualizer
             $"    Add {AppName} to your Start menu (current user), then exit.\n\n" +
             $"{RemoveShortcutOption}\n" +
             $"    Remove it from your Start menu, then exit.";
+
+        /// <summary>
+        /// On uninstall, takes out what the app added to the user's registry: the Open with entries for .sqlplan and .xdl,
+        /// if they are for this copy.  The Start menu shortcut is the installer's, and it removes it.
+        /// </summary>
+        private static void RemoveRegistrations()
+        {
+            try
+            {
+                foreach (var association in FileAssociation.All)
+                {
+                    if (association.IsRegisteredToThisCopy) association.Unregister();
+                }
+            }
+            catch (Exception)
+            {
+                // The uninstall carries on regardless: a stale Open with entry is harmless, a failed uninstall is not.
+            }
+        }
 
         private static bool SetStartMenuShortcut(bool create)
         {

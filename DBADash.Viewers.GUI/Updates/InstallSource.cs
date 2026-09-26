@@ -7,7 +7,13 @@
         Zip,
 
         /// <summary>Installed by winget.  Updated by <c>winget upgrade</c>.</summary>
-        Winget
+        Winget,
+
+        /// <summary>
+        /// Installed by the setup program, which installs it per user and keeps it up to date.  Not something a folder says:
+        /// the app asks the installer.
+        /// </summary>
+        Installer
     }
 
     /// <summary>Works out where a copy of the app came from.</summary>
