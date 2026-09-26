@@ -5,7 +5,7 @@
     Writes the three manifest files winget wants - version, installer and default locale - for a published GitHub release,
     and validates them with 'winget validate' when winget is installed.
 
-    The package is the setup program, DBA_Dash_Visualizer_Setup_<version>.exe.  Winget runs it silently: it installs for the
+    The package is the setup program, DBADash_Visualizer_Setup_<version>.exe.  Winget runs it silently: it installs for the
     user only, needs no elevation, adds a Start menu entry and an Installed apps entry, and the app then keeps itself up to
     date, as well as winget being able to.
 
@@ -49,7 +49,7 @@ $ErrorActionPreference = "Stop"
 $repoRoot = Split-Path -Parent $PSScriptRoot
 if (-not $OutputFolder) { $OutputFolder = Join-Path $repoRoot "DBADashBuild\winget" }
 
-$fileName = "DBA_Dash_Visualizer_Setup_$Version.exe"
+$fileName = "DBADash_Visualizer_Setup_$Version.exe"
 $installerUrl = "https://github.com/$Repo/releases/download/$Version/$fileName"
 $releaseUrl = "https://github.com/$Repo/releases/tag/$Version"
 
@@ -117,11 +117,11 @@ $installerLines += @(
     "- Architecture: x64",
     "  InstallerUrl: $installerUrl",
     "  InstallerSha256: $sha256",
-    "  ProductCode: DBADashVisualizer",
+    "  ProductCode: DBADash_Visualizer",
     "  AppsAndFeaturesEntries:",
     "  - DisplayName: DBA Dash Visualizer",
     "    Publisher: Trimble, Inc.",
-    "    ProductCode: DBADashVisualizer",
+    "    ProductCode: DBADash_Visualizer",
     "Dependencies:",
     "  PackageDependencies:",
     "  - PackageIdentifier: Microsoft.DotNet.DesktopRuntime.10"

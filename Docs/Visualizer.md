@@ -19,7 +19,7 @@ Query Store lookup - isn't offered in the Visualizer.
 
 ## Install
 
-**Setup program.**  Download `DBA_Dash_Visualizer_Setup_<version>.exe` from the
+**Setup program.**  Download `DBADash_Visualizer_Setup_<version>.exe` from the
 [latest release](https://github.com/trimble-oss/dba-dash/releases/latest) and run it.  It installs in a few seconds, for your
 user only, so it needs no administrator rights: no questions, and no windows to click through.  It adds DBA Dash Visualizer to
 your Start menu and to *Installed apps*, and installs the .NET Desktop Runtime if you don't have it.  This is the one that
@@ -110,7 +110,7 @@ The Visualizer is released with DBA Dash, at the same version.
    Visualizer zip from the draft release, packs it with [Velopack](https://velopack.io) (`vpk`), signs what identifies the app -
    `DBADashVisualizer.exe` if the zip didn't already have it signed, Velopack's launcher stub and updater (`Squirrel.exe`) and the
    setup - through `SignFiles.exe`, checks the signatures, and adds these to the draft release:
-   `DBA_Dash_Visualizer_Setup_<version>.exe`, the `DBADashVisualizer-<version>-full.nupkg` package (and a `-delta.nupkg` against
+   `DBADash_Visualizer_Setup_<version>.exe`, the `DBADash_Visualizer-<version>-full.nupkg` package (and a `-delta.nupkg` against
    the previous release, if there is one), and the feed files `releases.win.json`, `RELEASES` and `assets.win.json` that installed
    copies read to find updates.  Velopack has to do the signing itself, part way through building, and the tool takes about half a
    minute a file, so it signs only those few files - the whole thing takes around 4 minutes.  Try it out without signing or
