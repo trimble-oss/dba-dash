@@ -15,6 +15,8 @@ namespace DBADashVisualizer
 
         private const string RegisterOption = "--RegisterFileAssociation";
         private const string UnregisterOption = "--UnregisterFileAssociation";
+        private const string CreateShortcutOption = "--CreateStartMenuShortcut";
+        private const string RemoveShortcutOption = "--RemoveStartMenuShortcut";
 
         /// <summary>Per user, as the app can be run from a folder the user can't write to.</summary>
         private static string DataFolder => Path.Combine(
@@ -80,6 +82,12 @@ namespace DBADashVisualizer
                 return SetFileAssociation(args.Contains(RegisterOption, StringComparer.OrdinalIgnoreCase)) ? 0 : 1;
             }
 
+            if (args.Contains(CreateShortcutOption, StringComparer.OrdinalIgnoreCase) ||
+                args.Contains(RemoveShortcutOption, StringComparer.OrdinalIgnoreCase))
+            {
+                return SetStartMenuShortcut(args.Contains(CreateShortcutOption, StringComparer.OrdinalIgnoreCase)) ? 0 : 1;
+            }
+
             // Anything that looks like a switch and isn't one is more likely a typo than a file with that name.
             var unknown = args.Where(a => a.StartsWith('-') && !File.Exists(a)).ToList();
             if (unknown.Count > 0)
@@ -92,6 +100,7 @@ namespace DBADashVisualizer
             // Keeps an existing file association working when this copy has replaced the one it points at.  Never adds
             // one the user didn't ask for.
             FileAssociation.UpdateRegistrations();
+            StartMenuShortcut.Repair();
 
             var files = args.Where(a => !string.IsNullOrWhiteSpace(a)).ToList();
             var missing = files.Where(f => !File.Exists(f)).ToList();
@@ -121,7 +130,34 @@ namespace DBADashVisualizer
             $"{RegisterOption}\n" +
             $"    Offer {AppName} in Open with for .sqlplan and .xdl files (current user), then exit.\n\n" +
             $"{UnregisterOption}\n" +
-            $"    Remove what {RegisterOption} added, then exit.";
+            $"    Remove what {RegisterOption} added, then exit.\n\n" +
+            $"{CreateShortcutOption}\n" +
+            $"    Add {AppName} to your Start menu (current user), then exit.\n\n" +
+            $"{RemoveShortcutOption}\n" +
+            $"    Remove it from your Start menu, then exit.";
+
+        private static bool SetStartMenuShortcut(bool create)
+        {
+            try
+            {
+                if (create)
+                {
+                    StartMenuShortcut.Create();
+                }
+                else
+                {
+                    StartMenuShortcut.Remove();
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Unable to update the Start menu shortcut");
+                CommonShared.ShowExceptionDialog(ex, "Error updating the Start menu shortcut");
+                return false;
+            }
+        }
 
         private static bool SetFileAssociation(bool register)
         {

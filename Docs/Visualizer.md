@@ -41,6 +41,10 @@ The winget package is added to the winget repository some time after each releas
   The same can be done from a command line - `DBADashVisualizer.exe --RegisterFileAssociation`, and
   `--UnregisterFileAssociation` to take it away.  This is per user and needs no elevation.
 - Files opened from Explorer, several at once, all open in the one running copy.
+- **Start menu.**  Neither the zip nor the winget package adds a Start menu entry.  Choose *Show in Start Menu* from the
+  Settings menu of either viewer, or run `DBADashVisualizer.exe --CreateStartMenuShortcut`, to add one for your user; choose it
+  again, or use `--RemoveStartMenuShortcut`, to take it away.  If you move the app to another folder, the shortcut is pointed at
+  the new one the next time it runs.
 
 The DBA Dash GUI has these viewers too, and registers its own entry for the same file types.  Both can be offered side by
 side.
@@ -60,14 +64,21 @@ The log is `%LOCALAPPDATA%\DBADash\Logs\DBADashVisualizer-<date>.log`.
 ## Updating
 
 At most once a day, a few seconds after it starts, the Visualizer asks GitHub whether there is a newer release and says so
-if there is.  It never downloads or installs anything by itself: choose *Download*, and extract the new zip over the old
-folder (close the Visualizer first).  *Skip This Version* stops it mentioning that version again.  Switch the check off in
-*About*, or look now with *Check for Updates* in the Settings menu.  With winget: `winget upgrade Trimble.DBADashVisualizer`.
+if there is.  It never downloads or installs anything by itself, and what it suggests depends on how you installed it:
+
+- **From the zip:** choose *Download*, then extract the new zip over the old folder (close the Visualizer first).
+- **With winget:** it tells you to run `winget upgrade Trimble.DBADashVisualizer` and offers to copy the command.  A new release
+  can take a little while to reach winget, so if winget says there is nothing to upgrade, try again later.
+
+*Skip This Version* stops it mentioning that version again.  Switch the check off in *About*, or look now with *Check for
+Updates* in the Settings menu.
 
 ## Uninstall
 
-Run `DBADashVisualizer.exe --UnregisterFileAssociation` if you registered it, then delete the folder (or
-`winget uninstall Trimble.DBADashVisualizer`).  Delete `%LOCALAPPDATA%\DBADash\Visualizer` to remove its settings.
+If you registered it for files or added it to the Start menu, undo that first - run
+`DBADashVisualizer.exe --UnregisterFileAssociation` and `--RemoveStartMenuShortcut` - as deleting the folder, or
+`winget uninstall Trimble.DBADashVisualizer`, doesn't remove them.  Then delete the folder (or uninstall with winget).  Delete
+`%LOCALAPPDATA%\DBADash\Visualizer` to remove its settings.
 
 ## For maintainers
 
