@@ -32,6 +32,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" />
     <PackageReference Include="Serilog" />
     <PackageReference Include="SkiaSharp.Views.WindowsForms" />
   </ItemGroup>
@@ -43,6 +44,38 @@
     <ProjectReference Include="..\DBADash.QueryPlan.Skia\DBADash.QueryPlan.Skia.csproj" />
     <ProjectReference Include="..\DBADashCommon\DBADashCommon.csproj" />
     <ProjectReference Include="..\DBADashSharedGUI\DBADashSharedGUI.csproj" />
+
+    <!--
+      Build-order only - DBADash.SSMSExtension is net472 (a hard VSSDK requirement) and can't be
+      referenced as an assembly from this net10 project. This just makes sure it's been built before
+      the EmbeddedResource below looks for its .vsix output.
+    -->
+    <ProjectReference Include="..\DBADash.SSMSExtension\DBADash.SSMSExtension.csproj" ReferenceOutputAssembly="false" SkipGetTargetFrameworkProperties="true" />
   </ItemGroup>
+
+  <!--
+    Embeds the SSMS extension so SsmsExtensionInstaller can offer it from the settings menu without a
+    separate download - present whenever DBADash.SSMSExtension has been built for the same
+    configuration, absent otherwise (a local dev build of just this project still works fine; the
+    installer option simply doesn't show up).  The extension itself ships on its own cadence
+    (Scripts/Pack-SSMSExtension.ps1) - embedding the code as built here is a separate concern from
+    when a new version of it gets released.
+
+    A Target rather than a plain ItemGroup: a plain Condition="Exists(...)" item is evaluated once, up
+    front, before any target - including the one that builds the ProjectReference above - has run, so on
+    a clean build it would always see the .vsix as missing even though the reference is about to produce
+    it. Runs before AssignTargetPaths - the point resource generation itself reads @(EmbeddedResource)
+    from, confirmed the hard way: adding the item at BeforeBuild logged correctly but the resource still
+    didn't make it into the built DLL, since CoreResGen had already run by then - and after
+    ResolveProjectReferences, so the .vsix this looks for actually exists by the time this runs.
+  -->
+  <Target Name="AddSsmsExtensionVsixResource" BeforeTargets="AssignTargetPaths" AfterTargets="ResolveProjectReferences">
+    <ItemGroup>
+      <EmbeddedResource Include="..\DBADash.SSMSExtension\bin\$(Configuration)\net472\DBADash.SSMSExtension.vsix" Condition="Exists('..\DBADash.SSMSExtension\bin\$(Configuration)\net472\DBADash.SSMSExtension.vsix')">
+        <LogicalName>DBADash.SSMSExtension.vsix</LogicalName>
+        <Link>Resources\DBADash.SSMSExtension.vsix</Link>
+      </EmbeddedResource>
+    </ItemGroup>
+  </Target>
 
 </Project>

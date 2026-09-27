@@ -76,6 +76,20 @@ namespace DBADashGUI.Viewers
             };
             menu.DropDownItems.Add(makeDefault);
 
+            // Not every build has the SSMS extension embedded (see DBADash.Viewers.GUI.csproj) - a dev
+            // build of just this project still works, it just doesn't offer either of these.
+            if (SsmsExtensionInstaller.IsAvailable)
+            {
+                menu.DropDownItems.Add(new ToolStripMenuItem("Install SSMS Extension...", null, (_, _) => InstallSsmsExtension())
+                {
+                    ToolTipText = "Adds \"Open in DBA Dash Visualizer\" to execution plan and deadlock graph tabs in SQL Server Management Studio."
+                });
+                menu.DropDownItems.Add(new ToolStripMenuItem("Uninstall SSMS Extension...", null, (_, _) => UninstallSsmsExtension())
+                {
+                    ToolTipText = "Removes the SSMS extension via VSIXInstaller."
+                });
+            }
+
             menu.DropDownOpening += (_, _) =>
             {
                 foreach (var (association, item) in toggles)
@@ -94,7 +108,7 @@ namespace DBADashGUI.Viewers
                     }
                 }
 
-                makeDefault.Enabled = FileAssociation.All.Any(a => !a.IsDefaultHandler);
+                makeDefault.Enabled = FileAssociation.All.Where(a => !a.IsOptIn).Any(a => !a.IsDefaultHandler);
             };
         }
 
@@ -102,6 +116,7 @@ namespace DBADashGUI.Viewers
         {
             ".sqlplan" => "execution plan (.sqlplan)",
             ".xdl" => "deadlock graph (.xdl)",
+            ".xml" => "plan or deadlock graph (.xml)",
             _ => association.Extension
         };
 
@@ -118,13 +133,41 @@ namespace DBADashGUI.Viewers
             }
         }
 
-        /// <summary>Registers every type not already registered to this copy, then opens Default apps to it - the
-        /// navigation is the same regardless of which association it's called on.</summary>
+        private static void InstallSsmsExtension()
+        {
+            try
+            {
+                SsmsExtensionInstaller.Install();
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex, "Error installing the SSMS extension");
+            }
+        }
+
+        private static void UninstallSsmsExtension()
+        {
+            try
+            {
+                SsmsExtensionInstaller.Uninstall();
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex, "Error uninstalling the SSMS extension");
+            }
+        }
+
+        /// <summary>Registers every defaultable type not already registered to this copy, then opens Default apps
+        /// to it - the navigation is the same regardless of which association it's called on. Leaves .xml alone:
+        /// see <see cref="FileAssociation.IsOptIn"/>.</summary>
         private static void MakeDefault()
         {
             try
             {
-                foreach (var association in FileAssociation.All.Where(a => !a.IsRegisteredToThisCopy)) association.Register();
+                foreach (var association in FileAssociation.All.Where(a => !a.IsOptIn && !a.IsRegisteredToThisCopy))
+                {
+                    association.Register();
+                }
                 FileAssociation.QueryPlan.OpenDefaultAppsSettings();
             }
             catch (Exception ex)
@@ -149,17 +192,21 @@ namespace DBADashGUI.Viewers
         {
             foreach (var file in files)
             {
-                // Which viewer by extension, falling back to the deadlock viewer for the .xml both file
-                // types also get saved as - it reports a file it cannot read, which is a better answer than
-                // guessing at the content and being confidently wrong about it.
+                // .sqlplan and .xdl are unambiguous; anything else - a bare .xml, or no extension at
+                // all - is both file types' other extension, so ShowXmlFile decides from the content.
                 if (Path.GetExtension(file).Equals(FileAssociation.QueryPlan.Extension,
                         StringComparison.OrdinalIgnoreCase))
                 {
                     ViewerLauncher.ShowQueryPlanFile(file);
                 }
-                else
+                else if (Path.GetExtension(file).Equals(FileAssociation.DeadlockGraph.Extension,
+                        StringComparison.OrdinalIgnoreCase))
                 {
                     ViewerLauncher.ShowDeadlockGraphFile(file);
+                }
+                else
+                {
+                    ViewerLauncher.ShowXmlFile(file);
                 }
             }
         }

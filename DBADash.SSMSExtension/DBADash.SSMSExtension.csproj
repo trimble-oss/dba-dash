@@ -1,0 +1,66 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    A VSIX for SQL Server Management Studio, not the rest of the repo's net10 world: SSMS's own
+    ShowPlan control family is classic .NET Framework (confirmed against the SSMS 22 install:
+    SqlWorkbench.Interfaces.dll's ImageRuntimeVersion is v4.0.30319), so this has to run in-process
+    at that runtime.  It talks to the rest of DBA Dash only by launching DBADashVisualizer.exe with a
+    temp file - never by project reference - so it deliberately opts out of the repo's centrally
+    managed package versions below, which target net10 and would fight the VSSDK's own old, pinned
+    dependency graph.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <!-- Microsoft.VsSDK.targets (imported below) assumes this is already set with its usual SDK
+         default; an SDK-style project's outer, TargetFramework-less evaluation pass can otherwise see
+         it empty and write files to the drive root instead of the intermediate output folder. -->
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+    <LangVersion>latest</LangVersion>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <GeneratePkgDefFile>true</GeneratePkgDefFile>
+    <UseCodebase>true</UseCodebase>
+    <IncludeAssemblyInVSIXContainer>true</IncludeAssemblyInVSIXContainer>
+    <IncludeDebugSymbolsInVSIXContainer>false</IncludeDebugSymbolsInVSIXContainer>
+    <IncludeDebugSymbolsInLocalVSIXDeployment>false</IncludeDebugSymbolsInLocalVSIXDeployment>
+    <CopyBuildOutputToOutputDirectory>true</CopyBuildOutputToOutputDirectory>
+    <CopyOutputSymbolsToOutputDirectory>false</CopyOutputSymbolsToOutputDirectory>
+    <StartAction>Program</StartAction>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <UseWindowsForms>true</UseWindowsForms>
+    <NoWarn>$(NoWarn);NU1701</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.SDK" Version="17.14.40265" ExcludeAssets="runtime" />
+    <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="18.4.33" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Design" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <VSCTCompile Include="DBADashCommands.vsct">
+      <ResourceName>Menus.ctmenu</ResourceName>
+    </VSCTCompile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Resources\DBADashIcon.png" Condition="Exists('Resources\DBADashIcon.png')">
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <!-- Embedded too, so the WinForms ContextMenuStrip icon (DeadlockContextMenuHook) can load it by
+         name at runtime instead of depending on the installed extension's folder layout. -->
+    <EmbeddedResource Include="Resources\DBADashIcon.png" Condition="Exists('Resources\DBADashIcon.png')">
+      <LogicalName>DBADashIcon.png</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <!--
+    Microsoft.VSSDK.BuildTools' own .targets only sets up properties (VSToolsPath etc.) for an
+    SDK-style project - unlike the classic VSIX project template, it doesn't import the file that
+    actually defines VSCTCompile/GeneratePkgDef/CreateVsixContainer, so that has to be done explicitly.
+  -->
+  <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="'$(VSToolsPath)' != ''" />
+
+</Project>

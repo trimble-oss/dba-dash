@@ -54,8 +54,23 @@ namespace DBADashGUI.ShellIntegration
             "QueryPlan",
             "SQL Server Execution Plan");
 
+        /// <summary>
+        /// A plan or deadlock graph saved under the generic extension either can end up with instead of
+        /// .sqlplan/.xdl - opened by looking at the content, since the extension alone doesn't say which
+        /// viewer it belongs in. See <see cref="ViewerLauncher.ShowXmlFile"/>.
+        ///
+        /// Opt-in - see <see cref="IsOptIn"/>. .xml is shared with everything else on the machine that
+        /// uses XML, unlike .sqlplan/.xdl which are unambiguously DBA Dash's. Offering it in Explorer's
+        /// Open with menu is still useful, through the settings menu's own toggle.
+        /// </summary>
+        public static readonly FileAssociation Xml = new(
+            ".xml",
+            "Xml",
+            "SQL Server Execution Plan or Deadlock Graph",
+            isOptIn: true);
+
         /// <summary>Every type DBA Dash offers to handle.</summary>
-        public static readonly IReadOnlyList<FileAssociation> All = [DeadlockGraph, QueryPlan];
+        public static readonly IReadOnlyList<FileAssociation> All = [DeadlockGraph, QueryPlan, Xml];
 
         /// <summary>The name under RegisteredApplications - also what Default Apps is asked to navigate to.</summary>
         private static string RegisteredAppName => ViewerApp.Identity.RegistryName;
@@ -65,17 +80,25 @@ namespace DBADashGUI.ShellIntegration
         private static string CapabilitiesKey => AppKey + @"\Capabilities";
         private const string RegisteredApplicationsKey = @"Software\RegisteredApplications";
 
-        private FileAssociation(string extension, string progIdSuffix, string typeName)
+        private FileAssociation(string extension, string progIdSuffix, string typeName, bool isOptIn = false)
         {
             Extension = extension;
             _progIdSuffix = progIdSuffix;
             TypeName = typeName;
+            IsOptIn = isOptIn;
         }
 
         private readonly string _progIdSuffix;
 
         /// <summary>The extension, with its leading dot - e.g. ".xdl".</summary>
         public string Extension { get; }
+
+        /// <summary>
+        /// True for a type that's fine to offer in Open with when the user turns it on by itself, but
+        /// shouldn't come along with the others - left out of "Make the Default" and of
+        /// <see cref="RegisterAll"/> (the command line's --RegisterFileAssociation).  See <see cref="Xml"/>.
+        /// </summary>
+        public bool IsOptIn { get; }
 
         /// <summary>DBADash.QueryPlan for the DBA Dash GUI - named after the application, so each has its own.</summary>
         private string ProgId => $"{ViewerApp.Identity.RegistryName}.{_progIdSuffix}";
@@ -146,13 +169,16 @@ namespace DBADashGUI.ShellIntegration
             }
         }
 
-        /// <summary>Registers this copy for every type, taking over from any other.</summary>
+        /// <summary>
+        /// Registers this copy for every type bar the opt-in ones, taking over from any other.  An opt-in
+        /// type already registered is left as it is.
+        /// </summary>
         public static void RegisterAll()
         {
-            foreach (var association in All) association.Register();
+            foreach (var association in All.Where(a => !a.IsOptIn)) association.Register();
         }
 
-        /// <summary>Removes the registration for every type.</summary>
+        /// <summary>Removes the registration for every type, opt-in ones included.</summary>
         public static void UnregisterAll()
         {
             foreach (var association in All) association.Unregister();
@@ -335,7 +361,11 @@ namespace DBADashGUI.ShellIntegration
 
         private static void NotifyShell() => SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, IntPtr.Zero, IntPtr.Zero);
 
-        private static string AssocQueryExecutable(string extension)
+        /// <summary>The executable Windows currently opens files of <paramref name="extension"/> with -
+        /// not tied to a particular <see cref="FileAssociation"/> instance, so also usable for a type
+        /// this class doesn't register itself, such as SsmsExtensionInstaller looking up VSIXInstaller
+        /// via .vsix.</summary>
+        internal static string AssocQueryExecutable(string extension)
         {
             uint length = 0;
             // S_FALSE (1) with the length needed

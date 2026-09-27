@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011"
+                 xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
+  <Metadata>
+    <Identity Id="DBADash.SSMSExtension.b7e6f4d1-2c3a-4e5f-9b8a-1d2e3f4a5b6c"
+              Version="1.0.10"
+              Language="en-US"
+              Publisher="DBA Dash" />
+    <DisplayName>DBA Dash Visualizer for SSMS</DisplayName>
+    <Description xml:space="preserve">Adds "Open in DBA Dash Visualizer" to the execution plan right-click menu, the deadlock graph right-click menu, and the Tools menu in SSMS - for a graphical plan or deadlock tab, or a plain XML tab holding one (e.g. sp_BlitzLock's deadlock output). Unsupported by Microsoft; compatible with SSMS 21 and SSMS 22.</Description>
+    <MoreInfo>https://github.com/trimble-oss/dba-dash</MoreInfo>
+    <Tags>SQL Server, Execution Plan, Deadlock, SSMS, DBA Dash</Tags>
+  </Metadata>
+  <Installation>
+    <!-- Version is the SSMS product version, not the VS shell version: [21.0,23.0) = SSMS 21 and 22. -->
+    <InstallationTarget Id="Microsoft.VisualStudio.Ssms" Version="[21.0,23.0)">
+      <ProductArchitecture>amd64</ProductArchitecture>
+    </InstallationTarget>
+    <InstallationTarget Id="Microsoft.VisualStudio.Ssms" Version="[21.0,23.0)">
+      <ProductArchitecture>arm64</ProductArchitecture>
+    </InstallationTarget>
+  </Installation>
+  <Prerequisites>
+    <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor"
+                  Version="[14.0,)"
+                  DisplayName="Visual Studio core editor" />
+  </Prerequisites>
+  <Assets>
+    <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
+  </Assets>
+</PackageManifest>
