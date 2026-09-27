@@ -22,7 +22,7 @@ namespace DBADashGUI.QueryPlans
     /// <summary>
     /// The query plan viewer for one plan: the graph, the properties of whatever is selected, and
     /// the lists that carry what there is no room for on the picture.  Each plan open is one of these
-    /// on a tab of <see cref="QueryPlanViewerForm"/>, with its own toolbar and status bar, since
+    /// on a tab of <see cref="DBADashGUI.Viewers.ViewerForm"/>, with its own toolbar and status bar, since
     /// every figure on them is about its own plan.
     ///
     /// The graph is the part people ask for, but a plan is diagnosed from the detail - which
@@ -517,10 +517,10 @@ namespace DBADashGUI.QueryPlans
                 ToolTipText = "What the icons, markers, arrows and bars on the plan mean, and the keys and mouse actions (F1)."
             });
             toolbar.Items.Add(new ToolStripSeparator());
-            toolbar.Items.Add(new ToolStripButton("Open...", Resources.FolderOpened_16x, (_, _) => ViewerLauncher.OpenQueryPlanFile(FindForm()))
+            toolbar.Items.Add(new ToolStripButton("Open...", Resources.FolderOpened_16x, (_, _) => OpenFiles())
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Image,
-                ToolTipText = "Open query plans (.sqlplan) from disk, each on a tab of its own."
+                ToolTipText = "Open query plans (.sqlplan) or deadlock graphs (.xdl) from disk, each on a tab of its own."
             });
             toolbar.Items.Add(BuildCopyMenu());
             toolbar.Items.Add(BuildSaveMenu());
@@ -1074,6 +1074,14 @@ namespace DBADashGUI.QueryPlans
         /// application in Explorer's Open with menu is a change to the machine and not ours to make
         /// uninvited.
         /// </summary>
+        /// <summary>Prompts for plans and deadlock graphs alike, and opens whichever are chosen - the Open button offers
+        /// both regardless of which tab is in front, since they all now share one window.</summary>
+        private void OpenFiles()
+        {
+            var files = ViewerApp.PromptForFiles(FindForm());
+            if (files.Count > 0) ViewerApp.OpenFiles(files);
+        }
+
         private ToolStripDropDownButton BuildSettingsMenu()
         {
             var menu = new ToolStripDropDownButton("Settings") { ToolTipText = "Viewer and file association settings.", Image = Resources.SettingsOutline_16x, DisplayStyle = ToolStripItemDisplayStyle.Image };
@@ -1115,73 +1123,10 @@ namespace DBADashGUI.QueryPlans
             menu.DropDownItems.Add(BuildOpeningZoomMenu());
             menu.DropDownItems.Add(new ToolStripSeparator());
 
-            var appName = ViewerApp.Identity.DisplayName;
-            var offer = new ToolStripMenuItem($"Open .sqlplan Files with {appName}", null, (_, _) => ToggleFileAssociation());
-            var makeDefault = new ToolStripMenuItem($"Make {appName} the Default...", null, (_, _) => MakeDefault())
-            {
-                ToolTipText = "Opens Settings > Default apps.  Windows only lets you choose the default yourself."
-            };
-
-            menu.DropDownItems.Add(offer);
-            menu.DropDownItems.Add(makeDefault);
+            ViewerApp.AddFileAssociationMenuItems(menu);
             ViewerApp.AddSettingsMenuItems(menu.DropDownItems);
 
-            // Read as the menu opens: the registration can be changed from another copy of DBA Dash,
-            // or by the user in Default Apps, while this window is sitting open.
-            menu.DropDownOpening += (_, _) =>
-            {
-                try
-                {
-                    var association = FileAssociation.QueryPlan;
-                    var registered = association.RegisteredExePath;
-
-                    offer.Checked = association.IsRegisteredToThisCopy;
-                    offer.ToolTipText = offer.Checked || registered == null
-                        ? $"Offer {appName} in Explorer's Open with menu for execution plan (.sqlplan) files.  They open in this viewer{(ViewerApp.Identity.IsFullGui ? " without starting the full GUI" : string.Empty)}."
-                        : $"Currently registered to another copy of {appName}:\n{registered}\n\nClick to use this copy instead.";
-
-                    makeDefault.Enabled = !association.IsDefaultHandler;
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine(ex);
-                }
-            };
-
             return menu;
-        }
-
-        private void ToggleFileAssociation()
-        {
-            try
-            {
-                var association = FileAssociation.QueryPlan;
-
-                if (association.IsRegisteredToThisCopy)
-                {
-                    association.Unregister();
-                }
-                else
-                {
-                    association.Register();
-                }
-            }
-            catch (Exception ex)
-            {
-                CommonShared.ShowExceptionDialog(ex, "Error updating the .sqlplan file association");
-            }
-        }
-
-        private void MakeDefault()
-        {
-            try
-            {
-                FileAssociation.QueryPlan.OpenDefaultAppsSettings();
-            }
-            catch (Exception ex)
-            {
-                CommonShared.ShowExceptionDialog(ex, "Could not open Default apps settings");
-            }
         }
 
         /// <summary>

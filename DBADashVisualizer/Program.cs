@@ -1,8 +1,6 @@
 ﻿using DBADashGUI.ShellIntegration;
 using DBADashSharedGUI;
-using DBADashGUI.Theme;
 using DBADashGUI.Viewers;
-using Microsoft.Win32;
 using Serilog;
 using System.IO;
 using System.Text;
@@ -57,10 +55,11 @@ namespace DBADashVisualizer
                 };
 
                 ViewerSettings.Store = new JsonFileSettingsStore(SettingsPath);
-                ApplyTheme();
+                ThemeMenu.ApplyAtStartUp();
 
                 _updates = new UpdateUi(AppName, ViewerSettings.Store);
                 foreach (var item in _updates.MenuItems()) ViewerApp.SettingsMenuItems.Add(item);
+                ViewerApp.SettingsMenuItems.Add(ThemeMenu.MenuItem);
 
                 return Run(args);
             }
@@ -117,12 +116,7 @@ namespace DBADashVisualizer
                 MessageBox.Show($"File not found:\n{string.Join("\n", missing)}", AppName,
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 files = files.Except(missing).ToList();
-                if (files.Count == 0) return 1;
             }
-
-            // Started with no file - from the Start menu, say - so ask for one.  Closing the dialog ends the app.
-            if (files.Count == 0) files = ViewerApp.PromptForFiles().ToList();
-            if (files.Count == 0) return 0;
 
             // Looks for a newer version once the viewer is up - at most once a day, and never if the user has switched it off.
             _updates.CheckAtStartUp();
@@ -134,7 +128,7 @@ namespace DBADashVisualizer
         private static string Usage =>
             $"{AppName} opens SQL Server execution plans (.sqlplan) and deadlock graphs (.xdl).\n\n" +
             $"DBADashVisualizer.exe [file ...]\n" +
-            $"    Open the files.  With none, asks for one.\n\n" +
+            $"    Open the files.  With none, opens with nothing loaded so you can choose one there.\n\n" +
             $"{RegisterOption}\n" +
             $"    Offer {AppName} in Open with for .sqlplan and .xdl files (current user), then exit.\n\n" +
             $"{UnregisterOption}\n" +
@@ -207,38 +201,6 @@ namespace DBADashVisualizer
                 CommonShared.ShowExceptionDialog(ex, "Error updating the file associations");
                 return false;
             }
-        }
-
-        /// <summary>
-        /// The theme is the one saved in the settings file ("Theme": "Dark", "White" or "Default"), and otherwise follows
-        /// Windows - dark when apps are set to use the dark theme.
-        /// </summary>
-        private static void ApplyTheme()
-        {
-            try
-            {
-                var saved = ViewerSettings.Store.Get("Theme") as string;
-                var type = Enum.TryParse(saved, ignoreCase: true, out ThemeType parsed)
-                    ? parsed
-                    : WindowsUsesDarkTheme() ? ThemeType.Dark : ThemeType.Default;
-
-                ThemeExtensions.CurrentTheme = type switch
-                {
-                    ThemeType.Dark => new DarkTheme(),
-                    ThemeType.White => new WhiteTheme(),
-                    _ => new BaseTheme()
-                };
-            }
-            catch (Exception ex)
-            {
-                Log.Warning(ex, "Unable to apply the theme");
-            }
-        }
-
-        private static bool WindowsUsesDarkTheme()
-        {
-            using var key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize");
-            return key?.GetValue("AppsUseLightTheme") is 0;
         }
 
         /// <summary>Without this the log calls go nowhere.  A small rolling file, as the app has no console.</summary>

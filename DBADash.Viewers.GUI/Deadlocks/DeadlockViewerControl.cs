@@ -31,7 +31,7 @@ namespace DBADashGUI.Deadlocks
     /// the triage actually happens - which login, which application, which statement - so they are
     /// first class tabs rather than an afterthought.
     ///
-    /// Each deadlock source open is one of these on a tab of <see cref="DeadlockViewerForm"/>, with
+    /// Each deadlock source open is one of these on a tab of <see cref="DBADashGUI.Viewers.ViewerForm"/>, with
     /// its own toolbar and status bar, since everything on them is about its own source.
     /// </summary>
     public sealed class DeadlockViewerControl : UserControl
@@ -289,10 +289,10 @@ namespace DBADashGUI.Deadlocks
             toolbar.Items.Add(new ToolStripButton("Zoom In", Resources.ZoomIn_16x, (_, _) => _graphControl.ZoomIn()) { DisplayStyle = ToolStripItemDisplayStyle.Image });
             toolbar.Items.Add(new ToolStripButton("Zoom Out", Resources.ZoomOut_16x, (_, _) => _graphControl.ZoomOut()) { DisplayStyle = ToolStripItemDisplayStyle.Image });
             toolbar.Items.Add(new ToolStripSeparator());
-            toolbar.Items.Add(new ToolStripButton("Open...", Resources.FolderOpened_16x, (_, _) => ViewerLauncher.OpenDeadlockGraphFile(this))
+            toolbar.Items.Add(new ToolStripButton("Open...", Resources.FolderOpened_16x, (_, _) => OpenFiles())
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Image,
-                ToolTipText = "Open a deadlock graph (.xdl) from disk in a new window."
+                ToolTipText = "Open deadlock graphs (.xdl) or query plans (.sqlplan) from disk, each on a tab of its own."
             });
             toolbar.Items.Add(new ToolStripButton("Copy Image", Resources.ASX_Copy_blue_16x, (_, _) => CopyImage()) { DisplayStyle = ToolStripItemDisplayStyle.Image });
             toolbar.Items.Add(new ToolStripButton("Save As...", Resources.Save_16x, (_, _) => SaveAs()) { DisplayStyle = ToolStripItemDisplayStyle.Image });
@@ -1222,6 +1222,14 @@ namespace DBADashGUI.Deadlocks
         /// running on its own.  The state is read from the registry each time the menu opens: another copy of DBA
         /// Dash, or the command line switches, can change it.
         /// </summary>
+        /// <summary>Prompts for deadlock graphs and plans alike, and opens whichever are chosen - the Open button
+        /// offers both regardless of which tab is in front, since they all now share one window.</summary>
+        private void OpenFiles()
+        {
+            var files = ViewerApp.PromptForFiles(FindForm());
+            if (files.Count > 0) ViewerApp.OpenFiles(files);
+        }
+
         private static ToolStripDropDownButton BuildSettingsMenu()
         {
             var settings = new ToolStripDropDownButton("Settings", Resources.SettingsOutline_16x)
@@ -1230,64 +1238,10 @@ namespace DBADashGUI.Deadlocks
                 ToolTipText = "Settings"
             };
 
-            var appName = ViewerApp.Identity.DisplayName;
-            var openXdlFiles = new ToolStripMenuItem($"Open .xdl Files with {appName}", null, (_, _) => ToggleFileAssociation());
-            var makeDefault = new ToolStripMenuItem($"Make {appName} the Default for .xdl Files...", null, (_, _) => OpenDefaultAppsSettings())
-            {
-                ToolTipText = $"Windows only allows the default app to be changed from Settings.  This opens Default apps - choose {appName} for .xdl."
-            };
-            settings.DropDownItems.AddRange(new ToolStripItem[] { openXdlFiles, makeDefault });
+            ViewerApp.AddFileAssociationMenuItems(settings);
             ViewerApp.AddSettingsMenuItems(settings.DropDownItems);
 
-            settings.DropDownOpening += (_, _) =>
-            {
-                try
-                {
-                    var registered = FileAssociation.DeadlockGraph.RegisteredExePath;
-                    openXdlFiles.Checked = FileAssociation.DeadlockGraph.IsRegisteredToThisCopy;
-                    openXdlFiles.ToolTipText = openXdlFiles.Checked || registered == null
-                        ? $"Offer {appName} in Explorer's Open with menu for deadlock graph (.xdl) files.  They open in the deadlock viewer{(ViewerApp.Identity.IsFullGui ? " without starting the full GUI" : string.Empty)}."
-                        : $"Currently registered to another copy of {appName}:\n{registered}\n\nClick to use this copy instead.";
-                    makeDefault.Enabled = !FileAssociation.DeadlockGraph.IsDefaultHandler;
-                }
-                catch (Exception ex)
-                {
-                    Log.Warning(ex, "Unable to read the .xdl file association");
-                }
-            };
-
             return settings;
-        }
-
-        private static void ToggleFileAssociation()
-        {
-            try
-            {
-                if (FileAssociation.DeadlockGraph.IsRegisteredToThisCopy)
-                {
-                    FileAssociation.DeadlockGraph.Unregister();
-                }
-                else
-                {
-                    FileAssociation.DeadlockGraph.Register();
-                }
-            }
-            catch (Exception ex)
-            {
-                CommonShared.ShowExceptionDialog(ex, "Error updating the .xdl file association");
-            }
-        }
-
-        private static void OpenDefaultAppsSettings()
-        {
-            try
-            {
-                FileAssociation.DeadlockGraph.OpenDefaultAppsSettings();
-            }
-            catch (Exception ex)
-            {
-                CommonShared.ShowExceptionDialog(ex, "Error opening Default apps");
-            }
         }
 
         /// <summary>
@@ -1343,16 +1297,6 @@ namespace DBADashGUI.Deadlocks
             {
                 CommonShared.ShowExceptionDialog(ex, "Error opening deadlock graph");
             }
-        }
-
-        /// <summary>
-        /// Set when the viewer is all that is running - a graph opened from Explorer rather than from the GUI.
-        /// The process then ends once its last window closes - see Program.RunDeadlockViewer.
-        /// </summary>
-        public static bool IsStandalone
-        {
-            get => DeadlockViewerForm.IsStandalone;
-            set => DeadlockViewerForm.IsStandalone = value;
         }
 
         protected override void Dispose(bool disposing)
