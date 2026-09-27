@@ -422,5 +422,42 @@ namespace DBADashGUI.Viewers
             return path;
 
         }
+
+        /// <summary>
+        /// Opens a file whose extension alone doesn't say which viewer it belongs in - a bare .xml, or
+        /// one with no extension at all, both of which either a plan or a deadlock graph can be saved
+        /// as - by looking at the content instead. Tried as a plan first with the same cheap check the
+        /// query editor's own grid cells are screened with; a deadlock graph never contains ShowPlanXML,
+        /// so there is no real ambiguity between the two, just work in telling either from anything else.
+        /// Reports the file if it's neither, rather than guessing.
+        /// </summary>
+        public static void ShowXmlFile(string path)
+        {
+            try
+            {
+                using var reader = new StreamReader(path, Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
+                var content = reader.ReadToEnd();
+
+                if (PlanParser.LooksLikeExecutionPlan(content))
+                {
+                    ShowQueryPlan(content, Path.GetFileName(path));
+                }
+                else if (DeadlockParser.IsDeadlockXml(content))
+                {
+                    ShowDeadlockGraph(content, Path.GetFileName(path));
+                }
+                else
+                {
+                    CommonShared.ShowExceptionDialog(
+                        new InvalidOperationException("Not a recognised execution plan or deadlock graph."),
+                        "Error opening file",
+                        text: $"{path} is not a query plan or deadlock graph DBA Dash recognises.");
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex, "Error opening file", text: $"{path} could not be opened.");
+            }
+        }
     }
 }

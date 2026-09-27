@@ -1,0 +1,72 @@
+# Run manually when the SSMS extension itself changes - separate from DBA Dash's own releases (tag-create-release.yml),
+# since the extension is expected to change far less often than the app itself.  Publishes to the Open SSMS VSIX Gallery
+# (https://ssmsgallery.azurewebsites.net) rather than creating a GitHub release: a release here would be picked up as the
+# "latest" DBA Dash release by the upgrade checks.  Every DBA Dash release already carries the extension, embedded in
+# the GUI, so the gallery is only for installing it from within SSMS.
+#
+# Bump Version in DBADash.SSMSExtension/source.extension.vsixmanifest before running - it's what SSMS compares to offer
+# the update.  Not signed: DBADash.SSMSExtension.dll doesn't go through Trimble's signing tool (SignRelease.ps1).
+name: Publish SSMS Extension
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Upload to the gallery.  Untick to only build the .vsix as a workflow artifact.
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Build and Publish
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+          dotnet-quality: 'ga'
+
+      - name: Pack SSMS Extension
+        id: Pack
+        shell: pwsh
+        run: |
+          $result = ./Scripts/Pack-SSMSExtension.ps1
+          Write-Output "VERSION=$($result.Version)" >> $env:GITHUB_OUTPUT
+          Write-Output "VSIX=$(Split-Path -Leaf $result.Vsix)" >> $env:GITHUB_OUTPUT
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DBADash_SSMSExtension-${{ steps.Pack.outputs.VERSION }}
+          path: ${{ steps.Pack.outputs.VSIX }}
+          if-no-files-found: error
+
+      # Without a token, the first upload has the gallery generate one and print it in the run summary - which is public
+      # on this repository.  Supplying our own keeps it secret, and is what lets us remove or replace the listing later.
+      - name: Check manage token
+        if: inputs.publish
+        shell: pwsh
+        env:
+          MANAGE_TOKEN: ${{ secrets.SSMS_GALLERY_MANAGE_TOKEN }}
+        run: |
+          if (-not $env:MANAGE_TOKEN) {
+            Write-Output "::error::Add a SSMS_GALLERY_MANAGE_TOKEN repository secret before publishing."
+            exit 1
+          }
+
+      - name: Publish to Open SSMS VSIX Gallery
+        if: inputs.publish
+        uses: madskristensen/publish-vsixgallery@fca01a5688f52684fc11b469205143a7737890cb # v1.11.1
+        with:
+          vsix-file: ${{ steps.Pack.outputs.VSIX }}
+          gallery-url: https://ssmsgallery.azurewebsites.net
+          readme: https://raw.githubusercontent.com/${{ github.repository }}/main/README.md
+          manage-token: ${{ secrets.SSMS_GALLERY_MANAGE_TOKEN }}

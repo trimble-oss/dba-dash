@@ -1,0 +1,23 @@
+<Project>
+
+  <!--
+    Scoped to this one project's folder - not the repo-wide Directory.Build.targets, which doesn't
+    exist. The .NET SDK imports this after its own Sdk.targets (Microsoft.Common.CurrentVersion.targets
+    included), which is the only point $(TargetPath)/$(TargetDir)/$(BuildDependsOn) actually hold their
+    real values for an SDK-style project - Microsoft.VsSDK.targets (imported from inside the .csproj
+    itself, i.e. before Sdk.targets) reads several of these too early otherwise and silently binds them
+    empty, which is what forces this file to exist at all instead of setting them inline.
+
+    Without this, GeneratePkgDef and CreateVsixContainer only run when explicitly requested with
+    `dotnet build -t:Build,GeneratePkgDef,CreateVsixContainer -p:TargetFramework=net472` - their
+    AfterTargets="Build" hooks in Microsoft.VsSDK.targets don't fire under the .NET SDK CLI's build the
+    way they do from Visual Studio's own MSBuild. Folding them into BuildDependsOn runs them as part of
+    the same Build invocation regardless of host, so a plain `dotnet build` produces the .vsix.
+  -->
+  <PropertyGroup>
+    <BuildDependsOn>$(BuildDependsOn);GeneratePkgDef;CreateVsixContainer</BuildDependsOn>
+    <CreatePkgDefAssemblyToProcess>$(TargetPath)</CreatePkgDefAssemblyToProcess>
+    <TargetVsixContainer>$(TargetDir)$(TargetName).vsix</TargetVsixContainer>
+  </PropertyGroup>
+
+</Project>

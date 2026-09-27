@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable"
+              xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <Extern href="stdidcmd.h"/>
+  <Extern href="vsshlids.h"/>
+
+  <Commands package="guidDBADashPackage">
+    <Groups>
+      <!-- Parented to SSMS's own execution plan right-click context menu. -->
+      <Group guid="guidDBADashCmdSet" id="ContextMenuGroupId" priority="0x0600">
+        <Parent guid="guidShowPlanContextMenu" id="ShowPlanContextMenuId"/>
+      </Group>
+
+      <!--
+        The same command also lives on the Tools menu, since a plan tab is the only one of the two with
+        a native context menu to rely on (the deadlock graph has none at all - see
+        DeadlockContextMenuHook). OpenCommand's own BeforeQueryStatus hides it here whenever nothing it
+        can read is focused, so this doesn't just sit there listing an option that would do nothing.
+      -->
+      <Group guid="guidDBADashCmdSet" id="ToolsGroupId" priority="0x0600">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_TOOLS"/>
+      </Group>
+    </Groups>
+
+    <Buttons>
+      <Button guid="guidDBADashCmdSet" id="OpenCommandId" priority="0x0100" type="Button">
+        <Parent guid="guidDBADashCmdSet" id="ContextMenuGroupId"/>
+        <Icon guid="guidDBADashImages" id="bmpDBADash"/>
+        <Strings>
+          <ButtonText>Open in DBA Dash Visualizer</ButtonText>
+        </Strings>
+      </Button>
+    </Buttons>
+
+    <Bitmaps>
+      <Bitmap guid="guidDBADashImages" href="Resources\DBADashIcon.png" usedList="bmpDBADash"/>
+    </Bitmaps>
+  </Commands>
+
+  <CommandPlacements>
+    <!-- The same OpenCommandId button as above, additionally placed on the Tools menu group. -->
+    <CommandPlacement guid="guidDBADashCmdSet" id="OpenCommandId" priority="0x0110">
+      <Parent guid="guidDBADashCmdSet" id="ToolsGroupId"/>
+    </CommandPlacement>
+  </CommandPlacements>
+
+  <!--
+    No right-click for a plain XML tab (e.g. sp_BlitzLock's deadlock output): IDM_VS_CTXT_CODEWIN, the
+    standard code editor context menu, didn't merge into it, and neither did attaching a WinForms/WPF
+    context menu directly to the view's window - a real native context menu does appear there, so this
+    viewer is most likely a COM-hosted editor that renders its own menu outside either mechanism.
+    Reaching it would need an IOleCommandTarget command filter (IVsTextView.AddCommandFilter) and its
+    own undiscoverable menu GUID - not attempted, since the Tools menu and the Ctrl+Alt+Shift+D
+    keybinding already cover this case reliably.
+  -->
+
+  <KeyBindings>
+    <!--
+      A keybinding invokes a command directly through the shell's command table, independent of
+      whether any menu placement actually rendered - useful since IDM_VS_MENU_TOOLS's group placement
+      above is unconfirmed in SSMS specifically (unlike guidShowPlanContextMenu, which is known to
+      work). Chosen to avoid colliding with SSMS's own common shortcuts.
+    -->
+    <KeyBinding guid="guidDBADashCmdSet" id="OpenCommandId" editor="guidVSStd97" key1="D" mod1="Control Alt Shift"/>
+  </KeyBindings>
+
+  <Symbols>
+    <!-- Package GUID -->
+    <GuidSymbol name="guidDBADashPackage" value="{00F620C6-2F07-4202-9D64-92AECB958CFB}" />
+
+    <!-- Command set GUID -->
+    <GuidSymbol name="guidDBADashCmdSet" value="{0CC07265-7442-475F-99F3-41177ED25148}">
+      <IDSymbol name="ContextMenuGroupId" value="0x1020"/>
+      <IDSymbol name="OpenCommandId" value="0x0100"/>
+      <IDSymbol name="ToolsGroupId" value="0x1030"/>
+    </GuidSymbol>
+
+    <!--
+      SSMS's execution plan right-click context menu. Not something we defined: a fact about SSMS
+      itself, publicly documented (e.g. erikdarlingdata/PerformanceStudio's AnalyzePlanPackage.vsct,
+      whose own comment notes it is confirmed the same across SSMS 18-22). Reused as data, not code.
+    -->
+    <GuidSymbol name="guidShowPlanContextMenu" value="{33F13AC3-80BB-4ECB-85BC-225435603A5E}">
+      <IDSymbol name="ShowPlanContextMenuId" value="0x0080"/>
+    </GuidSymbol>
+
+    <!-- The DBA Dash app icon, extracted 16x16 from Assets/DBADash.ico. -->
+    <GuidSymbol name="guidDBADashImages" value="{5A9E9F2E-6B7C-4A1E-9E3D-8F2C1B4A6D7E}">
+      <IDSymbol name="bmpDBADash" value="1"/>
+    </GuidSymbol>
+  </Symbols>
+</CommandTable>
