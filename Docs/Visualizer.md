@@ -14,8 +14,8 @@ Query Store lookup - isn't offered in the Visualizer.
 ## Requirements
 
 - 64 bit Windows 10 or later.
-- The [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0) (x64).  The setup program and the
-  winget package install it for you.
+- The [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0) (x64).  The setup program installs it for
+  you if it's missing, including when winget runs it.
 
 ## Install
 
@@ -118,13 +118,16 @@ The Visualizer is released with DBA Dash, at the same version.
 4. **Publish** the release.  Installed copies find the update from the feed of the latest published release.
 5. **winget.**  Once the release is published, `Scripts/New-WingetManifest.ps1 -Version <version>` downloads the signed setup
    program, works out its hash, writes the manifest under `DBADashBuild\winget` and validates it with `winget validate`.  The
-   manifest runs the setup with `--silent` (it installs for the user, and doesn't start the app), finds the install again by its
-   *Installed apps* product code, and depends on the .NET Desktop Runtime.  Submit the
+   manifest runs the setup with `--silent` (it installs for the user, and doesn't start the app), and finds the install again by
+   its *Installed apps* product code.  It doesn't declare the .NET Desktop Runtime as a winget dependency - the setup already
+   installs it if it's missing (see Requirements), and winget's own dependency resolution turned out not to recognise an
+   already-installed runtime as satisfying it, downloading it again needlessly.  Submit the
    result to [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs) as a pull request, or with
    [`wingetcreate submit`](https://github.com/microsoft/winget-create).  The script doesn't submit anything itself.
 
-The winget package hasn't been through winget's own review yet, and a `winget upgrade` over a copy that has already updated
-itself hasn't been tried.
+The winget package hasn't been through winget's own review yet.  Install, upgrade and uninstall have been tried with
+`winget install --manifest` / `winget upgrade --manifest` against a release on a fork - including upgrading a copy that had
+already updated itself in the meantime - so it's only the real submission and the community index that are untested.
 
 To try the installer channel before publishing, build both versions with `Pack-VisualizerInstaller.ps1 -ZipPath <zip>
 -SkipSigning`, install the earlier setup, and set the environment variable `DBADASH_VISUALIZER_UPDATE_FEED` to the folder that

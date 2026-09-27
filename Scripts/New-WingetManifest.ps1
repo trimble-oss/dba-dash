@@ -100,8 +100,9 @@ $installerLines = @(
 # A Velopack setup.  It isn't one of the installer frameworks winget knows the switches of, so they are given:
 # --silent hides everything, and doesn't start the app afterwards.  It installs for the user, under
 # %LOCALAPPDATA%, and registers itself in Installed apps under the id it was packed with - which is how winget finds it
-# again to upgrade or uninstall.  The .NET Desktop Runtime is a dependency so winget installs it, rather than the setup
-# having to.
+# again to upgrade or uninstall.  The .NET Desktop Runtime isn't declared as a winget dependency: the setup already installs
+# it if it's missing (it was packed with --framework), and winget didn't recognise an already-installed runtime as
+# satisfying the dependency, downloading it again needlessly.
 $installerLines += @(
     "InstallerType: exe",
     "Scope: user",
@@ -121,10 +122,7 @@ $installerLines += @(
     "  AppsAndFeaturesEntries:",
     "  - DisplayName: DBA Dash Visualizer",
     "    Publisher: Trimble, Inc.",
-    "    ProductCode: DBADash_Visualizer",
-    "Dependencies:",
-    "  PackageDependencies:",
-    "  - PackageIdentifier: Microsoft.DotNet.DesktopRuntime.10"
+    "    ProductCode: DBADash_Visualizer"
 )
 
 if ($releaseDateLine) { $installerLines += $releaseDateLine }
