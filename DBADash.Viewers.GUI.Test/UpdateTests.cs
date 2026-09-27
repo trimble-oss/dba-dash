@@ -107,6 +107,14 @@ namespace DBADash.Viewers.GUI.Test
         }
 
         [TestMethod]
+        public async Task ATagWithTheWrongNumberOfPartsIsIgnored()
+        {
+            // Version.TryParse alone would accept both of these - we only ever tag releases with three parts.
+            Assert.IsNull(await Latest(Release("4.20", assets: [Prefix + "4.20.zip"])));
+            Assert.IsNull(await Latest(Release("4.20.0.1", assets: [Prefix + "4.20.0.1.zip"])));
+        }
+
+        [TestMethod]
         public async Task JsonThatIsNotAReleaseIsIgnored()
         {
             Assert.IsNull(await Latest("[]"));
