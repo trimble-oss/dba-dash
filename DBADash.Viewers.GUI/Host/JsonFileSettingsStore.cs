@@ -1,6 +1,9 @@
 ﻿using Serilog;
 using System.IO;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
+using System.Threading;
 
 namespace DBADashGUI.Viewers
 {
@@ -11,6 +14,11 @@ namespace DBADashGUI.Viewers
     /// A file that is missing, unreadable or not what it should be gives the defaults rather than an error: the
     /// settings are a convenience, and never a reason a plan doesn't open.  The file is written to a temporary name and
     /// moved into place, so a crash part way through a save can't leave half a file behind.
+    ///
+    /// The file is shared by every copy of the app a user has (the zip, the setup, both at once), each its own process
+    /// with its own instance of this class, so a named <see cref="Mutex"/> - not just the in-process <see cref="_lock"/> -
+    /// keeps two copies from writing the same temporary file at the same time.  Whichever saves last still wins; that's
+    /// accepted for what is only ever a handful of UI preferences.
     /// </summary>
     public sealed class JsonFileSettingsStore : IViewerSettingsStore
     {
@@ -18,11 +26,16 @@ namespace DBADashGUI.Viewers
 
         private readonly string _path;
         private readonly object _lock = new();
+        private readonly Mutex _saveMutex;
         private Dictionary<string, object> _values;
 
         public JsonFileSettingsStore(string path)
         {
             _path = path ?? throw new ArgumentNullException(nameof(path));
+
+            // Named mutexes can't contain '\' or be arbitrarily long, so the path is hashed rather than used directly.
+            var hash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(_path.ToUpperInvariant())));
+            _saveMutex = new Mutex(initiallyOwned: false, name: "DBADashViewerSettings-" + hash);
         }
 
         public object Get(string name)
@@ -50,9 +63,27 @@ namespace DBADashGUI.Viewers
                     var folder = Path.GetDirectoryName(_path);
                     if (!string.IsNullOrEmpty(folder)) Directory.CreateDirectory(folder);
 
-                    var temp = _path + ".tmp";
-                    File.WriteAllText(temp, JsonSerializer.Serialize(Values, WriteOptions));
-                    File.Move(temp, _path, overwrite: true);
+                    var json = JsonSerializer.Serialize(Values, WriteOptions);
+
+                    try
+                    {
+                        _saveMutex.WaitOne();
+                    }
+                    catch (AbandonedMutexException)
+                    {
+                        // Whichever copy of the app held this last crashed before releasing it - we still got it, and
+                        // the settings file is left as whatever that copy's own last successful save wrote.
+                    }
+                    try
+                    {
+                        var temp = _path + ".tmp";
+                        File.WriteAllText(temp, json);
+                        File.Move(temp, _path, overwrite: true);
+                    }
+                    finally
+                    {
+                        _saveMutex.ReleaseMutex();
+                    }
                 }
             }
             catch (Exception ex)

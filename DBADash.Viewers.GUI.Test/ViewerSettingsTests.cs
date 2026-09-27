@@ -1,5 +1,8 @@
 ﻿using DBADashGUI.Viewers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Serilog;
+using Serilog.Core;
+using Serilog.Events;
 using System.IO;
 
 namespace DBADash.Viewers.GUI.Test
@@ -163,6 +166,42 @@ namespace DBADash.Viewers.GUI.Test
             ViewerSettings.Store = new JsonFileSettingsStore(SettingsPath);
 
             Assert.AreEqual(3, ViewerSettings.QueryPlanPropertyRowLines);
+        }
+
+        private sealed class CollectingSink : ILogEventSink
+        {
+            public List<LogEvent> Events { get; } = new();
+            public void Emit(LogEvent logEvent) { lock (Events) Events.Add(logEvent); }
+        }
+
+        [TestMethod]
+        public void ConcurrentSavesFromSeveralInstancesDoNotLogAFailure()
+        {
+            // Several store instances on the same path stand in for several copies of the app (the zip, the setup, more
+            // than one running at once) sharing the one settings file - each its own process in reality, but a named
+            // mutex serializes them the same way regardless of whether that's across threads or across processes.
+            var sink = new CollectingSink();
+            var original = Log.Logger;
+            Log.Logger = new LoggerConfiguration().MinimumLevel.Warning().WriteTo.Sink(sink).CreateLogger();
+            try
+            {
+                var stores = Enumerable.Range(0, 8).Select(_ => new JsonFileSettingsStore(SettingsPath)).ToArray();
+
+                Parallel.For(0, 200, i =>
+                {
+                    var store = stores[i % stores.Length];
+                    store.Set("Value", i);
+                    store.Save();
+                });
+            }
+            finally
+            {
+                Log.CloseAndFlush();
+                Log.Logger = original;
+            }
+
+            Assert.AreEqual(0, sink.Events.Count,
+                "A save from one copy of the app shouldn't be able to fail because another copy is saving the same file at the same time.");
         }
 
         [TestMethod]

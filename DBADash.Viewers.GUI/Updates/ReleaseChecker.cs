@@ -1,5 +1,6 @@
 ﻿using System.Net.Http;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace DBADashGUI.Viewers
 {
@@ -90,6 +91,11 @@ namespace DBADashGUI.Viewers
 
             var text = tag.Trim();
             if (text.StartsWith('v') || text.StartsWith('V')) text = text[1..];
+
+            // Version.TryParse alone also accepts two or four parts, which the summary above says we don't - reject
+            // those before it gets the chance to.
+            if (!Regex.IsMatch(text, @"^\d+\.\d+\.\d+$")) return false;
+
             return Version.TryParse(text, out version);
         }
 

@@ -42,8 +42,10 @@ if (-not $ZipFolder) { $ZipFolder = $repo }
 $project = Join-Path $repo "DBADashVisualizer\DBADashVisualizer.csproj"
 
 # Files that mean the rest of DBA Dash - the collection service, the repository code, cloud SDKs - has come along.
-# Patterns, matched against the file name.
+# Patterns, matched against the file name.  DBADashGUI's own assembly is named DBADash.exe (a historical mismatch with
+# its project folder), and DBADash.csproj's is DBADashTools.dll - both listed by their actual file name, not the folder.
 $forbidden = @(
+    "DBADash.exe",
     "DBADashTools.dll",
     "DBADashService*",
     "DBADashConfig*",
