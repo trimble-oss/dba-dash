@@ -1,6 +1,5 @@
-﻿using DBADashGUI.Deadlocks;
-using DBADashGUI.QueryPlans;
-using DBADashGUI.ShellIntegration;
+﻿using DBADashGUI.ShellIntegration;
+using Serilog;
 using System.IO;
 
 namespace DBADashGUI.Viewers
@@ -55,6 +54,86 @@ namespace DBADashGUI.Viewers
         }
 
         /// <summary>
+        /// Adds "Open with" items for every type the viewers handle - .sqlplan and .xdl alike - to a Settings menu,
+        /// the same regardless of which tab, plan or deadlock, is in front: since they share one window there's no
+        /// reason the offer should only cover the type on the active tab.  Read fresh each time the menu opens, as
+        /// the registration can change from another copy of DBA Dash, or from the user in Default Apps, while this
+        /// window is sitting open.
+        /// </summary>
+        internal static void AddFileAssociationMenuItems(ToolStripDropDownItem menu)
+        {
+            var appName = Identity.DisplayName;
+            var toggles = FileAssociation.All
+                .Select(association => (association, item: new ToolStripMenuItem(
+                    $"Open {association.Extension} Files with {appName}", null, (_, _) => ToggleFileAssociation(association))))
+                .ToList();
+
+            foreach (var (_, item) in toggles) menu.DropDownItems.Add(item);
+
+            var makeDefault = new ToolStripMenuItem($"Make {appName} the Default...", null, (_, _) => MakeDefault())
+            {
+                ToolTipText = "Opens Settings > Default apps.  Windows only lets you choose the default yourself."
+            };
+            menu.DropDownItems.Add(makeDefault);
+
+            menu.DropDownOpening += (_, _) =>
+            {
+                foreach (var (association, item) in toggles)
+                {
+                    try
+                    {
+                        var registered = association.RegisteredExePath;
+                        item.Checked = association.IsRegisteredToThisCopy;
+                        item.ToolTipText = item.Checked || registered == null
+                            ? $"Offer {appName} in Explorer's Open with menu for {FriendlyName(association)} files.  They open in this viewer{(Identity.IsFullGui ? " without starting the full GUI" : string.Empty)}."
+                            : $"Currently registered to another copy of {appName}:\n{registered}\n\nClick to use this copy instead.";
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Warning(ex, "Unable to read the {extension} file association", association.Extension);
+                    }
+                }
+
+                makeDefault.Enabled = FileAssociation.All.Any(a => !a.IsDefaultHandler);
+            };
+        }
+
+        private static string FriendlyName(FileAssociation association) => association.Extension switch
+        {
+            ".sqlplan" => "execution plan (.sqlplan)",
+            ".xdl" => "deadlock graph (.xdl)",
+            _ => association.Extension
+        };
+
+        private static void ToggleFileAssociation(FileAssociation association)
+        {
+            try
+            {
+                if (association.IsRegisteredToThisCopy) association.Unregister();
+                else association.Register();
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex, $"Error updating the {association.Extension} file association");
+            }
+        }
+
+        /// <summary>Registers every type not already registered to this copy, then opens Default apps to it - the
+        /// navigation is the same regardless of which association it's called on.</summary>
+        private static void MakeDefault()
+        {
+            try
+            {
+                foreach (var association in FileAssociation.All.Where(a => !a.IsRegisteredToThisCopy)) association.Register();
+                FileAssociation.QueryPlan.OpenDefaultAppsSettings();
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex, "Could not open Default apps settings");
+            }
+        }
+
+        /// <summary>
         /// The files the viewers open, for the Open dialog: .sqlplan and .xdl, and the .xml either of them is also saved
         /// as.
         /// </summary>
@@ -63,7 +142,7 @@ namespace DBADashGUI.Viewers
             "Query plan (*.sqlplan)|*.sqlplan|Deadlock graph (*.xdl)|*.xdl|XML (*.xml)|*.xml|All files (*.*)|*.*";
 
         /// <summary>
-        /// Opens each file in the viewer for its type - plans on tabs of one window, deadlock graphs on tabs of another.
+        /// Opens each file in the viewer for its type, on tabs of the one window - plans and deadlock graphs alike.
         /// A file that can't be read is reported and doesn't stop the rest.
         /// </summary>
         public static void OpenFiles(IEnumerable<string> files)
@@ -100,15 +179,15 @@ namespace DBADashGUI.Viewers
 
         /// <summary>
         /// Runs the viewers for <paramref name="files"/> as the only thing in the process, and returns when the last
-        /// window has been closed.
+        /// window has been closed.  With no files - or none that could be opened - shows <see cref="ViewerForm.ShowEmpty"/>
+        /// instead of leaving the process with nothing on screen.
         ///
-        /// Explorer starts a copy per file.  The first copy opens them all - plans on tabs of one window - and the rest
+        /// Explorer starts a copy per file.  The first copy opens them all - on tabs of one window - and the rest
         /// hand their files to it and return at once.  See <see cref="ViewerInstance"/>.
         /// </summary>
         public static void Run(IEnumerable<string> files)
         {
-            DeadlockViewerForm.IsStandalone = true;
-            QueryPlanViewerForm.IsStandalone = true;
+            ViewerForm.IsStandalone = true;
 
             // Full paths: another copy opening them resolves a relative path against its own folder.
             var paths = files.Select(Path.GetFullPath).ToList();
@@ -129,8 +208,7 @@ namespace DBADashGUI.Viewers
 
             OpenFiles(paths);
 
-            // Nothing opened - each failure has already been reported.
-            if (!AnyVisibleForms()) return;
+            if (!AnyVisibleForms()) ViewerForm.ShowEmpty();
 
             // Exit once every window is closed - not just the viewers, as a viewer can open other windows that
             // would otherwise be closed out from under the user.  Idle runs once the close has been processed.

@@ -2,8 +2,6 @@
 using DBADash.Deadlock.Model;
 using DBADash.QueryPlan;
 using DBADash.QueryPlan.Model;
-using DBADashGUI.Deadlocks;
-using DBADashGUI.QueryPlans;
 using System.IO;
 using System.Text;
 
@@ -74,7 +72,7 @@ namespace DBADashGUI.Viewers
             // On a tab of the plan window already open, if there is one, so plans can be compared.
 
             host ??= DefaultHost;
-            OnUIThread(() => QueryPlanViewerForm.Open(parsed, plan, fileName, host));
+            OnUIThread(() => ViewerForm.OpenQueryPlan(parsed, plan, fileName, host));
 
         }
 
@@ -305,7 +303,7 @@ namespace DBADashGUI.Viewers
             // On a tab of the deadlock window already open, if there is one, so deadlocks can be compared.
 
             host ??= DefaultHost;
-            OnUIThread(() => DeadlockViewerForm.Open(graphs, dlGraph, fileName, host));
+            OnUIThread(() => ViewerForm.OpenDeadlock(graphs, dlGraph, fileName, host));
 
         }
 
