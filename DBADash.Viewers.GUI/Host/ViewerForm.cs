@@ -5,6 +5,7 @@ using DBADashGUI.CustomReports;
 using DBADashGUI.Deadlocks;
 using DBADashGUI.Grids;
 using DBADashGUI.QueryPlans;
+using DBADashGUI.ShellIntegration;
 using DBADashGUI.Theme;
 using System;
 using System.Collections.Generic;
@@ -138,6 +139,63 @@ namespace DBADashGUI.Viewers
 
             if (window.WindowState == FormWindowState.Minimized) window.WindowState = FormWindowState.Normal;
             window.Activate();
+        }
+
+        /// <summary>Offered once per process at most - the bar isn't something to see again on every file opened.</summary>
+        private static bool _ssmsExtensionUpdateOffered;
+
+        /// <summary>
+        /// Offers the SSMS extension this build carries, on a bar across the top of the window, when it's newer than
+        /// the one that just handed over a file - one that predates a feature the app now has, e.g. after DBA Dash was
+        /// upgraded but the extension wasn't.  Not offered for a version the user chose to skip.
+        /// </summary>
+        public static void OfferSsmsExtensionUpdate()
+        {
+            if (_ssmsExtensionUpdateOffered || _current is not { IsDisposed: false } window) return;
+
+            var installed = SsmsExtensionInstaller.LastLaunchedVersion;
+            if (!SsmsExtensionInstaller.IsNewerThan(installed)) return;
+
+            var available = SsmsExtensionInstaller.EmbeddedVersion;
+            if (ViewerSettings.SsmsExtensionSkippedVersion == available.ToString()) return;
+
+            _ssmsExtensionUpdateOffered = true;
+            window.ShowSsmsExtensionUpdateBar(installed, available);
+        }
+
+        private void ShowSsmsExtensionUpdateBar(Version installed, Version available)
+        {
+            var bar = new ToolStrip { GripStyle = ToolStripGripStyle.Hidden, Dock = DockStyle.Top, Name = "SsmsExtensionUpdateBar" };
+            var close = new ToolStripButton("Close") { DisplayStyle = ToolStripItemDisplayStyle.Text, Alignment = ToolStripItemAlignment.Right };
+
+            bar.Items.Add(new ToolStripLabel(
+                $"A newer DBA Dash SSMS extension is available: {available}" +
+                (installed == null ? string.Empty : $" (installed: {installed})") +
+                ".  SSMS needs to be closed to finish the update."));
+            bar.Items.Add(new ToolStripButton("Update SSMS Extension...", null, (_, _) =>
+            {
+                RemoveBar();
+                ViewerApp.InstallSsmsExtension();
+            }) { DisplayStyle = ToolStripItemDisplayStyle.Text });
+            bar.Items.Add(new ToolStripButton("Skip This Version", null, (_, _) =>
+            {
+                RemoveBar();
+                ViewerSettings.SsmsExtensionSkippedVersion = available.ToString();
+                ViewerSettings.Save();
+            }) { DisplayStyle = ToolStripItemDisplayStyle.Text });
+            close.Click += (_, _) => RemoveBar();
+            bar.Items.Add(close);
+
+            Controls.Add(bar);
+            // The tabs fill what's left below it: docking goes in reverse z-order.
+            _documents.BringToFront();
+            bar.ApplyTheme();
+
+            void RemoveBar()
+            {
+                Controls.Remove(bar);
+                bar.Dispose();
+            }
         }
 
         /// <summary>
