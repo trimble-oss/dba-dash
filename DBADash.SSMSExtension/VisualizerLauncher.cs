@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
 using Microsoft.Win32;
 
@@ -77,12 +78,16 @@ namespace DBADash.SSMSExtension
         /// it with nothing extra. Gzipped - a result set can run to hundreds of MB of XML - and as .xml.gz rather
         /// than .xml, so the app opens it as a grid without having to tell it apart from a plan or deadlock
         /// graph saved as .xml. Doesn't touch the UI, so it can run on a background thread.
+        ///
+        /// Writing a large result set takes a while too, so <paramref name="cancellationToken"/> is checked on every
+        /// write to the file - the wait dialog's Cancel stops it rather than being ignored until it's done - and the
+        /// partial file is deleted.
         /// </summary>
-        public static string SaveGridToTemp(DataTable table)
+        public static string SaveGridToTemp(DataTable table, CancellationToken cancellationToken)
         {
             return SaveToTemp(".xml.gz", stream =>
             {
-                using var gzip = new GZipStream(stream, CompressionLevel.Fastest);
+                using var gzip = new GZipStream(new CancellableStream(stream, cancellationToken), CompressionLevel.Fastest);
                 table.WriteXml(gzip, XmlWriteMode.WriteSchema);
             });
         }
@@ -125,7 +130,8 @@ namespace DBADash.SSMSExtension
         /// Writes the XML to a random-named file under %TEMP%. FileMode.CreateNew refuses to overwrite
         /// or follow a file already sitting at the path, closing the race a predictable name would
         /// leave open. Sweeps this extension's own stale temp files older than an hour on the way in,
-        /// rather than deleting the file right after handing it to another process to open.
+        /// rather than deleting the file right after handing it to another process to open. A write that fails, or is
+        /// cancelled, deletes its partial file.
         /// </summary>
         private static string SaveToTemp(string extension, Action<Stream> write)
         {
@@ -133,12 +139,55 @@ namespace DBADash.SSMSExtension
 
             var fileName = "ssms_" + Path.GetFileNameWithoutExtension(Path.GetRandomFileName()) + extension;
             var path = Path.Combine(Path.GetTempPath(), fileName);
-            using (var stream = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+            try
             {
+                using var stream = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None);
                 write(stream);
+            }
+            catch
+            {
+                try
+                {
+                    File.Delete(path);
+                }
+                catch
+                {
+                    // Left for SweepOldTempFiles.
+                }
+                throw;
             }
 
             return path;
+        }
+
+        /// <summary>
+        /// A write-only pass-through that throws once <see cref="CancellationToken"/> is cancelled, for a write -
+        /// DataTable.WriteXml - that takes no token of its own. Doesn't close the stream it writes to: that's the
+        /// caller's.
+        /// </summary>
+        private sealed class CancellableStream(Stream inner, CancellationToken cancellationToken) : Stream
+        {
+            public override bool CanRead => false;
+            public override bool CanSeek => false;
+            public override bool CanWrite => true;
+            public override long Length => throw new NotSupportedException();
+
+            public override long Position
+            {
+                get => throw new NotSupportedException();
+                set => throw new NotSupportedException();
+            }
+
+            public override void Write(byte[] buffer, int offset, int count)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                inner.Write(buffer, offset, count);
+            }
+
+            public override void Flush() => inner.Flush();
+            public override int Read(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+            public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+            public override void SetLength(long value) => throw new NotSupportedException();
         }
 
         private static void SweepOldTempFiles()

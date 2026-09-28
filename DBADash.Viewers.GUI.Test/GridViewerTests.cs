@@ -228,6 +228,47 @@ namespace DBADash.Viewers.GUI.Test
             Assert.AreEqual(DBADashDataGridView.RowHeaderModes.Hidden, FindGrid(control).RowHeaderMode);
         }
 
+        /// <summary>
+        /// A grid file opens on a tab that says it's loading straight away, and the grid replaces it once the file has
+        /// been read in the background - named from the table's Title, not the file.
+        /// </summary>
+        // STA: the viewer window registers as a drop target, which needs OLE - on an MTA thread creating its handle
+        // throws, and WinForms puts up its unhandled exception dialog.
+        [STATestMethod]
+        public void OpenGridFile_ShowsLoadingThenTheGrid()
+        {
+            var path = Path.Combine(_folder, "ssms_test.xml.gz");
+            using (var stream = File.Create(path))
+            using (var gzip = new GZipStream(stream, CompressionLevel.Fastest))
+            {
+                SsmsStyleTable().WriteXml(gzip, XmlWriteMode.WriteSchema);
+            }
+
+            ViewerForm.OpenGridFile(path);
+            var window = Application.OpenForms.OfType<ViewerForm>().Single();
+            try
+            {
+                var page = FindAll<TabPage>(window).Single();
+                Assert.AreEqual("ssms_test.xml.gz", page.Text, "named after the file while it loads");
+                Assert.IsInstanceOfType<Label>(page.Controls[0]);
+
+                var deadline = DateTime.UtcNow.AddSeconds(10);
+                while (page.Controls[0] is not GridViewerControl && DateTime.UtcNow < deadline)
+                {
+                    Application.DoEvents();
+                    Thread.Sleep(10);
+                }
+
+                Assert.IsInstanceOfType<GridViewerControl>(page.Controls[0]);
+                Assert.AreEqual("SQLQuery1.sql - Result 1", page.Text);
+                Assert.AreEqual(2, FindGrid(page.Controls[0]).Rows.Count);
+            }
+            finally
+            {
+                window.Close();
+            }
+        }
+
         [TestMethod]
         public void GridViewerControl_WithoutTitle_IsCalledResults()
         {
