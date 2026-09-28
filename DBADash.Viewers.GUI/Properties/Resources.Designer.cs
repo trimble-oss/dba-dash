@@ -159,6 +159,16 @@ namespace DBADash.Viewers.GUI.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Icon.
         /// </summary>
+        internal static System.Drawing.Icon GridIcon {
+            get {
+                object obj = ResourceManager.GetObject("GridIcon", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon.
+        /// </summary>
         internal static System.Drawing.Icon PlanViewerIcon {
             get {
                 object obj = ResourceManager.GetObject("PlanViewerIcon", resourceCulture);

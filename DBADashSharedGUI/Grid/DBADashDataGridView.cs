@@ -143,6 +143,88 @@ namespace DBADashGUI.CustomReports
             return tsAutoResize;
         }
 
+        /// <summary>How the row header - the margin down the left of the rows - is shown.</summary>
+        public enum RowHeaderModes
+        {
+            /// <summary>No row header: the most room for the data.</summary>
+            Hidden,
+
+            /// <summary>The row header, blank but for the current row marker - somewhere to click to select a row.</summary>
+            Visible,
+
+            /// <summary>The row header with each row's number in it, counted down the rows as they're shown.</summary>
+            Numbered
+        }
+
+        private bool _rowNumbers;
+
+        /// <summary>
+        /// Hidden, visible or numbered row headers - see <see cref="RowHeaderModes"/>.  Offered on the context menus, so
+        /// it's the reader's choice; a grid starts with whatever RowHeadersVisible it was given.
+        /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public RowHeaderModes RowHeaderMode
+        {
+            get => !RowHeadersVisible ? RowHeaderModes.Hidden : _rowNumbers ? RowHeaderModes.Numbered : RowHeaderModes.Visible;
+            set
+            {
+                _rowNumbers = value == RowHeaderModes.Numbered;
+                RowHeadersVisible = value != RowHeaderModes.Hidden;
+                SizeRowHeadersForNumbers();
+                Invalidate();
+            }
+        }
+
+        private ToolStripMenuItem GetRowHeadersMenuItem()
+        {
+            var menuItem = new ToolStripMenuItem("Row Headers", Resources.RowHeaders_16x);
+            var options = new[]
+            {
+                (Mode: RowHeaderModes.Hidden, Text: "Hide"),
+                (Mode: RowHeaderModes.Visible, Text: "Show"),
+                (Mode: RowHeaderModes.Numbered, Text: "Show with Row Numbers")
+            }.Select(o => new ToolStripMenuItem(o.Text, null, (_, _) => RowHeaderMode = o.Mode) { Tag = o.Mode }).ToArray();
+
+            menuItem.DropDownItems.AddRange(options);
+            menuItem.DropDownOpening += (_, _) =>
+            {
+                foreach (var option in options) option.Checked = (RowHeaderModes)option.Tag == RowHeaderMode;
+            };
+            return menuItem;
+        }
+
+        /// <summary>
+        /// Widens the row header to fit the largest row number, and no wider - it's the room the numbers exist to use
+        /// well.  Left alone when the numbers are off, so a grid's own width is kept.
+        /// </summary>
+        private void SizeRowHeadersForNumbers()
+        {
+            if (!_rowNumbers || !RowHeadersVisible) return;
+
+            var widest = TextRenderer.MeasureText(new string('9', Math.Max(1, Rows.Count.ToString().Length)),
+                RowHeadersDefaultCellStyle.Font ?? Font).Width;
+            // Room for the current row marker the grid draws on the left, and a little padding.
+            var width = Math.Max(widest + 24, 30);
+
+            if (RowHeadersWidthSizeMode is not (DataGridViewRowHeadersWidthSizeMode.EnableResizing or
+                DataGridViewRowHeadersWidthSizeMode.DisableResizing))
+            {
+                RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.EnableResizing;
+            }
+            RowHeadersWidth = width;
+        }
+
+        private void DrawRowNumber(object sender, DataGridViewRowPostPaintEventArgs e)
+        {
+            if (!_rowNumbers || !RowHeadersVisible) return;
+
+            var bounds = new Rectangle(e.RowBounds.Left, e.RowBounds.Top, RowHeadersWidth - 4, e.RowBounds.Height);
+            TextRenderer.DrawText(e.Graphics, (e.RowIndex + 1).ToString("N0"),
+                RowHeadersDefaultCellStyle.Font ?? Font, bounds,
+                RowHeadersDefaultCellStyle.ForeColor.IsEmpty ? ForeColor : RowHeadersDefaultCellStyle.ForeColor,
+                TextFormatFlags.Right | TextFormatFlags.VerticalCenter);
+        }
+
         private ToolStripMenuItem GetFreezeColumnMenuItem() => new("Freeze Column", Resources.FreezeColumn_16x, (_, _) => FreezeColumn());
 
         private void FreezeColumn()
@@ -183,6 +265,9 @@ namespace DBADashGUI.CustomReports
             MouseUp += Dgv_MouseUp;
             DataSourceChanged += Dgv_DataSourceChanged;
             ColumnAdded += Dgv_ColumnsAdded;
+            RowPostPaint += DrawRowNumber;
+            // The widest number changes as rows come and go - a filter, or a new data source.
+            DataBindingComplete += (_, _) => SizeRowHeadersForNumbers();
             EnableDoubleBuffering();
             AddCellContextMenuItems();
             AddColumnContextMenuItems();
@@ -269,6 +354,7 @@ namespace DBADashGUI.CustomReports
                     new ToolStripSeparator(),
                     GetColumnsMenuItem(),
                     GetAutoResizeColumns(),
+                    GetRowHeadersMenuItem(),
                     hideColumn,
                     freezeColumn,
                     new ToolStripSeparator(),
@@ -328,14 +414,7 @@ namespace DBADashGUI.CustomReports
             var equal = new ToolStripMenuItem("=", null, (_, _) => FilterByValueWithPrompt("="));
             var notEqual = new ToolStripMenuItem("<>", null, (_, _) => FilterByValueWithPrompt("<>"));
 
-            var transpose = new ToolStripMenuItem("Transpose", Resources.PivotTable);
-            var transposeGrid = new ToolStripMenuItem("Grid", Resources.PivotTable,
-                (_, _) => TransposeGrid());
-            var transposeSelected = new ToolStripMenuItem("Selected Rows", Resources.PivotTable,
-                (sender, args) => TransposeSelected());
-            var transposeContext = new ToolStripMenuItem("Context Row (Right Click)", Resources.PivotTable,
-                (sender, args) => TransposeContextRow());
-            transpose.DropDownItems.AddRange(new ToolStripItem[] { transposeContext, transposeSelected, transposeGrid });
+            var transpose = GetTransposeMenuItem(includeContextRow: true);
 
             allFilters.DropDownItems.AddRange(new ToolStripItem[]
                 { filterLike, filterNotLike, equal, notEqual, greaterThan, lessThan, greaterThanEqual, lessThanEqual });
@@ -380,6 +459,7 @@ namespace DBADashGUI.CustomReports
                     select,
                     GetColumnsMenuItem(),
                     GetAutoResizeColumns(),
+                    GetRowHeadersMenuItem(),
                     cellGroupByMenuItem,
                     new ToolStripSeparator(),
                     inFilter,
@@ -1393,6 +1473,13 @@ namespace DBADashGUI.CustomReports
 
         private void CopySelected()
         {
+            // Reachable with nothing selected from a toolbar (CreateToolbarItems), unlike a right-click, which selects.
+            if (SelectedCells.Count == 0)
+            {
+                MessageBox.Show("No data to copy", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             var sb = new StringBuilder();
             var minCol = SelectedCells
                 .Cast<DataGridViewCell>()
@@ -2569,6 +2656,84 @@ GO
                 new ToolStripMenuItem("Prettified", Resources.PrettyCode, (_, _) => CopyAsJson(true))
             ]);
             return menuItem;
+        }
+
+        /// <param name="includeContextRow">Offer the right-clicked row - only meaningful from the cell context menu.</param>
+        private ToolStripMenuItem GetTransposeMenuItem(bool includeContextRow)
+        {
+            var menuItem = new ToolStripMenuItem("Transpose", Resources.PivotTable);
+            if (includeContextRow)
+            {
+                menuItem.DropDownItems.Add(new ToolStripMenuItem("Context Row (Right Click)", Resources.PivotTable,
+                    (_, _) => TransposeContextRow()));
+            }
+            menuItem.DropDownItems.Add(new ToolStripMenuItem("Selected Rows", Resources.PivotTable, (_, _) => TransposeSelected()));
+            menuItem.DropDownItems.Add(new ToolStripMenuItem("Grid", Resources.PivotTable, (_, _) => TransposeGrid()));
+            return menuItem;
+        }
+
+        /// <summary>
+        /// The grid-wide actions from the context menus, as items for a host's toolbar - copy, export, transpose,
+        /// Group By, columns and filters one click away rather than behind a right-click.  Built by the same factories
+        /// as the context menus, so the two stay in step.  Actions about the cell or column that was right-clicked
+        /// (copy cell, filter by value, hide column...) have nothing to act on from a toolbar, so stay in the menus -
+        /// as does Edit Filter, which wants a RowFilter expression typed in: fine next to the filters it edits, but
+        /// no way to start filtering from a toolbar.
+        /// </summary>
+        public ToolStripItem[] CreateToolbarItems()
+        {
+            var groupBy = ToToolbarItem(GetGroupByMenuItem());
+            groupBy.Enabled = HasGroupByColumns;
+            DataBindingComplete += (_, _) => groupBy.Enabled = HasGroupByColumns;
+            ColumnStateChanged += (_, _) => groupBy.Enabled = HasGroupByColumns;
+
+            var clearFilter = new ToolStripButton("Clear Filters", Resources.Eraser_16x)
+            {
+                DisplayStyle = ToolStripItemDisplayStyle.Image,
+                Enabled = false,
+                ToolTipText = "No Filter Applied"
+            };
+            RegisterClearFilter(clearFilter);
+
+            return
+            [
+                ToolbarDropDown("Copy", Resources.ASX_Copy_blue_16x,
+                    GetCopyGridMenuItem(), GetCopySelectedMenuItem(), GetCopyAsMarkdownMenuItem(), GetCopyAsJsonMenuItem()),
+                ToolbarDropDown("Export", Resources.Save_16x,
+                    GetExportToExcelMenuItem(), GetExportToFileMenuItem(), GetSaveTableMenuItem()),
+                new ToolStripSeparator(),
+                ToToolbarItem(GetTransposeMenuItem(includeContextRow: false)),
+                groupBy,
+                new ToolStripSeparator(),
+                ToToolbarItem(GetColumnsMenuItem()),
+                ToToolbarItem(GetAutoResizeColumns()),
+                new ToolStripSeparator(),
+                clearFilter
+            ];
+        }
+
+        /// <summary>
+        /// A context menu item as a toolbar item: its sub-items moved onto a drop-down button, or a button that clicks
+        /// it - so the action itself is only ever defined once.
+        /// </summary>
+        private static ToolStripItem ToToolbarItem(ToolStripMenuItem item) =>
+            item.HasDropDownItems
+                ? ToolbarDropDown(item.Text, item.Image, item.DropDownItems.Cast<ToolStripItem>().ToArray())
+                : new ToolStripButton(item.Text, item.Image, (_, _) => item.PerformClick())
+                {
+                    DisplayStyle = ToolStripItemDisplayStyle.Image,
+                    ToolTipText = item.ToolTipText ?? item.Text
+                };
+
+        private static ToolStripDropDownButton ToolbarDropDown(string text, Image image, params ToolStripItem[] items)
+        {
+            var button = new ToolStripDropDownButton(text, image)
+            {
+                DisplayStyle = ToolStripItemDisplayStyle.Image,
+                ToolTipText = text
+            };
+            button.DropDownItems.AddRange(items);
+            return button;
         }
     }
 }

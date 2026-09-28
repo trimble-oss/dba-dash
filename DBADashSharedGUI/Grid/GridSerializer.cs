@@ -106,6 +106,42 @@ namespace DBADashGUI.CustomReports
             writer.Write(json);
         }
 
+        /// <summary>
+        /// Reads every table in a file: one written by <see cref="SaveDataTable"/>, or a whole DataSet saved the same
+        /// ways - above all the DataSets the DBA Dash service writes as XML with their schema, which is what lands in
+        /// its Failed folder when an import fails.  A single table comes back as a DataSet of one.
+        /// </summary>
+        public static DataSet LoadDataSet(string path)
+        {
+            var (fmt, compressed) = Resolve(path);
+
+            using var fileStream = File.OpenRead(path);
+            using var inStream = compressed
+                ? (Stream)new GZipStream(fileStream, CompressionMode.Decompress)
+                : fileStream;
+
+            if (fmt == Format.Xml)
+            {
+                // DataTable.WriteXml with its schema writes a DataSet-shaped document too, so this reads both.
+                var ds = new DataSet();
+                ds.ReadXml(inStream);
+                return ds;
+            }
+
+            using var reader = new StreamReader(inStream);
+            var json = reader.ReadToEnd();
+
+            // A DataTable serializes as an array of rows; a DataSet as an object of named tables.
+            if (json.TrimStart().StartsWith('{'))
+            {
+                return JsonConvert.DeserializeObject<DataSet>(json) ?? new DataSet();
+            }
+
+            var single = new DataSet();
+            single.Tables.Add(JsonConvert.DeserializeObject<DataTable>(json) ?? new DataTable());
+            return single;
+        }
+
         /// <summary>Reads a table previously written by <see cref="SaveDataTable"/>.</summary>
         public static DataTable LoadDataTable(string path)
         {

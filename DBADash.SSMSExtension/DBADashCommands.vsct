@@ -12,10 +12,14 @@
         <Parent guid="guidShowPlanContextMenu" id="ShowPlanContextMenuId"/>
       </Group>
 
+      <!-- Parented to SSMS's results grid right-click context menu. -->
+      <Group guid="guidDBADashCmdSet" id="ResultsGridContextMenuGroupId" priority="0x0600">
+        <Parent guid="guidShowPlanContextMenu" id="ResultsGridContextMenuId"/>
+      </Group>
+
       <!--
-        The same command also lives on the Tools menu, since a plan tab is the only one of the two with
-        a native context menu to rely on (the deadlock graph has none at all - see
-        DeadlockContextMenuHook). OpenCommand's own BeforeQueryStatus hides it here whenever nothing it
+        The same command also lives on the Tools menu, since the deadlock graph has no native context
+        menu to rely on at all (see DeadlockContextMenuHook). OpenCommand's own BeforeQueryStatus hides it here whenever nothing it
         can read is focused, so this doesn't just sit there listing an option that would do nothing.
       -->
       <Group guid="guidDBADashCmdSet" id="ToolsGroupId" priority="0x0600">
@@ -42,6 +46,10 @@
     <!-- The same OpenCommandId button as above, additionally placed on the Tools menu group. -->
     <CommandPlacement guid="guidDBADashCmdSet" id="OpenCommandId" priority="0x0110">
       <Parent guid="guidDBADashCmdSet" id="ToolsGroupId"/>
+    </CommandPlacement>
+    <!-- ...and on the results grid's right-click menu. -->
+    <CommandPlacement guid="guidDBADashCmdSet" id="OpenCommandId" priority="0x0100">
+      <Parent guid="guidDBADashCmdSet" id="ResultsGridContextMenuGroupId"/>
     </CommandPlacement>
   </CommandPlacements>
 
@@ -74,15 +82,22 @@
       <IDSymbol name="ContextMenuGroupId" value="0x1020"/>
       <IDSymbol name="OpenCommandId" value="0x0100"/>
       <IDSymbol name="ToolsGroupId" value="0x1030"/>
+      <IDSymbol name="ResultsGridContextMenuGroupId" value="0x1040"/>
     </GuidSymbol>
 
     <!--
       SSMS's execution plan right-click context menu. Not something we defined: a fact about SSMS
       itself, publicly documented (e.g. erikdarlingdata/PerformanceStudio's AnalyzePlanPackage.vsct,
       whose own comment notes it is confirmed the same across SSMS 18-22). Reused as data, not code.
+
+      The results grid's right-click menu is in the same group: SQLEditors.dll's SQLWorkbenchCommands
+      names this GUID GUID_SQLEditorGroup, with IDM_SQLWB_EXECPLAN_CONTEXT = 0x0080 and
+      IDM_SQLWB_SQLRESGRID_CONTEXT = 0x0070 - the ID DisplaySqlResultsTabControl.WndProc shows on
+      WM_CONTEXTMENU over a grid (confirmed against the SSMS 22 install).
     -->
     <GuidSymbol name="guidShowPlanContextMenu" value="{33F13AC3-80BB-4ECB-85BC-225435603A5E}">
       <IDSymbol name="ShowPlanContextMenuId" value="0x0080"/>
+      <IDSymbol name="ResultsGridContextMenuId" value="0x0070"/>
     </GuidSymbol>
 
     <!-- The DBA Dash app icon, extracted 16x16 from Assets/DBADash.ico. -->

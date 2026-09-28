@@ -1,6 +1,8 @@
 using System;
+using System.Data;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Text;
 using System.Windows.Forms;
 using Microsoft.Win32;
@@ -8,8 +10,8 @@ using Microsoft.Win32;
 namespace DBADash.SSMSExtension
 {
     /// <summary>
-    /// Finds and launches whichever DBA Dash app can open a plan or deadlock graph, with it written to a
-    /// temp file: the stand-alone DBADashVisualizer.exe, or the full DBADash.exe GUI someone may already
+    /// Finds and launches whichever DBA Dash app can open a plan, deadlock graph or result set, with it written
+    /// to a temp file: the stand-alone DBADashVisualizer.exe, or the full DBADash.exe GUI someone may already
     /// have installed instead - both open a file the same way, with no repository connection needed
     /// (DBADashGUI's own Program.cs takes the same shortcut, straight to the viewer, for exactly this
     /// reason). Neither is assumed to be there; whichever is found first wins, and the choice is never
@@ -68,10 +70,36 @@ namespace DBADash.SSMSExtension
             Open(xml, ".xml", Encoding.UTF8);
         }
 
+        /// <summary>
+        /// Writes a result set read from SSMS's results grid (ResultsGridReader) to a temp file for
+        /// <see cref="OpenFile"/>. DataTable XML with its schema, so the column types survive: it's one of the
+        /// formats DBA Dash's own grid export saves and reads back (GridSerializer), and .NET Framework can write
+        /// it with nothing extra. Gzipped - a result set can run to hundreds of MB of XML - and as .xml.gz rather
+        /// than .xml, so the app opens it as a grid without having to tell it apart from a plan or deadlock
+        /// graph saved as .xml. Doesn't touch the UI, so it can run on a background thread.
+        /// </summary>
+        public static string SaveGridToTemp(DataTable table)
+        {
+            return SaveToTemp(".xml.gz", stream =>
+            {
+                using var gzip = new GZipStream(stream, CompressionLevel.Fastest);
+                table.WriteXml(gzip, XmlWriteMode.WriteSchema);
+            });
+        }
+
         private static void Open(string xml, string extension, Encoding encoding)
         {
-            var tempFile = SaveToTemp(xml, extension, encoding);
+            OpenFile(SaveToTemp(extension, stream =>
+            {
+                using var writer = new StreamWriter(stream, encoding);
+                writer.Write(xml);
+            }));
+        }
 
+        /// <summary>Opens a temp file written by this class in whichever DBA Dash app is found, asking the user
+        /// to locate one if none is. Must be called on the UI thread, as it may prompt.</summary>
+        public static void OpenFile(string tempFile)
+        {
             var exePath = FindDBADashExe();
             if (exePath != null && LaunchApp(exePath, tempFile)) return;
 
@@ -99,16 +127,15 @@ namespace DBADash.SSMSExtension
         /// leave open. Sweeps this extension's own stale temp files older than an hour on the way in,
         /// rather than deleting the file right after handing it to another process to open.
         /// </summary>
-        private static string SaveToTemp(string xml, string extension, Encoding encoding)
+        private static string SaveToTemp(string extension, Action<Stream> write)
         {
             SweepOldTempFiles();
 
             var fileName = "ssms_" + Path.GetFileNameWithoutExtension(Path.GetRandomFileName()) + extension;
             var path = Path.Combine(Path.GetTempPath(), fileName);
             using (var stream = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None))
-            using (var writer = new StreamWriter(stream, encoding))
             {
-                writer.Write(xml);
+                write(stream);
             }
 
             return path;
@@ -119,7 +146,7 @@ namespace DBADash.SSMSExtension
             try
             {
                 var cutoff = DateTime.UtcNow.AddHours(-1);
-                foreach (var pattern in new[] { "ssms_*.sqlplan", "ssms_*.xdl", "ssms_*.xml" })
+                foreach (var pattern in new[] { "ssms_*.sqlplan", "ssms_*.xdl", "ssms_*.xml", "ssms_*.xml.gz" })
                 {
                     foreach (var path in Directory.GetFiles(Path.GetTempPath(), pattern))
                     {

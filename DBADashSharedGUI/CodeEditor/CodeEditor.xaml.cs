@@ -135,8 +135,10 @@ namespace DBADashGUI.SchemaCompare
 
             var formattedXmlBuilder = new StringBuilder();
 
-            // Getting rid of the temporary root element and formatting the XML
-            foreach (var node in tempRoot.Elements())
+            // Getting rid of the temporary root element and formatting the XML.  Nodes rather than Elements: a value can
+            // be a processing instruction alone - sp_BlitzLock returns each query as <?query ... ?> - or have text or
+            // comments at the top level, and those would otherwise be dropped, leaving nothing to show.
+            foreach (var node in tempRoot.Nodes())
             {
                 var formattedNode = node.ToString(SaveOptions.None);
                 formattedXmlBuilder.AppendLine(formattedNode);
