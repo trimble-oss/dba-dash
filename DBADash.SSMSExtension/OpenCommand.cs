@@ -123,6 +123,9 @@ namespace DBADash.SSMSExtension
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
+            // Before reading what may be millions of rows, not after: an older DBA Dash can't open them.
+            if (!VisualizerLauncher.CheckAppCanOpenGrids()) return;
+
             var title = ResultSetTitle(resultSet);
             var totalRows = resultSet.RowCount;
 
