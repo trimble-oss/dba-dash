@@ -64,6 +64,175 @@ namespace DBADash.QueryPlan.Test
         }
 
         [TestMethod]
+        public void Statement_CallsOutAnExcessiveMemoryGrant_WhenMostOfALargeGrantWentUnused()
+        {
+            // A 2 GB grant of which only a tenth was used: query memory other queries could not be
+            // granted, for nothing.
+            var statement = TestPlans.Statement(TestPlans.ParallelSpill);
+            statement.MemoryGrant!.GrantedMemoryKb = 2 * 1024 * 1024;
+            statement.MemoryGrant.MaxUsedMemoryKb = 200 * 1024;
+
+            var insight = PlanInsights.ForStatement(statement)
+                .Single(i => i.Text.Contains("granted") && i.Text.Contains("used only"));
+
+            Assert.AreEqual(PlanWarningSeverity.Warning, insight.Severity);
+            StringAssert.Contains(insight.Text, PlanFormat.Percent(statement.MemoryGrant.GrantUsedFraction!.Value));
+        }
+
+        [TestMethod]
+        public void Statement_DoesNotCallOutAMemoryGrant_ThatWasMostlyUsed()
+        {
+            var statement = TestPlans.Statement(TestPlans.ParallelSpill);
+            statement.MemoryGrant!.GrantedMemoryKb = 2 * 1024 * 1024;
+            statement.MemoryGrant.MaxUsedMemoryKb = 400 * 1024;
+
+            Assert.IsFalse(
+                PlanInsights.ForStatement(statement).Any(i => i.Text.Contains("used only")),
+                "A grant with 15% or more used is not excessive.");
+        }
+
+        [TestMethod]
+        public void Statement_DoesNotCallOutASmallMemoryGrant_EvenWhenMostlyUnused()
+        {
+            var statement = TestPlans.Statement(TestPlans.ParallelSpill);
+            statement.MemoryGrant!.GrantedMemoryKb = 512 * 1024;
+            statement.MemoryGrant.MaxUsedMemoryKb = 8;
+
+            Assert.IsFalse(
+                PlanInsights.ForStatement(statement).Any(i => i.Text.Contains("used only")),
+                "A grant under 1 GB is not worth taking a card, however little of it was used.");
+        }
+
+        [TestMethod]
+        public void MemoryGrant_IsExcessive_BelowFifteenPercentUsedOfAtLeastOneGigabyte()
+        {
+            var grant = TestPlans.Statement(TestPlans.ParallelSpill).MemoryGrant!;
+            grant.GrantedMemoryKb = 2_000_000;
+            grant.MaxUsedMemoryKb = 300_000;
+            Assert.IsFalse(grant.IsExcessive, "Exactly 15% used is not excessive.");
+
+            grant.MaxUsedMemoryKb = 299_999;
+            Assert.IsTrue(grant.IsExcessive);
+
+            grant.GrantedMemoryKb = PlanMemoryGrantInfo.ExcessiveGrantMinKb - 1;
+            grant.MaxUsedMemoryKb = 0;
+            Assert.IsFalse(grant.IsExcessive, "Just under 1 GB is not excessive.");
+        }
+
+        [TestMethod]
+        public void StatementTooltip_HighlightsTheGrant_OnlyWhenTheInsightWouldCallItOut()
+        {
+            var statement = TestPlans.Statement(TestPlans.ParallelSpill);
+            var grant = statement.MemoryGrant!;
+            grant.GrantedMemoryKb = 10 * 1024;
+            grant.MaxUsedMemoryKb = 1024;
+
+            Assert.IsFalse(GrantRow(statement).IsEmphasised, "A small grant, however little of it was used, is not flagged.");
+
+            grant.GrantedMemoryKb = 2 * 1024 * 1024;
+            grant.MaxUsedMemoryKb = 200 * 1024;
+            Assert.IsTrue(GrantRow(statement).IsEmphasised);
+
+            static PlanTooltipRow GrantRow(PlanStatement statement)
+            {
+                var layout = new PlanLayoutEngine(new FakeTextMeasurer()).Layout(statement);
+                return PlanTooltipBuilder.Build(layout.Nodes.Single(n => n.IsRoot)).Rows.Single(r => r.Label == "Memory grant");
+            }
+        }
+
+        [TestMethod]
+        public void Statement_CallsOutAnyGrantWait_AsAWarning()
+        {
+            var statement = TestPlans.Statement(TestPlans.ParallelSpill);
+            statement.MemoryGrant!.GrantWaitTimeMs = 5;
+
+            var insight = PlanInsights.ForStatement(statement).Single(i => i.Text.StartsWith("The query waited"));
+
+            Assert.AreEqual(PlanWarningSeverity.Warning, insight.Severity, "Even a short wait means query memory ran out.");
+            StringAssert.Contains(insight.Text, "RESOURCE_SEMAPHORE");
+        }
+
+        [TestMethod]
+        public void OperatorTooltip_ShowsTheGrant_WhenOnlyTheOutputPhaseHasOne()
+        {
+            var statement = Parse(
+                """
+                <RelOp NodeId="1" PhysicalOp="Sort" LogicalOp="Sort" EstimateRows="10" AvgRowSize="100" EstimatedTotalSubtreeCost="1">
+                  <MemoryFractions Input="0" Output="1" />
+                  <RunTimeInformation>
+                    <RunTimeCountersPerThread Thread="0" ActualRows="10" ActualExecutions="1" InputMemoryGrant="0" OutputMemoryGrant="1024" UsedMemoryGrant="512" />
+                  </RunTimeInformation>
+                  <Sort />
+                </RelOp>
+                """);
+
+            var layout = new PlanLayoutEngine(new FakeTextMeasurer()).Layout(statement);
+            var tooltip = PlanTooltipBuilder.Build(layout.Nodes.Single(n => n.Operator?.NodeId == 1));
+
+            Assert.AreEqual("1 MB  (512 KB used)", tooltip.Rows.Single(r => r.Label == "Memory grant").Value);
+        }
+
+        [TestMethod]
+        public void EstimatedPlan_CallsOutALargeDesiredGrant_AndIgnoresASmallOne()
+        {
+            var large = Parse("""<MemoryGrantInfo SerialRequiredMemory="1024" SerialDesiredMemory="2097152" />""" + Op(1, "Sort", "Sort", ""));
+            Assert.AreEqual(2097152, large.MemoryGrant!.EffectiveDesiredMemoryKb);
+
+            var insight = PlanInsights.ForStatement(large).Single(i => i.Text.StartsWith("The optimizer wants a memory grant"));
+            Assert.AreEqual(PlanWarningSeverity.Warning, insight.Severity);
+            StringAssert.Contains(insight.Text, "2 GB");
+
+            var small = Parse("""<MemoryGrantInfo SerialRequiredMemory="1024" SerialDesiredMemory="4096" />""" + Op(1, "Sort", "Sort", ""));
+            Assert.IsFalse(PlanInsights.ForStatement(small).Any(i => i.Text.StartsWith("The optimizer wants a memory grant")));
+        }
+
+        [TestMethod]
+        public void HashMatch_MemoryFractionsAndRuntimeGrant_AreParsedAndShown()
+        {
+            var statement = Parse(
+                """
+                <RelOp NodeId="1" PhysicalOp="Hash Match" LogicalOp="Inner Join" EstimateRows="10" AvgRowSize="100" EstimatedTotalSubtreeCost="1">
+                  <MemoryFractions Input="1" Output="0.5" />
+                  <RunTimeInformation>
+                    <RunTimeCountersPerThread Thread="1" ActualRows="6" ActualExecutions="1" InputMemoryGrant="2048" OutputMemoryGrant="1024" UsedMemoryGrant="512" />
+                    <RunTimeCountersPerThread Thread="2" ActualRows="4" ActualExecutions="1" InputMemoryGrant="1024" OutputMemoryGrant="256" UsedMemoryGrant="128" />
+                  </RunTimeInformation>
+                  <Hash />
+                </RelOp>
+                """);
+
+            var op = statement.RootOperator!;
+            Assert.AreEqual(1.0, op.MemoryFractionInput);
+            Assert.AreEqual(0.5, op.MemoryFractionOutput);
+            // Each thread has its own share of the grant, so the operator's is the sum across threads.
+            Assert.AreEqual(3072, op.Runtime!.InputMemoryGrantKb);
+            Assert.AreEqual(1280, op.Runtime.OutputMemoryGrantKb);
+            Assert.AreEqual(640, op.Runtime.UsedMemoryGrantKb);
+
+            var memory = op.Properties.Single(p => p.Name == "Memory Grant");
+            CollectionAssert.AreEqual(
+                new[] { "Input Fraction", "Output Fraction", "Input Memory Grant", "Output Memory Grant", "Used Memory Grant" },
+                memory.Children.Select(p => p.Name).ToArray());
+            Assert.AreEqual("640 KB", memory.Children.Single(p => p.Name == "Used Memory Grant").Value);
+            Assert.IsFalse(op.Properties.Single(p => p.Name == "Actual Execution").Children.Any(p => p.Name.Contains("Memory")));
+        }
+
+        [TestMethod]
+        public void StartupExpression_IsATopLevelProperty_NotLeftInTheFilterGroup()
+        {
+            var statement = Parse(
+                """
+                <RelOp NodeId="1" PhysicalOp="Filter" LogicalOp="Filter" EstimateRows="1" AvgRowSize="100" EstimatedTotalSubtreeCost="1">
+                  <Filter StartupExpression="true" />
+                </RelOp>
+                """);
+
+            var properties = statement.RootOperator!.Properties;
+            Assert.AreEqual("True", properties.Single(p => p.Name == "Startup Expression").Value);
+            Assert.IsFalse(properties.Any(p => p.Name == "Filter"), "Nothing else was left for a Filter group.");
+        }
+
+        [TestMethod]
         public void NonParallelReasons_ReadAsWords()
         {
             Assert.AreEqual("max DOP set to one", PlanInsights.Words("MaxDOPSetToOne"));

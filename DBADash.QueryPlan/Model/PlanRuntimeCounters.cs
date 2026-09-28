@@ -46,6 +46,15 @@ namespace DBADash.QueryPlan.Model
 
         /// <summary>Batch mode row batches, present only for batch mode operators.</summary>
         public long? Batches { get; internal set; }
+
+        /// <summary>Memory granted to the operator for its input phase, in KB.</summary>
+        public long? InputMemoryGrantKb { get; internal set; }
+
+        /// <summary>Memory granted to the operator for its output phase, in KB.</summary>
+        public long? OutputMemoryGrantKb { get; internal set; }
+
+        /// <summary>The most of its grant the operator used, in KB.</summary>
+        public long? UsedMemoryGrantKb { get; internal set; }
     }
 
     /// <summary>
@@ -84,6 +93,11 @@ namespace DBADash.QueryPlan.Model
             ActualLobLogicalReads = Sum(threads, t => t.ActualLobLogicalReads);
             ActualLobPhysicalReads = Sum(threads, t => t.ActualLobPhysicalReads);
             Batches = Sum(threads, t => t.Batches);
+
+            // Each thread has its own share of the grant, so the operator's is the sum.
+            InputMemoryGrantKb = Sum(threads, t => t.InputMemoryGrantKb);
+            OutputMemoryGrantKb = Sum(threads, t => t.OutputMemoryGrantKb);
+            UsedMemoryGrantKb = Sum(threads, t => t.UsedMemoryGrantKb);
 
             // Thread 0 is the coordinator and does no work in a parallel branch, so counting it would
             // report a serial operator as having run on one thread and a four thread one as five.
@@ -127,6 +141,15 @@ namespace DBADash.QueryPlan.Model
         public long? ActualLobPhysicalReads { get; }
 
         public long? Batches { get; }
+
+        /// <summary>Memory granted for the input phase across every thread, in KB.</summary>
+        public long? InputMemoryGrantKb { get; }
+
+        /// <summary>Memory granted for the output phase across every thread, in KB.</summary>
+        public long? OutputMemoryGrantKb { get; }
+
+        /// <summary>The most of its grant the operator used across every thread, in KB.</summary>
+        public long? UsedMemoryGrantKb { get; }
 
         /// <summary>Threads that did work, excluding the coordinator.  Zero for a serial operator.</summary>
         public int WorkerThreadCount { get; }

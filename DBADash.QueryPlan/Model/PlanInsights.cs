@@ -102,11 +102,18 @@ namespace DBADash.QueryPlan.Model
 
             if (statement.MemoryGrant?.GrantWaitTimeMs is long wait and > 0)
             {
-                // A moment's wait is worth knowing; a second or more is the server short of memory.
+                // Any wait means the memory was already given to other queries - the server (or, under
+                // Resource Governor, the query's pool) was short of workspace memory, and this query
+                // queued (RESOURCE_SEMAPHORE) for its turn.
                 insights.Add(new PlanInsight(
-                    wait >= 1000 ? PlanWarningSeverity.Warning : PlanWarningSeverity.Information,
-                    "The query waited " + Milliseconds(wait) + " for its memory grant before it could start running."));
+                    PlanWarningSeverity.Warning,
+                    "The query waited " + Milliseconds(wait) + " for its memory grant before it could start running. " +
+                    "Other queries were holding the available query memory (or, under Resource Governor, their pool's share of it), " +
+                    "so this one had to queue (RESOURCE_SEMAPHORE) until enough was released. " +
+                    "Look for large or excessive grants in the queries running alongside it."));
             }
+
+            if (ExcessiveMemoryGrant(statement) is { } excessiveGrant) insights.Add(excessiveGrant);
 
             if (ScalarUdfInsight(statement) is { } udfInsight)
             {
@@ -339,6 +346,53 @@ namespace DBADash.QueryPlan.Model
         };
 
         private static string Milliseconds(long ms) => ms.ToString("N0", CultureInfo.CurrentCulture) + " ms";
+
+        /// <summary>
+        /// A grant far larger than the query used - query memory other queries could not be granted
+        /// while it ran, and a common cause of RESOURCE_SEMAPHORE waits for them.  On an
+        /// actual plan it is judged by what was used; an estimated plan has nothing to measure it
+        /// against, so there a large desired grant is called out on its own.  Null when the grant
+        /// was small or, on an actual plan, well used.
+        /// </summary>
+        private static PlanInsight? ExcessiveMemoryGrant(PlanStatement statement)
+        {
+            var grant = statement.MemoryGrant;
+            if (grant is null) return null;
+
+            if (!statement.IsActualPlan)
+            {
+                if (grant.EffectiveDesiredMemoryKb is not { } desired || desired < PlanMemoryGrantInfo.ExcessiveGrantMinKb) return null;
+
+                return new PlanInsight(
+                    PlanWarningSeverity.Warning,
+                    "The optimizer wants a memory grant of " + PlanFormat.Kilobytes(desired) +
+                    " (the server may cap it, and a parallel plan asks for more). While the query runs, a large " +
+                    "grant is query memory other queries cannot be granted, and is a common cause of " +
+                    "RESOURCE_SEMAPHORE waits for them. " + GrantSizingHint +
+                    " An actual plan shows how much is really used.");
+            }
+
+            if (!grant.IsExcessive ||
+                grant is not { GrantedMemoryKb: { } granted, MaxUsedMemoryKb: { } used, GrantUsedFraction: { } usedFraction })
+            {
+                return null;
+            }
+
+            return new PlanInsight(
+                PlanWarningSeverity.Warning,
+                "The query was granted " + PlanFormat.Kilobytes(granted) + " of memory but used only " +
+                PlanFormat.Kilobytes(used) + " (" + PlanFormat.Percent(usedFraction) +
+                "). The rest was query memory other queries could not be granted while this one ran, and an " +
+                "over-sized grant is a common cause of RESOURCE_SEMAPHORE waits for other queries. " + GrantSizingHint);
+        }
+
+        /// <summary>Where a grant's size usually comes from, for the reader to go and look.</summary>
+        private const string GrantSizingHint =
+            "Grants are mostly sized for Sort operators, and for the hash tables built by Hash Match " +
+            "joins and aggregates; each operator's memory fraction or grant shows where it goes. Check the " +
+            "estimated rows and row sizes going into them. An ORDER BY that an index could supply, or " +
+            "fewer or narrower columns (variable-length columns are estimated at half their declared size, " +
+            "and (max) columns at 4,000 bytes), can shrink the grant.";
 
         /// <summary>
         /// One card for everything a scalar UDF is worth saying, rather than one about its time and

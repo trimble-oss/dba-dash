@@ -303,6 +303,7 @@ namespace DBADash.QueryPlan.Analysis
 
             if (statement.MemoryGrant is { } grant)
             {
+                Add(stats, "Memory desired", grant.EffectiveDesiredMemoryKb is { } desired ? $"{desired:N0} KB" : null);
                 Add(stats, "Memory requested", grant.RequestedMemoryKb is { } requested ? $"{requested:N0} KB" : null);
                 Add(stats, "Memory granted", grant.GrantedMemoryKb is { } granted ? $"{granted:N0} KB" : null);
                 Add(stats, "Memory used", grant.MaxUsedMemoryKb is { } maxUsed ? $"{maxUsed:N0} KB" : null);

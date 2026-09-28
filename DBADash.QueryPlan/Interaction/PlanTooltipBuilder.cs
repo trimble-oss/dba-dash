@@ -199,6 +199,24 @@ namespace DBADash.QueryPlan.Interaction
                     op.AvgRowSize.Value.ToString("N0", CultureInfo.InvariantCulture) + " B per row)"));
             }
 
+            // Where the statement's grant goes: only memory consuming operators - sorts, hashes -
+            // have a share of it.
+            if (op.Runtime is { } grantRuntime &&
+                Math.Max(grantRuntime.InputMemoryGrantKb ?? 0, grantRuntime.OutputMemoryGrantKb ?? 0) is var operatorGrant and > 0)
+            {
+                var value = PlanFormat.Kilobytes(operatorGrant);
+                if (grantRuntime.UsedMemoryGrantKb is { } operatorUsed)
+                {
+                    value += "  (" + PlanFormat.Kilobytes(operatorUsed) + " used)";
+                }
+
+                rows.Add(new PlanTooltipRow("Memory grant", value));
+            }
+            else if (Math.Max(op.MemoryFractionInput ?? 0, op.MemoryFractionOutput ?? 0) is var fraction and > 0)
+            {
+                rows.Add(new PlanTooltipRow("Memory fraction", PlanFormat.Percent(fraction) + " of the statement's grant"));
+            }
+
             rows.Add(new PlanTooltipRow(
                 "Operator cost",
                 PlanFormat.Cost(op.OperatorCost) + "  (" + PlanFormat.Percent(op.CostPercent) + ")"));
@@ -429,7 +447,11 @@ namespace DBADash.QueryPlan.Interaction
                         value += "  (" + PlanFormat.Percent(used) + " used)";
                     }
 
-                    rows.Add(new PlanTooltipRow("Memory grant", value, grant.GrantUsedFraction is < 0.25));
+                    rows.Add(new PlanTooltipRow("Memory grant", value, grant.IsExcessive));
+                }
+                else if (grant.EffectiveDesiredMemoryKb is { } desired)
+                {
+                    rows.Add(new PlanTooltipRow("Desired memory", PlanFormat.Kilobytes(desired), false));
                 }
 
                 if (grant.GrantWaitTimeMs is > 0)
