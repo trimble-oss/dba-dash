@@ -33,18 +33,38 @@ namespace DBADash.QueryPlan.Model
         /// <summary>The ceiling the server would have allowed.</summary>
         public long? MaxQueryMemoryKb { get; internal set; }
 
+        /// <summary>
+        /// What the optimizer wanted: the parallel figure where there is one, otherwise the serial
+        /// one, which is all an estimated plan usually carries.
+        /// </summary>
+        public long? EffectiveDesiredMemoryKb => DesiredMemoryKb ?? SerialDesiredMemoryKb;
+
         /// <summary>Milliseconds spent waiting for the grant - RESOURCE_SEMAPHORE time.</summary>
         public long? GrantWaitTimeMs { get; internal set; }
 
         /// <summary>
         /// The share of the grant that was used, from 0 to 1, or null when either figure is missing.
-        /// A low value on a large grant is memory taken from everything else on the server for
+        /// A low value on a large grant is query memory other queries could not be granted, for
         /// nothing, and it is the number the grant warning is really about.
         /// </summary>
         public double? GrantUsedFraction =>
             GrantedMemoryKb is > 0 && MaxUsedMemoryKb is { } used
                 ? used / (double)GrantedMemoryKb.Value
                 : null;
+
+        /// <summary>The most of a large grant that can be used before it stops being worth calling out.</summary>
+        public const double ExcessiveGrantMaxUsedFraction = 0.15;
+
+        /// <summary>The smallest grant worth calling excessive (1 GB), so a wasteful but modest one is ignored.</summary>
+        public const long ExcessiveGrantMinKb = 1024 * 1024;
+
+        /// <summary>
+        /// A large grant that went mostly unused - the one rule behind both the insight card and the
+        /// tooltip highlight, so the two never disagree.  Only an actual plan can be judged.
+        /// </summary>
+        public bool IsExcessive =>
+            GrantedMemoryKb >= ExcessiveGrantMinKb &&
+            GrantUsedFraction < ExcessiveGrantMaxUsedFraction;
     }
 
     /// <summary>Overall timings for a statement, from QueryTimeStats on an actual plan.</summary>

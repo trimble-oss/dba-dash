@@ -104,6 +104,16 @@ namespace DBADash.QueryPlan.Model
         /// </summary>
         public bool? IsOrdered { get; internal set; }
 
+        /// <summary>
+        /// The share of the statement's memory grant this operator may use while it reads its input,
+        /// from 0 to 1, from MemoryFractions.  Only memory consuming operators - sorts, hashes and
+        /// the like - have one, which is what makes it the way to find where a grant goes.
+        /// </summary>
+        public double? MemoryFractionInput { get; internal set; }
+
+        /// <summary>The share of the grant the operator may use while it returns rows.</summary>
+        public double? MemoryFractionOutput { get; internal set; }
+
         // ---------------------------------------------------------------- actuals
 
         /// <summary>

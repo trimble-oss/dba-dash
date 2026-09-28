@@ -54,7 +54,8 @@ namespace DBADash.QueryPlan
         private static readonly HashSet<string> HandledBodyAttributes = new(StringComparer.Ordinal)
         {
             "Lookup",
-            "Ordered"
+            "Ordered",
+            "StartupExpression"
         };
 
         /// <summary>
@@ -556,6 +557,7 @@ namespace DBADash.QueryPlan
             var storage = body is null
                 ? null
                 : ChildElements(body, "Object").Select(o => Attribute(o, "Storage")).FirstOrDefault(s => s is not null);
+            var memoryFractions = ChildElements(relOp, "MemoryFractions").FirstOrDefault();
 
             var operatorNode = new PlanOperator
             {
@@ -578,6 +580,8 @@ namespace DBADash.QueryPlan
                 IsPartitioned = Bool(Attribute(relOp, "Partitioned")) ?? false,
                 IsLookup = isLookup,
                 IsOrdered = body is null ? null : Bool(Attribute(body, "Ordered")),
+                MemoryFractionInput = memoryFractions is null ? null : Double(Attribute(memoryFractions, "Input")),
+                MemoryFractionOutput = memoryFractions is null ? null : Double(Attribute(memoryFractions, "Output")),
                 OutputList = ParseColumnReferences(ChildElements(relOp, "OutputList").FirstOrDefault()),
                 Warnings = ParseWarnings(ChildElements(relOp, "Warnings").FirstOrDefault()),
                 Runtime = ParseRuntime(ChildElements(relOp, "RunTimeInformation").FirstOrDefault())
@@ -674,7 +678,10 @@ namespace DBADash.QueryPlan
                     ActualLobLogicalReads = Long(Attribute(thread, "ActualLobLogicalReads")),
                     ActualLobPhysicalReads = Long(Attribute(thread, "ActualLobPhysicalReads")),
                     ActualExecutionMode = Attribute(thread, "ActualExecutionMode"),
-                    Batches = Long(Attribute(thread, "Batches"))
+                    Batches = Long(Attribute(thread, "Batches")),
+                    InputMemoryGrantKb = Long(Attribute(thread, "InputMemoryGrant")),
+                    OutputMemoryGrantKb = Long(Attribute(thread, "OutputMemoryGrant")),
+                    UsedMemoryGrantKb = Long(Attribute(thread, "UsedMemoryGrant"))
                 })
                 .ToList();
 
@@ -923,6 +930,8 @@ namespace DBADash.QueryPlan
                 if (grant.GrantUsedFraction is { } usedFraction) Add(children, "Grant Used", PlanFormat.Percent(usedFraction));
                 if (grant.RequiredMemoryKb is { } required) Add(children, "Required Memory", PlanFormat.Kilobytes(required));
                 if (grant.DesiredMemoryKb is { } desired) Add(children, "Desired Memory", PlanFormat.Kilobytes(desired));
+                if (grant.SerialRequiredMemoryKb is { } serialRequired) Add(children, "Serial Required Memory", PlanFormat.Kilobytes(serialRequired));
+                if (grant.SerialDesiredMemoryKb is { } serialDesired) Add(children, "Serial Desired Memory", PlanFormat.Kilobytes(serialDesired));
                 if (grant.MaxQueryMemoryKb is { } maxQuery) Add(children, "Max Query Memory", PlanFormat.Kilobytes(maxQuery));
                 if (grant.GrantWaitTimeMs is { } wait) Add(children, "Grant Wait Time", PlanFormat.Duration(wait));
                 if (children.Count > 0) properties.Add(new PlanProperty("Memory Grant", null, children));
@@ -1022,6 +1031,7 @@ namespace DBADash.QueryPlan
             Add(properties, "Estimated CPU Cost", PlanFormat.Cost(node.EstimateCPU));
             Add(properties, "Estimated I/O Cost", PlanFormat.Cost(node.EstimateIO));
             Add(properties, "Estimated Rows Per Execution", PlanFormat.Rows(node.EstimateRows));
+            Add(properties, "Estimated Number of Executions", PlanFormat.Rows(node.EstimatedExecutions));
 
             if (node.EstimateRowsWithoutRowGoal is { } withoutRowGoal)
             {
@@ -1034,6 +1044,17 @@ namespace DBADash.QueryPlan
             Add(properties, "Estimated Execution Mode", node.EstimatedExecutionMode);
             Add(properties, "Parallel", PlanFormat.Boolean(node.IsParallel));
             if (node.IsOrdered is { } ordered) Add(properties, "Ordered", PlanFormat.Boolean(ordered));
+
+            // The operator's share of the statement's grant, and on an actual plan what it was given
+            // and used, together - the fractions say where the grant was meant to go, the figures
+            // what happened to it.
+            var memory = new List<PlanProperty>();
+            if (node.MemoryFractionInput is { } input) Add(memory, "Input Fraction", PlanFormat.Percent(input));
+            if (node.MemoryFractionOutput is { } output) Add(memory, "Output Fraction", PlanFormat.Percent(output));
+            if (node.Runtime?.InputMemoryGrantKb is { } inputGrant) Add(memory, "Input Memory Grant", PlanFormat.Kilobytes(inputGrant));
+            if (node.Runtime?.OutputMemoryGrantKb is { } outputGrant) Add(memory, "Output Memory Grant", PlanFormat.Kilobytes(outputGrant));
+            if (node.Runtime?.UsedMemoryGrantKb is { } usedGrant) Add(memory, "Used Memory Grant", PlanFormat.Kilobytes(usedGrant));
+            if (memory.Count > 0) properties.Add(new PlanProperty("Memory Grant", null, memory));
 
             if (node.Runtime is { } runtime)
             {
@@ -1113,6 +1134,13 @@ namespace DBADash.QueryPlan
 
             AddExpression(properties, "Seek Predicates", node.SeekPredicate);
             AddExpression(properties, "Predicate", node.Predicate);
+
+            // A startup filter tests its predicate once, before running its input at all, so a
+            // branch under it with no executions was skipped rather than broken.
+            if (body is not null && Bool(Attribute(body, "StartupExpression")) is { } startup)
+            {
+                Add(properties, "Startup Expression", PlanFormat.Boolean(startup));
+            }
 
             if (body is not null)
             {

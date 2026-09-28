@@ -410,8 +410,9 @@ namespace DBADash.QueryPlan.Test
             Assert.IsTrue(tooltip.Rows.Any(r => r.Label == "Memory grant"));
             Assert.IsTrue(tooltip.Rows.Any(r => r.Label == "Grant wait"));
 
-            // Three of eight kilobytes used is worth drawing attention to.
-            Assert.IsTrue(tooltip.Rows.Single(r => r.Label == "Memory grant").IsEmphasised);
+            // An 8 MB grant is too small to be excessive, however little of it was used - the same
+            // rule as the insight card, so the tooltip never flags what the card does not.
+            Assert.IsFalse(tooltip.Rows.Single(r => r.Label == "Memory grant").IsEmphasised);
 
             // So is a plan compiled for one parameter value and run with another.
             var parameters = tooltip.Rows.Single(r => r.Label == "Parameters");
