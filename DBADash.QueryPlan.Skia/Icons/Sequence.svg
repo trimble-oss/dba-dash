@@ -1,8 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-  <!-- Sequence: its inputs run one after another, top to bottom, and only the last one's rows are
-       returned - in the accent.  Black is drawn in the symbol colour, red in the accent; see README.md. -->
-  <path d="M4 3v16.5 M1.8 17.3L4 19.5l2.2-2.2"/>
-  <rect x="8.5" y="2.5" width="13.5" height="4.5" rx="0.8"/>
-  <rect x="8.5" y="9.75" width="13.5" height="4.5" rx="0.8"/>
-  <rect x="8.5" y="17" width="13.5" height="4.5" rx="0.8" fill="#F00" stroke="#F00"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" viewBox="0 0 24 24"><path d="M4 3v16.5 M1.8 17.3L4 19.5l2.2-2.2"/><rect width="13.5" height="4.5" x="8.5" y="2.5" rx=".8"/><rect width="13.5" height="4.5" x="8.5" y="9.75" rx=".8"/><rect width="13.5" height="4.5" x="8.5" y="17" fill="red" stroke="red" rx=".8"/></svg>
