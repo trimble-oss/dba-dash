@@ -2,10 +2,12 @@ using DBADash.Deadlock.Model;
 using DBADash.QueryPlan.Model;
 using DBADashGUI.Controls;
 using DBADashGUI.Deadlocks;
+using DBADashGUI.Grids;
 using DBADashGUI.QueryPlans;
 using DBADashGUI.Theme;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -14,8 +16,8 @@ using System.Windows.Forms;
 namespace DBADashGUI.Viewers
 {
     /// <summary>
-    /// The viewer window: every query plan and deadlock graph open, one to a tab, in a single window rather than
-    /// one window per file type.
+    /// The viewer window: every query plan, deadlock graph and result set open, one to a tab, in a single window
+    /// rather than one window per file type.
     ///
     /// Comparing artifacts is a common reason to open more than one - the plan before a change and after it, a
     /// deadlock and the plan for the statement that lost it - and a window each for that leaves the reader
@@ -136,6 +138,50 @@ namespace DBADashGUI.Viewers
             window.Activate();
         }
 
+        /// <summary>
+        /// Show a result set on a tab of the window, opening it if there is none.  Always a new tab: unlike a plan or a
+        /// graph, the same result set opened twice is more likely a re-run query whose results have moved on.
+        /// </summary>
+        public static void OpenGrid(DataTable table, string title) => OpenInNewTab(window => window.AddGridTab(table, title));
+
+        /// <summary>
+        /// Show a DataSet of several tables on one tab of the window, opening it if there is none.  Always a new tab,
+        /// as for <see cref="OpenGrid"/>.
+        /// </summary>
+        public static void OpenDataSet(DataSet dataSet, string title) =>
+            OpenInNewTab(window => window.AddDataSetTab(dataSet, title));
+
+        /// <summary>Adds a tab to the window with <paramref name="addTab"/>, opening the window if there is none.</summary>
+        private static void OpenInNewTab(Action<ViewerForm> addTab)
+        {
+            var window = _current is { IsDisposed: false } ? _current : null;
+
+            if (window is null)
+            {
+                window = _current = new ViewerForm();
+                addTab(window);
+                window.Show();
+                return;
+            }
+
+            addTab(window);
+
+            if (window.WindowState == FormWindowState.Minimized) window.WindowState = FormWindowState.Normal;
+            window.Activate();
+        }
+
+        private void AddDataSetTab(DataSet dataSet, string title)
+        {
+            var control = new DataSetViewerControl(dataSet, title) { Dock = DockStyle.Fill };
+            AddTab(control, control.Title, control.TabToolTip);
+        }
+
+        private void AddGridTab(DataTable table, string title)
+        {
+            var control = new GridViewerControl(table, title) { Dock = DockStyle.Fill };
+            AddTab(control, control.Title, control.TabToolTip);
+        }
+
         private void AddQueryPlanTab(ExecutionPlan plan, string sourceXml, string fileName, IViewerHost host)
         {
             var open = _documents.TabPages.Cast<TabPage>()
@@ -196,7 +242,7 @@ namespace DBADashGUI.Viewers
                 TextAlign = ContentAlignment.MiddleCenter,
                 Cursor = Cursors.Hand,
                 Font = new Font("Segoe UI", 11F),
-                Text = "Open a query plan (.sqlplan) or deadlock graph (.xdl)\n\n" +
+                Text = "Open a query plan (.sqlplan), deadlock graph (.xdl) or grid file\n\n" +
                        "Click here to browse, or drag a file onto this window."
             };
             message.Click += (_, _) =>
@@ -258,11 +304,18 @@ namespace DBADashGUI.Viewers
         {
             var content = _documents.SelectedTab?.Controls.Count > 0 ? _documents.SelectedTab.Controls[0] : null;
 
-            Icon = content is DeadlockViewerControl ? Resources.DeadlockIcon : Resources.PlanViewerIcon;
+            Icon = content switch
+            {
+                DeadlockViewerControl => Resources.DeadlockIcon,
+                GridViewerControl or DataSetViewerControl => Resources.GridIcon,
+                _ => Resources.PlanViewerIcon
+            };
             Text = content switch
             {
                 QueryPlanViewerControl => "Query Plan - " + _documents.SelectedTab.Text,
                 DeadlockViewerControl => "Deadlock - " + _documents.SelectedTab.Text,
+                GridViewerControl => "Grid - " + _documents.SelectedTab.Text,
+                DataSetViewerControl => "Data Set - " + _documents.SelectedTab.Text,
                 _ => ViewerApp.Identity.DisplayName
             };
         }
@@ -270,7 +323,7 @@ namespace DBADashGUI.Viewers
         /// <summary>The files in a drag that the window can open, by extension - the same ones the Open dialog offers.</summary>
         private static string[] DroppedFiles(IDataObject data) =>
             data?.GetData(DataFormats.FileDrop) is string[] files
-                ? files.Where(f => Path.GetExtension(f).ToLowerInvariant() is ".sqlplan" or ".xdl" or ".xml").ToArray()
+                ? files.Where(ViewerApp.CanOpen).ToArray()
                 : [];
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)

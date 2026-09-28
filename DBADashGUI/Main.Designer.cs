@@ -72,6 +72,7 @@ namespace DBADashGUI
             tsTools = new System.Windows.Forms.ToolStripMenuItem();
             openDeadlockxdlToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             openQueryPlanToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            openGridToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             tsDateRange = new DateRangeToolStripMenuItem();
@@ -638,7 +639,7 @@ namespace DBADashGUI
             // 
             // tsTools
             // 
-            tsTools.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { openDeadlockxdlToolStripMenuItem, openQueryPlanToolStripMenuItem });
+            tsTools.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { openDeadlockxdlToolStripMenuItem, openQueryPlanToolStripMenuItem, openGridToolStripMenuItem });
             tsTools.Image = Properties.Resources.toolbox_16xLG;
             tsTools.Name = "tsTools";
             tsTools.Size = new System.Drawing.Size(78, 28);
@@ -661,6 +662,15 @@ namespace DBADashGUI
             openQueryPlanToolStripMenuItem.Text = "Open Query Plan | *.sqlplan";
             openQueryPlanToolStripMenuItem.ToolTipText = "Open an execution plan (.sqlplan) saved from SSMS, Query Store, or this viewer.";
             openQueryPlanToolStripMenuItem.Click += OpenQueryPlanToolStripMenuItem_Click;
+            //
+            // openGridToolStripMenuItem
+            //
+            openGridToolStripMenuItem.Image = Properties.Resources.Table_16x;
+            openGridToolStripMenuItem.Name = "openGridToolStripMenuItem";
+            openGridToolStripMenuItem.Size = new System.Drawing.Size(280, 26);
+            openGridToolStripMenuItem.Text = "Open Grid or Data Set | *.json;*.xml;*.gz";
+            openGridToolStripMenuItem.ToolTipText = "Open a grid exported from DBA Dash (JSON or XML, optionally compressed), or a data set saved by the DBA Dash service - e.g. from its Failed folder.";
+            openGridToolStripMenuItem.Click += OpenGridToolStripMenuItem_Click;
             //
             // helpToolStripMenuItem
             // 
@@ -3037,6 +3047,7 @@ namespace DBADashGUI
         private System.Windows.Forms.Label lblRepositoryDB;
         private System.Windows.Forms.ToolStripMenuItem tsTools;
         private System.Windows.Forms.ToolStripMenuItem openDeadlockxdlToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem openGridToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem openQueryPlanToolStripMenuItem;
     }
 }

@@ -183,6 +183,13 @@ namespace DBADashGUI.Theme
 
             dgv.ColumnHeadersDefaultCellStyle.BackColor = theme.ColumnHeaderBackColor;
             dgv.ColumnHeadersDefaultCellStyle.ForeColor = theme.ColumnHeaderForeColor;
+            // Row headers as the column headers, so the two read as one frame round the data rather than the row
+            // headers falling back to the system's grey.  Selected rows keep the header colours too: the cells
+            // already show the selection, and the system highlight blue would clash with the header blue.
+            dgv.RowHeadersDefaultCellStyle.BackColor = theme.ColumnHeaderBackColor;
+            dgv.RowHeadersDefaultCellStyle.ForeColor = theme.ColumnHeaderForeColor;
+            dgv.RowHeadersDefaultCellStyle.SelectionBackColor = theme.ColumnHeaderBackColor;
+            dgv.RowHeadersDefaultCellStyle.SelectionForeColor = theme.ColumnHeaderForeColor;
             dgv.EnableHeadersVisualStyles = false;
 
             foreach (var col in dgv.Columns.OfType<DataGridViewLinkColumn>())

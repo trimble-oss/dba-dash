@@ -1,4 +1,5 @@
-﻿using DBADashGUI.ShellIntegration;
+﻿using DBADashGUI.CustomReports;
+using DBADashGUI.ShellIntegration;
 using Serilog;
 using System.IO;
 
@@ -82,7 +83,7 @@ namespace DBADashGUI.Viewers
             {
                 menu.DropDownItems.Add(new ToolStripMenuItem("Install SSMS Extension...", null, (_, _) => InstallSsmsExtension())
                 {
-                    ToolTipText = "Adds \"Open in DBA Dash Visualizer\" to execution plan and deadlock graph tabs in SQL Server Management Studio."
+                    ToolTipText = "Adds \"Open in DBA Dash Visualizer\" to results grids, execution plans and deadlock graphs in SQL Server Management Studio."
                 });
                 menu.DropDownItems.Add(new ToolStripMenuItem("Uninstall SSMS Extension...", null, (_, _) => UninstallSsmsExtension())
                 {
@@ -177,24 +178,45 @@ namespace DBADashGUI.Viewers
         }
 
         /// <summary>
-        /// The files the viewers open, for the Open dialog: .sqlplan and .xdl, and the .xml either of them is also saved
-        /// as.
+        /// The files the viewers open, for the Open dialog: .sqlplan and .xdl, the .xml either of them is also saved
+        /// as, and the grid files DBA Dash exports (<see cref="GridSerializer"/>) - which is also how the SSMS extension
+        /// hands over a results grid.
         /// </summary>
         public const string OpenFileFilter =
-            "Query plans and deadlock graphs (*.sqlplan;*.xdl;*.xml)|*.sqlplan;*.xdl;*.xml|" +
-            "Query plan (*.sqlplan)|*.sqlplan|Deadlock graph (*.xdl)|*.xdl|XML (*.xml)|*.xml|All files (*.*)|*.*";
+            "Query plans, deadlock graphs and grids (*.sqlplan;*.xdl;*.xml;*.json;*.json.gz;*.xml.gz)|*.sqlplan;*.xdl;*.xml;*.json;*.json.gz;*.xml.gz|" +
+            "Query plan (*.sqlplan)|*.sqlplan|Deadlock graph (*.xdl)|*.xdl|XML (*.xml)|*.xml|" +
+            "Grid (*.json;*.json.gz;*.xml.gz)|*.json;*.json.gz;*.xml.gz|All files (*.*)|*.*";
 
         /// <summary>
-        /// Opens each file in the viewer for its type, on tabs of the one window - plans and deadlock graphs alike.
+        /// A grid file DBA Dash exports - by extension alone.  A grid saved as a bare .xml can't be told apart from a
+        /// plan or deadlock graph that way, so <see cref="ViewerLauncher.ShowXmlFile"/> goes by its content instead.
+        /// Only the compressed extensions DBA Dash writes, not any .gz, so an unrelated archive isn't taken for one.
+        /// </summary>
+        private static bool IsGridFile(string file) =>
+            file.EndsWith(GridSerializer.JsonExtension, StringComparison.OrdinalIgnoreCase) ||
+            file.EndsWith(GridSerializer.CompressedJsonExtension, StringComparison.OrdinalIgnoreCase) ||
+            file.EndsWith(GridSerializer.CompressedXmlExtension, StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>True for a file the viewers can open, by its extension - what a window accepts dropped on it.</summary>
+        public static bool CanOpen(string file) =>
+            IsGridFile(file) ||
+            Path.GetExtension(file).ToLowerInvariant() is ".sqlplan" or ".xdl" or ".xml";
+
+        /// <summary>
+        /// Opens each file in the viewer for its type, on tabs of the one window - plans, deadlock graphs and grids alike.
         /// A file that can't be read is reported and doesn't stop the rest.
         /// </summary>
         public static void OpenFiles(IEnumerable<string> files)
         {
             foreach (var file in files)
             {
-                // .sqlplan and .xdl are unambiguous; anything else - a bare .xml, or no extension at
-                // all - is both file types' other extension, so ShowXmlFile decides from the content.
-                if (Path.GetExtension(file).Equals(FileAssociation.QueryPlan.Extension,
+                // .sqlplan and .xdl are unambiguous, as are the grid files; anything else - a bare .xml, or
+                // no extension at all - is all three's other extension, so ShowXmlFile decides from the content.
+                if (IsGridFile(file))
+                {
+                    ViewerLauncher.ShowGridFile(file);
+                }
+                else if (Path.GetExtension(file).Equals(FileAssociation.QueryPlan.Extension,
                         StringComparison.OrdinalIgnoreCase))
                 {
                     ViewerLauncher.ShowQueryPlanFile(file);

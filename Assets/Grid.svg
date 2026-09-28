@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <style>
+      .canvas{fill: none; opacity: 0;}
+      .trimble-blue{fill: #0063a3;}
+      .white{fill: #ffffff;}
+      .trimble-grey-stroke{fill: none; stroke: #5b6670; stroke-width: 4;}
+    </style>
+    <clipPath id="body">
+      <rect x="4" y="6" width="56" height="52" rx="6" />
+    </clipPath>
+  </defs>
+  <title>Grid</title>
+  <g id="canvas" class="canvas">
+    <path class="canvas" d="M64,64H0V0H64Z" />
+  </g>
+  <g id="level-1">
+    <!--
+      A result set: a table with its header row picked out in blue, over three rows and three columns
+      of data.  The window icon for the viewer's grid and data set tabs (DBADash.Viewers.GUI's Grid.ico),
+      alongside PlanViewer.svg and Deadlock.svg.
+
+      The body is white rather than transparent so the grid reads on a dark taskbar as well as a
+      light one; the lines are the same mid grey as the plan viewer's connector for the same reason.
+      All strokes are 4 wide.  The header and grid lines are clipped to the body's rounded corners,
+      and the outline is drawn last, half a stroke inside the body, so it covers their ends.
+    -->
+    <g clip-path="url(#body)">
+      <rect class="white" x="4" y="6" width="56" height="52" />
+      <rect class="trimble-blue" x="4" y="6" width="56" height="16" />
+      <path class="trimble-grey-stroke" d="M4,32H60M4,44H60M24,22V58M40,22V58" />
+    </g>
+    <rect class="trimble-grey-stroke" x="6" y="8" width="52" height="48" rx="4" />
+  </g>
+</svg>

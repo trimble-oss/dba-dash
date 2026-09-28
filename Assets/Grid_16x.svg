@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+  <defs>
+    <style>
+      .canvas{fill: none; opacity: 0;}
+      .trimble-blue{fill: #0063a3;}
+      .trimble-grey{fill: #5b6670;}
+      .white{fill: #ffffff;}
+    </style>
+  </defs>
+  <title>IconLightGrid</title>
+  <g id="canvas" class="canvas">
+    <path class="canvas" d="M16,16H0V0H16Z" />
+  </g>
+  <g id="level-1">
+    <!--
+      The 16 pixel form of Assets/Grid.svg - Table_16x.png, and the smallest frame of the viewer's
+      Grid.ico: a blue header row over a white body ruled into three rows and three columns.
+
+      Drawn as whole-pixel rectangles rather than strokes, so every edge sits on a pixel boundary and
+      nothing blurs.  The corners are square: at this size a radius only leaves a grey fringe.  The
+      outline is a 1 pixel grey frame drawn as the outermost rectangle, with everything inside it laid
+      over the top.
+    -->
+    <rect class="trimble-grey" x="1" y="2" width="14" height="12" />
+    <rect class="white" x="2" y="3" width="12" height="10" />
+    <rect class="trimble-blue" x="2" y="3" width="12" height="3" />
+    <rect class="trimble-grey" x="2" y="8" width="12" height="1" />
+    <rect class="trimble-grey" x="2" y="11" width="12" height="1" />
+    <rect class="trimble-grey" x="5" y="6" width="1" height="7" />
+    <rect class="trimble-grey" x="10" y="6" width="1" height="7" />
+  </g>
+</svg>

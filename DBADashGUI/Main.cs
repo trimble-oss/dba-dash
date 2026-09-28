@@ -3389,5 +3389,10 @@ namespace DBADashGUI
         {
             ViewerLauncher.OpenQueryPlanFile(this);
         }
+
+        private void OpenGridToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ViewerLauncher.OpenGridFile(this);
+        }
     }
 }
