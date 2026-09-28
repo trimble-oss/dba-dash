@@ -56,10 +56,12 @@ namespace DBADash.SSMSExtension
         // different version, and it's the one that just handed over a file that matters.
         private const string OwnVersionValue = "ExtensionVersion";
 
-        // The first DBA Dash release that opens a results grid (.xml.gz) - an older app, which this extension can
-        // just as well find, would take the file for an XML document and fail to read it.  Compared with the exe's
-        // file version, which both apps take from GlobalAssemblyInfo.cs's AssemblyVersion.
-        private static readonly Version GridMinimumAppVersion = new(4, 20, 0);
+        // The oldest DBA Dash this extension hands files to: the first release it shipped with, 4.20.  An older app -
+        // which this extension can just as well find - predates what it hands over (results grids as .xml.gz, for
+        // one), so rather than work out which files an older app might still manage, anything older is refused with
+        // a message saying to update.  Compared with the exe's file version, which both apps take from
+        // GlobalAssemblyInfo.cs's AssemblyVersion.
+        private static readonly Version MinimumAppVersion = new(4, 20, 0);
 
         private const string ReleasesUrl = "https://github.com/trimble-oss/dba-dash/releases";
 
@@ -116,26 +118,26 @@ namespace DBADash.SSMSExtension
         }
 
         /// <summary>
-        /// Checks, before a result set is read - which can take a while - that the DBA Dash app it would open in is
-        /// new enough to open one. False, having told the user, if it isn't. True when no app is found yet:
-        /// <see cref="OpenFile"/> asks for one then, and checks whichever is picked.
+        /// Checks the DBA Dash app found is new enough for this extension, before doing work there'd be no app to
+        /// hand to - reading a result set can take a while.  False, having told the user, if it isn't.  True when no
+        /// app is found yet: <see cref="OpenFile"/> asks for one then, and checks whichever is picked.
         /// </summary>
-        public static bool CheckAppCanOpenGrids()
+        public static bool CheckAppVersion()
         {
             var exePath = FindDBADashExe();
-            return exePath == null || CheckAppCanOpenGrids(exePath);
+            return exePath == null || CheckAppVersion(exePath);
         }
 
-        private static bool CheckAppCanOpenGrids(string exePath)
+        private static bool CheckAppVersion(string exePath)
         {
             var appVersion = AppVersion(exePath);
             // A version that can't be read isn't a reason to refuse - the app gets its chance to open it.
-            if (appVersion == null || appVersion >= GridMinimumAppVersion) return true;
+            if (appVersion == null || appVersion >= MinimumAppVersion) return true;
 
             var result = MessageBox.Show(
-                $"The DBA Dash app this extension found is too old to open results grids:\n\n{exePath}\n" +
-                $"Version {appVersion} - results grids need {GridMinimumAppVersion} or later.\n\n" +
-                "Execution plans and deadlock graphs still open in it.  Open the DBA Dash releases page to update?",
+                $"The DBA Dash app this extension found is too old for it:\n\n{exePath}\n" +
+                $"Version {appVersion} - this extension needs {MinimumAppVersion.ToString(2)} or later.\n\n" +
+                "Open the DBA Dash releases page to update?",
                 "DBA Dash Visualizer", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
             if (result == DialogResult.Yes)
             {
@@ -165,8 +167,6 @@ namespace DBADash.SSMSExtension
             }
         }
 
-        private static bool IsGridFile(string path) => path.EndsWith(".xml.gz", StringComparison.OrdinalIgnoreCase);
-
         /// <summary>Opens a temp file written by this class in whichever DBA Dash app is found, asking the user
         /// to locate one if none is. Must be called on the UI thread, as it may prompt.</summary>
         public static void OpenFile(string tempFile)
@@ -174,7 +174,7 @@ namespace DBADash.SSMSExtension
             var exePath = FindDBADashExe();
             if (exePath != null)
             {
-                if (IsGridFile(tempFile) && !CheckAppCanOpenGrids(exePath)) return;
+                if (!CheckAppVersion(exePath)) return;
                 if (LaunchApp(exePath, tempFile)) return;
             }
 
@@ -188,7 +188,7 @@ namespace DBADash.SSMSExtension
 
             var browsedPath = BrowseForApp();
             if (browsedPath == null) return;
-            if (IsGridFile(tempFile) && !CheckAppCanOpenGrids(browsedPath)) return;
+            if (!CheckAppVersion(browsedPath)) return;
 
             if (!LaunchApp(browsedPath, tempFile))
             {
