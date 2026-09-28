@@ -2,11 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
+using System.Xml.Linq;
 using Microsoft.VisualStudio.Setup.Configuration;
 using Microsoft.Win32;
+using Serilog;
 
 namespace DBADashGUI.ShellIntegration
 {
@@ -200,5 +203,83 @@ namespace DBADashGUI.ShellIntegration
 
         private static Stream GetResourceStream() =>
             typeof(SsmsExtensionInstaller).Assembly.GetManifestResourceStream(ResourceName);
+
+        // Written by DBADash.SSMSExtension's VisualizerLauncher (OwnVersionValue) just before it launches this app:
+        // the version of the extension that handed over the file.  Under DiscoveryKey, as VisualizerPath is.
+        private const string ExtensionVersionValue = "ExtensionVersion";
+
+        /// <summary>
+        /// True for a file the SSMS extension handed over: it writes each one to %TEMP% as ssms_*, the same prefix
+        /// its own clean-up sweeps.
+        /// </summary>
+        public static bool IsFromExtension(string path)
+        {
+            try
+            {
+                return Path.GetFileName(path).StartsWith("ssms_", StringComparison.OrdinalIgnoreCase) &&
+                       string.Equals(Path.GetFullPath(Path.GetDirectoryName(path) ?? string.Empty).TrimEnd('\\'),
+                           Path.GetFullPath(Path.GetTempPath()).TrimEnd('\\'), StringComparison.OrdinalIgnoreCase);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>The version of the extension embedded in this build, or null if there isn't one.</summary>
+        public static Version EmbeddedVersion => _embeddedVersion.Value;
+
+        private static readonly Lazy<Version> _embeddedVersion = new(() =>
+        {
+            try
+            {
+                using var resource = GetResourceStream();
+                if (resource == null) return null;
+
+                using var vsix = new ZipArchive(resource, ZipArchiveMode.Read);
+                using var manifest = vsix.GetEntry("extension.vsixmanifest")?.Open();
+                return manifest == null ? null : ReadManifestVersion(manifest);
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Unable to read the embedded SSMS extension's version");
+                return null;
+            }
+        });
+
+        /// <summary>Identity/@Version from a .vsixmanifest - the number SSMS and VSIXInstaller compare.</summary>
+        public static Version ReadManifestVersion(Stream manifest)
+        {
+            var identity = XDocument.Load(manifest).Descendants().FirstOrDefault(e => e.Name.LocalName == "Identity");
+            return Version.TryParse(identity?.Attribute("Version")?.Value, out var version) ? version : null;
+        }
+
+        /// <summary>
+        /// The version of the extension that last launched this app, as it recorded it - null if it didn't, which
+        /// means it's older than the extensions that do (1.0.11).
+        /// </summary>
+        public static Version LastLaunchedVersion
+        {
+            get
+            {
+                try
+                {
+                    using var key = Registry.CurrentUser.OpenSubKey(DiscoveryKey);
+                    return Version.TryParse(key?.GetValue(ExtensionVersionValue) as string, out var version) ? version : null;
+                }
+                catch
+                {
+                    return null;
+                }
+            }
+        }
+
+        /// <summary>
+        /// True when this build carries a newer extension than <paramref name="installed"/> - null meaning one too old
+        /// to say.  Never when this build has none to offer, or carries an older one than is installed (a newer
+        /// extension from the SSMS gallery, with an older DBA Dash).
+        /// </summary>
+        public static bool IsNewerThan(Version installed) =>
+            EmbeddedVersion is { } embedded && (installed == null || embedded > installed);
     }
 }

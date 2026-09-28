@@ -382,5 +382,17 @@ namespace DBADashGUI.Properties {
                 this["LocalAIServiceUrl"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string SsmsExtensionSkippedVersion {
+            get {
+                return ((string)(this["SsmsExtensionSkippedVersion"]));
+            }
+            set {
+                this["SsmsExtensionSkippedVersion"] = value;
+            }
+        }
     }
 }

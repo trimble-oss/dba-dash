@@ -134,7 +134,7 @@ namespace DBADashGUI.Viewers
             }
         }
 
-        private static void InstallSsmsExtension()
+        internal static void InstallSsmsExtension()
         {
             try
             {
@@ -208,7 +208,8 @@ namespace DBADashGUI.Viewers
         /// </summary>
         public static void OpenFiles(IEnumerable<string> files)
         {
-            foreach (var file in files)
+            var list = files.ToList();
+            foreach (var file in list)
             {
                 // .sqlplan and .xdl are unambiguous, as are the grid files; anything else - a bare .xml, or
                 // no extension at all - is all three's other extension, so ShowXmlFile decides from the content.
@@ -231,6 +232,10 @@ namespace DBADashGUI.Viewers
                     ViewerLauncher.ShowXmlFile(file);
                 }
             }
+
+            // Only when the SSMS extension just handed over a file: that's when it's in use, and when the version it
+            // recorded is the one that did.
+            if (list.Any(SsmsExtensionInstaller.IsFromExtension)) ViewerForm.OfferSsmsExtensionUpdate();
         }
 
         /// <summary>Prompts for plans and deadlock graphs and returns the ones chosen; empty if cancelled.</summary>

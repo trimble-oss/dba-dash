@@ -44,6 +44,9 @@ namespace DBADashGUI.Viewers
         public static bool QueryPlanShowNodeIds { get => Get(false); set => Set(value); }
         public static int QueryPlanMinFitZoom { get => Get(100); set => Set(value); }
 
+        /// <summary>An SSMS extension update the user chose to skip - not offered again until a newer one.</summary>
+        public static string SsmsExtensionSkippedVersion { get => Get(string.Empty); set => Set(value); }
+
         public static void Save() => Store.Save();
 
         private static T Get<T>(T fallback, [CallerMemberName] string name = null)

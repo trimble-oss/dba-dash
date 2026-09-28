@@ -54,6 +54,11 @@
     <EmbeddedResource Include="Resources\DBADashIcon.png" Condition="Exists('Resources\DBADashIcon.png')">
       <LogicalName>DBADashIcon.png</LogicalName>
     </EmbeddedResource>
+    <!-- Embedded so VisualizerLauncher can read its own version from the one place it's set, and record it for the
+         app to tell whether a newer extension is available. -->
+    <EmbeddedResource Include="source.extension.vsixmanifest">
+      <LogicalName>source.extension.vsixmanifest</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
 
   <!--

@@ -6,6 +6,7 @@ using System.IO.Compression;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
+using System.Xml;
 using Microsoft.Win32;
 
 namespace DBADash.SSMSExtension
@@ -48,6 +49,12 @@ namespace DBADash.SSMSExtension
         // when none of the above has ever been registered.
         private const string OwnSettingsKey = @"Software\DBADash\SSMSExtension";
         private const string OwnSettingsValue = "VisualizerPath";
+
+        // This extension's own version, recorded under the same key just before each launch, so the app it hands
+        // a file to can tell whether a newer extension is available (SsmsExtensionInstaller.NeedsUpdate).  Recorded
+        // at launch rather than once when SSMS loads the extension: side-by-side SSMS installs can each have a
+        // different version, and it's the one that just handed over a file that matters.
+        private const string OwnVersionValue = "ExtensionVersion";
 
         public static void OpenPlan(string planXml)
         {
@@ -314,6 +321,8 @@ namespace DBADash.SSMSExtension
 
         private static bool LaunchApp(string exePath, string tempFile)
         {
+            RecordOwnVersion();
+
             try
             {
                 // No single-instance forwarding needed here: both apps already forward a second launch
@@ -330,6 +339,50 @@ namespace DBADash.SSMSExtension
                 return false;
             }
         }
+
+        /// <summary>
+        /// Best effort: without it, the app just takes this for an extension older than the ones that record their
+        /// version, and offers the update it carries - the same as for one that's genuinely out of date.
+        /// </summary>
+        private static void RecordOwnVersion()
+        {
+            try
+            {
+                if (OwnVersion is not { } version) return;
+                using var key = Registry.CurrentUser.CreateSubKey(OwnSettingsKey);
+                key?.SetValue(OwnVersionValue, version);
+            }
+            catch
+            {
+                // Best effort - see summary above.
+            }
+        }
+
+        /// <summary>
+        /// This extension's version: Identity/@Version from source.extension.vsixmanifest, embedded in this assembly
+        /// by the .csproj - the one place the version is set, and the number SSMS and VSIXInstaller compare - rather
+        /// than read from the installed extension's folder, whose layout is SSMS's business.
+        /// </summary>
+        private static string OwnVersion => _ownVersion.Value;
+
+        private static readonly Lazy<string> _ownVersion = new(() =>
+        {
+            try
+            {
+                using var stream = typeof(VisualizerLauncher).Assembly.GetManifestResourceStream("source.extension.vsixmanifest");
+                if (stream == null) return null;
+
+                var manifest = new XmlDocument();
+                manifest.Load(stream);
+                var ns = new XmlNamespaceManager(manifest.NameTable);
+                ns.AddNamespace("vsx", "http://schemas.microsoft.com/developer/vsx-schema/2011");
+                return manifest.SelectSingleNode("/vsx:PackageManifest/vsx:Metadata/vsx:Identity/@Version", ns)?.Value;
+            }
+            catch
+            {
+                return null;
+            }
+        });
 
         /// <summary>Prompts for either exe once, and remembers the choice for next time.</summary>
         private static string BrowseForApp()
