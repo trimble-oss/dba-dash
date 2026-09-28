@@ -137,7 +137,7 @@ namespace DBADash.SSMSExtension
                         cancellationToken);
 
                     progress.Report(new ThreadedWaitDialogProgressData("Writing results...", isCancelable: true));
-                    return VisualizerLauncher.SaveGridToTemp(table);
+                    return VisualizerLauncher.SaveGridToTemp(table, cancellationToken);
                 });
 
             VisualizerLauncher.OpenFile(tempFile);

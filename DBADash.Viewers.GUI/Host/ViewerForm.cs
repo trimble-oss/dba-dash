@@ -1,6 +1,7 @@
 using DBADash.Deadlock.Model;
 using DBADash.QueryPlan.Model;
 using DBADashGUI.Controls;
+using DBADashGUI.CustomReports;
 using DBADashGUI.Deadlocks;
 using DBADashGUI.Grids;
 using DBADashGUI.QueryPlans;
@@ -11,6 +12,7 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DBADashGUI.Viewers
@@ -139,47 +141,121 @@ namespace DBADashGUI.Viewers
         }
 
         /// <summary>
-        /// Show a result set on a tab of the window, opening it if there is none.  Always a new tab: unlike a plan or a
-        /// graph, the same result set opened twice is more likely a re-run query whose results have moved on.
+        /// Show a grid file on a new tab of the window, opening it if there is none - a result set, or a DataSet of
+        /// several tables.  Always a new tab: unlike a plan or a graph, the same result set opened twice is more likely
+        /// a re-run query whose results have moved on.
+        ///
+        /// The tab and window appear straight away, saying the file is loading, and the file is read off the UI thread:
+        /// a result set can run to hundreds of MB, and reading that on the UI thread would hang the window - or the
+        /// whole DBA Dash GUI, opening one from its Tools menu.
         /// </summary>
-        public static void OpenGrid(DataTable table, string title) => OpenInNewTab(window => window.AddGridTab(table, title));
-
-        /// <summary>
-        /// Show a DataSet of several tables on one tab of the window, opening it if there is none.  Always a new tab,
-        /// as for <see cref="OpenGrid"/>.
-        /// </summary>
-        public static void OpenDataSet(DataSet dataSet, string title) =>
-            OpenInNewTab(window => window.AddDataSetTab(dataSet, title));
-
-        /// <summary>Adds a tab to the window with <paramref name="addTab"/>, opening the window if there is none.</summary>
-        private static void OpenInNewTab(Action<ViewerForm> addTab)
+        public static void OpenGridFile(string path)
         {
             var window = _current is { IsDisposed: false } ? _current : null;
 
             if (window is null)
             {
                 window = _current = new ViewerForm();
-                addTab(window);
+                window.AddGridFileTab(path);
                 window.Show();
                 return;
             }
 
-            addTab(window);
+            window.AddGridFileTab(path);
 
             if (window.WindowState == FormWindowState.Minimized) window.WindowState = FormWindowState.Normal;
             window.Activate();
         }
 
-        private void AddDataSetTab(DataSet dataSet, string title)
+        private void AddGridFileTab(string path)
         {
-            var control = new DataSetViewerControl(dataSet, title) { Dock = DockStyle.Fill };
-            AddTab(control, control.Title, control.TabToolTip);
+            var fileName = Path.GetFileName(path);
+            var loading = new Label
+            {
+                Dock = DockStyle.Fill,
+                TextAlign = ContentAlignment.MiddleCenter,
+                Font = new Font("Segoe UI", 11F),
+                Text = $"Loading {fileName}...",
+                UseWaitCursor = true
+            };
+            var page = AddTab(loading, fileName, path);
+            // Built after the form's own ApplyTheme() already ran, as the start tab's content is.
+            loading.ApplyTheme();
+
+            // The load is handed back to the window with BeginInvoke, which needs its handle - and a new window isn't
+            // shown until after this returns, possibly after a small file has already loaded.
+            _ = Handle;
+            Task.Run(() => GridSerializer.LoadDataSet(path)).ContinueWith(load =>
+            {
+                try
+                {
+                    BeginInvoke(() => ShowLoadedGridFile(page, path, fileName, load));
+                }
+                catch (Exception ex) when (ex is ObjectDisposedException or InvalidOperationException)
+                {
+                    // The window closed while the file loaded.
+                    if (load.Status == TaskStatus.RanToCompletion) load.Result.Dispose();
+                }
+            }, TaskScheduler.Default);
         }
 
-        private void AddGridTab(DataTable table, string title)
+        /// <summary>
+        /// Swaps the tab's loading message for the grid, once the file has been read on a background thread.  A file
+        /// that couldn't be read is reported and its tab closed - leaving the start tab if it was the only one, as a
+        /// file that fails to open from Explorer does.
+        /// </summary>
+        private void ShowLoadedGridFile(TabPage page, string path, string fileName, Task<DataSet> load)
         {
-            var control = new GridViewerControl(table, title) { Dock = DockStyle.Fill };
-            AddTab(control, control.Title, control.TabToolTip);
+            try
+            {
+                var dataSet = load.GetAwaiter().GetResult();
+
+                // Closed while it loaded.
+                if (page.IsDisposed)
+                {
+                    dataSet.Dispose();
+                    return;
+                }
+
+                Control viewer;
+                string title, tooltip;
+                if (dataSet.Tables.Count == 1)
+                {
+                    // The SSMS extension names the tab in the table's extended properties, rather than leaving it
+                    // named after its temp file.
+                    var table = dataSet.Tables[0];
+                    var tableTitle = table.ExtendedProperties["Title"] as string;
+                    var grid = new GridViewerControl(table, string.IsNullOrWhiteSpace(tableTitle) ? fileName : tableTitle)
+                    {
+                        Dock = DockStyle.Fill
+                    };
+                    (viewer, title, tooltip) = (grid, grid.Title, grid.TabToolTip);
+                }
+                else
+                {
+                    // A DataSet the DBA Dash service saved, such as one left in its Failed folder.
+                    var dataSetViewer = new DataSetViewerControl(dataSet, fileName) { Dock = DockStyle.Fill };
+                    (viewer, title, tooltip) = (dataSetViewer, dataSetViewer.Title, dataSetViewer.TabToolTip);
+                }
+
+                var loading = page.Controls[0];
+                page.Controls.Clear();
+                loading.Dispose();
+                page.Controls.Add(viewer);
+                page.Text = title;
+                page.ToolTipText = tooltip;
+                if (_documents.SelectedTab == page) ShowTitle();
+            }
+            catch (Exception ex)
+            {
+                if (!page.IsDisposed)
+                {
+                    if (_documents.TabCount == 1) AddStartTab();
+                    CloseTab(page);
+                }
+
+                CommonShared.ShowExceptionDialog(ex, "Error opening grid", text: $"{path} could not be opened as a grid.");
+            }
         }
 
         private void AddQueryPlanTab(ExecutionPlan plan, string sourceXml, string fileName, IViewerHost host)
@@ -219,7 +295,7 @@ namespace DBADashGUI.Viewers
         }
 
         /// <summary>Adds a viewer on a tab of its own, replacing the placeholder tab if that's all there was.</summary>
-        private void AddTab(Control viewer, string title, string tooltip)
+        private TabPage AddTab(Control viewer, string title, string tooltip)
         {
             RemoveStartTab();
 
@@ -229,6 +305,7 @@ namespace DBADashGUI.Viewers
             _documents.TabPages.Add(page);
             _documents.SelectedTab = page;
             ShowTitle();
+            return page;
         }
 
         /// <summary>The placeholder tab shown when the window is opened with nothing to open - click or drag a file.
