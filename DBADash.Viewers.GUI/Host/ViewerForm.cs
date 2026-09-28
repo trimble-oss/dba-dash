@@ -165,36 +165,129 @@ namespace DBADashGUI.Viewers
 
         private void ShowSsmsExtensionUpdateBar(Version installed, Version available)
         {
-            var bar = new ToolStrip { GripStyle = ToolStripGripStyle.Hidden, Dock = DockStyle.Top, Name = "SsmsExtensionUpdateBar" };
-            var close = new ToolStripButton("Close") { DisplayStyle = ToolStripItemDisplayStyle.Text, Alignment = ToolStripItemAlignment.Right };
+            var bar = new ToolStrip
+            {
+                GripStyle = ToolStripGripStyle.Hidden,
+                Dock = DockStyle.Top,
+                Name = "SsmsExtensionUpdateBar",
+                Renderer = new NoticeBarRenderer(),
+                ForeColor = NoticeBarRenderer.Text,
+                Padding = new Padding(6, 3, 4, 5)
+            };
 
+            // Kept short, so the actions after it are never pushed into the overflow.
             bar.Items.Add(new ToolStripLabel(
                 $"A newer DBA Dash SSMS extension is available: {available}" +
-                (installed == null ? string.Empty : $" (installed: {installed})") +
-                ".  SSMS needs to be closed to finish the update."));
-            bar.Items.Add(new ToolStripButton("Update SSMS Extension...", null, (_, _) =>
+                (installed == null ? "." : $" (installed: {installed}).")));
+
+            // The one action the bar is for, as a filled button - the text around it is plainly not clickable.
+            var update = new ToolStripButton("Update SSMS Extension...")
+            {
+                DisplayStyle = ToolStripItemDisplayStyle.Text,
+                Tag = NoticeBarRenderer.PrimaryTag,
+                Padding = new Padding(8, 1, 8, 1),
+                Margin = new Padding(8, 1, 4, 2),
+                ToolTipText = "Runs the SSMS extension installer.  SSMS needs to be closed to finish the update."
+            };
+            update.Click += (_, _) =>
             {
                 RemoveBar();
                 ViewerApp.InstallSsmsExtension();
-            }) { DisplayStyle = ToolStripItemDisplayStyle.Text });
-            bar.Items.Add(new ToolStripButton("Skip This Version", null, (_, _) =>
+            };
+            bar.Items.Add(update);
+
+            var skip = new ToolStripLabel("Skip this version")
+            {
+                IsLink = true,
+                LinkBehavior = LinkBehavior.HoverUnderline,
+                LinkColor = NoticeBarRenderer.Link,
+                ActiveLinkColor = NoticeBarRenderer.Link,
+                Margin = new Padding(8, 1, 0, 2),
+                ToolTipText = $"Don't offer {available} again"
+            };
+            skip.Click += (_, _) =>
             {
                 RemoveBar();
                 ViewerSettings.SsmsExtensionSkippedVersion = available.ToString();
                 ViewerSettings.Save();
-            }) { DisplayStyle = ToolStripItemDisplayStyle.Text });
+            };
+            bar.Items.Add(skip);
+
+            var close = new ToolStripButton("✕")
+            {
+                DisplayStyle = ToolStripItemDisplayStyle.Text,
+                Alignment = ToolStripItemAlignment.Right,
+                ToolTipText = "Close"
+            };
             close.Click += (_, _) => RemoveBar();
             bar.Items.Add(close);
 
             Controls.Add(bar);
             // The tabs fill what's left below it: docking goes in reverse z-order.
             _documents.BringToFront();
-            bar.ApplyTheme();
 
             void RemoveBar()
             {
                 Controls.Remove(bar);
                 bar.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// A notice bar in Trimble's warning yellows, rather than themed like the toolbars below it, so it stands out
+        /// from them - in the dark theme too, as Visual Studio's own yellow info bars do.  A pale background with the
+        /// stronger yellow as a rule along the bottom; the primary action a button filled in that yellow, lighter on
+        /// hover; a secondary one a link, in Trimble blue.
+        /// </summary>
+        private sealed class NoticeBarRenderer : ToolStripProfessionalRenderer
+        {
+            /// <summary>Tags the button drawn as the bar's primary action.</summary>
+            internal const string PrimaryTag = "Primary";
+
+            internal static readonly Color Background = ColorTranslator.FromHtml("#fff5e4");
+            internal static readonly Color Hover = ColorTranslator.FromHtml("#fec157");
+            internal static readonly Color Accent = ColorTranslator.FromHtml("#fbad26");
+            internal static readonly Color Link = ColorTranslator.FromHtml("#0063a3");
+            // Dark enough to read on all three yellows.
+            internal static readonly Color Text = ColorTranslator.FromHtml("#252a2e");
+
+            protected override void OnRenderToolStripBackground(ToolStripRenderEventArgs e)
+            {
+                using var brush = new SolidBrush(Background);
+                e.Graphics.FillRectangle(brush, e.AffectedBounds);
+            }
+
+            protected override void OnRenderToolStripBorder(ToolStripRenderEventArgs e)
+            {
+                using var brush = new SolidBrush(Accent);
+                e.Graphics.FillRectangle(brush, 0, e.ToolStrip.Height - 2, e.ToolStrip.Width, 2);
+            }
+
+            protected override void OnRenderButtonBackground(ToolStripItemRenderEventArgs e)
+            {
+                var bounds = new Rectangle(Point.Empty, e.Item.Size);
+
+                if (Equals(e.Item.Tag, PrimaryTag))
+                {
+                    // Filled at rest, so it reads as a button; lighter on hover, the text colour's outline pressed.
+                    using var fill = new SolidBrush(e.Item.Selected && !e.Item.Pressed ? Hover : Accent);
+                    e.Graphics.FillRectangle(fill, bounds);
+                    using var border = new Pen(e.Item.Pressed ? Text : ControlPaint.Dark(Accent, 0.1f));
+                    e.Graphics.DrawRectangle(border, 0, 0, bounds.Width - 1, bounds.Height - 1);
+                    return;
+                }
+
+                if (!e.Item.Selected && !e.Item.Pressed) return;
+
+                using var brush = new SolidBrush(e.Item.Pressed ? Accent : Hover);
+                e.Graphics.FillRectangle(brush, bounds);
+            }
+
+            protected override void OnRenderItemText(ToolStripItemTextRenderEventArgs e)
+            {
+                // A link label paints in its own LinkColor.
+                if (e.Item is not ToolStripLabel { IsLink: true }) e.TextColor = Text;
+                base.OnRenderItemText(e);
             }
         }
 
