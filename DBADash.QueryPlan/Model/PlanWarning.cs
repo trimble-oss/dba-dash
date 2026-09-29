@@ -131,6 +131,13 @@ namespace DBADash.QueryPlan.Model
                 or PlanWarningKind.HashSpill
                 or PlanWarningKind.ExchangeSpill;
 
+        /// <summary>
+        /// True for the warnings only a run can raise - a spill, a grant that didn't fit what was used,
+        /// a wait - which an estimated plan never carries, however it would have run.
+        /// </summary>
+        public bool IsRuntime =>
+            IsSpill || Kind is PlanWarningKind.MemoryGrantWarning or PlanWarningKind.Wait;
+
         public override string ToString() => Detail is null ? Title : Title + ": " + Detail;
     }
 

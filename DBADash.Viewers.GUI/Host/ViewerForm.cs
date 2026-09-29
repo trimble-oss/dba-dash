@@ -1,4 +1,5 @@
 using DBADash.Deadlock.Model;
+using DBADash.QueryPlan;
 using DBADash.QueryPlan.Model;
 using DBADashGUI.Controls;
 using DBADashGUI.CustomReports;
@@ -425,6 +426,99 @@ namespace DBADashGUI.Viewers
             AddTab(control, control.Title, control.TabToolTip);
         }
 
+        /// <summary>The plan viewers open in this window, in tab order.</summary>
+        private IReadOnlyList<QueryPlanViewerControl> PlanViewers =>
+            _documents.TabPages.Cast<TabPage>()
+                .Select(p => p.Controls.Count > 0 ? p.Controls[0] as QueryPlanViewerControl : null)
+                .Where(viewer => viewer is not null)
+                .ToList();
+
+        /// <summary>The plan viewers open in the window <paramref name="from"/> is on, for offering something to compare with.</summary>
+        internal static IReadOnlyList<QueryPlanViewerControl> PlanViewersBeside(Control from) =>
+            from?.FindForm() is ViewerForm window ? window.PlanViewers : [];
+
+        /// <summary>
+        /// Every statement of every plan open in the window, as a side a comparison can take.  A plan
+        /// of several statements offers each one that has a plan, in batch order.
+        /// </summary>
+        private IReadOnlyList<PlanCompareSide> ComparableSides() =>
+            PlanViewers
+                .SelectMany(viewer =>
+                {
+                    var statements = viewer.Plan.StatementsWithPlans.ToList();
+                    if (statements.Count == 0) statements = viewer.Plan.Statements.ToList();
+                    return statements.Select(statement => new PlanCompareSide(viewer.Title, viewer.Plan, statement));
+                })
+                .ToList();
+
+        /// <summary>
+        /// Compare the statement shown in <paramref name="before"/> with the one shown in
+        /// <paramref name="after"/>, on a tab of their window.  Either side can then be changed to any
+        /// statement of any plan open in the window.
+        /// </summary>
+        internal static void OpenPlanComparison(QueryPlanViewerControl before, QueryPlanViewerControl after, PlanStatement afterStatement = null)
+        {
+            if (before?.FindForm() is not ViewerForm window || after is null) return;
+
+            var control = new QueryPlanCompareControl(
+                new PlanCompareSide(before.Title, before.Plan, before.CurrentStatement),
+                new PlanCompareSide(after.Title, after.Plan, afterStatement ?? after.CurrentStatement),
+                window.ComparableSides)
+            {
+                Dock = DockStyle.Fill
+            };
+
+            var page = window.AddTab(control, control.Title, control.TabToolTip);
+            control.TitleChanged += (_, _) =>
+            {
+                page.Text = control.Title;
+                page.ToolTipText = control.TabToolTip;
+                if (window._documents.SelectedTab == page) window.ShowTitle();
+            };
+        }
+
+        /// <summary>
+        /// Opens a plan file on a tab of the window <paramref name="from"/> is on - or finds it, if it's open already - and
+        /// returns its viewer.  Null when the file couldn't be opened, or is the plan <paramref name="from"/> already
+        /// shows, either of which has been reported.
+        /// </summary>
+        internal static QueryPlanViewerControl OpenPlanFileBeside(QueryPlanViewerControl from, string path)
+        {
+            if (from?.FindForm() is not ViewerForm window) return null;
+
+            string sourceXml;
+            ExecutionPlan plan;
+            try
+            {
+                // SSMS saves plans as UTF-16 and other tools as UTF-8 - see ViewerLauncher.ShowQueryPlanFile.
+                using (var reader = new StreamReader(path, System.Text.Encoding.UTF8, detectEncodingFromByteOrderMarks: true))
+                {
+                    sourceXml = reader.ReadToEnd();
+                }
+
+                plan = PlanParser.Parse(sourceXml);
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex, "Error opening query plan", text: $"{path} could not be opened as a query plan.");
+                return null;
+            }
+
+            // Opening it would only find the tab it was chosen from - say so, rather than doing nothing.
+            if (string.Equals(sourceXml, from.SourceXml, StringComparison.Ordinal))
+            {
+                MessageBox.Show(window,
+                    "That file is the plan already open here." +
+                    (from.Plan.StatementsWithPlans.Skip(1).Any() ? " To compare two of its statements, choose With Another Statement in This Plan." : string.Empty),
+                    "Compare With Query Plan", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return null;
+            }
+
+            window.AddQueryPlanTab(plan, sourceXml, Path.GetFileName(path), ViewerLauncher.DefaultHost);
+
+            return window._documents.SelectedTab?.Controls.Count > 0 ? window._documents.SelectedTab.Controls[0] as QueryPlanViewerControl : null;
+        }
+
         private void AddDeadlockTab(IReadOnlyList<DeadlockGraph> graphs, string sourceXml, string fileName, IViewerHost host)
         {
             // Only fold into an existing tab when there is a real key to match on: two graphs opened without a
@@ -535,12 +629,14 @@ namespace DBADashGUI.Viewers
             Icon = content switch
             {
                 DeadlockViewerControl => Resources.DeadlockIcon,
+                QueryPlanCompareControl => Resources.PlanCompareIcon,
                 GridViewerControl or DataSetViewerControl => Resources.GridIcon,
                 _ => Resources.PlanViewerIcon
             };
             Text = content switch
             {
                 QueryPlanViewerControl => "Query Plan - " + _documents.SelectedTab.Text,
+                QueryPlanCompareControl => "Plan Comparison - " + _documents.SelectedTab.Text,
                 DeadlockViewerControl => "Deadlock - " + _documents.SelectedTab.Text,
                 GridViewerControl => "Grid - " + _documents.SelectedTab.Text,
                 DataSetViewerControl => "Data Set - " + _documents.SelectedTab.Text,
