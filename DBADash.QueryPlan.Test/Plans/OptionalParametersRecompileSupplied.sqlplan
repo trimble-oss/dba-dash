@@ -1,0 +1,123 @@
+<ShowPlanXML xmlns="http://schemas.microsoft.com/sqlserver/2004/07/showplan" Version="1.599" Build="17.0.1135.8">
+  <BatchSequence>
+    <Batch>
+      <Statements>
+        <StmtSimple StatementText="SELECT ID FROM dbo.T WHERE A = ISNULL(@A, A) AND B = ISNULL(@B, B) OPTION (RECOMPILE)" StatementId="6" StatementCompId="17" StatementType="SELECT" StatementSqlHandle="0x09009940A6347D7E7AECF57573E5B10C64100000000000000000000000000000000000000000000000000000" DatabaseContextSettingsId="1" ParentObjectId="1301579675" StatementParameterizationType="0" RetrievedFromCache="false" StatementSubTreeCost="0.0127655" StatementEstRows="2.85133" SecurityPolicyApplied="false" StatementOptmLevel="FULL" QueryHash="0x9EABCAB83FC60DB2" QueryPlanHash="0x40B41BA0A13D55DE" StatementOptmEarlyAbortReason="GoodEnoughPlanFound" CardinalityEstimationModelVersion="170">
+          <StatementSetOptions QUOTED_IDENTIFIER="true" ARITHABORT="true" CONCAT_NULL_YIELDS_NULL="true" ANSI_NULLS="true" ANSI_PADDING="true" ANSI_WARNINGS="true" NUMERIC_ROUNDABORT="false"></StatementSetOptions>
+          <QueryPlan DegreeOfParallelism="1" CachedPlanSize="24" CompileTime="1" CompileCPU="1" CompileMemory="368">
+            <MemoryGrantInfo SerialRequiredMemory="0" SerialDesiredMemory="0" GrantedMemory="0" MaxUsedMemory="0"></MemoryGrantInfo>
+            <OptimizerHardwareDependentProperties EstimatedAvailableMemoryGrant="66704" EstimatedPagesCached="50028" EstimatedAvailableDegreeOfParallelism="6" MaxCompileMemory="1706720"></OptimizerHardwareDependentProperties>
+            <OptimizerStatsUsage>
+              <StatisticsInfo LastUpdate="2026-09-30T01:43:22.06" ModificationCount="0" SamplingPercent="100" Statistics="[PK__T__3214EC2704F99380]" Table="[T]" Schema="[dbo]" Database="[CatchAll]"></StatisticsInfo>
+              <StatisticsInfo LastUpdate="2026-09-30T01:43:21.90" ModificationCount="0" SamplingPercent="100" Statistics="[IX_A]" Table="[T]" Schema="[dbo]" Database="[CatchAll]"></StatisticsInfo>
+              <StatisticsInfo LastUpdate="2026-09-30T01:43:22.03" ModificationCount="0" SamplingPercent="100" Statistics="[IX_B]" Table="[T]" Schema="[dbo]" Database="[CatchAll]"></StatisticsInfo>
+            </OptimizerStatsUsage>
+            <TraceFlags IsCompileTime="1">
+              <TraceFlag Value="3226" Scope="Global"></TraceFlag>
+            </TraceFlags>
+            <TraceFlags IsCompileTime="0">
+              <TraceFlag Value="3226" Scope="Global"></TraceFlag>
+            </TraceFlags>
+            <QueryTimeStats ElapsedTime="0" CpuTime="0"></QueryTimeStats>
+            <RelOp NodeId="1" PhysicalOp="Merge Join" LogicalOp="Inner Join" EstimateRows="1" EstimateIO="0" EstimateCPU="0.0059928" AvgRowSize="11" EstimatedTotalSubtreeCost="0.0127655" Parallel="0" EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row">
+              <OutputList>
+                <ColumnReference Database="[CatchAll]" Schema="[dbo]" Table="[T]" Column="ID"></ColumnReference>
+              </OutputList>
+              <RunTimeInformation>
+                <RunTimeCountersPerThread Thread="0" ActualRows="0" Batches="0" ActualElapsedms="0" ActualCPUms="0" ActualScans="0" ActualLogicalReads="0" ActualPhysicalReads="0" ActualReadAheads="0" ActualLobLogicalReads="0" ActualLobPhysicalReads="0" ActualLobReadAheads="0" ActualEndOfScans="1" ActualExecutions="1" ActualExecutionMode="Row"></RunTimeCountersPerThread>
+              </RunTimeInformation>
+              <Merge ManyToMany="0">
+                <InnerSideJoinColumns>
+                  <ColumnReference Database="[CatchAll]" Schema="[dbo]" Table="[T]" Column="ID"></ColumnReference>
+                </InnerSideJoinColumns>
+                <OuterSideJoinColumns>
+                  <ColumnReference Database="[CatchAll]" Schema="[dbo]" Table="[T]" Column="ID"></ColumnReference>
+                </OuterSideJoinColumns>
+                <Residual>
+                  <ScalarOperator ScalarString="[CatchAll].[dbo].[T].[ID] = [CatchAll].[dbo].[T].[ID]">
+                    <Compare CompareOp="IS">
+                      <ScalarOperator>
+                        <Identifier>
+                          <ColumnReference Database="[CatchAll]" Schema="[dbo]" Table="[T]" Column="ID"></ColumnReference>
+                        </Identifier>
+                      </ScalarOperator>
+                      <ScalarOperator>
+                        <Identifier>
+                          <ColumnReference Database="[CatchAll]" Schema="[dbo]" Table="[T]" Column="ID"></ColumnReference>
+                        </Identifier>
+                      </ScalarOperator>
+                    </Compare>
+                  </ScalarOperator>
+                </Residual>
+                <RelOp NodeId="2" PhysicalOp="Index Seek" LogicalOp="Index Seek" EstimateRows="93" EstimatedRowsRead="93" EstimateIO="0.003125" EstimateCPU="0.0002593" AvgRowSize="11" EstimatedTotalSubtreeCost="0.0033843" TableCardinality="100000" Parallel="0" EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row">
+                  <OutputList>
+                    <ColumnReference Database="[CatchAll]" Schema="[dbo]" Table="[T]" Column="ID"></ColumnReference>
+                  </OutputList>
+                  <RunTimeInformation>
+                    <RunTimeCountersPerThread Thread="0" ActualRows="90" Batches="0" ActualElapsedms="0" ActualCPUms="0" ActualScans="1" ActualLogicalReads="3" ActualPhysicalReads="0" ActualReadAheads="0" ActualLobLogicalReads="0" ActualLobPhysicalReads="0" ActualLobReadAheads="0" ActualRowsRead="90" ActualEndOfScans="0" ActualExecutions="1" ActualExecutionMode="Row"></RunTimeCountersPerThread>
+                  </RunTimeInformation>
+                  <IndexScan Ordered="1" ScanDirection="FORWARD" ForcedIndex="0" ForceSeek="0" ForceScan="0" NoExpandHint="0" Storage="RowStore">
+                    <DefinedValues>
+                      <DefinedValue>
+                        <ColumnReference Database="[CatchAll]" Schema="[dbo]" Table="[T]" Column="ID"></ColumnReference>
+                      </DefinedValue>
+                    </DefinedValues>
+                    <Object Database="[CatchAll]" Schema="[dbo]" Table="[T]" Index="[IX_B]" IndexKind="NonClustered" Storage="RowStore"></Object>
+                    <SeekPredicates>
+                      <SeekPredicateNew>
+                        <SeekKeys>
+                          <Prefix ScanType="EQ">
+                            <RangeColumns>
+                              <ColumnReference Database="[CatchAll]" Schema="[dbo]" Table="[T]" Column="B"></ColumnReference>
+                            </RangeColumns>
+                            <RangeExpressions>
+                              <ScalarOperator ScalarString="'b7'">
+                                <Const ConstValue="'b7'"></Const>
+                              </ScalarOperator>
+                            </RangeExpressions>
+                          </Prefix>
+                        </SeekKeys>
+                      </SeekPredicateNew>
+                    </SeekPredicates>
+                  </IndexScan>
+                </RelOp>
+                <RelOp NodeId="3" PhysicalOp="Index Seek" LogicalOp="Index Seek" EstimateRows="94" EstimatedRowsRead="94" EstimateIO="0.003125" EstimateCPU="0.0002604" AvgRowSize="11" EstimatedTotalSubtreeCost="0.0033854" TableCardinality="100000" Parallel="0" EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row">
+                  <OutputList>
+                    <ColumnReference Database="[CatchAll]" Schema="[dbo]" Table="[T]" Column="ID"></ColumnReference>
+                  </OutputList>
+                  <RunTimeInformation>
+                    <RunTimeCountersPerThread Thread="0" ActualRows="82" Batches="0" ActualElapsedms="0" ActualCPUms="0" ActualScans="1" ActualLogicalReads="3" ActualPhysicalReads="0" ActualReadAheads="0" ActualLobLogicalReads="0" ActualLobPhysicalReads="0" ActualLobReadAheads="0" ActualRowsRead="82" ActualEndOfScans="1" ActualExecutions="1" ActualExecutionMode="Row"></RunTimeCountersPerThread>
+                  </RunTimeInformation>
+                  <IndexScan Ordered="1" ScanDirection="FORWARD" ForcedIndex="0" ForceSeek="0" ForceScan="0" NoExpandHint="0" Storage="RowStore">
+                    <DefinedValues>
+                      <DefinedValue>
+                        <ColumnReference Database="[CatchAll]" Schema="[dbo]" Table="[T]" Column="ID"></ColumnReference>
+                      </DefinedValue>
+                    </DefinedValues>
+                    <Object Database="[CatchAll]" Schema="[dbo]" Table="[T]" Index="[IX_A]" IndexKind="NonClustered" Storage="RowStore"></Object>
+                    <SeekPredicates>
+                      <SeekPredicateNew>
+                        <SeekKeys>
+                          <Prefix ScanType="EQ">
+                            <RangeColumns>
+                              <ColumnReference Database="[CatchAll]" Schema="[dbo]" Table="[T]" Column="A"></ColumnReference>
+                            </RangeColumns>
+                            <RangeExpressions>
+                              <ScalarOperator ScalarString="(5)">
+                                <Const ConstValue="(5)"></Const>
+                              </ScalarOperator>
+                            </RangeExpressions>
+                          </Prefix>
+                        </SeekKeys>
+                      </SeekPredicateNew>
+                    </SeekPredicates>
+                  </IndexScan>
+                </RelOp>
+              </Merge>
+            </RelOp>
+          </QueryPlan>
+        </StmtSimple>
+      </Statements>
+    </Batch>
+  </BatchSequence>
+</ShowPlanXML>

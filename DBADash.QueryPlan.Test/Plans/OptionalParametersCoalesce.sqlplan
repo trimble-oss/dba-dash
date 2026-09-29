@@ -1,0 +1,133 @@
+<ShowPlanXML xmlns="http://schemas.microsoft.com/sqlserver/2004/07/showplan" Version="1.599" Build="17.0.1135.8">
+  <BatchSequence>
+    <Batch>
+      <Statements>
+        <StmtSimple StatementText="SELECT ID FROM dbo.T WHERE A = COALESCE(@A, A) AND B = COALESCE(@B, B)" StatementId="4" StatementCompId="15" StatementType="SELECT" StatementSqlHandle="0x0900116E7FE224059D4CB7CF226F22030C630000000000000000000000000000000000000000000000000000" DatabaseContextSettingsId="1" ParentObjectId="1285579618" StatementParameterizationType="0" RetrievedFromCache="true" StatementSubTreeCost="0.340689" StatementEstRows="3162.28" SecurityPolicyApplied="false" StatementOptmLevel="FULL" QueryHash="0x7381CB12B84F13A8" QueryPlanHash="0x257D7D3D52AD86DF" StatementOptmEarlyAbortReason="GoodEnoughPlanFound" CardinalityEstimationModelVersion="170">
+          <StatementSetOptions QUOTED_IDENTIFIER="true" ARITHABORT="true" CONCAT_NULL_YIELDS_NULL="true" ANSI_NULLS="true" ANSI_PADDING="true" ANSI_WARNINGS="true" NUMERIC_ROUNDABORT="false"></StatementSetOptions>
+          <QueryPlan DegreeOfParallelism="1" CachedPlanSize="24" CompileTime="2" CompileCPU="2" CompileMemory="312">
+            <MemoryGrantInfo SerialRequiredMemory="0" SerialDesiredMemory="0" GrantedMemory="0" MaxUsedMemory="0"></MemoryGrantInfo>
+            <OptimizerHardwareDependentProperties EstimatedAvailableMemoryGrant="66704" EstimatedPagesCached="50028" EstimatedAvailableDegreeOfParallelism="6" MaxCompileMemory="1706720"></OptimizerHardwareDependentProperties>
+            <OptimizerStatsUsage>
+              <StatisticsInfo LastUpdate="2026-09-30T01:43:22.06" ModificationCount="0" SamplingPercent="100" Statistics="[PK__T__3214EC2704F99380]" Table="[T]" Schema="[dbo]" Database="[CatchAll]"></StatisticsInfo>
+            </OptimizerStatsUsage>
+            <TraceFlags IsCompileTime="1">
+              <TraceFlag Value="3226" Scope="Global"></TraceFlag>
+            </TraceFlags>
+            <TraceFlags IsCompileTime="0">
+              <TraceFlag Value="3226" Scope="Global"></TraceFlag>
+            </TraceFlags>
+            <QueryTimeStats ElapsedTime="8" CpuTime="8"></QueryTimeStats>
+            <RelOp NodeId="0" PhysicalOp="Clustered Index Scan" LogicalOp="Clustered Index Scan" EstimateRows="3162.28" EstimatedRowsRead="100000" EstimateIO="0.230532" EstimateCPU="0.110157" AvgRowSize="44" EstimatedTotalSubtreeCost="0.340689" TableCardinality="100000" Parallel="0" EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row">
+              <OutputList>
+                <ColumnReference Database="[CatchAll]" Schema="[dbo]" Table="[T]" Column="ID"></ColumnReference>
+              </OutputList>
+              <RunTimeInformation>
+                <RunTimeCountersPerThread Thread="0" ActualRows="82" Batches="0" ActualElapsedms="7" ActualCPUms="7" ActualScans="1" ActualLogicalReads="310" ActualPhysicalReads="0" ActualReadAheads="0" ActualLobLogicalReads="0" ActualLobPhysicalReads="0" ActualLobReadAheads="0" ActualRowsRead="100000" ActualEndOfScans="1" ActualExecutions="1" ActualExecutionMode="Row"></RunTimeCountersPerThread>
+              </RunTimeInformation>
+              <IndexScan Ordered="0" ForcedIndex="0" ForceScan="0" NoExpandHint="0" Storage="RowStore">
+                <DefinedValues>
+                  <DefinedValue>
+                    <ColumnReference Database="[CatchAll]" Schema="[dbo]" Table="[T]" Column="ID"></ColumnReference>
+                  </DefinedValue>
+                </DefinedValues>
+                <Object Database="[CatchAll]" Schema="[dbo]" Table="[T]" Index="[PK__T__3214EC2704F99380]" IndexKind="Clustered" Storage="RowStore"></Object>
+                <Predicate>
+                  <ScalarOperator ScalarString="[CatchAll].[dbo].[T].[A]=CASE WHEN [@A] IS NOT NULL THEN [@A] ELSE [CatchAll].[dbo].[T].[A] END AND [CatchAll].[dbo].[T].[B]=CASE WHEN [@B] IS NOT NULL THEN [@B] ELSE [CatchAll].[dbo].[T].[B] END">
+                    <Logical Operation="AND">
+                      <ScalarOperator>
+                        <Compare CompareOp="EQ">
+                          <ScalarOperator>
+                            <Identifier>
+                              <ColumnReference Database="[CatchAll]" Schema="[dbo]" Table="[T]" Column="A"></ColumnReference>
+                            </Identifier>
+                          </ScalarOperator>
+                          <ScalarOperator>
+                            <IF>
+                              <Condition>
+                                <ScalarOperator>
+                                  <Compare CompareOp="IS NOT">
+                                    <ScalarOperator>
+                                      <Identifier>
+                                        <ColumnReference Column="@A"></ColumnReference>
+                                      </Identifier>
+                                    </ScalarOperator>
+                                    <ScalarOperator>
+                                      <Const ConstValue="NULL"></Const>
+                                    </ScalarOperator>
+                                  </Compare>
+                                </ScalarOperator>
+                              </Condition>
+                              <Then>
+                                <ScalarOperator>
+                                  <Identifier>
+                                    <ColumnReference Column="@A"></ColumnReference>
+                                  </Identifier>
+                                </ScalarOperator>
+                              </Then>
+                              <Else>
+                                <ScalarOperator>
+                                  <Identifier>
+                                    <ColumnReference Database="[CatchAll]" Schema="[dbo]" Table="[T]" Column="A"></ColumnReference>
+                                  </Identifier>
+                                </ScalarOperator>
+                              </Else>
+                            </IF>
+                          </ScalarOperator>
+                        </Compare>
+                      </ScalarOperator>
+                      <ScalarOperator>
+                        <Compare CompareOp="EQ">
+                          <ScalarOperator>
+                            <Identifier>
+                              <ColumnReference Database="[CatchAll]" Schema="[dbo]" Table="[T]" Column="B"></ColumnReference>
+                            </Identifier>
+                          </ScalarOperator>
+                          <ScalarOperator>
+                            <IF>
+                              <Condition>
+                                <ScalarOperator>
+                                  <Compare CompareOp="IS NOT">
+                                    <ScalarOperator>
+                                      <Identifier>
+                                        <ColumnReference Column="@B"></ColumnReference>
+                                      </Identifier>
+                                    </ScalarOperator>
+                                    <ScalarOperator>
+                                      <Const ConstValue="NULL"></Const>
+                                    </ScalarOperator>
+                                  </Compare>
+                                </ScalarOperator>
+                              </Condition>
+                              <Then>
+                                <ScalarOperator>
+                                  <Identifier>
+                                    <ColumnReference Column="@B"></ColumnReference>
+                                  </Identifier>
+                                </ScalarOperator>
+                              </Then>
+                              <Else>
+                                <ScalarOperator>
+                                  <Identifier>
+                                    <ColumnReference Database="[CatchAll]" Schema="[dbo]" Table="[T]" Column="B"></ColumnReference>
+                                  </Identifier>
+                                </ScalarOperator>
+                              </Else>
+                            </IF>
+                          </ScalarOperator>
+                        </Compare>
+                      </ScalarOperator>
+                    </Logical>
+                  </ScalarOperator>
+                </Predicate>
+              </IndexScan>
+            </RelOp>
+            <ParameterList>
+              <ColumnReference Column="@B" ParameterDataType="varchar(50)" ParameterCompiledValue="NULL" ParameterRuntimeValue="NULL"></ColumnReference>
+              <ColumnReference Column="@A" ParameterDataType="int" ParameterCompiledValue="(5)" ParameterRuntimeValue="(5)"></ColumnReference>
+            </ParameterList>
+          </QueryPlan>
+        </StmtSimple>
+      </Statements>
+    </Batch>
+  </BatchSequence>
+</ShowPlanXML>

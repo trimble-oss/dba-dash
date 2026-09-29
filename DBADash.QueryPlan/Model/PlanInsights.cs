@@ -120,6 +120,8 @@ namespace DBADash.QueryPlan.Model
                 insights.Add(udfInsight);
             }
 
+            if (OptionalParametersInsight(statement) is { } optional) insights.Add(optional);
+
             var changed = statement.Parameters.Where(p => p.CompiledValueDiffers).ToList();
             if (changed.Count > 0)
             {
@@ -176,6 +178,10 @@ namespace DBADash.QueryPlan.Model
                 .OrderByDescending(i => i.Severity)
                 .Concat(statement.MissingIndexesFor(op)
                     .Select(index => new PlanInsight(PlanWarningSeverity.Warning, MissingIndexText(index), op, index)))
+                .Concat(PlanOptionalParameters.On(op, statement) is { } use
+                        && NothingLeftToOptimizeInsight(statement, [use]) is null
+                    ? new[] { OptionalParametersInsight(statement, [use], onOneOperator: true) }
+                    : Enumerable.Empty<PlanInsight>())
                 .ToList();
         }
 
@@ -433,6 +439,167 @@ namespace DBADash.QueryPlan.Model
 
             return new PlanInsight(PlanWarningSeverity.Critical, text.ToString());
         }
+
+        /// <summary>
+        /// The catch-all query - WHERE (col = @p OR @p IS NULL) - compiled without OPTION (RECOMPILE),
+        /// which <see cref="PlanOptionalParameters"/> finds.  Null when there is none.
+        /// </summary>
+        private static PlanInsight? OptionalParametersInsight(PlanStatement statement)
+        {
+            var uses = PlanOptionalParameters.In(statement);
+            if (NothingLeftToOptimizeInsight(statement, uses) is { } optimized) return optimized;
+            return uses.Count == 0 ? null : OptionalParametersInsight(statement, uses, onOneOperator: false);
+        }
+
+        /// <summary>
+        /// A plan SQL Server 2025's optional parameter plan optimization compiled, with no optional
+        /// parameter conditions left in it that these values could use - none at all, or only ones
+        /// whose parameters are NULL, which match every row.  Neither OPTION (RECOMPILE) nor another
+        /// variant could do better, so it is only worth saying that the optimization was applied.
+        /// Null when the plan is not a variant, or when a condition it left is on a supplied value.
+        /// </summary>
+        private static PlanInsight? NothingLeftToOptimizeInsight(PlanStatement statement, IReadOnlyList<PlanOptionalParameterUse> uses)
+        {
+            var optimizedBy = PlanOptionalParameters.OptimizedBy(statement.StatementText);
+            if (optimizedBy.Count == 0) return null;
+
+            var remaining = uses.SelectMany(u => u.Parameters).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+            if (!remaining.All(p => IsNull(statement, p))) return null;
+
+            var text = AppendOptimizedBy(new StringBuilder(), optimizedBy);
+            if (remaining.Count > 0)
+            {
+                var one = remaining.Count == 1;
+                text.Append(one ? " The condition" : " The conditions")
+                    .Append(" left on ")
+                    .Append(PlanFormat.List(remaining, MaxNamedParameters))
+                    .Append(one ? " matches" : " match")
+                    .Append(" every row, as ")
+                    .Append(one ? "it is" : "they are")
+                    .Append(" NULL, so neither OPTION (RECOMPILE) nor another variant could do better for these values.");
+            }
+
+            return new PlanInsight(PlanWarningSeverity.Information, text.ToString());
+        }
+
+        /// <summary>
+        /// Whether <paramref name="parameter"/> is NULL in the values this plan ran with, or was
+        /// compiled for when it has no runtime values.  False when the plan doesn't list it.
+        /// </summary>
+        private static bool IsNull(PlanStatement statement, string parameter) =>
+            statement.Parameters.FirstOrDefault(p => string.Equals(p.Name, parameter, StringComparison.OrdinalIgnoreCase)) is { } found
+            && string.Equals(found.RuntimeValue ?? found.CompiledValue, "NULL", StringComparison.OrdinalIgnoreCase);
+
+        private static StringBuilder AppendOptimizedBy(StringBuilder text, IReadOnlyList<string> optimizedBy) =>
+            text.Append("Optional parameters, optimized by SQL Server: optional parameter plan optimization compiled this plan for whether ")
+                .Append(PlanFormat.List(optimizedBy, MaxNamedParameters))
+                .Append(optimizedBy.Count == 1 ? " is" : " are")
+                .Append(" NULL, removing ")
+                .Append(optimizedBy.Count == 1 ? "its" : "their")
+                .Append(" IS NULL test from the plan.");
+
+        private static PlanInsight OptionalParametersInsight(
+            PlanStatement statement,
+            IReadOnlyList<PlanOptionalParameterUse> uses,
+            bool onOneOperator)
+        {
+            // A plan SQL Server 2025 compiled for which parameters are NULL: those parameters' IS NULL
+            // tests are gone from it, and what is left is the conditions it did not choose by.
+            // Here at least one of those is supplied (NothingLeftToOptimizeInsight takes the rest), so
+            // still worth a card - how much it costs depends on selectivity the plan cannot show - but
+            // the query is already being optimized for its optional parameters, so not a warning.
+            // The conditions left on NULL parameters match every row, so there is nothing in them to
+            // name.
+            var optimizedBy = PlanOptionalParameters.OptimizedBy(statement.StatementText);
+            var isVariant = optimizedBy.Count > 0;
+            bool Named(string parameter) => !isVariant || !IsNull(statement, parameter);
+
+            uses = uses.Where(u => u.Parameters.Any(Named)).ToList();
+            var parameters = uses.SelectMany(u => u.Parameters).Where(Named).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+            var operators = uses.Select(u => u.Operator).ToList();
+            var one = parameters.Count == 1;
+
+            var where = onOneOperator ? "this operator's predicate matches" :
+                operators.Count == 1 ? "the predicate on " + Nodes(operators) + " matches" : "the predicates on " + Nodes(operators) + " match";
+
+            var text = new StringBuilder();
+
+            if (isVariant)
+            {
+                AppendOptimizedBy(text, optimizedBy)
+                    .Append(' ')
+                    .Append(char.ToUpperInvariant(where[0])).Append(where, 1, where.Length - 1)
+                    .Append(" whether or not ")
+                    .Append(PlanFormat.List(parameters, MaxNamedParameters))
+                    .Append(one ? " is" : " are")
+                    .Append(" supplied, and can't seek on ")
+                    .Append(one ? "that condition" : "those conditions")
+                    .Append(", which matters if ")
+                    .Append(one ? "it is" : "they are")
+                    .Append(" selective.");
+            }
+            else
+            {
+                text.Append("Optional parameters without OPTION (RECOMPILE): ")
+                    .Append(where)
+                    .Append(" whether or not ")
+                    .Append(PlanFormat.List(parameters, MaxNamedParameters))
+                    .Append(one ? " is" : " are")
+                    .Append(" supplied (@p IS NULL OR col = @p, col = ISNULL(@p, col) or col = COALESCE(@p, col)). One plan has to serve every combination of values, so it can't seek on ")
+                    .Append(one ? "that condition" : "those conditions")
+                    .Append(" and may read far more rows than the values given need.");
+            }
+
+            // What each run would pay to compile, from what this plan took - a guide rather than a
+            // measure, since a plan compiled for known values is often simpler.
+            var compileCost = statement.CompileCpuMs is { } compileCpu
+                ? " This plan took " + Milliseconds(compileCpu) + " of CPU to compile" +
+                  (statement.QueryTimeStats?.CpuMs is { } runCpu ? ", against " + Milliseconds(runCpu) + " to run." : ".")
+                : string.Empty;
+
+            // Bare newlines: a card's label counts "\r\n" as two characters and draws it as one.
+            text.Append("\nOptions:")
+                .Append("\n- OPTION (RECOMPILE) on the statement compiles each run for its own values, removing the conditions not used. ")
+                .Append("It adds a compile to every execution, which may cost too much CPU for a frequently run query.")
+                .Append(compileCost)
+                .Append("\n- Dynamic SQL, parameterized with sp_executesql, that includes only the conditions supplied gets a cached plan for each combination, ")
+                .Append("at the cost of more complex code.");
+
+            // Already in use when this is a variant, so only offered when it is not.
+            if (!isVariant)
+            {
+                // The configuration is on by default in the 2025 builds checked, but can be switched off
+                // per database, so it is named for the reader to check.
+                text.Append("\n- SQL Server 2025 handles optional parameters itself with optional parameter plan optimization, ")
+                    .Append("which needs compatibility level 170 and the OPTIONAL_PARAMETER_OPTIMIZATION database scoped configuration on. ")
+                    .Append("It compiles plans by which parameters are NULL, typically seeking on one supplied parameter per plan and ")
+                    .Append("leaving the other conditions in as residual predicates.");
+
+                // Checked on 17.0.1135.8 at level 170: ISNULL and COALESCE spellings compile as a single
+                // plan, with no optional_predicate variants.
+                var defaulted = uses.SelectMany(u => u.Defaulted).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+                if (defaulted.Count > 0)
+                {
+                    text.Append(" It only recognizes (col = @p OR @p IS NULL), not ISNULL(@p, col) or COALESCE(@p, col), so ")
+                        .Append(defaulted.Count == 1 ? "the condition on " : "the conditions on ")
+                        .Append(PlanFormat.List(defaulted, MaxNamedParameters))
+                        .Append(" would need rewriting in that form first. On a nullable column that also changes the results: ")
+                        .Append("the OR form keeps rows where the column is NULL, which col = ISNULL(@p, col) leaves out.");
+                }
+            }
+
+            text.Append("\nNone of these helps unless an index supports the conditions that remain. WITH RECOMPILE on a procedure does not help.");
+
+            // Warning whatever operator it is on: whether a residual after a seek is cheap depends on
+            // how selective the seek is, which the plan cannot tell us for other values.
+            return new PlanInsight(
+                isVariant ? PlanWarningSeverity.Information : PlanWarningSeverity.Warning,
+                text.ToString(),
+                operators);
+        }
+
+        /// <summary>The most parameters an optional parameters card names before the rest are counted.</summary>
+        private const int MaxNamedParameters = 4;
 
         /// <summary>The reason code showplan uses when a T-SQL UDF stops a plan going parallel.</summary>
         private const string TSqlUdfNonParallelReason = "TSQLUserDefinedFunctionsNotParallelizable";

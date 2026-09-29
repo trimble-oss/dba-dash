@@ -34,6 +34,39 @@ namespace DBADash.QueryPlan.Test
         /// </summary>
         public const string Concatenation = "Concatenation";
 
+        /// <summary>
+        /// A catch-all query - (A = @A OR @A IS NULL) AND (B = @B OR @B IS NULL) - compiled without
+        /// OPTION (RECOMPILE), at compatibility level 150.  Constructed rather than captured.
+        /// </summary>
+        public const string OptionalParameters = "OptionalParameters";
+
+        // The rest are captured from SQL Server 2025 (17.0.1135.8) at compatibility level 170, running
+        // procedures over dbo.T (ID, A int NULL, B varchar(50) NULL) with an index on each of A and B.
+
+        /// <summary>
+        /// The same query, run with @A = 5 and @B NULL: optional parameter plan optimization compiled
+        /// a variant for @A and left the condition on @B in it.
+        /// </summary>
+        public const string OptionalParametersVariant = "OptionalParametersVariant";
+
+        /// <summary>
+        /// The variant above reused from cache for @A = 5, @B = 'b7': compiled with @B NULL, run with
+        /// it supplied, so its condition on @B can't seek.
+        /// </summary>
+        public const string OptionalParametersVariantReused = "OptionalParametersVariantReused";
+
+        /// <summary>A = ISNULL(@A, A) AND B = ISNULL(@B, B), for which no variant is compiled.</summary>
+        public const string OptionalParametersIsNull = "OptionalParametersIsNull";
+
+        /// <summary>A = COALESCE(@A, A) AND B = COALESCE(@B, B), for which no variant is compiled.</summary>
+        public const string OptionalParametersCoalesce = "OptionalParametersCoalesce";
+
+        /// <summary>The ISNULL query with OPTION (RECOMPILE), @A = 5 and @B NULL: a seek on A, and B = B left.</summary>
+        public const string OptionalParametersRecompile = "OptionalParametersRecompile";
+
+        /// <summary>The ISNULL query with OPTION (RECOMPILE), @A = 5 and @B = 'b7': a seek on each.</summary>
+        public const string OptionalParametersRecompileSupplied = "OptionalParametersRecompileSupplied";
+
         public static string Xml(string name)
         {
             var assembly = Assembly.GetExecutingAssembly();
