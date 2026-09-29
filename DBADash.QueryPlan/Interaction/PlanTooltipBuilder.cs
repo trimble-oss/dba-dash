@@ -472,7 +472,9 @@ namespace DBADash.QueryPlan.Interaction
 
             if (statement.OptimisationEarlyAbortReason is { } abort)
             {
-                rows.Add(new PlanTooltipRow("Optimiser stopped early", abort, true));
+                // GoodEnoughPlanFound is the optimiser stopping because it had a plan worth keeping,
+                // which is normal - only a time out or a memory limit means it might have done better.
+                rows.Add(new PlanTooltipRow("Optimiser stopped early", abort, abort != "GoodEnoughPlanFound"));
             }
 
             // Parameter sniffing in one line: a plan compiled for one value and run with another is

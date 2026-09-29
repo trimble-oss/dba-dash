@@ -1170,7 +1170,7 @@ namespace DBADash.QueryPlan
                 // an output list reading Expr1033, Expr1034, Expr1035 is the commonest place a reader
                 // meets a generated name, and on its own it says nothing at all.
                 properties.Add(new PlanProperty(
-                    "Output List",
+                    PlanOperatorText.OutputList,
                     node.OutputList.Count.ToString(CultureInfo.InvariantCulture) + " columns",
                     node.OutputList
                         .Select(c => DefinitionOf(c, node, statement) is { } definition
