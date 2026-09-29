@@ -64,6 +64,27 @@ namespace DBADash.QueryPlan.Test
         }
 
         [TestMethod]
+        public void StatementTooltip_FlagsAnEarlyStop_OnlyWhenThePlanMightNotBeTheBest()
+        {
+            var statement = Parse(Op(1, "Table Scan", "Table Scan", Rows(10)));
+
+            statement.OptimisationEarlyAbortReason = "TimeOut";
+            Assert.IsTrue(EarlyStopRow(statement).IsEmphasised);
+
+            // The same rule as the insight cards: finding a good enough plan is the optimiser working.
+            statement.OptimisationEarlyAbortReason = "GoodEnoughPlanFound";
+            var row = EarlyStopRow(statement);
+            Assert.AreEqual("GoodEnoughPlanFound", row.Value, "Still shown - it is worth knowing - just not flagged.");
+            Assert.IsFalse(row.IsEmphasised);
+
+            static PlanTooltipRow EarlyStopRow(PlanStatement statement)
+            {
+                var layout = new PlanLayoutEngine(new FakeTextMeasurer()).Layout(statement);
+                return PlanTooltipBuilder.Build(layout.Nodes.Single(n => n.IsRoot)).Rows.Single(r => r.Label == "Optimiser stopped early");
+            }
+        }
+
+        [TestMethod]
         public void Statement_CallsOutAnExcessiveMemoryGrant_WhenMostOfALargeGrantWentUnused()
         {
             // A 2 GB grant of which only a tenth was used: query memory other queries could not be
@@ -491,6 +512,35 @@ namespace DBADash.QueryPlan.Test
                               "CONVERT_IMPLICIT(int,[db].[dbo].[T].[Reference],0)&lt;=[@p2]")));
 
             CollectionAssert.AreEqual(new[] { 0 }, statement.Warnings.Single().Operators.Select(op => op.NodeId).ToList());
+        }
+
+        [TestMethod]
+        public void AConversionInsideAValueCarriedUpThePlan_IsTracedOnlyToTheOperatorThatWorksItOut()
+        {
+            // The aggregate converts inside Expr1030 and the operators above only pass it on - but
+            // their output lists write Expr1030 out with its definition, conversion and all.
+            const string definition = "MAX(N'queue_id: '+CONVERT(nvarchar(30),[Union1014],0))";
+
+            static string Carrying(int id, string physicalOp, string body) =>
+                $"""
+                 <RelOp NodeId="{id}" PhysicalOp="{physicalOp}" LogicalOp="{physicalOp}" EstimateRows="1" AvgRowSize="9" EstimatedTotalSubtreeCost="1">
+                   <OutputList><ColumnReference Column="Expr1030" /></OutputList>
+                   <Body>{body}</Body>
+                 </RelOp>
+                 """;
+
+            var statement = Parse(
+                Converts("CONVERT(nvarchar(30),[Union1014],0)") +
+                Carrying(0, "Top", Carrying(1, "Filter", Carrying(2, "Stream Aggregate", $"""
+                    <DefinedValues>
+                      <DefinedValue>
+                        <ColumnReference Column="Expr1030" />
+                        <ScalarOperator ScalarString="{definition}" />
+                      </DefinedValue>
+                    </DefinedValues>
+                    """ + Op(3, "Table Scan", "Table Scan", Rows(10))))));
+
+            CollectionAssert.AreEqual(new[] { 2 }, statement.Warnings.Single().Operators.Select(op => op.NodeId).ToList());
         }
 
         [TestMethod]

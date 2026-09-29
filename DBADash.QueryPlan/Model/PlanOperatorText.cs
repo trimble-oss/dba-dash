@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DBADash.QueryPlan.Model
 {
@@ -12,6 +13,9 @@ namespace DBADash.QueryPlan.Model
     /// </summary>
     internal static class PlanOperatorText
     {
+        /// <summary>The property holding the operator's output columns, each with what it means beside it.</summary>
+        public const string OutputList = "Output List";
+
         public static IEnumerable<string> Of(PlanOperator op)
         {
             foreach (var column in op.OutputList)
@@ -21,6 +25,17 @@ namespace DBADash.QueryPlan.Model
 
             foreach (var text in Of(op.Properties)) yield return text;
         }
+
+        /// <summary>
+        /// What the operator itself works out or tests - everything but the output list.
+        ///
+        /// The output list writes each generated name out with its definition beside it, and that
+        /// definition belongs to whichever operator computed the value, often far below.  A value
+        /// carried up through a dozen operators would otherwise have its expression found in all of
+        /// them, when only one of them evaluates it.
+        /// </summary>
+        public static IEnumerable<string> Evaluated(PlanOperator op) =>
+            Of(op.Properties.Where(property => property.Name != OutputList).ToList());
 
         private static IEnumerable<string> Of(IReadOnlyList<PlanProperty> properties)
         {

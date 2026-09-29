@@ -330,8 +330,10 @@ namespace DBADash.QueryPlan.Model
             if (convertWarnings.Count == 0) return;
 
             // Each operator's text joined once, because every warning is looked for in every operator.
+            // Only what the operator evaluates: an output list repeats the definition of every value
+            // passing through, which would point the warning at every operator above the one doing it.
             var operators = statement.Operators
-                .Select(op => (Operator: op, Text: string.Join("\n", PlanOperatorText.Of(op))))
+                .Select(op => (Operator: op, Text: string.Join("\n", PlanOperatorText.Evaluated(op))))
                 .ToList();
 
             foreach (var warning in convertWarnings)
