@@ -77,19 +77,7 @@ namespace DBADashGUI.Viewers
             };
             menu.DropDownItems.Add(makeDefault);
 
-            // Not every build has the SSMS extension embedded (see DBADash.Viewers.GUI.csproj) - a dev
-            // build of just this project still works, it just doesn't offer either of these.
-            if (SsmsExtensionInstaller.IsAvailable)
-            {
-                menu.DropDownItems.Add(new ToolStripMenuItem("Install SSMS Extension...", null, (_, _) => InstallSsmsExtension())
-                {
-                    ToolTipText = "Adds \"Open in DBA Dash Visualizer\" to results grids, execution plans and deadlock graphs in SQL Server Management Studio."
-                });
-                menu.DropDownItems.Add(new ToolStripMenuItem("Uninstall SSMS Extension...", null, (_, _) => UninstallSsmsExtension())
-                {
-                    ToolTipText = "Removes the SSMS extension via VSIXInstaller."
-                });
-            }
+            AddSsmsExtensionMenuItems(menu.DropDownItems);
 
             menu.DropDownOpening += (_, _) =>
             {
@@ -111,6 +99,25 @@ namespace DBADashGUI.Viewers
 
                 makeDefault.Enabled = FileAssociation.All.Where(a => !a.IsOptIn).Any(a => !a.IsDefaultHandler);
             };
+        }
+
+        /// <summary>
+        /// Adds Install and Uninstall SSMS Extension items - to the viewers' Settings menu, and to the DBA Dash GUI's
+        /// Options menu.  Not every build has the SSMS extension embedded (see DBADash.Viewers.GUI.csproj) - a dev
+        /// build of just this project still works, it just doesn't offer either of these.
+        /// </summary>
+        public static void AddSsmsExtensionMenuItems(ToolStripItemCollection items)
+        {
+            if (!SsmsExtensionInstaller.IsAvailable) return;
+
+            items.Add(new ToolStripMenuItem("Install SSMS Extension...", null, (_, _) => InstallSsmsExtension())
+            {
+                ToolTipText = "Adds \"Open in DBA Dash Visualizer\" to results grids, execution plans and deadlock graphs in SQL Server Management Studio."
+            });
+            items.Add(new ToolStripMenuItem("Uninstall SSMS Extension...", null, (_, _) => UninstallSsmsExtension())
+            {
+                ToolTipText = "Removes the SSMS extension via VSIXInstaller."
+            });
         }
 
         private static string FriendlyName(FileAssociation association) => association.Extension switch

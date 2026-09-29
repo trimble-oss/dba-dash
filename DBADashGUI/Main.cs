@@ -334,11 +334,26 @@ namespace DBADashGUI
             commandLine = opts;
             Disposed += OnDispose;
             AddTabs();
+            AddSsmsExtensionMenu();
             // Apply currently selected theme immediately so controls are
             // themed before the form is shown (prevents a short white flash).
             try { this.ApplyTheme(); } catch { }
             MainFormInstance = this;
             SetSingleInstance(Settings.Default.ChildFormSingleInstance);
+        }
+
+        /// <summary>
+        /// Offers the SSMS extension from the Options menu, in alphabetical order with the rest - otherwise it's only on
+        /// the viewers' Settings menu.  Left out when this build has no extension embedded.
+        /// </summary>
+        private void AddSsmsExtensionMenu()
+        {
+            var ssmsExtension = new ToolStripMenuItem("SSMS Extension");
+            ViewerApp.AddSsmsExtensionMenuItems(ssmsExtension.DropDownItems);
+            if (ssmsExtension.DropDownItems.Count == 0) return;
+
+            optionsToolStripMenuItem.DropDownItems.Insert(
+                optionsToolStripMenuItem.DropDownItems.IndexOf(themeToolStripMenuItem), ssmsExtension);
         }
 
         private void AddTabs()
