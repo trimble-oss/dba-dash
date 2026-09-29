@@ -157,6 +157,26 @@ namespace DBADash.Viewers.GUI.Properties {
         }
 
         /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Icon PlanCompareIcon {
+            get {
+                object obj = ResourceManager.GetObject("PlanCompareIcon", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap PlanCompare_16x {
+            get {
+                object obj = ResourceManager.GetObject("PlanCompare_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Icon.
         /// </summary>
         internal static System.Drawing.Icon GridIcon {

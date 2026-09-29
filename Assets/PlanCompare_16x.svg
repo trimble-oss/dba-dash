@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+  <defs>
+    <style>
+      .canvas{fill: none; opacity: 0;}
+      .trimble-blue{fill: #0063a3;}
+      .trimble-blue-light{fill: #217cbb;}
+      .trimble-grey{fill: #5b6670;}
+      .white{fill: #fff;}
+    </style>
+  </defs>
+  <title>IconLightPlanCompare</title>
+  <g id="canvas" class="canvas">
+    <path class="canvas" d="M16,16H0V0H16Z" />
+  </g>
+  <g id="level-1">
+    <!--
+      The 16 pixel form of Assets/PlanCompare.svg: the before plan top left, the after plan bottom
+      right, and an arrow each way between them.
+
+      Each page keeps the white plan inside it, reduced to its nodes: a root and two inputs on the
+      before page, a root joined to one input on the after page.  The before plan's connectors are
+      left out - in a page 5 pixels wide inside, the root, the upright and the inputs run together
+      into a solid bracket, where the three nodes alone still read as the plan viewer's layout.
+
+      Everything is on whole pixels.  The arrow heads are stepped - 6, 4 and 2 pixels tall - rather
+      than drawn as triangles, which at this size land between pixels and blur into a nub on the end
+      of the shaft.  The shafts are 2 pixels tall, matching the heads' tip, and a pixel is left
+      between each head and the page beside it.  The grey is the plan viewer icon's connector grey,
+      which holds up on light and dark toolbars alike.
+    -->
+    <path class="trimble-grey" d="M8,2H12V0H13V1H14V2H15V4H14V5H13V6H12V4H8Z" />
+    <path class="trimble-grey" d="M8,12H4V10H3V11H2V12H1V14H2V15H3V16H4V14H8Z" />
+    <rect class="trimble-blue" x="0" y="0" width="7" height="9" rx="1" />
+    <rect class="trimble-blue-light" x="9" y="7" width="7" height="9" rx="1" />
+    <path class="white" d="M1,3H3V6H1ZM4,1H6V3H4ZM4,6H6V8H4Z" />
+    <path class="white" d="M10,10H12V13H10ZM12,11H13V12H12ZM13,10H15V13H13Z" />
+  </g>
+</svg>

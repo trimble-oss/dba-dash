@@ -279,6 +279,7 @@ namespace DBADashGUI.QueryPlans
             Controls.Add(BuildToolbar());
             Controls.Add(BuildStatusBar());
 
+            foreach (var grid in ListGrids) grid.VisibleChanged += ListGrid_VisibleChanged;
             _graphControl.SelectionChanged += (_, node) => ShowSelection(node);
             _graphSplit.SplitterMoved += (_, _) =>
             {
@@ -329,6 +330,11 @@ namespace DBADashGUI.QueryPlans
         /// <summary>The plan XML exactly as it was opened, so the same plan opened twice is recognised.</summary>
         public string SourceXml => _sourceXml;
 
+        public ExecutionPlan Plan => _plan;
+
+        /// <summary>The statement being shown - the one a comparison starting from this plan takes.</summary>
+        public PlanStatement CurrentStatement => _current ?? _plan.PrimaryStatement ?? _plan.Statements[0];
+
         /// <summary>
         /// What the plan's tab is called: the file name when it came from one, otherwise the start of
         /// its most expensive statement - the one it opens on, and the likeliest to tell two apart.
@@ -367,10 +373,52 @@ namespace DBADashGUI.QueryPlans
             ReadOnly = true,
             AllowUserToAddRows = false,
             AllowUserToDeleteRows = false,
-            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells,
+            // Sized once, by FitGrids, rather than in an auto size mode, which stops the reader
+            // dragging a column wider or narrower.
+            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None,
             SelectionMode = DataGridViewSelectionMode.FullRowSelect,
             RowHeadersVisible = false
         };
+
+        private IEnumerable<DataGridView> ListGrids => [_warningsGrid, _missingIndexGrid, _expressionsGrid, _parametersGrid, _waitsGrid];
+
+        /// <summary>Grids refilled while their tab was hidden, sized when they are first shown.</summary>
+        private readonly HashSet<DataGridView> _unsizedGrids = new();
+
+        /// <summary>
+        /// Sizes each list's columns to what is in them, once, after they are filled for a statement.
+        /// A list on a tab not shown has no width to size against, so it waits until it is.
+        /// </summary>
+        private void FitGrids()
+        {
+            _unsizedGrids.Clear();
+            foreach (var grid in ListGrids)
+            {
+                if (grid.Visible) FitGrid(grid);
+                else _unsizedGrids.Add(grid);
+            }
+        }
+
+        private void FitGrid(DataGridView grid)
+        {
+            grid.AutoResizeColumnsWithMaxColumnWidth();
+
+            // The expression columns keep the width they open at - see ShowExpressions.
+            if (ReferenceEquals(grid, _expressionsGrid))
+            {
+                foreach (var column in new[] { "Definition", "Expanded" })
+                {
+                    if (grid.Columns.Contains(column)) grid.Columns[column].Width = ExpressionColumnWidth;
+                }
+            }
+        }
+
+        private void ListGrid_VisibleChanged(object sender, EventArgs e)
+        {
+            if (sender is not DataGridView { Visible: true } grid || !_unsizedGrids.Remove(grid)) return;
+
+            BeginInvoke(() => FitGrid(grid));
+        }
 
         private static TabPage NewPage(string text, Control content)
         {
@@ -517,6 +565,7 @@ namespace DBADashGUI.QueryPlans
                 ToolTipText = "What the icons, markers, arrows and bars on the plan mean, and the keys and mouse actions (F1)."
             });
             toolbar.Items.Add(new ToolStripSeparator());
+            toolbar.Items.Add(BuildCompareMenu());
             toolbar.Items.Add(new ToolStripButton("Open...", Resources.FolderOpened_16x, (_, _) => OpenFiles())
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Image,
@@ -637,12 +686,12 @@ namespace DBADashGUI.QueryPlans
         /// The line width choices are per user preferences held locally: the viewer opens plans from
         /// a file as well as from the repository, so it cannot depend on being connected to one.
         /// </summary>
-        private static PlanEdgeWidthMetric LoadEdgeWidth() =>
+        internal static PlanEdgeWidthMetric LoadEdgeWidth() =>
             Enum.TryParse<PlanEdgeWidthMetric>(ViewerSettings.QueryPlanEdgeWidth, out var metric)
                 ? metric
                 : PlanEdgeWidthMetric.Rows;
 
-        private static PlanEdgeWidthBasis LoadEdgeWidthBasis() =>
+        internal static PlanEdgeWidthBasis LoadEdgeWidthBasis() =>
             Enum.TryParse<PlanEdgeWidthBasis>(ViewerSettings.QueryPlanEdgeWidthBasis, out var basis)
                 ? basis
                 : PlanEdgeWidthBasis.Actual;
@@ -721,7 +770,7 @@ namespace DBADashGUI.QueryPlans
                 : "What the operator times show: each operator's own, or as reported, where a row mode operator's time includes its inputs.";
         }
 
-        private static OperatorTimeMode LoadTimeMode() =>
+        internal static OperatorTimeMode LoadTimeMode() =>
             Enum.TryParse<OperatorTimeMode>(ViewerSettings.QueryPlanOperatorTime, out var mode)
                 ? mode
                 : OperatorTimeMode.Own;
@@ -854,7 +903,7 @@ namespace DBADashGUI.QueryPlans
             }
         }
 
-        private static PlanNodeWidth LoadNodeWidth() =>
+        internal static PlanNodeWidth LoadNodeWidth() =>
             Enum.TryParse<PlanNodeWidth>(ViewerSettings.QueryPlanNodeWidth, out var width)
                 ? width
                 : PlanNodeWidth.Normal;
@@ -950,7 +999,7 @@ namespace DBADashGUI.QueryPlans
             }
         }
 
-        private static PlanVerticalLayout LoadVerticalLayout() =>
+        internal static PlanVerticalLayout LoadVerticalLayout() =>
             Enum.TryParse<PlanVerticalLayout>(ViewerSettings.QueryPlanVerticalLayout, out var layout)
                 ? layout
                 : PlanVerticalLayout.FirstChildAligned;
@@ -1013,7 +1062,7 @@ namespace DBADashGUI.QueryPlans
             return OpeningZooms.Any(z => z.Percent == percent) ? percent / 100.0 : 1.0;
         }
 
-        private static PlanColumnSpacing LoadColumnSpacing() =>
+        internal static PlanColumnSpacing LoadColumnSpacing() =>
             Enum.TryParse<PlanColumnSpacing>(ViewerSettings.QueryPlanColumnSpacing, out var spacing)
                 ? spacing
                 : PlanColumnSpacing.Normal;
@@ -1067,13 +1116,73 @@ namespace DBADashGUI.QueryPlans
         }
 
         /// <summary>
-        /// The viewer's settings, and the Windows integration: offering DBA Dash for .sqlplan files,
-        /// and making it the default.
-        ///
-        /// The integration is offered from the viewer rather than done at startup, because putting an
-        /// application in Explorer's Open with menu is a change to the machine and not ours to make
-        /// uninvited.
+        /// Compare: this plan against another open in the window, or one opened from a file for the
+        /// purpose.  Listed as the menu opens, since tabs come and go.  This plan is the before side -
+        /// the one already being read is usually the baseline - and the comparison can swap them.
         /// </summary>
+        private ToolStripDropDownButton BuildCompareMenu()
+        {
+            // Captioned as well as iconed, like Open With: the icon can say two plans, but not what is done with them.
+            var menu = new ToolStripDropDownButton("Compare", Resources.PlanCompare_16x)
+            {
+                DisplayStyle = ToolStripItemDisplayStyle.Image,
+                ToolTipText = "Compare this plan with another: run time, CPU, I/O, memory grant, waits, operators, parameters and more.",
+            };
+
+            // A placeholder so the drop down arrow works - the real items are listed as it opens.
+            menu.DropDownItems.Add(new ToolStripMenuItem("Loading..."));
+            menu.DropDownOpening += (_, _) =>
+            {
+                menu.DropDownItems.Clear();
+
+                var others = ViewerForm.PlanViewersBeside(this).Where(viewer => !ReferenceEquals(viewer, this)).ToList();
+                foreach (var other in others)
+                {
+                    menu.DropDownItems.Add(new ToolStripMenuItem("With " + other.Title, null,
+                        (_, _) => ViewerForm.OpenPlanComparison(this, other))
+                    {
+                        ToolTipText = other.TabToolTip
+                    });
+                }
+
+                if (others.Count == 0)
+                {
+                    menu.DropDownItems.Add(new ToolStripMenuItem("No other plans open") { Enabled = false });
+                }
+
+                // Another statement of this same plan - a procedure's statements are often worth setting side by side.
+                if (_plan.StatementsWithPlans.FirstOrDefault(s => !ReferenceEquals(s, CurrentStatement)) is { } another)
+                {
+                    menu.DropDownItems.Add(new ToolStripMenuItem("With Another Statement in This Plan", null,
+                        (_, _) => ViewerForm.OpenPlanComparison(this, this, another))
+                    {
+                        ToolTipText = "Compare this statement with another of the same plan - choose which from the After list."
+                    });
+                }
+
+                menu.DropDownItems.Add(new ToolStripSeparator());
+                menu.DropDownItems.Add(new ToolStripMenuItem("With a File...", Resources.FolderOpened_16x, (_, _) => CompareWithFile()));
+            };
+
+            return menu;
+        }
+
+        private void CompareWithFile()
+        {
+            using var dialog = new OpenFileDialog
+            {
+                Filter = "Query plan (*.sqlplan)|*.sqlplan|XML (*.xml)|*.xml|All files (*.*)|*.*",
+                Title = @"Compare With Query Plan"
+            };
+
+            if (dialog.ShowDialog(FindForm()) != DialogResult.OK) return;
+
+            if (ViewerForm.OpenPlanFileBeside(this, dialog.FileName) is { } other)
+            {
+                ViewerForm.OpenPlanComparison(this, other);
+            }
+        }
+
         /// <summary>Prompts for plans and deadlock graphs alike, and opens whichever are chosen - the Open button offers
         /// both regardless of which tab is in front, since they all now share one window.</summary>
         private void OpenFiles()
@@ -1082,6 +1191,14 @@ namespace DBADashGUI.QueryPlans
             if (files.Count > 0) ViewerApp.OpenFiles(files);
         }
 
+        /// <summary>
+        /// The viewer's settings, and the Windows integration: offering DBA Dash for .sqlplan files,
+        /// and making it the default.
+        ///
+        /// The integration is offered from the viewer rather than done at startup, because putting an
+        /// application in Explorer's Open with menu is a change to the machine and not ours to make
+        /// uninvited.
+        /// </summary>
         private ToolStripDropDownButton BuildSettingsMenu()
         {
             var menu = new ToolStripDropDownButton("Settings") { ToolTipText = "Viewer and file association settings.", Image = Resources.SettingsOutline_16x, DisplayStyle = ToolStripItemDisplayStyle.Image };
@@ -1378,6 +1495,7 @@ namespace DBADashGUI.QueryPlans
             ShowExpressions(statement);
             ShowParameters(statement);
             ShowWaits(statement);
+            FitGrids();
 
             _queryText.Text = statement.StatementText ?? string.Empty;
             _xmlText.Text = _sourceXml ?? string.Empty;

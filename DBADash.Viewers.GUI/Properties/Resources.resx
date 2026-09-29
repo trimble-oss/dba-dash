@@ -88,6 +88,12 @@
   <data name="Open_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Open_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="PlanCompareIcon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\PlanCompare.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="PlanCompare_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\PlanCompare_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="PlanViewerIcon" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\PlanViewer.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
