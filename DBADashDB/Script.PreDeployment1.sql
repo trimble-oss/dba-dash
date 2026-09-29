@@ -104,14 +104,16 @@ BEGIN
 	own machine (see AiLocalConversationStore), so any that reached the repository under the old
 	arrangement are deleted here - erring on the side of privacy - before the TurnNumber and Question
 	columns that carried them are dropped.  Guarded on the column still existing so it runs once, on
-	the upgrade that removes it, and never afterwards.
+	the upgrade that removes it, and never afterwards.  Dynamic SQL because the whole pre-deployment
+	batch is compiled up front, and a reference to a column the table no longer has fails compilation
+	even inside a guard that would skip it.
 */
 IF COLUMNPROPERTY(OBJECT_ID('AI.DeadlockAnalysis'), 'TurnNumber', 'ColumnId') IS NOT NULL
 BEGIN
-	DELETE FROM AI.DeadlockAnalysis WHERE TurnNumber > 1
+	EXEC sp_executesql N'DELETE FROM AI.DeadlockAnalysis WHERE TurnNumber > 1'
 END
 IF COLUMNPROPERTY(OBJECT_ID('AI.QueryPlanAnalysis'), 'TurnNumber', 'ColumnId') IS NOT NULL
 BEGIN
-	DELETE FROM AI.QueryPlanAnalysis WHERE TurnNumber > 1
+	EXEC sp_executesql N'DELETE FROM AI.QueryPlanAnalysis WHERE TurnNumber > 1'
 END
 END
