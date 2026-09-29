@@ -1,0 +1,12 @@
+<Project>
+
+  <!--
+    CLI is the configuration releases are built with (tag-create-release.yml), but the SDK only turns on
+    optimization for a configuration literally named Release - without this, CLI builds ship unoptimized IL
+    and a DebuggableAttribute that stops the JIT optimizing it either.
+  -->
+  <PropertyGroup Condition="'$(Configuration)' == 'CLI'">
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+
+</Project>

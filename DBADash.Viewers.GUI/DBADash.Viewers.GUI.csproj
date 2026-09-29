@@ -68,10 +68,27 @@
     from, confirmed the hard way: adding the item at BeforeBuild logged correctly but the resource still
     didn't make it into the built DLL, since CoreResGen had already run by then - and after
     ResolveProjectReferences, so the .vsix this looks for actually exists by the time this runs.
+
+    The .vsix path is asked of the extension project itself (its VSIXContainerProjectOutputGroup, with
+    the same properties ResolveProjectReferences built it with) rather than assumed to be
+    bin\$(Configuration)\net472: the solution maps this project's CLI configuration to a different one
+    for the extension, and -o redirects its output entirely - either way the guessed path didn't exist
+    and the resource was silently left out of the release build.
   -->
   <Target Name="AddSsmsExtensionVsixResource" BeforeTargets="AssignTargetPaths" AfterTargets="ResolveProjectReferences">
+    <MSBuild Projects="@(_MSBuildProjectReferenceExistent)"
+             Targets="VSIXContainerProjectOutputGroup"
+             Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetTargetFramework)"
+             RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)$(_GlobalPropertiesToRemoveFromProjectReferences)"
+             Condition="'%(_MSBuildProjectReferenceExistent.Filename)' == 'DBADash.SSMSExtension'">
+      <Output TaskParameter="TargetOutputs" ItemName="_SsmsExtensionVsix" />
+    </MSBuild>
+
+    <Warning Text="SSMS extension .vsix not found (@(_SsmsExtensionVsix)) - the Install SSMS Extension option won't be offered by this build."
+             Condition="'$(DesignTimeBuild)' != 'true' and ('@(_SsmsExtensionVsix)' == '' or !Exists('@(_SsmsExtensionVsix)'))" />
+
     <ItemGroup>
-      <EmbeddedResource Include="..\DBADash.SSMSExtension\bin\$(Configuration)\net472\DBADash.SSMSExtension.vsix" Condition="Exists('..\DBADash.SSMSExtension\bin\$(Configuration)\net472\DBADash.SSMSExtension.vsix')">
+      <EmbeddedResource Include="@(_SsmsExtensionVsix)" Condition="Exists('@(_SsmsExtensionVsix)')">
         <LogicalName>DBADash.SSMSExtension.vsix</LogicalName>
         <Link>Resources\DBADash.SSMSExtension.vsix</Link>
       </EmbeddedResource>
