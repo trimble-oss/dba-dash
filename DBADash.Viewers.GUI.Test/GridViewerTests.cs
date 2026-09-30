@@ -167,6 +167,80 @@ namespace DBADash.Viewers.GUI.Test
             Assert.AreEqual(typeof(TimeSpan), single.Tables[0].Columns["duration"]!.DataType);
         }
 
+        /// <summary>
+        /// Results SSMS saved as XML (Save Results As... XML): names decoded, xsi:nil read as NULL, and each column's
+        /// type inferred from its values - including sp_WhoIsActive's padded, comma-separated counts.
+        /// </summary>
+        [TestMethod]
+        public void LoadDataSet_ReadsSsmsResultsXml()
+        {
+            var path = Path.Combine(_folder, "Results.xml");
+            File.WriteAllText(path, SsmsResultsXmlText);
+
+            var table = GridSerializer.LoadDataSet(path).Tables.Cast<DataTable>().Single();
+
+            CollectionAssert.AreEqual(
+                new[] { "dd hh:mm:ss.mss", "session_id", "sql_text", "CPU", "blocking_session_id", "start_time", "code", "list", "code (2)" },
+                table.Columns.Cast<DataColumn>().Select(c => c.ColumnName).ToArray());
+            Assert.AreEqual(2, table.Rows.Count);
+
+            Assert.AreEqual(typeof(string), table.Columns["dd hh:mm:ss.mss"]!.DataType);
+            Assert.AreEqual(typeof(long), table.Columns["session_id"]!.DataType);
+            Assert.AreEqual(typeof(long), table.Columns["CPU"]!.DataType);
+            Assert.AreEqual(9688L, table.Rows[0]["CPU"]);
+            Assert.AreEqual(typeof(DateTime), table.Columns["start_time"]!.DataType);
+            Assert.AreEqual(new DateTime(2026, 9, 29, 23, 33, 58, 330), table.Rows[0]["start_time"]);
+            Assert.AreEqual(typeof(string), table.Columns["blocking_session_id"]!.DataType, "all NULL");
+            Assert.IsTrue(table.Rows[0].IsNull("blocking_session_id"));
+            Assert.AreEqual(typeof(string), table.Columns["code"]!.DataType, "a leading zero is a code, not a number");
+            Assert.AreEqual(typeof(string), table.Columns["list"]!.DataType, "\"1,2\" isn't 12");
+            StringAssert.StartsWith((string)table.Rows[0]["sql_text"], "<?query --");
+            Assert.IsTrue(table.Rows[0].IsNull("code (2)"), "a column a row leaves out is NULL in it");
+            Assert.AreEqual("x", table.Rows[1]["code (2)"]);
+        }
+
+        [TestMethod]
+        [DataRow("<?xml version=\"1.0\"?><Data><Row><a>1</a></Row></Data>", true)]
+        [DataRow("<Data />", true)]
+        [DataRow("<Data><Row><a>1</a></Row>", true)] // just the start of a file
+        [DataRow("<NewDataSet><xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" /></NewDataSet>", false)]
+        [DataRow("<ShowPlanXML><Row /></ShowPlanXML>", false)]
+        [DataRow("<Data><Other /></Data>", false)]
+        [DataRow("not xml", false)]
+        public void SsmsResultsXml_IsResultsXml(string xml, bool expected)
+        {
+            Assert.AreEqual(expected, SsmsResultsXml.IsResultsXml(new StringReader(xml)));
+        }
+
+        private const string SsmsResultsXmlText = """
+            <?xml version="1.0" encoding="utf-8"?>
+            <Data xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+              <Row>
+                <dd_x0020_hh_x003A_mm_x003A_ss.mss>00 12:00:08.900</dd_x0020_hh_x003A_mm_x003A_ss.mss>
+                <session_id>131</session_id>
+                <sql_text>&lt;?query --
+            waitfor delay @waittime
+            --?&gt;</sql_text>
+                <CPU>              9,688</CPU>
+                <blocking_session_id xsi:nil="true" />
+                <start_time>2026-09-29 23:33:58.330</start_time>
+                <code>007</code>
+                <list>1,2</list>
+              </Row>
+              <Row>
+                <dd_x0020_hh_x003A_mm_x003A_ss.mss>00 00:06:06.564</dd_x0020_hh_x003A_mm_x003A_ss.mss>
+                <session_id>79</session_id>
+                <sql_text>WAITFOR DELAY '00:10:00'</sql_text>
+                <CPU>                     0</CPU>
+                <blocking_session_id xsi:nil="true" />
+                <start_time>2026-09-30 11:28:00.667</start_time>
+                <code>12</code>
+                <list>3</list>
+                <code>x</code>
+              </Row>
+            </Data>
+            """;
+
         [TestMethod]
         public void DataSetViewerControl_ListsAndFiltersTables()
         {

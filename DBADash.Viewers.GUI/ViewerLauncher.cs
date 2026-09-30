@@ -464,11 +464,13 @@ namespace DBADashGUI.Viewers
         /// <summary>
         /// A DataTable or DataSet saved as XML with its schema, as <see cref="GridSerializer"/> and the DBA Dash
         /// service write them: an inline xs:schema flagged as a DataSet's, at the start.  Only the start is looked
-        /// at - the data after it can be anything.
+        /// at - the data after it can be anything.  Or a results grid SSMS saved as XML, told by its &lt;Data&gt; root
+        /// and &lt;Row&gt; elements - see <see cref="SsmsResultsXml"/>.
         /// </summary>
         private static bool LooksLikeGridXml(string start) =>
-            start.Contains("<xs:schema", StringComparison.Ordinal) &&
-            start.Contains("msdata:IsDataSet", StringComparison.Ordinal);
+            (start.Contains("<xs:schema", StringComparison.Ordinal) &&
+             start.Contains("msdata:IsDataSet", StringComparison.Ordinal)) ||
+            SsmsResultsXml.IsResultsXml(new StringReader(start));
 
         /// <summary>
         /// Opens a file whose extension alone doesn't say which viewer it belongs in - a bare .xml, or
