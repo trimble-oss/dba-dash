@@ -67,6 +67,37 @@ namespace DBADash.QueryPlan.Test
         /// <summary>The ISNULL query with OPTION (RECOMPILE), @A = 5 and @B = 'b7': a seek on each.</summary>
         public const string OptionalParametersRecompileSupplied = "OptionalParametersRecompileSupplied";
 
+        // Captured from SQL Server 2022 (16.0.4275.2) against DBADashDB's dbo.CPU, clustered on
+        // (InstanceID, EventTime) and partitioned by day on EventTime DATETIME2(3) - 381 partitions.
+
+        /// <summary>EventTime &gt;= CONVERT(datetime, '20260930'): a scan of every partition, with no partition seek.</summary>
+        public const string PartitionScanConvert = "PartitionScanConvert";
+
+        /// <summary>EventTime &gt;= @t, @t DATETIME: a scan of every partition, with no partition seek.</summary>
+        public const string PartitionScanDatetimeVariable = "PartitionScanDatetimeVariable";
+
+        /// <summary>
+        /// EventTime &gt;= @t AND InstanceID = 1, @t DATETIME: a seek on each of the 381 partitions,
+        /// from a constant partition range of 1 to 381 and a GetRangeWithMismatchedTypes range on
+        /// EventTime.
+        /// </summary>
+        public const string PartitionSeekDatetimeVariable = "PartitionSeekDatetimeVariable";
+
+        /// <summary>
+        /// EventTime &gt;= CONVERT(datetime2(3), '20260930'): a scan whose partition range starts at
+        /// RangePartitionNew, reading partitions 367 to 381.
+        /// </summary>
+        public const string PartitionElimination = "PartitionElimination";
+
+        /// <summary>
+        /// SELECT INTO where EventTime &lt; a DATETIME2(3) 100 days ago: a scan whose partition range ends at
+        /// RangePartitionNew, reading partitions 1 to 267 - from the first, and still eliminating.
+        /// </summary>
+        public const string PartitionEliminationLessThan = "PartitionEliminationLessThan";
+
+        /// <summary>The query above as an estimated plan, with no partitions accessed to go by.</summary>
+        public const string PartitionEliminationLessThanEstimated = "PartitionEliminationLessThanEstimated";
+
         public static string Xml(string name)
         {
             var assembly = Assembly.GetExecutingAssembly();

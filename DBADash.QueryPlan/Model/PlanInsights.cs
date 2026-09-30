@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace DBADash.QueryPlan.Model
 {
@@ -122,6 +123,11 @@ namespace DBADash.QueryPlan.Model
 
             if (OptionalParametersInsight(statement) is { } optional) insights.Add(optional);
 
+            insights.AddRange(statement.Operators
+                .OrderBy(op => op.NodeId)
+                .Select(op => PartitionEliminationInsight(op, statement))
+                .OfType<PlanInsight>());
+
             var changed = statement.Parameters.Where(p => p.CompiledValueDiffers).ToList();
             if (changed.Count > 0)
             {
@@ -182,6 +188,7 @@ namespace DBADash.QueryPlan.Model
                         && NothingLeftToOptimizeInsight(statement, [use]) is null
                     ? new[] { OptionalParametersInsight(statement, [use], onOneOperator: true) }
                     : Enumerable.Empty<PlanInsight>())
+                .Concat(PartitionEliminationInsight(op, statement) is { } partitions ? new[] { partitions } : Enumerable.Empty<PlanInsight>())
                 .ToList();
         }
 
@@ -596,6 +603,190 @@ namespace DBADash.QueryPlan.Model
                 isVariant ? PlanWarningSeverity.Information : PlanWarningSeverity.Warning,
                 text.ToString(),
                 operators);
+        }
+
+        /// <summary>
+        /// A partitioned scan or seek reading every partition - see <see cref="PlanPartitionAccess"/>
+        /// for how that is told from the plan.  Null when partitions were eliminated, when there is
+        /// only one to read, or when the operator did not run.
+        ///
+        /// Showplan doesn't say which column the table is partitioned on, so the card can't say which
+        /// predicate should have eliminated partitions, or that one was meant to.  It gives the
+        /// general advice, and names the DATETIME values and mismatched type ranges it finds on the
+        /// operator as facts for the reader to judge: a DATETIME value against a DATETIME2 partition
+        /// function is the easy one to miss, as it seeks and filters correctly and shows no
+        /// conversion warning.
+        /// </summary>
+        private static PlanInsight? PartitionEliminationInsight(PlanOperator op, PlanStatement statement)
+        {
+            if (op.Partitions is not { IsEliminated: false } partitions || !ReadsPartitions(op.Kind)) return null;
+            if (op.Runtime is { ActualExecutions: 0 }) return null;
+
+            // A constant range that doesn't start at the first partition is IsEliminated; one from
+            // the first partition is very likely all of them, and without a partition seek it is
+            // certainly all of them.  A partition seek with neither is one this doesn't understand.
+            if (!partitions.ReadsEveryPartition && partitions.ConstantRange is null) return null;
+
+            var count = partitions.PartitionsAccessed ?? partitions.ConstantRange?.Count;
+            if (count is <= 1) return null;
+
+            var seeks = op.Kind is PlanOperatorKind.ClusteredIndexSeek or PlanOperatorKind.NonClusteredIndexSeek;
+            var actual = op.HasRuntime;
+            var table = op.PrimaryObject is { Table: { Length: > 0 } name } target
+                ? string.IsNullOrEmpty(target.Schema) ? name : target.Schema + "." + name
+                : "the table";
+
+            // "Accessed", as SQL Server's own Partitions Accessed says: it doesn't suggest a seek read
+            // everything in each partition, as "read" would.
+            var text = new StringBuilder("This query's ")
+                .Append(seeks ? "seek " : "scan ")
+                .Append(actual ? "accessed " : "accesses ");
+
+            if (partitions.ReadsEveryPartition)
+            {
+                text.Append(count is { } all ? "all " + all.ToString("N0", CultureInfo.CurrentCulture) + " partitions" : "every partition")
+                    .Append(" of ").Append(table)
+                    .Append(". Partition elimination is not in effect.");
+            }
+            else
+            {
+                var range = partitions.ConstantRange!.Value;
+                text.Append(count!.Value.ToString("N0", CultureInfo.CurrentCulture))
+                    .Append(" partitions of ").Append(table)
+                    .Append(" (").Append(range.Start.ToString(CultureInfo.CurrentCulture))
+                    .Append(" to ").Append(range.End.ToString(CultureInfo.CurrentCulture))
+                    .Append("). Partition elimination doesn't appear to be in effect: the range is fixed and starts at the first partition.");
+            }
+
+            // Two examples of different types, so neither reads as a guess at this table's.  Saying
+            // the rows still come back right is what stops a reader dismissing it as working.
+            text.Append(" Consider adding a predicate on the partitioning column. If there is one, the value's type must match the partition function's exactly, including precision. " +
+                        "For example, a DATETIME value against a DATETIME2 partition function, or DATETIME2(7) against DATETIME2(3), " +
+                        "prevents elimination even though the query still returns the right rows.");
+
+            var datetimeValues = DatetimeValues(op, statement);
+            var mismatched = MismatchedTypeRanges(op, statement);
+
+            if (datetimeValues.Count > 0)
+            {
+                text.Append(" This operator compares against ")
+                    .Append(datetimeValues.Count == 1 ? "a DATETIME value: " : "DATETIME values: ")
+                    .Append(PlanFormat.List(datetimeValues, MaxNamedParameters));
+            }
+
+            if (mismatched.Count > 0)
+            {
+                text.Append(datetimeValues.Count > 0 ? ", and its" : " Its")
+                    .Append(" seek range is worked out with ")
+                    .Append(string.Join(" and ", mismatched))
+                    .Append(", which SQL Server uses when a value's type differs from the column's");
+            }
+
+            if (datetimeValues.Count > 0 || mismatched.Count > 0)
+            {
+                text.Append(". If that comparison is with the partitioning column, it is the likely cause.");
+            }
+
+            return new PlanInsight(
+                datetimeValues.Count > 0 || mismatched.Count > 0 ? PlanWarningSeverity.Warning : PlanWarningSeverity.Information,
+                text.ToString(),
+                op);
+        }
+
+        /// <summary>The operators that read a table's partitions, as opposed to writing to them.</summary>
+        private static bool ReadsPartitions(PlanOperatorKind kind) => kind is
+            PlanOperatorKind.TableScan or PlanOperatorKind.ClusteredIndexScan or PlanOperatorKind.NonClusteredIndexScan or
+            PlanOperatorKind.ColumnstoreIndexScan or PlanOperatorKind.ClusteredIndexSeek or PlanOperatorKind.NonClusteredIndexSeek;
+
+        /// <summary>The functions SQL Server builds a seek range with when the value's type isn't the column's.</summary>
+        private static readonly string[] MismatchedTypeRangeFunctions = ["GetRangeWithMismatchedTypes", "GetRangeThroughConvert"];
+
+        private static readonly Regex BracketedName = new(@"\[(?<n>[^\]]+)\]", RegexOptions.CultureInvariant | RegexOptions.Compiled);
+
+        private static readonly Regex DatetimeConvert =
+            new(@"\bCONVERT(?:_IMPLICIT)?\(datetime,", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Compiled);
+
+        /// <summary>
+        /// The operator's predicates, and what each of the plan's own names in them stands for, a
+        /// few levels down: a seek's range is often an Expr1004 that a Compute Scalar below it works
+        /// out, and the part that matters is in there.
+        /// </summary>
+        private static IReadOnlyList<string> PredicateTexts(PlanOperator op, PlanStatement statement)
+        {
+            var texts = new List<string>();
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var pending = new[] { op.SeekPredicate, op.Predicate }.OfType<string>().ToList();
+
+            for (var level = 0; level < 4 && pending.Count > 0; level++)
+            {
+                texts.AddRange(pending);
+                pending = pending
+                    .SelectMany(t => BracketedName.Matches(t).Cast<Match>().Select(m => m.Groups["n"].Value))
+                    .Where(n => PlanExpressions.IsGeneratedName(n) && seen.Add(n))
+                    .Select(n => statement.ExpressionNamed(n)?.Definition)
+                    .OfType<string>()
+                    .ToList();
+            }
+
+            return texts;
+        }
+
+        /// <summary>
+        /// The DATETIME values the operator compares with: CONVERT(datetime, ...) expressions, and
+        /// parameters or variables the plan says are DATETIME.  In the order found.
+        /// </summary>
+        private static IReadOnlyList<string> DatetimeValues(PlanOperator op, PlanStatement statement)
+        {
+            var datetimeParameters = new HashSet<string>(
+                statement.Parameters
+                    .Where(p => string.Equals(p.DataType, "datetime", StringComparison.OrdinalIgnoreCase))
+                    .Select(p => p.Name),
+                StringComparer.OrdinalIgnoreCase);
+
+            var found = new List<string>();
+            foreach (var text in PredicateTexts(op, statement))
+            {
+                foreach (Match convert in DatetimeConvert.Matches(text))
+                {
+                    found.Add(Balanced(text, convert.Index, text.IndexOf('(', convert.Index)));
+                }
+
+                foreach (Match name in BracketedName.Matches(text))
+                {
+                    if (datetimeParameters.Contains(name.Groups["n"].Value)) found.Add(name.Groups["n"].Value);
+                }
+            }
+
+            // A parameter already inside a CONVERT(datetime, ...) found above is said by that.
+            return found
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .Where(value => !found.Any(other => other.Length > value.Length && other.Contains("[" + value + "]")))
+                .ToList();
+        }
+
+        /// <summary>The mismatched type range functions the operator's seek is worked out with.</summary>
+        private static IReadOnlyList<string> MismatchedTypeRanges(PlanOperator op, PlanStatement statement)
+        {
+            var texts = PredicateTexts(op, statement);
+            return MismatchedTypeRangeFunctions
+                .Where(function => texts.Any(t => t.IndexOf(function + "(", StringComparison.OrdinalIgnoreCase) >= 0))
+                .ToList();
+        }
+
+        /// <summary>
+        /// The call that starts at <paramref name="start"/>, up to the bracket closing the one at
+        /// <paramref name="open"/>, or to the end of the text when it isn't closed.
+        /// </summary>
+        private static string Balanced(string text, int start, int open)
+        {
+            var depth = 0;
+            for (var i = open; i < text.Length; i++)
+            {
+                if (text[i] == '(') depth++;
+                else if (text[i] == ')' && --depth == 0) return text.Substring(start, i - start + 1);
+            }
+
+            return text.Substring(start);
         }
 
         /// <summary>The most parameters an optional parameters card names before the rest are counted.</summary>

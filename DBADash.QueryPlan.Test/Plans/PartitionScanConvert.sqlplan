@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ShowPlanXML xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Version="1.564" Build="16.0.4275.2" xmlns="http://schemas.microsoft.com/sqlserver/2004/07/showplan">
+  <BatchSequence>
+    <Batch>
+      <Statements>
+        <StmtSimple StatementCompId="1" StatementEstRows="23428.8" StatementId="1" StatementOptmLevel="FULL" CardinalityEstimationModelVersion="160" StatementSubTreeCost="46.5063" StatementText="SELECT [EventTime] FROM [dbo].[cpu] WHERE [EventTime]&gt;=CONVERT([datetime],@1)" StatementType="SELECT" QueryHash="0xEB169389B85C55B3" QueryPlanHash="0x7266EB4D839B02F3" RetrievedFromCache="true" StatementSqlHandle="0x0900319A0553109D7404F43C2539994B49C90000000000000000000000000000000000000000000000000000" DatabaseContextSettingsId="1" ParentObjectId="0" StatementParameterizationType="2" SecurityPolicyApplied="false">
+          <StatementSetOptions ANSI_NULLS="true" ANSI_PADDING="true" ANSI_WARNINGS="true" ARITHABORT="true" CONCAT_NULL_YIELDS_NULL="true" NUMERIC_ROUNDABORT="false" QUOTED_IDENTIFIER="true" />
+          <QueryPlan DegreeOfParallelism="8" MemoryGrant="136" CachedPlanSize="40" CompileTime="1" CompileCPU="1" CompileMemory="704">
+            <ThreadStat Branches="1" UsedThreads="8">
+              <ThreadReservation NodeId="0" ReservedThreads="8" />
+            </ThreadStat>
+            <MissingIndexes>
+              <MissingIndexGroup Impact="85.4601">
+                <MissingIndex Database="[DBADashDB]" Schema="[dbo]" Table="[CPU]">
+                  <ColumnGroup Usage="INEQUALITY">
+                    <Column Name="[EventTime]" ColumnId="2" />
+                  </ColumnGroup>
+                </MissingIndex>
+              </MissingIndexGroup>
+            </MissingIndexes>
+            <MemoryGrantInfo SerialRequiredMemory="0" SerialDesiredMemory="0" RequiredMemory="136" DesiredMemory="136" RequestedMemory="136" GrantWaitTime="0" GrantedMemory="136" MaxUsedMemory="136" MaxQueryMemory="1914552" />
+            <OptimizerHardwareDependentProperties EstimatedAvailableMemoryGrant="139801" EstimatedPagesCached="104850" EstimatedAvailableDegreeOfParallelism="6" MaxCompileMemory="7482208" />
+            <OptimizerStatsUsage>
+              <StatisticsInfo Database="[DBADashDB]" Schema="[dbo]" Table="[CPU]" Statistics="[_WA_Sys_00000002_7C1A6C5A]" ModificationCount="2712" SamplingPercent="2.76204" LastUpdate="2026-09-30T12:44:01.35" />
+            </OptimizerStatsUsage>
+            <TraceFlags IsCompileTime="true">
+              <TraceFlag Value="174" Scope="Global" />
+              <TraceFlag Value="3226" Scope="Global" />
+              <TraceFlag Value="7745" Scope="Global" />
+              <TraceFlag Value="7752" Scope="Global" />
+            </TraceFlags>
+            <TraceFlags IsCompileTime="false">
+              <TraceFlag Value="174" Scope="Global" />
+              <TraceFlag Value="3226" Scope="Global" />
+              <TraceFlag Value="7745" Scope="Global" />
+              <TraceFlag Value="7752" Scope="Global" />
+            </TraceFlags>
+            <WaitStats>
+              <Wait WaitType="ASYNC_NETWORK_IO" WaitTimeMs="78" WaitCount="30" />
+              <Wait WaitType="CXPACKET" WaitTimeMs="56" WaitCount="23" />
+              <Wait WaitType="SOS_SCHEDULER_YIELD" WaitTimeMs="2" WaitCount="898" />
+              <Wait WaitType="CXROWSET_SYNC" WaitTimeMs="1" WaitCount="9" />
+            </WaitStats>
+            <QueryTimeStats CpuTime="3665" ElapsedTime="535" />
+            <RelOp AvgRowSize="14" EstimateCPU="0.0366239" EstimateIO="0" EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row" EstimateRows="23428.8" LogicalOp="Gather Streams" NodeId="0" Parallel="true" PhysicalOp="Parallelism" EstimatedTotalSubtreeCost="46.5063">
+              <OutputList>
+                <ColumnReference Database="[DBADashDB]" Schema="[dbo]" Table="[CPU]" Column="EventTime" />
+              </OutputList>
+              <RunTimeInformation>
+                <RunTimeCountersPerThread Thread="0" ActualRows="28294" Batches="0" ActualEndOfScans="1" ActualExecutions="1" ActualExecutionMode="Row" ActualElapsedms="454" ActualCPUms="1" />
+              </RunTimeInformation>
+              <Parallelism>
+                <RelOp AvgRowSize="14" EstimateCPU="2.49334" EstimateIO="42.9143" EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row" EstimateRows="23428.8" EstimatedRowsRead="13274500" LogicalOp="Clustered Index Scan" NodeId="1" Parallel="true" Partitioned="true" PhysicalOp="Clustered Index Scan" EstimatedTotalSubtreeCost="45.4077" TableCardinality="13274500">
+                  <OutputList>
+                    <ColumnReference Database="[DBADashDB]" Schema="[dbo]" Table="[CPU]" Column="EventTime" />
+                  </OutputList>
+                  <RunTimeInformation>
+                    <RunTimeCountersPerThread Thread="8" ActualRows="0" Batches="0" ActualEndOfScans="1" ActualExecutions="1" ActualExecutionMode="Row" ActualElapsedms="459" ActualCPUms="459" ActualScans="0" ActualLogicalReads="0" ActualPhysicalReads="0" ActualReadAheads="0" ActualLobLogicalReads="0" ActualLobPhysicalReads="0" ActualLobReadAheads="0" />
+                    <RunTimeCountersPerThread Thread="7" ActualRows="0" Batches="0" ActualEndOfScans="1" ActualExecutions="1" ActualExecutionMode="Row" ActualElapsedms="459" ActualCPUms="459" ActualScans="0" ActualLogicalReads="0" ActualPhysicalReads="0" ActualReadAheads="0" ActualLobLogicalReads="0" ActualLobPhysicalReads="0" ActualLobReadAheads="0" />
+                    <RunTimeCountersPerThread Thread="6" ActualRows="0" Batches="0" ActualEndOfScans="1" ActualExecutions="1" ActualExecutionMode="Row" ActualElapsedms="458" ActualCPUms="457" ActualScans="0" ActualLogicalReads="0" ActualPhysicalReads="0" ActualReadAheads="0" ActualLobLogicalReads="0" ActualLobPhysicalReads="0" ActualLobReadAheads="0" />
+                    <RunTimeCountersPerThread Thread="5" ActualRows="0" Batches="0" ActualEndOfScans="1" ActualExecutions="1" ActualExecutionMode="Row" ActualElapsedms="451" ActualCPUms="451" ActualScans="0" ActualLogicalReads="0" ActualPhysicalReads="0" ActualReadAheads="0" ActualLobLogicalReads="0" ActualLobPhysicalReads="0" ActualLobReadAheads="0" />
+                    <RunTimeCountersPerThread Thread="4" ActualRows="0" Batches="0" ActualEndOfScans="1" ActualExecutions="1" ActualExecutionMode="Row" ActualElapsedms="455" ActualCPUms="455" ActualScans="0" ActualLogicalReads="0" ActualPhysicalReads="0" ActualReadAheads="0" ActualLobLogicalReads="0" ActualLobPhysicalReads="0" ActualLobReadAheads="0" />
+                    <RunTimeCountersPerThread Thread="3" ActualRows="0" Batches="0" ActualEndOfScans="1" ActualExecutions="1" ActualExecutionMode="Row" ActualElapsedms="452" ActualCPUms="452" ActualScans="0" ActualLogicalReads="0" ActualPhysicalReads="0" ActualReadAheads="0" ActualLobLogicalReads="0" ActualLobPhysicalReads="0" ActualLobReadAheads="0" />
+                    <RunTimeCountersPerThread Thread="2" ActualRows="0" Batches="0" ActualEndOfScans="1" ActualExecutions="1" ActualExecutionMode="Row" ActualElapsedms="457" ActualCPUms="457" ActualScans="0" ActualLogicalReads="0" ActualPhysicalReads="0" ActualReadAheads="0" ActualLobLogicalReads="0" ActualLobPhysicalReads="0" ActualLobReadAheads="0" />
+                    <RunTimeCountersPerThread Thread="1" ActualRows="28294" Batches="0" ActualEndOfScans="1" ActualExecutions="1" ActualExecutionMode="Row" ActualElapsedms="464" ActualCPUms="464" ActualScans="0" ActualLogicalReads="0" ActualPhysicalReads="0" ActualReadAheads="0" ActualLobLogicalReads="0" ActualLobPhysicalReads="0" ActualLobReadAheads="0" />
+                    <RunTimeCountersPerThread Thread="0" ActualRows="0" ActualRowsRead="12252767" Batches="0" ActualEndOfScans="0" ActualExecutions="0" ActualExecutionMode="Row" ActualElapsedms="0" ActualCPUms="0" ActualScans="381" ActualLogicalReads="57230" ActualPhysicalReads="0" ActualReadAheads="0" ActualLobLogicalReads="0" ActualLobPhysicalReads="0" ActualLobReadAheads="0" />
+                  </RunTimeInformation>
+                  <RunTimePartitionSummary>
+                    <PartitionsAccessed PartitionCount="381">
+                      <PartitionRange Start="1" End="381" />
+                    </PartitionsAccessed>
+                  </RunTimePartitionSummary>
+                  <IndexScan Ordered="false" ForcedIndex="false" ForceScan="false" NoExpandHint="false" Storage="RowStore">
+                    <DefinedValues>
+                      <DefinedValue>
+                        <ColumnReference Database="[DBADashDB]" Schema="[dbo]" Table="[CPU]" Column="EventTime" />
+                      </DefinedValue>
+                    </DefinedValues>
+                    <Object Database="[DBADashDB]" Schema="[dbo]" Table="[CPU]" Index="[PK_CPU]" IndexKind="Clustered" Storage="RowStore" />
+                    <Predicate>
+                      <ScalarOperator ScalarString="[DBADashDB].[dbo].[CPU].[EventTime]&gt;=CONVERT(datetime,[@1],0)">
+                        <Compare CompareOp="GE">
+                          <ScalarOperator>
+                            <Identifier>
+                              <ColumnReference Database="[DBADashDB]" Schema="[dbo]" Table="[CPU]" Column="EventTime" />
+                            </Identifier>
+                          </ScalarOperator>
+                          <ScalarOperator>
+                            <Identifier>
+                              <ColumnReference Column="ConstExpr1003">
+                                <ScalarOperator>
+                                  <Convert DataType="datetime" Style="0" Implicit="false">
+                                    <ScalarOperator>
+                                      <Identifier>
+                                        <ColumnReference Column="@1" />
+                                      </Identifier>
+                                    </ScalarOperator>
+                                  </Convert>
+                                </ScalarOperator>
+                              </ColumnReference>
+                            </Identifier>
+                          </ScalarOperator>
+                        </Compare>
+                      </ScalarOperator>
+                    </Predicate>
+                  </IndexScan>
+                </RelOp>
+              </Parallelism>
+            </RelOp>
+            <ParameterList>
+              <ColumnReference Column="@1" ParameterDataType="varchar(8000)" ParameterCompiledValue="'20260930'" ParameterRuntimeValue="'20260930'" />
+            </ParameterList>
+          </QueryPlan>
+        </StmtSimple>
+      </Statements>
+    </Batch>
+  </BatchSequence>
+</ShowPlanXML>

@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ShowPlanXML xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Version="1.564" Build="16.0.4275.2" xmlns="http://schemas.microsoft.com/sqlserver/2004/07/showplan">
+  <BatchSequence>
+    <Batch>
+      <Statements>
+        <StmtSimple StatementCompId="2" StatementEstRows="310368" StatementId="1" StatementOptmLevel="TRIVIAL" CardinalityEstimationModelVersion="160" StatementSubTreeCost="2.29185" StatementText="select EventTime from dbo.cpu &#xD;&#xA;where EventTime &gt;= @t&#xD;&#xA;and instanceid = 1" StatementType="SELECT" QueryHash="0x7F2DB8ECE302A44B" QueryPlanHash="0xBF8D985237CA6896" RetrievedFromCache="true" StatementSqlHandle="0x090006D83511E2B0873AB191A0FA887D754C0000000000000000000000000000000000000000000000000000" DatabaseContextSettingsId="1" ParentObjectId="0" StatementParameterizationType="0" SecurityPolicyApplied="false">
+          <StatementSetOptions ANSI_NULLS="true" ANSI_PADDING="true" ANSI_WARNINGS="true" ARITHABORT="true" CONCAT_NULL_YIELDS_NULL="true" NUMERIC_ROUNDABORT="false" QUOTED_IDENTIFIER="true" />
+          <QueryPlan DegreeOfParallelism="1" CachedPlanSize="40" CompileTime="1" CompileCPU="1" CompileMemory="640">
+            <MemoryGrantInfo SerialRequiredMemory="0" SerialDesiredMemory="0" GrantedMemory="0" MaxUsedMemory="0" />
+            <OptimizerHardwareDependentProperties EstimatedAvailableMemoryGrant="139801" EstimatedPagesCached="104850" EstimatedAvailableDegreeOfParallelism="6" MaxCompileMemory="6783216" />
+            <OptimizerStatsUsage>
+              <StatisticsInfo Database="[DBADashDB]" Schema="[dbo]" Table="[CPU]" Statistics="[PK_CPU]" ModificationCount="6911" SamplingPercent="2.76205" LastUpdate="2026-09-30T12:44:00.82" />
+            </OptimizerStatsUsage>
+            <TraceFlags IsCompileTime="true">
+              <TraceFlag Value="174" Scope="Global" />
+              <TraceFlag Value="3226" Scope="Global" />
+              <TraceFlag Value="7745" Scope="Global" />
+              <TraceFlag Value="7752" Scope="Global" />
+            </TraceFlags>
+            <TraceFlags IsCompileTime="false">
+              <TraceFlag Value="174" Scope="Global" />
+              <TraceFlag Value="3226" Scope="Global" />
+              <TraceFlag Value="7745" Scope="Global" />
+              <TraceFlag Value="7752" Scope="Global" />
+            </TraceFlags>
+            <QueryTimeStats CpuTime="3" ElapsedTime="4" />
+            <RelOp AvgRowSize="14" EstimateCPU="0.401222" EstimateIO="1.89062" EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row" EstimateRows="310368" EstimatedRowsRead="310368" LogicalOp="Inner Join" NodeId="0" Parallel="false" PhysicalOp="Nested Loops" EstimatedTotalSubtreeCost="2.29185" TableCardinality="13278700">
+              <OutputList>
+                <ColumnReference Database="[DBADashDB]" Schema="[dbo]" Table="[CPU]" Column="EventTime" />
+              </OutputList>
+              <RunTimeInformation>
+                <RunTimeCountersPerThread Thread="0" ActualRows="896" Batches="0" ActualEndOfScans="1" ActualExecutions="1" ActualExecutionMode="Row" ActualElapsedms="4" ActualCPUms="3" />
+              </RunTimeInformation>
+              <NestedLoops Optimized="false">
+                <OuterReferences>
+                  <ColumnReference Column="Expr1004" />
+                  <ColumnReference Column="Expr1005" />
+                  <ColumnReference Column="Expr1003" />
+                </OuterReferences>
+                <RelOp AvgRowSize="25" EstimateCPU="0" EstimateIO="0" EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row" EstimateRows="1" LogicalOp="Compute Scalar" NodeId="1" Parallel="false" PhysicalOp="Compute Scalar" EstimatedTotalSubtreeCost="0">
+                  <OutputList>
+                    <ColumnReference Column="Expr1004" />
+                    <ColumnReference Column="Expr1005" />
+                    <ColumnReference Column="Expr1003" />
+                  </OutputList>
+                  <RunTimeInformation>
+                    <RunTimeCountersPerThread Thread="0" ActualRows="1" Batches="0" ActualEndOfScans="1" ActualExecutions="1" ActualExecutionMode="Row" ActualElapsedms="0" ActualCPUms="0" />
+                  </RunTimeInformation>
+                  <ComputeScalar>
+                    <DefinedValues>
+                      <DefinedValue>
+                        <ValueVector>
+                          <ColumnReference Column="Expr1004" />
+                          <ColumnReference Column="Expr1005" />
+                          <ColumnReference Column="Expr1003" />
+                        </ValueVector>
+                        <ScalarOperator ScalarString="GetRangeWithMismatchedTypes([@t],NULL,(22))">
+                          <Intrinsic FunctionName="GetRangeWithMismatchedTypes">
+                            <ScalarOperator>
+                              <Identifier>
+                                <ColumnReference Column="@t" />
+                              </Identifier>
+                            </ScalarOperator>
+                            <ScalarOperator>
+                              <Const ConstValue="NULL" />
+                            </ScalarOperator>
+                            <ScalarOperator>
+                              <Const ConstValue="(22)" />
+                            </ScalarOperator>
+                          </Intrinsic>
+                        </ScalarOperator>
+                      </DefinedValue>
+                    </DefinedValues>
+                    <RelOp AvgRowSize="0" EstimateCPU="0" EstimateIO="0" EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row" EstimateRows="1" LogicalOp="Constant Scan" NodeId="2" Parallel="false" PhysicalOp="Constant Scan" EstimatedTotalSubtreeCost="0">
+                      <OutputList />
+                      <RunTimeInformation>
+                        <RunTimeCountersPerThread Thread="0" ActualRows="1" Batches="0" ActualEndOfScans="1" ActualExecutions="1" ActualExecutionMode="Row" ActualElapsedms="0" ActualCPUms="0" />
+                      </RunTimeInformation>
+                      <ConstantScan />
+                    </RelOp>
+                  </ComputeScalar>
+                </RelOp>
+                <RelOp AvgRowSize="14" EstimateCPU="0.401222" EstimateIO="1.89062" EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row" EstimateRows="310368" EstimatedRowsRead="310368" LogicalOp="Clustered Index Seek" NodeId="3" Parallel="false" Partitioned="true" PhysicalOp="Clustered Index Seek" EstimatedTotalSubtreeCost="2.29185" TableCardinality="13278700">
+                  <OutputList>
+                    <ColumnReference Database="[DBADashDB]" Schema="[dbo]" Table="[CPU]" Column="EventTime" />
+                  </OutputList>
+                  <RunTimeInformation>
+                    <RunTimeCountersPerThread Thread="0" ActualRows="896" ActualRowsRead="896" Batches="0" ActualEndOfScans="1" ActualExecutions="1" ActualExecutionMode="Row" ActualElapsedms="4" ActualCPUms="3" ActualScans="381" ActualLogicalReads="1416" ActualPhysicalReads="0" ActualReadAheads="0" ActualLobLogicalReads="0" ActualLobPhysicalReads="0" ActualLobReadAheads="0" />
+                  </RunTimeInformation>
+                  <RunTimePartitionSummary>
+                    <PartitionsAccessed PartitionCount="381">
+                      <PartitionRange Start="1" End="381" />
+                    </PartitionsAccessed>
+                  </RunTimePartitionSummary>
+                  <IndexScan Ordered="true" ScanDirection="FORWARD" ForcedIndex="false" ForceSeek="false" ForceScan="false" NoExpandHint="false" Storage="RowStore">
+                    <DefinedValues>
+                      <DefinedValue>
+                        <ColumnReference Database="[DBADashDB]" Schema="[dbo]" Table="[CPU]" Column="EventTime" />
+                      </DefinedValue>
+                    </DefinedValues>
+                    <Object Database="[DBADashDB]" Schema="[dbo]" Table="[CPU]" Index="[PK_CPU]" IndexKind="Clustered" Storage="RowStore" />
+                    <SeekPredicates>
+                      <SeekPredicateNew>
+                        <SeekKeys>
+                          <StartRange ScanType="GE">
+                            <RangeColumns>
+                              <ColumnReference Column="PtnId1000" />
+                            </RangeColumns>
+                            <RangeExpressions>
+                              <ScalarOperator ScalarString="(1)">
+                                <Const ConstValue="(1)" />
+                              </ScalarOperator>
+                            </RangeExpressions>
+                          </StartRange>
+                          <EndRange ScanType="LE">
+                            <RangeColumns>
+                              <ColumnReference Column="PtnId1000" />
+                            </RangeColumns>
+                            <RangeExpressions>
+                              <ScalarOperator ScalarString="(381)">
+                                <Const ConstValue="(381)" />
+                              </ScalarOperator>
+                            </RangeExpressions>
+                          </EndRange>
+                        </SeekKeys>
+                        <SeekKeys>
+                          <Prefix ScanType="EQ">
+                            <RangeColumns>
+                              <ColumnReference Database="[DBADashDB]" Schema="[dbo]" Table="[CPU]" Column="InstanceID" />
+                            </RangeColumns>
+                            <RangeExpressions>
+                              <ScalarOperator ScalarString="(1)">
+                                <Const ConstValue="(1)" />
+                              </ScalarOperator>
+                            </RangeExpressions>
+                          </Prefix>
+                          <StartRange ScanType="GT">
+                            <RangeColumns>
+                              <ColumnReference Database="[DBADashDB]" Schema="[dbo]" Table="[CPU]" Column="EventTime" />
+                            </RangeColumns>
+                            <RangeExpressions>
+                              <ScalarOperator ScalarString="[Expr1004]">
+                                <Identifier>
+                                  <ColumnReference Column="Expr1004" />
+                                </Identifier>
+                              </ScalarOperator>
+                            </RangeExpressions>
+                          </StartRange>
+                          <EndRange ScanType="LT">
+                            <RangeColumns>
+                              <ColumnReference Database="[DBADashDB]" Schema="[dbo]" Table="[CPU]" Column="EventTime" />
+                            </RangeColumns>
+                            <RangeExpressions>
+                              <ScalarOperator ScalarString="[Expr1005]">
+                                <Identifier>
+                                  <ColumnReference Column="Expr1005" />
+                                </Identifier>
+                              </ScalarOperator>
+                            </RangeExpressions>
+                          </EndRange>
+                        </SeekKeys>
+                      </SeekPredicateNew>
+                    </SeekPredicates>
+                  </IndexScan>
+                </RelOp>
+              </NestedLoops>
+            </RelOp>
+            <ParameterList>
+              <ColumnReference Column="@t" ParameterDataType="datetime" ParameterRuntimeValue="'2026-09-30 00:00:00.000'" />
+            </ParameterList>
+          </QueryPlan>
+        </StmtSimple>
+      </Statements>
+    </Batch>
+  </BatchSequence>
+</ShowPlanXML>
