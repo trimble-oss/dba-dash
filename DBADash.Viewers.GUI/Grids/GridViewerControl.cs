@@ -22,6 +22,9 @@ namespace DBADashGUI.Grids
     /// xml and json columns are links, as they are in SSMS: a plan or deadlock graph - sp_BlitzCache's query_plan,
     /// sp_BlitzLock's deadlock_graph - opens in its viewer on a tab of the same window, anything else in a code
     /// window.  A plan or graph in a column of any other type opens in its viewer when double-clicked.
+    ///
+    /// Data bars added to the grid are remembered for the next result set with the same columns - see
+    /// <see cref="GridDataBarMemory"/>.
     /// </summary>
     public sealed class GridViewerControl : UserControl
     {
@@ -97,6 +100,10 @@ namespace DBADashGUI.Grids
 
             // Link columns are added after the grid was themed, so they need their link colours now.
             _grid.ApplyTheme();
+
+            // The bars added the last time a result set of this shape was open - and from here on, the ones added now.
+            _grid.SetDataBars(GridDataBarMemory.Recall(_table));
+            _grid.DataBarChanged += (_, _) => GridDataBarMemory.Remember(_table, _grid.DataBars);
         }
 
         private string SqlType(DataGridViewColumn column) =>

@@ -506,6 +506,8 @@ namespace DBADashGUI.CustomReports
                     {
                         grid.DataSource = null;
                         grid.RowsAdded -= Dgv_RowsAdded;
+                        grid.DataBarChanged -= Dgv_DataBarChanged;
+                        grid.SaveDataBars = null;
                         grid.CellContentClick -= Dgv_CellContentClick;
                         grid.DataBindingComplete -= Dgv_DataBindingComplete;
                         if (gridFilterHandlers.TryGetValue(grid, out var handler))
@@ -1785,6 +1787,10 @@ namespace DBADashGUI.CustomReports
 
                 var customReportResults = Report.CustomReportResults[i];
                 dgv.AddColumns(table, customReportResults);
+                dgv.SetDataBars(customReportResults.SessionDataBars?.Select(kvp => KeyValuePair.Create(kvp.Key, kvp.Value.Clone()))
+                                ?? customReportResults.Columns.Where(kvp => kvp.Value.DataBar != null)
+                                    .Select(kvp => KeyValuePair.Create(kvp.Key, kvp.Value.DataBar.Clone())));
+                dgv.DataBarChanged += Dgv_DataBarChanged;
                 dgv.DataBindingComplete += Dgv_DataBindingComplete;
 
                 if (Report.CanEditReport) // Add context menu items for editing
@@ -1906,6 +1912,7 @@ namespace DBADashGUI.CustomReports
                 new ToolStripMenuItem("Set Format String", Properties.Resources.Percentage_16x);
             var addLink = new ToolStripMenuItem("Add Link", Properties.Resources.WebURL_16x);
             var rules = new ToolStripMenuItem("Highlighting Rules", Properties.Resources.HighlightHS);
+            var dataBar = new ToolStripMenuItem("Data Bar") { ToolTipText = "Save a data bar for the column with the report" };
             var convertLocalMenuItem = new ToolStripMenuItem("Convert to local timezone") { Checked = true, CheckOnClick = true, Name = "ConvertLocal" };
             renameColumnMenuItem.Click += (sender, e) => RenameColumnMenuItem_Click(dgv);
             setTooltipMenuItem.Click += (sender, e) => SetColumnTooltip_Click(dgv);
@@ -1913,6 +1920,8 @@ namespace DBADashGUI.CustomReports
             setFormatStringMenuItem.Click += (sender, e) => SetFormatStringMenuItem_Click(dgv);
             addLink.Click += (sender, e) => AddLink_Click(dgv);
             rules.Click += (sender, e) => SetCellHighlightingRules(dgv);
+            dataBar.Click += (sender, e) => SetDataBar_Click(dgv);
+            dgv.SaveDataBars = () => SaveDataBars_Click(dgv); // Save Data Bars on the grid's own Data Bar menu
 
             editReport.DropDownItems.AddRange(new ToolStripItem[]
             {
@@ -1921,7 +1930,8 @@ namespace DBADashGUI.CustomReports
                 convertLocalMenuItem,
                 setFormatStringMenuItem,
                 addLink,
-                rules
+                rules,
+                dataBar
             });
 
             dgv.ColumnContextMenu.Items.Add(editReport);
@@ -1931,7 +1941,75 @@ namespace DBADashGUI.CustomReports
                 convertLocalMenuItem.Checked = dgv.Columns[args.ColumnIndex].ValueType == typeof(DateTime) &&
                                        !Report.CustomReportResults[dgv.ResultSetID].DoNotConvertToLocalTimeZone.Contains(dgv.Columns[args.ColumnIndex].DataPropertyName);
                 convertLocalMenuItem.Visible = dgv.Columns[args.ColumnIndex].ValueType == typeof(DateTime);
+                dataBar.Visible = dgv.Columns[args.ColumnIndex].ValueType?.IsNumericType() == true;
             };
+        }
+
+        /// <summary>
+        /// Save a data bar for the clicked column with the report.  Starts from the bar showing in the grid, so one
+        /// tried out from the grid's own Data Bar menu can be kept.
+        /// </summary>
+        private void SetDataBar_Click(DBADashDataGridView dgv)
+        {
+            if (dgv == null || dgv.ClickedColumnIndex < 0) return;
+            try
+            {
+                var customReportResult = Report.CustomReportResults[dgv.ResultSetID];
+                var column = dgv.Columns[dgv.ClickedColumnIndex];
+                var key = DBADashDataGridView.DataBarKey(column);
+                var colInfo = GetColumnMetadata(customReportResult, key);
+
+                using var frm = new DataBarConfig(column.HeaderText, (dgv.DataBars.GetValueOrDefault(key) ?? colInfo.DataBar)?.Clone());
+                if (frm.ShowDialog(this) != DialogResult.OK) return;
+
+                colInfo.DataBar = frm.Settings;
+                customReportResult.SessionDataBars?.Remove(key);
+                if (frm.Settings != null) customReportResult.SessionDataBars?.Add(key, frm.Settings.Clone());
+                dgv.SetDataBar(key, frm.Settings?.Clone());
+                Report.Update();
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex, "Error setting data bar");
+            }
+        }
+
+        /// <summary>
+        /// Make the data bars showing in the grid the ones saved with the report - including taking away a saved bar
+        /// that was removed from the grid - so bars tried out from the grid's own menu, or copied to every column,
+        /// can be kept in one go.
+        /// </summary>
+        private void SaveDataBars_Click(DBADashDataGridView dgv)
+        {
+            if (dgv == null) return;
+            try
+            {
+                var result = Report.CustomReportResults[dgv.ResultSetID];
+                foreach (DataGridViewColumn column in dgv.Columns)
+                {
+                    var key = DBADashDataGridView.DataBarKey(column);
+                    var dataBar = dgv.DataBars.GetValueOrDefault(key);
+                    if (dataBar == null && !result.Columns.ContainsKey(key)) continue; // Nothing to save, and no need to add metadata for the column
+                    GetColumnMetadata(result, key).DataBar = dataBar?.Clone();
+                }
+                result.SessionDataBars = null; // What's saved is now what's showing
+                Report.Update();
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex, "Error saving data bars");
+            }
+        }
+
+        /// <summary>
+        /// A data bar added or changed from the grid's own menu lasts while the report is open.  Edit Report >
+        /// Data Bar, or Save Data Bars on the grid's Data Bar menu, keeps it with the report.
+        /// </summary>
+        private void Dgv_DataBarChanged(object sender, string key)
+        {
+            if (sender is not DBADashDataGridView dgv) return;
+            if (!Report.CustomReportResults.TryGetValue(dgv.ResultSetID, out var customReportResult)) return;
+            customReportResult.SessionDataBars = dgv.DataBars.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Clone(), StringComparer.OrdinalIgnoreCase);
         }
 
         private void Maximize_Click(object sender, EventArgs e)

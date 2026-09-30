@@ -63,5 +63,11 @@ namespace DBADashGUI.CustomReports
         public bool RequiresDataColumn { get; set; }
 
         public CellHighlightingRuleSet Highlighting { get; set; }
+
+        /// <summary>
+        /// A bar drawn in the column's cells, sized by the value.  For numeric columns.
+        /// </summary>
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public DataBarSettings DataBar { get; set; }
     }
 }
