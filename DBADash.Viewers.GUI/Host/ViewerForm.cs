@@ -385,8 +385,13 @@ namespace DBADashGUI.Viewers
                 }
                 else
                 {
-                    // A DataSet the DBA Dash service saved, such as one left in its Failed folder.
-                    var dataSetViewer = new DataSetViewerControl(dataSet, fileName) { Dock = DockStyle.Fill };
+                    // A DataSet the DBA Dash service saved, such as one left in its Failed folder - or all of a query's
+                    // result sets from the SSMS extension, which names the tab as it does for one.
+                    var dataSetTitle = dataSet.ExtendedProperties["Title"] as string;
+                    var dataSetViewer = new DataSetViewerControl(dataSet, string.IsNullOrWhiteSpace(dataSetTitle) ? fileName : dataSetTitle)
+                    {
+                        Dock = DockStyle.Fill
+                    };
                     (viewer, title, tooltip) = (dataSetViewer, dataSetViewer.Title, dataSetViewer.TabToolTip);
                 }
 

@@ -1,7 +1,10 @@
+using DBADash.Viewers.GUI.Properties;
+using DBADashGUI.CustomReports;
 using DBADashGUI.Theme;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -14,7 +17,7 @@ namespace DBADashGUI.Grids
     ///
     /// Mostly for troubleshooting the DBA Dash service: what it collects travels as a DataSet of a table per
     /// collection, and one that fails to import is left in its Failed folder as XML.  This reads one of those without
-    /// needing a separate tool.
+    /// needing a separate tool.  The SSMS extension also hands over all of a query's result sets this way.
     /// </summary>
     public sealed class DataSetViewerControl : UserControl
     {
@@ -63,10 +66,28 @@ namespace DBADashGUI.Grids
             _search.TextChanged += (_, _) => ListTables();
             _hideEmpty.CheckedChanged += (_, _) => ListTables();
 
+            // Each grid's own toolbar saves the one table; this saves them all: as one file that opens here again, or as
+            // a workbook with a sheet per table.
+            var saveAll = new ToolStripDropDownButton("Save All", Resources.Save_16x)
+            {
+                ToolTipText = "Save every table to one file"
+            };
+            saveAll.DropDownItems.Add(new ToolStripMenuItem("Data Set File...", Resources.SaveTable_16x, (_, _) => SaveAs())
+            {
+                ToolTipText = "XML or JSON that opens here again - the XML keeps the column types"
+            });
+            saveAll.DropDownItems.Add(new ToolStripMenuItem("Excel...", Resources.excel16x16, (_, _) => ExportToExcel())
+            {
+                ToolTipText = "A workbook with a sheet per table"
+            });
+            var toolbar = new ToolStrip { GripStyle = ToolStripGripStyle.Hidden, Dock = DockStyle.Top };
+            toolbar.Items.Add(saveAll);
+
             var list = new Panel { Dock = DockStyle.Fill };
             list.Controls.Add(_tables);
             list.Controls.Add(_hideEmpty);
             list.Controls.Add(_search);
+            list.Controls.Add(toolbar);
 
             // Sized before the splitter is placed: SplitterDistance throws if it's beyond the container's width, and a
             // new SplitContainer is only 150 wide until docking lays it out.
@@ -130,6 +151,58 @@ namespace DBADashGUI.Grids
             ShowSelectedTable();
         }
 
+        /// <summary>
+        /// Saves the whole DataSet - every table, whatever the list is filtered to - as one file that opens back on a tab
+        /// like this one.
+        /// </summary>
+        private void SaveAs()
+        {
+            using var dialog = new SaveFileDialog
+            {
+                Filter = GridSerializer.SaveDataSetFilter,
+                FileName = DefaultFileName() + GridSerializer.CompressedXmlExtension
+            };
+            if (dialog.ShowDialog(FindForm()) != DialogResult.OK) return;
+
+            try
+            {
+                GridSerializer.SaveDataSet(_dataSet, dialog.FileName);
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex, "Error saving data set");
+            }
+        }
+
+        /// <summary>Every table to an Excel workbook, a sheet each - all of them, whatever the list is filtered to.</summary>
+        private void ExportToExcel()
+        {
+            try
+            {
+                CommonShared.PromptSaveDataSetToXLSX(_dataSet, DefaultFileName());
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex, "Error exporting to Excel");
+            }
+        }
+
+        /// <summary>The title as a file name, without the extension of the file it may already be named after.</summary>
+        private string DefaultFileName()
+        {
+            var name = Title;
+            foreach (var extension in new[] { GridSerializer.CompressedXmlExtension, GridSerializer.CompressedJsonExtension,
+                         GridSerializer.XmlExtension, GridSerializer.JsonExtension })
+            {
+                if (!name.EndsWith(extension, StringComparison.OrdinalIgnoreCase)) continue;
+                name = name[..^extension.Length];
+                break;
+            }
+
+            foreach (var c in Path.GetInvalidFileNameChars()) name = name.Replace(c, '_');
+            return name;
+        }
+
         private DataTable SelectedTable => _tables.SelectedRows.Count > 0 ? (DataTable)_tables.SelectedRows[0].Tag : null;
 
         private void ShowSelectedTable()
@@ -139,7 +212,9 @@ namespace DBADashGUI.Grids
 
             if (!_grids.TryGetValue(table, out var grid))
             {
-                grid = new GridViewerControl(table, table.TableName) { Dock = DockStyle.Fill };
+                // The SSMS extension's own title for a result set, where it gave one.
+                var title = table.ExtendedProperties["Title"] as string;
+                grid = new GridViewerControl(table, string.IsNullOrWhiteSpace(title) ? table.TableName : title) { Dock = DockStyle.Fill };
                 _grids.Add(table, grid);
             }
 

@@ -150,7 +150,21 @@ namespace DBADash.SSMSExtension
         /// What the viewer's tab is called: the query window's document and which of its result sets this is - e.g.
         /// "SQLQuery1.sql - Result 2" - rather than the temp file's random name.
         /// </summary>
-        private static string ResultSetTitle(ResultsGridReader.ResultSet resultSet)
+        internal static string ResultSetTitle(ResultsGridReader.ResultSet resultSet)
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
+            var title = WithDocumentName(ResultSetName(resultSet));
+            if (!resultSet.IsComplete) title += " (partial)";
+            return title;
+        }
+
+        /// <summary>"Result 2" - which of the query's result sets this is, where the grid says.</summary>
+        internal static string ResultSetName(ResultsGridReader.ResultSet resultSet) =>
+            resultSet.Index is { } index ? $"Result {index + 1}" : "Results";
+
+        /// <summary>The query window's document name ahead of <paramref name="title"/>, if it can be had.</summary>
+        internal static string WithDocumentName(string title)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
@@ -164,10 +178,7 @@ namespace DBADash.SSMSExtension
                 // Just a caption - go without the document's name.
             }
 
-            var title = resultSet.Index is { } index ? $"Result {index + 1}" : "Results";
-            if (!string.IsNullOrEmpty(document)) title = document + " - " + title;
-            if (!resultSet.IsComplete) title += " (partial)";
-            return title;
+            return string.IsNullOrEmpty(document) ? title : document + " - " + title;
         }
     }
 }

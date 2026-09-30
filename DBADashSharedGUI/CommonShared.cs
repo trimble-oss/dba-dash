@@ -620,6 +620,34 @@ namespace DBADashSharedGUI
             Process.Start(psi);
         }
 
+        /// <summary>
+        /// Prompts for a file and saves every table in the DataSet to it, a sheet per table (see
+        /// <see cref="SaveDataSetToXLSX"/>), then opens it - as <see cref="PromptSaveDataTableToXLSX"/> does for one.
+        /// </summary>
+        public static void PromptSaveDataSetToXLSX(DataSet dataSet, string defaultFileName)
+        {
+            using var dialog = new SaveFileDialog
+            {
+                FileName = defaultFileName + ".xlsx",
+                Filter = "Excel Workbook (*.xlsx)|*.xlsx",
+                AddExtension = true,
+                DefaultExt = ".xlsx"
+            };
+            if (dialog.ShowDialog() != DialogResult.OK) return;
+
+            try
+            {
+                SaveDataSetToXLSX(dataSet, dialog.FileName); // Assume there will be no invalid XML characters
+            }
+            catch (XmlException ex)
+            {
+                Debug.WriteLine("XmlException exporting to Excel, retrying with invalid XML characters removed", ex.ToString());
+                SaveDataSetToXLSX(dataSet, dialog.FileName, true); // Try again with invalid XML characters removed
+            }
+
+            Process.Start(new ProcessStartInfo(dialog.FileName) { UseShellExecute = true });
+        }
+
         public static void SaveDataGridViewsToXLSX(DataGridView[] Grids, string path, bool replaceInvalidChars = false)
         {
             using var workbook = new XLWorkbook();
@@ -749,7 +777,59 @@ namespace DBADashSharedGUI
         public static void SaveDataTableToXLSX(DataTable dataTable, string excelFilePath, bool replaceInvalidChars = false)
         {
             using var workbook = new XLWorkbook();
-            var sheet = workbook.Worksheets.Add("Sheet1");
+            AddDataTableSheet(workbook, dataTable, "Sheet1", replaceInvalidChars);
+
+            // Save the workbook to the specified file path
+            workbook.SaveAs(excelFilePath);
+        }
+
+        /// <summary>
+        /// Every table in the DataSet on a sheet of its own, named after the table - e.g. each of a query's result sets
+        /// the SSMS extension handed over.
+        /// </summary>
+        public static void SaveDataSetToXLSX(DataSet dataSet, string excelFilePath, bool replaceInvalidChars = false)
+        {
+            using var workbook = new XLWorkbook();
+            var used = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var index = 1;
+            foreach (DataTable dataTable in dataSet.Tables)
+            {
+                AddDataTableSheet(workbook, dataTable, ExcelSheetName(dataTable.TableName, index++, used), replaceInvalidChars);
+            }
+
+            workbook.SaveAs(excelFilePath);
+        }
+
+        /// <summary>
+        /// A name Excel accepts for a sheet: none of : \ / ? * [ ], not starting or ending with an apostrophe, at most 31
+        /// characters, and unique ignoring case.
+        /// </summary>
+        public static string ExcelSheetName(string name, int index, ISet<string> used)
+        {
+            const int maxLength = 31;
+            name = new string((name ?? string.Empty).Select(c => ":\\/?*[]".Contains(c) ? '_' : c).ToArray());
+            if (name.Length > maxLength) name = name[..maxLength];
+            // Trimmed after truncating, which can leave an apostrophe at the end.
+            name = name.Trim().Trim('\'');
+            if (name.Length == 0) name = $"Sheet{index}";
+
+            var unique = name;
+            for (var i = 2; !used.Add(unique); i++)
+            {
+                var suffix = $" ({i})";
+                unique = name[..Math.Min(name.Length, maxLength - suffix.Length)] + suffix;
+            }
+
+            return unique;
+        }
+
+        /// <summary>The table's columns and rows on a new sheet, with DBA Dash's header style.</summary>
+        private static void AddDataTableSheet(XLWorkbook workbook, DataTable dataTable, string sheetName, bool replaceInvalidChars)
+        {
+            var sheet = workbook.Worksheets.Add(sheetName);
+
+            // A table with no columns has nothing to lay out - the sheet is left empty.
+            if (dataTable.Columns.Count == 0) return;
 
             // Header
             for (var i = 0; i < dataTable.Columns.Count; i++)
@@ -804,9 +884,6 @@ namespace DBADashSharedGUI
             {
                 sheet.Column(i).Width = Math.Min(sheet.Column(i).Width, maxColumnWidth);
             }
-
-            // Save the workbook to the specified file path
-            workbook.SaveAs(excelFilePath);
         }
 
         public static void SaveDataGridViewToXLSX(ref DataGridView dgv, string path, bool replaceInvalidChars = false)
