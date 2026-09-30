@@ -17,6 +17,14 @@ namespace DBADashGUI.CustomReports
         /// </summary>
         public string ResultName { get; set; }
 
+        /// <summary>
+        /// The result set's data bars as changed from the grid's context menu while the report is open, by column.
+        /// Not saved with the report, but kept so a refresh doesn't lose them.  Null until one is changed, when the
+        /// saved <see cref="ColumnMetadata.DataBar"/> settings apply.
+        /// </summary>
+        [JsonIgnore]
+        public Dictionary<string, DataBarSettings> SessionDataBars { get; set; }
+
         #region "Backward compatibility"
 
         /// <summary>

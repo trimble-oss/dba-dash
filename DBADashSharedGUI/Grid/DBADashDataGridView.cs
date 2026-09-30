@@ -23,7 +23,7 @@ using Resources = DBADashSharedGUI.Properties.Resources;
 
 namespace DBADashGUI.CustomReports
 {
-    public class DBADashDataGridView : DataGridView
+    public partial class DBADashDataGridView : DataGridView
     {
         public ContextMenuStrip CellContextMenu;
         public ContextMenuStrip ColumnContextMenu;
@@ -271,6 +271,7 @@ namespace DBADashGUI.CustomReports
             EnableDoubleBuffering();
             AddCellContextMenuItems();
             AddColumnContextMenuItems();
+            WireDataBars();
             this.ApplyTheme();
             this.AllowUserToOrderColumns = true;
             this.DataError += DBADashDataGridView_DataError;
@@ -359,6 +360,7 @@ namespace DBADashGUI.CustomReports
                     freezeColumn,
                     new ToolStripSeparator(),
                     colGroupByMenuItem,
+                    GetDataBarMenuItem(),
                     new ToolStripSeparator(),
                     editFilter,
                     clearFilter,
@@ -461,6 +463,7 @@ namespace DBADashGUI.CustomReports
                     GetAutoResizeColumns(),
                     GetRowHeadersMenuItem(),
                     cellGroupByMenuItem,
+                    GetDataBarMenuItem(),
                     new ToolStripSeparator(),
                     inFilter,
                     notInFilter,

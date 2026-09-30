@@ -36,6 +36,8 @@ namespace DBADashGUI.QueryPlans
         private const string ElapsedColumn = "Elapsed";
         private const string WarningsColumn = "Warnings";
         private const string EstimateErrorColumn = "EstimateError";
+        private const string EstimatedRowsColumn = "EstimatedRows";
+        private const string ActualRowsColumn = "ActualRows";
 
         // Hidden: the bar lengths, carried on the row so they survive sorting.
         private const string CostShareColumn = "CostShare";
@@ -83,6 +85,7 @@ namespace DBADashGUI.QueryPlans
             };
             _grid.SizeChanged += (_, _) => QueueFitRowHeights();
             _grid.CellPainting += Grid_CellPainting;
+            AddDataBars();
             _grid.CellFormatting += Grid_CellFormatting;
             _grid.CellToolTipTextNeeded += Grid_CellToolTipTextNeeded;
 
@@ -217,8 +220,8 @@ namespace DBADashGUI.QueryPlans
 
             AddColumn(CostPercentColumn, "Cost %", 80, "0.0");
             AddColumn("EstimatedCost", "Est. Cost", 85, "#,##0.###");
-            AddColumn("EstimatedRows", "Est. Rows", 90, "N0");
-            AddColumn("ActualRows", "Actual Rows", 95, "N0");
+            AddColumn(EstimatedRowsColumn, "Est. Rows", 90, "N0");
+            AddColumn(ActualRowsColumn, "Actual Rows", 95, "N0");
             AddColumn(ElapsedColumn, "Elapsed (ms)", 100, "N0");
             AddColumn("Cpu", "CPU (ms)", 85, "N0");
             AddColumn(EstimateErrorColumn, "Worst Estimate", 110, null);
@@ -268,7 +271,7 @@ namespace DBADashGUI.QueryPlans
         {
             var actual = summaries.Any(s => s.IsActual);
 
-            _grid.Columns["ActualRows"]!.Visible = actual;
+            _grid.Columns[ActualRowsColumn]!.Visible = actual;
             _grid.Columns[ElapsedColumn]!.Visible = summaries.Any(s => s.ElapsedMs is not null);
             _grid.Columns["Cpu"]!.Visible = summaries.Any(s => s.CpuMs is not null);
             _grid.Columns[EstimateErrorColumn]!.Visible = summaries.Any(s => s.WorstEstimateError is not null);
@@ -290,8 +293,8 @@ namespace DBADashGUI.QueryPlans
             table.Columns.Add(StatementColumn, typeof(string));
             table.Columns.Add(CostPercentColumn, typeof(double));
             table.Columns.Add("EstimatedCost", typeof(double));
-            table.Columns.Add("EstimatedRows", typeof(double));
-            table.Columns.Add("ActualRows", typeof(long));
+            table.Columns.Add(EstimatedRowsColumn, typeof(double));
+            table.Columns.Add(ActualRowsColumn, typeof(long));
             table.Columns.Add(ElapsedColumn, typeof(long));
             table.Columns.Add("Cpu", typeof(long));
             table.Columns.Add(EstimateErrorColumn, typeof(double));
@@ -512,57 +515,53 @@ namespace DBADashGUI.QueryPlans
             }
         }
 
+        // Bars the grid's own data bars draw: each against the largest in its column, blue to red.
+        private static readonly string[] CostColumns = ["EstimatedCost", "Cpu"];
+
+        // Bars drawn here, measured against something the grid's data bars can't express: Cost % and
+        // Elapsed against their hidden share columns, and the two row counts against one shared scale.
+        private static readonly string[] OwnBarColumns = [CostPercentColumn, ElapsedColumn, EstimatedRowsColumn, ActualRowsColumn];
+
+        private void AddDataBars()
+        {
+            foreach (var column in CostColumns) _grid.SetDataBar(column, DataBarSettings.MoreIsWorse());
+            _grid.ColumnsWithOwnDataBars.UnionWith(OwnBarColumns);
+        }
+
         /// <summary>
         /// The cost, time and row cells carry a bar under the number, so the expensive or slow statement
-        /// stands out in a long list without reading every figure.  Cost % and Elapsed are drawn to
-        /// their hidden share columns, the others to the largest in the list.
+        /// stands out in a long list without reading every figure.  Estimated cost and CPU are the grid's
+        /// own data bars; the ones here are measured against something else - see <see cref="OwnBarColumns"/>.
         /// </summary>
         private void Grid_CellPainting(object sender, DataGridViewCellPaintingEventArgs e)
         {
             if (e.RowIndex < 0 || e.ColumnIndex < 0) return;
 
-            var name = _grid.Columns[e.ColumnIndex].Name;
-            var shareColumn = name switch
+            switch (_grid.Columns[e.ColumnIndex].Name)
             {
-                CostPercentColumn => CostShareColumn,
-                ElapsedColumn => ElapsedShareColumn,
-                _ => null
-            };
-
-            if (shareColumn is not null)
-            {
-                var share = _grid.Rows[e.RowIndex].Cells[shareColumn].Value as double?;
-                PlanGridBars.Paint(e, share);
-                return;
-            }
-
-            // The figure columns, against the largest in the list.
-            if (_scales.TryGetValue(name, out var scale))
-            {
-                var share = PlanGridBars.Share(_grid.Rows[e.RowIndex].Cells[name].Value, scale.Max);
-                PlanGridBars.Paint(e, share, scale.Neutral ? DashColors.BlueLight : null);
+                case CostPercentColumn:
+                    PlanGridBars.Paint(e, _grid.Rows[e.RowIndex].Cells[CostShareColumn].Value as double?);
+                    break;
+                case ElapsedColumn:
+                    PlanGridBars.Paint(e, _grid.Rows[e.RowIndex].Cells[ElapsedShareColumn].Value as double?);
+                    break;
+                case EstimatedRowsColumn:
+                case ActualRowsColumn:
+                    PlanGridBars.Paint(e, PlanGridBars.Share(e.Value, _mostRows), DashColors.BlueLight);
+                    break;
             }
         }
 
         /// <summary>
-        /// What the bar in a figure column is measured against, and whether it is coloured by size.
-        /// Estimated and actual rows share a scale - the pair is compared, and bars of different
-        /// lengths for the same number of rows would say something that is not true.  Rows are a
-        /// volume rather than a cost, so they stay one colour; cost and CPU run from blue to red.
+        /// What both row bars are measured against.  Estimated and actual rows share a scale - the pair is
+        /// compared, and bars of different lengths for the same number of rows would say something that is
+        /// not true.  Rows are a volume rather than a cost, so they stay one colour.
         /// </summary>
-        private readonly Dictionary<string, (double Max, bool Neutral)> _scales = [];
+        private double _mostRows;
 
         private void BuildScales(IReadOnlyList<PlanStatementSummary> summaries)
         {
-            _scales.Clear();
-            if (summaries.Count == 0) return;
-
-            _scales["EstimatedCost"] = (summaries.Max(s => s.EstimatedCost), false);
-            _scales["Cpu"] = (summaries.Max(s => (double)(s.CpuMs ?? 0)), false);
-
-            var rows = summaries.Max(s => Math.Max(s.EstimatedRows ?? 0, s.ActualRows ?? 0));
-            _scales["EstimatedRows"] = (rows, true);
-            _scales["ActualRows"] = (rows, true);
+            _mostRows = summaries.Count == 0 ? 0 : summaries.Max(s => Math.Max(s.EstimatedRows ?? 0, s.ActualRows ?? 0));
         }
 
         private void Grid_CellToolTipTextNeeded(object sender, DataGridViewCellToolTipTextNeededEventArgs e)

@@ -307,7 +307,14 @@ namespace DBADashGUI.QueryPlans
             _expressionsGrid.CellDoubleClick += ExpressionsGrid_CellDoubleClick;
             _expressionsGrid.CellContentClick += ExpressionsGrid_CellContentClick;
             _waitsGrid.CellContentClick += WaitsGrid_CellContentClick;
-            _waitsGrid.CellPainting += WaitsGrid_CellPainting;
+            // A bar under Wait Time, against the longest wait so the one the query spent longest on has the full
+            // bar, and under % of Wait Time, at its share of all of them.  Kept by column name, so they last
+            // as the columns are rebuilt for each statement.
+            _waitsGrid.SetDataBar("WaitTimeMs", DataBarSettings.MoreIsWorse());
+            var shareBar = DataBarSettings.MoreIsWorse();
+            shareBar.Minimum = 0;
+            shareBar.Maximum = 1;
+            _waitsGrid.SetDataBar("Share", shareBar);
 
             // Top of the Parameters list's right click menus - on a row, and on the empty space below the
             // rows, which is most of the list for a statement with one or two parameters.
@@ -2229,8 +2236,8 @@ namespace DBADashGUI.QueryPlans
         {
             ResetGrid(_waitsGrid);
 
-            // Rows tall enough for a bar under the figure, which is drawn along the bottom of the cell
-            // with the text at the top - see WaitsGrid_CellPainting.
+            // Rows tall enough for the data bars (set up with the grid) to sit along the bottom of the
+            // cell, under the figure at the top.
             _waitsGrid.RowTemplate.Height = _waitsGrid.Font.Height + 14;
 
             _waitsGrid.Columns.Add(new DataGridViewTextBoxColumn
@@ -2258,7 +2265,6 @@ namespace DBADashGUI.QueryPlans
             });
 
             var total = statement.WaitStats.Sum(w => w.WaitTimeMs);
-            _longestWaitMs = statement.WaitStats.Count == 0 ? 0 : statement.WaitStats.Max(w => w.WaitTimeMs);
 
             foreach (var wait in statement.WaitStats)
             {
@@ -2278,30 +2284,6 @@ namespace DBADashGUI.QueryPlans
             _waitsTab.ToolTipText = total == 0
                 ? string.Empty
                 : total.ToString("N0", CultureInfo.InvariantCulture) + " ms waiting in total.";
-        }
-
-        // The largest wait time of the statement shown, which a wait's bar is measured against so the
-        // one the query spent longest on has the full bar.
-        private long _longestWaitMs;
-
-        /// <summary>
-        /// A bar under Wait Time, against the longest wait, and under % of Wait Time, at its share of
-        /// all of them.  The bar is read from the row's own cells, so it stays with its row when the
-        /// list is sorted.
-        /// </summary>
-        private void WaitsGrid_CellPainting(object sender, DataGridViewCellPaintingEventArgs e)
-        {
-            if (e.RowIndex < 0 || e.ColumnIndex < 0) return;
-
-            switch (_waitsGrid.Columns[e.ColumnIndex].Name)
-            {
-                case "WaitTimeMs":
-                    PlanGridBars.Paint(e, PlanGridBars.Share(e.Value, _longestWaitMs));
-                    break;
-                case "Share":
-                    PlanGridBars.Paint(e, PlanGridBars.Share(e.Value, 1));
-                    break;
-            }
         }
 
         private void WaitsGrid_CellContentClick(object sender, DataGridViewCellEventArgs e)
