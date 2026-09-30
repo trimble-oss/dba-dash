@@ -94,6 +94,12 @@ namespace DBADash.QueryPlan.Model
         public bool IsPartitioned { get; internal set; }
 
         /// <summary>
+        /// Which partitions it reads and how they were chosen - see <see cref="PlanPartitionAccess"/>.
+        /// Null when the operator is not partitioned.
+        /// </summary>
+        public PlanPartitionAccess? Partitions { get; internal set; }
+
+        /// <summary>
         /// A seek fetching columns its index did not cover, which is what makes it a key lookup.
         /// </summary>
         public bool IsLookup { get; internal set; }

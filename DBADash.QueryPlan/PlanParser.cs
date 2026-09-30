@@ -594,6 +594,8 @@ namespace DBADash.QueryPlan
                 operatorNode.SeekPredicate = DescribeSeekPredicates(body);
             }
 
+            if (operatorNode.IsPartitioned) operatorNode.Partitions = ParsePartitions(relOp, body);
+
             elements.Add((operatorNode, relOp, body));
 
             // Nested operators live inside the body element, not directly under the RelOp.
@@ -1285,6 +1287,84 @@ namespace DBADash.QueryPlan
             return parts.Count == 0 ? null : string.Join(", ", parts);
         }
 
+        /// <summary>
+        /// The partitions a partitioned operator reads - see <see cref="PlanPartitionAccess"/>: the
+        /// seek on its partition id, which is a column showplan names PtnId1000 and the like with no
+        /// table, and on an actual plan the partitions the run touched.
+        /// </summary>
+        private static PlanPartitionAccess ParsePartitions(XElement relOp, XElement? body)
+        {
+            var access = new PlanPartitionAccess();
+
+            if (ChildElements(relOp, "RunTimePartitionSummary")
+                    .SelectMany(s => ChildElements(s, "PartitionsAccessed"))
+                    .FirstOrDefault() is { } accessed)
+            {
+                access.PartitionsAccessed = Int(Attribute(accessed, "PartitionCount"));
+                access.AccessedRanges = ChildElements(accessed, "PartitionRange")
+                    .Select(r => (Start: Int(Attribute(r, "Start")), End: Int(Attribute(r, "End"))))
+                    .Where(r => r.Start is not null && r.End is not null)
+                    .Select(r => new PlanPartitionRange(r.Start!.Value, r.End!.Value))
+                    .ToList();
+            }
+
+            if (body is null) return access;
+
+            int? start = null, end = null;
+
+            foreach (var range in ChildElements(body, "SeekPredicates")
+                         .SelectMany(p => p.Descendants())
+                         .Where(e => SeekRangeElements.Contains(e.Name.LocalName)))
+            {
+                var columns = ChildElements(range, "RangeColumns").SelectMany(c => ChildElements(c, "ColumnReference")).ToList();
+                var expressions = ChildElements(range, "RangeExpressions").SelectMany(e => ChildElements(e, "ScalarOperator")).ToList();
+
+                for (var i = 0; i < columns.Count; i++)
+                {
+                    if (!IsPartitionId(columns[i])) continue;
+
+                    access.HasPartitionSeek = true;
+
+                    if (i >= expressions.Count || PartitionNumber(expressions[i]) is not { } number)
+                    {
+                        // RangePartitionNew(value, ...), or anything else that isn't a constant: the
+                        // partition is worked out from a value when the query runs.
+                        access.HasDynamicBound = true;
+                        continue;
+                    }
+
+                    switch (range.Name.LocalName)
+                    {
+                        case "StartRange": start = number; break;
+                        case "EndRange": end = number; break;
+                        default: start = end = number; break;
+                    }
+                }
+            }
+
+            if (!access.HasDynamicBound && start is { } first && end is { } last)
+            {
+                access.ConstantRange = new PlanPartitionRange(first, last);
+            }
+
+            return access;
+        }
+
+        /// <summary>
+        /// The partition id showplan seeks on to choose partitions: a column it makes up, PtnId
+        /// followed by a number, belonging to no table.
+        /// </summary>
+        private static bool IsPartitionId(XElement column) =>
+            Attribute(column, "Table") is null &&
+            Attribute(column, "Column") is { } name &&
+            name.StartsWith("PtnId", StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>A partition number written as a constant - (381) - or null for anything else.</summary>
+        private static int? PartitionNumber(XElement scalarOperator) =>
+            ChildElements(scalarOperator, "Const").FirstOrDefault() is { } constant
+                ? Int(Attribute(constant, "ConstValue")?.Trim('(', ')'))
+                : null;
+
         /// <summary>Showplan's scan types as the comparison a reader would write.</summary>
         private static string OperatorFor(string? scanType) => scanType switch
         {
@@ -1329,18 +1409,26 @@ namespace DBADash.QueryPlan
             foreach (var defined in ChildElements(body, "DefinedValues")
                          .SelectMany(d => ChildElements(d, "DefinedValue")))
             {
-                if (ChildElements(defined, "ColumnReference").FirstOrDefault() is not { } column) continue;
+                // One column, or a ValueVector of several set by the one expression - the start, end
+                // and flags a GetRangeWithMismatchedTypes works out for a seek.
+                var columns = ChildElements(defined, "ColumnReference").Take(1)
+                    .Concat(ChildElements(defined, "ValueVector").SelectMany(v => ChildElements(v, "ColumnReference")))
+                    .ToList();
+                if (columns.Count == 0) continue;
                 if ((ScalarString(defined) ?? ConcatenationDefinition(body, defined)) is not { Length: > 0 } expression) continue;
 
-                var name = Attribute(column, "Column") ?? Attribute(column, "ComputedColumn");
-                if (string.IsNullOrEmpty(name)) continue;
+                foreach (var column in columns)
+                {
+                    var name = Attribute(column, "Column") ?? Attribute(column, "ComputedColumn");
+                    if (string.IsNullOrEmpty(name)) continue;
 
-                // The alias the query gave, or the table, for the defined values that are real
-                // columns - a computed column's definition, or the value an update writes.
-                var qualifier = PlanObjectReference.Unquote(Attribute(column, "Alias")) ??
-                                PlanObjectReference.Unquote(Attribute(column, "Table"));
+                    // The alias the query gave, or the table, for the defined values that are real
+                    // columns - a computed column's definition, or the value an update writes.
+                    var qualifier = PlanObjectReference.Unquote(Attribute(column, "Alias")) ??
+                                    PlanObjectReference.Unquote(Attribute(column, "Table"));
 
-                yield return new PlanExpression(name!, qualifier, expression, op);
+                    yield return new PlanExpression(name!, qualifier, expression, op);
+                }
             }
         }
 
