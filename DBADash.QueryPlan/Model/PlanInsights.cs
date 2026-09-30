@@ -18,14 +18,25 @@ namespace DBADash.QueryPlan.Model
         {
         }
 
+        /// <summary>One of DBA Dash's own findings - see <see cref="IsAnalysis"/>.</summary>
+        internal static PlanInsight Analysis(
+            PlanWarningSeverity severity,
+            string title,
+            string text,
+            IReadOnlyList<PlanOperator>? operators = null,
+            bool dependsOnPlanKind = false) =>
+            new(severity, text, operators ?? [], title: title) { DependsOnPlanKind = dependsOnPlanKind };
+
         internal PlanInsight(
             PlanWarningSeverity severity,
             string text,
             IReadOnlyList<PlanOperator> operators,
             PlanMissingIndex? missingIndex = null,
             string? fullText = null,
-            int warningCount = 0)
+            int warningCount = 0,
+            string? title = null)
         {
+            Title = title;
             Severity = severity;
             Text = text;
             Operators = operators;
@@ -35,6 +46,27 @@ namespace DBADash.QueryPlan.Model
         }
 
         public PlanWarningSeverity Severity { get; }
+
+        /// <summary>
+        /// A short name for a finding of DBA Dash's own, for a list to show beside the plan's
+        /// warning titles.  Null for the plan's warnings and missing indexes.
+        /// </summary>
+        public string? Title { get; }
+
+        /// <summary>
+        /// True when this is DBA Dash's own reading of the plan rather than a warning or missing
+        /// index SQL Server put in it - see <see cref="PlanInsights.AnalysisFor"/>.  A reader
+        /// comparing with SSMS needs to know which is which: SSMS will not show these.
+        /// </summary>
+        public bool IsAnalysis => Title is not null;
+
+        /// <summary>
+        /// A finding only one kind of plan can give - one read from a run's figures, or the large
+        /// grant only an estimated plan is judged on - so an estimated plan and an actual one having
+        /// it or not says nothing about which is better.  The insight's
+        /// <see cref="PlanWarning.IsRuntime"/>, for comparing two plans.
+        /// </summary>
+        public bool DependsOnPlanKind { get; private init; }
 
         /// <summary>What was found, as plain text.</summary>
         public string Text { get; }
@@ -99,6 +131,21 @@ namespace DBADash.QueryPlan.Model
                 insights.Add(new PlanInsight(PlanWarningSeverity.Warning, MissingIndexText(index), reader, index));
             }
 
+            insights.AddRange(AnalysisFor(statement));
+
+            // Worst first, in the order found within each severity.
+            return insights.OrderByDescending(i => i.Severity).ToList();
+        }
+
+        /// <summary>
+        /// DBA Dash's own findings about the statement - what the plan records but SQL Server never
+        /// raises as a warning - in the order found.  <see cref="ForStatement"/> without the plan's
+        /// warnings and missing indexes, for a list that already shows those.
+        /// </summary>
+        public static IReadOnlyList<PlanInsight> AnalysisFor(PlanStatement statement)
+        {
+            var insights = new List<PlanInsight>();
+
             if (EarlyAbort(statement.OptimisationEarlyAbortReason) is { } abort) insights.Add(abort);
 
             if (statement.MemoryGrant?.GrantWaitTimeMs is long wait and > 0)
@@ -106,12 +153,14 @@ namespace DBADash.QueryPlan.Model
                 // Any wait means the memory was already given to other queries - the server (or, under
                 // Resource Governor, the query's pool) was short of workspace memory, and this query
                 // queued (RESOURCE_SEMAPHORE) for its turn.
-                insights.Add(new PlanInsight(
+                insights.Add(PlanInsight.Analysis(
                     PlanWarningSeverity.Warning,
+                    "Memory grant wait",
                     "The query waited " + Milliseconds(wait) + " for its memory grant before it could start running. " +
                     "Other queries were holding the available query memory (or, under Resource Governor, their pool's share of it), " +
                     "so this one had to queue (RESOURCE_SEMAPHORE) until enough was released. " +
-                    "Look for large or excessive grants in the queries running alongside it."));
+                    "Look for large or excessive grants in the queries running alongside it.",
+                    dependsOnPlanKind: true));
             }
 
             if (ExcessiveMemoryGrant(statement) is { } excessiveGrant) insights.Add(excessiveGrant);
@@ -131,40 +180,52 @@ namespace DBADash.QueryPlan.Model
             var changed = statement.Parameters.Where(p => p.CompiledValueDiffers).ToList();
             if (changed.Count > 0)
             {
-                insights.Add(new PlanInsight(
+                insights.Add(PlanInsight.Analysis(
                     PlanWarningSeverity.Information,
+                    "Parameter values differ",
                     "Ran with different parameter values from those the plan was compiled for: " +
                     string.Join("; ", changed.Select(p => p.Name + " compiled for " + p.CompiledValue + ", ran with " + p.RuntimeValue)) +
-                    ". A plan compiled for one value can suit another poorly."));
+                    ". A plan compiled for one value can suit another poorly.",
+                    dependsOnPlanKind: true));
             }
 
             if (statement.WaitStats.Count > 0)
             {
-                insights.Add(new PlanInsight(
+                insights.Add(PlanInsight.Analysis(
                     PlanWarningSeverity.Information,
+                    "Waits",
                     "Waited longest on " +
                     string.Join(", ", statement.WaitStats.OrderByDescending(w => w.WaitTimeMs).Take(3)
-                        .Select(w => w.WaitType + " (" + Milliseconds(w.WaitTimeMs) + ")")) + "."));
+                        .Select(w => w.WaitType + " (" + Milliseconds(w.WaitTimeMs) + ")")) + ".",
+                    dependsOnPlanKind: true));
             }
 
             // Said above, as part of the scalar UDF card, rather than repeated here as a plain reason code.
             if (!IsUdfNonParallelReason(statement.NonParallelPlanReason) && !string.IsNullOrEmpty(statement.NonParallelPlanReason))
             {
-                insights.Add(new PlanInsight(
+                insights.Add(PlanInsight.Analysis(
                     PlanWarningSeverity.Information,
+                    "Serial plan",
                     "The plan runs on a single thread: " + Words(statement.NonParallelPlanReason) + "."));
             }
 
             if (statement.HasPlan && !statement.IsActualPlan)
             {
-                insights.Add(new PlanInsight(
+                insights.Add(PlanInsight.Analysis(
                     PlanWarningSeverity.Information,
-                    "This is an estimated plan: it shows what the optimizer expected, without the row counts and times of a real run."));
+                    EstimatedPlanTitle,
+                    "This is an estimated plan: it shows what the optimizer expected, without the row counts and times of a real run.",
+                    dependsOnPlanKind: true));
             }
 
-            // Worst first, in the order found within each severity.
-            return insights.OrderByDescending(i => i.Severity).ToList();
+            return insights;
         }
+
+        /// <summary>
+        /// The title of the note that a plan is estimated - about the plan rather than the query, so
+        /// left out when two plans are compared, which already say which kind each is.
+        /// </summary>
+        public const string EstimatedPlanTitle = "Estimated plan";
 
         /// <summary>
         /// One operator's warnings, worst first, then the missing indexes on the table it reads.
@@ -349,11 +410,13 @@ namespace DBADash.QueryPlan.Model
         /// </summary>
         private static PlanInsight? EarlyAbort(string? reason) => reason switch
         {
-            "TimeOut" => new PlanInsight(
+            "TimeOut" => PlanInsight.Analysis(
                 PlanWarningSeverity.Warning,
+                "Optimizer timed out",
                 "The optimizer timed out: it stopped searching and used the best plan found so far, which may not be the best one available."),
-            "MemoryLimitExceeded" => new PlanInsight(
+            "MemoryLimitExceeded" => PlanInsight.Analysis(
                 PlanWarningSeverity.Warning,
+                "Optimizer out of memory",
                 "The optimizer ran out of memory: it stopped searching and used the best plan found so far, which may not be the best one available."),
             _ => null
         };
@@ -376,13 +439,15 @@ namespace DBADash.QueryPlan.Model
             {
                 if (grant.EffectiveDesiredMemoryKb is not { } desired || desired < PlanMemoryGrantInfo.ExcessiveGrantMinKb) return null;
 
-                return new PlanInsight(
+                return PlanInsight.Analysis(
                     PlanWarningSeverity.Warning,
+                    "Large memory grant",
                     "The optimizer wants a memory grant of " + PlanFormat.Kilobytes(desired) +
                     " (the server may cap it, and a parallel plan asks for more). While the query runs, a large " +
                     "grant is query memory other queries cannot be granted, and is a common cause of " +
                     "RESOURCE_SEMAPHORE waits for them. " + GrantSizingHint +
-                    " An actual plan shows how much is really used.");
+                    " An actual plan shows how much is really used.",
+                    dependsOnPlanKind: true);
             }
 
             if (!grant.IsExcessive ||
@@ -391,12 +456,14 @@ namespace DBADash.QueryPlan.Model
                 return null;
             }
 
-            return new PlanInsight(
+            return PlanInsight.Analysis(
                 PlanWarningSeverity.Warning,
+                "Excessive memory grant",
                 "The query was granted " + PlanFormat.Kilobytes(granted) + " of memory but used only " +
                 PlanFormat.Kilobytes(used) + " (" + PlanFormat.Percent(usedFraction) +
                 "). The rest was query memory other queries could not be granted while this one ran, and an " +
-                "over-sized grant is a common cause of RESOURCE_SEMAPHORE waits for other queries. " + GrantSizingHint);
+                "over-sized grant is a common cause of RESOURCE_SEMAPHORE waits for other queries. " + GrantSizingHint,
+                dependsOnPlanKind: true);
         }
 
         /// <summary>Where a grant's size usually comes from, for the reader to go and look.</summary>
@@ -444,7 +511,8 @@ namespace DBADash.QueryPlan.Model
                 .Append(blocksParallelism ? " - consider an inline table-valued function or rewriting the logic without a UDF" : string.Empty)
                 .Append('.');
 
-            return new PlanInsight(PlanWarningSeverity.Critical, text.ToString());
+            // Raised only for its times when it does not block parallelism, and only a run has times.
+            return PlanInsight.Analysis(PlanWarningSeverity.Critical, "Scalar UDF", text.ToString(), dependsOnPlanKind: !blocksParallelism);
         }
 
         /// <summary>
@@ -486,7 +554,7 @@ namespace DBADash.QueryPlan.Model
                     .Append(" NULL, so neither OPTION (RECOMPILE) nor another variant could do better for these values.");
             }
 
-            return new PlanInsight(PlanWarningSeverity.Information, text.ToString());
+            return PlanInsight.Analysis(PlanWarningSeverity.Information, OptimizedOptionalParametersTitle, text.ToString());
         }
 
         /// <summary>
@@ -599,8 +667,9 @@ namespace DBADash.QueryPlan.Model
 
             // Warning whatever operator it is on: whether a residual after a seek is cheap depends on
             // how selective the seek is, which the plan cannot tell us for other values.
-            return new PlanInsight(
+            return PlanInsight.Analysis(
                 isVariant ? PlanWarningSeverity.Information : PlanWarningSeverity.Warning,
+                isVariant ? OptimizedOptionalParametersTitle : "Optional parameters",
                 text.ToString(),
                 operators);
         }
@@ -791,6 +860,13 @@ namespace DBADash.QueryPlan.Model
 
         /// <summary>The most parameters an optional parameters card names before the rest are counted.</summary>
         private const int MaxNamedParameters = 4;
+
+        /// <summary>
+        /// The title of the optional parameters note on a plan SQL Server 2025 already optimized -
+        /// apart from the catch-all warning's, so comparing a catch-all plan with an optimized one
+        /// shows the warning gone rather than the same title on both.
+        /// </summary>
+        private const string OptimizedOptionalParametersTitle = "Optional parameters (optimized)";
 
         /// <summary>The reason code showplan uses when a T-SQL UDF stops a plan going parallel.</summary>
         private const string TSqlUdfNonParallelReason = "TSQLUserDefinedFunctionsNotParallelizable";

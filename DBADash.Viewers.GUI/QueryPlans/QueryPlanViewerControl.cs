@@ -45,7 +45,7 @@ namespace DBADashGUI.QueryPlans
 
         private readonly QueryPlanGraphControl _graphControl = new() { Dock = DockStyle.Fill };
         private readonly QueryPlanPropertiesControl _properties = new() { Dock = DockStyle.Fill };
-        private readonly DBADashDataGridView _warningsGrid = NewGrid();
+        private readonly DBADashDataGridView _insightsGrid = NewGrid();
         private readonly DBADashDataGridView _missingIndexGrid = NewGrid();
         private readonly DBADashDataGridView _expressionsGrid = NewGrid();
         private readonly DBADashDataGridView _parametersGrid = NewGrid();
@@ -84,7 +84,7 @@ namespace DBADashGUI.QueryPlans
         // Tooltips on, for the tabs that summarise what they hold - a parameter that ran with a
         // different value, the total time spent waiting.
         private readonly ThemedTabControl _tabs = new() { Dock = DockStyle.Fill, ShowToolTips = true };
-        private readonly TabPage _warningsTab;
+        private readonly TabPage _insightsTab;
         private readonly TabPage _missingIndexTab;
         private readonly TabPage _expressionsTab;
         private readonly TabPage _parametersTab;
@@ -256,14 +256,14 @@ namespace DBADashGUI.QueryPlans
             _statementSplit.Panel2.Controls.Add(_graphSplit);
             _statementSplit.Panel1Collapsed = !HasStatementChoice;
 
-            _warningsTab = NewPage("Warnings", _warningsGrid);
+            _insightsTab = NewPage("Insights", _insightsGrid);
             _missingIndexTab = NewPage("Missing Indexes", GridAndScript(_missingIndexGrid, _missingIndexScript, _missingIndexScriptSplit));
             _expressionsTab = NewPage("Expressions", _expressionsGrid);
             _parametersTab = NewPage("Parameters", GridAndScript(_parametersGrid, _parameterScript, _parameterScriptSplit));
             _waitsTab = NewPage("Waits", _waitsGrid);
 
             _tabs.TabPages.Add(NewPage("Plan", _statementSplit));
-            _tabs.TabPages.Add(_warningsTab);
+            _tabs.TabPages.Add(_insightsTab);
             _tabs.TabPages.Add(_missingIndexTab);
             _tabs.TabPages.Add(_expressionsTab);
             _tabs.TabPages.Add(_parametersTab);
@@ -294,7 +294,15 @@ namespace DBADashGUI.QueryPlans
             // toolbar button follows the control's state rather than only setting it.
             _graphControl.FollowDataPathChanged += (_, _) => _dataPathButton.Checked = _graphControl.FollowDataPath;
             _properties.OperatorRequested += (_, op) => _graphControl.SelectOperator(op);
-            _warningsGrid.CellDoubleClick += (_, e) => SelectFromGrid(_warningsGrid, e.RowIndex);
+            _insightsGrid.CellDoubleClick += (_, e) => SelectFromGrid(_insightsGrid, e.RowIndex);
+            // Rows grow to fit the wrapped detail, and the detail keeps the width the grid has left.
+            _insightsGrid.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
+            _insightsGrid.Resize += (_, _) => FitInsightDetail();
+            // The other columns can still be dragged wider or narrower, and the detail takes up the difference.
+            _insightsGrid.ColumnWidthChanged += (_, e) =>
+            {
+                if (e.Column.Name != "Detail") FitInsightDetail();
+            };
             _missingIndexGrid.CellDoubleClick += MissingIndexGrid_CellDoubleClick;
             _expressionsGrid.CellDoubleClick += ExpressionsGrid_CellDoubleClick;
             _expressionsGrid.CellContentClick += ExpressionsGrid_CellContentClick;
@@ -380,7 +388,7 @@ namespace DBADashGUI.QueryPlans
             RowHeadersVisible = false
         };
 
-        private IEnumerable<DataGridView> ListGrids => [_warningsGrid, _missingIndexGrid, _expressionsGrid, _parametersGrid, _waitsGrid];
+        private IEnumerable<DataGridView> ListGrids => [_insightsGrid, _missingIndexGrid, _expressionsGrid, _parametersGrid, _waitsGrid];
 
         /// <summary>Grids refilled while their tab was hidden, sized when they are first shown.</summary>
         private readonly HashSet<DataGridView> _unsizedGrids = new();
@@ -411,6 +419,39 @@ namespace DBADashGUI.QueryPlans
                     if (grid.Columns.Contains(column)) grid.Columns[column].Width = ExpressionColumnWidth;
                 }
             }
+
+            if (ReferenceEquals(grid, _insightsGrid))
+            {
+                if (grid.Columns.Contains("Expanded") && grid.Columns["Expanded"].Width > ExpressionColumnWidth)
+                {
+                    grid.Columns["Expanded"].Width = ExpressionColumnWidth;
+                }
+
+                FitInsightDetail();
+            }
+        }
+
+        /// <summary>The narrowest the insights' detail is squeezed to before the grid scrolls sideways.</summary>
+        private const int MinInsightDetailWidth = 300;
+
+        /// <summary>
+        /// Gives the insights' detail column whatever width the other columns leave, so its text
+        /// wraps to the grid rather than running off the side of it - some insights are a paragraph
+        /// or more, with the options for fixing what they found.
+        /// </summary>
+        private void FitInsightDetail()
+        {
+            if (!_insightsGrid.Columns.Contains("Detail") || _insightsGrid.ClientSize.Width <= 0) return;
+
+            var detail = _insightsGrid.Columns["Detail"];
+            var others = _insightsGrid.Columns.Cast<DataGridViewColumn>()
+                .Where(c => c.Visible && !ReferenceEquals(c, detail))
+                .Sum(c => c.Width);
+
+            // Room left for the vertical scroll bar whether or not it is showing yet: wrapping makes
+            // the rows taller, which can bring it in, which would otherwise push the detail under it.
+            detail.Width = Math.Max(MinInsightDetailWidth,
+                _insightsGrid.ClientSize.Width - others - SystemInformation.VerticalScrollBarWidth - 2);
         }
 
         private void ListGrid_VisibleChanged(object sender, EventArgs e)
@@ -1223,7 +1264,7 @@ namespace DBADashGUI.QueryPlans
             {
                 CheckOnClick = true,
                 Checked = _graphControl.ShowNodeIds,
-                ToolTipText = "Put each operator's node id on it, so the nodes the cards, the warnings list and the properties panel name can be found in the plan."
+                ToolTipText = "Put each operator's node id on it, so the nodes the cards, the insights list and the properties panel name can be found in the plan."
             };
 
             nodeIds.CheckedChanged += (_, _) =>
@@ -1490,7 +1531,7 @@ namespace DBADashGUI.QueryPlans
             // leaves the canvas the same size, so the view raises no change of its own to follow.
             ShowCollapsedState();
             UpdateTimeMenu(statement);
-            ShowWarnings(statement);
+            ShowInsights(statement);
             ShowMissingIndexes(statement);
             ShowExpressions(statement);
             ShowParameters(statement);
@@ -1794,70 +1835,106 @@ namespace DBADashGUI.QueryPlans
             _tabs.SelectedTab = _tabs.TabPages.Cast<TabPage>().First(p => p.Text == "Query");
         }
 
-        private void ShowWarnings(PlanStatement statement)
+        private void ShowInsights(PlanStatement statement)
         {
-            _warningsGrid.DataSource = null;
-            _warningsGrid.Rows.Clear();
-            _warningsGrid.Columns.Clear();
+            _insightsGrid.DataSource = null;
+            _insightsGrid.Rows.Clear();
+            _insightsGrid.Columns.Clear();
 
-            _warningsGrid.Columns.Add("Severity", "Severity");
-            _warningsGrid.Columns.Add("Operator", "Operator");
-            _warningsGrid.Columns.Add("Warning", "Warning");
-            _warningsGrid.Columns.Add("Detail", "Detail");
-            _warningsGrid.Columns.Add("Expanded", "In Full");
-            _warningsGrid.Columns.Add(NodeIdColumn, NodeIdColumn);
-            _warningsGrid.Columns[NodeIdColumn].Visible = false;
+            _insightsGrid.Columns.Add("Severity", "Severity");
+            _insightsGrid.Columns.Add("Source", "Source");
+            _insightsGrid.Columns.Add("Operator", "Operator");
+            _insightsGrid.Columns.Add("Insight", "Insight");
+            _insightsGrid.Columns.Add("Detail", "Detail");
+            _insightsGrid.Columns.Add("Expanded", "In Full");
+            _insightsGrid.Columns.Add(NodeIdColumn, NodeIdColumn);
+            _insightsGrid.Columns[NodeIdColumn].Visible = false;
+            _insightsGrid.Columns["Detail"].DefaultCellStyle.WrapMode = DataGridViewTriState.True;
+            _insightsGrid.Columns["Expanded"].DefaultCellStyle.WrapMode = DataGridViewTriState.True;
+            _insightsGrid.Columns["Insight"].DefaultCellStyle.WrapMode = DataGridViewTriState.True;
+            _insightsGrid.Columns["Source"].ToolTipText =
+                PlanWarningSource + ": a warning SQL Server put in the plan, as SSMS shows it.\n" +
+                AnalysisSource + ": DBA Dash's own reading of the plan - something it records but SQL Server doesn't raise as a warning.";
 
-            var count = 0;
+            // The plan's warnings and DBA Dash's own findings in one list, so a reader who has seen a
+            // card in the overview finds it here too - with the source saying which is which, as
+            // SSMS will only ever show the first kind.  All in one order, worst first, so an analysis
+            // finding that matters more than a plan warning isn't pushed below it.
+            var rows = new List<(PlanWarningSeverity Severity, bool IsAnalysis, string Operator, string Title, string Detail, int? NodeId)>();
 
-            // Plan level warnings first, then the operators' own, worst first within each - the same
-            // order AllWarnings uses, so the list and the badges agree about what matters.
-            foreach (var warning in statement.Warnings.OrderByDescending(w => w.Severity))
+            foreach (var warning in statement.Warnings)
             {
                 // A conversion showplan reported against the statement happens in one operator, and
                 // the reader wants that one - so the row names it and double clicking goes there, the
                 // same as a warning the plan put on an operator itself.
-                AddWarningRow(
-                    warning.Severity.ToString(),
+                rows.Add((warning.Severity, false,
                     warning.Operators.Count == 0 ? "Plan" : warning.OperatorsDescription,
                     warning.Title,
                     warning.Detail,
-                    warning.Operators.Count == 0 ? null : warning.Operators[0].NodeId);
-
-                count++;
+                    warning.Operators.Count == 0 ? null : warning.Operators[0].NodeId));
             }
 
             foreach (var op in statement.Operators)
             {
-                foreach (var warning in op.Warnings.OrderByDescending(w => w.Severity))
+                foreach (var warning in op.Warnings)
                 {
-                    AddWarningRow(warning.Severity.ToString(), op.ToString(), warning.Title, warning.Detail, op.NodeId);
-                    count++;
+                    rows.Add((warning.Severity, false, op.ToString(), warning.Title, warning.Detail, op.NodeId));
                 }
             }
 
-            _warningsTab.Text = count == 0 ? "Warnings" : "Warnings (" + count.ToString(CultureInfo.InvariantCulture) + ")";
-            SetTabVisible(_warningsTab, count > 0);
+            // Missing indexes are left to their own tab, which has the columns and scripts for them.
+            foreach (var insight in PlanInsights.AnalysisFor(statement))
+            {
+                rows.Add((insight.Severity, true,
+                    insight.Operators.Count == 0 ? "Plan" : string.Join(", ", insight.Operators.Select(op => op.ToString())),
+                    insight.Title,
+                    insight.Text,
+                    insight.Operator?.NodeId));
+            }
+
+            // Stable, so plan level warnings still come before the operators' own within a severity.
+            foreach (var row in rows.OrderByDescending(r => r.Severity))
+            {
+                AddInsightRow(row.Severity, row.IsAnalysis, row.Operator, row.Title, row.Detail, row.NodeId);
+            }
+
+            var count = rows.Count;
+            _insightsTab.Text = count == 0 ? "Insights" : "Insights (" + count.ToString(CultureInfo.InvariantCulture) + ")";
+            SetTabVisible(_insightsTab, count > 0);
         }
 
-        private void AddWarningRow(string severity, string source, string title, string detail, int? nodeId)
+        private const string PlanWarningSource = "SQL Server";
+        private const string AnalysisSource = "DBA Dash";
+
+        private void AddInsightRow(PlanWarningSeverity severity, bool isAnalysis, string operatorText, string title, string detail, int? nodeId)
         {
             // The values the plan works out that the detail names, written out in place: a wrong
             // estimate blamed on [Expr1011] is unreadable until something says what [Expr1011] is.
             // Empty where the detail names none, so a filled cell is itself the sign it refers to one.
             var expanded = PlanExpressions.ExpandedReferencesIn(_current, detail);
 
-            var index = _warningsGrid.Rows.Add(severity, source, title, detail ?? string.Empty, expanded,
+            var index = _insightsGrid.Rows.Add(severity.ToString(), isAnalysis ? AnalysisSource : PlanWarningSource,
+                operatorText, title, detail ?? string.Empty, expanded,
                 nodeId?.ToString(CultureInfo.InvariantCulture) ?? string.Empty);
+
+            var row = _insightsGrid.Rows[index];
 
             // The severity colour is the point of the column: a spill and a note about a missing
             // statistic in the same list need telling apart without reading them.
-            _warningsGrid.Rows[index].Cells[0].Style.ForeColor = severity switch
+            row.Cells[0].Style.ForeColor = severity switch
             {
-                nameof(PlanWarningSeverity.Critical) => DashColors.Fail,
-                nameof(PlanWarningSeverity.Warning) => DashColors.Warning,
+                PlanWarningSeverity.Critical => DashColors.Fail,
+                PlanWarningSeverity.Warning => DashColors.Warning,
                 _ => DashColors.Information
             };
+
+            // DBA Dash's own findings stand out from the plan's, so nobody goes looking for them in
+            // SSMS - or takes one for something SQL Server said.
+            var sourceCell = row.Cells[1];
+            if (isAnalysis) sourceCell.Style.ForeColor = DashColors.Information;
+            sourceCell.ToolTipText = isAnalysis
+                ? "Found by DBA Dash's own analysis of the plan. SQL Server doesn't raise this as a warning, so SSMS won't show it."
+                : "A warning SQL Server put in the plan.";
         }
 
         private void ShowMissingIndexes(PlanStatement statement)
