@@ -71,7 +71,8 @@ namespace DBADashGUI.CustomReports
         /// <summary>Reads the results into a table, its column types inferred from the values.</summary>
         public static DataTable Load(Stream stream)
         {
-            var names = new List<string>();
+            var columns = new ColumnNames();
+            var names = columns.Names;
             var rows = new List<string[]>();
 
             using (var reader = XmlReader.Create(stream, ReaderSettings))
@@ -84,7 +85,7 @@ namespace DBADashGUI.CustomReports
                     reader.Read();
                     while (reader.MoveToContent() == XmlNodeType.Element)
                     {
-                        rows.Add(ReadRow((XElement)XNode.ReadFrom(reader), names));
+                        rows.Add(ReadRow((XElement)XNode.ReadFrom(reader), columns));
                     }
                 }
             }
@@ -117,10 +118,10 @@ namespace DBADashGUI.CustomReports
         /// leaves out is NULL in it.  A name seen twice in a row is a second column of the same name - a result set can
         /// have those - and is told apart with a number, as the grid needs unique column names.
         /// </summary>
-        private static string[] ReadRow(XElement row, List<string> names)
+        private static string[] ReadRow(XElement row, ColumnNames names)
         {
             var values = new string[names.Count];
-            var seen = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            var seen = new Dictionary<string, int>(StringComparer.Ordinal);
 
             foreach (var cell in row.Elements())
             {
@@ -128,20 +129,45 @@ namespace DBADashGUI.CustomReports
                 if (string.IsNullOrWhiteSpace(name)) name = "(No column name)";
 
                 var occurrence = seen[name] = seen.GetValueOrDefault(name) + 1;
-                var columnName = occurrence == 1 ? name : $"{name} ({occurrence})";
-
-                var index = names.FindIndex(n => n.Equals(columnName, StringComparison.OrdinalIgnoreCase));
-                if (index < 0)
-                {
-                    index = names.Count;
-                    names.Add(columnName);
-                }
+                var index = names.IndexOf(name, occurrence);
 
                 if (index >= values.Length) Array.Resize(ref values, names.Count);
                 values[index] = CellValue(cell);
             }
 
             return values;
+        }
+
+        /// <summary>
+        /// The table's columns, found by the element they came from - its name, and which of that name in the row it
+        /// is - rather than by the name the column is given.  Those are kept apart because the name given to a second
+        /// "a", "a (2)", can be a column's real name too: looked up by that, the two would share a column.
+        /// </summary>
+        private sealed class ColumnNames
+        {
+            private readonly Dictionary<(string Name, int Occurrence), int> _bySource = new();
+            // The grid, like DataTable lookups, doesn't tell names apart by case.
+            private readonly HashSet<string> _taken = new(StringComparer.OrdinalIgnoreCase);
+
+            public List<string> Names { get; } = new();
+
+            public int Count => Names.Count;
+
+            public int IndexOf(string name, int occurrence)
+            {
+                if (_bySource.TryGetValue((name, occurrence), out var index)) return index;
+
+                var unique = name;
+                for (var n = occurrence; !_taken.Add(unique); n++)
+                {
+                    unique = $"{name} ({Math.Max(n, 2)})";
+                }
+
+                index = Names.Count;
+                Names.Add(unique);
+                _bySource.Add((name, occurrence), index);
+                return index;
+            }
         }
 
         /// <summary>

@@ -199,6 +199,25 @@ namespace DBADash.Viewers.GUI.Test
             Assert.AreEqual("x", table.Rows[1]["code (2)"]);
         }
 
+        /// <summary>
+        /// The name a repeated column is given can be another column's real name - a, a (2), a - and each keeps its own
+        /// column and value rather than two sharing one.
+        /// </summary>
+        [TestMethod]
+        public void LoadDataSet_SsmsResultsXml_DuplicateNamesDontCollide()
+        {
+            var path = Path.Combine(_folder, "Duplicates.xml");
+            File.WriteAllText(path,
+                "<Data><Row><a>first</a><a_x0020__x0028_2_x0029_>real</a_x0020__x0028_2_x0029_><a>third</a><A>case</A></Row></Data>");
+
+            var table = GridSerializer.LoadDataSet(path).Tables.Cast<DataTable>().Single();
+
+            // Told apart from the others ignoring case, as the grid does.
+            CollectionAssert.AreEqual(new[] { "a", "a (2)", "a (3)", "A (4)" },
+                table.Columns.Cast<DataColumn>().Select(c => c.ColumnName).ToArray());
+            CollectionAssert.AreEqual(new object[] { "first", "real", "third", "case" }, table.Rows[0].ItemArray);
+        }
+
         [TestMethod]
         [DataRow("<?xml version=\"1.0\"?><Data><Row><a>1</a></Row></Data>", true)]
         [DataRow("<Data />", true)]
