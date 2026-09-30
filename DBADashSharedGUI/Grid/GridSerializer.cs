@@ -110,15 +110,22 @@ namespace DBADashGUI.CustomReports
         /// Reads every table in a file: one written by <see cref="SaveDataTable"/>, or a whole DataSet saved the same
         /// ways - above all the DataSets the DBA Dash service writes as XML with their schema, which is what lands in
         /// its Failed folder when an import fails.  A single table comes back as a DataSet of one.
+        ///
+        /// Also reads a results grid SSMS saved as XML - see <see cref="SsmsResultsXml"/>.
         /// </summary>
         public static DataSet LoadDataSet(string path)
         {
             var (fmt, compressed) = Resolve(path);
 
-            using var fileStream = File.OpenRead(path);
-            using var inStream = compressed
-                ? (Stream)new GZipStream(fileStream, CompressionMode.Decompress)
-                : fileStream;
+            if (fmt == Format.Xml && IsSsmsResultsXml(path, compressed))
+            {
+                using var resultsStream = OpenRead(path, compressed);
+                var results = new DataSet();
+                results.Tables.Add(SsmsResultsXml.Load(resultsStream));
+                return results;
+            }
+
+            using var inStream = OpenRead(path, compressed);
 
             if (fmt == Format.Xml)
             {
@@ -140,6 +147,18 @@ namespace DBADashGUI.CustomReports
             var single = new DataSet();
             single.Tables.Add(JsonConvert.DeserializeObject<DataTable>(json) ?? new DataTable());
             return single;
+        }
+
+        private static Stream OpenRead(string path, bool compressed)
+        {
+            var fileStream = File.OpenRead(path);
+            return compressed ? new GZipStream(fileStream, CompressionMode.Decompress) : fileStream;
+        }
+
+        private static bool IsSsmsResultsXml(string path, bool compressed)
+        {
+            using var stream = OpenRead(path, compressed);
+            return SsmsResultsXml.IsResultsXml(stream);
         }
 
         /// <summary>Reads a table previously written by <see cref="SaveDataTable"/>.</summary>
