@@ -30,6 +30,27 @@ namespace DBADash.QueryPlan.Test
         }
 
         [TestMethod]
+        public void Analysis_IsOnlyDBADashsOwnFindings_EachTitled_AndAllInTheStatementsCards()
+        {
+            var statement = TestPlans.Statement(TestPlans.ParallelSpill);
+            statement.OptimisationEarlyAbortReason = "TimeOut";
+
+            var all = PlanInsights.ForStatement(statement);
+            var analysis = PlanInsights.AnalysisFor(statement);
+
+            Assert.IsTrue(analysis.Count > 0);
+            Assert.IsTrue(analysis.All(i => i.IsAnalysis && !string.IsNullOrEmpty(i.Title)), "Each finding has a title for the warnings list.");
+            Assert.IsTrue(analysis.All(i => i.MissingIndex is null), "Missing indexes are the plan's own.");
+            Assert.IsTrue(analysis.Any(i => i.Title == "Optimizer timed out"));
+
+            // The plan's warnings are not DBA Dash's findings, and every finding is also on a card.
+            Assert.IsTrue(all.Any(i => !i.IsAnalysis && i.Text.Contains("spilled")));
+            CollectionAssert.AreEquivalent(
+                analysis.Select(i => i.Text).ToList(),
+                all.Where(i => i.IsAnalysis).Select(i => i.Text).ToList());
+        }
+
+        [TestMethod]
         public void Statement_ListsMissingIndexes_WithTheirScriptAndTheOperatorReadingTheTable()
         {
             var statement = TestPlans.Statement(TestPlans.KeyLookupSeek);

@@ -251,7 +251,7 @@ namespace DBADash.QueryPlan.Compare
             Number(ShapeGroup, OperatorsName, PlanComparisonUnit.Count, PlanComparisonDirection.Neutral,
                 f => f.OperatorCount, "Operators in the plan.");
             Number(ShapeGroup, WarningsName, PlanComparisonUnit.Count, PlanComparisonDirection.LowerIsBetter,
-                f => f.WarningCount, "Warnings on the statement and its operators - see the Warnings tab." +
+                f => f.WarningCount, "Warnings SQL Server put on the statement and its operators - listed, with DBA Dash's own findings, on the Insights tab." +
                                      (countRuntimeWarnings ? string.Empty : "  Not counting the warnings only a run can raise - spills, grant warnings, waits - since one plan is estimated."));
             Number(ShapeGroup, "Missing Indexes", PlanComparisonUnit.Count, PlanComparisonDirection.LowerIsBetter,
                 f => f.Statement.MissingIndexes.Count, "Indexes the optimiser said it wanted.");
@@ -487,19 +487,35 @@ namespace DBADash.QueryPlan.Compare
 
         private static IReadOnlyList<PlanWarningComparison> CompareWarnings(PlanStatement before, PlanStatement after)
         {
-            var groups = new Dictionary<string, PlanWarningComparison>(StringComparer.OrdinalIgnoreCase);
+            // Keyed on the source as well as the title, so one of DBA Dash's findings is never counted
+            // in with a plan warning that happens to share its name.
+            var groups = new Dictionary<(bool IsAnalysis, string Title), PlanWarningComparison>();
+
+            PlanWarningComparison Group(bool isAnalysis, string title)
+            {
+                var key = (isAnalysis, title.ToUpperInvariant());
+                if (!groups.TryGetValue(key, out var group))
+                {
+                    group = new PlanWarningComparison(title, isAnalysis);
+                    groups.Add(key, group);
+                }
+
+                return group;
+            }
 
             void Add(PlanStatement statement, bool isBefore)
             {
                 foreach (var warning in statement.AllWarnings)
                 {
-                    if (!groups.TryGetValue(warning.Title, out var group))
-                    {
-                        group = new PlanWarningComparison(warning.Title);
-                        groups.Add(warning.Title, group);
-                    }
+                    Group(false, warning.Title).Add(warning.Severity, warning.IsRuntime, isBefore);
+                }
 
-                    group.Add(warning, isBefore);
+                // DBA Dash's own findings too, as the viewer lists them beside the warnings - a scalar
+                // UDF or an optimizer time out gone from the new plan is as much the answer as a spill
+                // gone.  Not the note that a plan is estimated, which is about the plan, not the query.
+                foreach (var insight in PlanInsights.AnalysisFor(statement).Where(i => i.Title != PlanInsights.EstimatedPlanTitle))
+                {
+                    Group(true, insight.Title!).Add(insight.Severity, insight.DependsOnPlanKind, isBefore);
                 }
             }
 
@@ -510,8 +526,11 @@ namespace DBADash.QueryPlan.Compare
             var sameType = before.IsActualPlan == after.IsActualPlan;
             foreach (var group in groups.Values)
             {
-                group.Change = !sameType && group.IsRuntime ? PlanComparisonChange.NotComparable
+                group.Change = !sameType && group.DependsOnPlanKind ? PlanComparisonChange.NotComparable
                     : group.AfterCount == group.BeforeCount ? PlanComparisonChange.Same
+                    // A note of DBA Dash's - a serial plan, parameters that ran with other values - is
+                    // worth seeing come or go, but isn't better or worse for it.
+                    : group.IsAnalysis && group.Severity == PlanWarningSeverity.Information ? PlanComparisonChange.Changed
                     : group.AfterCount < group.BeforeCount ? PlanComparisonChange.Better
                     : PlanComparisonChange.Worse;
             }
@@ -1086,9 +1105,19 @@ namespace DBADash.QueryPlan.Compare
 
     public sealed class PlanWarningComparison
     {
-        internal PlanWarningComparison(string title) => Title = title;
+        internal PlanWarningComparison(string title, bool isAnalysis = false)
+        {
+            Title = title;
+            IsAnalysis = isAnalysis;
+        }
 
         public string Title { get; }
+
+        /// <summary>
+        /// One of DBA Dash's own findings rather than a warning SQL Server put in the plan - see
+        /// <see cref="PlanInsight.IsAnalysis"/>.
+        /// </summary>
+        public bool IsAnalysis { get; }
 
         /// <summary>The worst severity either side gave this warning.</summary>
         public PlanWarningSeverity Severity { get; private set; }
@@ -1097,16 +1126,23 @@ namespace DBADash.QueryPlan.Compare
 
         public int AfterCount { get; private set; }
 
-        /// <summary>A warning only a run can raise - see <see cref="PlanWarning.IsRuntime"/>.</summary>
-        public bool IsRuntime { get; private set; }
+        /// <summary>
+        /// A warning only a run can raise - see <see cref="PlanWarning.IsRuntime"/> - or a finding
+        /// only one kind of plan gives - see <see cref="PlanInsight.DependsOnPlanKind"/>.  Either
+        /// way, meaningless to compare between an actual plan and an estimated one.
+        /// </summary>
+        public bool DependsOnPlanKind { get; private set; }
 
-        /// <summary>Fewer is better; not comparable for a run time warning when only one plan is actual.</summary>
+        /// <summary>
+        /// Fewer is better; not comparable for a run time warning when only one plan is actual, and
+        /// only changed, not better or worse, for one of DBA Dash's information notes.
+        /// </summary>
         public PlanComparisonChange Change { get; internal set; }
 
-        internal void Add(PlanWarning warning, bool isBefore)
+        internal void Add(PlanWarningSeverity severity, bool dependsOnPlanKind, bool isBefore)
         {
-            if (warning.Severity > Severity) Severity = warning.Severity;
-            IsRuntime |= warning.IsRuntime;
+            if (severity > Severity) Severity = severity;
+            DependsOnPlanKind |= dependsOnPlanKind;
             if (isBefore) BeforeCount++;
             else AfterCount++;
         }

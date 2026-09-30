@@ -82,11 +82,11 @@ namespace DBADashGUI.QueryPlans
         private readonly DBADashDataGridView _objectsGrid = NewGrid();
         private readonly DBADashDataGridView _waitsGrid = NewGrid();
         private readonly DBADashDataGridView _parametersGrid = NewGrid();
-        private readonly DBADashDataGridView _warningsGrid = NewGrid();
+        private readonly DBADashDataGridView _insightsGrid = NewGrid();
         private readonly DBADashDataGridView _missingIndexGrid = NewGrid();
 
         private readonly SplitContainer _summarySplit = new() { Dock = DockStyle.Fill, Orientation = Orientation.Horizontal, FixedPanel = FixedPanel.Panel1 };
-        private readonly SplitContainer _warningsSplit = new() { Dock = DockStyle.Fill, Orientation = Orientation.Horizontal };
+        private readonly SplitContainer _insightsSplit = new() { Dock = DockStyle.Fill, Orientation = Orientation.Horizontal };
 
         // The plans themselves, side by side - or one above the other, for the wide plans that fit
         // better that way.
@@ -122,7 +122,7 @@ namespace DBADashGUI.QueryPlans
         private readonly TabPage _objectsTab;
         private readonly TabPage _waitsTab;
         private readonly TabPage _parametersTab;
-        private readonly TabPage _warningsTab;
+        private readonly TabPage _insightsTab;
 
         private readonly ToolStripStatusLabel _status = new() { Spring = true, TextAlign = ContentAlignment.MiddleLeft };
 
@@ -139,8 +139,8 @@ namespace DBADashGUI.QueryPlans
             _summarySplit.Panel1.Controls.Add(_highlightsGrid);
             _summarySplit.Panel2.Controls.Add(_metricsGrid);
 
-            _warningsSplit.Panel1.Controls.Add(_warningsGrid);
-            _warningsSplit.Panel2.Controls.Add(_missingIndexGrid);
+            _insightsSplit.Panel1.Controls.Add(_insightsGrid);
+            _insightsSplit.Panel2.Controls.Add(_missingIndexGrid);
 
             _plansSplit.Panel1.Controls.Add(_beforeGraph);
             _plansSplit.Panel1.Controls.Add(_beforeHeader);
@@ -153,7 +153,7 @@ namespace DBADashGUI.QueryPlans
             _objectsTab = NewPage("Objects", _objectsGrid);
             _waitsTab = NewPage("Waits", _waitsGrid);
             _parametersTab = NewPage("Parameters", _parametersGrid);
-            _warningsTab = NewPage("Warnings", _warningsSplit);
+            _insightsTab = NewPage("Insights", _insightsSplit);
 
             _tabs.TabPages.Add(_summaryTab);
             _tabs.TabPages.Add(_plansTab);
@@ -161,13 +161,13 @@ namespace DBADashGUI.QueryPlans
             _tabs.TabPages.Add(_objectsTab);
             _tabs.TabPages.Add(_waitsTab);
             _tabs.TabPages.Add(_parametersTab);
-            _tabs.TabPages.Add(_warningsTab);
+            _tabs.TabPages.Add(_insightsTab);
             _tabs.TabPages.Add(NewPage("Query", new ElementHost { Dock = DockStyle.Fill, Child = _queryDiff }));
 
             _tabs.SelectedIndexChanged += (_, _) =>
             {
                 // Laid out on first sight: a graph fitted while its tab is hidden is fitted to no size at all.
-                if (_tabs.SelectedTab == _plansTab || _tabs.SelectedTab == _warningsTab) PlaceSplitters();
+                if (_tabs.SelectedTab == _plansTab || _tabs.SelectedTab == _insightsTab) PlaceSplitters();
             };
 
             Controls.Add(_tabs);
@@ -180,7 +180,7 @@ namespace DBADashGUI.QueryPlans
             _objectsGrid.CellFormatting += StatusCell_Formatting;
             _missingIndexGrid.CellFormatting += StatusCell_Formatting;
             _waitsGrid.CellFormatting += ChangeCell_Formatting;
-            _warningsGrid.CellFormatting += ChangeCell_Formatting;
+            _insightsGrid.CellFormatting += ChangeCell_Formatting;
             _parametersGrid.CellFormatting += ParametersGrid_CellFormatting;
             foreach (var grid in AllGrids) grid.VisibleChanged += Grid_VisibleChanged;
             _operatorsGrid.CellDoubleClick += (_, e) => ShowGroupInPlans(_operatorsGrid, e.RowIndex);
@@ -431,14 +431,14 @@ namespace DBADashGUI.QueryPlans
 
             SizeHighlights();
 
-            if (!_warningsPlaced && !_warningsSplit.Panel2Collapsed && _tabs.SelectedTab == _warningsTab)
+            if (!_insightsPlaced && !_insightsSplit.Panel2Collapsed && _tabs.SelectedTab == _insightsTab)
             {
-                SetSplitterDistance(_warningsSplit, _warningsSplit.Height / 2);
-                _warningsPlaced = true;
+                SetSplitterDistance(_insightsSplit, _insightsSplit.Height / 2);
+                _insightsPlaced = true;
             }
         }
 
-        private bool _warningsPlaced;
+        private bool _insightsPlaced;
 
         /// <summary>
         /// Places a splitter, clamped to where the container allows it - and not at all while it has too
@@ -478,7 +478,7 @@ namespace DBADashGUI.QueryPlans
             ShowGroups(_objectsGrid, _comparison.Objects, byObject: true);
             ShowWaits();
             ShowParameters();
-            ShowWarnings();
+            ShowInsights();
             ShowQueryText();
             ClearSelections();
 
@@ -486,7 +486,7 @@ namespace DBADashGUI.QueryPlans
             _objectsTab.Text = Counted("Objects", _comparison.Objects.Count(o => o.Status != PlanPresence.Both), "changed");
             _waitsTab.Text = Counted("Waits", _comparison.Waits.Count, null);
             _parametersTab.Text = Counted("Parameters", _comparison.Parameters.Count(p => p.CompiledValueDiffers || p.RuntimeValueDiffers), "differ");
-            _warningsTab.Text = Counted("Warnings", _comparison.Warnings.Count(w => w.Change is PlanComparisonChange.Better or PlanComparisonChange.Worse), "changed");
+            _insightsTab.Text = Counted("Insights", _comparison.Warnings.Count(w => w.Change is PlanComparisonChange.Better or PlanComparisonChange.Worse or PlanComparisonChange.Changed), "changed");
 
             _status.Text = StatusText();
 
@@ -524,7 +524,7 @@ namespace DBADashGUI.QueryPlans
         }
 
         private IEnumerable<DataGridView> AllGrids =>
-            [_highlightsGrid, _metricsGrid, _operatorsGrid, _objectsGrid, _waitsGrid, _parametersGrid, _warningsGrid, _missingIndexGrid];
+            [_highlightsGrid, _metricsGrid, _operatorsGrid, _objectsGrid, _waitsGrid, _parametersGrid, _insightsGrid, _missingIndexGrid];
 
         /// <summary>Grids refilled while their tab was hidden, sized and cleared when they are first shown.</summary>
         private readonly HashSet<DataGridView> _unshownGrids = new();
@@ -978,23 +978,40 @@ namespace DBADashGUI.QueryPlans
             if (differs) ApplyChangeStyle(e.CellStyle, PlanComparisonChange.Changed);
         }
 
-        private void ShowWarnings()
+        private void ShowInsights()
         {
-            ResetGrid(_warningsGrid);
+            ResetGrid(_insightsGrid);
 
-            _warningsGrid.Columns.Add(new DataGridViewTextBoxColumn { Name = ChangeColumn, Visible = false });
-            AddTextColumn(_warningsGrid, "Warning", "Warning");
-            AddTextColumn(_warningsGrid, "Severity", "Severity");
-            AddNumberColumn(_warningsGrid, "BeforeCount", "Before", typeof(int), "N0");
-            AddNumberColumn(_warningsGrid, "AfterCount", "After", typeof(int), "N0");
-            AddTextColumn(_warningsGrid, "Marker", "Change");
+            _insightsGrid.Columns.Add(new DataGridViewTextBoxColumn { Name = ChangeColumn, Visible = false });
+            AddTextColumn(_insightsGrid, "Insight", "Insight");
+            AddTextColumn(_insightsGrid, "Source", "Source");
+            AddTextColumn(_insightsGrid, "Severity", "Severity");
+            AddNumberColumn(_insightsGrid, "BeforeCount", "Before", typeof(int), "N0");
+            AddNumberColumn(_insightsGrid, "AfterCount", "After", typeof(int), "N0");
+            AddTextColumn(_insightsGrid, "Marker", "Change");
+            _insightsGrid.Columns["Source"].ToolTipText =
+                "SQL Server: a warning SQL Server put in the plan, as SSMS shows it.\n" +
+                "DBA Dash: DBA Dash's own reading of the plan - something it records but SQL Server doesn't raise as a warning.";
 
+            // The plan's warnings and DBA Dash's own findings, as the viewer's Insights tab lists them,
+            // with the source saying which is which.
             foreach (var warning in _comparison.Warnings)
             {
-                var index = _warningsGrid.Rows.Add(warning.Change, warning.Title, warning.Severity.ToString(), warning.BeforeCount, warning.AfterCount, ChangeName(warning.Change));
+                var index = _insightsGrid.Rows.Add(warning.Change, warning.Title, warning.IsAnalysis ? "DBA Dash" : "SQL Server",
+                    warning.Severity.ToString(), warning.BeforeCount, warning.AfterCount, ChangeName(warning.Change));
+                var row = _insightsGrid.Rows[index];
+
+                if (warning.IsAnalysis) row.Cells["Source"].Style.ForeColor = DashColors.Information;
+
                 if (warning.Change == PlanComparisonChange.NotComparable)
                 {
-                    _warningsGrid.Rows[index].Cells["Marker"].ToolTipText = "Only a run can raise this warning, and one of the plans is estimated.";
+                    row.Cells["Marker"].ToolTipText = warning.IsAnalysis
+                        ? "Only an actual or only an estimated plan can give this, and the plans are one of each."
+                        : "Only a run can raise this warning, and one of the plans is estimated.";
+                }
+                else if (warning.Change == PlanComparisonChange.Changed)
+                {
+                    row.Cells["Marker"].ToolTipText = "A note rather than a problem, so neither plan is better for having it.";
                 }
             }
 
@@ -1010,7 +1027,7 @@ namespace DBADashGUI.QueryPlans
                 _missingIndexGrid.Rows.Add(index.Status, PresenceName(index.Status), index.Before?.Impact, index.After?.Impact, index.Index.CreateStatementOneLine);
             }
 
-            _warningsSplit.Panel2Collapsed = _comparison.MissingIndexes.Count == 0;
+            _insightsSplit.Panel2Collapsed = _comparison.MissingIndexes.Count == 0;
         }
 
         private void ShowQueryText()

@@ -310,14 +310,54 @@ namespace DBADash.QueryPlan.Test
             const string noStats = """<ColumnsWithNoStatistics><ColumnReference Database="[db]" Schema="[dbo]" Table="[T]" Column="c" /></ColumnsWithNoStatistics>""";
 
             var mixed = PlanComparison.Compare(Plan(actual: false), Plan(warnings: spill + noStats));
+            var mixedWarnings = mixed.Warnings.Where(w => !w.IsAnalysis).ToList();
 
-            Assert.AreEqual(PlanComparisonChange.NotComparable, mixed.Warnings.Single(w => w.IsRuntime).Change);
-            Assert.AreEqual(PlanComparisonChange.Worse, mixed.Warnings.Single(w => !w.IsRuntime).Change);
+            Assert.AreEqual(PlanComparisonChange.NotComparable, mixedWarnings.Single(w => w.DependsOnPlanKind).Change);
+            Assert.AreEqual(PlanComparisonChange.Worse, mixedWarnings.Single(w => !w.DependsOnPlanKind).Change);
             Assert.AreEqual(1, mixed.Metric(PlanComparison.WarningsName)!.After, "The spill isn't counted: the estimated plan could never have had one.");
 
             var bothActual = PlanComparison.Compare(Plan(), Plan(warnings: spill + noStats));
-            Assert.AreEqual(PlanComparisonChange.Worse, bothActual.Warnings.Single(w => w.IsRuntime).Change);
+            Assert.AreEqual(PlanComparisonChange.Worse, bothActual.Warnings.Single(w => !w.IsAnalysis && w.DependsOnPlanKind).Change);
             Assert.AreEqual(2, bothActual.Metric(PlanComparison.WarningsName)!.After);
+        }
+
+        [TestMethod]
+        public void DBADashFindings_AreComparedBesideTheWarnings()
+        {
+            var timedOut = Plan();
+            timedOut.OptimisationEarlyAbortReason = "TimeOut";
+
+            // A finding worth fixing, gone from the new plan, is better - and marked as DBA Dash's own.
+            var fixedIt = PlanComparison.Compare(timedOut, Plan());
+            var timeout = fixedIt.Warnings.Single(w => w.Title == "Optimizer timed out");
+            Assert.IsTrue(timeout.IsAnalysis);
+            Assert.AreEqual(1, timeout.BeforeCount);
+            Assert.AreEqual(0, timeout.AfterCount);
+            Assert.AreEqual(PlanComparisonChange.Better, timeout.Change);
+
+            // A note coming or going is a change, not better or worse.
+            var noWaits = PlanComparison.Compare(Plan(), Plan(waits: ""));
+            Assert.AreEqual(PlanComparisonChange.Changed, noWaits.Warnings.Single(w => w.Title == "Waits").Change);
+
+            // One only an actual plan gives says nothing against an estimated plan, and the note that
+            // a plan is estimated is left out altogether.
+            var mixed = PlanComparison.Compare(Plan(actual: false), Plan());
+            Assert.AreEqual(PlanComparisonChange.NotComparable, mixed.Warnings.Single(w => w.Title == "Waits").Change);
+            Assert.IsFalse(mixed.Warnings.Any(w => w.Title == PlanInsights.EstimatedPlanTitle));
+        }
+
+        [TestMethod]
+        public void ACatchAllPlan_AgainstAnOptimizedVariant_ShowsTheWarningGone()
+        {
+            var comparison = PlanComparison.Compare(
+                TestPlans.Statement(TestPlans.OptionalParameters),
+                TestPlans.Statement(TestPlans.OptionalParametersVariantReused));
+
+            var catchAll = comparison.Warnings.Single(w => w.Title == "Optional parameters");
+            Assert.AreEqual(1, catchAll.BeforeCount);
+            Assert.AreEqual(0, catchAll.AfterCount);
+            Assert.AreEqual(PlanComparisonChange.Better, catchAll.Change);
+            Assert.AreEqual(1, comparison.Warnings.Single(w => w.Title == "Optional parameters (optimized)").AfterCount);
         }
 
         [TestMethod]
