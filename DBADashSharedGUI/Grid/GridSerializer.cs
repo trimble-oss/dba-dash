@@ -33,6 +33,14 @@ namespace DBADashGUI.CustomReports
             "JSON (*.json)|*.json|Compressed JSON (*.json.gz)|*.json.gz|" +
             "DataTable XML (*.xml)|*.xml|Compressed XML (*.xml.gz)|*.xml.gz";
 
+        /// <summary>
+        /// Filter for a Save dialog for a whole DataSet (see <see cref="SaveDataSet"/>).  Compressed XML first: a DataSet
+        /// is more likely to be big, and only the XML keeps the column types and titles.
+        /// </summary>
+        public const string SaveDataSetFilter =
+            "Compressed XML (*.xml.gz)|*.xml.gz|DataSet XML (*.xml)|*.xml|" +
+            "JSON (*.json)|*.json|Compressed JSON (*.json.gz)|*.json.gz";
+
         /// <summary>Filter for an Open dialog offering all native formats.</summary>
         public const string OpenFilter =
             "DBA Dash grid files (*.json;*.json.gz;*.xml;*.xml.gz)|*.json;*.json.gz;*.xml;*.xml.gz|" +
@@ -102,6 +110,32 @@ namespace DBADashGUI.CustomReports
             }
 
             var json = JsonConvert.SerializeObject(dt, Formatting.Indented);
+            using var writer = new StreamWriter(outStream, new UTF8Encoding(false));
+            writer.Write(json);
+        }
+
+        /// <summary>
+        /// Writes every table in the DataSet to <paramref name="path"/> in the format implied by its extension - one file
+        /// <see cref="LoadDataSet"/> reads back whole.  The XML keeps the column types and extended properties; JSON
+        /// keeps the tables and their values, with the types inferred again on load.
+        /// </summary>
+        public static void SaveDataSet(DataSet ds, string path)
+        {
+            if (ds == null) throw new ArgumentNullException(nameof(ds));
+            var (fmt, compressed) = Resolve(path);
+
+            using var fileStream = File.Create(path);
+            using var outStream = compressed
+                ? (Stream)new GZipStream(fileStream, CompressionLevel.Optimal)
+                : fileStream;
+
+            if (fmt == Format.Xml)
+            {
+                ds.WriteXml(outStream, XmlWriteMode.WriteSchema);
+                return;
+            }
+
+            var json = JsonConvert.SerializeObject(ds, Formatting.Indented);
             using var writer = new StreamWriter(outStream, new UTF8Encoding(false));
             writer.Write(json);
         }

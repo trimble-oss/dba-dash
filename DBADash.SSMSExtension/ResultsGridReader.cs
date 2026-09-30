@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Data;
 using System.Data.SqlTypes;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -28,6 +29,14 @@ namespace DBADash.SSMSExtension
     internal static class ResultsGridReader
     {
         private const string GridControlTypeName = "Microsoft.SqlServer.Management.UI.Grid.GridControl";
+
+        // A query window's Results tab, holding a grid per result set, and the query window itself (script and results
+        // together). Both from SQLEditors.dll, confirmed against the SSMS 22 install.
+        private const string GridResultsTabPageTypeName =
+            "Microsoft.SqlServer.Management.UI.VSIntegration.Editors.GridResultsTabPage";
+
+        private const string QueryWindowTypeName =
+            "Microsoft.SqlServer.Management.UI.VSIntegration.Editors.ScriptAndResultsEditorControl";
 
         // The column types kept as themselves. Anything else - binary, sql_variant, spatial, hierarchyid - is
         // read as SSMS's own display text for the cell, which is what the user was looking at anyway.
@@ -84,9 +93,10 @@ namespace DBADash.SSMSExtension
             /// Copies the result set into a DataTable. <paramref name="progress"/> is told the number of rows read so
             /// far, every few thousand.
             /// </summary>
-            internal DataTable ReadTable(string title, Action<long> progress, CancellationToken cancellationToken)
+            internal DataTable ReadTable(string title, Action<long> progress, CancellationToken cancellationToken,
+                string tableName = "Results")
             {
-                var table = new DataTable("Results");
+                var table = new DataTable(tableName);
                 table.ExtendedProperties["Title"] = title;
 
                 // Each column's type, or null to read it as text: one with no supported type, or one a value has
@@ -179,9 +189,76 @@ namespace DBADash.SSMSExtension
         /// The focused results grid's result set, or null if focus isn't in a results grid, or a future SSMS build
         /// has changed the grid's shape.
         /// </summary>
-        public static ResultSet TryGetFocused()
+        public static ResultSet TryGetFocused() => TryGet(FocusedGrid());
+
+        /// <summary>
+        /// Every result set in the query window focus is in, in the order the query returned them. A grid that can't be
+        /// read is left out and counted in <paramref name="unreadable"/>, for the caller to say so rather than open less
+        /// than it appears to. Empty if focus isn't in a query window with results.
+        /// </summary>
+        public static List<ResultSet> TryGetAll(out int unreadable)
         {
-            var grid = FocusedGrid();
+            var resultSets = new List<ResultSet>();
+            unreadable = 0;
+            foreach (var grid in GridsInFocusedWindow())
+            {
+                var resultSet = TryGet(grid);
+                if (resultSet != null) resultSets.Add(resultSet);
+                else unreadable++;
+            }
+
+            // Ordered by the index SSMS tags each grid with, where it does, rather than trusting the control order.
+            return resultSets.Select((r, i) => (r, i)).OrderBy(x => x.r.Index ?? int.MaxValue).ThenBy(x => x.i)
+                .Select(x => x.r).ToList();
+        }
+
+        /// <summary>
+        /// How many results grids the query window focus is in holds - without reading any of them, so cheap enough
+        /// for BeforeQueryStatus.
+        /// </summary>
+        public static int CountInFocusedWindow() => GridsInFocusedWindow().Count();
+
+        /// <summary>
+        /// The results grids on the Results tab of the query window focus is in: up from the focused control to that
+        /// tab, or failing that to the query window and down to its Results tab. Bounded to the one tab on purpose,
+        /// rather than searching from the root of the control tree - that did only find the one query window's grids
+        /// in testing, but nothing guarantees the root is a single query window, and the tab leaves out any other grid
+        /// in the window (e.g. Spatial results) too. With focus somewhere that isn't a WinForms control - the Messages
+        /// tab, as it turns out - nothing is found, and the command stays hidden.
+        /// </summary>
+        private static IEnumerable<Control> GridsInFocusedWindow()
+        {
+            var resultsTab = FocusedResultsTab();
+            return resultsTab == null
+                ? Enumerable.Empty<Control>()
+                : Descendants(resultsTab).Where(c => !c.IsDisposed && IsOfType(c, GridControlTypeName));
+        }
+
+        private static Control FocusedResultsTab()
+        {
+            for (var control = Control.FromHandle(GetFocus()); control != null; control = control.Parent)
+            {
+                if (IsOfType(control, GridResultsTabPageTypeName)) return control;
+                if (IsOfType(control, QueryWindowTypeName))
+                {
+                    return Descendants(control).FirstOrDefault(c => IsOfType(c, GridResultsTabPageTypeName));
+                }
+            }
+
+            return null;
+        }
+
+        private static IEnumerable<Control> Descendants(Control control)
+        {
+            foreach (Control child in control.Controls)
+            {
+                yield return child;
+                foreach (var descendant in Descendants(child)) yield return descendant;
+            }
+        }
+
+        private static ResultSet TryGet(Control grid)
+        {
             if (grid == null) return null;
 
             try
@@ -213,13 +290,21 @@ namespace DBADash.SSMSExtension
         {
             for (var control = Control.FromHandle(GetFocus()); control != null; control = control.Parent)
             {
-                for (var type = control.GetType(); type != null; type = type.BaseType)
-                {
-                    if (string.Equals(type.FullName, GridControlTypeName, StringComparison.Ordinal)) return control;
-                }
+                if (IsOfType(control, GridControlTypeName)) return control;
             }
 
             return null;
+        }
+
+        /// <summary>True if the control is of the named type, or derives from it.</summary>
+        private static bool IsOfType(Control control, string fullTypeName)
+        {
+            for (var type = control.GetType(); type != null; type = type.BaseType)
+            {
+                if (string.Equals(type.FullName, fullTypeName, StringComparison.Ordinal)) return true;
+            }
+
+            return false;
         }
 
         /// <summary>

@@ -108,6 +108,20 @@ namespace DBADash.SSMSExtension
             });
         }
 
+        /// <summary>
+        /// As <see cref="SaveGridToTemp(DataTable, CancellationToken)"/>, for all of a query's result sets at once: a
+        /// DataSet of a table per result set, which the app opens on one tab with the tables listed down the side - the
+        /// way it opens the DataSets the DBA Dash service saves.
+        /// </summary>
+        public static string SaveGridToTemp(DataSet dataSet, CancellationToken cancellationToken)
+        {
+            return SaveToTemp(".xml.gz", stream =>
+            {
+                using var gzip = new GZipStream(new CancellableStream(stream, cancellationToken), CompressionLevel.Fastest);
+                dataSet.WriteXml(gzip, XmlWriteMode.WriteSchema);
+            });
+        }
+
         private static void Open(string xml, string extension, Encoding encoding)
         {
             OpenFile(SaveToTemp(extension, stream =>

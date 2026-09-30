@@ -35,6 +35,20 @@
           <ButtonText>Open in DBA Dash Visualizer</ButtonText>
         </Strings>
       </Button>
+
+      <!--
+        Every result set in the query window at once (OpenAllResultsCommand). DynamicVisibility and DefaultInvisible
+        so it only appears once its BeforeQueryStatus has found more than one results grid.
+      -->
+      <Button guid="guidDBADashCmdSet" id="OpenAllResultsCommandId" priority="0x0101" type="Button">
+        <Parent guid="guidDBADashCmdSet" id="ResultsGridContextMenuGroupId"/>
+        <Icon guid="guidDBADashImages" id="bmpDBADash"/>
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <CommandFlag>DefaultInvisible</CommandFlag>
+        <Strings>
+          <ButtonText>Open All Results in DBA Dash Visualizer</ButtonText>
+        </Strings>
+      </Button>
     </Buttons>
 
     <Bitmaps>
@@ -50,6 +64,10 @@
     <!-- ...and on the results grid's right-click menu. -->
     <CommandPlacement guid="guidDBADashCmdSet" id="OpenCommandId" priority="0x0100">
       <Parent guid="guidDBADashCmdSet" id="ResultsGridContextMenuGroupId"/>
+    </CommandPlacement>
+    <!-- Open All Results on the Tools menu too, just below Open. -->
+    <CommandPlacement guid="guidDBADashCmdSet" id="OpenAllResultsCommandId" priority="0x0111">
+      <Parent guid="guidDBADashCmdSet" id="ToolsGroupId"/>
     </CommandPlacement>
   </CommandPlacements>
 
@@ -81,6 +99,7 @@
     <GuidSymbol name="guidDBADashCmdSet" value="{0CC07265-7442-475F-99F3-41177ED25148}">
       <IDSymbol name="ContextMenuGroupId" value="0x1020"/>
       <IDSymbol name="OpenCommandId" value="0x0100"/>
+      <IDSymbol name="OpenAllResultsCommandId" value="0x0101"/>
       <IDSymbol name="ToolsGroupId" value="0x1030"/>
       <IDSymbol name="ResultsGridContextMenuGroupId" value="0x1040"/>
     </GuidSymbol>

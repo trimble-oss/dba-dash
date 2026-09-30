@@ -362,6 +362,144 @@ namespace DBADash.Viewers.GUI.Test
             }
         }
 
+        /// <summary>
+        /// All of a query's result sets from the SSMS extension (OpenAllResultsCommand): a DataSet of a table per result
+        /// set, opened on one tab named from the DataSet's Title, each table keeping its name, title and types.
+        /// </summary>
+        [STATestMethod]
+        public void OpenGridFile_AllResults_OpensAsOneDataSetTab()
+        {
+            var path = Path.Combine(_folder, "ssms_all.xml.gz");
+            using (var stream = File.Create(path))
+            using (var gzip = new GZipStream(stream, CompressionLevel.Fastest))
+            {
+                SsmsStyleDataSet().WriteXml(gzip, XmlWriteMode.WriteSchema);
+            }
+
+            var read = GridSerializer.LoadDataSet(path);
+            Assert.AreEqual("SQLQuery1.sql - All results", read.ExtendedProperties["Title"]);
+            CollectionAssert.AreEqual(new[] { "Result 1", "Result 2" },
+                read.Tables.Cast<DataTable>().Select(t => t.TableName).ToArray());
+            Assert.AreEqual("SQLQuery1.sql - Result 2", read.Tables[1].ExtendedProperties["Title"]);
+            Assert.AreEqual(typeof(TimeSpan), read.Tables[1].Columns["duration"]!.DataType);
+            Assert.AreEqual("time(7)", read.Tables[1].Columns["duration"]!.ExtendedProperties["SqlType"]);
+
+            ViewerForm.OpenGridFile(path);
+            var window = Application.OpenForms.OfType<ViewerForm>().Single();
+            try
+            {
+                var page = FindAll<TabPage>(window).Single();
+                var deadline = DateTime.UtcNow.AddSeconds(10);
+                while (page.Controls[0] is not DataSetViewerControl && DateTime.UtcNow < deadline)
+                {
+                    Application.DoEvents();
+                    Thread.Sleep(10);
+                }
+
+                Assert.IsInstanceOfType<DataSetViewerControl>(page.Controls[0]);
+                Assert.AreEqual("SQLQuery1.sql - All results", page.Text);
+                var grid = FindAll<GridViewerControl>(page.Controls[0]).Single();
+                Assert.AreEqual("SQLQuery1.sql - Result 1", grid.Title, "each result set keeps its own title");
+            }
+            finally
+            {
+                window.Close();
+            }
+        }
+
+        /// <summary>
+        /// A whole DataSet saved from the viewer reads back with every table: from XML with the titles and types intact,
+        /// from JSON with the tables and values.
+        /// </summary>
+        [TestMethod]
+        [DataRow("saved.xml.gz", true)]
+        [DataRow("saved.xml", true)]
+        [DataRow("saved.json", false)]
+        [DataRow("saved.json.gz", false)]
+        public void SaveDataSet_RoundTrips(string file, bool keepsTypes)
+        {
+            var path = Path.Combine(_folder, file);
+            GridSerializer.SaveDataSet(SsmsStyleDataSet(), path);
+
+            var read = GridSerializer.LoadDataSet(path);
+            CollectionAssert.AreEqual(new[] { "Result 1", "Result 2" },
+                read.Tables.Cast<DataTable>().Select(t => t.TableName).ToArray());
+            Assert.AreEqual(2, read.Tables[1].Rows.Count);
+            Assert.AreEqual("first", read.Tables[1].Rows[0]["name"]);
+
+            if (!keepsTypes) return;
+            Assert.AreEqual("SQLQuery1.sql - All results", read.ExtendedProperties["Title"]);
+            Assert.AreEqual("SQLQuery1.sql - Result 2", read.Tables[1].ExtendedProperties["Title"]);
+            Assert.AreEqual(typeof(TimeSpan), read.Tables[1].Columns["duration"]!.DataType);
+        }
+
+        [TestMethod]
+        public void DataSetViewerControl_HasSaveAll()
+        {
+            using var control = new DataSetViewerControl(SsmsStyleDataSet(), "SQLQuery1.sql - All results");
+            var saveAll = FindAll<ToolStrip>(control).SelectMany(t => t.Items.OfType<ToolStripDropDownButton>())
+                .Single(i => i.Text == "Save All");
+            CollectionAssert.AreEqual(new[] { "Data Set File...", "Excel..." },
+                saveAll.DropDownItems.Cast<ToolStripItem>().Select(i => i.Text).ToArray());
+            Assert.IsTrue(saveAll.DropDownItems.Cast<ToolStripItem>().All(i => i.Image != null), "each item has an icon");
+        }
+
+        /// <summary>A sheet per table, named after it, with its header and rows - and an empty table still gets a sheet.</summary>
+        [TestMethod]
+        public void SaveDataSetToXLSX_SheetPerTable()
+        {
+            var dataSet = SsmsStyleDataSet();
+            dataSet.Tables.Add("Empty");
+            var path = Path.Combine(_folder, "all.xlsx");
+            DBADashSharedGUI.CommonShared.SaveDataSetToXLSX(dataSet, path);
+
+            using var workbook = new ClosedXML.Excel.XLWorkbook(path);
+            CollectionAssert.AreEqual(new[] { "Result 1", "Result 2", "Empty" },
+                workbook.Worksheets.Select(w => w.Name).ToArray());
+            var sheet = workbook.Worksheet("Result 2");
+            Assert.AreEqual("id", sheet.Cell(1, 1).GetString());
+            Assert.AreEqual("first", sheet.Cell(2, 5).GetString());
+            Assert.AreEqual(12.5, sheet.Cell(2, 2).GetDouble());
+        }
+
+        [TestMethod]
+        [DataRow("Result 1", "Result 1")]
+        [DataRow("a/b:c*d?e[f]g\\h", "a_b_c_d_e_f_g_h")]
+        [DataRow("'quoted'", "quoted")]
+        [DataRow("", "Sheet3")]
+        [DataRow("A name that is much longer than thirty-one characters", "A name that is much longer than")]
+        [DataRow("A name much longer than 31 cha's", "A name much longer than 31 cha")] // the 31st character is '
+        [DataRow("'''", "Sheet3")]
+        public void ExcelSheetName_IsValid(string name, string expected)
+        {
+            Assert.AreEqual(expected, DBADashSharedGUI.CommonShared.ExcelSheetName(name, 3, new HashSet<string>()));
+        }
+
+        [TestMethod]
+        public void ExcelSheetName_IsUnique()
+        {
+            var used = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var longName = new string('x', 40);
+            var names = new[] { "Results", "results", longName, longName }
+                .Select((n, i) => DBADashSharedGUI.CommonShared.ExcelSheetName(n, i + 1, used)).ToArray();
+
+            CollectionAssert.AreEqual(new[] { "Results", "results (2)", new string('x', 31), new string('x', 27) + " (2)" }, names);
+        }
+
+        private static DataSet SsmsStyleDataSet()
+        {
+            var ds = new DataSet("Results");
+            ds.ExtendedProperties["Title"] = "SQLQuery1.sql - All results";
+            for (var i = 1; i <= 2; i++)
+            {
+                var table = SsmsStyleTable();
+                table.TableName = $"Result {i}";
+                table.ExtendedProperties["Title"] = $"SQLQuery1.sql - Result {i}";
+                ds.Tables.Add(table);
+            }
+            return ds;
+        }
+
         [TestMethod]
         public void GridViewerControl_WithoutTitle_IsCalledResults()
         {

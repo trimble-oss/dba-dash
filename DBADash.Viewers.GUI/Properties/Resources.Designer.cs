@@ -219,6 +219,26 @@ namespace DBADash.Viewers.GUI.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap SaveTable_16x {
+            get {
+                object obj = ResourceManager.GetObject("SaveTable_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap excel16x16 {
+            get {
+                object obj = ResourceManager.GetObject("excel16x16", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap SettingsOutline_16x {
             get {
                 object obj = ResourceManager.GetObject("SettingsOutline_16x", resourceCulture);

@@ -22,6 +22,7 @@ namespace DBADash.SSMSExtension
         {
             await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
             await OpenCommand.InitializeAsync(this);
+            await OpenAllResultsCommand.InitializeAsync(this);
             await DeadlockContextMenuHook.InitializeAsync(this);
         }
     }
