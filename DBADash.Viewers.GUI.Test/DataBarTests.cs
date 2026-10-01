@@ -104,6 +104,30 @@ namespace DBADash.Viewers.GUI.Test
         }
 
         /// <summary>
+        /// A traffic light reads the value's place in the scale, not its bar's length: on a scale of negatives the
+        /// lowest value has the longest bar but is the least bad where higher is worse.
+        /// </summary>
+        [TestMethod]
+        public void Grid_ColoursNegativeScaleByPlaceInScale()
+        {
+            var table = new DataTable();
+            table.Columns.Add("n", typeof(decimal));
+            table.Rows.Add(-100m);
+            table.Rows.Add(-10m);
+
+            using var form = new Form { Width = 400, Height = 300, ShowInTaskbar = false, StartPosition = FormStartPosition.Manual, Left = -3000 };
+            using var grid = new DBADashDataGridView { Dock = DockStyle.Fill, RowHeadersVisible = false, AllowUserToAddRows = false };
+            form.Controls.Add(grid);
+            grid.DataSource = new DataView(table);
+            form.Show();
+            grid.SetDataBar("n", new DataBarSettings { ColorMode = DataBarColorMode.TrafficLight });
+            Application.DoEvents();
+
+            Assert.AreNotEqual(0, BarExtent(grid, 0, DashColors.BlueLight).Length, "-100 is the bottom of the scale");
+            Assert.AreNotEqual(0, BarExtent(grid, 1, DashColors.Fail).Length, "-10 is 90% of the way up");
+        }
+
+        /// <summary>
         /// The Data Bar menu is offered on numeric columns - but not on one whose owner paints its own bar, where a bar
         /// set from the menu would never show.
         /// </summary>

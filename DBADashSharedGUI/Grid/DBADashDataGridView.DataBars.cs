@@ -107,12 +107,21 @@ namespace DBADashGUI.CustomReports
             DataBindingComplete += (_, _) => _dataBarScales.Clear();
             RowsAdded += (_, _) => _dataBarScales.Clear();
             RowsRemoved += (_, _) => _dataBarScales.Clear();
-            CellValueChanged += (_, _) => _dataBarScales.Clear();
-            GridFilterChanged += (_, _) =>
+            // An edit can move the column's range, so every bar in it may need redrawing, not just the edited cell.
+            CellValueChanged += (_, e) =>
             {
-                _dataBarScales.Clear();
-                Invalidate();
+                if (_dataBars.Count == 0 || e.ColumnIndex < 0) return;
+                var key = DataBarKey(Columns[e.ColumnIndex]);
+                if (_dataBarScales.Remove(key)) InvalidateColumn(e.ColumnIndex);
             };
+            GridFilterChanged += (_, _) => RescaleDataBars();
+        }
+
+        /// <summary>Throw away the bars' scales and redraw them, after the rows on show have changed.</summary>
+        private void RescaleDataBars()
+        {
+            _dataBarScales.Clear();
+            Invalidate();
         }
 
         protected override void OnCellPainting(DataGridViewCellPaintingEventArgs e)
@@ -139,10 +148,9 @@ namespace DBADashGUI.CustomReports
             var zero = Math.Clamp(0, min, max);
             var from = (zero - min) / (max - min);
             var to = (Math.Clamp(number, min, max) - min) / (max - min);
-            var negative = to < from;
-            var side = negative ? from : 1 - from; // How much of the cell the bar's side of zero takes up
-            var share = side > 0 ? Math.Abs(to - from) / side : 0;
-            DataBarPainter.PaintRange(e, from, to, settings.ColorFor(share, negative), settings.Style);
+            // Colour by the value's place in the whole scale, so on a scale of negatives the highest value is still
+            // the top of a gradient or traffic light, though its bar is the shortest.
+            DataBarPainter.PaintRange(e, from, to, settings.ColorFor(to, to < from), settings.Style);
         }
 
         /// <summary>

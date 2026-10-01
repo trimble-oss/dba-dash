@@ -1836,6 +1836,7 @@ namespace DBADashGUI.CustomReports
                     _ => throw new ArgumentException("Operator symbol is not supported", nameof(operatorSymbol))
                 };
             }
+            GridFilterChanged?.Invoke(this, EventArgs.Empty);
         }
 
         private void FilterByValue_Click(object sender, EventArgs e)
