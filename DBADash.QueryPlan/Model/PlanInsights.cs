@@ -756,10 +756,11 @@ namespace DBADash.QueryPlan.Model
                 text.Append(". If that comparison is with the partitioning column, it is the likely cause.");
             }
 
-            return new PlanInsight(
+            return PlanInsight.Analysis(
                 datetimeValues.Count > 0 || mismatched.Count > 0 ? PlanWarningSeverity.Warning : PlanWarningSeverity.Information,
+                "No partition elimination",
                 text.ToString(),
-                op);
+                [op]);
         }
 
         /// <summary>The operators that read a table's partitions, as opposed to writing to them.</summary>
