@@ -48,6 +48,46 @@ namespace DBADash.Viewers.GUI.Test
             Assert.AreEqual(DashColors.Fail, settings.ColorFor(0.1));
         }
 
+        /// <summary>Value thresholds colour by the figure itself - latency green under 5ms, red from 50ms - wherever it sits on the scale.</summary>
+        [TestMethod]
+        public void TrafficLight_ValueThresholds_ColourByTheValue()
+        {
+            var settings = new DataBarSettings { ColorMode = DataBarColorMode.TrafficLight, ThresholdsAreValues = true, WarningThreshold = 5, CriticalThreshold = 50 };
+            Assert.AreEqual(DashColors.Success, settings.ColorFor(1, value: 4.9), "The top of the scale, but under the warning value");
+            Assert.AreEqual(DashColors.Warning, settings.ColorFor(0.1, value: 5));
+            Assert.AreEqual(DashColors.Fail, settings.ColorFor(0.1, value: 50));
+
+            // Where higher is better, red at or below the critical value and amber at or below the warning one.
+            settings.HigherIsBetter = true;
+            settings.WarningThreshold = 90;
+            settings.CriticalThreshold = 50;
+            Assert.AreEqual(DashColors.Success, settings.ColorFor(0, value: 95));
+            Assert.AreEqual(DashColors.Warning, settings.ColorFor(1, value: 90));
+            Assert.AreEqual(DashColors.Fail, settings.ColorFor(1, value: 50));
+        }
+
+        /// <summary>The bars scale to the column, but the colour is the value's alone.</summary>
+        [TestMethod]
+        public void Grid_ValueThresholdsColourIndependentlyOfTheScale()
+        {
+            var table = new DataTable();
+            table.Columns.Add("LatencyMs", typeof(decimal));
+            table.Rows.Add(4m);
+            table.Rows.Add(2m);
+
+            using var form = new Form { Width = 400, Height = 300, ShowInTaskbar = false, StartPosition = FormStartPosition.Manual, Left = -3000 };
+            using var grid = new DBADashDataGridView { Dock = DockStyle.Fill, RowHeadersVisible = false, AllowUserToAddRows = false };
+            form.Controls.Add(grid);
+            grid.DataSource = new DataView(table);
+            form.Show();
+            grid.Columns[0].Width = 208; // a 200px bar at full length
+            grid.SetDataBar("LatencyMs", new DataBarSettings { ColorMode = DataBarColorMode.TrafficLight, ThresholdsAreValues = true, WarningThreshold = 5, CriticalThreshold = 50 });
+            Application.DoEvents();
+
+            Assert.AreEqual(200, BarLength(grid, 0, DashColors.Success), 2, "4ms is a full bar, and green");
+            Assert.AreEqual(100, BarLength(grid, 1, DashColors.Success), 2, "2ms is half a bar");
+        }
+
         [TestMethod]
         public void Gradient_RunsFromTheLowColourToTheHigh()
         {
@@ -260,7 +300,8 @@ namespace DBADash.Viewers.GUI.Test
                 Minimum = 0,
                 Maximum = 100,
                 WarningThreshold = 30,
-                CriticalThreshold = 60
+                CriticalThreshold = 60,
+                ThresholdsAreValues = true
             };
             var json = JsonConvert.SerializeObject(settings);
             StringAssert.Contains(json, "\"Fill\"");
@@ -275,6 +316,7 @@ namespace DBADash.Viewers.GUI.Test
             Assert.AreEqual(settings.Maximum, copy.Maximum);
             Assert.AreEqual(settings.WarningThreshold, copy.WarningThreshold);
             Assert.AreEqual(settings.CriticalThreshold, copy.CriticalThreshold);
+            Assert.AreEqual(settings.ThresholdsAreValues, copy.ThresholdsAreValues);
 
             // Automatic limits are left out rather than saved as null.
             Assert.IsFalse(JsonConvert.SerializeObject(new DataBarSettings()).Contains("Minimum"));
