@@ -21,8 +21,9 @@ namespace DBADashGUI.CustomReports
         private readonly CheckBox chkHigherIsBetter = new() { Text = "Higher is better", AutoSize = true };
         private readonly Label lblWarning = new() { Text = "Warning at (% of scale)", AutoSize = true, Anchor = AnchorStyles.Left };
         private readonly Label lblCritical = new() { Text = "Critical at (% of scale)", AutoSize = true, Anchor = AnchorStyles.Left };
-        private readonly NumericUpDown numWarning = new() { Minimum = 0, Maximum = 100, Width = 80 };
-        private readonly NumericUpDown numCritical = new() { Minimum = 0, Maximum = 100, Width = 80 };
+        private readonly CheckBox chkThresholdsAreValues = new() { Text = "Thresholds are values, not % of scale", AutoSize = true };
+        private readonly NumericUpDown numWarning = new() { Minimum = 0, Maximum = 100, Width = 100 };
+        private readonly NumericUpDown numCritical = new() { Minimum = 0, Maximum = 100, Width = 100 };
         private readonly TextBox txtMinimum = new() { Width = 120, PlaceholderText = "Auto" };
         private readonly TextBox txtMaximum = new() { Width = 120, PlaceholderText = "Auto" };
 
@@ -72,6 +73,7 @@ namespace DBADashGUI.CustomReports
             AddRow(layout, lblColor, bttnColor);
             AddRow(layout, lblEndColor, bttnEndColor);
             AddRow(layout, null, chkHigherIsBetter);
+            AddRow(layout, null, chkThresholdsAreValues);
             AddRow(layout, lblWarning, numWarning);
             AddRow(layout, lblCritical, numCritical);
             AddRow(layout, FieldLabel("Minimum"), txtMinimum);
@@ -117,14 +119,17 @@ namespace DBADashGUI.CustomReports
             bttnColor.BackColor = settings.Color;
             bttnEndColor.BackColor = settings.GradientEndColor;
             chkHigherIsBetter.Checked = settings.HigherIsBetter;
-            numWarning.Value = Math.Clamp(settings.WarningThreshold, 0, 100);
-            numCritical.Value = Math.Clamp(settings.CriticalThreshold, 0, 100);
+            chkThresholdsAreValues.Checked = settings.ThresholdsAreValues;
+            SetThresholdRange();
+            numWarning.Value = Math.Clamp(settings.WarningThreshold, numWarning.Minimum, numWarning.Maximum);
+            numCritical.Value = Math.Clamp(settings.CriticalThreshold, numCritical.Minimum, numCritical.Maximum);
             txtMinimum.Text = settings.Minimum?.ToString(CultureInfo.CurrentCulture) ?? string.Empty;
             txtMaximum.Text = settings.Maximum?.ToString(CultureInfo.CurrentCulture) ?? string.Empty;
 
             bttnColor.Click += (_, _) => PickColor(bttnColor);
             bttnEndColor.Click += (_, _) => PickColor(bttnEndColor);
             cboColorMode.SelectedIndexChanged += (_, _) => ShowColorModeOptions();
+            chkThresholdsAreValues.CheckedChanged += (_, _) => SetThresholdRange();
             ShowColorModeOptions();
 
             this.ApplyTheme();
@@ -155,10 +160,26 @@ namespace DBADashGUI.CustomReports
             lblColor.Visible = bttnColor.Visible = mode is DataBarColorMode.Solid or DataBarColorMode.Gradient;
             lblColor.Text = mode == DataBarColorMode.Gradient ? "Low colour" : "Colour";
             lblEndColor.Visible = bttnEndColor.Visible = mode == DataBarColorMode.Gradient;
-            lblWarning.Visible = numWarning.Visible =
+            lblWarning.Visible = numWarning.Visible = chkThresholdsAreValues.Visible =
                 lblCritical.Visible = numCritical.Visible = mode == DataBarColorMode.TrafficLight;
             chkHigherIsBetter.Visible = mode is DataBarColorMode.TrafficLight or DataBarColorMode.PositiveNegative;
             chkHigherIsBetter.Text = mode == DataBarColorMode.PositiveNegative ? "Positive is good" : "Higher is better";
+        }
+
+        /// <summary>A percentage of the scale runs from 0 to 100; a value can be anything, to a fraction of a millisecond.</summary>
+        private void SetThresholdRange()
+        {
+            var values = chkThresholdsAreValues.Checked;
+            lblWarning.Text = values ? "Warning at (value)" : "Warning at (% of scale)";
+            lblCritical.Text = values ? "Critical at (value)" : "Critical at (% of scale)";
+            foreach (var num in new[] { numWarning, numCritical })
+            {
+                var current = num.Value;
+                num.Minimum = values ? -1_000_000_000_000m : 0;
+                num.Maximum = values ? 1_000_000_000_000m : 100;
+                num.DecimalPlaces = values ? 3 : 0;
+                num.Value = Math.Clamp(current, num.Minimum, num.Maximum);
+            }
         }
 
         private static void PickColor(Button swatch)
@@ -188,9 +209,16 @@ namespace DBADashGUI.CustomReports
                 MessageBox.Show("Minimum must be less than maximum.", Text, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            if (SelectedColorMode == DataBarColorMode.TrafficLight && numWarning.Value > numCritical.Value)
+            // A percentage is measured from the bad end of the scale, so critical is always the further along; a value
+            // where higher is better turns red below the point it turns amber.
+            var criticalBelowWarning = chkThresholdsAreValues.Checked && chkHigherIsBetter.Checked;
+            if (SelectedColorMode == DataBarColorMode.TrafficLight
+                && (criticalBelowWarning ? numCritical.Value > numWarning.Value : numWarning.Value > numCritical.Value))
             {
-                MessageBox.Show("The warning threshold must not be above the critical threshold.", Text, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show(criticalBelowWarning
+                        ? "Where higher is better, the critical value must not be above the warning value."
+                        : "The warning threshold must not be above the critical threshold.",
+                    Text, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -201,6 +229,7 @@ namespace DBADashGUI.CustomReports
                 Color = bttnColor.BackColor,
                 GradientEndColor = bttnEndColor.BackColor,
                 HigherIsBetter = chkHigherIsBetter.Checked,
+                ThresholdsAreValues = chkThresholdsAreValues.Checked,
                 WarningThreshold = numWarning.Value,
                 CriticalThreshold = numCritical.Value,
                 Minimum = min,

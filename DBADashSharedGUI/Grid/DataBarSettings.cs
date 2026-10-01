@@ -80,23 +80,46 @@ namespace DBADashGUI.CustomReports
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public decimal? Maximum { get; set; }
 
-        /// <summary>For <see cref="DataBarColorMode.TrafficLight"/>: the percentage of the scale where a bar turns amber.</summary>
+        /// <summary>
+        /// For <see cref="DataBarColorMode.TrafficLight"/>: where a bar turns amber - a percentage of the scale, or with
+        /// <see cref="ThresholdsAreValues"/>, a value.
+        /// </summary>
         public decimal WarningThreshold { get; set; } = 20;
 
-        /// <summary>For <see cref="DataBarColorMode.TrafficLight"/>: the percentage of the scale where a bar turns red.</summary>
+        /// <summary>
+        /// For <see cref="DataBarColorMode.TrafficLight"/>: where a bar turns red - a percentage of the scale, or with
+        /// <see cref="ThresholdsAreValues"/>, a value.
+        /// </summary>
         public decimal CriticalThreshold { get; set; } = 50;
 
         /// <summary>
-        /// The colour of a bar for a value <paramref name="share"/> (0 to 1) of the way up the scale, for a value
-        /// below zero where <paramref name="negative"/>.
+        /// For <see cref="DataBarColorMode.TrafficLight"/>: the thresholds are values in the column's own units - e.g. amber
+        /// from 5ms of latency and red from 50ms - so the colour doesn't depend on the rest of the column, while the bar's
+        /// length still does.  Where <see cref="HigherIsBetter"/>, a bar turns amber at or below the warning value and red at
+        /// or below the critical one.
         /// </summary>
-        public Color ColorFor(double share, bool negative = false)
+        public bool ThresholdsAreValues { get; set; }
+
+        /// <summary>
+        /// The colour of a bar for a value <paramref name="share"/> (0 to 1) of the way up the scale, for a value
+        /// below zero where <paramref name="negative"/>.  <paramref name="value"/> is the value itself, which a
+        /// traffic light with <see cref="ThresholdsAreValues"/> is coloured by.
+        /// </summary>
+        public Color ColorFor(double share, bool negative = false, double? value = null)
         {
             share = Math.Clamp(share, 0, 1);
             switch (ColorMode)
             {
                 case DataBarColorMode.PositiveNegative:
                     return negative == HigherIsBetter ? DashColors.Fail : DashColors.Success;
+
+                case DataBarColorMode.TrafficLight when ThresholdsAreValues && value.HasValue:
+                    var v = value.Value;
+                    var critical = (double)CriticalThreshold;
+                    var warning = (double)WarningThreshold;
+                    return (HigherIsBetter ? v <= critical : v >= critical) ? DashColors.Fail
+                        : (HigherIsBetter ? v <= warning : v >= warning) ? DashColors.Warning
+                        : NeutralBelowWarning ? DashColors.BlueLight : DashColors.Success;
 
                 case DataBarColorMode.TrafficLight:
                     var measured = (HigherIsBetter ? 1 - share : share) * 100;

@@ -150,7 +150,7 @@ namespace DBADashGUI.CustomReports
             var to = (Math.Clamp(number, min, max) - min) / (max - min);
             // Colour by the value's place in the whole scale, so on a scale of negatives the highest value is still
             // the top of a gradient or traffic light, though its bar is the shortest.
-            DataBarPainter.PaintRange(e, from, to, settings.ColorFor(to, to < from), settings.Style);
+            DataBarPainter.PaintRange(e, from, to, settings.ColorFor(to, to < from, number), settings.Style);
         }
 
         /// <summary>
