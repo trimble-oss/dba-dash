@@ -49,6 +49,13 @@
     <Content Include="Resources\DBADashIcon.png" Condition="Exists('Resources\DBADashIcon.png')">
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
+    <!-- Gallery listing icon (128x128), and the repo licence - both referenced by source.extension.vsixmanifest. -->
+    <Content Include="Resources\DBADashIcon128.png">
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="..\LICENSE">
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <!-- Embedded too, so the WinForms ContextMenuStrip icon (DeadlockContextMenuHook) can load it by
          name at runtime instead of depending on the installed extension's folder layout. -->
     <EmbeddedResource Include="Resources\DBADashIcon.png" Condition="Exists('Resources\DBADashIcon.png')">
