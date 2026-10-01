@@ -62,7 +62,7 @@ namespace DBADashService
         {
             while (DateTime.Now < waitUntil)
             {
-                var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, newInstanceAddedSignal.Token);
+                using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, newInstanceAddedSignal.Token);
                 try
                 {
                     await Task.Delay(500, linkedTokenSource.Token);
