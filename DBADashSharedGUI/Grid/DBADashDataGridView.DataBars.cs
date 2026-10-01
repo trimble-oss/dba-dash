@@ -212,18 +212,8 @@ namespace DBADashGUI.CustomReports
             var underline = new ToolStripMenuItem("Bar Under Value", null, (_, _) => UpdateClickedDataBar(s => s.Style = DataBarStyle.Underline));
             var fill = new ToolStripMenuItem("Fill Behind Value", null, (_, _) => UpdateClickedDataBar(s => s.Style = DataBarStyle.Fill));
             var solid = new ToolStripMenuItem("Solid Colour", null, (_, _) => UpdateClickedDataBar(s => s.ColorMode = DataBarColorMode.Solid));
-            var worse = new ToolStripMenuItem("Traffic Light (Higher is Worse)", null, (_, _) => UpdateClickedDataBar(s =>
-            {
-                s.ColorMode = DataBarColorMode.TrafficLight;
-                s.HigherIsBetter = false;
-                s.NeutralBelowWarning = false;
-            }));
-            var better = new ToolStripMenuItem("Traffic Light (Higher is Better)", null, (_, _) => UpdateClickedDataBar(s =>
-            {
-                s.ColorMode = DataBarColorMode.TrafficLight;
-                s.HigherIsBetter = true;
-                s.NeutralBelowWarning = false;
-            }));
+            var worse = new ToolStripMenuItem("Traffic Light (Higher is Worse)", null, (_, _) => UpdateClickedDataBar(s => s.SetTrafficLight(higherIsBetter: false)));
+            var better = new ToolStripMenuItem("Traffic Light (Higher is Better)", null, (_, _) => UpdateClickedDataBar(s => s.SetTrafficLight(higherIsBetter: true)));
             var gradient = new ToolStripMenuItem("Gradient", null, (_, _) => UpdateClickedDataBar(s => s.ColorMode = DataBarColorMode.Gradient));
             var positiveGood = new ToolStripMenuItem("Positive / Negative (Positive is Good)", null, (_, _) => UpdateClickedDataBar(s =>
             {

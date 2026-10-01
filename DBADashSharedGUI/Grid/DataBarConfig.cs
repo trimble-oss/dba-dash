@@ -129,7 +129,12 @@ namespace DBADashGUI.CustomReports
             bttnColor.Click += (_, _) => PickColor(bttnColor);
             bttnEndColor.Click += (_, _) => PickColor(bttnEndColor);
             cboColorMode.SelectedIndexChanged += (_, _) => ShowColorModeOptions();
-            chkThresholdsAreValues.CheckedChanged += (_, _) => SetThresholdRange();
+            chkThresholdsAreValues.CheckedChanged += (_, _) =>
+            {
+                SetThresholdRange();
+                OrderThresholds();
+            };
+            chkHigherIsBetter.CheckedChanged += (_, _) => OrderThresholds();
             ShowColorModeOptions();
 
             this.ApplyTheme();
@@ -167,6 +172,18 @@ namespace DBADashGUI.CustomReports
         }
 
         /// <summary>A percentage of the scale runs from 0 to 100; a value can be anything, to a fraction of a millisecond.</summary>
+        /// <summary>
+        /// Value thresholds where higher is better have red below amber; everything else has amber first.  Swap the two
+        /// where the direction or the kind of threshold has just changed, so the amber band survives the change.
+        /// </summary>
+        private void OrderThresholds()
+        {
+            if (CriticalBelowWarning ? numCritical.Value <= numWarning.Value : numWarning.Value <= numCritical.Value) return;
+            (numWarning.Value, numCritical.Value) = (numCritical.Value, numWarning.Value);
+        }
+
+        private bool CriticalBelowWarning => chkThresholdsAreValues.Checked && chkHigherIsBetter.Checked;
+
         private void SetThresholdRange()
         {
             var values = chkThresholdsAreValues.Checked;
@@ -175,8 +192,8 @@ namespace DBADashGUI.CustomReports
             foreach (var num in new[] { numWarning, numCritical })
             {
                 var current = num.Value;
-                num.Minimum = values ? -1_000_000_000_000m : 0;
-                num.Maximum = values ? 1_000_000_000_000m : 100;
+                num.Minimum = values ? decimal.MinValue : 0;
+                num.Maximum = values ? decimal.MaxValue : 100;
                 num.DecimalPlaces = values ? 3 : 0;
                 num.Value = Math.Clamp(current, num.Minimum, num.Maximum);
             }
@@ -211,11 +228,10 @@ namespace DBADashGUI.CustomReports
             }
             // A percentage is measured from the bad end of the scale, so critical is always the further along; a value
             // where higher is better turns red below the point it turns amber.
-            var criticalBelowWarning = chkThresholdsAreValues.Checked && chkHigherIsBetter.Checked;
             if (SelectedColorMode == DataBarColorMode.TrafficLight
-                && (criticalBelowWarning ? numCritical.Value > numWarning.Value : numWarning.Value > numCritical.Value))
+                && (CriticalBelowWarning ? numCritical.Value > numWarning.Value : numWarning.Value > numCritical.Value))
             {
-                MessageBox.Show(criticalBelowWarning
+                MessageBox.Show(CriticalBelowWarning
                         ? "Where higher is better, the critical value must not be above the warning value."
                         : "The warning threshold must not be above the critical threshold.",
                     Text, MessageBoxButtons.OK, MessageBoxIcon.Warning);
