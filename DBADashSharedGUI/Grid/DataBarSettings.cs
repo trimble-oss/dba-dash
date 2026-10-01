@@ -25,7 +25,7 @@ namespace DBADashGUI.CustomReports
         Solid,
 
         /// <summary>
-        /// Blue, then amber past <see cref="DataBarSettings.WarningThreshold"/>, then red past
+        /// Green, then amber past <see cref="DataBarSettings.WarningThreshold"/>, then red past
         /// <see cref="DataBarSettings.CriticalThreshold"/> - for figures where more is worse (or, with
         /// <see cref="DataBarSettings.HigherIsBetter"/>, where less is).
         /// </summary>
@@ -65,6 +65,13 @@ namespace DBADashGUI.CustomReports
         /// </summary>
         public bool HigherIsBetter { get; set; }
 
+        /// <summary>
+        /// For <see cref="DataBarColorMode.TrafficLight"/>: blue rather than green below the warning threshold, where
+        /// a low figure is unremarkable rather than good - the plan viewer's cost bars.  Not saved.
+        /// </summary>
+        [JsonIgnore]
+        internal bool NeutralBelowWarning { get; set; }
+
         /// <summary>The value an empty bar stands for.  Null takes the smaller of zero and the lowest value in the column.</summary>
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public decimal? Minimum { get; set; }
@@ -95,7 +102,7 @@ namespace DBADashGUI.CustomReports
                     var measured = (HigherIsBetter ? 1 - share : share) * 100;
                     return measured >= (double)CriticalThreshold ? DashColors.Fail
                         : measured >= (double)WarningThreshold ? DashColors.Warning
-                        : HigherIsBetter ? DashColors.Success : DashColors.BlueLight;
+                        : NeutralBelowWarning ? DashColors.BlueLight : DashColors.Success;
 
                 case DataBarColorMode.Gradient:
                     return Blend(Color, GradientEndColor, share);
@@ -116,6 +123,6 @@ namespace DBADashGUI.CustomReports
         /// Blue, amber from a fifth of the scale, red from half - for figures where more is worse, like cost and time.
         /// The plan viewer's list bars use these colours.
         /// </summary>
-        public static DataBarSettings MoreIsWorse() => new() { ColorMode = DataBarColorMode.TrafficLight };
+        public static DataBarSettings MoreIsWorse() => new() { ColorMode = DataBarColorMode.TrafficLight, NeutralBelowWarning = true };
     }
 }
