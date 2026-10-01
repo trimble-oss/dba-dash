@@ -135,6 +135,22 @@ namespace DBADashGUI.CustomReports
             }
         }
 
+        /// <summary>
+        /// Make the bar a traffic light running the given way.  Value thresholds run the opposite way where higher is
+        /// better - red at the lower value - so they swap round where they don't suit the new direction, keeping an
+        /// amber band between them.
+        /// </summary>
+        public void SetTrafficLight(bool higherIsBetter)
+        {
+            ColorMode = DataBarColorMode.TrafficLight;
+            HigherIsBetter = higherIsBetter;
+            NeutralBelowWarning = false;
+            if (ThresholdsAreValues && (higherIsBetter ? CriticalThreshold > WarningThreshold : WarningThreshold > CriticalThreshold))
+            {
+                (WarningThreshold, CriticalThreshold) = (CriticalThreshold, WarningThreshold);
+            }
+        }
+
         private static Color Blend(Color from, Color to, double amount) => Color.FromArgb(
             (int)Math.Round(from.R + (to.R - from.R) * amount),
             (int)Math.Round(from.G + (to.G - from.G) * amount),

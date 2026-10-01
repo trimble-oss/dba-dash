@@ -3,6 +3,7 @@ using DBADashSharedGUI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Drawing;
@@ -65,6 +66,53 @@ namespace DBADash.Viewers.GUI.Test
             Assert.AreEqual(DashColors.Warning, settings.ColorFor(1, value: 90));
             Assert.AreEqual(DashColors.Fail, settings.ColorFor(1, value: 50));
         }
+
+        /// <summary>Turning a value traffic light round swaps its thresholds, so there is still an amber band.</summary>
+        [TestMethod]
+        public void SetTrafficLight_SwapsValueThresholdsToSuitTheDirection()
+        {
+            var settings = new DataBarSettings { ColorMode = DataBarColorMode.TrafficLight, ThresholdsAreValues = true, HigherIsBetter = true, WarningThreshold = 90, CriticalThreshold = 50 };
+            settings.SetTrafficLight(higherIsBetter: false);
+            Assert.AreEqual(50, settings.WarningThreshold);
+            Assert.AreEqual(90, settings.CriticalThreshold);
+            Assert.AreEqual(DashColors.Warning, settings.ColorFor(0.5, value: 70));
+
+            settings.SetTrafficLight(higherIsBetter: true);
+            Assert.AreEqual(90, settings.WarningThreshold);
+            Assert.AreEqual(50, settings.CriticalThreshold);
+
+            // Already the right way round, or percentages of the scale: left alone.
+            settings.SetTrafficLight(higherIsBetter: true);
+            Assert.AreEqual(90, settings.WarningThreshold);
+            var percent = new DataBarSettings { WarningThreshold = 20, CriticalThreshold = 50 };
+            percent.SetTrafficLight(higherIsBetter: true);
+            Assert.AreEqual(20, percent.WarningThreshold);
+            Assert.AreEqual(50, percent.CriticalThreshold);
+        }
+
+        /// <summary>The options dialog swaps the thresholds too, when either box that sets their order is ticked.</summary>
+        [TestMethod]
+        public void Config_SwapsThresholdsWhenTheirOrderChanges()
+        {
+            using var config = new DataBarConfig("LatencyMs", new DataBarSettings { ColorMode = DataBarColorMode.TrafficLight, ThresholdsAreValues = true, WarningThreshold = 5, CriticalThreshold = 50 });
+            var all = AllControls(config).ToList();
+            var higherIsBetter = all.OfType<CheckBox>().Single(c => c.Text == "Higher is better");
+            var values = all.OfType<CheckBox>().Single(c => c.Text.StartsWith("Thresholds are values"));
+            var nums = all.OfType<NumericUpDown>().ToList(); // warning, then critical
+            Assert.AreEqual(2, nums.Count);
+
+            higherIsBetter.Checked = true;
+            Assert.AreEqual(50, nums[0].Value, "Warning");
+            Assert.AreEqual(5, nums[1].Value, "Critical");
+
+            // Back to percentages of the scale, where amber always comes first.
+            values.Checked = false;
+            Assert.AreEqual(5, nums[0].Value);
+            Assert.AreEqual(50, nums[1].Value);
+        }
+
+        private static IEnumerable<Control> AllControls(Control parent) =>
+            parent.Controls.Cast<Control>().SelectMany(c => new[] { c }.Concat(AllControls(c)));
 
         /// <summary>The bars scale to the column, but the colour is the value's alone.</summary>
         [TestMethod]
