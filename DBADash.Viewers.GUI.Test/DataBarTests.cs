@@ -37,11 +37,11 @@ namespace DBADash.Viewers.GUI.Test
         public void TrafficLight_TurnsAtTheThresholds()
         {
             var settings = new DataBarSettings { ColorMode = DataBarColorMode.TrafficLight, WarningThreshold = 20, CriticalThreshold = 50 };
-            Assert.AreEqual(DashColors.BlueLight, settings.ColorFor(0.1));
+            Assert.AreEqual(DashColors.Success, settings.ColorFor(0.1));
             Assert.AreEqual(DashColors.Warning, settings.ColorFor(0.2));
             Assert.AreEqual(DashColors.Fail, settings.ColorFor(0.9));
 
-            // Where higher is better the short bars are the bad ones.
+            // Where higher is better the short bars are the bad ones - the mirror image.
             settings.HigherIsBetter = true;
             Assert.AreEqual(DashColors.Success, settings.ColorFor(0.9));
             Assert.AreEqual(DashColors.Warning, settings.ColorFor(0.7));
@@ -123,7 +123,7 @@ namespace DBADash.Viewers.GUI.Test
             grid.SetDataBar("n", new DataBarSettings { ColorMode = DataBarColorMode.TrafficLight });
             Application.DoEvents();
 
-            Assert.AreNotEqual(0, BarExtent(grid, 0, DashColors.BlueLight).Length, "-100 is the bottom of the scale");
+            Assert.AreNotEqual(0, BarExtent(grid, 0, DashColors.Success).Length, "-100 is the bottom of the scale");
             Assert.AreNotEqual(0, BarExtent(grid, 1, DashColors.Fail).Length, "-10 is 90% of the way up");
         }
 

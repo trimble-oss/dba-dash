@@ -216,11 +216,13 @@ namespace DBADashGUI.CustomReports
             {
                 s.ColorMode = DataBarColorMode.TrafficLight;
                 s.HigherIsBetter = false;
+                s.NeutralBelowWarning = false;
             }));
             var better = new ToolStripMenuItem("Traffic Light (Higher is Better)", null, (_, _) => UpdateClickedDataBar(s =>
             {
                 s.ColorMode = DataBarColorMode.TrafficLight;
                 s.HigherIsBetter = true;
+                s.NeutralBelowWarning = false;
             }));
             var gradient = new ToolStripMenuItem("Gradient", null, (_, _) => UpdateClickedDataBar(s => s.ColorMode = DataBarColorMode.Gradient));
             var positiveGood = new ToolStripMenuItem("Positive / Negative (Positive is Good)", null, (_, _) => UpdateClickedDataBar(s =>
