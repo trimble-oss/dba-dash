@@ -9,6 +9,8 @@
     <DisplayName>DBA Dash Visualizer for SSMS</DisplayName>
     <Description xml:space="preserve">Adds "Open in DBA Dash Visualizer" to the results grid, execution plan and deadlock graph right-click menus, and the Tools menu in SSMS - for a results grid (opened in DBA Dash's grid, with filtering, grouping and export), a graphical plan or deadlock tab, or a plain XML tab holding one (e.g. sp_BlitzLock's deadlock output). Unsupported by Microsoft; compatible with SSMS 21 and SSMS 22.</Description>
     <MoreInfo>https://github.com/trimble-oss/dba-dash</MoreInfo>
+    <License>LICENSE</License>
+    <Icon>Resources\DBADashIcon128.png</Icon>
     <Tags>SQL Server, Execution Plan, Deadlock, Results Grid, SSMS, DBA Dash</Tags>
   </Metadata>
   <Installation>
