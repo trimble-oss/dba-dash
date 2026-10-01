@@ -80,7 +80,7 @@ namespace DBADashGUI.CustomReports
         public decimal CriticalThreshold { get; set; } = 50;
 
         /// <summary>
-        /// The colour of a bar that fills <paramref name="share"/> (0 to 1) of its side of the scale, for a value
+        /// The colour of a bar for a value <paramref name="share"/> (0 to 1) of the way up the scale, for a value
         /// below zero where <paramref name="negative"/>.
         /// </summary>
         public Color ColorFor(double share, bool negative = false)
