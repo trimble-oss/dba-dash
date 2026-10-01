@@ -1,4 +1,5 @@
 using System.Linq;
+using DBADash.QueryPlan.Compare;
 using DBADash.QueryPlan.Model;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -43,6 +44,22 @@ namespace DBADash.QueryPlan.Test
             StringAssert.Contains(card.Text, "or DATETIME2(7) against DATETIME2(3), prevents elimination even though the query still returns the right rows.");
             StringAssert.Contains(card.Text, "compares against a DATETIME value: CONVERT(datetime,[@1],0)");
             StringAssert.Contains(card.Text, "If that comparison is with the partitioning column, it is the likely cause.");
+        }
+
+        [TestMethod]
+        public void Card_IsATitledFinding_SoPlansWithItCanBeCompared()
+        {
+            var card = Card(TestPlans.Statement(TestPlans.PartitionScanConvert));
+
+            Assert.IsTrue(card!.IsAnalysis);
+            Assert.AreEqual("No partition elimination", card.Title);
+
+            var comparison = PlanComparison.Compare(
+                TestPlans.Statement(TestPlans.PartitionScanConvert),
+                TestPlans.Statement(TestPlans.PartitionScanDatetimeVariable));
+            var finding = comparison.Warnings.Single(w => w.Title == "No partition elimination");
+            Assert.IsTrue(finding.IsAnalysis);
+            Assert.AreEqual(PlanComparisonChange.Same, finding.Change);
         }
 
         [TestMethod]
