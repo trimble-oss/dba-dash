@@ -1,6 +1,6 @@
 namespace DBADashGUI.Performance
 {
-    partial class SessionDetailViewer
+    partial class SessionDetailControl
     {
         /// <summary>
         /// Required designer variable.
@@ -145,18 +145,17 @@ namespace DBADashGUI.Performance
             tabs.Size = new System.Drawing.Size(1000, 915);
             tabs.TabIndex = 1;
             // 
-            // SessionDetailViewer
+            // SessionDetailControl
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            ClientSize = new System.Drawing.Size(1000, 964);
+            Size = new System.Drawing.Size(1000, 964);
             Controls.Add(tabs);
             Controls.Add(statusStrip1);
             Controls.Add(toolStrip1);
             Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            Name = "SessionDetailViewer";
-            Text = "Session Detail";
-            Load += SessionDetailViewer_Load;
+            Name = "SessionDetailControl";
+            Load += SessionDetailControl_Load;
             toolStrip1.ResumeLayout(false);
             toolStrip1.PerformLayout();
             statusStrip1.ResumeLayout(false);

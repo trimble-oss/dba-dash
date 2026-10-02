@@ -20,16 +20,24 @@ using System.Windows.Forms.Integration;
 namespace DBADashGUI.Performance
 {
     /// <summary>
-    /// Tabbed viewer for a single running queries session.  Opened when the Session ID link is clicked.
+    /// Tabbed viewer for a single running queries session.  Hosted on a tab of its own in <see cref="SessionDetailForm"/>
+    /// - opened when the Session ID link is clicked.
     /// Each tab is loaded on demand (the first time it is selected) and is not reloaded when switching tabs.
     /// </summary>
-    public partial class SessionDetailViewer : Form, Interface.ISetStatus
+    public partial class SessionDetailControl : UserControl, Interface.ISetStatus
     {
         private DataRowView Row;
         private readonly DBADashContext Context;
-        private readonly int InstanceID;
-        private readonly int SessionID;
-        private DateTime SnapshotDateUtc;
+        public int InstanceID { get; }
+        public int SessionID { get; }
+        public DateTime SnapshotDateUtc { get; private set; }
+        public string InstanceName { get; private set; }
+
+        /// <summary>Full description of the session and snapshot - used for the window title.</summary>
+        public string Title => $"Session {SessionID} - {InstanceName} - {SnapshotDateUtc.ToAppTimeZone().ToString(CultureInfo.CurrentCulture)}";
+
+        /// <summary>Raised when the viewer navigates in place to a different snapshot (Get Latest / Back / Trigger Collection).</summary>
+        public event EventHandler TitleChanged;
         private DateTime StartTimeUtc;
         private DateTime HistoryFromUtc;
 
@@ -78,13 +86,18 @@ namespace DBADashGUI.Performance
 
         /// <param name="sourceRow">The running queries snapshot row (from the grid) to display.</param>
         /// <param name="context">The current context - used for object execution drill down.</param>
-        public SessionDetailViewer(DataRowView sourceRow, DBADashContext context)
+        public SessionDetailControl(DataRowView sourceRow, DBADashContext context)
         {
             InitializeComponent();
             Context = context;
             InstanceID = Convert.ToInt32(sourceRow["InstanceID"]);
             SessionID = Convert.ToInt32(sourceRow["session_id"]);
             LoadSnapshotRow(sourceRow, null);
+            Disposed += (_, _) =>
+            {
+                insightBoldFont?.Dispose();
+                insightRegularFont?.Dispose();
+            };
         }
 
         /// <summary>
@@ -113,8 +126,7 @@ namespace DBADashGUI.Performance
             BlockedReaderPeerCount = 0;
             IsBlockedByReadCommittedReader = false;
 
-            var instanceName = Convert.ToString(Row["InstanceDisplayName"]);
-            Text = $"Session {SessionID} - {instanceName} - {SnapshotDateUtc.ToAppTimeZone().ToString(CultureInfo.CurrentCulture)}";
+            InstanceName = Convert.ToString(Row["InstanceDisplayName"]);
 
             SetupPlanButton();
             SetupFlushPlanButton();
@@ -123,19 +135,13 @@ namespace DBADashGUI.Performance
             SetupCollectButton();
             UpdateNavButtons();
             BuildTabs();
+            TitleChanged?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>Show the Trigger Collection button only when messaging is enabled and the user has access to it.</summary>
         private void SetupCollectButton()
         {
             tsCollectNow.Visible = CommonData.GetDBADashContext(InstanceID).CanMessage;
-        }
-
-        protected override void OnFormClosed(FormClosedEventArgs e)
-        {
-            insightBoldFont?.Dispose();
-            insightRegularFont?.Dispose();
-            base.OnFormClosed(e);
         }
 
         /// <summary>The start of the session history: transaction start if there is an open transaction, otherwise the query start time.</summary>
@@ -810,7 +816,7 @@ DBCC FREEPROCCACHE({planHandle});";
             return context.CanMessage;
         }
 
-        private async void SessionDetailViewer_Load(object sender, EventArgs e)
+        private async void SessionDetailControl_Load(object sender, EventArgs e)
         {
             this.ApplyTheme();
             tabs.ApplyTheme();
@@ -1494,7 +1500,7 @@ DBCC FREEPROCCACHE({planHandle});";
             _ => InsightCard.CardIcon.Information
         };
 
-        /// <summary>Open another session from the same snapshot in a new viewer (used by insight drill-down links).</summary>
+        /// <summary>Open another session from the same snapshot on a new tab (used by insight drill-down links).</summary>
         private void OpenSession(int sessionId)
         {
             try
@@ -1505,8 +1511,7 @@ DBCC FREEPROCCACHE({planHandle});";
                 var peerRow = InMemorySnapshotIsComplete() ? FindSessionInSnapshot(sessionId) : null;
                 if (peerRow != null)
                 {
-                    var frm = new SessionDetailViewer(peerRow, Context);
-                    frm.ShowSingleInstance();
+                    SessionDetailForm.Open(peerRow, Context);
                     return;
                 }
 
