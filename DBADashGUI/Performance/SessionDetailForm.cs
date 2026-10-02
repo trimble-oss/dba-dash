@@ -115,6 +115,7 @@ namespace DBADashGUI.Performance
             var sessions = Sessions;
             tabs.ShowTabStrip = sessions.Count > 1;
             var multipleInstances = sessions.Select(s => s.Viewer.InstanceID).Distinct().Count() > 1;
+            var instanceLabels = multipleInstances ? InstanceLabels(sessions) : null;
 
             foreach (var group in sessions.GroupBy(s => (s.Viewer.InstanceID, s.Viewer.SessionID)))
             {
@@ -127,7 +128,7 @@ namespace DBADashGUI.Performance
                     var label = viewer.SessionID.ToString();
                     if (multipleInstances)
                     {
-                        label += " · " + ShortInstanceName(viewer.InstanceName);
+                        label += " · " + instanceLabels[viewer.InstanceID];
                     }
                     if (showSnapshot)
                     {
@@ -138,6 +139,22 @@ namespace DBADashGUI.Performance
                     page.ToolTipText = $"Session {viewer.SessionID}\n{viewer.InstanceName}\nSnapshot: {snapshot.ToString(CultureInfo.CurrentCulture)}";
                 }
             }
+        }
+
+        /// <summary>
+        /// Instance name to show on the tabs for each instance: shortened, unless shortening would make two instances look
+        /// the same (e.g. names that differ only at the end, like SQL-PROD-EAST-01 and SQL-PROD-EAST-02).
+        /// </summary>
+        private static Dictionary<int, string> InstanceLabels(IEnumerable<(TabPage Page, SessionDetailControl Viewer)> sessions)
+        {
+            var names = sessions.GroupBy(s => s.Viewer.InstanceID)
+                .ToDictionary(g => g.Key, g => g.First().Viewer.InstanceName);
+            var clashing = names.Values.Distinct()
+                .GroupBy(ShortInstanceName)
+                .Where(g => g.Count() > 1)
+                .SelectMany(g => g)
+                .ToHashSet();
+            return names.ToDictionary(n => n.Key, n => clashing.Contains(n.Value) ? n.Value : ShortInstanceName(n.Value));
         }
 
         private static string ShortInstanceName(string name) =>
