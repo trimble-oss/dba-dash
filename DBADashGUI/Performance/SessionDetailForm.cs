@@ -14,7 +14,7 @@ namespace DBADashGUI.Performance
     /// of its own, so several sessions (e.g. a blocker and the sessions it blocks) can be flipped between.  Each tab is a
     /// whole <see cref="SessionDetailControl"/> with its own toolbar and status bar.  The window closes with its last tab.
     ///
-    /// Tabs are labelled with just the session ID to keep them short.  The instance name is added only when the window
+    /// The tab strip only appears once a second session is opened.  Tabs are labelled with just the session ID to keep them short.  The instance name is added only when the window
     /// holds sessions from more than one instance, and the snapshot time only when the same session is open more than
     /// once - the full detail is always in the tab's tooltip and in the window title for the tab in front.
     /// </summary>
@@ -108,10 +108,12 @@ namespace DBADashGUI.Performance
         /// <summary>
         /// Label each tab with its session ID, plus whatever else is needed to tell the tabs apart: the instance when the
         /// window spans more than one, and the snapshot time when the same session is open more than once.
+        /// The tab strip is hidden while there's only one session - the window title already says which it is.
         /// </summary>
         private void RefreshTabLabels()
         {
             var sessions = Sessions;
+            tabs.ShowTabStrip = sessions.Count > 1;
             var multipleInstances = sessions.Select(s => s.Viewer.InstanceID).Distinct().Count() > 1;
 
             foreach (var group in sessions.GroupBy(s => (s.Viewer.InstanceID, s.Viewer.SessionID)))

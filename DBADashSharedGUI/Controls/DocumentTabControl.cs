@@ -37,6 +37,40 @@ namespace DBADashGUI.Controls
         /// <summary>A tab asked to close, by its ×, a middle click or the right click menu.</summary>
         public event EventHandler<TabPage> CloseRequested;
 
+        private const int TCM_ADJUSTRECT = 0x1328;
+
+        private bool _showTabStrip = true;
+
+        /// <summary>
+        /// Show the strip of tab headers.  When false the selected page fills the whole control, covering the strip -
+        /// e.g. for an owner that only wants tabs once there's more than one document open.
+        /// </summary>
+        [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+        public bool ShowTabStrip
+        {
+            get => _showTabStrip;
+            set
+            {
+                if (_showTabStrip == value) return;
+                _showTabStrip = value;
+                // Clears the cached display rectangle and resizes the pages to the new one.
+                OnResize(EventArgs.Empty);
+                Invalidate();
+            }
+        }
+
+        protected override void WndProc(ref Message m)
+        {
+            // Without the strip, report the whole control as the page area rather than the area below the headers.
+            if (m.Msg == TCM_ADJUSTRECT && !_showTabStrip)
+            {
+                m.Result = 1;
+                return;
+            }
+
+            base.WndProc(ref m);
+        }
+
         private Rectangle CloseBounds(int index)
         {
             var tab = GetTabRect(index);
