@@ -1507,15 +1507,14 @@ namespace DBADashGUI.Performance
 
         private void ShowSessionDetail(DataRowView row)
         {
-            // Ctrl+click opens a new copy of the viewer instead of reusing the single instance.
-            var forceNewInstance = (Control.ModifierKeys & Keys.Control) == Keys.Control;
-            var frm = new SessionDetailViewer(row, CurrentContext);
-            frm.ShowSingleInstance(forceNewInstance: forceNewInstance);
+            // Ctrl+click opens the session in a new window instead of on a new tab of the existing one.
+            var newWindow = (Control.ModifierKeys & Keys.Control) == Keys.Control;
+            SessionDetailForm.Open(row, CurrentContext, newWindow: newWindow);
         }
 
         /// <summary>
         /// Load a specific session from the running queries snapshot identified by instance and snapshot date,
-        /// and open it in a <see cref="SessionDetailViewer"/>. Used for drill down (e.g. opening a blocking session).
+        /// and open it on a tab of the <see cref="SessionDetailForm"/>. Used for drill down (e.g. opening a blocking session).
         /// <paramref name="snapshotDateUtc"/> is the UTC snapshot date.
         /// Returns false if the session was not found in the snapshot.
         /// </summary>
@@ -1527,8 +1526,7 @@ namespace DBADashGUI.Performance
                 return false;
             }
 
-            var frm = new SessionDetailViewer(row, context) { StaleWarning = staleWarning };
-            frm.ShowSingleInstance();
+            SessionDetailForm.Open(row, context, staleWarning);
             return true;
         }
 
