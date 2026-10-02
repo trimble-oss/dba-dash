@@ -5,6 +5,12 @@
 	@Type VARCHAR(50)
 )
 AS
+/* Report customizations are shared with all users.  Same rule as CanEditReport in CustomReport_Get */
+IF IS_ROLEMEMBER('db_owner')=0 AND IS_ROLEMEMBER('db_ddladmin')=0
+BEGIN
+	RAISERROR('db_owner or db_ddladmin membership is required to edit reports',11,1)
+	RETURN
+END
 
 UPDATE dbo.CustomReport
 SET MetaData = @MetaData

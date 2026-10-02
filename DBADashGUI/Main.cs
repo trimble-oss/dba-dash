@@ -133,8 +133,13 @@ namespace DBADashGUI
                             // taken out of the flat Reports list so nothing is listed twice.  At this level
                             // it covers every database on the logical server.
                             AzureNode.AddDeadlocksFolder(reports?.InstanceLevelReports);
+                            // Reports that don't apply to any database on the logical server are hidden
+                            var azureServerInstanceIDs = instances.Rows.Cast<DataRow>()
+                                .Where(r => (bool)r["IsAzure"] && (string)r["Instance"] == instance)
+                                .Select(r => (int)r["InstanceID"]).ToList();
                             AzureNode.AddReportsFolder(
-                                SQLTreeItem.ExcludeDeadlockReports(reports?.InstanceLevelReports ?? Enumerable.Empty<CustomReport>()));
+                                SQLTreeItem.ExcludeDeadlockReports(reports?.InstanceLevelReports ?? Enumerable.Empty<CustomReport>()),
+                                azureServerInstanceIDs);
                             var poolNodes = poolTable.Rows.Cast<DataRow>()
                                 .Where(r => (string)r["InstanceGroupName"] == instance && r["elastic_pool_name"] != DBNull.Value)
                                 .Select(r => (string)r["elastic_pool_name"]).Distinct().OrderBy(r => r)
@@ -481,7 +486,7 @@ namespace DBADashGUI
             {
                 tabPerformanceSummary, tabPerformance, tabSlowQueries, tabAzureDB, tabAzureSummary, tabMetrics,
                 tabObjectExecutionSummary, tabWaits, tabRunningQueries, tabMemory, tabJobStats, tabJobTimeline, tabDrivePerformance, tabTopQueries, tabOfflineInstances, tabPoolsAndGroups
-            }).Contains(tabs.SelectedTab) || (tabs.SelectedTab == tabCustomReport && ((SQLTreeItem)tv1.SelectedNode).Report.TimeFilterSupported)
+            }).Contains(tabs.SelectedTab) || (tabs.SelectedTab == tabCustomReport && (tv1.SelectedNode as SQLTreeItem)?.Report?.TimeFilterSupported == true)
             // The Deadlocks folder's tabs run reports too, and both of them are over a date range.
             || SelectedDeadlockTabReport(tv1.SelectedNode as SQLTreeItem)?.TimeFilterSupported == true;
 
@@ -583,6 +588,8 @@ namespace DBADashGUI
             }
 
             customReportView1.ReportNameChanged += CustomReport_ReportNameChanged;
+            CustomReports.CustomReports.ReportPlacementChanged += CustomReport_PlacementChanged;
+            tv1.ShowNodeToolTips = true; // e.g. reports hidden by visibility rules
             InitializeNotifyIcon();
             desktopNotificationsToolStripMenuItem.Checked = Properties.Settings.Default.DesktopNotificationsEnabled;
             _ = Task.Run(GetNewAlertsLoop);
@@ -644,7 +651,50 @@ namespace DBADashGUI
         private void CustomReport_ReportNameChanged(object sender, EventArgs e)
         {
             UpdateReportNameInTreeView(tv1.Nodes);
-            tabCustomReport.Text = ((SQLTreeItem)tv1.SelectedNode).Report.ReportName;
+            if ((tv1.SelectedNode as SQLTreeItem)?.Report is { } report) tabCustomReport.Text = report.ReportName;
+        }
+
+        /// <summary>
+        /// A report was moved to a different folder or its visibility rules changed.  Rebuild the Reports folders in the
+        /// tree and keep the report selected if it's still visible at the selected location.
+        /// </summary>
+        private void CustomReport_PlacementChanged(object sender, CustomReport report) => RefreshReportsFoldersInTree();
+
+        /// <summary>
+        /// Rebuild the Reports folders in the tree, keeping the selected report or folder selected if it's still visible.
+        /// </summary>
+        /// <returns>True if the selection changed (and the newly selected node was loaded)</returns>
+        private bool RefreshReportsFoldersInTree()
+        {
+            var selected = tv1.SelectedNode as SQLTreeItem;
+            var selectedReportsRoot = selected?.ReportsRoot;
+            var selectedFolderPath = selected?.Type == SQLTreeItem.TreeType.ReportsFolder ? selected.ReportFolderPath : null;
+            // Removing the selected report node selects another node.  Don't load it - the node to select is set below.
+            suppressLoadTab = true;
+            suppressSaveContext = true;
+            tv1.BeginUpdate();
+            try
+            {
+                SQLTreeItem.RefreshReportsFolders(tv1.Nodes);
+            }
+            finally
+            {
+                tv1.EndUpdate();
+                suppressLoadTab = false;
+                suppressSaveContext = false;
+            }
+            // Report nodes are recreated so remove any history that points to nodes no longer in the tree
+            VisitedNodes.RemoveAll(v => v.Node?.TreeView == null);
+            tsBack.Enabled = VisitedNodes.Count > 0;
+
+            // Nothing to do if the selected node wasn't in a Reports folder that was rebuilt
+            if (selected?.TreeView != null || selectedReportsRoot?.TreeView == null) return false;
+            // Select the report in its new location, or the Reports folder if it's no longer visible here
+            var newNode = (selected.Report != null ? selectedReportsRoot.FindReportNode(selected.Report) : selectedReportsRoot.FindReportFolderNode(selectedFolderPath))
+                          ?? selectedReportsRoot;
+            newNode.EnsureVisible();
+            tv1.SelectedNode = newNode;
+            return true;
         }
 
         private static void UpdateReportNameInTreeView(TreeNodeCollection nodes)
@@ -1294,7 +1344,7 @@ namespace DBADashGUI
             // Deadlock reports get their own folder; the Reports folder takes everything else so that
             // nothing is listed twice.
             instanceNode.AddDeadlocksFolder(customReports.InstanceLevelReports);
-            instanceNode.AddReportsFolder(SQLTreeItem.ExcludeDeadlockReports(customReports.InstanceLevelReports));
+            instanceNode.AddReportsFolder(SQLTreeItem.ExcludeDeadlockReports(customReports.InstanceLevelReports), new[] { instanceNode.InstanceID });
             instanceNode.AddCommunityTools();
             instanceNode.AddCustomToolsFolder();
         }
@@ -2538,7 +2588,7 @@ namespace DBADashGUI
             SaveContext(tv1.SelectedNode, tabs.SelectedIndex);
             tv1.SelectedNode.NodeFont = tv1.Font;
             tv1.SelectedNode.BackColor = Color.Empty;
-            tv1.SelectedNode.ForeColor = Color.Empty;
+            tv1.SelectedNode.ForeColor = tv1.SelectedNode is SQLTreeItem { IsHiddenByVisibilityRules: true } ? SQLTreeItem.HiddenByVisibilityRulesColor : Color.Empty;
         }
 
         /// <summary>
@@ -2741,6 +2791,8 @@ namespace DBADashGUI
         private async void ShowHidden_Changed(object sender, EventArgs e)
         {
             Common.ShowHidden = showHiddenToolStripMenuItem.Checked;
+            // Show Hidden also shows reports hidden by their visibility rules
+            if (RefreshReportsFoldersInTree()) return; // Selected report was hidden - its Reports folder is now selected and loaded
             await LoadSelectedTabAsync();
         }
 
