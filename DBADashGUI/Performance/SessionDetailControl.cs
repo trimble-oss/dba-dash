@@ -720,7 +720,8 @@ DBCC FREEPROCCACHE({planHandle});";
 
         public void RefreshData()
         {
-            if (!collectRequested) return;
+            // The tab may have been closed while the collection was in flight.
+            if (!collectRequested || IsDisposed) return;
             if (InvokeRequired)
             {
                 BeginInvoke(new Action(RefreshData));
@@ -872,7 +873,10 @@ DBCC FREEPROCCACHE({planHandle});";
             catch (Exception ex)
             {
                 loadedTabs.Remove(page); // Allow a retry by selecting the tab again
-                ShowTabMessage(page, ex.Message);
+                if (!page.IsDisposed) // Session tab closed while loading
+                {
+                    ShowTabMessage(page, ex.Message);
+                }
             }
             finally
             {
