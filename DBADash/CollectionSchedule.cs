@@ -88,6 +88,8 @@ namespace DBADashService
 
                             {CollectionType.TableSize, new CollectionSchedule() {Schedule = disabled, RunOnServiceStart = false} },
                             {CollectionType.FailedLogins, new CollectionSchedule() {Schedule = disabled, RunOnServiceStart = false} },
+                            /* Latch stats are for investigating latch contention - enable when needed.  every1min is the suggested schedule. */
+                            {CollectionType.LatchStats, new CollectionSchedule() {Schedule = disabled, RunOnServiceStart = false} },
 
                             {CollectionType.ScheduleInfo, new CollectionSchedule() {Schedule = disabled, RunOnServiceStart = true} },
         };

@@ -460,6 +460,8 @@ BEGIN
 
 	EXEC dbo.Waits_60MIN_Del @InstanceID=@InstanceID,@DaysToKeep=0
 
+	EXEC dbo.LatchStats_Del @InstanceID=@InstanceID,@DaysToKeep=0
+
 	DELETE dbo.IdentityColumnsHistory 
 	WHERE InstanceID = @InstanceID
 
@@ -470,6 +472,9 @@ BEGIN
 	WHERE InstanceID = @InstanceID
 
 	DELETE Staging.Waits
+	WHERE InstanceID = @InstanceID
+
+	DELETE Staging.LatchStats
 	WHERE InstanceID = @InstanceID
 
 	DELETE Staging.ObjectExecutionStats

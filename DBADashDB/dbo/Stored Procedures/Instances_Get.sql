@@ -31,6 +31,10 @@ SELECT  I.InstanceID,
 	CASE WHEN M.InstanceID IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS HasInstanceMetadata,
 	FIRST_VALUE(CASE WHEN D.name = ''master'' THEN D.InstanceID ELSE NULL END) OVER(PARTITION BY Instance ORDER BY CASE WHEN D.name = ''master'' THEN 0 ELSE 1 END) AS MasterInstanceID,
 	CASE WHEN EXISTS(SELECT 1 FROM dbo.ResourceGovernorWorkloadGroups WG WHERE WG.InstanceID = I.InstanceID) THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS HasResourceGovernorWorkloadGroups,
+	/* Latch stats collection is off by default.  Reporting is shown where it is switched on, or where there is still data from when it was. */
+	CASE WHEN EXISTS(SELECT 1 FROM dbo.ScheduleInfo SI WHERE SI.InstanceID = I.InstanceID AND SI.Reference = ''LatchStats'' AND SI.IsEnabled = 1)
+			OR EXISTS(SELECT 1 FROM dbo.LatchStats_60MIN LS WHERE LS.InstanceID = I.InstanceID)
+		THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS HasLatchStats,
 	I.UTCOffset,
 	I.IsReadOnlyReplica
 FROM dbo.InstancesMatchingTags(@TagIDs) I

@@ -1248,12 +1248,50 @@ FROM (VALUES('dbo','ObjectExecutionStats',120),
 				('dbo','ResourceGovernorResourcePoolsMetrics',90),
 				('XE','XETraceSession',30),
 				('XE','XETraceEvent',30),
-				('dbo','AvailabilityGroupHealthEvents',365)
+				('dbo','AvailabilityGroupHealthEvents',365),
+				('dbo','LatchStats',120),
+				('dbo','LatchStats_60MIN',730)
 				) AS t(SchemaName,TableName,RetentionDays)
 WHERE NOT EXISTS(SELECT 1
 				FROM dbo.DataRetention DR
 				WHERE DR.TableName = T.TableName
 				AND DR.SchemaName = T.SchemaName)
+
+/*	Descriptions for the latch classes most often behind latch contention.  Other classes are added by
+	dbo.LatchStats_Upd as they are collected, with no description.
+	Sources: Microsoft's sys.dm_os_latch_stats documentation, and Paul Randal's "Most common latch classes and what
+	they mean" (SQLskills).  Most latch classes are documented only as "Internal use only" - only describe a class where
+	there is a published explanation of what it protects.  This list is authoritative: descriptions for classes no longer
+	listed here are removed.  */
+MERGE INTO dbo.LatchClass AS T
+USING (VALUES
+	(N'BUFFER',N'Latches on database pages - a page is latched while it is read or modified.  Usually the largest latch class by far.  Wait stats break these waits down: PAGEIOLATCH_* is waiting for a page that is in an I/O request (usually being read from disk), and PAGELATCH_* is contention on a page already in memory, such as last-page inserts on an ascending key or tempdb allocation pages.'),
+	(N'ACCESS_METHODS_DATASET_PARENT',N'Synchronizes the threads of a parallel operation with their parent - used during parallel scans to give each thread a range of pages to scan.  High values point to a lot of parallel scanning, usually alongside CXPACKET waits.  Check whether the parallelism is warranted (for example, a plan that has changed from a seek to a scan) and the cost threshold for parallelism and MAXDOP settings.'),
+	(N'ACCESS_METHODS_SCAN_RANGE_GENERATOR',N'Synchronizes access to the range generator that gives each thread of a parallel scan a range of pages to scan.  As with ACCESS_METHODS_DATASET_PARENT, high values point to a lot of parallel scanning.'),
+	(N'ACCESS_METHODS_KEY_RANGE_GENERATOR',N'Synchronizes read-ahead during parallel scans of key ranges.'),
+	(N'ACCESS_METHODS_HOBT_VIRTUAL_ROOT',N'Protects the metadata holding the page ID of an index root page.  Contention occurs when the root page splits, which needs this latch in exclusive mode, while threads navigating down the index wait for it in shared mode.  Can be caused by many connections quickly populating a small index.'),
+	(N'ACCESS_METHODS_HOBT_COUNT',N'Synchronizes access to the page and row counts of a heap or index as changes to them are flushed to metadata.  Contention suggests many small, concurrent data modifications against the same table.'),
+	(N'ALLOC_FREESPACE_CACHE',N'Synchronizes access to the cache of pages with free space for heaps and LOB data.  Contention can occur when many connections insert into the same heap or LOB data at the same time.  Partitioning the object reduces it, as each partition has its own latch.'),
+	(N'ALLOC_EXTENT_CACHE',N'Synchronizes access to the cache of extents with unallocated pages.  Contention can occur when many connections allocate pages in the same allocation unit at the same time.  Partitioning the object reduces it.'),
+	(N'FGCB_ADD_REMOVE',N'Protects the filegroup control block.  Taken when files in the filegroup are added, removed, grown (manually or by autogrowth) or shrunk, when proportional fill weightings are recalculated, and during round-robin allocation across the files.  Frequent autogrowth is the most common cause of contention - pre-size files and use a suitable growth increment.  Can also occur in filegroups with many files under heavy concurrent allocation, such as tempdb.'),
+	(N'FGCB_ALLOC',N'Synchronizes access to the round-robin allocation information of a filegroup.'),
+	(N'LOG_MANAGER',N'Transaction log manager.  Contention almost always means a transaction log is growing because it cannot be cleared - check log_reuse_wait_desc in sys.databases to see what is preventing log reuse.'),
+	(N'NESTING_TRANSACTION_READONLY',N'Controls access to the transaction descriptor shared by the nested transactions of a parallel operation, for a read-only transaction.  Parallel queries start a nested transaction per thread, so contention usually points to parallelism - check whether it is warranted.  Scans of row version chains also use parallel nested transactions.'),
+	(N'NESTING_TRANSACTION_FULL',N'Controls access to the transaction descriptor shared by the nested transactions of a parallel operation, for a transaction that has modified the database (for example, a parallel index build).  Contention usually points to parallelism - check whether it is warranted.'),
+	(N'TRACE_CONTROLLER',N'Used by SQL Trace, including when generating trace events.  Contention points to SQL Trace (server-side traces or Profiler) collecting a lot of data - review the traces in sys.traces.'),
+	(N'DBCC_MULTIOBJECT_SCANNER',N'Used by DBCC CHECK commands running in parallel - each thread takes it to get the next page to process.  Expected while consistency checks are running.'),
+	(N'DATABASE_MIRRORING_CONNECTION',N'Controls the flow of messages for database mirroring sessions.  If prevalent, the server likely has a lot of busy mirroring sessions.'),
+	(N'DATABASE_CHECKPOINT',N'Serializes checkpoints within a database.'),
+	(N'SERVICE_BROKER_WAITFOR_MANAGER',N'Synchronizes the instance-wide map of Service Broker wait queues.  Contention can occur when many connections are waiting in, calling or timing out of WAITFOR(RECEIVE), receiving messages, or committing or rolling back transactions containing a WAITFOR(RECEIVE).  Reduce the number of threads waiting in WAITFOR(RECEIVE).')
+) AS S(LatchClass,Description)
+ON T.LatchClass = S.LatchClass
+WHEN MATCHED AND (NULLIF(S.Description, T.Description) IS NOT NULL OR T.Description IS NULL) THEN
+	UPDATE SET T.Description = S.Description
+WHEN NOT MATCHED BY TARGET THEN
+	INSERT(LatchClass,Description)
+	VALUES(S.LatchClass,S.Description)
+WHEN NOT MATCHED BY SOURCE AND T.Description IS NOT NULL THEN
+	UPDATE SET T.Description = NULL;
 
 DELETE dbo.OSLoadedModulesStatus
 WHERE IsSystem=1
