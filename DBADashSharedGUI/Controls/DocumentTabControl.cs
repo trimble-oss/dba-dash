@@ -26,9 +26,12 @@ namespace DBADashGUI.Controls
             // Room for the × after the text, which the base control centres in the tab.
             Padding = new Point(24, 8);
             ShowToolTips = true;
+        }
 
-            // After the base control's handler, which clears the strip and draws every tab.
-            DrawItem += (_, e) => DrawCloseButtons(e.Graphics);
+        protected override void DrawTabs(Graphics g)
+        {
+            base.DrawTabs(g);
+            DrawCloseButtons(g);
         }
 
         /// <summary>A tab asked to close, by its ×, a middle click or the right click menu.</summary>
@@ -116,19 +119,23 @@ namespace DBADashGUI.Controls
 
             var index = TabAt(e.Location);
             var hovered = index >= 0 && CloseBounds(index).Contains(e.Location) ? index : -1;
-            if (hovered == _hoveredClose) return;
-
-            _hoveredClose = hovered;
-            Invalidate();
+            SetHoveredClose(hovered);
         }
 
         protected override void OnMouseLeave(EventArgs e)
         {
             base.OnMouseLeave(e);
-            if (_hoveredClose < 0) return;
+            SetHoveredClose(-1);
+        }
 
-            _hoveredClose = -1;
-            Invalidate();
+        /// <summary>Repaint just the × buttons whose hover state changed, rather than the whole control.</summary>
+        private void SetHoveredClose(int index)
+        {
+            if (index == _hoveredClose) return;
+
+            if (_hoveredClose >= 0 && _hoveredClose < TabCount) Invalidate(CloseBounds(_hoveredClose));
+            if (index >= 0) Invalidate(CloseBounds(index));
+            _hoveredClose = index;
         }
     }
 }
