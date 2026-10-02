@@ -185,6 +185,12 @@ namespace DBADash.Alert
 
         public async Task SetCustomThreadKey(int channelID, string threadKey, string connectionString)
         {
+            // Consolidated (AlertID 0) and test (AlertID -1) notifications don't relate to a stored alert
+            if (AlertID <= 0)
+            {
+                CustomThreadKey = threadKey;
+                return;
+            }
             await using var cn = new SqlConnection(connectionString);
             await using var cmd = new SqlCommand("Alert.CustomThreadKey_Add", cn)
             { CommandType = CommandType.StoredProcedure };

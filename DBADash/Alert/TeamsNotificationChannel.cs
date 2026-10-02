@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -22,8 +23,11 @@ namespace DBADash.Alert
     {
         public override NotificationChannelTypes NotificationChannelType => NotificationChannelTypes.Teams;
 
-        // Teams rejects cards over ~28KB. Leave headroom for the rest of the card.
+        // Maximum length of the alert message text included in the default card
         internal const int MaxTextLength = 20000;
+
+        // Teams rejects messages over ~28KB (serialized UTF-8).  Leave some headroom.
+        internal const int MaxPayloadBytes = 27 * 1024;
 
         // Response header a custom workflow can use to return the ID of the posted message
         internal const string MessageIdHeader = "MessageId";
@@ -111,10 +115,26 @@ namespace DBADash.Alert
 
         internal string GetPayload(Alert alert)
         {
-            var message = string.IsNullOrEmpty(MessageTemplate)
-                ? GetDefaultMessage(alert)
-                : JObject.Parse(ReplacePlaceholders(alert, MessageTemplate));
+            if (!string.IsNullOrEmpty(MessageTemplate))
+            {
+                return Serialize(JObject.Parse(ReplacePlaceholders(alert, MessageTemplate)), alert);
+            }
 
+            // The Teams limit applies to the serialized UTF-8 payload.  JSON escaping, multi-byte characters and the
+            // TextBlock added per line mean the text length isn't a reliable guide, so reduce the text until it fits.
+            var maxTextLength = Math.Min(MaxTextLength, alert.Message?.Length ?? 0);
+            while (true)
+            {
+                var payload = Serialize(GetDefaultMessage(alert, maxTextLength), alert);
+                var size = Encoding.UTF8.GetByteCount(payload);
+                if (size <= MaxPayloadBytes || maxTextLength == 0) return payload;
+                maxTextLength = Math.Min(maxTextLength - 1, (int)(maxTextLength * 0.9 * MaxPayloadBytes / size));
+                maxTextLength = Math.Max(maxTextLength, 0);
+            }
+        }
+
+        private static string Serialize(JObject message, Alert alert)
+        {
             // Allows a custom workflow to reply to the message posted for the first notification
             if (!string.IsNullOrEmpty(alert.CustomThreadKey))
             {
@@ -123,7 +143,7 @@ namespace DBADash.Alert
             return message.ToString(Formatting.None);
         }
 
-        private static JObject GetDefaultMessage(Alert alert)
+        private static JObject GetDefaultMessage(Alert alert, int maxTextLength)
         {
             var card = new JObject
             {
@@ -187,7 +207,7 @@ namespace DBADash.Alert
                     })
             };
 
-            foreach (var block in GetTextBlocks(alert.Message))
+            foreach (var block in GetTextBlocks(alert.Message, maxTextLength))
             {
                 ((JArray)card["body"]!).Add(block);
             }
@@ -224,12 +244,14 @@ namespace DBADash.Alert
         /// Teams doesn't reliably render single line breaks inside a TextBlock, so each line
         /// of the message is sent as its own TextBlock.  Blank lines add spacing between blocks.
         /// </summary>
-        internal static IEnumerable<JObject> GetTextBlocks(string message)
+        internal static IEnumerable<JObject> GetTextBlocks(string message, int maxTextLength = MaxTextLength)
         {
             if (string.IsNullOrEmpty(message)) yield break;
-            if (message.Length > MaxTextLength)
+            if (message.Length > maxTextLength)
             {
-                message = message[..MaxTextLength] + "\n…(truncated)";
+                // Avoid splitting a surrogate pair
+                if (maxTextLength > 0 && char.IsHighSurrogate(message[maxTextLength - 1])) maxTextLength--;
+                message = message[..maxTextLength] + "\n…(truncated)";
             }
 
             var isFirst = true;
@@ -289,6 +311,10 @@ namespace DBADash.Alert
                 if (!Placeholders.Any(p => MessageTemplate.ToString().Contains(p, StringComparison.InvariantCultureIgnoreCase)))
                 {
                     yield return new ValidationResult($"Message template must contain at least one of the following placeholders: {string.Join(", ", Placeholders)}.  Or leave blank to use the default template.");
+                }
+                if (JToken.Parse(MessageTemplate).Type != JTokenType.Object)
+                {
+                    yield return new ValidationResult("Message template must be a Json object.  e.g. {\"type\":\"message\",\"attachments\":[...]}", new[] { nameof(MessageTemplate) });
                 }
             }
 
