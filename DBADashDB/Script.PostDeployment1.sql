@@ -2023,7 +2023,8 @@ USING (VALUES
 	(2,N'Email'),
 	(3,N'Slack'),
 	(4,N'PagerDuty'),
-	(5,N'AWSDevOps')
+	(5,N'AWSDevOps'),
+	(6,N'Teams')
 ) AS [Source]([NotificationChannelTypeID],[NotificationChannelType])
 ON ([Target].[NotificationChannelTypeID] = [Source].[NotificationChannelTypeID])
 WHEN MATCHED AND (

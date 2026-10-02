@@ -30,7 +30,8 @@ namespace DBADashGUI.DBADashAlerts
             Email = 2,
             Slack = 3,
             PagerDuty = 4,
-            AWSDevOps = 5
+            AWSDevOps = 5,
+            Teams = 6
         }
 
         [JsonIgnore]
@@ -284,6 +285,7 @@ namespace DBADashGUI.DBADashAlerts
                     NotificationChannelTypes.Slack => JsonConvert.DeserializeObject<SlackNotificationChannel>(channelDetails),
                     NotificationChannelTypes.PagerDuty => JsonConvert.DeserializeObject<PagerDutyNotificationChannel>(channelDetails),
                     NotificationChannelTypes.AWSDevOps => JsonConvert.DeserializeObject<AWSDevOpsNotificationChannel>(channelDetails),
+                    NotificationChannelTypes.Teams => JsonConvert.DeserializeObject<TeamsNotificationChannel>(channelDetails),
                     _ => throw new NotImplementedException($"Channel type {channelType} hasn't been implemented.")
                 };
 
@@ -313,6 +315,7 @@ namespace DBADashGUI.DBADashAlerts
                 NotificationChannelTypes.Slack => new SlackNotificationChannel(),
                 NotificationChannelTypes.PagerDuty => new PagerDutyNotificationChannel(),
                 NotificationChannelTypes.AWSDevOps => new AWSDevOpsNotificationChannel(),
+                NotificationChannelTypes.Teams => new TeamsNotificationChannel(),
                 _ => throw new NotImplementedException($"Channel type {type} hasn't been implemented.")
             };
         }
