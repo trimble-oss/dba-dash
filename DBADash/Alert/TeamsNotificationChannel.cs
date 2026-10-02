@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace DBADash.Alert
@@ -23,6 +24,17 @@ namespace DBADash.Alert
 
         // Teams rejects cards over ~28KB. Leave headroom for the rest of the card.
         internal const int MaxTextLength = 20000;
+
+        // Response header a custom workflow can use to return the ID of the posted message
+        internal const string MessageIdHeader = "MessageId";
+
+        // Added to the payload for later notifications so a custom workflow can reply in the same thread
+        internal const string ReplyToMessageIdProperty = "replyToMessageId";
+
+        // Size of Alert.CustomThreadKey.ThreadKey
+        private const int MaxMessageIdLength = 256;
+
+        private static readonly Regex NumericMessageId = new(@"^\d+$", RegexOptions.Compiled);
 
         [Category("Teams Config")]
         [DisplayName("Workflow Url")]
@@ -44,22 +56,75 @@ namespace DBADash.Alert
 
             var payload = GetPayload(alert);
             using var response = await WebhookSender.PostJsonAsync(WebhookUrl, payload);
+            var responseContent = await response.Content.ReadAsStringAsync();
             if (!response.IsSuccessStatusCode)
             {
-                var responseContent = await response.Content.ReadAsStringAsync();
                 throw new Exception($"Failed to send notification to Teams. Status: {response.StatusCode}. Response: {responseContent}");
             }
             // Note: Workflows return 202 Accepted before the flow runs.  If the card is rejected by Teams,
             // the error is only visible in the workflow run history in Teams/Power Automate.
+
+            // The standard workflow template doesn't return anything.  A custom workflow can return the ID of the
+            // posted message so later notifications for the alert are sent as replies in the same thread.
+            if (string.IsNullOrEmpty(alert.CustomThreadKey) && ChannelID != null && !string.IsNullOrEmpty(connectionString))
+            {
+                var headerValue = response.Headers.TryGetValues(MessageIdHeader, out var values) ? values.FirstOrDefault()
+                    : response.Content.Headers.TryGetValues(MessageIdHeader, out values) ? values.FirstOrDefault() : null;
+                var messageId = GetMessageId(headerValue, responseContent);
+                if (!string.IsNullOrEmpty(messageId))
+                {
+                    await alert.SetCustomThreadKey(ChannelID.Value, messageId, connectionString);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the ID of the posted Teams message from the workflow response.  The MessageId header is preferred.
+        /// The body is used as a fallback, but only if it's clearly a message ID (a JSON object with a messageId
+        /// property or a numeric value) as we can't assume what a custom workflow returns in the body.
+        /// </summary>
+        internal static string GetMessageId(string headerValue, string body)
+        {
+            var messageId = headerValue?.Trim();
+            if (string.IsNullOrEmpty(messageId) && !string.IsNullOrWhiteSpace(body))
+            {
+                body = body.Trim();
+                if (body.StartsWith('{'))
+                {
+                    try
+                    {
+                        messageId = JObject.Parse(body).GetValue("messageId", StringComparison.OrdinalIgnoreCase)?.ToString().Trim();
+                    }
+                    catch (JsonReaderException)
+                    {
+                        // Not JSON - ignore
+                    }
+                }
+                else if (NumericMessageId.IsMatch(body.Trim('"')))
+                {
+                    messageId = body.Trim('"');
+                }
+            }
+
+            return string.IsNullOrEmpty(messageId) || messageId.Length > MaxMessageIdLength ? null : messageId;
         }
 
         internal string GetPayload(Alert alert)
         {
-            if (!string.IsNullOrEmpty(MessageTemplate))
-            {
-                return ReplacePlaceholders(alert, MessageTemplate);
-            }
+            var message = string.IsNullOrEmpty(MessageTemplate)
+                ? GetDefaultMessage(alert)
+                : JObject.Parse(ReplacePlaceholders(alert, MessageTemplate));
 
+            // Allows a custom workflow to reply to the message posted for the first notification
+            if (!string.IsNullOrEmpty(alert.CustomThreadKey))
+            {
+                message[ReplyToMessageIdProperty] = alert.CustomThreadKey;
+            }
+            return message.ToString(Formatting.None);
+        }
+
+        private static JObject GetDefaultMessage(Alert alert)
+        {
             var card = new JObject
             {
                 ["$schema"] = "http://adaptivecards.io/schemas/adaptive-card.json",
@@ -127,7 +192,7 @@ namespace DBADash.Alert
                 ((JArray)card["body"]!).Add(block);
             }
 
-            var message = new JObject
+            return new JObject
             {
                 ["type"] = "message",
                 ["attachments"] = new JArray(new JObject
@@ -137,7 +202,6 @@ namespace DBADash.Alert
                     ["content"] = card
                 })
             };
-            return message.ToString(Formatting.None);
         }
 
         private static IEnumerable<KeyValuePair<string, string>> GetFacts(Alert alert)
