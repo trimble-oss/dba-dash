@@ -390,6 +390,42 @@ namespace DBADashConfig.Test
         }
 
         [TestMethod]
+        public void Teams_Payload_ReplyToMessageId_OnlyWhenThreadKeyStored()
+        {
+            var channel = new TeamsNotificationChannel();
+            var alert = CreateTestAlert();
+            Assert.IsNull(ParsePayload(channel.GetPayload(alert))[TeamsNotificationChannel.ReplyToMessageIdProperty]);
+
+            alert.CustomThreadKey = "1727856412345";
+            Assert.AreEqual("1727856412345", ParsePayload(channel.GetPayload(alert))[TeamsNotificationChannel.ReplyToMessageIdProperty]?.ToString());
+
+            channel.MessageTemplate = (JsonString)"{\"text\":\"{Title}\"}";
+            Assert.AreEqual("1727856412345", ParsePayload(channel.GetPayload(alert))[TeamsNotificationChannel.ReplyToMessageIdProperty]?.ToString());
+        }
+
+        [TestMethod]
+        [DataRow(" 1727856412345 ", null, "1727856412345", DisplayName = "Header")]
+        [DataRow("1727856412345", "{\"messageId\":\"999\"}", "1727856412345", DisplayName = "Header preferred over body")]
+        [DataRow(null, "{\"messageId\":\"1727856412345\"}", "1727856412345", DisplayName = "JSON body")]
+        [DataRow(null, "{\"MessageID\":1727856412345}", "1727856412345", DisplayName = "JSON body case insensitive")]
+        [DataRow(null, "1727856412345", "1727856412345", DisplayName = "Numeric body")]
+        [DataRow(null, "\"1727856412345\"", "1727856412345", DisplayName = "Quoted numeric body")]
+        [DataRow(null, "", null, DisplayName = "Empty body")]
+        [DataRow(null, "Accepted", null, DisplayName = "Text body")]
+        [DataRow(null, "{\"id\":\"1727856412345\"}", null, DisplayName = "JSON without messageId")]
+        [DataRow(null, "{not json", null, DisplayName = "Invalid JSON")]
+        public void Teams_GetMessageId(string header, string body, string expected)
+        {
+            Assert.AreEqual(expected, TeamsNotificationChannel.GetMessageId(header, body));
+        }
+
+        [TestMethod]
+        public void Teams_GetMessageId_RejectsTooLong()
+        {
+            Assert.IsNull(TeamsNotificationChannel.GetMessageId(new string('1', 257), null));
+        }
+
+        [TestMethod]
         public void Teams_Validate_RequiresHttpsUrl()
         {
             var channel = new TeamsNotificationChannel { ChannelName = DefaultChannelName, WebhookUrl = "http://example.com/workflow" };
