@@ -371,6 +371,22 @@ namespace DBADashConfig.Test
         }
 
         [TestMethod]
+        [DataRow("\\", DisplayName = "Backslashes expanded by JSON escaping")]
+        [DataRow("🚨", DisplayName = "Multi-byte UTF-8")]
+        [DataRow("x\n", DisplayName = "TextBlock per line")]
+        public void Teams_Payload_LimitsSerializedSize(string repeat)
+        {
+            var channel = new TeamsNotificationChannel();
+            var message = string.Concat(Enumerable.Repeat(repeat, TeamsNotificationChannel.MaxTextLength));
+            var payload = channel.GetPayload(CreateTestAlert(message: message));
+
+            ParsePayload(payload);
+            var size = System.Text.Encoding.UTF8.GetByteCount(payload);
+            Assert.IsTrue(size <= TeamsNotificationChannel.MaxPayloadBytes, $"Payload is {size} bytes");
+            StringAssert.Contains(payload, "(truncated)");
+        }
+
+        [TestMethod]
         public void Teams_Payload_UsesStyleForStatus()
         {
             var channel = new TeamsNotificationChannel();
@@ -434,6 +450,16 @@ namespace DBADashConfig.Test
 
             channel.WebhookUrl = "https://example.environment.api.powerplatform.com/powerautomate/automations/direct/workflows/abc/triggers/manual/paths/invoke?sig=xyz";
             Assert.AreEqual(0, channel.Validate(new System.ComponentModel.DataAnnotations.ValidationContext(channel)).Count());
+        }
+
+        [TestMethod]
+        [DataRow("[\"{Text}\"]", 1, DisplayName = "Array")]
+        [DataRow("\"{Text}\"", 1, DisplayName = "String")]
+        [DataRow("{\"text\":\"{Text}\"}", 0, DisplayName = "Object")]
+        public void Teams_Validate_TemplateMustBeObject(string template, int expectedErrors)
+        {
+            var channel = new TeamsNotificationChannel { ChannelName = DefaultChannelName, WebhookUrl = "https://example.com/workflow", MessageTemplate = (JsonString)template };
+            Assert.AreEqual(expectedErrors, channel.Validate(new System.ComponentModel.DataAnnotations.ValidationContext(channel)).Count());
         }
 
         private static JObject ParsePayload(string json) =>
