@@ -15,15 +15,12 @@ namespace DBADashGUI
         public HashSet<int> InstanceIDs => new HashSet<int>(RegularInstanceIDs.Union(AzureInstanceIDs));
 
         /// <summary>
-        /// Returns the subset of context instance IDs relevant to a report based on its
-        /// <see cref="CustomReport.AppliesTo"/> setting (e.g. exclude Azure SQL DB for SQL Patching).
+        /// Returns the subset of context instance IDs relevant to a report based on its visibility rules - instance
+        /// type (<see cref="CustomReport.AppliesTo"/>, e.g. exclude Azure SQL DB for SQL Patching), tags and
+        /// included/excluded instances.
         /// </summary>
-        public HashSet<int> GetInstanceIDs(CustomReport.InstanceApplicability applicability) => applicability switch
-        {
-            CustomReport.InstanceApplicability.RegularOnly => RegularInstanceIDs,
-            CustomReport.InstanceApplicability.AzureOnly => AzureInstanceIDs,
-            _ => InstanceIDs
-        };
+        public HashSet<int> GetInstanceIDs(CustomReport report) =>
+            report is not { HasVisibilityRules: true } ? InstanceIDs : InstanceIDs.Where(report.AppliesToInstance).ToHashSet();
         public HashSet<int> AzureInstanceIDs => ShowHiddenInstances ? AzureInstanceIDsWithHidden : new HashSet<int>(AzureInstanceIDsWithHidden.Except(HiddenInstanceIDs));
         public HashSet<int> RegularInstanceIDs => ShowHiddenInstances ? RegularInstanceIDsWithHidden : new HashSet<int>(RegularInstanceIDsWithHidden.Except(HiddenInstanceIDs));
 

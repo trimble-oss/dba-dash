@@ -8,6 +8,7 @@ using Microsoft.SqlServer.Management.Common;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -117,6 +118,15 @@ namespace DBADashGUI
         public string ElasticPoolName { get; set; }
 
         public CustomReport Report;
+
+        /// <summary>
+        /// Report node shown even though the report's visibility rules don't match this location, because Show Hidden
+        /// is enabled.  Displayed in gray so a report whose rules no longer match any instance (e.g. a tag was removed)
+        /// can still be reached to fix its rules.
+        /// </summary>
+        public bool IsHiddenByVisibilityRules { get; private set; }
+
+        public static readonly Color HiddenByVisibilityRulesColor = Color.Gray;
 
         /// <summary>
         /// The reports a folder node shows as tabs rather than as children - see
@@ -579,28 +589,183 @@ namespace DBADashGUI
             AddRefreshContextMenu();
         }
 
-        public static SQLTreeItem GetReportsFolder(IEnumerable<CustomReport> reports)
-        {
-            var reportsNode = new SQLTreeItem("Reports", TreeType.ReportsFolder);
-            foreach (var report in reports)
-            {
-                if (!report.HasAccess()) continue;
-                var treeType = report is SystemReport ? TreeType.SystemReport :
-                                                                    report is SystemDirectExecutionReport ? TreeType.DirectSystemReport : TreeType.CustomReport;
-                var reportNode = new SQLTreeItem(report.ReportName, treeType) { Report = report };
-                reportsNode.Nodes.Add(reportNode);
-            }
+        /// <summary>
+        /// Instances a top level Reports folder is for.  Reports that don't apply to any of these instances (see
+        /// <see cref="CustomReport.AppliesToInstance"/>) are hidden.  Null at root/tag folder level where the report
+        /// receives the applicable subset of instances in @InstanceIDs instead.
+        /// </summary>
+        private HashSet<int> ReportScopeInstanceIDs;
 
+        /// <summary>True for the top level Reports folder (as opposed to a sub folder created from <see cref="CustomReport.Folder"/>)</summary>
+        private bool IsReportsRoot => Type == TreeType.ReportsFolder && FolderReports != null;
+
+        /// <summary>The top level Reports folder this node belongs to</summary>
+        public SQLTreeItem ReportsRoot
+        {
+            get
+            {
+                var node = this;
+                while (node != null && !node.IsReportsRoot) node = node.SQLTreeItemParent;
+                return node;
+            }
+        }
+
+        public static SQLTreeItem GetReportsFolder(IEnumerable<CustomReport> reports, IEnumerable<int> scopeInstanceIDs = null)
+        {
+            var reportsNode = new SQLTreeItem("Reports", TreeType.ReportsFolder)
+            {
+                FolderReports = reports.ToList(),
+                ReportScopeInstanceIDs = scopeInstanceIDs?.ToHashSet()
+            };
+            reportsNode.PopulateReportsFolder();
             return reportsNode;
         }
 
-        public void AddReportsFolder(IEnumerable<CustomReport> reports)
+        public void AddReportsFolder(IEnumerable<CustomReport> reports, IEnumerable<int> scopeInstanceIDs = null)
         {
-            var reportsNode = GetReportsFolder(reports);
+            var reportsNode = GetReportsFolder(reports, scopeInstanceIDs);
             if (reportsNode.Nodes.Count > 0)
             {
                 Nodes.Add(reportsNode);
             }
+        }
+
+        private bool ReportAppliesToScope(CustomReport report) =>
+            ReportScopeInstanceIDs == null || !report.HasVisibilityRules || ReportScopeInstanceIDs.Any(report.AppliesToInstance);
+
+        /// <summary>
+        /// (Re)build the children of a top level Reports folder: sub folders (alphabetical) followed by reports, with
+        /// reports placed in sub folders based on <see cref="CustomReport.Folder"/>.
+        /// </summary>
+        private void PopulateReportsFolder()
+        {
+            var expandedFolders = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            CollectExpandedFolders(this, expandedFolders);
+            Nodes.Clear();
+            var folders = new Dictionary<string, SQLTreeItem>(StringComparer.OrdinalIgnoreCase);
+            foreach (var report in FolderReports)
+            {
+                if (!report.HasAccess()) continue;
+                var isHidden = !ReportAppliesToScope(report);
+                if (isHidden && !Common.ShowHidden) continue;
+                var treeType = report is SystemReport ? TreeType.SystemReport :
+                                                                    report is SystemDirectExecutionReport ? TreeType.DirectSystemReport : TreeType.CustomReport;
+                var reportNode = new SQLTreeItem(report.ReportName, treeType) { Report = report, IsHiddenByVisibilityRules = isHidden };
+                if (isHidden)
+                {
+                    reportNode.ForeColor = HiddenByVisibilityRulesColor;
+                    reportNode.ToolTipText = "Hidden by the report's visibility rules.  Shown because Show Hidden is enabled.";
+                }
+                reportNode.AddReportContextMenu();
+                GetReportSubFolder(report.Folder, folders).Nodes.Add(reportNode);
+            }
+
+            foreach (var folder in folders.Where(f => expandedFolders.Contains(f.Key)))
+            {
+                folder.Value.Expand();
+            }
+        }
+
+        private static void CollectExpandedFolders(SQLTreeItem node, HashSet<string> expanded)
+        {
+            foreach (var child in node.Nodes.OfType<SQLTreeItem>().Where(n => n.Type == TreeType.ReportsFolder))
+            {
+                if (child.IsExpanded) expanded.Add(child.ReportFolderPath);
+                CollectExpandedFolders(child, expanded);
+            }
+        }
+
+        /// <summary>Folder path of a Reports sub folder relative to the top level Reports folder</summary>
+        public string ReportFolderPath
+        {
+            get
+            {
+                var parts = new List<string>();
+                for (var node = this; node is { IsReportsRoot: false, Type: TreeType.ReportsFolder }; node = node.SQLTreeItemParent)
+                {
+                    parts.Insert(0, node.Text);
+                }
+                return parts.Count == 0 ? null : string.Join(CustomReport.FolderSeparator, parts);
+            }
+        }
+
+        private SQLTreeItem GetReportSubFolder(string folderPath, Dictionary<string, SQLTreeItem> folders)
+        {
+            folderPath = CustomReport.NormalizeFolder(folderPath);
+            if (folderPath == null) return this;
+            if (folders.TryGetValue(folderPath, out var existing)) return existing;
+
+            var separatorIndex = folderPath.LastIndexOf(CustomReport.FolderSeparator);
+            var parent = separatorIndex < 0 ? this : GetReportSubFolder(folderPath[..separatorIndex], folders);
+            var name = folderPath[(separatorIndex + 1)..];
+            var folderNode = new SQLTreeItem(name, TreeType.ReportsFolder);
+
+            // Sub folders come first in alphabetical order, followed by reports
+            var index = 0;
+            while (index < parent.Nodes.Count && parent.Nodes[index] is SQLTreeItem { Type: TreeType.ReportsFolder } sibling
+                   && string.Compare(sibling.Text, name, StringComparison.CurrentCultureIgnoreCase) < 0)
+            {
+                index++;
+            }
+            parent.Nodes.Insert(index, folderNode);
+            folders[folderPath] = folderNode;
+            return folderNode;
+        }
+
+        /// <summary>Find a sub folder by path under this top level Reports folder</summary>
+        public SQLTreeItem FindReportFolderNode(string folderPath)
+        {
+            var node = this;
+            foreach (var part in (CustomReport.NormalizeFolder(folderPath) ?? string.Empty).Split(CustomReport.FolderSeparator, StringSplitOptions.RemoveEmptyEntries))
+            {
+                node = node.Nodes.OfType<SQLTreeItem>().FirstOrDefault(n => n.Type == TreeType.ReportsFolder && string.Equals(n.Text, part, StringComparison.OrdinalIgnoreCase));
+                if (node == null) return null;
+            }
+            return node;
+        }
+
+        /// <summary>Find the node for a report under this top level Reports folder</summary>
+        public SQLTreeItem FindReportNode(CustomReport report) => FindReportNode(Nodes, report);
+
+        private static SQLTreeItem FindReportNode(TreeNodeCollection nodes, CustomReport report)
+        {
+            foreach (var node in nodes.OfType<SQLTreeItem>())
+            {
+                if (ReferenceEquals(node.Report, report)) return node;
+                if (node.Type != TreeType.ReportsFolder) continue;
+                var found = FindReportNode(node.Nodes, report);
+                if (found != null) return found;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Rebuild every Reports folder in the tree after a report's folder or visibility rules change.  Instance nodes
+        /// that haven't been expanded yet will pick up the change when they are expanded.
+        /// </summary>
+        public static void RefreshReportsFolders(TreeNodeCollection nodes)
+        {
+            foreach (var node in nodes.OfType<SQLTreeItem>())
+            {
+                if (node.IsReportsRoot)
+                {
+                    node.PopulateReportsFolder();
+                }
+                else if (node.Type != TreeType.ReportsFolder)
+                {
+                    RefreshReportsFolders(node.Nodes);
+                }
+            }
+        }
+
+        /// <summary>Move to Folder option for report nodes when the user can organize reports</summary>
+        private void AddReportContextMenu()
+        {
+            if (!CustomReports.CustomReports.CanOrganizeReports || Report == null) return;
+            ContextMenuStrip = new ContextMenuStrip();
+            var mnuMove = new ToolStripMenuItem("Move to Folder...") { Image = Properties.Resources.FolderOpened_16x };
+            mnuMove.Click += (_, _) => ReportFolderDialog.MoveReport(Report);
+            ContextMenuStrip.Items.Add(mnuMove);
         }
 
         /// <summary>
@@ -665,7 +830,7 @@ namespace DBADashGUI
             var nXML = NewFolder("XML Schema Collections", "XSC", true);
             var nSeq = NewFolder("Sequences", "SO", true);
             var nTriggers = NewFolder("Triggers", "TA,TR", true);
-            AddReportsFolder(CustomReports.CustomReports.GetCustomReports().DatabaseLevelReports);
+            AddReportsFolder(CustomReports.CustomReports.GetCustomReports().DatabaseLevelReports, new[] { InstanceID });
             AddCommunityTools();
             AddCustomToolsFolder();
             nTypes.Nodes.Add(nTableTypes);

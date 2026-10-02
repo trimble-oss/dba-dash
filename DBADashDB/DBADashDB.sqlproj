@@ -825,6 +825,10 @@
     <Build Include="Security\RunUserReports.sql" />
     <Build Include="dbo\Tables\CustomReport.sql" />
     <Build Include="dbo\Stored Procedures\CustomReport_Upd.sql" />
+    <Build Include="dbo\Tables\CustomReportFolder.sql" />
+    <Build Include="dbo\Stored Procedures\CustomReportFolder_Get.sql" />
+    <Build Include="dbo\Stored Procedures\CustomReportFolder_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\InstanceTagValues_Get.sql" />
     <Build Include="Security\UserData.sql" />
     <Build Include="dbo\Views\PartitionHelper.sql" />
     <Build Include="dbo\Views\PartitionConfiguration.sql" />

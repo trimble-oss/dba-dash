@@ -23,6 +23,26 @@ namespace DBADashGUI.CustomReports
 
         public static SystemReports SystemReports { get; } = new();
 
+        /// <summary>True if the user can organize reports into folders (db_owner or db_ddladmin).  Applies to system reports as well as user custom reports.</summary>
+        public static bool CanOrganizeReports { get; private set; }
+
+        /// <summary>Raised when a report's folder or visibility rules change so the tree can be updated.</summary>
+        public static event EventHandler<CustomReport> ReportPlacementChanged;
+
+        public static void OnReportPlacementChanged(CustomReport report) => ReportPlacementChanged?.Invoke(null, report);
+
+        /// <summary>Distinct folder paths in use, including parent folders.</summary>
+        public IEnumerable<string> FolderPaths => this.Union(SystemReports)
+            .Select(r => r.Folder)
+            .Where(f => !string.IsNullOrEmpty(f))
+            .SelectMany(f =>
+            {
+                var parts = f.Split(CustomReport.FolderSeparator);
+                return Enumerable.Range(1, parts.Length).Select(i => string.Join(CustomReport.FolderSeparator, parts.Take(i)));
+            })
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(f => f, StringComparer.OrdinalIgnoreCase);
+
         public static CustomReports GetCustomReports(bool forceRefresh = false)
         {
             if (connectionId != Common.ConnectionGUID || forceRefresh) // Check if connection has changed
@@ -32,6 +52,7 @@ namespace DBADashGUI.CustomReports
             }
             if (_customReports != null) return _customReports;
 
+            ReportInstanceInfo.ClearCache();
             try
             {
                 _customReports = GetCustomReportsFromDb();
@@ -42,7 +63,44 @@ namespace DBADashGUI.CustomReports
                 CommonShared.ShowExceptionDialog(ex, "Error getting custom reports");
             }
 
+            try
+            {
+                LoadFolders(_customReports);
+            }
+            catch (Exception ex)
+            {
+                // Reports are still usable without folders
+                CanOrganizeReports = false;
+                CommonShared.ShowExceptionDialog(ex, "Error getting report folders");
+            }
+
             return _customReports;
+        }
+
+        /// <summary>Assign folders to user custom reports and system reports from dbo.CustomReportFolder</summary>
+        private static void LoadFolders(CustomReports customReports)
+        {
+            var folders = new Dictionary<(string Schema, string Proc), string>();
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("dbo.CustomReportFolder_Get", cn) { CommandType = CommandType.StoredProcedure })
+            {
+                var pCanEdit = cmd.Parameters.Add("CanEditReport", SqlDbType.Bit);
+                pCanEdit.Direction = ParameterDirection.Output;
+                cn.Open();
+                using (var rdr = cmd.ExecuteReader())
+                {
+                    while (rdr.Read())
+                    {
+                        folders[(rdr.GetString(0).ToUpperInvariant(), rdr.GetString(1).ToUpperInvariant())] = CustomReport.NormalizeFolder(rdr.GetString(2));
+                    }
+                }
+                CanOrganizeReports = pCanEdit.Value is true;
+            }
+
+            foreach (var report in customReports.Union(SystemReports))
+            {
+                report.Folder = folders.GetValueOrDefault((report.SchemaName.ToUpperInvariant(), report.ProcedureName?.ToUpperInvariant() ?? string.Empty));
+            }
         }
 
         private static CustomReports GetCustomReportsFromDb()

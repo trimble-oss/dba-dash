@@ -24,27 +24,103 @@ namespace DBADashGUI.CustomReports
         }
 
         /// <summary>
-        /// Indicates which instances (by engine edition) a report is relevant to.  Used to filter the list of
-        /// context instance IDs passed to the report's @InstanceIDs parameter.  For example SQL Patching is not
+        /// Indicates which instance types (by engine edition) a report is relevant to.  For example SQL Patching is not
         /// relevant to Azure SQL DB and uses <see cref="InstanceApplicability.RegularOnly"/>.
         /// </summary>
+        [Flags]
         public enum InstanceApplicability
         {
+            None = 0,
+
+            /// <summary>SQL Server instances (on-premises/VM), excluding Managed Instance</summary>
+            Regular = 1,
+
+            /// <summary>Azure SQL Managed Instance (including Azure Arc)</summary>
+            ManagedInstance = 2,
+
+            /// <summary>Azure SQL DB</summary>
+            AzureSQLDB = 4,
+
+            /// <summary>Report applies to regular (non-Azure SQL DB) instances only.  Name retained for compatibility.</summary>
+            RegularOnly = Regular | ManagedInstance,
+
+            /// <summary>Report applies to Azure SQL DB instances only.  Name retained for compatibility.</summary>
+            AzureOnly = AzureSQLDB,
+
             /// <summary>Report applies to all instances (default).</summary>
-            All,
-
-            /// <summary>Report applies to regular (non-Azure SQL DB) instances only.</summary>
-            RegularOnly,
-
-            /// <summary>Report applies to Azure SQL DB instances only.</summary>
-            AzureOnly
+            All = Regular | ManagedInstance | AzureSQLDB
         }
 
         /// <summary>
-        /// Controls which subset of the current context's instances is passed to the report's @InstanceIDs
-        /// parameter.  Defaults to <see cref="InstanceApplicability.All"/>.
+        /// Instance types the report applies to.  Instance and database level reports are hidden in the tree for
+        /// instances that don't apply and root level reports only receive the applicable instances in @InstanceIDs.
+        /// Defaults to <see cref="InstanceApplicability.All"/>.
         /// </summary>
+        [System.ComponentModel.DefaultValue(InstanceApplicability.All)]
         public InstanceApplicability AppliesTo { get; set; } = InstanceApplicability.All;
+
+        /// <summary>
+        /// Only show the report for instances with these tags.  All tag names must match, with any of the values for
+        /// each name (same as the main tag filter).  Empty for no tag rule.
+        /// </summary>
+        public List<ReportTag> VisibleTags { get; set; } = new();
+
+        /// <summary>Show the report for these instances (by ConnectionID) in addition to any matching <see cref="VisibleTags"/>.</summary>
+        public List<string> IncludeConnectionIDs { get; set; } = new();
+
+        /// <summary>Never show the report for these instances (by ConnectionID).</summary>
+        public List<string> ExcludeConnectionIDs { get; set; } = new();
+
+        // Keep serialized metadata tidy for reports without visibility rules
+        public bool ShouldSerializeVisibleTags() => VisibleTags?.Count > 0;
+
+        public bool ShouldSerializeIncludeConnectionIDs() => IncludeConnectionIDs?.Count > 0;
+
+        public bool ShouldSerializeExcludeConnectionIDs() => ExcludeConnectionIDs?.Count > 0;
+
+        /// <summary>True if the report has any rule that limits the instances it applies to.</summary>
+        [JsonIgnore]
+        public bool HasVisibilityRules => (AppliesTo & InstanceApplicability.All) != InstanceApplicability.All
+                                          || VisibleTags?.Count > 0 || IncludeConnectionIDs?.Count > 0 || ExcludeConnectionIDs?.Count > 0;
+
+        /// <summary>True if the report applies to the specified instance based on <see cref="AppliesTo"/>, tags and included/excluded instances.</summary>
+        public bool AppliesToInstance(int instanceID)
+        {
+            if (!HasVisibilityRules) return true;
+            return ReportVisibility.AppliesTo(AppliesTo, VisibleTags, IncludeConnectionIDs, ExcludeConnectionIDs,
+                ReportInstanceInfo.GetEngineEdition(instanceID), ReportInstanceInfo.GetConnectionID(instanceID),
+                () => ReportInstanceInfo.GetTags(instanceID));
+        }
+
+        /// <summary>
+        /// Folder path within the Reports folder of the tree.  Nested folders are separated with "/".  Stored in
+        /// dbo.CustomReportFolder rather than with the report metadata so system reports can be organized too.
+        /// </summary>
+        [JsonIgnore]
+        public string Folder { get; set; }
+
+        public const char FolderSeparator = '/';
+
+        /// <summary>Normalize a folder path - trims each part and removes empty parts.  Returns null for the top level.</summary>
+        public static string NormalizeFolder(string folder)
+        {
+            var parts = (folder ?? string.Empty).Split(FolderSeparator, '\\').Select(p => p.Trim()).Where(p => p.Length > 0).ToArray();
+            return parts.Length == 0 ? null : string.Join(FolderSeparator, parts);
+        }
+
+        /// <summary>Save the folder for the report.  Null or empty moves the report to the top level of the Reports folder.</summary>
+        public void UpdateFolder(string folder)
+        {
+            folder = NormalizeFolder(folder);
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.CustomReportFolder_Upd", cn) { CommandType = CommandType.StoredProcedure };
+            cmd.Parameters.AddWithValue("SchemaName", SchemaName);
+            cmd.Parameters.AddWithValue("ProcedureName", ProcedureName);
+            cmd.Parameters.AddWithValue("FolderPath", (object)folder ?? DBNull.Value);
+            cn.Open();
+            cmd.ExecuteNonQuery();
+            Folder = folder;
+        }
 
         public ChartLocations ChartLocation { get; set; } = ChartLocations.Top;
 

@@ -385,6 +385,28 @@ namespace DBADashGUI.CustomReports
             chartLayout.ColumnStyles.Clear();
             chartLayout.ColumnCount = 1;
             chartLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            AddPlacementMenuItems();
+        }
+
+        private ToolStripMenuItem moveToFolderToolStripMenuItem;
+        private ToolStripMenuItem visibilityToolStripMenuItem;
+
+        /// <summary>Configure menu options to organize the report into a folder and control which instances it's shown for</summary>
+        private void AddPlacementMenuItems()
+        {
+            moveToFolderToolStripMenuItem = new ToolStripMenuItem("Move to Folder...", Properties.Resources.FolderOpened_16x)
+            {
+                ToolTipText = "Organize the report into a folder within the Reports folder of the tree"
+            };
+            moveToFolderToolStripMenuItem.Click += (_, _) => ReportFolderDialog.MoveReport(Report);
+            visibilityToolStripMenuItem = new ToolStripMenuItem("Visibility...", Properties.Resources.Filter_16x)
+            {
+                ToolTipText = "Control which instances the report is shown for based on instance type, tags or specific instances"
+            };
+            visibilityToolStripMenuItem.Click += (_, _) => ReportVisibilityDialog.ConfigureVisibility(Report);
+            // Configure menu items are in alphabetical order
+            tsConfigure.DropDownItems.Insert(tsConfigure.DropDownItems.IndexOf(renameResultSetToolStripMenuItem), moveToFolderToolStripMenuItem);
+            tsConfigure.DropDownItems.Add(visibilityToolStripMenuItem);
         }
 
         private void DisposeManagedResources()
@@ -2395,12 +2417,12 @@ namespace DBADashGUI.CustomReports
             var pInstanceIDs = customParams.FirstOrDefault(p => p.Param.ParameterName.Equals("@InstanceIDs", StringComparison.InvariantCultureIgnoreCase) && p.UseDefaultValue);
             if (pInstanceIDs != null)
             {
-                var reportInstanceIDs = context.GetInstanceIDs(Report.AppliesTo);
-                // When a report is scoped to a subset of engine editions (e.g. SQL Patching excludes Azure SQL DB)
+                var reportInstanceIDs = context.GetInstanceIDs(Report);
+                // When a report is scoped to a subset of instances (e.g. SQL Patching excludes Azure SQL DB)
                 // and none of the current context's instances apply, pass a non-existent InstanceID so the proc
                 // returns no rows.  An empty @InstanceIDs table is treated as "all active instances" by the procs,
                 // which would incorrectly widen the scope beyond the current context.
-                if (reportInstanceIDs.Count == 0 && Report.AppliesTo != CustomReport.InstanceApplicability.All)
+                if (reportInstanceIDs.Count == 0 && Report.HasVisibilityRules)
                 {
                     reportInstanceIDs = new HashSet<int> { 0 };
                 }
@@ -2557,6 +2579,9 @@ namespace DBADashGUI.CustomReports
                 // When a status filter is shown it drives the @Include* parameters, so the generic params button is redundant.
                 tsParams.Visible = Report.UserParams.Any() && Report.ShowStatusFilter != true && !Report.HideParametersButton;
                 tsConfigure.Visible = Report.CanEditReport;
+                moveToFolderToolStripMenuItem.Visible = CustomReports.CanOrganizeReports;
+                // Visibility rules for system reports are set in code
+                visibilityToolStripMenuItem.Visible = Report.GetType() == typeof(CustomReport);
                 SetStatus(Report.Description, Report.Description, DBADashUser.SelectedTheme.ForegroundColor);
                 lblDescription.Visible = !string.IsNullOrEmpty(Report.Description);
                 if (Report.DeserializationException != null)
@@ -3233,6 +3258,10 @@ namespace DBADashGUI.CustomReports
             }
         }
 
+        /// <summary>Visibility rule properties excluded when scripting a report as they only make sense in this repository</summary>
+        private static readonly string[] RepositorySpecificVisibilityProperties =
+            { nameof(CustomReport.VisibleTags), nameof(CustomReport.IncludeConnectionIDs), nameof(CustomReport.ExcludeConnectionIDs) };
+
         private void ScriptReport()
         {
             var options = new ScriptingOptions()
@@ -3296,13 +3325,34 @@ namespace DBADashGUI.CustomReports
                 sb.AppendLine($"/* Error scripting pickers {ex.Message.Replace("*", "")} */");
             }
 
-            var meta = Report.Serialize();
+            // Tag & instance visibility rules are specific to this repository - other repositories will have different
+            // tags and instances.  Instance type rules (AppliesTo) are portable so they are kept.
+            var metaJson = Newtonsoft.Json.Linq.JObject.Parse(Report.Serialize());
+            foreach (var repositorySpecific in RepositorySpecificVisibilityProperties)
+            {
+                metaJson.Remove(repositorySpecific);
+            }
+            var meta = metaJson.ToString(Newtonsoft.Json.Formatting.Indented);
+            var schema = Report.SchemaName.SqlSingleQuote();
+            var procName = Report.ProcedureName.SqlSingleQuote();
             sb.AppendLine();
             sb.AppendLine("/* Report customizations in GUI */");
-            sb.AppendFormat("DELETE dbo.CustomReport\nWHERE SchemaName = '{0}'\nAND ProcedureName = '{1}'\n\n", Report.SchemaName.SqlSingleQuote(), Report.ProcedureName.SqlSingleQuote());
+            sb.AppendFormat("DECLARE @MetaData NVARCHAR(MAX) = N'{0}'\n\n", meta.SqlSingleQuote());
+            sb.AppendLine("/*");
+            sb.AppendLine("\tTag and instance visibility rules are specific to each repository so they are not scripted.");
+            sb.AppendLine("\tKeep any existing rules for this report in the target repository.");
+            sb.AppendLine("*/");
+            sb.Append("SELECT @MetaData = ");
+            sb.Append(string.Concat(Enumerable.Repeat("JSON_MODIFY(", RepositorySpecificVisibilityProperties.Length)));
+            sb.Append("@MetaData");
+            foreach (var repositorySpecific in RepositorySpecificVisibilityProperties)
+            {
+                sb.AppendFormat(",\n\t\t'$.{0}', JSON_QUERY(MetaData, '$.{0}'))", repositorySpecific);
+            }
+            sb.AppendFormat("\nFROM dbo.CustomReport\nWHERE SchemaName = '{0}'\nAND ProcedureName = '{1}'\nAND Type = 'CustomReport'\nAND ISJSON(MetaData) = 1\n\n", schema, procName);
+            sb.AppendFormat("DELETE dbo.CustomReport\nWHERE SchemaName = '{0}'\nAND ProcedureName = '{1}'\n\n", schema, procName);
             sb.AppendLine("INSERT INTO dbo.CustomReport(SchemaName,ProcedureName,MetaData)");
-            sb.AppendFormat("VALUES('{0}','{1}','{2}')", Report.SchemaName.SqlSingleQuote(),
-                Report.ProcedureName.SqlSingleQuote(), meta.SqlSingleQuote());
+            sb.AppendFormat("VALUES('{0}','{1}',@MetaData)", schema, procName);
 
             var frm = new CodeViewer() { Code = sb.ToString() };
             frm.ShowDialog();
