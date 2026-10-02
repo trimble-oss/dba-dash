@@ -4,6 +4,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Linq;
 
 namespace DBADashConfig.Test
 {
@@ -321,6 +322,82 @@ namespace DBADashConfig.Test
             Assert.IsNull(payload["data"]!["metadata"]);
             StringAssert.StartsWith(payload["description"]!.ToString(), $"SQL Server instance: {DefaultInstanceDisplayName}");
             Assert.IsFalse(channel.SupportsConsolidation);
+        }
+
+        [TestMethod]
+        public void Teams_Payload_IsAdaptiveCardMessage()
+        {
+            var channel = new TeamsNotificationChannel();
+            var payload = ParsePayload(channel.GetPayload(CreateTestAlert()));
+
+            Assert.AreEqual("message", payload["type"]?.ToString());
+            var attachment = payload["attachments"]![0]!;
+            Assert.AreEqual("application/vnd.microsoft.card.adaptive", attachment["contentType"]?.ToString());
+            var card = attachment["content"]!;
+            Assert.AreEqual("AdaptiveCard", card["type"]?.ToString());
+            Assert.AreEqual("1.4", card["version"]?.ToString());
+            StringAssert.Contains(card.ToString(), $"{DefaultAlertName} [Active]");
+            StringAssert.Contains(card.ToString(), DefaultInstanceDisplayName);
+            StringAssert.Contains(card.ToString(), DefaultMessage);
+        }
+
+        [TestMethod]
+        public void Teams_Payload_HandlesSpecialCharacters()
+        {
+            var channel = new TeamsNotificationChannel();
+            const string message = "Line \"one\" with \\backslash\\\r\nLine two 🚨\n\nLine four after blank";
+            var payload = ParsePayload(channel.GetPayload(CreateTestAlert(message: message, instanceDisplayName: "SQL\\\"PROD\"")));
+
+            var textBlocks = payload["attachments"]![0]!["content"]!["body"]!
+                .Where(b => b["type"]?.ToString() == "TextBlock")
+                .ToList();
+            Assert.AreEqual(3, textBlocks.Count);
+            Assert.AreEqual("Line \"one\" with \\backslash\\", textBlocks[0]["text"]?.ToString());
+            Assert.AreEqual("Line two 🚨", textBlocks[1]["text"]?.ToString());
+            Assert.AreEqual("None", textBlocks[1]["spacing"]?.ToString());
+            Assert.AreEqual("Medium", textBlocks[2]["spacing"]?.ToString());
+            StringAssert.Contains(payload.ToString(), "SQL\\\\\\\"PROD\\\"");
+        }
+
+        [TestMethod]
+        public void Teams_Payload_TruncatesLongText()
+        {
+            var channel = new TeamsNotificationChannel();
+            var payload = channel.GetPayload(CreateTestAlert(message: new string('x', TeamsNotificationChannel.MaxTextLength * 2)));
+
+            ParsePayload(payload);
+            Assert.IsTrue(payload.Length < 28 * 1024, $"Payload is {payload.Length} chars");
+            StringAssert.Contains(payload, "(truncated)");
+        }
+
+        [TestMethod]
+        public void Teams_Payload_UsesStyleForStatus()
+        {
+            var channel = new TeamsNotificationChannel();
+            string Style(Alert a) => ParsePayload(channel.GetPayload(a))["attachments"]![0]!["content"]!["body"]![0]!["style"]!.ToString();
+
+            Assert.AreEqual("attention", Style(CreateTestAlert(priority: Alert.Priorities.Critical)));
+            Assert.AreEqual("good", Style(CreateTestAlert(isResolved: true)));
+        }
+
+        [TestMethod]
+        public void Teams_Payload_UsesCustomTemplate()
+        {
+            var channel = new TeamsNotificationChannel { MessageTemplate = (JsonString)"{\"text\":\"{Title} {Text}\"}" };
+            var payload = ParsePayload(channel.GetPayload(CreateTestAlert(message: "a \"quoted\" message")));
+
+            Assert.AreEqual($"{DefaultAlertName}[Active] a \"quoted\" message", payload["text"]?.ToString());
+        }
+
+        [TestMethod]
+        public void Teams_Validate_RequiresHttpsUrl()
+        {
+            var channel = new TeamsNotificationChannel { ChannelName = DefaultChannelName, WebhookUrl = "http://example.com/workflow" };
+            var results = channel.Validate(new System.ComponentModel.DataAnnotations.ValidationContext(channel)).ToList();
+            Assert.AreEqual(1, results.Count);
+
+            channel.WebhookUrl = "https://example.environment.api.powerplatform.com/powerautomate/automations/direct/workflows/abc/triggers/manual/paths/invoke?sig=xyz";
+            Assert.AreEqual(0, channel.Validate(new System.ComponentModel.DataAnnotations.ValidationContext(channel)).Count());
         }
 
         private static JObject ParsePayload(string json) =>
