@@ -1,0 +1,3 @@
+CREATE PARTITION SCHEME [PS_LatchStats]
+    AS PARTITION [PF_LatchStats]
+    ALL TO ([PRIMARY])

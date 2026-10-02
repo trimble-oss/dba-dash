@@ -61,6 +61,7 @@ namespace DBADashGUI
         private bool? _hasInstanceMetadata;
         private DatabaseEngineEdition? _engineEdition;
         private bool? _hasResourceGovernorWorkloadGroups;
+        private bool? _hasLatchStats;
         private int? _utcOffset;
 
         public bool? HasInstanceMetadata
@@ -136,6 +137,21 @@ namespace DBADashGUI
         }
 
         /// <summary>
+        /// Latch stats collection is off by default.  True if it's enabled for the instance or there is data collected from when it was.
+        /// </summary>
+        public bool HasLatchStats
+        {
+            get
+            {
+                if (_hasLatchStats != null) return _hasLatchStats.Value;
+                GetAdditionalInfo();
+                _hasLatchStats ??= false;
+
+                return _hasLatchStats.Value;
+            }
+        }
+
+        /// <summary>
         /// UTC offset in minutes.  This is used to convert UTC times to local server time or local server time to UTC
         /// The offset is calculated as DATEDIFF(mi, GETDATE(), GETUTCDATE()) on the server.
         /// To convert UTC to local server time, subtract the offset.
@@ -166,6 +182,7 @@ namespace DBADashGUI
             _importAgentID = (int)row["ImportAgentID"];
             _connectionID = (string)row["ConnectionID"];
             _hasResourceGovernorWorkloadGroups = (bool)row["HasResourceGovernorWorkloadGroups"];
+            _hasLatchStats = row.Table.Columns.Contains("HasLatchStats") && row["HasLatchStats"] is true;
             try
             {
                 _productVersion = new Version((string)row["ProductVersion"]);
