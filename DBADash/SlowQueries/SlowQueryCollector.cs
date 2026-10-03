@@ -86,29 +86,68 @@ namespace DBADash.SlowQueries
             cmd.Parameters.AddWithValue("MaxTargetMemory", targetMaxMemoryKB);
             cmd.Parameters.AddWithValue("CollectGroupIDAndPoolID", collectGroupIDAndPoolID);
 
-            XElement targetData;
-            await using (var reader = await cmd.ExecuteReaderAsync(CommandBehavior.SequentialAccess |
-                                                                   CommandBehavior.SingleResult |
-                                                                   CommandBehavior.SingleRow))
-            {
-                if (!await reader.ReadAsync() || reader.IsDBNull(0))
-                {
-                    throw new Exception("Result is NULL");
-                }
-
-                using var textReader = reader.GetTextReader(0);
-                var settings = new XmlReaderSettings
-                {
-                    Async = true,
-                    DtdProcessing = DtdProcessing.Prohibit,
-                    XmlResolver = null,
-                };
-                using var xmlReader = XmlReader.Create(textReader, settings);
-                targetData = await XElement.LoadAsync(xmlReader, LoadOptions.None, CancellationToken.None);
-            }
+            var targetData = await ReadTargetDataAsync(cmd)
+                             ?? throw new Exception("Result is NULL");
 
             var dt = XETools.XEStrToDT(targetData, out var ringBufferAtt);
             return new Result { SlowQueries = dt, Stats = ringBufferAtt.GetTable() };
+        }
+
+        /// <summary>
+        /// Reads the ring buffer DBA Dash's own sessions hold without consuming it - no stop/start, so the buffer is
+        /// still there for the next scheduled collection.  For a triggered collection - see
+        /// <see cref="DBCollector.SlowQueriesReadOnly"/>.
+        ///
+        /// <para>Reads the oldest running session, as the SlowQueries script does: in dual session mode that is the one
+        /// holding everything since the last scheduled read.  Returns null when neither session is running.  Nothing
+        /// is created, started or altered, so there is nothing the scheduled collection would miss.</para>
+        ///
+        /// <para>The stats describe a buffer that hasn't been emptied, so a dropped count covers the time since the
+        /// last scheduled read rather than only this one.</para>
+        /// </summary>
+        public static async Task<Result> PeekRingBufferAsync(string connectionString, bool isAzureDB)
+        {
+            var sessions = isAzureDB ? "sys.dm_xe_database_sessions" : "sys.dm_xe_sessions";
+            var targets = isAzureDB ? "sys.dm_xe_database_session_targets" : "sys.dm_xe_session_targets";
+            await using var cn = new SqlConnection(GetXEConnectionString(connectionString));
+            await using var cmd = new SqlCommand(
+                $"SELECT TOP(1) CAST(t.target_data AS NVARCHAR(MAX)) FROM {sessions} AS s " +
+                $"JOIN {targets} AS t ON t.event_session_address = s.address " +
+                "WHERE s.name IN (N'DBADash_1', N'DBADash_2') AND t.target_name = N'ring_buffer' " +
+                "ORDER BY s.create_time", cn)
+            { CommandType = CommandType.Text, CommandTimeout = CommandTimeout };
+            await cn.OpenAsync();
+
+            var targetData = await ReadTargetDataAsync(cmd);
+            if (targetData == null) return null;
+
+            var dt = XETools.XEStrToDT(targetData, out var ringBufferAtt);
+            return new Result { SlowQueries = dt, Stats = ringBufferAtt.GetTable() };
+        }
+
+        /// <summary>
+        /// The first column of the first row as XML, streamed rather than read into a string first - a full ring
+        /// buffer is several MB.  Null when there is no row or the value is NULL.
+        /// </summary>
+        private static async Task<XElement> ReadTargetDataAsync(SqlCommand cmd)
+        {
+            await using var reader = await cmd.ExecuteReaderAsync(CommandBehavior.SequentialAccess |
+                                                                  CommandBehavior.SingleResult |
+                                                                  CommandBehavior.SingleRow);
+            if (!await reader.ReadAsync() || reader.IsDBNull(0))
+            {
+                return null;
+            }
+
+            using var textReader = reader.GetTextReader(0);
+            var settings = new XmlReaderSettings
+            {
+                Async = true,
+                DtdProcessing = DtdProcessing.Prohibit,
+                XmlResolver = null,
+            };
+            using var xmlReader = XmlReader.Create(textReader, settings);
+            return await XElement.LoadAsync(xmlReader, LoadOptions.None, CancellationToken.None);
         }
 
         #endregion

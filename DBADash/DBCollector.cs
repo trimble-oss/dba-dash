@@ -202,6 +202,20 @@ namespace DBADash
         /// </summary>
         public string OnDemandDeadlockXESessionName { get; set; }
 
+        /// <summary>
+        /// Read slow queries without consuming them: the ring buffer isn't emptied and the event file read position
+        /// isn't moved.  Set for a triggered collection, and false - the default - for everything else.
+        ///
+        /// <para>The repository only imports slow queries newer than the latest it holds for the instance, so
+        /// batches have to arrive in the order they were read.  Scheduled collections do; a triggered one doesn't
+        /// have to - it runs outside the work queue, alongside the scheduled one, and when relayed via S3 its
+        /// result is imported separately from the scheduled data.  If it consumed what it read, a newer scheduled
+        /// batch imported first would cause its events to be discarded.  Read without consuming, the next scheduled
+        /// run reads them again along with anything newer, so whichever batch is imported second only repeats
+        /// events the repository already holds.</para>
+        /// </summary>
+        public bool SlowQueriesReadOnly { get; set; }
+
         public const int DefaultIdentityCollectionThreshold = 5;
 
         /// <summary>
@@ -1747,8 +1761,9 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
                             Math.Max(1, Source.SlowQueryEventFileMaxSizeMB), Math.Max(1, Source.SlowQueryEventFileMaxRolloverFiles),
                             Source.KeepSlowQueryXESessionRunning, collectGroupIDAndPoolID, state,
                             CancellationToken.None);
-                        // Held until the data is written, as for deadlocks - see CommitReadPositions.
-                        pendingSlowQueryCursor = (cursorKey, state);
+                        // Held until the data is written, as for deadlocks - see CommitReadPositions.  Never moved by
+                        // a triggered collection - see SlowQueriesReadOnly.
+                        if (!SlowQueriesReadOnly) pendingSlowQueryCursor = (cursorKey, state);
                         break;
                     }
                 case DBADashSource.SlowQueryCaptureModes.ExistingSession:
@@ -1760,11 +1775,17 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
                         result = await SlowQueryCollector.CollectExistingSessionAsync(ConnectionString,
                             Source.SlowQueryXESessionName, IsAzureDB, IsManagedInstance, Source.SlowQueryThresholdMs,
                             state, CancellationToken.None);
-                        pendingSlowQueryCursor = (cursorKey, state);
+                        if (!SlowQueriesReadOnly) pendingSlowQueryCursor = (cursorKey, state);
                         break;
                     }
                 default:
-                    result = await SlowQueryCollector.CollectRingBufferAsync(ConnectionString, IsAzureDB,
+                    // A triggered collection reads the running session's buffer without the stop/start that empties
+                    // it - see SlowQueriesReadOnly.  With no session running there is nothing to lose, so the normal
+                    // collection runs and creates one.
+                    result = SlowQueriesReadOnly
+                        ? await SlowQueryCollector.PeekRingBufferAsync(ConnectionString, IsAzureDB)
+                        : null;
+                    result ??= await SlowQueryCollector.CollectRingBufferAsync(ConnectionString, IsAzureDB,
                         Source.SlowQueryThresholdMs, Source.SlowQuerySessionMaxMemoryKB, Source.UseDualEventSession,
                         Source.SlowQueryTargetMaxMemoryKB,
                         IsResourceGovernorApplicable() && IsResourceGovernorInUse());

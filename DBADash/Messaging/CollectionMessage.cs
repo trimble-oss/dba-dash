@@ -114,6 +114,9 @@ namespace DBADash.Messaging
             collector.FailedLoginsBackfillMinutes = cfg.FailedLoginsBackfillMinutes ?? CollectionConfig.DefaultFailedLoginsBackfillMinutes;
             collector.DeadlockXERingBufferKB = cfg.GetDeadlockXERingBufferKB();
             collector.OnDemandDeadlockXESessionName = onDemandDeadlockSession;
+            // Triggered collections leave slow queries for the scheduled collection to consume, so they can't be lost
+            // to an import that arrives out of order - see SlowQueriesReadOnly.
+            collector.SlowQueriesReadOnly = true;
             await collector.CollectAsync(standardCollections.ToArray());
             await collector.CollectAsync(customCollections);
 
@@ -139,8 +142,9 @@ namespace DBADash.Messaging
             if (CollectAgent.S3Path != null)
             {
                 // The caller uploads this to the agent's S3 path and reports a failure there to the user, who can
-                // run the collection again - the collector does not outlive the return, so the read position moves
-                // here rather than after that upload.
+                // run the collection again - the collector does not outlive the return, so the deadlock read position
+                // moves here rather than after that upload.  Slow queries have no position to move here: a triggered
+                // collection reads them without consuming them - see SlowQueriesReadOnly.
                 collector.CommitReadPositions();
                 op.Complete();
                 return collector.Data;
