@@ -105,6 +105,21 @@ SetSchedule - Set how often a collection runs.  Sets the service level schedule,
         [Option("PersistXESessions", Default = false, Required = false, HelpText = "Allows customization of event sessions by persisting them instead of removing them when the service is shutdown.")]
         public bool? PersistXESessions { get; set; }
 
+        [Option("SlowQueryCaptureMode", Default = DBADashSource.SlowQueryCaptureModes.RingBuffer, Required = false, HelpText = "How slow queries are captured.  RingBuffer (the default) uses the DBADash_1/DBADash_2 sessions with a ring buffer that is read and then emptied by stopping and starting the session.  EventFile uses a DBADash_SlowQueries session with an event file target that is read from a saved position, so the session never has to be stopped and nothing is lost while it is - not available on Azure SQL Database or Managed Instance, which use RingBuffer.  ExistingSession reads a session you manage, named with --SlowQueryXESessionName, and never alters it.")]
+        public DBADashSource.SlowQueryCaptureModes SlowQueryCaptureMode { get; set; }
+
+        [Option("SlowQueryXESessionName", Default = "", Required = false, HelpText = "The session read when --SlowQueryCaptureMode is ExistingSession.  It is read and never altered: an event_file target is read from a saved position and a ring_buffer is read without being emptied.  rpc_completed, sql_batch_completed, sql_statement_completed and sp_statement_completed events over --SlowQueryThresholdMs are collected.")]
+        public string SlowQueryXESessionName { get; set; } = string.Empty;
+
+        [Option("SlowQueryEventFileMaxSizeMB", Default = DBADashSource.DefaultSlowQueryEventFileMaxSizeMB, Required = false, HelpText = "Size of each event file in EventFile mode, in MB.")]
+        public int SlowQueryEventFileMaxSizeMB { get; set; }
+
+        [Option("SlowQueryEventFileMaxRolloverFiles", Default = DBADashSource.DefaultSlowQueryEventFileMaxRolloverFiles, Required = false, HelpText = "Number of event files kept in EventFile mode.  With --SlowQueryEventFileMaxSizeMB this sets how much can be held while the service isn't collecting.")]
+        public int SlowQueryEventFileMaxRolloverFiles { get; set; }
+
+        [Option("KeepSlowQueryXESessionRunning", Default = false, Required = false, HelpText = "Set this switch to leave the DBADash_SlowQueries session running when the service stops, and start it with the instance, so slow queries are still captured while the service is down and collected when it starts.  EventFile mode only.  Without it, the session is stopped or removed on service stop as --PersistXESessions says.")]
+        public bool KeepSlowQueryXESessionRunning { get; set; }
+
         [Option("ConnectionID", Default = "", Required = false, HelpText = "The ConnectionID is used to uniquely identify the SQL Instance in the repository database.  The ConnectionID is automatically assigned to @@SERVERNAME but you can override this with a custom value.  If you change the ConnectionID for an existing server it will appear as a new instance in the repository database.")]
         public string ConnectionID { get; set; } = "";
 

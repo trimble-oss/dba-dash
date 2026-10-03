@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    name: Build & Test (SQL ${{ matrix.sql-version }})
+    name: Build & Test (SQL ${{ matrix.sql-version }}, ${{ matrix.slow-query-capture-mode }} slow query capture)
     runs-on: windows-latest
 
     strategy:
@@ -15,6 +15,10 @@ jobs:
         language: [csharp]
         sql-version: [2016, 2017, 2019, 2022, 2025]
         sql-collation: [Latin1_General_BIN]
+        # EventFile on every SQL version here: its session check reads the XE catalog, whose format can differ
+        # between versions.  The default RingBuffer mode is covered by the Folder, Bucket and Minimal Permissions
+        # workflows.  Add RingBuffer to this list to run both modes against every version.
+        slow-query-capture-mode: [EventFile]
 
     steps:
       - name: Checkout repository
@@ -114,7 +118,7 @@ jobs:
           Set-Location $InstallPath
           "Configure"
           ./dbadashconfig -c "Data Source=localhost;UID=sa;pwd=dbatools.I0;Initial Catalog=DBADashDB_GitHubAction;Encrypt=True;TrustServerCertificate=True;" -a SetDestination
-          ./dbadashconfig -c "Data Source=localhost;UID=sa;pwd=dbatools.I0;Encrypt=True;TrustServerCertificate=True;" -a Add --PlanCollectionEnabled --SlowQueryThresholdMs 1000 --SchemaSnapshotDBs "*" --CaptureDeadlocks
+          ./dbadashconfig -c "Data Source=localhost;UID=sa;pwd=dbatools.I0;Encrypt=True;TrustServerCertificate=True;" -a Add --PlanCollectionEnabled --SlowQueryThresholdMs 1000 --SlowQueryCaptureMode ${{ matrix.slow-query-capture-mode }} --SchemaSnapshotDBs "*" --CaptureDeadlocks
           "Enable OS-level (perfmon) counter collection"
           ./dbadashconfig -a SetPerfmonCounters --PerfmonDefaults
           "Collect deadlocks every minute - the workflow does not run long enough to wait out the shipped five minute schedule, and the session DBA Dash manages is not created until the first collection has run"
@@ -139,6 +143,13 @@ jobs:
         shell: powershell
         run: |
           ./Scripts/New-TestDeadlock -SessionName "DBADash_Deadlocks" -ConnectionString "Data Source=localhost;UID=sa;pwd=dbatools.I0"
+
+      # Waits for the capture session the configured mode uses - created by the first SlowQueries collection -
+      # then runs a slow batch and a slow RPC for the Pester tests to find.
+      - name: Generate slow queries
+        shell: powershell
+        run: |
+          ./Scripts/New-TestSlowQuery -SessionName "${{ matrix.slow-query-capture-mode == 'EventFile' && 'DBADash_SlowQueries' || 'DBADash_1,DBADash_2' }}" -ConnectionString "Data Source=localhost;UID=sa;pwd=dbatools.I0"
 
       - name: Wait 5min
         shell: powershell
@@ -172,7 +183,9 @@ jobs:
           }
           Import-Module Pester -MinimumVersion 5.0.0
           # Perfmon = $true: this leg enables the default perfmon counters, so assert they were collected.
-          $container = New-PesterContainer -Path 'Scripts\CI_Workflow.Tests.ps1' -Data @{ Perfmon = $true; Deadlocks = $true }
+          # SlowQueryCursorFile: only EventFile mode keeps a read position, so only that mode asserts one was saved.
+          $cursorFile = if ('${{ matrix.slow-query-capture-mode }}' -eq 'EventFile') { 'C:\DBADashTest\SlowQueryCursors.json' } else { '' }
+          $container = New-PesterContainer -Path 'Scripts\CI_Workflow.Tests.ps1' -Data @{ Perfmon = $true; Deadlocks = $true; SlowQueries = $true; SlowQueryCursorFile = $cursorFile }
           Invoke-Pester -Container $container -Output Detailed
 
       - name: Output Table Counts Following Delete

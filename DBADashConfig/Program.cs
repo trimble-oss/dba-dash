@@ -13,7 +13,13 @@ public class Program
            .WriteTo.Console(outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj} {NewLine}{Exception}")
            .CreateLogger();
 
-        return await Parser.Default
+        // Parser.Default's settings, plus case-insensitive enum values so e.g. "--SlowQueryCaptureMode eventfile" parses.
+        using var parser = new Parser(settings =>
+        {
+            settings.HelpWriter = Console.Error;
+            settings.CaseInsensitiveEnumValues = true;
+        });
+        return await parser
             .ParseArguments<Options>(args)
             .MapResult(
                 async o =>

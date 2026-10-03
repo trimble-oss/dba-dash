@@ -44,6 +44,7 @@
     <EmbeddedResource Include="SQL\SQLAvailableProcs.sql" />
     <EmbeddedResource Include="SQL\SQLDeadlockSession.sql" />
     <EmbeddedResource Include="SQL\SQLDeadlockSessionAzure.sql" />
+    <EmbeddedResource Include="SQL\SQLSlowQueriesEventFileSession.sql" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="PerformanceCounters.xml">

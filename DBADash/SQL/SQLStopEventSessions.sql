@@ -18,3 +18,15 @@ BEGIN
 	ON SERVER
 	State = STOP
 END
+/* Event file mode session.  Left running when configured to, so it captures while the service is down */
+IF @KeepSlowQuerySession = 0
+	AND EXISTS(
+	SELECT *
+	FROM sys.dm_xe_sessions
+	WHERE name = 'DBADash_SlowQueries'
+	)
+BEGIN
+	ALTER EVENT SESSION DBADash_SlowQueries
+	ON SERVER
+	State = STOP
+END

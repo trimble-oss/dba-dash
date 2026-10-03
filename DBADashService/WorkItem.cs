@@ -156,7 +156,7 @@ namespace DBADashService
                         await DestinationHandling.WriteAllDestinationsAsync(collector.Data, Source, fileName, config);
                         collector.CacheCollectedText();
                         collector.CacheCollectedPlans();
-                        collector.CommitDeadlockCursor();
+                        collector.CommitReadPositions();
                         // Advanced here rather than straight after the collection: the next run asks msdb for
                         // history above this id, so moving it for a batch that never reached a destination
                         // would step over that history until the service restarts and the watermark resets.

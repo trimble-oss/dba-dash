@@ -175,6 +175,11 @@ namespace DBADashConfig
                 SlowQueryTargetMaxMemoryKB = o.SlowQueryTargetMaxMemoryKB,
                 UseDualEventSession = o.UseDualEventSession ?? true,
                 PersistXESessions = o.PersistXESessions ?? false,
+                SlowQueryCaptureMode = o.SlowQueryCaptureMode,
+                SlowQueryXESessionName = o.SlowQueryXESessionName,
+                SlowQueryEventFileMaxSizeMB = o.SlowQueryEventFileMaxSizeMB,
+                SlowQueryEventFileMaxRolloverFiles = o.SlowQueryEventFileMaxRolloverFiles,
+                KeepSlowQueryXESessionRunning = o.KeepSlowQueryXESessionRunning,
                 CollectTempDB = o.CollectTempDB ?? false,
                 CollectTranBeginTime = o.CollectTranBeginTime ?? true,
                 WriteToSecondaryDestinations = o.WriteToSecondaryDestinations ?? true,
@@ -228,6 +233,21 @@ namespace DBADashConfig
                 source.PlanCollectionCPUThreshold = o.PlanCollectionCPUThreshold;
                 source.PlanCollectionDurationThreshold = o.PlanCollectionDurationThreshold;
                 source.PlanCollectionMemoryGrantThreshold = o.PlanCollectionMemoryGrantThreshold;
+            }
+            if (source.SlowQueryCaptureMode == DBADashSource.SlowQueryCaptureModes.ExistingSession &&
+                string.IsNullOrWhiteSpace(source.SlowQueryXESessionName))
+            {
+                Log.Error("--SlowQueryCaptureMode ExistingSession needs the session to read: set --SlowQueryXESessionName.");
+                Environment.Exit(1);
+                return;
+            }
+            if (source.SlowQueryCaptureMode == DBADashSource.SlowQueryCaptureModes.ExistingSession &&
+                DBADashSource.IsReservedSlowQueryXESessionName(source.SlowQueryXESessionName))
+            {
+                Log.Error("--SlowQueryXESessionName {SessionName} is a session DBA Dash creates and removes itself, so it can't be read as an existing session.  Use --SlowQueryCaptureMode EventFile or RingBuffer, or a session of your own with a different name.",
+                    source.SlowQueryXESessionName);
+                Environment.Exit(1);
+                return;
             }
             // Naming a session says which session to read, not when to read it.  The Deadlocks collection is
             // disabled in the default schedule, so without a schedule the connection is configured for
