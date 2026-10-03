@@ -43,7 +43,26 @@ namespace DBADashGUI.Performance
             openInNewWindow.DropDownItems.AddRange(new ToolStripItem[] { contextRowInNewWindow, selectedInNewWindow });
             dgv.CellContextMenu.Items.Insert(0, openInNewWindow);
             dgv.CellContextMenu.Items.Insert(1, new ToolStripSeparator());
+
+            // Insights for the snapshot, shown above the grid. Added last so it docks above the grid (which fills the rest).
+            insightsPanel = new InsightsPanel { Visible = false, AutoScroll = true };
+            splitContainer1.Panel1.Controls.Add(insightsPanel);
+            splitContainer1.Panel1.SizeChanged += (_, _) => LimitInsightsHeight();
+            LimitInsightsHeight();
+            UpdateInsightsModeMenu();
         }
+
+        private readonly InsightsPanel insightsPanel;
+
+        // True when the grid is showing a single snapshot (all sessions) that insights can be shown for.
+        private bool insightsAvailable;
+
+        /// <summary>
+        /// Show insights above the grid when viewing a single snapshot (subject to the user's Insights toggle).
+        /// Set to false when the control is embedded where the insights aren't relevant.
+        /// </summary>
+        [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+        public bool ShowInsights { get; set; } = true;
 
         private const int MaxSnapshotsToLoadBeforePrompt = 20;
         private const int MaxSnapshotTabs = 100; // Tabs wil be loaded on demand after first few tabs
@@ -166,7 +185,7 @@ namespace DBADashGUI.Performance
                 {
                     HeaderText = "Blocking Session ID", DataPropertyName = "blocking_session_id",
                     Name = "colBlockingSessionID", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 60,
-                    ToolTipText = "ID of the session directly blocking the current query.  0 = Not blocked.",
+                    ToolTipText = "ID of the session directly blocking the current query.  0 = Not blocked.\nNegative values aren't sessions: -2 = orphaned distributed transaction, -3 = deferred recovery transaction, -4/-5 = latch wait where the latch owner is unknown (not blocking).",
                     DefaultCellStyle = new DataGridViewCellStyle() { ForeColor = Color.White }
                 },
                 new DataGridViewTextBoxColumn()
@@ -694,6 +713,10 @@ namespace DBADashGUI.Performance
             var detail = InstanceID > 0 && (SessionID != 0 || JobId != Guid.Empty || IsForceDetail ||
                                             (SnapshotDateFrom == SnapshotDateTo &&
                                              SnapshotDateFrom != DateTime.MinValue));
+            // Insights summarize a whole snapshot, so only when showing a single snapshot that isn't filtered to a session/job.
+            var singleSnapshot = detail && SessionID == 0 && JobId == Guid.Empty && !IsForceDetail &&
+                                 SnapshotDateFrom == SnapshotDateTo;
+            insightsAvailable = false;
 
             try
             {
@@ -733,6 +756,7 @@ namespace DBADashGUI.Performance
                     tsViewALL.Visible = false;
                     currentSnapshotDate = SnapshotDateFrom;
                     lblRowLimit.Visible = snapshotDT.Rows.Count == filters.Top;
+                    insightsAvailable = singleSnapshot;
                 }
                 else // List of snapshots for an instance or last snapshot for all instances
                 {
@@ -749,9 +773,148 @@ namespace DBADashGUI.Performance
                 CommonShared.ShowExceptionDialog(ex);
             }
 
+            UpdateInsights();
             dgv.ApplyTheme(DBADashUser.SelectedTheme);
             tsEditLimit.LinkColor = DBADashUser.SelectedTheme.LinkColor;
         }
+
+        #region Insights
+
+        /// <summary>Build (or hide) the insights for the snapshot shown in the grid.</summary>
+        private void UpdateInsights()
+        {
+            var available = ShowInsights && insightsAvailable && snapshotDT != null;
+            tsInsights.Visible = available;
+            tsInsights.Text = "Insights";
+            insightsPanel.Visible = false;
+            insightsPanel.ClearInsights();
+            if (!available) return;
+
+            try
+            {
+                // Built even when the panel is toggled off, so the button can show how many insights there are.
+                var insights = SnapshotInsights.Build(snapshotDT, new SnapshotInsightActions
+                {
+                    OpenSession = OpenSessionFromSnapshot,
+                    ShowRootBlockers = () => ApplyInsightAction(ShowRootBlockers),
+                    ShowBlockedQueries = () => ApplyInsightAction(() => BlockedQueriesToolStripMenuItem_Click(this, EventArgs.Empty)),
+                    ApplyFilter = (filter, description) => ApplyInsightAction(() => ApplyInsightFilter(filter, description))
+                }, InsightsSummaryVisible);
+                var count = insights.Count(i => !i.IsSummary);
+                if (count > 0)
+                {
+                    tsInsights.Text = $"Insights ({count})";
+                }
+                if (!InsightsVisible) return;
+
+                insightsPanel.SetInsights(insights);
+                insightsPanel.Visible = true;
+            }
+            catch (Exception ex)
+            {
+                // Insights are supplementary - don't prevent the snapshot from being displayed.
+                insightsPanel.Visible = false;
+                Serilog.Log.Warning(ex, "Error building running queries insights");
+            }
+        }
+
+        /// <summary>Cap the insights height so the grid always gets most of the space (the panel scrolls if needed).</summary>
+        private void LimitInsightsHeight()
+        {
+            insightsPanel.MaximumSize = new Size(0, Math.Max(100, splitContainer1.Panel1.Height * 2 / 5));
+        }
+
+        /// <summary>How the insights panel is displayed.</summary>
+        private enum InsightsMode
+        {
+            WithSummary,
+            InsightsOnly,
+            Hidden
+        }
+
+        /// <summary>The user's insights mode, persisted by name. An unrecognised value falls back to the default.</summary>
+        private static InsightsMode CurrentInsightsMode
+        {
+            get => Enum.TryParse<InsightsMode>(Properties.Settings.Default.RunningQueriesInsightsMode, out var mode) &&
+                   Enum.IsDefined(mode)
+                ? mode
+                : InsightsMode.WithSummary;
+            set
+            {
+                Properties.Settings.Default.RunningQueriesInsightsMode = value.ToString();
+                Properties.Settings.Default.Save();
+            }
+        }
+
+        private static bool InsightsVisible => CurrentInsightsMode != InsightsMode.Hidden;
+        private static bool InsightsSummaryVisible => CurrentInsightsMode == InsightsMode.WithSummary;
+
+        /// <summary>Tick the menu item for the current insights mode (the three items behave like radio buttons).</summary>
+        private void UpdateInsightsModeMenu()
+        {
+            var mode = CurrentInsightsMode;
+            insightsWithSummaryToolStripMenuItem.Checked = mode == InsightsMode.WithSummary;
+            insightsOnlyToolStripMenuItem.Checked = mode == InsightsMode.InsightsOnly;
+            insightsHiddenToolStripMenuItem.Checked = mode == InsightsMode.Hidden;
+        }
+
+        private void InsightsMode_Click(object sender, EventArgs e)
+        {
+            CurrentInsightsMode = sender == insightsHiddenToolStripMenuItem ? InsightsMode.Hidden
+                : sender == insightsOnlyToolStripMenuItem ? InsightsMode.InsightsOnly
+                : InsightsMode.WithSummary;
+            UpdateInsightsModeMenu();
+            UpdateInsights();
+        }
+
+        /// <summary>Run an insight's grid action against the full snapshot (undoing any Group By first).</summary>
+        private void ApplyInsightAction(Action action)
+        {
+            try
+            {
+                if (IsGroupBy)
+                {
+                    LoadSnapshot(new DataView(snapshotDT));
+                }
+                action();
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex);
+            }
+        }
+
+        private void ApplyInsightFilter(string filter, string description)
+        {
+            ResetBlockingFilterText();
+            dgv.SetFilter(filter);
+            tsGroupByFilter.Text = description;
+            tsGroupByFilter.Visible = true;
+            tsBack.Enabled = true;
+        }
+
+        /// <summary>Open the session detail viewer for a session in the current snapshot (insight drill down).</summary>
+        private void OpenSessionFromSnapshot(int sessionId)
+        {
+            try
+            {
+                var view = new DataView(snapshotDT);
+                var row = view.Cast<DataRowView>().FirstOrDefault(r => Convert.ToInt32(r["session_id"]) == sessionId);
+                if (row == null)
+                {
+                    MessageBox.Show($"Session {sessionId} was not found in this snapshot.", "Session not found",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+                ShowSessionDetail(row);
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex, "Error opening session detail");
+            }
+        }
+
+        #endregion
 
         private void LoadSnapshot(DateTime snapshotDate, int _skip = 0)
         {
@@ -1027,14 +1190,16 @@ namespace DBADashGUI.Performance
         private void GetCounts()
         {
             runningJobCount = snapshotDT.AsEnumerable().Count(r => r["job_id"] != DBNull.Value);
-            blockedCount = snapshotDT.AsEnumerable().Count(r => Convert.ToInt16(r["blocking_session_id"]) != 0);
+            // Only a positive blocking_session_id is blocking by a session (same rule as the repository snapshot summary).
+            // Negative values identify blockers that aren't sessions (-2/-3) or latch waits with an unknown owner (-4/-5).
+            blockedCount = snapshotDT.AsEnumerable().Count(r => Convert.ToInt16(r["blocking_session_id"]) > 0);
             hasTaskWaits = snapshotDT.AsEnumerable().Any(r => !string.IsNullOrEmpty((string)(r["TaskWaits"].DBNullToNull())));
             hasCursorColumn = snapshotDT.AsEnumerable().Any(r => !string.IsNullOrEmpty((string)(r["cursor_text"].DBNullToNull())));
             hasWorkloadGroups = snapshotDT.AsEnumerable().Any(r => !string.IsNullOrEmpty((string)(r["workload_group"].DBNullToNull())));
             idleCount = snapshotDT.AsEnumerable()
                 .Count(r => Convert.ToInt64(r["sleeping_session_idle_time_sec"].DBNullToNull()) > 0);
             blockedWait = snapshotDT.AsEnumerable()
-                .Where(r => Convert.ToInt16(r["blocking_session_id"]) != 0 && r["wait_time"] != DBNull.Value)
+                .Where(r => Convert.ToInt16(r["blocking_session_id"]) > 0 && r["wait_time"] != DBNull.Value)
                 .Sum(r => Convert.ToInt64(r["wait_time"]));
             hasWaitResource = snapshotDT.AsEnumerable().Any(r =>
                 r["wait_resource"] != DBNull.Value && !string.IsNullOrEmpty((string)r["wait_resource"]));
@@ -1699,9 +1864,14 @@ namespace DBADashGUI.Performance
             else if (new[] { "colBlockCount", "colBlockedCountRecursive", "colBlockingSessionID" }.Contains(
                          dgv.Columns[e.ColumnIndex].Name))
             {
-                dgv.Rows[e.RowIndex].Cells[e.ColumnIndex].SetStatusColor(Convert.ToInt32(e.Value) == 0
-                    ? DBADashStatus.DBADashStatusEnum.OK
-                    : DBADashStatus.DBADashStatusEnum.Critical);
+                var value = Convert.ToInt32(e.Value);
+                // Blocking session ID: -2/-3 are blocking by a transaction with no session; -4/-5 are latch waits, not blocking.
+                var isBlocking = dgv.Columns[e.ColumnIndex].Name == "colBlockingSessionID"
+                    ? value > 0 || QueryInsights.SpecialBlockerDescription(value) != null
+                    : value != 0;
+                dgv.Rows[e.RowIndex].Cells[e.ColumnIndex].SetStatusColor(isBlocking
+                    ? DBADashStatus.DBADashStatusEnum.Critical
+                    : DBADashStatus.DBADashStatusEnum.OK);
             }
             else if (new[] { "colIdleTimeSec", "colIdleTime" }.Contains(dgv.Columns[e.ColumnIndex].Name))
             {
@@ -1801,7 +1971,7 @@ namespace DBADashGUI.Performance
                         r["granted_query_memory_kb"] == DBNull.Value
                             ? 0
                             : Convert.ToInt64(r["granted_query_memory_kb"]));
-                    row["blocked_count"] = g.Count(r => r.Field<short>("blocking_session_id") != 0);
+                    row["blocked_count"] = g.Count(r => r.Field<short>("blocking_session_id") > 0);
                     row["blocking_count"] = g.Count(r => r.Field<int>("BlockCount") > 0);
                     row["root_blockers"] = g.Count(r => r.Field<bool>("IsRootBlocker"));
                     return row;

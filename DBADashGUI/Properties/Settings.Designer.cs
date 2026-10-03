@@ -73,6 +73,18 @@ namespace DBADashGUI.Properties {
 
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("WithSummary")]
+        public string RunningQueriesInsightsMode {
+            get {
+                return ((string)(this["RunningQueriesInsightsMode"]));
+            }
+            set {
+                this["RunningQueriesInsightsMode"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool SuppressXETraceWarning {
             get {
