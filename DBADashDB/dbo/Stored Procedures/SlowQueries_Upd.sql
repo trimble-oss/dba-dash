@@ -13,9 +13,38 @@ SELECT @MinDate =MIN(timestamp)
 FROM @SlowQueries
 
 SELECT @MaxDate = ISNULL(MAX(timestamp),'19000101')
-FROM dbo.SlowQueries 
+FROM dbo.SlowQueries
 WHERE InstanceID = @InstanceID
 AND timestamp>=@MinDate
+
+/*	Events are inserted when they are newer than the latest already stored, which discards anything collected
+	twice - a re-read of an event file, or the overlap between the dual ring buffer sessions.  The exception is
+	the latest millisecond itself: a later read can return an event from that same millisecond that wasn't
+	collected before (it was dispatched after the previous read, or the read stopped part way through it).
+	Those are inserted unless an identical event is already stored, numbered after the existing rows so the key
+	stays unique.  Only done when the batch has rows in that millisecond, and only reads the rows stored in it. */
+DECLARE @Boundary TABLE(
+	event_type SYSNAME NOT NULL,
+	session_id INT NULL,
+	duration BIGINT NULL,
+	cpu_time BIGINT NULL,
+	logical_reads BIGINT NULL
+)
+DECLARE @BoundaryUniqueifier SMALLINT = 0
+
+IF EXISTS(SELECT 1 FROM @SlowQueries WHERE timestamp = @MaxDate)
+BEGIN
+	INSERT INTO @Boundary(event_type, session_id, duration, cpu_time, logical_reads)
+	SELECT event_type, session_id, duration, cpu_time, logical_reads
+	FROM dbo.SlowQueries
+	WHERE InstanceID = @InstanceID
+	AND timestamp = @MaxDate
+
+	SELECT @BoundaryUniqueifier = ISNULL(MAX(Uniqueifier),0)
+	FROM dbo.SlowQueries
+	WHERE InstanceID = @InstanceID
+	AND timestamp = @MaxDate
+END
 
 /* For AzureDB there is a 1:1 mapping between dbo.Instances and dbo.Databases.  Get the associated DatabaseID */
 SELECT @AzureDatabaseID = D.DatabaseID
@@ -65,7 +94,8 @@ SELECT @InstanceID,
 		client_hostname,
 		client_app_name,
 		result,
-		ROW_NUMBER() OVER(PARTITION BY timestamp ORDER BY timestamp), -- just to ensure uniqueness in key
+		ROW_NUMBER() OVER(PARTITION BY timestamp ORDER BY timestamp) -- just to ensure uniqueness in key
+			+ CASE WHEN timestamp = @MaxDate THEN @BoundaryUniqueifier ELSE 0 END, -- after rows already stored in the boundary millisecond
 		session_id,
 		context_info,
 		row_count,
@@ -75,7 +105,19 @@ FROM @SlowQueries SQ
 LEFT JOIN dbo.Databases D ON D.database_id = SQ.database_id AND D.InstanceID = @InstanceID AND D.IsActive=1
 LEFT JOIN dbo.ResourceGovernorWorkloadGroups WG ON WG.group_id = SQ.session_resource_group_id AND WG.InstanceID = @InstanceID AND WG.IsActive=1
 LEFT JOIN dbo.ResourceGovernorResourcePools RP ON RP.pool_id = SQ.session_resource_pool_id AND RP.InstanceID = @InstanceID AND RP.IsActive=1
-WHERE timestamp > @MaxDate
+WHERE (timestamp > @MaxDate
+	OR (timestamp = @MaxDate
+		AND NOT EXISTS(
+			/* INTERSECT so NULLs compare as equal */
+			SELECT 1
+			FROM @Boundary B
+			WHERE B.event_type = SQ.event_type
+			AND EXISTS(	SELECT B.session_id, B.duration, B.cpu_time, B.logical_reads
+						INTERSECT
+						SELECT SQ.session_id, SQ.duration, SQ.cpu_time, SQ.logical_reads)
+			)
+		)
+	)
 
 DECLARE @MetricsInstanceID INT 
 SELECT @MetricsInstanceID = CASE WHEN EXISTS(SELECT 1 FROM dbo.RepositoryMetricsConfig WHERE InstanceID = @InstanceID AND MetricType='SlowQueries') THEN @InstanceID ELSE -1 END
