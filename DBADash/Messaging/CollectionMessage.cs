@@ -40,6 +40,20 @@ namespace DBADash.Messaging
         [Newtonsoft.Json.JsonIgnore]
         public List<string> UnknownCollectionTypes { get; private set; }
 
+        /// <summary>
+        /// Why SlowQueries is never run by a triggered collection.  The repository only imports slow queries newer
+        /// than the latest it holds for the instance, so batches have to arrive in the order they were read.  A
+        /// triggered collection runs outside the work queue, alongside the scheduled one, and when relayed via S3
+        /// its result is imported separately - so its batch, or the scheduled one, could be discarded for arriving
+        /// out of order.  The collection already runs every minute by default, so there is little to gain from
+        /// running it on demand.
+        /// </summary>
+        internal const string SlowQueriesNotTriggerable =
+            "SlowQueries can't be triggered manually - it is collected on its schedule (every minute by default).";
+
+        /// <summary>Set by <see cref="ParseCollectionTypes"/> when the request included SlowQueries.</summary>
+        internal bool SlowQueriesSkipped { get; private set; }
+
         public CollectionMessage(List<string> collectionTypes, string connectionID)
         {
             CollectionTypes = collectionTypes;
@@ -87,6 +101,19 @@ namespace DBADash.Messaging
 
             var (standardCollections, customCollections, unknownCollections) = ParseCollectionTypes(src, cfg);
             UnknownCollectionTypes = unknownCollections;
+
+            // SlowQueries is left out of a triggered collection - see SlowQueriesNotTriggerable.  Skipped rather than
+            // rejected when other collections were asked for too, so a request built by an older GUI, which could
+            // include it, still runs the rest.
+            if (SlowQueriesSkipped)
+            {
+                if (standardCollections.Count == 0 && customCollections.Count == 0 && unknownCollections.Count == 0)
+                {
+                    throw new ArgumentException(SlowQueriesNotTriggerable);
+                }
+                Log.Warning("Message {Id}: skipping SlowQueries for {instance}.  {reason}", Id, connectionID,
+                    SlowQueriesNotTriggerable);
+            }
 
             // Don't run collections whose schedule has been disabled for this instance - a manual trigger
             // shouldn't collect something the user has turned off.  Disabled collections are skipped and, if
@@ -245,7 +272,7 @@ namespace DBADash.Messaging
             return onDemandDeadlockSession;
         }
 
-        private (List<CollectionType>, Dictionary<string, CustomCollection>, List<string>) ParseCollectionTypes(DBADashSource src, CollectionConfig cfg)
+        internal (List<CollectionType>, Dictionary<string, CustomCollection>, List<string>) ParseCollectionTypes(DBADashSource src, CollectionConfig cfg)
         {
             var standardCollections = new List<CollectionType>();
             var customCollections = new Dictionary<string, CustomCollection>();
@@ -269,6 +296,10 @@ namespace DBADash.Messaging
                 else if (string.Equals(type, "InternalPerformanceCounters", StringComparison.OrdinalIgnoreCase))
                 {
                     throw new ArgumentException("InternalPerformanceCounters collection can't be triggered manually");
+                }
+                else if (string.Equals(type, nameof(CollectionType.SlowQueries), StringComparison.OrdinalIgnoreCase))
+                {
+                    SlowQueriesSkipped = true;
                 }
                 else if (CollectionTypeLegacyNames.TryParse(type, out var collectionType))
                 {
