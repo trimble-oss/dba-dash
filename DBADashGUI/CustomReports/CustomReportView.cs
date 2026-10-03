@@ -2581,7 +2581,7 @@ namespace DBADashGUI.CustomReports
                 tsConfigure.Visible = Report.CanEditReport;
                 moveToFolderToolStripMenuItem.Visible = CustomReports.CanOrganizeReports;
                 // Visibility rules for system reports are set in code
-                visibilityToolStripMenuItem.Visible = Report.GetType() == typeof(CustomReport);
+                visibilityToolStripMenuItem.Visible = Report.GetType() == typeof(CustomReport) && Report.SupportsVisibilityRules;
                 SetStatus(Report.Description, Report.Description, DBADashUser.SelectedTheme.ForegroundColor);
                 lblDescription.Visible = !string.IsNullOrEmpty(Report.Description);
                 if (Report.DeserializationException != null)

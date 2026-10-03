@@ -228,6 +228,19 @@ namespace DBADashGUI.CustomReports
         [JsonIgnore]
         public virtual bool IsDatabaseLevel => Params != null && Params.ParamList.Any(p => p.ParamName.Equals("@DATABASEID", StringComparison.OrdinalIgnoreCase));
 
+        private static readonly string[] ContextParams = { "@INSTANCEIDS", "@INSTANCEID", "@DATABASEID", "@OBJECTID" };
+
+        /// <summary>
+        /// Report doesn't take any parameters supplied from the tree context (e.g. a report with no parameters).  User
+        /// reports like this are shown at root level.  @ObjectID reports are excluded as they are drill down reports.
+        /// </summary>
+        [JsonIgnore]
+        public bool IsContextFree => Params?.ParamList != null && !Params.ParamList.Any(p => ContextParams.Contains(p.ParamName.ToUpperInvariant()));
+
+        /// <summary>Visibility rules only have an effect for reports that receive instances from the tree context</summary>
+        [JsonIgnore]
+        public bool SupportsVisibilityRules => IsRootLevel || IsInstanceLevel || IsDatabaseLevel;
+
         [JsonIgnore]
         public virtual bool IsInstanceLevel => Params != null && Params.ParamList.Any(p => InstanceLevelSystemParams.Contains(p.ParamName.ToUpper()));
 
