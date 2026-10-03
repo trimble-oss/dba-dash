@@ -2,7 +2,7 @@ CREATE PROC dbo.InstanceTagValues_Get
 AS
 /*
 	Tags for every active instance, used to evaluate custom report visibility rules client side.
-	Matches the same way as dbo.InstancesMatchingTags: tags by instance name (Azure DB logical server) or by InstanceID.
+	Tags by instance name (Azure DB logical server) and by InstanceID are combined, as they are shown in the Tags tab.
 	Returned as name/value rather than TagID as report metadata can be scripted to other repositories.
 */
 SELECT	I.InstanceID,

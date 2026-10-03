@@ -61,7 +61,8 @@ namespace DBADashGUI.CustomReports
 
         /// <summary>
         /// Only show the report for instances with these tags.  All tag names must match, with any of the values for
-        /// each name (same as the main tag filter).  Empty for no tag rule.
+        /// each name.  For Azure DB, tags inherited from the logical server count along with the database's own tags.
+        /// Empty for no tag rule.
         /// </summary>
         public List<ReportTag> VisibleTags { get; set; } = new();
 
@@ -100,6 +101,9 @@ namespace DBADashGUI.CustomReports
         public string Folder { get; set; }
 
         public const char FolderSeparator = '/';
+
+        /// <summary>Maximum length of a folder path - dbo.CustomReportFolder.FolderPath</summary>
+        public const int FolderMaxLength = 400;
 
         /// <summary>Normalize a folder path - trims each part and removes empty parts.  Returns null for the top level.</summary>
         public static string NormalizeFolder(string folder)

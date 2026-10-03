@@ -1,4 +1,4 @@
-using DBADashGUI.Theme;
+﻿using DBADashGUI.Theme;
 using System;
 using System.Drawing;
 using System.Linq;
@@ -50,7 +50,8 @@ namespace DBADashGUI.CustomReports
                 Dock = DockStyle.Top,
                 MinimumSize = new Size(420, 0),
                 AutoCompleteMode = AutoCompleteMode.SuggestAppend,
-                AutoCompleteSource = AutoCompleteSource.ListItems
+                AutoCompleteSource = AutoCompleteSource.ListItems,
+                MaxLength = CustomReport.FolderMaxLength
             };
             cboFolder.Items.AddRange(CustomReports.GetCustomReports().FolderPaths.Cast<object>().ToArray());
             cboFolder.Text = report.Folder ?? string.Empty;
