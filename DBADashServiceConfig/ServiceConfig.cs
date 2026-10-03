@@ -165,6 +165,69 @@ namespace DBADashServiceConfig
             return false;
         }
 
+        private const string SlowQueryCaptureModeToolTip =
+            "RingBuffer (default) - DBADash_1/DBADash_2 sessions with a ring buffer, read and then emptied by stopping and starting the session.\r\n" +
+            $"EventFile - a {DBADashSource.ManagedSlowQueryXESessionName} session with an event file, read from a saved position.  Never stopped to be emptied, so nothing is lost while it is.  Not available on Azure SQL Database or Managed Instance, which use RingBuffer.\r\n" +
+            "ExistingSession - a session you create and manage.  DBA Dash reads it and never alters it.";
+
+        private const string KeepSlowQuerySessionToolTip =
+            $"Leave the {DBADashSource.ManagedSlowQueryXESessionName} session running when the service stops, and start it with the instance, so slow queries are captured while the service is down and collected when it starts.\r\n" +
+            "EventFile mode only.  Without it, the session is stopped or removed on service stop like the other DBA Dash sessions.";
+
+        private DBADashSource.SlowQueryCaptureModes SelectedSlowQueryCaptureMode =>
+            cboSlowQueryCaptureMode.SelectedItem is DBADashSource.SlowQueryCaptureModes mode
+                ? mode
+                : DBADashSource.SlowQueryCaptureModes.RingBuffer;
+
+        private void CboSlowQueryCaptureMode_SelectedIndexChanged(object sender, EventArgs e) =>
+            UpdateSlowQueryOptionsEnabled();
+
+        /// <summary>Each option on the Slow Queries tab only applies to some modes.</summary>
+        private void UpdateSlowQueryOptionsEnabled()
+        {
+            var enabled = chkSlowQueryThreshold.Checked;
+            var mode = SelectedSlowQueryCaptureMode;
+            cboSlowQueryCaptureMode.Enabled = enabled;
+            chkDualSession.Enabled = enabled && mode == DBADashSource.SlowQueryCaptureModes.RingBuffer;
+            chkPersistXESession.Enabled = enabled && mode != DBADashSource.SlowQueryCaptureModes.ExistingSession;
+            txtSlowQueryXESessionName.Enabled = enabled && mode == DBADashSource.SlowQueryCaptureModes.ExistingSession;
+            chkKeepSlowQuerySessionRunning.Enabled = enabled && mode == DBADashSource.SlowQueryCaptureModes.EventFile;
+            if (!txtSlowQueryXESessionName.Enabled)
+            {
+                errorProvider1.SetError(txtSlowQueryXESessionName, null);
+            }
+        }
+
+        /// <summary>The existing session mode is the only one that needs a name typed - and not the name of a session
+        /// DBA Dash manages itself.</summary>
+        private bool ValidateSlowQueryOptions()
+        {
+            errorProvider1.SetError(txtSlowQueryXESessionName, null);
+            if (!txtSlowQueryXESessionName.Enabled)
+            {
+                return true;
+            }
+
+            string error = null;
+            if (string.IsNullOrWhiteSpace(txtSlowQueryXESessionName.Text))
+            {
+                error = "Enter the name of the extended events session to read slow queries from";
+            }
+            else if (DBADashSource.IsReservedSlowQueryXESessionName(txtSlowQueryXESessionName.Text))
+            {
+                error = "This is a session DBA Dash creates and removes itself.  Use the EventFile or RingBuffer capture mode, or a session of your own with a different name.";
+            }
+            if (error == null)
+            {
+                return true;
+            }
+
+            errorProvider1.SetError(txtSlowQueryXESessionName, error);
+            tab1.SelectedTab = tabSource;
+            tabSrcOptions.SelectedTab = tabExtendedEvents;
+            return false;
+        }
+
         /// <summary>
         /// True if the Deadlocks collection has a schedule that would actually run it, taking the connection's
         /// own schedule overrides into account.  The collection is disabled in the default schedule, so setting
@@ -236,7 +299,7 @@ namespace DBADashServiceConfig
                 return;
             }
 
-            if (!ValidateDeadlockOptions())
+            if (!ValidateDeadlockOptions() || !ValidateSlowQueryOptions())
             {
                 return;
             }
@@ -274,6 +337,9 @@ namespace DBADashServiceConfig
                 UseDualEventSession = chkDualSession.Checked,
                 PersistXESessions = chkPersistXESession.Checked,
                 SlowQueryThresholdMs = chkSlowQueryThreshold.Checked ? (int)numSlowQueryThreshold.Value : -1,
+                SlowQueryCaptureMode = SelectedSlowQueryCaptureMode,
+                SlowQueryXESessionName = txtSlowQueryXESessionName.Text.Trim(),
+                KeepSlowQueryXESessionRunning = chkKeepSlowQuerySessionRunning.Checked,
                 DeadlockXESessionName = SelectedDeadlockXESessionName,
                 BackfillDeadlocksFromSystemHealth = chkBackfillDeadlocks.Checked,
                 RunningQueryPlanThreshold = chkCollectPlans.Checked
@@ -421,6 +487,10 @@ namespace DBADashServiceConfig
                             {
                                 collectionConfig.SourceConnections.Remove(existingConnection);
                                 src.ConnectionID = existingConnection.ConnectionID;
+                                // Not on the form, so carried over rather than reset to the defaults.  A change here
+                                // would also rebuild the event file session for no reason.
+                                src.SlowQueryEventFileMaxSizeMB = existingConnection.SlowQueryEventFileMaxSizeMB;
+                                src.SlowQueryEventFileMaxRolloverFiles = existingConnection.SlowQueryEventFileMaxRolloverFiles;
                                 hasUpdateApproval = true;
                             }
                             else
@@ -795,6 +865,10 @@ namespace DBADashServiceConfig
             if (Upgrade.IsUpgradeIncomplete) return;
 
             cboIOLevel.DataSource = Enum.GetValues(typeof(DBADashSource.IOCollectionLevels));
+            cboSlowQueryCaptureMode.DataSource = Enum.GetValues(typeof(DBADashSource.SlowQueryCaptureModes));
+            toolTip1.SetToolTip(cboSlowQueryCaptureMode, SlowQueryCaptureModeToolTip);
+            toolTip1.SetToolTip(chkKeepSlowQuerySessionRunning, KeepSlowQuerySessionToolTip);
+            UpdateSlowQueryOptionsEnabled();
 
             dgvConnections.AutoGenerateColumns = false;
             dgvConnections.Columns.Add(new DataGridViewTextBoxColumn()
@@ -867,6 +941,38 @@ namespace DBADashServiceConfig
                 DataPropertyName = "SlowQueryTargetMaxMemoryKB",
                 HeaderText = "Slow Query Target Max Memory (KB)",
                 ToolTipText = "Max memory target parameter for ring_buffer"
+            });
+            dgvConnections.Columns.Add(new DataGridViewComboBoxColumn()
+            {
+                DataPropertyName = "SlowQueryCaptureMode",
+                HeaderText = "Slow Query Capture Mode",
+                DataSource = Enum.GetValues(typeof(DBADashSource.SlowQueryCaptureModes)),
+                ValueType = typeof(DBADashSource.SlowQueryCaptureModes),
+                ToolTipText = SlowQueryCaptureModeToolTip
+            });
+            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn()
+            {
+                DataPropertyName = "SlowQueryXESessionName",
+                HeaderText = "Slow Query XE Session",
+                ToolTipText = "The session read in ExistingSession mode.  Read only - DBA Dash never alters it."
+            });
+            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn()
+            {
+                DataPropertyName = "SlowQueryEventFileMaxSizeMB",
+                HeaderText = "Slow Query Event File Size (MB)",
+                ToolTipText = $"Size of each event file in EventFile mode.  Default {DBADashSource.DefaultSlowQueryEventFileMaxSizeMB}MB."
+            });
+            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn()
+            {
+                DataPropertyName = "SlowQueryEventFileMaxRolloverFiles",
+                HeaderText = "Slow Query Event File Count",
+                ToolTipText = $"Number of event files kept in EventFile mode.  Default {DBADashSource.DefaultSlowQueryEventFileMaxRolloverFiles}."
+            });
+            dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn()
+            {
+                DataPropertyName = "KeepSlowQueryXESessionRunning",
+                HeaderText = "Keep Slow Query XE Session Running",
+                ToolTipText = KeepSlowQuerySessionToolTip
             });
             dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn()
             {
@@ -1703,8 +1809,7 @@ namespace DBADashServiceConfig
                 lblSlow.Text = "Extended events trace to capture slow rpc and batch completed events is NOT enabled";
             }
 
-            chkDualSession.Enabled = chkSlowQueryThreshold.Checked;
-            chkPersistXESession.Enabled = chkSlowQueryThreshold.Checked;
+            UpdateSlowQueryOptionsEnabled();
         }
 
         private void LoadConnectionForEdit(DBADashSource src)
@@ -1722,6 +1827,10 @@ namespace DBADashServiceConfig
 
                 txtSnapshotDBs.Text = src.SchemaSnapshotDBs;
                 chkDualSession.Checked = src.UseDualEventSession;
+                cboSlowQueryCaptureMode.SelectedItem = src.SlowQueryCaptureMode;
+                txtSlowQueryXESessionName.Text = src.SlowQueryXESessionName;
+                chkKeepSlowQuerySessionRunning.Checked = src.KeepSlowQueryXESessionRunning;
+                UpdateSlowQueryOptionsEnabled();
                 if (src.RunningQueryPlanThreshold != null)
                 {
                     txtCountThreshold.Text = src.RunningQueryPlanThreshold.CountThreshold.ToString();

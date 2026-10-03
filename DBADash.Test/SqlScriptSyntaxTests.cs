@@ -71,6 +71,79 @@ namespace DBADash.Test
         }
 
         /// <summary>
+        /// The statements the slow query event file session script assembles: the drop to rebuild, the create and
+        /// the start.
+        /// </summary>
+        [TestMethod]
+        public void SlowQueryEventFileSessionScriptBuildsParseableStatements()
+        {
+            var script = SqlStrings.GetSqlString("SlowQueriesEventFileSession");
+            var parser = new TSql160Parser(true);
+            using var reader = new StringReader(script);
+            var fragment = parser.Parse(reader, out var errors);
+            Assert.AreEqual(0, errors.Count, $"The script itself does not parse: {Describe(errors)}");
+
+            // Unlike the deadlock scripts, the create is assembled from other variables - the actions and the
+            // predicates - so those are substituted with what they were declared as rather than a stand-in.
+            var visitor = new DeclaredVariableVisitor();
+            fragment.Accept(visitor);
+            var statements = visitor.Assigned.Where(ContainsStringLiteral)
+                .Select(e => RebuildWithVariables(e, visitor.Declared))
+                .Where(s => s.TrimStart().StartsWith("CREATE", StringComparison.OrdinalIgnoreCase)
+                            || s.TrimStart().StartsWith("DROP", StringComparison.OrdinalIgnoreCase)
+                            || s.TrimStart().StartsWith("ALTER", StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            Assert.AreEqual(3, statements.Count, "Expected the drop, create and start statements");
+            foreach (var statement in statements)
+            {
+                AssertParses($"slow query event file session: {Summarise(statement)}", statement);
+            }
+            var create = statements.Single(s => s.TrimStart().StartsWith("CREATE", StringComparison.OrdinalIgnoreCase));
+            StringAssert.Contains(create, "sqlserver.session_resource_pool_id",
+                "The resource governor actions are the first branch of their CASE");
+        }
+
+        private sealed class DeclaredVariableVisitor : TSqlFragmentVisitor
+        {
+            public Dictionary<string, ScalarExpression> Declared { get; } = new(StringComparer.OrdinalIgnoreCase);
+
+            public List<ScalarExpression> Assigned { get; } = new();
+
+            public override void Visit(SetVariableStatement node)
+            {
+                if (node.Expression != null) Assigned.Add(node.Expression);
+            }
+
+            public override void Visit(DeclareVariableElement node)
+            {
+                if (node.Value == null) return;
+                Declared[node.VariableName.Value] = node.Value;
+                Assigned.Add(node.Value);
+            }
+        }
+
+        /// <summary><see cref="Rebuild"/>, resolving a variable to the value it was declared with, and a CASE to its
+        /// first branch.</summary>
+        private static string RebuildWithVariables(ScalarExpression expression,
+            IReadOnlyDictionary<string, ScalarExpression> declared) => expression switch
+            {
+                StringLiteral literal => literal.Value,
+                BinaryExpression { BinaryExpressionType: BinaryExpressionType.Add } concat =>
+                    RebuildWithVariables(concat.FirstExpression, declared) +
+                    RebuildWithVariables(concat.SecondExpression, declared),
+                ParenthesisExpression parenthesis => RebuildWithVariables(parenthesis.Expression, declared),
+                VariableReference variable when declared.TryGetValue(variable.Name, out var value) &&
+                                                ContainsStringLiteral(value) =>
+                    RebuildWithVariables(value, declared),
+                SearchedCaseExpression caseExpression =>
+                    RebuildWithVariables(caseExpression.WhenClauses[0].ThenExpression, declared),
+                FunctionCall call when string.Equals(call.FunctionName?.Value, "QUOTENAME",
+                    StringComparison.OrdinalIgnoreCase) => "[DBADashSyntaxTest]",
+                _ => "1"
+            };
+
+        /// <summary>
         /// The stop/start that empties a ring buffer.  Built in C# rather than in a script, so it is taken
         /// from the collector itself - both the batch that is sent and the statements that batch assembles.
         /// </summary>

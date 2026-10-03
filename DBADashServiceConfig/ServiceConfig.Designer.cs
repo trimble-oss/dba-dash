@@ -166,6 +166,11 @@ namespace DBADashServiceConfig
             label9 = new System.Windows.Forms.Label();
             lblSlow = new System.Windows.Forms.Label();
             chkPersistXESession = new System.Windows.Forms.CheckBox();
+            lblSlowQueryCaptureMode = new System.Windows.Forms.Label();
+            cboSlowQueryCaptureMode = new System.Windows.Forms.ComboBox();
+            lblSlowQueryXESessionName = new System.Windows.Forms.Label();
+            txtSlowQueryXESessionName = new System.Windows.Forms.TextBox();
+            chkKeepSlowQuerySessionRunning = new System.Windows.Forms.CheckBox();
             tabRunningQueries = new System.Windows.Forms.TabPage();
             chkCollectTempDB = new System.Windows.Forms.CheckBox();
             chkCollectPlans = new System.Windows.Forms.CheckBox();
@@ -1731,6 +1736,11 @@ namespace DBADashServiceConfig
             pnlExtendedEvents.Controls.Add(label9);
             pnlExtendedEvents.Controls.Add(lblSlow);
             pnlExtendedEvents.Controls.Add(chkPersistXESession);
+            pnlExtendedEvents.Controls.Add(lblSlowQueryCaptureMode);
+            pnlExtendedEvents.Controls.Add(cboSlowQueryCaptureMode);
+            pnlExtendedEvents.Controls.Add(lblSlowQueryXESessionName);
+            pnlExtendedEvents.Controls.Add(txtSlowQueryXESessionName);
+            pnlExtendedEvents.Controls.Add(chkKeepSlowQuerySessionRunning);
             pnlExtendedEvents.Dock = System.Windows.Forms.DockStyle.Fill;
             pnlExtendedEvents.Location = new System.Drawing.Point(3, 4);
             pnlExtendedEvents.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
@@ -1792,6 +1802,55 @@ namespace DBADashServiceConfig
             chkPersistXESession.TabIndex = 15;
             chkPersistXESession.Text = "Persist XE sessions (to allow for manual configuration)";
             chkPersistXESession.UseVisualStyleBackColor = true;
+            // 
+            // lblSlowQueryCaptureMode
+            // 
+            lblSlowQueryCaptureMode.AutoSize = true;
+            lblSlowQueryCaptureMode.Location = new System.Drawing.Point(620, 8);
+            lblSlowQueryCaptureMode.Name = "lblSlowQueryCaptureMode";
+            lblSlowQueryCaptureMode.Size = new System.Drawing.Size(103, 20);
+            lblSlowQueryCaptureMode.TabIndex = 19;
+            lblSlowQueryCaptureMode.Text = "Capture mode:";
+            // 
+            // cboSlowQueryCaptureMode
+            // 
+            cboSlowQueryCaptureMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            cboSlowQueryCaptureMode.Enabled = false;
+            cboSlowQueryCaptureMode.FormattingEnabled = true;
+            cboSlowQueryCaptureMode.Location = new System.Drawing.Point(760, 4);
+            cboSlowQueryCaptureMode.Name = "cboSlowQueryCaptureMode";
+            cboSlowQueryCaptureMode.Size = new System.Drawing.Size(250, 28);
+            cboSlowQueryCaptureMode.TabIndex = 20;
+            cboSlowQueryCaptureMode.SelectedIndexChanged += CboSlowQueryCaptureMode_SelectedIndexChanged;
+            // 
+            // lblSlowQueryXESessionName
+            // 
+            lblSlowQueryXESessionName.AutoSize = true;
+            lblSlowQueryXESessionName.Location = new System.Drawing.Point(620, 41);
+            lblSlowQueryXESessionName.Name = "lblSlowQueryXESessionName";
+            lblSlowQueryXESessionName.Size = new System.Drawing.Size(111, 20);
+            lblSlowQueryXESessionName.TabIndex = 21;
+            lblSlowQueryXESessionName.Text = "Session name:";
+            // 
+            // txtSlowQueryXESessionName
+            // 
+            txtSlowQueryXESessionName.Enabled = false;
+            txtSlowQueryXESessionName.Location = new System.Drawing.Point(760, 38);
+            txtSlowQueryXESessionName.Name = "txtSlowQueryXESessionName";
+            txtSlowQueryXESessionName.Size = new System.Drawing.Size(250, 27);
+            txtSlowQueryXESessionName.TabIndex = 22;
+            // 
+            // chkKeepSlowQuerySessionRunning
+            // 
+            chkKeepSlowQuerySessionRunning.AutoSize = true;
+            chkKeepSlowQuerySessionRunning.Enabled = false;
+            chkKeepSlowQuerySessionRunning.Location = new System.Drawing.Point(620, 71);
+            chkKeepSlowQuerySessionRunning.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            chkKeepSlowQuerySessionRunning.Name = "chkKeepSlowQuerySessionRunning";
+            chkKeepSlowQuerySessionRunning.Size = new System.Drawing.Size(321, 24);
+            chkKeepSlowQuerySessionRunning.TabIndex = 23;
+            chkKeepSlowQuerySessionRunning.Text = "Keep session running when service stops";
+            chkKeepSlowQuerySessionRunning.UseVisualStyleBackColor = true;
             // 
             // tabRunningQueries
             // 
@@ -2562,6 +2621,11 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Label lblSlow;
         private System.Windows.Forms.CheckBox chkPersistXESession;
+        private System.Windows.Forms.Label lblSlowQueryCaptureMode;
+        private System.Windows.Forms.ComboBox cboSlowQueryCaptureMode;
+        private System.Windows.Forms.Label lblSlowQueryXESessionName;
+        private System.Windows.Forms.TextBox txtSlowQueryXESessionName;
+        private System.Windows.Forms.CheckBox chkKeepSlowQuerySessionRunning;
         private System.Windows.Forms.TabPage tabRunningQueries;
         private System.Windows.Forms.CheckBox chkCollectPlans;
         private System.Windows.Forms.GroupBox grpRunningQueryThreshold;

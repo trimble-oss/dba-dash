@@ -9,7 +9,13 @@ param(
 	# collection.  Scripts\New-TestDeadlock.ps1 is what creates the database below and deadlocks in it.
 	[bool]$Deadlocks = $false,
 	[string]$DeadlockDatabase = "DBADashDeadlockTest",
-	[string]$DeadlockClientApp = "DBADash CI Deadlock"
+	[string]$DeadlockClientApp = "DBADash CI Deadlock",
+	# Only a leg that ran Scripts\New-TestSlowQuery.ps1 after slow query capture started asserts the capture.
+	[bool]$SlowQueries = $false,
+	[string]$SlowQueryClientApp = "DBADash CI Slow Query",
+	# The service's SlowQueryCursors.json.  Set by a leg in EventFile capture mode, which is the only mode that
+	# keeps a read position - its existence is what shows the event file path ran and committed.
+	[string]$SlowQueryCursorFile
 )
 
 # Get SQL Server version at the script level
@@ -102,6 +108,13 @@ if (-not $isSql2016OrLower) {
     $TableCountGreaterThanZeroTestCases += @{TableName="dbo.DBTuningOptionsHistory"}
 } else {
     Write-Host "Excluding SQL Server 2017+ tables (DBTuningOptions, DBTuningOptionsHistory) for SQL Server 2016 or earlier" -ForegroundColor Yellow
+}
+
+# Only a leg that ran Scripts\New-TestSlowQuery.ps1 has slow queries to find
+if ($SlowQueries) {
+    Write-Host "Adding slow query tables to test cases" -ForegroundColor Green
+    $TableCountGreaterThanZeroTestCases += @{TableName="dbo.SlowQueries"}
+    $TableCountGreaterThanZeroTestCases += @{TableName="dbo.SlowQueriesStats"}
 }
 
 Describe 'CI Workflow checks' {
@@ -253,6 +266,45 @@ Describe 'CI Workflow checks' {
 		# seven charts empty while every table above still had rows.
 		$results = Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "DECLARE @IDs dbo.IDs; INSERT INTO @IDs(ID) SELECT InstanceID FROM dbo.Instances; SELECT COUNT(*) cnt FROM dbo.DeadlockScope(@IDs, NULL, '19000101', '99991231 23:59:59.999', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0)"
 		$results.cnt | Should -BeGreaterThan 0
+	}
+
+	# Slow query capture.  Skipped unless this leg ran Scripts\New-TestSlowQuery.ps1, which runs a slow batch
+	# and a slow RPC as $SlowQueryClientApp.  The same assertions hold whichever capture mode the leg uses -
+	# the modes differ in how the events are read, not in what reaches the repository.
+	# dbo.SlowQueries and dbo.SlowQueriesStats having rows is checked with the other table counts.
+	It 'Slow batch captured' -Skip:(-not $SlowQueries) {
+		$results = Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "SELECT COUNT(*) cnt FROM dbo.SlowQueries WHERE client_app_name = '$SlowQueryClientApp' AND event_type = 'sql_batch_completed' AND text LIKE '%DBADash CI slow batch%'"
+		$results.cnt | Should -BeGreaterThan 0
+	}
+	It 'Slow RPC captured' -Skip:(-not $SlowQueries) {
+		$results = Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "SELECT COUNT(*) cnt FROM dbo.SlowQueries WHERE client_app_name = '$SlowQueryClientApp' AND event_type = 'rpc_completed' AND text LIKE '%DBADash CI slow rpc%'"
+		$results.cnt | Should -BeGreaterThan 0
+	}
+	It 'Slow query metrics carried through' -Skip:(-not $SlowQueries) {
+		# Duration is in microseconds and every test query waits longer than the 1000ms threshold, so anything
+		# under that means the value was lost or mis-scaled on the way in.  The timestamp is parsed as UTC; the
+		# window is wide enough for CI clock skew.
+		$results = Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "SELECT COUNT(*) cnt FROM dbo.SlowQueries WHERE client_app_name = '$SlowQueryClientApp' AND (duration IS NULL OR duration < 1000000 OR session_id IS NULL OR timestamp < DATEADD(HOUR, -2, GETUTCDATE()) OR timestamp > DATEADD(MINUTE, 5, GETUTCDATE()))"
+		$results.cnt | Should -Be 0
+	}
+	It 'Slow query capture excludes its own reads' -Skip:(-not $SlowQueries) {
+		# Every capture session filters out the DBADashXE application name the collection connects with.  The
+		# reads themselves can run long, so a missing filter would show up here.
+		$results = Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "SELECT COUNT(*) cnt FROM dbo.SlowQueries WHERE client_app_name = 'DBADashXE'"
+		$results.cnt | Should -Be 0
+	}
+	It 'Slow query sessions removed when the service stopped' -Skip:(-not $SlowQueries) {
+		# Neither PersistXESessions nor KeepSlowQueryXESessionRunning is set, so stopping the service drops the
+		# capture sessions in either mode.  DBADash_Deadlocks is deliberately left alone.
+		$results = Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database "master" -TrustServerCertificate -Query "SELECT COUNT(*) cnt FROM sys.server_event_sessions WHERE name IN (N'DBADash_1', N'DBADash_2', N'DBADash_SlowQueries')"
+		$results.cnt | Should -Be 0
+	}
+	It 'Event file read position saved' -Skip:(-not $SlowQueryCursorFile) {
+		# Only EventFile mode keeps a position, and it is only written once a run's data has reached the
+		# repository - so the file existing with an entry shows that path ran end to end.
+		Test-Path $SlowQueryCursorFile | Should -BeTrue
+		$cursors = Get-Content $SlowQueryCursorFile -Raw | ConvertFrom-Json
+		@($cursors.PSObject.Properties | Where-Object { $_.Name -like '*|DBADash_SlowQueries' -and $_.Value.FileName -like '*DBADash_SlowQueries*.xel' }).Count | Should -BeGreaterThan 0
 	}
 
 }

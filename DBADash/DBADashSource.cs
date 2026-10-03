@@ -3,6 +3,7 @@ using Microsoft.Data.SqlClient;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using static DBADash.DBADashConnection;
@@ -204,6 +205,117 @@ namespace DBADash
         {
             get => SourceConnection is { Type: ConnectionType.SQL } && persistXESessions; set => persistXESessions = value;
         }
+
+        /// <summary>How the SlowQueries collection captures events - see <see cref="SlowQueryCaptureModes"/>.</summary>
+        [JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
+        public enum SlowQueryCaptureModes
+        {
+            /// <summary>
+            /// The DBADash_1 session (and DBADash_2 in dual session mode) with a ring buffer target that is read in
+            /// full and then emptied by stopping and starting the session.  The default, and the only mode that
+            /// needs nothing on disk - so the one Azure SQL Database and Managed Instance always use.
+            /// </summary>
+            RingBuffer,
+
+            /// <summary>
+            /// The <see cref="ManagedSlowQueryXESessionName"/> session with an event_file target, read from a resume
+            /// cursor so each run reads only what is new and the session is never stopped to empty it.  On-premises
+            /// only: Azure SQL Database and Managed Instance fall back to <see cref="RingBuffer"/>.
+            /// </summary>
+            EventFile,
+
+            /// <summary>
+            /// A session the DBA already runs, named by <see cref="SlowQueryXESessionName"/>.  Read only - never
+            /// created, altered, stopped or emptied.  Its own filters decide what it captures; the configured
+            /// threshold is applied as it is read.
+            /// </summary>
+            ExistingSession
+        }
+
+        /// <summary>The session DBA Dash creates and reads in <see cref="SlowQueryCaptureModes.EventFile"/> mode.</summary>
+        public const string ManagedSlowQueryXESessionName = "DBADash_SlowQueries";
+
+        /// <summary>
+        /// The sessions DBA Dash creates for slow query capture - the ring buffer mode's two and the event file mode's
+        /// one.  None of them can be read in <see cref="SlowQueryCaptureModes.ExistingSession"/> mode: DBA Dash drops
+        /// them when it cleans up after a mode switch and on service stop, which would remove the session the existing
+        /// session mode is meant to read and never alter.
+        /// </summary>
+        public static readonly IReadOnlyList<string> ReservedSlowQueryXESessionNames =
+            new[] { "DBADash_1", "DBADash_2", ManagedSlowQueryXESessionName };
+
+        /// <summary>True when <paramref name="sessionName"/> is one of <see cref="ReservedSlowQueryXESessionNames"/>.
+        /// Session names aren't case sensitive on the instance, so neither is this.</summary>
+        public static bool IsReservedSlowQueryXESessionName(string sessionName) =>
+            !string.IsNullOrWhiteSpace(sessionName) &&
+            ReservedSlowQueryXESessionNames.Contains(sessionName.Trim(), StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// How slow queries are captured.  <see cref="SlowQueryCaptureModes.RingBuffer"/> is the default and is the
+        /// behaviour from before the other modes existed.
+        /// </summary>
+        [DefaultValue(SlowQueryCaptureModes.RingBuffer)]
+        public SlowQueryCaptureModes SlowQueryCaptureMode
+        {
+            get => SourceConnection is { Type: ConnectionType.SQL } ? slowQueryCaptureMode : SlowQueryCaptureModes.RingBuffer;
+            set => slowQueryCaptureMode = value;
+        }
+
+        private SlowQueryCaptureModes slowQueryCaptureMode = SlowQueryCaptureModes.RingBuffer;
+
+        /// <summary>The session read in <see cref="SlowQueryCaptureModes.ExistingSession"/> mode.  Ignored otherwise.</summary>
+        [DefaultValue("")]
+        public string SlowQueryXESessionName
+        {
+            get => SourceConnection is { Type: ConnectionType.SQL } ? slowQueryXESessionName?.Trim() ?? string.Empty : string.Empty;
+            set => slowQueryXESessionName = value;
+        }
+
+        private string slowQueryXESessionName;
+
+        /// <summary>max_file_size, in MB, of the event file in <see cref="SlowQueryCaptureModes.EventFile"/> mode.</summary>
+        [DefaultValue(DefaultSlowQueryEventFileMaxSizeMB)]
+        public int SlowQueryEventFileMaxSizeMB { get; set; } = DefaultSlowQueryEventFileMaxSizeMB;
+
+        public const int DefaultSlowQueryEventFileMaxSizeMB = 20;
+
+        /// <summary>max_rollover_files of the event file in <see cref="SlowQueryCaptureModes.EventFile"/> mode.  Together
+        /// with <see cref="SlowQueryEventFileMaxSizeMB"/> this is how much the session can hold before the oldest
+        /// events are lost - which only matters when the service isn't collecting.</summary>
+        [DefaultValue(DefaultSlowQueryEventFileMaxRolloverFiles)]
+        public int SlowQueryEventFileMaxRolloverFiles { get; set; } = DefaultSlowQueryEventFileMaxRolloverFiles;
+
+        public const int DefaultSlowQueryEventFileMaxRolloverFiles = 5;
+
+        /// <summary>
+        /// Leave the <see cref="ManagedSlowQueryXESessionName"/> session running when the service stops, and start it
+        /// with the instance (STARTUP_STATE=ON), so slow queries that run while the service is down are still captured
+        /// and collected when it comes back.  Off by default: some would rather DBA Dash left nothing running on the
+        /// instance while the service is stopped.  When off, the session is stopped or dropped on service stop like
+        /// the ring buffer sessions, as <see cref="PersistXESessions"/> says.  Only applies in
+        /// <see cref="SlowQueryCaptureModes.EventFile"/> mode.
+        /// </summary>
+        [DefaultValue(false)]
+        public bool KeepSlowQueryXESessionRunning { get; set; }
+
+        /// <summary>
+        /// The capture mode that actually applies to an instance.  Event file mode needs a local event file, which
+        /// Azure SQL Database and Managed Instance don't allow without blob storage, so those use the ring buffer.
+        /// </summary>
+        public SlowQueryCaptureModes GetEffectiveSlowQueryCaptureMode(bool isAzureDB, bool isManagedInstance) =>
+            SlowQueryCaptureMode == SlowQueryCaptureModes.EventFile && (isAzureDB || isManagedInstance)
+                ? SlowQueryCaptureModes.RingBuffer
+                : SlowQueryCaptureMode;
+
+        /// <summary>
+        /// True when the service should leave the managed event file session alone on shutdown.  Only in event file
+        /// mode with slow query capture switched on: otherwise the session is a leftover - from a mode switch, or from
+        /// capture being switched off - and is cleaned up like the others.
+        /// </summary>
+        [JsonIgnore]
+        public bool IsSlowQueryXESessionKeptRunning =>
+            KeepSlowQueryXESessionRunning && IsSlowQueryCollectionEnabled &&
+            SlowQueryCaptureMode == SlowQueryCaptureModes.EventFile;
 
         /// <summary>
         /// The extended events session the Deadlocks collection reads <c>xml_deadlock_report</c> from.  Four

@@ -141,7 +141,7 @@ namespace DBADash.Messaging
                 // The caller uploads this to the agent's S3 path and reports a failure there to the user, who can
                 // run the collection again - the collector does not outlive the return, so the read position moves
                 // here rather than after that upload.
-                collector.CommitDeadlockCursor();
+                collector.CommitReadPositions();
                 op.Complete();
                 return collector.Data;
             }
@@ -149,7 +149,7 @@ namespace DBADash.Messaging
             {
                 var fileName = DBADashSource.GenerateFileName(src.SourceConnection.ConnectionForFileName);
                 await DestinationHandling.WriteAllDestinationsAsync(collector.Data, src, fileName, cfg);
-                collector.CommitDeadlockCursor();
+                collector.CommitReadPositions();
                 if (collector.Exceptions.Any())
                 {
                     throw new AggregateException(collector.Exceptions);

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Xml.Linq;
 
@@ -97,17 +98,37 @@ namespace DBADash
 
             foreach (var evt in el.Elements("event"))
             {
-                var r = dt.Rows.Add();
-                r["event_type"] = evt.Attribute("name")?.Value!;
-                var timestamp = evt.Attribute("timestamp")?.Value;
-                if (timestamp == null) continue;
-                r["timestamp"] = DateTime.Parse(timestamp).ToUniversalTime();
-
-                ProcessEventElements(evt, r, "data");
-                ProcessEventElements(evt, r, "action");
+                AddEvent(dt, evt);
             }
 
             return dt;
+        }
+
+        /// <summary>
+        /// The same table as <see cref="XEStrToDT(XElement, out RingBufferTargetAttributes)"/>, from individual
+        /// &lt;event&gt; elements rather than a ring buffer's target_data - for the event file reads, where each row
+        /// is a single event.
+        /// </summary>
+        public static DataTable XEEventsToDT(IEnumerable<XElement> events)
+        {
+            var dt = GetXELSchema();
+            foreach (var evt in events)
+            {
+                AddEvent(dt, evt);
+            }
+            return dt;
+        }
+
+        private static void AddEvent(DataTable dt, XElement evt)
+        {
+            var r = dt.Rows.Add();
+            r["event_type"] = evt.Attribute("name")?.Value!;
+            var timestamp = evt.Attribute("timestamp")?.Value;
+            if (timestamp == null) return;
+            r["timestamp"] = DateTime.Parse(timestamp).ToUniversalTime();
+
+            ProcessEventElements(evt, r, "data");
+            ProcessEventElements(evt, r, "action");
         }
 
         private static void ProcessEventElements(XContainer evt, DataRow row, string elementType)

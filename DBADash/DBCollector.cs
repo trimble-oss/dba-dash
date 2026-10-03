@@ -1,4 +1,5 @@
 ﻿using DBADash.Deadlocks;
+using DBADash.SlowQueries;
 using DBADash.InstanceMetadata;
 using Microsoft.Data.SqlClient;
 using Microsoft.Management.Infrastructure;
@@ -148,6 +149,12 @@ namespace DBADash
         /// been written.  See <see cref="CommitDeadlockCursor"/>.
         /// </summary>
         private (string Key, DeadlockCollectionState State)? pendingDeadlockCursor;
+
+        /// <summary>
+        /// Where this run's slow query read got to, for the modes that read an event file or an existing session.
+        /// Held until written, as <see cref="pendingDeadlockCursor"/> is.  See <see cref="CommitReadPositions"/>.
+        /// </summary>
+        private (string Key, SlowQueryCollectionState State)? pendingSlowQueryCursor;
 
         // SqlClient connections never issue SET ARITHABORT ON, and ARITHABORT is only implicitly ON when
         // ANSI_WARNINGS is ON *and* the connection database's compatibility level is >= 90.  On instances
@@ -591,6 +598,9 @@ namespace DBADash
                 var removeSQL = IsAzureDB ? SqlStrings.RemoveEventSessionsAzure : SqlStrings.RemoveEventSessions;
                 await using var cn = new SqlConnection(ConnectionString);
                 await using var cmd = new SqlCommand(removeSQL, cn);
+                // The event file mode session can be left running on service stop - see KeepSlowQueryXESessionRunning.
+                // The Azure scripts don't use it: that session is never created there.
+                cmd.Parameters.Add("@KeepSlowQuerySession", SqlDbType.Bit).Value = Source.IsSlowQueryXESessionKeptRunning;
                 await cn.OpenAsync();
                 await cmd.ExecuteNonQueryAsync();
             }
@@ -603,6 +613,7 @@ namespace DBADash
                 var removeSQL = IsAzureDB ? SqlStrings.StopEventSessionsAzure : SqlStrings.StopEventSessions;
                 await using var cn = new SqlConnection(ConnectionString);
                 await using var cmd = new SqlCommand(removeSQL, cn);
+                cmd.Parameters.Add("@KeepSlowQuerySession", SqlDbType.Bit).Value = Source.IsSlowQueryXESessionKeptRunning;
                 await cn.OpenAsync();
                 await cmd.ExecuteNonQueryAsync();
             }
@@ -1100,6 +1111,21 @@ namespace DBADash
             var (key, state) = pendingDeadlockCursor.Value;
             DeadlockCursorStore.Commit(key, state);
             pendingDeadlockCursor = null;
+        }
+
+        /// <summary>
+        /// Once written to the destination, moves every read position this run holds forward - the deadlock cursor
+        /// (see <see cref="CommitDeadlockCursor"/>) and the slow query one.  The slow query repository import only
+        /// inserts events newer than those it holds, so a re-read after a failed write costs only the read.  The
+        /// default ring buffer mode has no position: its buffer is emptied as it is read, as it always has been.
+        /// </summary>
+        public void CommitReadPositions()
+        {
+            CommitDeadlockCursor();
+            if (pendingSlowQueryCursor == null) return;
+            var (key, state) = pendingSlowQueryCursor.Value;
+            SlowQueryCursorStore.Commit(key, state);
+            pendingSlowQueryCursor = null;
         }
 
         /// <summary>
@@ -1614,36 +1640,6 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             return dt;
         }
 
-        private async Task<XElement> GetSlowQueriesAsync()
-        {
-            SqlConnectionStringBuilder builder = new(ConnectionString)
-            {
-                ApplicationName = "DBADashXE"
-            };
-            var slowQueriesSQL = IsAzureDB ? SqlStrings.SlowQueriesAzure : SqlStrings.SlowQueries;
-            await using var cn = new SqlConnection(builder.ConnectionString);
-            await using var cmd = new SqlCommand(slowQueriesSQL, cn) { CommandTimeout = CollectionType.SlowQueries.GetCommandTimeout() };
-            await cn.OpenAsync();
-            bool collectGroupIDAndPoolID = IsResourceGovernorApplicable() && IsResourceGovernorInUse();
-            cmd.Parameters.AddWithValue("SlowQueryThreshold", Source.SlowQueryThresholdMs * 1000);
-            cmd.Parameters.AddWithValue("MaxMemory", Source.SlowQuerySessionMaxMemoryKB);
-            cmd.Parameters.AddWithValue("UseDualSession", Source.UseDualEventSession);
-            cmd.Parameters.AddWithValue("MaxTargetMemory", Source.SlowQueryTargetMaxMemoryKB);
-            cmd.Parameters.AddWithValue("CollectGroupIDAndPoolID", collectGroupIDAndPoolID);
-            await using var reader = await cmd.ExecuteReaderAsync(CommandBehavior.SequentialAccess | CommandBehavior.SingleResult | CommandBehavior.SingleRow);
-            if (!await reader.ReadAsync() || reader.IsDBNull(0))
-                return null;
-            using var textReader = reader.GetTextReader(0);
-            var settings = new System.Xml.XmlReaderSettings
-            {
-                Async = true,
-                DtdProcessing = System.Xml.DtdProcessing.Prohibit,
-                XmlResolver = null,
-            };
-            using var xmlReader = System.Xml.XmlReader.Create(textReader, settings);
-            return await XElement.LoadAsync(xmlReader, LoadOptions.None, CancellationToken.None);
-        }
-
         private async Task CollectDeadlocksAsync()
         {
             if (!IsXESupported) return;
@@ -1720,20 +1716,80 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             }
         }
 
+        /// <summary>
+        /// Captures slow queries in the mode configured for the connection - see <see cref="SlowQueryCollector"/>.  The
+        /// ring buffer mode is the default and behaves exactly as it always has.
+        /// </summary>
         private async Task CollectSlowQueriesAsync()
         {
             if (!IsXESupported) return;
-            var result = await GetSlowQueriesAsync();
-            if (result == null)
+            var mode = Source.GetEffectiveSlowQueryCaptureMode(IsAzureDB, IsManagedInstance);
+            if (mode != Source.SlowQueryCaptureMode)
             {
-                throw new Exception("Result is NULL");
+                LogSlowQueryModeFallbackOnce();
             }
-            var dt = XETools.XEStrToDT(result, out RingBufferTargetAttributes ringBufferAtt);
+            if (!IsAzureDB)
+            {
+                await SlowQueryCollector.RemoveLeftoverSessionsOnceAsync(ConnectionString, ConnectionID,
+                    mode == DBADashSource.SlowQueryCaptureModes.EventFile);
+            }
+
+            SlowQueryCollector.Result result;
+            switch (mode)
+            {
+                case DBADashSource.SlowQueryCaptureModes.EventFile:
+                    {
+                        var collectGroupIDAndPoolID = IsResourceGovernorApplicable() && IsResourceGovernorInUse();
+                        var cursorKey = ConnectionID + "|" + DBADashSource.ManagedSlowQueryXESessionName;
+                        var state = SlowQueryCursorStore.GetPending(cursorKey);
+                        result = await SlowQueryCollector.CollectEventFileAsync(ConnectionString,
+                            Source.SlowQueryThresholdMs, Source.SlowQuerySessionMaxMemoryKB,
+                            Math.Max(1, Source.SlowQueryEventFileMaxSizeMB), Math.Max(1, Source.SlowQueryEventFileMaxRolloverFiles),
+                            Source.KeepSlowQueryXESessionRunning, collectGroupIDAndPoolID, state,
+                            CancellationToken.None);
+                        // Held until the data is written, as for deadlocks - see CommitReadPositions.
+                        pendingSlowQueryCursor = (cursorKey, state);
+                        break;
+                    }
+                case DBADashSource.SlowQueryCaptureModes.ExistingSession:
+                    {
+                        // Keyed by session as well as instance: a cursor in one session's file set means nothing in
+                        // another's.
+                        var cursorKey = ConnectionID + "|" + Source.SlowQueryXESessionName;
+                        var state = SlowQueryCursorStore.GetPending(cursorKey);
+                        result = await SlowQueryCollector.CollectExistingSessionAsync(ConnectionString,
+                            Source.SlowQueryXESessionName, IsAzureDB, IsManagedInstance, Source.SlowQueryThresholdMs,
+                            state, CancellationToken.None);
+                        pendingSlowQueryCursor = (cursorKey, state);
+                        break;
+                    }
+                default:
+                    result = await SlowQueryCollector.CollectRingBufferAsync(ConnectionString, IsAzureDB,
+                        Source.SlowQueryThresholdMs, Source.SlowQuerySessionMaxMemoryKB, Source.UseDualEventSession,
+                        Source.SlowQueryTargetMaxMemoryKB,
+                        IsResourceGovernorApplicable() && IsResourceGovernorInUse());
+                    break;
+            }
+
+            var dt = result.SlowQueries;
             dt.TableName = "SlowQueries";
             AddDT(dt);
-            var dtAtt = ringBufferAtt.GetTable();
+            var dtAtt = result.Stats;
             dtAtt.TableName = "SlowQueriesStats";
             AddDT(dtAtt);
+        }
+
+        /// <summary>Connections already warned that event file mode isn't available to them, so the warning isn't
+        /// repeated on every collection for the life of the service.</summary>
+        private static readonly ConcurrentDictionary<string, byte> SlowQueryModeFallbackLogged =
+            new(StringComparer.OrdinalIgnoreCase);
+
+        private void LogSlowQueryModeFallbackOnce()
+        {
+            if (!SlowQueryModeFallbackLogged.TryAdd(ConnectionID ?? string.Empty, 0)) return;
+            Log.Warning("Slow query capture for {instance} is set to {mode}, which needs a local event file - not available on {edition}.  Using the ring buffer instead.",
+                instanceName, Source.SlowQueryCaptureMode,
+                IsAzureDB ? "Azure SQL Database" : "Azure SQL Managed Instance");
         }
 
         private async Task CollectServerExtraPropertiesAsync()
