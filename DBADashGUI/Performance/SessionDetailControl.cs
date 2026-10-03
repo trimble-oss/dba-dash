@@ -16,6 +16,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.Integration;
+using static DBADashGUI.Performance.QueryInsights;
 
 namespace DBADashGUI.Performance
 {
@@ -80,9 +81,8 @@ namespace DBADashGUI.Performance
         // session) keeps context about other queries, and so peer counts survive a grid refresh.
         private DataTable Snapshot;
 
-        // Cached fonts for insight cards, shared across labels and disposed when the form closes.
+        // Cached bold font for the overview grid section headers, disposed when the form closes.
         private Font insightBoldFont;
-        private Font insightRegularFont;
 
         /// <param name="sourceRow">The running queries snapshot row (from the grid) to display.</param>
         /// <param name="context">The current context - used for object execution drill down.</param>
@@ -96,7 +96,6 @@ namespace DBADashGUI.Performance
             Disposed += (_, _) =>
             {
                 insightBoldFont?.Dispose();
-                insightRegularFont?.Dispose();
             };
         }
 
@@ -802,7 +801,7 @@ DBCC FREEPROCCACHE({planHandle});";
         /// <summary>True if this query is blocked by another session.</summary>
         private bool IsBlocked() =>
             Row.Row.Table.Columns.Contains("blocking_session_id") &&
-            Convert.ToInt32(Row["blocking_session_id"].DBNullToNull() ?? 0) != 0;
+            Convert.ToInt32(Row["blocking_session_id"].DBNullToNull() ?? 0) > 0; // Negative ids aren't sessions (orphaned DTC, latch owner unknown etc.)
 
         /// <summary>True if this query has a wait resource that can be deciphered.</summary>
         private bool HasWaitResource() =>
@@ -976,39 +975,11 @@ DBCC FREEPROCCACHE({planHandle});";
 
             SizeOverviewGrid(dgv); // Size the Attribute column to its content and let Value fill the rest
             page.ApplyTheme();
-            ApplyInsightColors(insightsPanel); // Re-apply severity colours after theming overwrites label ForeColor
             StyleOverviewSections(dgv); // Re-apply section header styling after theming
             HighlightMemoryGrant(dgv); // Draw attention to a large memory grant
         }
 
         #region Overview insights
-
-        private enum InsightSeverity
-        {
-            Info,
-            Warning,
-            Critical
-        }
-
-        private sealed class Insight
-        {
-            public InsightSeverity Severity { get; }
-            public string Text { get; }
-
-            /// <summary>Optional in-app actions keyed by the <c>action:&lt;key&gt;</c> links used in <see cref="Text"/>.</summary>
-            public IReadOnlyDictionary<string, Action> Actions { get; }
-
-            /// <summary>Optional hover tooltips keyed by the full link url (e.g. <c>action:&lt;key&gt;</c>) used in <see cref="Text"/>.</summary>
-            public IReadOnlyDictionary<string, string> Tooltips { get; }
-
-            public Insight(InsightSeverity severity, string text, IReadOnlyDictionary<string, Action> actions = null, IReadOnlyDictionary<string, string> tooltips = null)
-            {
-                Severity = severity;
-                Text = text;
-                Actions = actions;
-                Tooltips = tooltips;
-            }
-        }
 
         /// <summary>Inspect the row and surface any notable issues (blocking, sleeping open transactions, memory waits, etc.).</summary>
         private List<Insight> BuildInsights(bool? rcsiEnabled = null, int resourceSemaphoreWaiters = 0, int allocationContentionPeers = 0)
@@ -1026,7 +997,7 @@ DBCC FREEPROCCACHE({planHandle});";
             // Allocation-page (PFS/GAM/SGAM) latch contention. Detected early because RCSI advice doesn't apply to it -
             // RCSI only helps reader/writer lock blocking, not allocation-page latch contention.
             var pageType = RowStr("page_type");
-            var isAllocationPage = pageType is "PFS" or "GAM" or "SGAM";
+            var isAllocationPage = IsAllocationContention(pageType, waitType);
 
             // Cases where the RCSI recommendation shouldn't be shown even when there is reader/writer blocking:
             //  - allocation-page latch contention (see above) - RCSI only relieves row/key lock blocking
@@ -1039,8 +1010,16 @@ DBCC FREEPROCCACHE({planHandle});";
             var waitMs = RowDouble("wait_time");
             var waited = WaitedSuffix(waitMs);
 
-            // This query is blocked
-            if (blockingSessionId != 0)
+            // This query is blocked by a transaction that has no session (orphaned DTC / deferred recovery).
+            // -4/-5 are page latch waits where the latch owner isn't known/tracked - not blocking, so not reported here.
+            var specialBlocker = SpecialBlockerDescription(blockingSessionId);
+            if (specialBlocker != null)
+            {
+                list.Add(new Insight(InsightSeverity.Critical, $"This query is blocked by {specialBlocker}{waited}."));
+            }
+
+            // This query is blocked by another session
+            if (blockingSessionId > 0)
             {
                 var actions = new Dictionary<string, Action>(StringComparer.OrdinalIgnoreCase)
                 {
@@ -1145,22 +1124,23 @@ DBCC FREEPROCCACHE({planHandle});";
                         $"This query is waiting on a {pageType} allocation page in {db}{waited}, which looks like allocation contention.{otherWaitersNote}{remedy}"));
                 }
             }
-            else if (IsTempDbWait())
+            else if (IsTempDbWait() && IsPageLatchWait(waitType))
             {
+                // Lock waits on tempdb objects are blocking (covered above) and PAGEIOLATCH is I/O - neither is tempdb contention.
                 list.Add(new Insight(WaitSeverity(waitMs, TempDbCriticalMs),
-                    $"This query is waiting on a resource in tempdb (database_id 2){waited}. This isn't allocation contention (the wait isn't on a GAM/SGAM/PFS allocation page) - it could be metadata contention. Use the 'Decipher Wait Resource' tab to inspect the exact resource."));
+                    $"This query is waiting on a page latch in tempdb ({WaitTypeLink(waitType)}){waited}. {TempDbPageLatchExplanation} Use the 'Wait Resource' tab to inspect the exact resource."));
             }
 
             // Compilation waits
             if (RowBool("wait_is_compile") == true)
             {
                 list.Add(new Insight(WaitSeverity(waitMs, CompileLockCriticalMs),
-                    $"This query is blocked waiting to compile a query plan (a compile lock){waited}. Compile locks serialize when multiple sessions try to compile the same object at the same time - often seen with unparameterized ad-hoc queries."));
+                    $"This query is blocked waiting on a compile lock{waited}. {CompileLockExplanation}"));
             }
             if (waitType == "RESOURCE_SEMAPHORE_QUERY_COMPILE")
             {
                 list.Add(new Insight(WaitSeverity(waitMs, CompileMemoryCriticalMs),
-                    $"This query is waiting for memory to compile its plan ({WaitTypeLink(waitType)}){waited}. This often indicates memory pressure or a large volume of ad-hoc/uncached queries."));
+                    $"This query is waiting for memory to compile its plan ({WaitTypeLink(waitType)}){waited}. {CompileMemoryExplanation}"));
             }
 
             // Waiting for a memory grant to run
@@ -1261,58 +1241,14 @@ DBCC FREEPROCCACHE({planHandle});";
             }
         }
 
-        /// <summary>
-        /// Render a wait type as a markdown link to its sqlskills.com reference page (used by CreateContentLabel).
-        /// </summary>
-        private static string WaitTypeLink(string waitType)
-        {
-            if (string.IsNullOrEmpty(waitType)) return waitType;
-            return $"[{waitType}](https://www.sqlskills.com/help/waits/{waitType.ToLowerInvariant()}/)";
-        }
-
         // Current SPID is performing a pure read that RCSI can unblock.
         private bool IsReadingCommand() => IsReadCommand(RowStr("command"));
 
-        // Prefix check shared by IsReadingCommand and the blocked-reader peer count. SELECT is the obvious read;
-        // CONDITIONAL is a control-flow predicate (e.g. IF EXISTS(SELECT ...)) that reads under the session's
-        // isolation level and takes no modification locks, so RCSI helps it the same way.
-        private static bool IsReadCommand(string command)
-        {
-            var c = command?.Trim();
-            return c?.StartsWith("SELECT", StringComparison.OrdinalIgnoreCase) == true ||
-                   c?.StartsWith("CONDITIONAL", StringComparison.OrdinalIgnoreCase) == true;
-        }
-
         // RCSI only changes the behaviour of the default Read Committed isolation level, so the advice only applies
-        // when the session is running under Read Committed. Note SQL Server still reports isolation level 'ReadCommitted'
-        // when RCSI is enabled, so this correctly gates the recommendation. Higher levels (Repeatable Read / Serializable),
+        // when the session is running under Read Committed. Higher levels (Repeatable Read / Serializable),
         // Snapshot, or locking hints (HOLDLOCK/UPDLOCK/XLOCK) are not helped by RCSI.
         private bool IsReadCommittedIsolation() =>
-            IsReadCommittedIsolation(RowStr("transaction_isolation_level"));
-
-        private static bool IsReadCommittedIsolation(string isolationLevel) =>
-            string.Equals(isolationLevel, "ReadCommitted", StringComparison.OrdinalIgnoreCase);
-
-
-        private static string Pluralize(int count, string singular, string plural) =>
-            count + " " + (count == 1 ? singular : plural);
-
-        // Wait time (ms) at or above which each kind of wait is escalated from a warning to a critical issue.
-        // Thresholds vary by wait type - e.g. an allocation-page latch should never take long, whereas queuing
-        // for a memory grant can legitimately take longer.
-        private const double AllocationCriticalMs = 1_000;      // PFS/GAM/SGAM latch - should be sub-second
-        private const double TempDbCriticalMs = 5_000;          // Other tempdb contention
-        private const double CompileLockCriticalMs = 5_000;     // Compile lock (serialized compilation)
-        private const double CompileMemoryCriticalMs = 10_000;  // Waiting for memory to compile
-        private const double MemoryGrantCriticalMs = 30_000;    // Queued for a memory grant to run
-        private const double AsyncNetworkIoCriticalMs = 30_000; // Client not consuming results (rarely a server problem)
-
-        // Memory grant (KB) at or above which a running query is flagged as having a large grant.
-        private const double LargeMemoryGrantKB = 512d * 1024;      // 512 MB
-
-        // Number of other sessions also hitting allocation-page contention in the same database at or above which the
-        // wait is treated as widespread contention (rather than an isolated blip) even when this query's wait time is 0.
-        private const int AllocationContentionWaiterThreshold = 3;
+            QueryInsights.IsReadCommittedIsolation(RowStr("transaction_isolation_level"));
 
         // Shared RCSI recommendation, used both when this query is a blocked reader and when it is a writer blocking
         // readers. Kept in one place so the wording stays consistent. The message carries a clickable footnote link
@@ -1336,29 +1272,6 @@ DBCC FREEPROCCACHE({planHandle});";
 
         /// <summary>True when this query is running with a memory grant large enough to be worth highlighting.</summary>
         private bool HasLargeMemoryGrant() => RowDouble("granted_query_memory_kb") >= LargeMemoryGrantKB;
-
-        /// <summary>Format a size given in KB as a human-readable string (MB/GB).</summary>
-        private static string HumanizeKb(double kb)
-        {
-            if (kb >= 1024 * 1024)
-            {
-                return $"{kb / (1024 * 1024):0.##} GB";
-            }
-            return kb >= 1024 ? $"{kb / 1024:0.##} MB" : $"{kb:0.##} KB";
-        }
-
-        private static InsightSeverity WaitSeverity(double waitMs, double criticalThresholdMs) =>
-            waitMs >= criticalThresholdMs ? InsightSeverity.Critical : InsightSeverity.Warning;
-
-        private static string HumanizeMs(double ms) =>
-            ms <= 0 ? null : TimeSpan.FromMilliseconds(ms).Humanize(precision: 2, maxUnit: TimeUnit.Day);
-
-        /// <summary>" (waiting X)" suffix for the current wait time, or empty when there is no meaningful wait.</summary>
-        private static string WaitedSuffix(double waitMs)
-        {
-            var human = HumanizeMs(waitMs);
-            return human == null ? string.Empty : $" (waiting {human})";
-        }
 
         /// <summary>" for X" suffix describing the total wait time of the sessions blocked by this query.</summary>
         private string BlockWaitSuffix()
@@ -1389,7 +1302,7 @@ DBCC FREEPROCCACHE({planHandle});";
 
         /// <summary>True when this session is involved in blocking (blocked and/or blocking others).</summary>
         private bool IsBlockingScenario() =>
-            RowInt("blocking_session_id") != 0 ||
+            RowInt("blocking_session_id") > 0 ||
             RowInt("BlockCount") > 0 ||
             RowInt("BlockCountRecursive") > 0;
 
@@ -1414,7 +1327,7 @@ DBCC FREEPROCCACHE({planHandle});";
             return Convert.ToBoolean(result);
         }
 
-        private FlowLayoutPanel BuildInsightsPanel(List<Insight> insights)
+        private static InsightsPanel BuildInsightsPanel(List<Insight> insights)
         {
             if (insights.Count == 0)
             {
@@ -1424,85 +1337,10 @@ DBCC FREEPROCCACHE({planHandle});";
                 };
             }
 
-            var panel = new FlowLayoutPanel
-            {
-                Dock = DockStyle.Top,
-                FlowDirection = FlowDirection.TopDown,
-                WrapContents = false,
-                AutoSize = true,
-                AutoSizeMode = AutoSizeMode.GrowAndShrink,
-                Padding = new Padding(10, 8, 10, 10)
-            };
-
-            foreach (var insight in insights)
-            {
-                var textColor = InsightTextColor(insight.Severity);
-                var backColor = InsightBackColor(insight.Severity);
-
-                var card = new InsightCard
-                {
-                    AutoSize = true,
-                    AutoSizeMode = AutoSizeMode.GrowAndShrink,
-                    Margin = new Padding(0, 0, 0, 8),
-                    Padding = new Padding(InsightCard.AccentWidth + InsightCard.IconGutter, 12, 16, 12),
-                    FillColor = backColor,
-                    AccentColor = InsightColor(insight.Severity),
-                    Icon = InsightIcon(insight.Severity)
-                };
-
-                var lbl = InsightCard.CreateContentLabel(insight.Text, insight.Actions, insight.Tooltips);
-                lbl.Dock = DockStyle.Top;
-                lbl.BackColor = backColor;
-                lbl.ForeColor = textColor;
-                lbl.Tag = (textColor, backColor);
-                lbl.Font = insight.Severity == InsightSeverity.Critical
-                    ? (insightBoldFont ??= new Font(Font, FontStyle.Bold))
-                    : (insightRegularFont ??= new Font(Font, FontStyle.Regular));
-                card.Controls.Add(lbl);
-                panel.Controls.Add(card);
-            }
-
-            panel.SizeChanged += (_, _) => InsightCard.FitToWidth(panel);
-            InsightCard.FitToWidth(panel);
+            var panel = new InsightsPanel();
+            panel.SetInsights(insights);
             return panel;
         }
-
-        // Cards keep their pale severity background regardless of theme, so re-apply the label
-        // fore/back colours after theming overwrites them with the generic theme colours.
-        private static void ApplyInsightColors(Control panel)
-        {
-            foreach (Control card in panel.Controls)
-            {
-                foreach (Control c in card.Controls)
-                {
-                    if (c is Label { Tag: ValueTuple<Color, Color> colors } lbl)
-                    {
-                        lbl.ForeColor = colors.Item1;
-                        lbl.BackColor = colors.Item2;
-                        if (lbl is LinkLabel link)
-                        {
-                            // Keep links legible against the pale severity background in either theme.
-                            link.LinkColor = DashColors.LinkColor;
-                        }
-                    }
-                }
-            }
-        }
-
-        private static Color InsightColor(InsightSeverity severity) => InsightCard.AccentFor(InsightIcon(severity));
-
-        // Pale card background per severity (from the Modus palette).
-        private static Color InsightBackColor(InsightSeverity severity) => InsightCard.FillFor(InsightIcon(severity));
-
-        // Dark, readable text so the message stays legible on the pale card background in either theme.
-        private static Color InsightTextColor(InsightSeverity severity) => InsightCard.TextFor(InsightIcon(severity));
-
-        private static InsightCard.CardIcon InsightIcon(InsightSeverity severity) => severity switch
-        {
-            InsightSeverity.Critical => InsightCard.CardIcon.Critical,
-            InsightSeverity.Warning => InsightCard.CardIcon.Warning,
-            _ => InsightCard.CardIcon.Information
-        };
 
         /// <summary>Open another session from the same snapshot on a new tab (used by insight drill-down links).</summary>
         private void OpenSession(int sessionId)
@@ -1643,6 +1481,7 @@ DBCC FREEPROCCACHE({planHandle});";
         {
             if (snapshot == null ||
                 !snapshot.Columns.Contains("page_type") ||
+                !snapshot.Columns.Contains("wait_type") ||
                 !snapshot.Columns.Contains("session_id"))
             {
                 return 0;
@@ -1658,8 +1497,8 @@ DBCC FREEPROCCACHE({planHandle});";
                     return false;
                 }
 
-                // Peer must also be waiting on an allocation page (PFS/GAM/SGAM).
-                if (r.CellStr("page_type") is not ("PFS" or "GAM" or "SGAM"))
+                // Peer must also be waiting on a page latch on an allocation page (PFS/GAM/SGAM).
+                if (!IsAllocationContention(r.CellStr("page_type"), r.CellStr("wait_type")))
                 {
                     return false;
                 }
@@ -1697,7 +1536,7 @@ DBCC FREEPROCCACHE({planHandle});";
             return snapshot.AsEnumerable().Count(r =>
                 r.CellInt("blocking_session_id") == blockerSessionId &&
                 IsReadCommand(r.CellStr("command")) &&
-                (!hasIsolation || IsReadCommittedIsolation(r.CellStr("transaction_isolation_level"))));
+                (!hasIsolation || QueryInsights.IsReadCommittedIsolation(r.CellStr("transaction_isolation_level"))));
         }
 
         /// <summary>
@@ -1721,7 +1560,7 @@ DBCC FREEPROCCACHE({planHandle});";
             return snapshot.AsEnumerable().Any(r =>
                 r.CellInt("session_id") == blockingSessionId &&
                 IsReadCommand(r.CellStr("command")) &&
-                (!hasIsolation || IsReadCommittedIsolation(r.CellStr("transaction_isolation_level"))));
+                (!hasIsolation || QueryInsights.IsReadCommittedIsolation(r.CellStr("transaction_isolation_level"))));
         }
 
         private int RowInt(string column) =>
@@ -1856,7 +1695,8 @@ DBCC FREEPROCCACHE({planHandle});";
             InstanceID = InstanceID,
             SessionID = 0,
             SnapshotDateFrom = SnapshotDateUtc,
-            SnapshotDateTo = SnapshotDateUtc
+            SnapshotDateTo = SnapshotDateUtc,
+            ShowInsights = false // Filtered to this session's blocking - the Overview tab has the insights
         };
 
         private Task LoadWaitResource(TabPage page)
