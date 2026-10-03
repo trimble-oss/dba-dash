@@ -13,7 +13,14 @@ namespace DBADashGUI.CustomReports
 {
     internal class CustomReports : List<CustomReport>
     {
-        public IEnumerable<CustomReport> RootLevelReports => this.Where(x => x.IsRootLevel).Union(SystemReports.Where(r => r.IsRootLevel));
+        /// <summary>Reports with @InstanceIDs, plus user reports that don't take any context parameters (e.g. no parameters at all)</summary>
+        public IEnumerable<CustomReport> RootLevelReports => this.Where(x => x.IsRootLevel || x.IsContextFree).Union(SystemReports.Where(r => r.IsRootLevel));
+
+        /// <summary>
+        /// Reports for tag group folders: reports with @InstanceIDs.  Reports without context parameters are only shown at
+        /// the root as they would return the same results in every folder.
+        /// </summary>
+        public IEnumerable<CustomReport> InstanceGroupReports => this.Where(x => x.IsRootLevel).Union(SystemReports.Where(r => r.IsRootLevel));
         public IEnumerable<CustomReport> InstanceLevelReports => this.Where(x => x.IsInstanceLevel).Union(SystemReports.Where(r => r.IsInstanceLevel));
         public IEnumerable<CustomReport> DatabaseLevelReports => this.Where(x => x.IsDatabaseLevel).Union(SystemReports.Where(r => r.IsDatabaseLevel));
 
@@ -115,15 +122,16 @@ namespace DBADashGUI.CustomReports
             while (rdr.Read())
             {
                 var strParams = rdr["Params"].ToString();
-                if (string.IsNullOrEmpty(strParams)) continue;
 
-                var stringReader = new StringReader(strParams);
                 var proc = (string)rdr["ProcedureName"];
                 var schema = (string)rdr["SchemaName"];
                 var qualifiedName = (string)rdr["QualifiedName"];
                 var meta = (string)rdr["MetaData"].DBNullToNull();
                 var canEdit = (bool)rdr["CanEditReport"];
-                var reportParams = (Params)deserializer.Deserialize(stringReader);
+                // Procedures without parameters return NULL for Params.  These are shown at root level.
+                var reportParams = string.IsNullOrEmpty(strParams)
+                    ? new Params { ParamList = new List<Param>() }
+                    : (Params)deserializer.Deserialize(new StringReader(strParams));
                 CustomReport customReport = null;
                 if (!string.IsNullOrEmpty(meta))
                 {

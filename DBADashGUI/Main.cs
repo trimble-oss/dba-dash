@@ -105,7 +105,7 @@ namespace DBADashGUI
                             parentNode.Nodes.Remove(hadrGrp);
                         }
                         AddMultiInstanceXENode(parentNode);
-                        parentNode.AddReportsFolder(reports?.RootLevelReports);
+                        parentNode.AddReportsFolder(reports?.InstanceGroupReports);
                         root.Nodes.Add(parentNode);
                         currentTagGroup = tagGroup;
                         AzureNode = null;
