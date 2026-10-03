@@ -76,8 +76,13 @@ namespace DBADashGUI.CustomReports
             }
             catch (Exception ex)
             {
-                // Reports are still usable without folders
+                // Reports are still usable without folders.  Clear folders as system reports are static and could
+                // otherwise keep folders loaded from a previous repository.
                 CanOrganizeReports = false;
+                foreach (var report in _customReports.Union(SystemReports))
+                {
+                    report.Folder = null;
+                }
                 CommonShared.ShowExceptionDialog(ex, "Error getting report folders");
             }
 

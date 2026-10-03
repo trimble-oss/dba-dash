@@ -1,4 +1,4 @@
-using Microsoft.Data.SqlClient;
+﻿using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.Management.Common;
 using System;
 using System.Collections.Generic;
@@ -117,8 +117,8 @@ namespace DBADashGUI.CustomReports
         /// 1. The instance type must be one the report applies to.
         /// 2. An excluded instance never shows the report.
         /// 3. If tags or included instances are specified, the instance must be in the included list or match the tags.
-        ///    Tags match the same way as the tag filter in the main window: all tag names must match, with any of the
-        ///    selected values for each name.
+        ///    All tag names must match, with any of the selected values for each name.  For Azure DB, tags inherited
+        ///    from the logical server and the database's own tags are combined, as they are shown in the Tags tab.
         /// </summary>
         public static bool AppliesTo(CustomReport.InstanceApplicability appliesTo, IReadOnlyCollection<ReportTag> visibleTags,
             IReadOnlyCollection<string> includeConnectionIDs, IReadOnlyCollection<string> excludeConnectionIDs,

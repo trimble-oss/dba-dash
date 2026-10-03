@@ -29,6 +29,8 @@ namespace DBADashGUI
             {
                 DeleteTag();
             }
+            // Tags are used to evaluate report visibility rules
+            CustomReports.ReportInstanceInfo.ClearCache();
         }
 
         private void SaveTag()
