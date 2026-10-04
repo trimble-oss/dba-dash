@@ -40,6 +40,8 @@ namespace DBADashGUI.Viewers
 
         public bool CanShowQueryStore => CanLookupPlans;
 
+        public bool CanShowQueryStoreForHash => CanLookupPlans;
+
         public void ShowQueryStore(string databaseName, string objectName)
         {
             if (_context == null) return;
@@ -50,6 +52,25 @@ namespace DBADashGUI.Viewers
             context.Type = SQLTreeItem.TreeType.StoredProcedure;
 
             var frm = new QueryStoreViewer { Context = context };
+            frm.ShowSingleInstance();
+        }
+
+        /// <summary>
+        /// The plan doesn't say which database it ran in, so this searches the database the viewer was opened for where
+        /// the context has one (Running Queries passes the session's database), and every database otherwise.
+        /// </summary>
+        public void ShowQueryStoreForHash(string queryHash, string queryPlanHash)
+        {
+            if (_context == null) return;
+
+            var frm = new QueryStoreViewer
+            {
+                Context = _context.DeepCopy(),
+                QueryHash = queryHash?.HexStringToByteArray(),
+                PlanHash = queryPlanHash?.HexStringToByteArray()
+            };
+            if (frm.QueryHash == null && frm.PlanHash == null) return;
+
             frm.ShowSingleInstance();
         }
     }

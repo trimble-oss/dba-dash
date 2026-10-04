@@ -1225,7 +1225,7 @@ namespace DBADashGUI.Performance
         {
             if (!(bool)row["has_plan"])
             {
-                var context = CommonData.GetDBADashContext((int)row["InstanceID"]);
+                var context = QueryPlanActions.PlanContext(row);
                 if (context.CanMessage)
                 {
                     CollectPlan(row, context);
@@ -1240,7 +1240,7 @@ namespace DBADashGUI.Performance
                     row["query_plan_text"] = GetPlan(row);
                 }
                 var plan = (string)row["query_plan_text"];
-                Common.ShowQueryPlan(plan, context: CommonData.GetDBADashContext((int)row["InstanceID"]));
+                Common.ShowQueryPlan(plan, context: QueryPlanActions.PlanContext(row));
             }
         }
 

@@ -35,8 +35,22 @@ namespace DBADashGUI.Performance
             var canFindPlan = row["plan_handle"] != DBNull.Value && row["query_plan_hash"] != DBNull.Value;
             if (!canFindPlan) return PlanAction.None;
 
-            context = CommonData.GetDBADashContext(Convert.ToInt32(row["InstanceID"]));
+            context = PlanContext(row);
             return context.CanMessage ? PlanAction.Collect : PlanAction.FindScript;
+        }
+
+        /// <summary>
+        /// The context to open the row's plan with: its instance, and the database the session was in where the row has
+        /// one, which the plan viewer's Query Store links search.
+        /// </summary>
+        internal static DBADashContext PlanContext(DataRowView row)
+        {
+            var context = CommonData.GetDBADashContext(Convert.ToInt32(row["InstanceID"]));
+            if (row.Row.Table.Columns.Contains("database_name"))
+            {
+                context.DatabaseName = Convert.ToString(row["database_name"].DBNullToNull());
+            }
+            return context;
         }
 
         /// <summary>The button caption for the available action.</summary>
@@ -54,7 +68,7 @@ namespace DBADashGUI.Performance
             switch (action)
             {
                 case PlanAction.View:
-                    ViewPlan(row, context);
+                    ViewPlan(row, PlanContext(row));
                     break;
 
                 case PlanAction.Collect:

@@ -294,6 +294,21 @@ namespace DBADashGUI.QueryPlans
             // toolbar button follows the control's state rather than only setting it.
             _graphControl.FollowDataPathChanged += (_, _) => _dataPathButton.Checked = _graphControl.FollowDataPath;
             _properties.OperatorRequested += (_, op) => _graphControl.SelectOperator(op);
+            // Evaluated once, as the deadlock viewer does: it can take a round trip to the repository to answer.
+            if (host is { CanShowQueryStoreForHash: true })
+            {
+                _properties.ShowQueryStore = (queryHash, planHash) =>
+                {
+                    try
+                    {
+                        host.ShowQueryStoreForHash(queryHash, planHash);
+                    }
+                    catch (Exception ex)
+                    {
+                        CommonShared.ShowExceptionDialog(ex, "Error opening Query Store");
+                    }
+                };
+            }
             _insightsGrid.CellDoubleClick += (_, e) => SelectFromGrid(_insightsGrid, e.RowIndex);
             // Rows grow to fit the wrapped detail, and the detail keeps the width the grid has left.
             _insightsGrid.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
