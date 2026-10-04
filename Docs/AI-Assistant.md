@@ -121,7 +121,31 @@ For Anthropic via **Azure Foundry**, set `BaseUrl` to the base Foundry URL (endi
 }
 ```
 
-If `AI:Provider` is not set, the service auto-selects the first fully-configured provider in the order: AzureOpenAI → Anthropic.
+#### Ollama (local models)
+
+```json
+{
+  "AI": { "Provider": "Ollama" },
+  "Ollama": {
+    "BaseUrl": "http://localhost:11434",
+    "Model": "qwen3:14b",
+    "ContextLength": 32768,
+    "MaxTokens": "",
+    "TimeoutSeconds": 170,
+    "ApiKey": ""
+  }
+}
+```
+
+- `Model` must be a model already pulled onto the Ollama server (`ollama pull qwen3:14b`, `ollama list`). The GUI's model picker lists the installed models.
+- `ContextLength` is the context window requested from Ollama (`num_ctx`). Ollama's own default (typically 4096 tokens) is too small for deadlock and query plan analysis. Larger values use more GPU/system memory. A prompt that doesn't fit is reported as too large rather than silently truncated (this relies on Ollama honouring `truncate: false` - use a current Ollama release).
+- `MaxTokens` optionally caps the answer length (`num_predict`). Leave blank for no limit - for reasoning models the limit includes the model's thinking.
+- `TimeoutSeconds` is how long to wait for an answer. The GUI waits up to 180-240 seconds for an analysis, so higher values only help other callers.
+- `ApiKey` is optional: Ollama doesn't use one, but it's sent as a bearer token if set (for an authenticating reverse proxy or ollama.com).
+
+Small models (e.g. 3B) are fine for checking the setup but tend to miss findings; a 14B-class model or larger gives much better analysis.
+
+If `AI:Provider` is not set, the service auto-selects the first fully-configured provider in the order: AzureOpenAI → Anthropic. Ollama is only used when `AI:Provider` is `Ollama`.
 
 ### Registration
 
@@ -228,7 +252,7 @@ If neither source is available the AI Assistant tab is hidden.
 | `GET /api/ai/diagnostics` | Required | Configuration summary (keys redacted) |
 | `GET /api/ai/tools` | Required | Available tools and metadata |
 | `GET /api/ai/examples` | Required | Example questions grouped by category |
-| `GET /api/ai/models` | Required | Available LLM models |
+| `GET /api/ai/models` | Required | Available LLM models (for Ollama, the models installed on the server) |
 | `POST /api/ai/ask` | Required | Ask a question |
 | `POST /api/ai/proactive-digest` | Required | Proactive risk digest |
 | `POST /api/ai/feedback` | Required | Submit helpful/not-helpful feedback |

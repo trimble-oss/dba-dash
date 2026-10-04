@@ -291,9 +291,17 @@ namespace DBADashGUI.AI
         }
     }
 
+    /// <summary>
+    /// Providers where the caller can pick a model per request.  Azure OpenAI is excluded because a
+    /// deployment, not a model name, is what it is addressed by.
+    /// </summary>
+    private bool ProviderSupportsModelSelection =>
+        string.Equals(_provider, "Anthropic", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(_provider, "Ollama", StringComparison.OrdinalIgnoreCase);
+
     private void UpdateModelSelectorVisibility()
     {
-        var showModelSelector = string.Equals(_provider, "Anthropic", StringComparison.OrdinalIgnoreCase);
+        var showModelSelector = ProviderSupportsModelSelection;
         cboModel.Visible = showModelSelector;
         lblModel.Visible = showModelSelector;
     }
@@ -688,7 +696,7 @@ namespace DBADashGUI.AI
 
     private async Task LoadModelsAsync()
     {
-        if (!string.Equals(_provider, "Anthropic", StringComparison.OrdinalIgnoreCase))
+        if (!ProviderSupportsModelSelection)
         {
             cboModel.Items.Clear();
             return;

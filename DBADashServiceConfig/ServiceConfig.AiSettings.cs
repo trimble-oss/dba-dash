@@ -13,6 +13,7 @@ public partial class ServiceConfig
 {
     private Panel pnlAzure;
     private Panel pnlAnthropic;
+    private Panel pnlOllama;
     private ComboBox cboAiProvider;
     private NumericUpDown numAiPort;
     private TextBox txtAiServiceUrl;
@@ -29,6 +30,11 @@ public partial class ServiceConfig
     private TextBox txtAiAnthropicModel;
     private TextBox txtAiAnthropicVersion;
     private TextBox txtAiAnthropicMaxTokens;
+    private TextBox txtAiOllamaBaseUrl;
+    private TextBox txtAiOllamaApiKey;
+    private TextBox txtAiOllamaModel;
+    private TextBox txtAiOllamaContextLength;
+    private TextBox txtAiOllamaMaxTokens;
 
     private const int AiLabelX = 14;
     private const int AiInputX = 220;
@@ -262,7 +268,7 @@ public partial class ServiceConfig
             Location = new Point(AiInputX, 46),
             Size = new Size(260, AiCtrlH)
         };
-        cboAiProvider.Items.AddRange(new object[] { "AzureOpenAI", "Anthropic" });
+        cboAiProvider.Items.AddRange(new object[] { "AzureOpenAI", "Anthropic", "Ollama" });
         cboAiProvider.SelectedIndexChanged += (_, _) => UpdateProviderFieldVisibility();
         grpSettings.Controls.Add(cboAiProvider);
 
@@ -303,8 +309,30 @@ public partial class ServiceConfig
         txtAiAnthropicVersion   = AddPanelRow(pnlAnthropic, "Version:",   3);
         txtAiAnthropicMaxTokens = AddPanelRow(pnlAnthropic, "MaxTokens:", 4);
 
+        pnlOllama = new Panel
+        {
+            Anchor = AnchorStyles.Top | AnchorStyles.Left,
+            Location = new Point(5, 40),
+            Size = new Size(panelWidth, 5 * AiRowH + 10),
+            Visible = false
+        };
+        txtAiOllamaBaseUrl       = AddPanelRow(pnlOllama, "BaseUrl:",       0);
+        txtAiOllamaModel         = AddPanelRow(pnlOllama, "Model:",         1);
+        txtAiOllamaContextLength = AddPanelRow(pnlOllama, "ContextLength:", 2);
+        txtAiOllamaMaxTokens     = AddPanelRow(pnlOllama, "MaxTokens:",     3);
+        txtAiOllamaApiKey        = AddPanelRow(pnlOllama, "ApiKey:",        4, true);
+        _aiToolTip.SetToolTip(txtAiOllamaBaseUrl, "Ollama server URL. Default: http://localhost:11434");
+        _aiToolTip.SetToolTip(txtAiOllamaModel, "Name of a model pulled onto the Ollama server, e.g. llama3.2:3b (see 'ollama list').");
+        _aiToolTip.SetToolTip(txtAiOllamaContextLength,
+            "Context window in tokens requested from Ollama (num_ctx). Default: 32768.\n" +
+            "Ollama's own default is too small for deadlock and query plan analysis.\n" +
+            "Larger values use more GPU/system memory.");
+        _aiToolTip.SetToolTip(txtAiOllamaMaxTokens, "Optional limit on the length of the answer (num_predict). Leave blank for no limit.");
+        _aiToolTip.SetToolTip(txtAiOllamaApiKey, "Optional. Ollama does not use a key - only needed behind an authenticating proxy or for ollama.com.");
+
         grpConfig.Controls.Add(pnlAzure);
         grpConfig.Controls.Add(pnlAnthropic);
+        grpConfig.Controls.Add(pnlOllama);
 
         tabAiService.Controls.Add(grpService);
         tabAiService.Controls.Add(grpSettings);
@@ -338,6 +366,7 @@ public partial class ServiceConfig
         var p = cboAiProvider.SelectedItem?.ToString() ?? string.Empty;
         pnlAzure.Visible     = p.Equals("AzureOpenAI", StringComparison.OrdinalIgnoreCase);
         pnlAnthropic.Visible = p.Equals("Anthropic",   StringComparison.OrdinalIgnoreCase);
+        pnlOllama.Visible    = p.Equals("Ollama",      StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>
@@ -370,6 +399,12 @@ public partial class ServiceConfig
         txtAiAnthropicModel.Text     = j["Anthropic"]?["Model"]?.Value<string>()     ?? string.Empty;
         txtAiAnthropicVersion.Text   = j["Anthropic"]?["Version"]?.Value<string>()   ?? string.Empty;
         txtAiAnthropicMaxTokens.Text = j["Anthropic"]?["MaxTokens"]?.Value<string>() ?? string.Empty;
+
+        txtAiOllamaBaseUrl.Text       = j["Ollama"]?["BaseUrl"]?.Value<string>()       ?? string.Empty;
+        txtAiOllamaApiKey.Text        = GetPlainText(j["Ollama"]?["ApiKey"]?.Value<string>());
+        txtAiOllamaModel.Text         = j["Ollama"]?["Model"]?.Value<string>()         ?? string.Empty;
+        txtAiOllamaContextLength.Text = j["Ollama"]?["ContextLength"]?.Value<string>() ?? string.Empty;
+        txtAiOllamaMaxTokens.Text     = j["Ollama"]?["MaxTokens"]?.Value<string>()     ?? string.Empty;
         UpdateAiServiceUrlState();
     }
 
@@ -438,6 +473,13 @@ private static string GetPlainText(string value)
             j["Anthropic"]!["Model"]     = txtAiAnthropicModel.Text;
             j["Anthropic"]!["Version"]   = txtAiAnthropicVersion.Text;
             j["Anthropic"]!["MaxTokens"] = txtAiAnthropicMaxTokens.Text;
+
+            j["Ollama"] ??= new JObject();
+            j["Ollama"]!["BaseUrl"]       = txtAiOllamaBaseUrl.Text;
+            j["Ollama"]!["ApiKey"]        = GetStoredValue(txtAiOllamaApiKey.Text, isSecret: true);
+            j["Ollama"]!["Model"]         = txtAiOllamaModel.Text;
+            j["Ollama"]!["ContextLength"] = txtAiOllamaContextLength.Text;
+            j["Ollama"]!["MaxTokens"]     = txtAiOllamaMaxTokens.Text;
 
             File.WriteAllText(AiLocalAppSettingsPath, j.ToString(Newtonsoft.Json.Formatting.Indented));
         }
