@@ -41,6 +41,7 @@ namespace DBADashGUI.Deadlocks
         private readonly ToolStripButton _submit;
         private readonly ToolStripDropDownButton _options;
         private readonly ToolStripMenuItem _showRequest;
+        private readonly AIModelMenu _model = new();
         private readonly ToolStripLabel _signature = new();
 
         /// <summary>Every stored conversation about this deadlock and its pattern, to pick from.  Hidden when there are none.</summary>
@@ -117,6 +118,7 @@ namespace DBADashGUI.Deadlocks
                               "time of the deadlock.  They make the analysis better and the request larger."
             };
 
+            _options.DropDownItems.Add(_model.Item);
             _options.DropDownItems.Add(_showRequest);
             _options.DropDownItems.Add(_includeSchema);
 
@@ -365,6 +367,12 @@ namespace DBADashGUI.Deadlocks
 
             UpdateStatus();
             UpdateCanAsk();
+
+            // After the button, not before it: the list is a nicety, and a slow answer to it should not
+            // keep the reader from submitting with the configured model.
+            await _model.LoadAsync(_service);
+            if (IsDisposed) return;
+            UpdateOptionsVisibility();
         }
 
         /// <summary>
@@ -394,7 +402,7 @@ namespace DBADashGUI.Deadlocks
             {
                 var graph = _graph;
                 var result = await DeadlockAnalysisClient.AnalyseAsync(
-                    _payload, _service, _inFlight.Token, _instanceId, continuing, question);
+                    _payload, _service, _inFlight.Token, _instanceId, continuing, question, _model.SelectedModel);
 
                 // The answer is stored either way; it just isn't shown against a deadlock selected while it was coming.
                 if (IsDisposed || !ReferenceEquals(graph, _graph)) return;

@@ -295,9 +295,7 @@ namespace DBADashGUI.AI
     /// Providers where the caller can pick a model per request.  Azure OpenAI is excluded because a
     /// deployment, not a model name, is what it is addressed by.
     /// </summary>
-    private bool ProviderSupportsModelSelection =>
-        string.Equals(_provider, "Anthropic", StringComparison.OrdinalIgnoreCase)
-        || string.Equals(_provider, "Ollama", StringComparison.OrdinalIgnoreCase);
+    private bool ProviderSupportsModelSelection => AIModelMenu.SupportsModelChoice(_provider);
 
     private void UpdateModelSelectorVisibility()
     {
