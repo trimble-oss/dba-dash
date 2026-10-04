@@ -23,8 +23,7 @@ namespace DBADashGUI.QueryPlans
     /// </summary>
     internal static class PlanAnalysisClient
     {
-        // Plans are larger than deadlock graphs and the answers longer, so the wait can be longer too.
-        private static readonly HttpClient Client = new() { Timeout = TimeSpan.FromSeconds(240) };
+        private static readonly HttpClient Client = new() { Timeout = AIServiceTimeouts.Request };
 
         internal sealed class Result
         {
@@ -175,6 +174,11 @@ namespace DBADashGUI.QueryPlans
                         ? turnNumber
                         : null
                 };
+            }
+            catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+            {
+                // The client's own timeout, not the reader pressing cancel.
+                return new Result { Error = $"No answer from the AI service within {AIServiceTimeouts.Request.TotalSeconds:0} seconds." };
             }
             catch (OperationCanceledException)
             {

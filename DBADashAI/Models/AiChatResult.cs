@@ -49,6 +49,12 @@ namespace DBADashAI.Models
         TooLarge,
 
         /// <summary>The provider refused or failed for any other reason.</summary>
-        Provider
+        Provider,
+
+        /// <summary>
+        /// The provider did not answer within the service's own timeout.  Not the caller giving up -
+        /// that is a cancellation, and is not answered at all.
+        /// </summary>
+        Timeout
     }
 }

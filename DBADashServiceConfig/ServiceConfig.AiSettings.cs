@@ -35,6 +35,7 @@ public partial class ServiceConfig
     private TextBox txtAiOllamaModel;
     private TextBox txtAiOllamaContextLength;
     private TextBox txtAiOllamaMaxTokens;
+    private TextBox txtAiOllamaTimeoutSeconds;
 
     private const int AiLabelX = 14;
     private const int AiInputX = 220;
@@ -153,7 +154,7 @@ public partial class ServiceConfig
         var grpService = new GroupBox
         {
             Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
-            Location = new Point(AiGrpX, 592),
+            Location = new Point(AiGrpX, 626),
             Size = new Size(AiGrpW, 70),
             TabStop = false,
             Text = IsAdmin
@@ -171,7 +172,7 @@ public partial class ServiceConfig
         var grpRegistration = new GroupBox
         {
             Anchor = AnchorStyles.Top | AnchorStyles.Left,
-            Location = new Point(AiGrpX, 382),
+            Location = new Point(AiGrpX, 416),
             Size = new Size(AiGrpW, 205),
             TabStop = false,
             Text = "Registration (Optional)"
@@ -277,7 +278,7 @@ public partial class ServiceConfig
         {
             Anchor = AnchorStyles.Top | AnchorStyles.Left,
             Location = new Point(AiGrpX, 122),
-            Size = new Size(AiGrpW, 50 + 5 * AiRowH + 30),
+            Size = new Size(AiGrpW, 50 + 6 * AiRowH + 30),
             TabStop = false,
             Text = "Provider Configuration"
         };
@@ -313,14 +314,19 @@ public partial class ServiceConfig
         {
             Anchor = AnchorStyles.Top | AnchorStyles.Left,
             Location = new Point(5, 40),
-            Size = new Size(panelWidth, 5 * AiRowH + 10),
+            Size = new Size(panelWidth, 6 * AiRowH + 10),
             Visible = false
         };
         txtAiOllamaBaseUrl       = AddPanelRow(pnlOllama, "BaseUrl:",       0);
         txtAiOllamaModel         = AddPanelRow(pnlOllama, "Model:",         1);
         txtAiOllamaContextLength = AddPanelRow(pnlOllama, "ContextLength:", 2);
         txtAiOllamaMaxTokens     = AddPanelRow(pnlOllama, "MaxTokens:",     3);
-        txtAiOllamaApiKey        = AddPanelRow(pnlOllama, "ApiKey:",        4, true);
+        txtAiOllamaTimeoutSeconds = AddPanelRow(pnlOllama, "TimeoutSeconds:", 4);
+        txtAiOllamaApiKey        = AddPanelRow(pnlOllama, "ApiKey:",        5, true);
+        _aiToolTip.SetToolTip(txtAiOllamaTimeoutSeconds,
+            "Seconds to wait for Ollama to answer. Default: 240.\n" +
+            "Slow models (large models, or running on CPU) may need longer.\n" +
+            "The GUI waits up to 300 seconds for the AI service, so higher values only help other callers.");
         _aiToolTip.SetToolTip(txtAiOllamaBaseUrl, "Ollama server URL. Default: http://localhost:11434");
         _aiToolTip.SetToolTip(txtAiOllamaModel, "Name of a model pulled onto the Ollama server, e.g. llama3.2:3b (see 'ollama list').");
         _aiToolTip.SetToolTip(txtAiOllamaContextLength,
@@ -405,6 +411,7 @@ public partial class ServiceConfig
         txtAiOllamaModel.Text         = j["Ollama"]?["Model"]?.Value<string>()         ?? string.Empty;
         txtAiOllamaContextLength.Text = j["Ollama"]?["ContextLength"]?.Value<string>() ?? string.Empty;
         txtAiOllamaMaxTokens.Text     = j["Ollama"]?["MaxTokens"]?.Value<string>()     ?? string.Empty;
+        txtAiOllamaTimeoutSeconds.Text = j["Ollama"]?["TimeoutSeconds"]?.Value<string>() ?? string.Empty;
         UpdateAiServiceUrlState();
     }
 
@@ -480,6 +487,7 @@ private static string GetPlainText(string value)
             j["Ollama"]!["Model"]         = txtAiOllamaModel.Text;
             j["Ollama"]!["ContextLength"] = txtAiOllamaContextLength.Text;
             j["Ollama"]!["MaxTokens"]     = txtAiOllamaMaxTokens.Text;
+            j["Ollama"]!["TimeoutSeconds"] = txtAiOllamaTimeoutSeconds.Text;
 
             File.WriteAllText(AiLocalAppSettingsPath, j.ToString(Newtonsoft.Json.Formatting.Indented));
         }

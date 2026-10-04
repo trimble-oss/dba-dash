@@ -40,6 +40,14 @@ namespace DBADash.Test
             }
         }
 
+        /// <summary>What HttpClient throws when its own timeout expires, or the caller cancels.</summary>
+        private sealed class CancellingHandler : HttpMessageHandler
+        {
+            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) =>
+                throw new TaskCanceledException("The request was canceled due to the configured HttpClient.Timeout.",
+                    new TimeoutException(), cancellationToken);
+        }
+
         private sealed class FakeFactory(HttpMessageHandler handler) : IHttpClientFactory
         {
             public HttpClient CreateClient(string name) => new(handler, disposeHandler: false);
@@ -59,13 +67,14 @@ namespace DBADash.Test
         private static (AiChatClient Client, FakeHandler Handler) Create(IConfiguration config, HttpStatusCode status, string body)
         {
             var handler = new FakeHandler(status, body);
-            var client = new AiChatClient(
-                config,
+            return (Create(config, handler), handler);
+        }
+
+        private static AiChatClient Create(IConfiguration config, HttpMessageHandler handler) =>
+            new(config,
                 new FakeFactory(handler),
                 NullLogger<AiChatClient>.Instance,
                 new SystemPromptLoader(config, NullLogger<SystemPromptLoader>.Instance));
-            return (client, handler);
-        }
 
         private static readonly AiConversationTurn[] Question =
             { new() { Role = AiConversationTurn.User, Content = "Why did this deadlock?" } };
@@ -156,6 +165,29 @@ namespace DBADash.Test
             Assert.AreEqual(AiChatFailure.Provider, result.Failure);
             StringAssert.Contains(result.Text, "Ollama");
             StringAssert.Contains(result.Text, "404");
+        }
+
+        [TestMethod]
+        public async Task SlowModel_IsATimeout_NotAGenericProviderError()
+        {
+            var client = Create(Config(), new CancellingHandler());
+
+            var result = await client.ChatAsync(Question, CancellationToken.None);
+
+            Assert.AreEqual(AiChatFailure.Timeout, result.Failure);
+            StringAssert.Contains(result.Text, "Ollama:TimeoutSeconds");
+        }
+
+        [TestMethod]
+        public async Task CallerCancelling_IsNotAnswered()
+        {
+            // The endpoints turn this into a closed request; answering it as a failure would log an
+            // error for something that is not one.
+            var client = Create(Config(), new CancellingHandler());
+            using var cancelled = new CancellationTokenSource();
+            cancelled.Cancel();
+
+            await Assert.ThrowsExactlyAsync<TaskCanceledException>(() => client.ChatAsync(Question, cancelled.Token));
         }
 
         [TestMethod]

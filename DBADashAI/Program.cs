@@ -930,6 +930,7 @@ static IResult AnalysisFailure(
         {
             AiChatFailure.TooLarge => StatusCodes.Status413PayloadTooLarge,
             AiChatFailure.NotConfigured => StatusCodes.Status503ServiceUnavailable,
+            AiChatFailure.Timeout => StatusCodes.Status504GatewayTimeout,
             _ => StatusCodes.Status502BadGateway
         });
 }
