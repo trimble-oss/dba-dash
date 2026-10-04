@@ -127,7 +127,8 @@ namespace DBADashGUI.QueryPlans
             CancellationToken cancellationToken,
             int? instanceId = null,
             AiConversation? conversation = null,
-            string? question = null)
+            string? question = null,
+            string? modelOverride = null)
         {
             try
             {
@@ -140,7 +141,7 @@ namespace DBADashGUI.QueryPlans
                     $"{baseUrl.TrimEnd('/')}/api/ai/analyse-plan")
                 {
                     Content = new StringContent(
-                        ToJson(payload, instanceId, modelOverride: null, conversation, question),
+                        ToJson(payload, instanceId, modelOverride, conversation, question),
                         Encoding.UTF8,
                         "application/json")
                 };

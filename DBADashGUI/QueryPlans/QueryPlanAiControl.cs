@@ -41,6 +41,7 @@ namespace DBADashGUI.QueryPlans
         private readonly ToolStripDropDownButton _options;
         private readonly ToolStripMenuItem _showRequest;
         private readonly ToolStripMenuItem _includePlanXml;
+        private readonly AIModelMenu _model = new();
         private readonly ToolStripLabel _identity = new();
 
         /// <summary>Every stored conversation about this plan and this query, to pick from.  Hidden when there are none.</summary>
@@ -140,6 +141,7 @@ namespace DBADashGUI.QueryPlans
                               "to the next analysis: a follow-up keeps the plan its conversation started with."
             };
 
+            _options.DropDownItems.Add(_model.Item);
             _options.DropDownItems.Add(_showRequest);
             _options.DropDownItems.Add(_includePlanXml);
 
@@ -425,6 +427,10 @@ namespace DBADashGUI.QueryPlans
 
             UpdateStatus();
             UpdateCanAsk();
+
+            // After the button, not before it: the list is a nicety, and a slow answer to it should not
+            // keep the reader from submitting with the configured model.
+            await _model.LoadAsync(_service);
         }
 
         /// <summary>
@@ -458,7 +464,7 @@ namespace DBADashGUI.QueryPlans
             {
                 var statement = _statement;
                 var result = await PlanAnalysisClient.AnalyseAsync(
-                    payload, _service, _inFlight.Token, _instanceId, continuing, question);
+                    payload, _service, _inFlight.Token, _instanceId, continuing, question, _model.SelectedModel);
 
                 // The answer is stored either way; it just isn't shown against a statement selected while
                 // it was coming.
