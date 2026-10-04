@@ -240,7 +240,7 @@ namespace DBADash.QueryPlan.Layout
             return planNode;
         }
 
-        private static string NodeId(PlanOperator node) =>
+        internal static string NodeId(PlanOperator node) =>
             "op" + node.NodeId.ToString(CultureInfo.InvariantCulture);
 
         /// <summary>

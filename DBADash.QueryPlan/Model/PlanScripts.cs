@@ -159,6 +159,16 @@ namespace DBADash.QueryPlan.Model
         }
 
         /// <summary>
+        /// A predicate laid out for reading - each AND and OR on its own line - with the plan's own
+        /// values it refers to written out underneath, as the properties panel opens one.  Empty for
+        /// no predicate.
+        /// </summary>
+        public static string Predicate(PlanStatement? statement, string? predicate) =>
+            string.IsNullOrWhiteSpace(predicate)
+                ? string.Empty
+                : PlanFormat.ForReading(predicate) + ExpressionsUsedIn(statement, predicate);
+
+        /// <summary>
         /// The plan's own values that <paramref name="text"/> refers to, as a note to go under it -
         /// or nothing when it refers to none.
         ///

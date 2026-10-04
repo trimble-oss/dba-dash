@@ -169,6 +169,23 @@ namespace DBADash.QueryPlan.Layout
         }
 
         /// <summary>
+        /// Expand every collapsed operator <paramref name="node"/> is hidden under, so it is drawn.
+        /// Collapsed branches elsewhere, and the operator's own inputs, are left as they are.
+        /// Returns false when it was already showing.
+        /// </summary>
+        public bool Reveal(PlanOperator? node)
+        {
+            var changed = false;
+            for (var current = node?.Parent; current is not null; current = current.Parent)
+            {
+                changed |= CollapsedIds.Remove(PlanLayoutEngine.NodeId(current));
+            }
+
+            if (changed) Rebuild();
+            return changed;
+        }
+
+        /// <summary>
         /// The topmost node containing <paramref name="point"/>, or null.  Tested in reverse paint
         /// order so the result matches what is drawn on top.
         /// </summary>

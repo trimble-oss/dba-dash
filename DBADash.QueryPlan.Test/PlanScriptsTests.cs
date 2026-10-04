@@ -255,5 +255,19 @@ namespace DBADash.QueryPlan.Test
             StringAssert.Contains(property.Script, "SET ARITHABORT ON;");
             Assert.AreEqual(7, property.Children.Count);
         }
+
+        [TestMethod]
+        public void Predicate_IsLaidOutWithTheValuesItNamesWrittenOutBelow()
+        {
+            var statement = TestPlans.Load(TestPlans.Expressions).Statements[0];
+            var filter = statement.Operators.Single(op => op.Predicate?.Contains("[Expr1004]") == true);
+
+            var script = PlanScripts.Predicate(statement, filter.Predicate);
+
+            StringAssert.StartsWith(script, "CONVERT_IMPLICIT(int,[Expr1001],0)=(12345)");
+            StringAssert.Contains(script, "AND [Expr1004]>(10)");
+            StringAssert.Contains(script, "Expr1004 = ");
+            Assert.AreEqual(string.Empty, PlanScripts.Predicate(statement, null));
+        }
     }
 }
