@@ -101,7 +101,7 @@ namespace DBADashGUI.AI
     };
     private readonly ProgressBar progressRunning = new() { Dock = DockStyle.Fill, Style = ProgressBarStyle.Marquee, MarqueeAnimationSpeed = 40, Visible = false };
 
-    private static readonly HttpClient HttpClient = new() { Timeout = TimeSpan.FromSeconds(120) };
+    private static readonly HttpClient HttpClient = new() { Timeout = AIServiceTimeouts.Request };
 
     private bool _seedingExamples = false;
     private string? _serviceUrl = null; // Resolved by AIServiceDiscovery, not hardcoded

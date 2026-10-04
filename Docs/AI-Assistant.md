@@ -131,7 +131,7 @@ For Anthropic via **Azure Foundry**, set `BaseUrl` to the base Foundry URL (endi
     "Model": "qwen3:14b",
     "ContextLength": 32768,
     "MaxTokens": "",
-    "TimeoutSeconds": 170,
+    "TimeoutSeconds": 240,
     "ApiKey": ""
   }
 }
@@ -140,7 +140,7 @@ For Anthropic via **Azure Foundry**, set `BaseUrl` to the base Foundry URL (endi
 - `Model` must be a model already pulled onto the Ollama server (`ollama pull qwen3:14b`, `ollama list`). The GUI's model picker lists the installed models.
 - `ContextLength` is the context window requested from Ollama (`num_ctx`). Ollama's own default (typically 4096 tokens) is too small for deadlock and query plan analysis. Larger values use more GPU/system memory. A prompt that doesn't fit is reported as too large rather than silently truncated (this relies on Ollama honouring `truncate: false` - use a current Ollama release).
 - `MaxTokens` optionally caps the answer length (`num_predict`). Leave blank for no limit - for reasoning models the limit includes the model's thinking.
-- `TimeoutSeconds` is how long to wait for an answer. The GUI waits up to 180-240 seconds for an analysis, so higher values only help other callers.
+- `TimeoutSeconds` is how long to wait for an answer (default 240). A model that takes longer is reported as timed out. The GUI waits up to 300 seconds for the service, so values above about 270 only help other callers.
 - `ApiKey` is optional: Ollama doesn't use one, but it's sent as a bearer token if set (for an authenticating reverse proxy or ollama.com).
 
 Small models (e.g. 3B) are fine for checking the setup but tend to miss findings; a 14B-class model or larger gives much better analysis.

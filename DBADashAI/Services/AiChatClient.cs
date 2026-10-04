@@ -113,6 +113,24 @@ namespace DBADashAI.Services
                 return AiChatResult.Failed(AiChatFailure.NotConfigured,
                     "AI summary is disabled. Configure AzureOpenAI:* or Anthropic:* settings, or set AI:Provider=Ollama and Ollama:Model.");
             }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                // The caller gave up.  There is nobody left to answer, and nothing went wrong here -
+                // the endpoints report it as a closed request.
+                throw;
+            }
+            catch (OperationCanceledException ex)
+            {
+                // HttpClient's own timeout: the provider is reachable but did not answer in time, which
+                // for a local model usually means it is too slow for the request rather than broken.
+                var errorId = Guid.NewGuid().ToString("N")[..8];
+                _logger.LogWarning(ex, "AI provider call timed out. ErrorId={ErrorId}, Provider={Provider}", errorId, provider ?? "auto");
+                var hint = string.Equals(provider, "Ollama", StringComparison.OrdinalIgnoreCase)
+                    ? " Try a smaller or faster model, or raise Ollama:TimeoutSeconds."
+                    : string.Empty;
+                return AiChatResult.Failed(AiChatFailure.Timeout,
+                    $"The AI provider did not answer in time (ErrorId={errorId}).{hint}", errorId);
+            }
             catch (Exception ex)
             {
                 // Log the full exception (including stack trace, server names, and any connection
@@ -267,11 +285,12 @@ namespace DBADashAI.Services
         internal const int DefaultOllamaContextLength = 32768;
 
         /// <summary>
-        /// Just inside the GUI's deadlock client, which gives up at 180s, so a slow model is reported
-        /// as a timeout by the service rather than as a dropped connection by the client.  Raising it
-        /// further only helps callers that wait longer than the GUI does.
+        /// Inside the GUI's wait for the service (300s, AIServiceTimeouts), so a slow model is reported
+        /// as a timeout by the service rather than as a dropped connection by the client - with room
+        /// left for the repository queries an Ask runs before the model is called.  Raising it past the
+        /// GUI's wait only helps callers that wait longer than the GUI does.
         /// </summary>
-        internal const int DefaultOllamaTimeoutSeconds = 170;
+        internal const int DefaultOllamaTimeoutSeconds = 240;
 
         internal static string OllamaBaseUrl(IConfiguration configuration) =>
             string.IsNullOrWhiteSpace(configuration["Ollama:BaseUrl"]) ? DefaultOllamaBaseUrl : configuration["Ollama:BaseUrl"]!;
