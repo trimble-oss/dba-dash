@@ -65,6 +65,17 @@ namespace DBADashAI.Services
 
             try
             {
+                if (string.Equals(provider, "Ollama", StringComparison.OrdinalIgnoreCase))
+                {
+                    var ollamaModel = modelOverride ?? _configuration["Ollama:Model"];
+                    if (!string.IsNullOrWhiteSpace(ollamaModel))
+                    {
+                        return await SummarizeWithOllamaAsync(messages, OllamaBaseUrl(_configuration), ollamaModel, cancellationToken);
+                    }
+                    return AiChatResult.Failed(AiChatFailure.NotConfigured,
+                        "AI summary is disabled. AI:Provider=Ollama but Ollama:Model is not set.");
+                }
+
                 if (string.Equals(provider, "AzureOpenAI", StringComparison.OrdinalIgnoreCase))
                 {
                     if (!string.IsNullOrWhiteSpace(azureEndpoint)
@@ -100,7 +111,7 @@ namespace DBADashAI.Services
                 }
 
                 return AiChatResult.Failed(AiChatFailure.NotConfigured,
-                    "AI summary is disabled. Configure AzureOpenAI:* or Anthropic:* settings.");
+                    "AI summary is disabled. Configure AzureOpenAI:* or Anthropic:* settings, or set AI:Provider=Ollama and Ollama:Model.");
             }
             catch (Exception ex)
             {
@@ -245,6 +256,179 @@ namespace DBADashAI.Services
             return AiChatResult.Answer(ExtractAnthropicSummary(document.RootElement, "No summary returned by Anthropic."));
         }
 
+        internal const string DefaultOllamaBaseUrl = "http://localhost:11434";
+
+        /// <summary>
+        /// Ollama's own default context window is small (4096 tokens on most models), and a prompt
+        /// built from a deadlock graph or a query plan is routinely several times that.  So the
+        /// service always asks for a window of its own rather than inheriting whatever the model
+        /// happens to default to.
+        /// </summary>
+        internal const int DefaultOllamaContextLength = 32768;
+
+        /// <summary>
+        /// Just inside the GUI's deadlock client, which gives up at 180s, so a slow model is reported
+        /// as a timeout by the service rather than as a dropped connection by the client.  Raising it
+        /// further only helps callers that wait longer than the GUI does.
+        /// </summary>
+        internal const int DefaultOllamaTimeoutSeconds = 170;
+
+        internal static string OllamaBaseUrl(IConfiguration configuration) =>
+            string.IsNullOrWhiteSpace(configuration["Ollama:BaseUrl"]) ? DefaultOllamaBaseUrl : configuration["Ollama:BaseUrl"]!;
+
+        /// <summary>
+        /// The model a request will use when the caller does not pick one: the one belonging to the
+        /// configured provider.  With no provider set, the same order <see cref="ChatAsync"/> falls
+        /// back through.
+        /// </summary>
+        public static string? ConfiguredModel(IConfiguration configuration)
+        {
+            var provider = configuration["AI:Provider"]?.Trim();
+
+            if (string.Equals(provider, "Ollama", StringComparison.OrdinalIgnoreCase))
+                return NullIfBlank(configuration["Ollama:Model"]);
+            if (string.Equals(provider, "AzureOpenAI", StringComparison.OrdinalIgnoreCase))
+                return NullIfBlank(configuration["AzureOpenAI:Deployment"]);
+            if (string.Equals(provider, "Anthropic", StringComparison.OrdinalIgnoreCase))
+                return NullIfBlank(configuration["Anthropic:Model"]);
+
+            return NullIfBlank(configuration["AzureOpenAI:Deployment"]) ?? NullIfBlank(configuration["Anthropic:Model"]);
+        }
+
+        private static string? NullIfBlank(string? value) => string.IsNullOrWhiteSpace(value) ? null : value;
+
+        /// <summary>
+        /// Ollama, over its native chat API rather than the OpenAI-compatible one.
+        ///
+        /// The native API is the only one that takes the context window per request (num_ctx), and
+        /// the only one that can be told to refuse an oversized prompt (truncate=false).  Without it
+        /// Ollama silently drops the start of the conversation to make it fit, which here is the system
+        /// prompt and most of the artifact, and the answer that comes back is about something else.
+        /// </summary>
+        private async Task<AiChatResult> SummarizeWithOllamaAsync(
+            IReadOnlyList<AiConversationTurn> messages,
+            string baseUrl,
+            string model,
+            CancellationToken cancellationToken)
+        {
+            var requestUrl = new Uri(baseUrl.TrimEnd('/') + "/api/chat");
+            var apiKey = _configuration["Ollama:ApiKey"];
+            var contextLength = ParseInt(_configuration["Ollama:ContextLength"], DefaultOllamaContextLength, 2048, 1048576);
+            var timeoutSeconds = ParseInt(_configuration["Ollama:TimeoutSeconds"], DefaultOllamaTimeoutSeconds, 30, 3600);
+
+            var options = new Dictionary<string, object>
+            {
+                ["num_ctx"] = contextLength,
+                ["temperature"] = 0.1
+            };
+            // Left unset, the answer runs until the model stops - which matters for a reasoning model,
+            // whose thinking counts against the same limit.
+            if (int.TryParse(_configuration["Ollama:MaxTokens"], out var maxTokens) && maxTokens > 0)
+                options["num_predict"] = maxTokens;
+
+            var conversation = new List<object> { new { role = "system", content = SystemPrompt } };
+            conversation.AddRange(messages.Select(m => (object)new { role = Role(m), content = m.Content }));
+
+            var payload = new Dictionary<string, object>
+            {
+                ["model"] = model,
+                ["messages"] = conversation,
+                ["stream"] = false,
+                ["truncate"] = false,
+                ["options"] = options
+            };
+
+            // A local model can take minutes over a large plan, past HttpClient's default of 100s.
+            var client = _httpClientFactory.CreateClient();
+            client.Timeout = TimeSpan.FromSeconds(timeoutSeconds);
+
+            using var response = await PostWithRetryAsync(
+                client,
+                requestUrl,
+                () =>
+                {
+                    var req = new HttpRequestMessage(HttpMethod.Post, requestUrl);
+                    // Ollama itself takes no key.  One is only needed behind a reverse proxy, or for ollama.com.
+                    if (!string.IsNullOrWhiteSpace(apiKey))
+                        req.Headers.Add("Authorization", "Bearer " + SanitizeHeaderValue(apiKey));
+                    req.Content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+                    return req;
+                },
+                cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
+                var errorId = Guid.NewGuid().ToString("N")[..8];
+                _logger.LogError("Ollama call failed. ErrorId={ErrorId}, Status={StatusCode}, URL={Url}, Body={Body}", LogSanitizer.SanitizeForLog(errorId), (int)response.StatusCode, requestUrl, LogSanitizer.TruncateAndSanitizeForLog(errorBody));
+                return ProviderFailure("Ollama", (int)response.StatusCode, errorBody, errorId);
+            }
+
+            using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+            using var document = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken);
+
+            return AiChatResult.Answer(ExtractOllamaSummary(document.RootElement, "No summary returned by Ollama."));
+        }
+
+        /// <summary>
+        /// The answer, without the reasoning.  Current Ollama returns a reasoning model's thinking in a
+        /// field of its own, but some models - and older Ollama versions - leave it inline in
+        /// &lt;think&gt; tags, and nobody asked to read it.  A model stopped by Ollama:MaxTokens while
+        /// still thinking leaves the tag unclosed, and then there is no answer at all - only reasoning.
+        /// </summary>
+        internal static string ExtractOllamaSummary(JsonElement root, string fallbackMessage)
+        {
+            if (!root.TryGetProperty("message", out var message)
+                || message.ValueKind != JsonValueKind.Object
+                || !message.TryGetProperty("content", out var content)
+                || content.ValueKind != JsonValueKind.String)
+            {
+                return fallbackMessage;
+            }
+
+            var text = System.Text.RegularExpressions.Regex.Replace(
+                content.GetString() ?? string.Empty,
+                @"^\s*<think>.*?(</think>|$)",
+                string.Empty,
+                System.Text.RegularExpressions.RegexOptions.Singleline).Trim();
+
+            return string.IsNullOrWhiteSpace(text) ? fallbackMessage : text;
+        }
+
+        /// <summary>
+        /// The models Ollama has pulled, by name.  Unlike the hosted providers there is no fixed list to
+        /// keep in the repository: what can be asked for is whatever is installed on that server.
+        /// </summary>
+        public async Task<IReadOnlyList<string>> GetOllamaModelsAsync(CancellationToken cancellationToken)
+        {
+            var requestUrl = new Uri(OllamaBaseUrl(_configuration).TrimEnd('/') + "/api/tags");
+            var apiKey = _configuration["Ollama:ApiKey"];
+
+            using var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+            if (!string.IsNullOrWhiteSpace(apiKey))
+                request.Headers.Add("Authorization", "Bearer " + SanitizeHeaderValue(apiKey));
+
+            // Only fills a drop-down, so an unreachable server should not hold the GUI up for long.
+            var client = _httpClientFactory.CreateClient();
+            client.Timeout = TimeSpan.FromSeconds(10);
+            using var response = await client.SendAsync(request, cancellationToken);
+            response.EnsureSuccessStatusCode();
+
+            using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+            using var document = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken);
+
+            if (!document.RootElement.TryGetProperty("models", out var models) || models.ValueKind != JsonValueKind.Array)
+                return Array.Empty<string>();
+
+            return models.EnumerateArray()
+                .Where(m => m.ValueKind == JsonValueKind.Object && m.TryGetProperty("name", out _))
+                .Select(m => m.GetProperty("name").GetString())
+                .Where(n => !string.IsNullOrWhiteSpace(n))
+                .Select(n => n!)
+                .OrderBy(n => n, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+        }
+
         private static string ExtractAnthropicSummary(JsonElement root, string fallbackMessage)
         {
             if (!root.TryGetProperty("content", out var content) || content.ValueKind != JsonValueKind.Array)
@@ -326,17 +510,20 @@ namespace DBADashAI.Services
         /// Whether the refusal was about size.  It is the one provider failure the caller can do
         /// something about - send less - so it is worth telling apart from the rest.
         ///
-        /// Neither provider gives it a status code of its own.  Anthropic answers 413 for a request
-        /// over the transport limit but 400 for a prompt over the model's context window, and Azure
-        /// OpenAI answers 400 with the reason as a code in the body.  So the body is what decides,
-        /// and it is matched loosely: the wording of these messages is not a contract.
+        /// No provider gives it a status code of its own.  Anthropic answers 413 for a request over
+        /// the transport limit but 400 for a prompt over the model's context window, Azure OpenAI
+        /// answers 400 with the reason as a code in the body, and Ollama - told not to truncate -
+        /// answers 400 naming the context size.  So the body is what decides, and it is matched
+        /// loosely: the wording of these messages is not a contract.
         /// </summary>
-        private static bool IsTooLarge(int status, string body)
+        internal static bool IsTooLarge(int status, string body)
         {
             if (status == 413) return true;
             if (status != 400 || string.IsNullOrEmpty(body)) return false;
 
             return body.Contains("context_length_exceeded", StringComparison.OrdinalIgnoreCase)
+                   || body.Contains("exceed_context_size", StringComparison.OrdinalIgnoreCase)
+                   || body.Contains("exceeds the available context size", StringComparison.OrdinalIgnoreCase)
                    || body.Contains("request_too_large", StringComparison.OrdinalIgnoreCase)
                    || body.Contains("string_above_max_length", StringComparison.OrdinalIgnoreCase)
                    || body.Contains("prompt is too long", StringComparison.OrdinalIgnoreCase)
@@ -348,22 +535,35 @@ namespace DBADashAI.Services
         /// tokens > 200000 maximum" tells the reader how much to cut, and anything written here
         /// could only guess at it.  Truncated and stripped of control characters like anything else
         /// that crosses back to a caller, and left out altogether when the body is not the shape
-        /// both providers document.
+        /// the providers document.
+        ///
+        /// Ollama's error is a string rather than an object, and when it comes from the model runner
+        /// that string is itself the documented shape, serialized a second time.
         /// </summary>
-        private static string? TooLargeDetail(string body)
+        internal static string? TooLargeDetail(string body, int depth = 0)
         {
             try
             {
                 using var document = JsonDocument.Parse(body);
 
-                if (document.RootElement.TryGetProperty("error", out var error)
-                    && error.ValueKind == JsonValueKind.Object
-                    && error.TryGetProperty("message", out var message)
-                    && message.ValueKind == JsonValueKind.String)
+                if (!document.RootElement.TryGetProperty("error", out var error))
+                    return null;
+
+                string? message = null;
+                if (error.ValueKind == JsonValueKind.Object
+                    && error.TryGetProperty("message", out var messageElement)
+                    && messageElement.ValueKind == JsonValueKind.String)
                 {
-                    var text = LogSanitizer.TruncateAndSanitizeForLog(message.GetString(), 300);
-                    return string.IsNullOrWhiteSpace(text) ? null : text;
+                    message = messageElement.GetString();
                 }
+                else if (error.ValueKind == JsonValueKind.String)
+                {
+                    message = error.GetString();
+                    if (depth == 0 && message is not null && message.TrimStart().StartsWith('{'))
+                        return TooLargeDetail(message, depth + 1) ?? Clean(message);
+                }
+
+                return Clean(message);
             }
             catch (JsonException)
             {
@@ -372,6 +572,12 @@ namespace DBADashAI.Services
             }
 
             return null;
+
+            static string? Clean(string? message)
+            {
+                var text = LogSanitizer.TruncateAndSanitizeForLog(message, 300);
+                return string.IsNullOrWhiteSpace(text) ? null : text;
+            }
         }
 
         private static string StatusHint(int statusCode) => statusCode switch

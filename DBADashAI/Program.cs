@@ -309,6 +309,11 @@ ApplyAuth(app.MapGet("/api/ai/diagnostics", (IConfiguration config, IHttpClientF
     var anthropicModel = config["Anthropic:Model"] ?? "(not set)";
     var anthropicVersion = config["Anthropic:Version"] ?? "(not set)";
 
+    var ollamaBaseUrl = AiChatClient.OllamaBaseUrl(config);
+    var ollamaKey = string.IsNullOrWhiteSpace(config["Ollama:ApiKey"]) ? "(not set)" : "***set***";
+    var ollamaModel = config["Ollama:Model"] ?? "(not set)";
+    var ollamaContextLength = config["Ollama:ContextLength"] ?? $"(default {AiChatClient.DefaultOllamaContextLength})";
+
     var registrationServiceUrlStatus = config["Registration:ServiceUrl"];
     var isLocalModeStatus = string.IsNullOrWhiteSpace(registrationServiceUrlStatus);
     var securityEnabledStatus = !isLocalModeStatus;
@@ -319,6 +324,7 @@ ApplyAuth(app.MapGet("/api/ai/diagnostics", (IConfiguration config, IHttpClientF
         repository = repoSafe,
         azureOpenAI = new { endpoint = azureEndpoint, apiKey = azureKey, deployment = azureDeployment },
         anthropic = new { baseUrl = anthropicUrl, apiKey = anthropicKey, model = anthropicModel, version = anthropicVersion },
+        ollama = new { baseUrl = ollamaBaseUrl, apiKey = ollamaKey, model = ollamaModel, contextLength = ollamaContextLength },
         security = new { enabled = securityEnabledStatus },
         systemPrompt = new { source = systemPromptLoader.Source, length = systemPromptLoader.Prompt.Length },
         utc = DateTime.UtcNow
@@ -450,10 +456,25 @@ ApplyAuth(app.MapGet("/api/ai/examples", async (SqlToolExecutor sql, ILoggerFact
     }
 }));
 
-ApplyAuth(app.MapGet("/api/ai/models", async (SqlToolExecutor sql, CancellationToken cancellationToken) =>
+ApplyAuth(app.MapGet("/api/ai/models", async (SqlToolExecutor sql, IConfiguration config, AiChatClient aiChat, ILogger<Program> logger, CancellationToken cancellationToken) =>
 {
     try
     {
+        // The repository's list is of hosted models.  Ollama serves whatever has been pulled onto it.
+        if (string.Equals(config["AI:Provider"]?.Trim(), "Ollama", StringComparison.OrdinalIgnoreCase))
+        {
+            try
+            {
+                var installed = await aiChat.GetOllamaModelsAsync(cancellationToken);
+                return Results.Ok(installed.Select(name => new { modelName = name, displayName = name }).ToList());
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Could not list Ollama models");
+                return Results.Ok(Array.Empty<object>());
+            }
+        }
+
         var rows = await sql.QueryNoParamsAsync("AI.Models_Get", cancellationToken);
         var models = rows.Select(r => new
         {
@@ -621,8 +642,7 @@ ApplyAuthAndRateLimit(app.MapPost("/api/ai/analyse-deadlock", async (
 
     // Resolved up front: it is stored with the analysis, and reported back to the caller.
     var model = request.ModelOverride
-                ?? config["Anthropic:Model"]
-                ?? config["AzureOpenAI:Deployment"]
+                ?? AiChatClient.ConfiguredModel(config)
                 ?? "unknown";
     var payloadVersion = string.IsNullOrWhiteSpace(request.PayloadVersion) ? "1" : request.PayloadVersion!;
 
@@ -724,8 +744,7 @@ ApplyAuthAndRateLimit(app.MapPost("/api/ai/analyse-plan", async (
 
     // Resolved up front: it is stored with the analysis, and reported back to the caller.
     var model = request.ModelOverride
-                ?? config["Anthropic:Model"]
-                ?? config["AzureOpenAI:Deployment"]
+                ?? AiChatClient.ConfiguredModel(config)
                 ?? "unknown";
     var payloadVersion = string.IsNullOrWhiteSpace(request.PayloadVersion) ? "1" : request.PayloadVersion!;
 
