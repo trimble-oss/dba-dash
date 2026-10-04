@@ -608,6 +608,35 @@ namespace DBADash.QueryPlan.Test
         }
 
         [TestMethod]
+        public void RevealOperator_ExpandsWhatTheOperatorIsHiddenUnderAndSelectsIt()
+        {
+            var controller = Controller();
+            controller.ToggleCollapse(controller.Layout.Nodes.Single(n => n.Operator?.NodeId == 2));
+            var selections = 0;
+            controller.SelectionChanged += (_, _) => selections++;
+
+            Assert.IsTrue(controller.RevealOperator(TestPlans.Operator(controller.Layout.Statement, 4)));
+
+            // The operator itself, not the collapsed node that stood in for it.
+            Assert.AreEqual(4, controller.SelectedNode!.Operator!.NodeId);
+            Assert.IsTrue(controller.Layout.Nodes.Contains(controller.SelectedNode));
+            Assert.IsFalse(controller.Layout.HasCollapsedNodes);
+            Assert.AreEqual(1, selections, "One selection, not a stop at the old one on the way.");
+        }
+
+        [TestMethod]
+        public void RevealOperator_LeavesTheOperatorsOwnInputsCollapsed()
+        {
+            var controller = Controller();
+            controller.ToggleCollapse(controller.Layout.Nodes.Single(n => n.Operator?.NodeId == 2));
+
+            Assert.IsTrue(controller.RevealOperator(TestPlans.Operator(controller.Layout.Statement, 2)));
+
+            Assert.AreEqual(2, controller.SelectedNode!.Operator!.NodeId);
+            Assert.IsTrue(controller.SelectedNode.IsCollapsed, "It was showing already - only what hides it is expanded.");
+        }
+
+        [TestMethod]
         public void EdgeWidthBasis_ReroutesTheArrowsAndKeepsTheSelection()
         {
             var controller = Controller();

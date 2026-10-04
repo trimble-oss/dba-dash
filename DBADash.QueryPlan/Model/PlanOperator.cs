@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DBADash.QueryPlan.Model
 {
@@ -332,6 +333,26 @@ namespace DBADash.QueryPlan.Model
         /// which kind of plan it has.
         /// </summary>
         public double RowsForDisplay => ActualRows ?? EstimatedTotalRows;
+
+        /// <summary>
+        /// The rows that came into this operator: what its inputs handed it, each counted the way
+        /// <see cref="RowsForDisplay"/> counts it, so on an actual plan the measured figures and on an
+        /// estimated one the estimates for all executions.  An operator with no inputs - a scan, a
+        /// seek, a constant scan - takes in nothing from the plan, so its rows in are zero: the rows it
+        /// returns are rows it brought into the plan.  What a scan read from storage is a different
+        /// figure, <see cref="PlanRuntimeCounters.ActualRowsRead"/>.
+        ///
+        /// Set against <see cref="RowsForDisplay"/> it shows where rows enter the plan, where they are
+        /// thrown away - a filter, an aggregate - and where they multiply, which is usually a join.
+        /// </summary>
+        public double RowsIn => Children.Sum(child => child.RowsForDisplay);
+
+        /// <summary>
+        /// Rows out less rows in: <see cref="RowsForDisplay"/> - <see cref="RowsIn"/>.  Positive where
+        /// the operator introduced rows - read them from storage, or multiplied them in a join - and
+        /// negative where it removed them.  Ranking by it finds where the plan's rows come from.
+        /// </summary>
+        public double RowsDiff => RowsForDisplay - RowsIn;
 
         /// <summary>
         /// Bytes this operator hands to its parent: <see cref="RowsForDisplay"/> times the

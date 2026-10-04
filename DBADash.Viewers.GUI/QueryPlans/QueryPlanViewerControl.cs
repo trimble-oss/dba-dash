@@ -51,6 +51,9 @@ namespace DBADashGUI.QueryPlans
         private readonly DBADashDataGridView _parametersGrid = NewGrid();
         private readonly DBADashDataGridView _waitsGrid = NewGrid();
 
+        /// <summary>Every operator as a sortable, filterable list - see <see cref="QueryPlanOperatorsControl"/>.</summary>
+        private readonly QueryPlanOperatorsControl _operators = new() { Dock = DockStyle.Fill };
+
         /// <summary>
         /// The graph and the properties panel side by side.  Properties are docked rather than in a
         /// separate window: reading a plan is a loop of clicking an operator and looking at its
@@ -84,6 +87,7 @@ namespace DBADashGUI.QueryPlans
         // Tooltips on, for the tabs that summarise what they hold - a parameter that ran with a
         // different value, the total time spent waiting.
         private readonly ThemedTabControl _tabs = new() { Dock = DockStyle.Fill, ShowToolTips = true };
+        private readonly TabPage _operatorsTab;
         private readonly TabPage _insightsTab;
         private readonly TabPage _missingIndexTab;
         private readonly TabPage _expressionsTab;
@@ -256,6 +260,7 @@ namespace DBADashGUI.QueryPlans
             _statementSplit.Panel2.Controls.Add(_graphSplit);
             _statementSplit.Panel1Collapsed = !HasStatementChoice;
 
+            _operatorsTab = NewPage("Operators", _operators);
             _insightsTab = NewPage("Insights", _insightsGrid);
             _missingIndexTab = NewPage("Missing Indexes", GridAndScript(_missingIndexGrid, _missingIndexScript, _missingIndexScriptSplit));
             _expressionsTab = NewPage("Expressions", _expressionsGrid);
@@ -263,6 +268,7 @@ namespace DBADashGUI.QueryPlans
             _waitsTab = NewPage("Waits", _waitsGrid);
 
             _tabs.TabPages.Add(NewPage("Plan", _statementSplit));
+            _tabs.TabPages.Add(_operatorsTab);
             _tabs.TabPages.Add(_insightsTab);
             _tabs.TabPages.Add(_missingIndexTab);
             _tabs.TabPages.Add(_expressionsTab);
@@ -294,6 +300,13 @@ namespace DBADashGUI.QueryPlans
             // toolbar button follows the control's state rather than only setting it.
             _graphControl.FollowDataPathChanged += (_, _) => _dataPathButton.Checked = _graphControl.FollowDataPath;
             _properties.OperatorRequested += (_, op) => _graphControl.SelectOperator(op);
+            // The list's Show link and double click go to the operator on the plan.
+            _operators.OperatorTimeMode = _graphControl.OperatorTimeMode;
+            _operators.OperatorRequested += (_, op) =>
+            {
+                _tabs.SelectedIndex = 0;
+                _graphControl.RevealOperator(op);
+            };
             // Evaluated once, as the deadlock viewer does: it can take a round trip to the repository to answer.
             if (host is { CanShowQueryStoreForHash: true })
             {
@@ -799,6 +812,7 @@ namespace DBADashGUI.QueryPlans
             item.Click += (_, _) =>
             {
                 _graphControl.OperatorTimeMode = mode;
+                _operators.OperatorTimeMode = mode;
                 ShowCurrentTimeMode();
                 SaveSetting(() => ViewerSettings.QueryPlanOperatorTime = mode.ToString());
             };
@@ -1553,6 +1567,7 @@ namespace DBADashGUI.QueryPlans
             // leaves the canvas the same size, so the view raises no change of its own to follow.
             ShowCollapsedState();
             UpdateTimeMenu(statement);
+            ShowOperators(statement);
             ShowInsights(statement);
             ShowMissingIndexes(statement);
             ShowExpressions(statement);
@@ -1800,6 +1815,9 @@ namespace DBADashGUI.QueryPlans
         {
             _properties.Show(node, _current);
 
+            // The operator list follows the graph, so switching to it finds the same operator.
+            if (node?.Operator is { } op) _operators.Select(op);
+
             // Opening or closing the panel changes the plan's width, and the plan keeps its zoom
             // through that rather than rescaling under the pointer - see ResizeKeepingView.
             SetPropertiesOpen(node is not null || HasOverview(_current), keepView: true);
@@ -1855,6 +1873,15 @@ namespace DBADashGUI.QueryPlans
             // click is usually asking: what part of the query is this?
             if (node is null) return;
             _tabs.SelectedTab = _tabs.TabPages.Cast<TabPage>().First(p => p.Text == "Query");
+        }
+
+        private void ShowOperators(PlanStatement statement)
+        {
+            _operators.Show(statement);
+
+            var count = _operators.OperatorCount;
+            _operatorsTab.Text = count == 0 ? "Operators" : "Operators (" + count.ToString(CultureInfo.InvariantCulture) + ")";
+            SetTabVisible(_operatorsTab, count > 0);
         }
 
         private void ShowInsights(PlanStatement statement)

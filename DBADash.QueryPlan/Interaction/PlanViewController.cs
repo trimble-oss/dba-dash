@@ -644,6 +644,22 @@ namespace DBADash.QueryPlan.Interaction
             return changed;
         }
 
+        /// <summary>
+        /// Select an operator, expanding whatever it is collapsed under first - for a request that
+        /// names this operator in particular, such as a row of the operator list, where landing on a
+        /// collapsed ancestor would show the reader the wrong operator's details.
+        /// </summary>
+        public bool RevealOperator(PlanOperator? node)
+        {
+            if (!Layout.Reveal(node)) return SelectOperator(node);
+
+            // The rebuild replaced every node, so the operator is selected on the new ones.
+            var found = Layout.FindVisibleNode(node);
+            AfterRelayout(found);
+            EnsureVisible(found!);
+            return true;
+        }
+
         public bool ClearSelection() => Select(null);
 
         /// <summary>Activate a node - what a double click does.</summary>

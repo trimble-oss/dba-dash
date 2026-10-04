@@ -388,6 +388,12 @@ namespace DBADashGUI.QueryPlans
         /// </summary>
         public void SelectOperator(PlanOperator node) => _controller?.SelectOperator(node);
 
+        /// <summary>
+        /// Selects the node for an operator, expanding anything it is collapsed under, so the operator
+        /// itself is selected rather than the collapsed node standing in for it.
+        /// </summary>
+        public void RevealOperator(PlanOperator node) => _controller?.RevealOperator(node);
+
         public void ZoomToFit() => _controller?.ZoomToFit();
 
         public void ZoomIn() => _controller?.ZoomIn(CentreOfView());
