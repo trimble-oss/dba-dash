@@ -113,7 +113,10 @@ namespace DBADashGUI.QueryPlans
             /// <summary>More than the row's height shows - set each time the rows are sized.</summary>
             public bool Clipped { get; set; }
 
-            public bool IsLink => FullText is not null && (AlwaysLink || Clipped);
+            /// <summary>What a click does instead of showing <see cref="FullText"/>, for a row that links elsewhere.</summary>
+            public Action Open { get; init; }
+
+            public bool IsLink => Open is not null || (FullText is not null && (AlwaysLink || Clipped));
         }
 
         /// <summary>
@@ -201,6 +204,13 @@ namespace DBADashGUI.QueryPlans
                 ShowCards();
             }
         }
+
+        /// <summary>
+        /// Opens Query Store for a query hash or a query plan hash (the other null), which makes the statement's hash
+        /// rows links.  Null when the viewer has no instance to look them up on.
+        /// </summary>
+        [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+        public Action<string, string> ShowQueryStore { get; set; }
 
         /// <summary>
         /// Raised when a card's link asks to go to an operator - the one a warning is on, or the one
@@ -311,13 +321,19 @@ namespace DBADashGUI.QueryPlans
                     {
                         Title = ViewerTitle(property.Name),
                         FullText = property.ReadableValue,
-                        AlwaysLink = property.IsExpression
+                        AlwaysLink = property.IsExpression,
+                        Open = QueryStoreLink(property, depth)
                     };
 
                 if (hasScript)
                 {
                     _grid.Rows[index].Cells[ValueColumnIndex].ToolTipText =
                         "Click to open the SET statements that reproduce these options, to run in SSMS.";
+                }
+                else if (InfoAt(index) is { Open: not null })
+                {
+                    _grid.Rows[index].Cells[ValueColumnIndex].ToolTipText =
+                        "Click to look this " + property.Name.ToLowerInvariant() + " up in Query Store.";
                 }
 
                 if (property.IsExpression && ShowsExpressionValues(property.Name))
@@ -382,6 +398,23 @@ namespace DBADashGUI.QueryPlans
                 Title = ViewerTitle(property.Name),
                 FullText = property.ReadableValue,
                 AlwaysLink = true
+            };
+        }
+
+        /// <summary>
+        /// The statement's query hash and query plan hash open Query Store, when the host can show it.  Operators have
+        /// no hash properties, so only the statement's top level rows are considered.
+        /// </summary>
+        private Action QueryStoreLink(PlanProperty property, int depth)
+        {
+            if (ShowQueryStore is not { } show || depth != 0 || _node?.Operator is not null || string.IsNullOrEmpty(property.Value)) return null;
+
+            var hash = property.Value;
+            return property.Name switch
+            {
+                "Query Hash" => () => show(hash, null),
+                "Query Plan Hash" => () => show(null, hash),
+                _ => null
             };
         }
 
@@ -485,11 +518,19 @@ namespace DBADashGUI.QueryPlans
         /// written out underneath: a predicate testing Expr1011 is unreadable until something says
         /// what Expr1011 is, and here there is room to say it.
         /// </summary>
-        private void ShowFull(RowInfo info) =>
+        private void ShowFull(RowInfo info)
+        {
+            if (info.Open is not null)
+            {
+                info.Open();
+                return;
+            }
+
             CommonShared.ShowCodeViewer(
                 info.NotesIncluded ? info.FullText : info.FullText + PlanScripts.ExpressionsUsedIn(_statement, info.FullText),
                 info.Title,
                 CodeEditor.CodeEditorModes.SQL);
+        }
 
         private static void ShowScript(string script) =>
             CommonShared.ShowCodeViewer(script, "Missing Index", CodeEditor.CodeEditorModes.SQL);

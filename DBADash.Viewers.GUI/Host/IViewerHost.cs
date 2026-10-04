@@ -46,6 +46,23 @@ namespace DBADashGUI.Viewers
         void ShowQueryStore(string databaseName, string objectName)
         {
         }
+
+        /// <summary>
+        /// True when <see cref="ShowQueryStoreForHash"/> can open Query Store for a query or plan hash.  Separate from
+        /// <see cref="CanShowQueryStore"/> so a host that only implements the module lookup doesn't get hash links that
+        /// do nothing.
+        /// </summary>
+        bool CanShowQueryStoreForHash => false;
+
+        /// <summary>
+        /// Opens Query Store on the source instance for a statement's query hash or query plan hash, as the plan
+        /// writes them ("0x..."). Only offered when <see cref="CanShowQueryStoreForHash"/> is true.
+        /// </summary>
+        /// <param name="queryHash">The query hash to look for, or null.</param>
+        /// <param name="queryPlanHash">The query plan hash to look for, or null.</param>
+        void ShowQueryStoreForHash(string queryHash, string queryPlanHash)
+        {
+        }
     }
 
     /// <summary>The AI Analysis tab of the plan viewer.</summary>
