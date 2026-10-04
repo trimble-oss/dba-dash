@@ -149,7 +149,14 @@ namespace DBADashGUI.Deadlocks
             _split.Panel1.Controls.Add(_preview);
             _split.Panel2.Controls.Add(_conversation);
 
-            var statusBar = new StatusStrip();
+            // Spring, because a StatusStrip drops an item wider than itself rather than clipping it -
+            // and the longest thing this line says is a failure, which is the one that has to be seen.
+            // Clipped, the rest is in the tooltip.  No sizing grip: there is no window edge here to drag,
+            // and at a high DPI the grip takes room the spring has already given to the label, which
+            // then is not shown at all.
+            _status.Spring = true;
+            _status.TextAlign = ContentAlignment.MiddleLeft;
+            var statusBar = new StatusStrip { ShowItemToolTips = true, SizingGrip = false };
             statusBar.Items.Add(_status);
 
             Controls.Add(_split);
@@ -300,9 +307,14 @@ namespace DBADashGUI.Deadlocks
         /// </summary>
         private void UpdateStatus()
         {
-            var parts = new[] { _analysisNote, _serviceNote }.Where(p => !string.IsNullOrEmpty(p));
+            // "Ready to submit" is only news before anything has been: once there is an answer, an error or
+            // a request on its way, it says nothing.  The absence of a service is worth saying throughout -
+            // it is why the button is disabled.
+            var serviceNote = _service is not null && _analysisNote is not null ? null : _serviceNote;
+            var parts = new[] { _analysisNote, serviceNote }.Where(p => !string.IsNullOrEmpty(p));
 
             _status.Text = string.Join("  ", parts);
+            _status.ToolTipText = AIStatusText.ToolTip(parts);
             _status.ForeColor = _statusColour;
         }
 

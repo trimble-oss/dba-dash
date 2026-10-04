@@ -153,7 +153,7 @@ namespace DBADashGUI.Deadlocks
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    return new Result { Error = $"{(int)response.StatusCode} {response.ReasonPhrase}: {body}" };
+                    return new Result { Error = AIServiceErrors.Describe(response, body) };
                 }
 
                 using var document = JsonDocument.Parse(body);
