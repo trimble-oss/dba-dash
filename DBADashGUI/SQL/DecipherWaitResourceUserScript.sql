@@ -114,6 +114,16 @@ BEGIN
 			@FileID =SUBSTRING(@NormalizedWaitResource,@idx1+1,@idx2-@idx1-1),
 			@PageID = SUBSTRING(@NormalizedWaitResource,@idx2+1,LEN(@NormalizedWaitResource))
 
+	/* File ID 0 (e.g. 2:0:0) doesn't identify a page - DBCC PAGE would fail */
+	IF @FileID = 0
+	BEGIN
+		SELECT	@WaitResource AS wait_resource,
+				DB_NAME(@DBID) AS database_name,
+				'File ID is 0 so the wait resource doesn''t identify a page.  See https://www.sqlskills.com/blogs/paul/the-curious-case-of-what-is-the-wait-resource-000/' AS info
+
+		RETURN
+	END
+
 	IF SERVERPROPERTY('EngineEdition') NOT IN(1,2,3,4)
 	BEGIN
 		SELECT	@DBID database_id,

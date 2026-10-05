@@ -111,6 +111,15 @@ BEGIN
 	       @FileID = SUBSTRING(@NormalizedWaitResource, @idx1 + 1, @idx2 - @idx1 - 1),
 	       @PageID = SUBSTRING(@NormalizedWaitResource, @idx2 + 1, LEN(@NormalizedWaitResource));
 
+	/* File ID 0 (e.g. 2:0:0) doesn't identify a page - sys.dm_db_page_info would fail with "Parameter 2 is incorrect" */
+	IF @FileID = 0
+	BEGIN
+		SELECT @WaitResource AS wait_resource,
+		       DB_NAME(@DBID) AS database_name,
+		       'File ID is 0 so the wait resource doesn''t identify a page.  See https://www.sqlskills.com/blogs/paul/the-curious-case-of-what-is-the-wait-resource-000/' AS info;
+		RETURN;
+	END
+
 	/*
 		sys.dm_db_page_info is available from SQL Server 2019 (and Azure SQL).  If it isn't available, signal the
 		caller to fall back to the manual script (which uses DBCC PAGE).
