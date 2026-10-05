@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
@@ -49,6 +50,41 @@ namespace DBADashGUI.Controls
         {
             SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint |
                      ControlStyles.ResizeRedraw | ControlStyles.UserPaint, true);
+
+            // A label's text can't be selected, so offer a Copy on right-click instead.
+            var copy = new ToolStripMenuItem("Copy", DBADashSharedGUI.Properties.Resources.ASX_Copy_blue_16x);
+            copy.Click += (_, _) => CopyText();
+            ContextMenuStrip = new ContextMenuStrip();
+            ContextMenuStrip.Items.Add(copy);
+        }
+
+        /// <summary>The card's text: each label's text as displayed, with markdown links reduced to their text.</summary>
+        public string CardText =>
+            string.Join(Environment.NewLine, Controls.OfType<Label>().Select(l => l.Text.Replace("\r\n", "\n").Replace("\n", Environment.NewLine)));
+
+        private void CopyText()
+        {
+            var text = CardText;
+            if (!string.IsNullOrEmpty(text))
+            {
+                Clipboard.SetText(text);
+            }
+        }
+
+        // Share the card's menu with its content, so right-clicking the text works as well as the margin around it.
+        protected override void OnControlAdded(ControlEventArgs e)
+        {
+            base.OnControlAdded(e);
+            e.Control.ContextMenuStrip ??= ContextMenuStrip;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                ContextMenuStrip?.Dispose();
+            }
+            base.Dispose(disposing);
         }
 
         protected override void OnPaint(PaintEventArgs e)
