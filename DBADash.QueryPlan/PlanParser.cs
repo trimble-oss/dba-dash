@@ -368,7 +368,9 @@ namespace DBADash.QueryPlan
                     GrantedMemoryKb = Long(Attribute(grant, "GrantedMemory")),
                     MaxUsedMemoryKb = Long(Attribute(grant, "MaxUsedMemory")),
                     MaxQueryMemoryKb = Long(Attribute(grant, "MaxQueryMemory")),
-                    GrantWaitTimeMs = Long(Attribute(grant, "GrantWaitTime"))
+                    GrantWaitTimeMs = Long(Attribute(grant, "GrantWaitTime")),
+                    IsMemoryGrantFeedbackAdjusted = Attribute(grant, "IsMemoryGrantFeedbackAdjusted"),
+                    LastRequestedMemoryKb = Long(Attribute(grant, "LastRequestedMemory"))
                 };
             }
 
@@ -936,6 +938,8 @@ namespace DBADash.QueryPlan
                 if (grant.SerialDesiredMemoryKb is { } serialDesired) Add(children, "Serial Desired Memory", PlanFormat.Kilobytes(serialDesired));
                 if (grant.MaxQueryMemoryKb is { } maxQuery) Add(children, "Max Query Memory", PlanFormat.Kilobytes(maxQuery));
                 if (grant.GrantWaitTimeMs is { } wait) Add(children, "Grant Wait Time", PlanFormat.Duration(wait));
+                Add(children, "Is Memory Grant Feedback Adjusted", grant.IsMemoryGrantFeedbackAdjusted);
+                if (grant.LastRequestedMemoryKb is { } lastRequested) Add(children, "Last Requested Memory", PlanFormat.Kilobytes(lastRequested));
                 if (children.Count > 0) properties.Add(new PlanProperty("Memory Grant", null, children));
             }
 
@@ -986,7 +990,7 @@ namespace DBADash.QueryPlan
                 if (element is null) continue;
 
                 var children = element.Attributes()
-                    .Select(a => new PlanProperty(SplitCamelCase(a.Name.LocalName), a.Value))
+                    .Select(a => new PlanProperty(SplitCamelCase(a.Name.LocalName), FormatHardwareProperty(a)))
                     .ToList();
 
                 if (children.Count == 0) continue;
@@ -1544,6 +1548,23 @@ namespace DBADash.QueryPlan
 
         private static string? Ms(string? value) =>
             Long(value) is { } milliseconds ? PlanFormat.Duration(milliseconds) : value;
+
+        /// <summary>
+        /// The optimizer hardware memory attributes are in KB, so they get the same MB/GB formatting
+        /// as the memory grant, and the 8 KB page count gets its size alongside.  Anything else is
+        /// shown as the plan has it.
+        /// </summary>
+        private static string FormatHardwareProperty(XAttribute attribute)
+        {
+            if (!long.TryParse(attribute.Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value)) return attribute.Value;
+
+            return attribute.Name.LocalName switch
+            {
+                "EstimatedAvailableMemoryGrant" or "MaxCompileMemory" => PlanFormat.Kilobytes(value),
+                "EstimatedPagesCached" => value.ToString("N0", CultureInfo.InvariantCulture) + " (" + PlanFormat.Kilobytes(value * 8) + ")",
+                _ => attribute.Value
+            };
+        }
 
         /// <summary>
         /// Puts spaces into showplan's PascalCase names so they read as labels.  Runs of capitals -

@@ -380,6 +380,35 @@ namespace DBADash.QueryPlan.Test
         }
 
         [TestMethod]
+        public void Parse_FormatsTheOptimizerHardwareMemoryProperties()
+        {
+            var properties = InlinePlan.Parse(
+                """<OptimizerHardwareDependentProperties EstimatedAvailableMemoryGrant="139801" EstimatedPagesCached="104850" EstimatedAvailableDegreeOfParallelism="6" MaxCompileMemory="6783216" />""" +
+                InlinePlan.Op(1, "Sort", "Sort", "")).Properties;
+
+            // Left where SSMS shows them, but in MB/GB like the memory grant.
+            var optimizer = properties.Single(p => p.Name == "Optimizer Hardware Dependent Properties");
+            Assert.AreEqual("136.5 MB", optimizer.Children.Single(p => p.Name == "Estimated Available Memory Grant").Value);
+            Assert.AreEqual("6.47 GB", optimizer.Children.Single(p => p.Name == "Max Compile Memory").Value);
+            Assert.AreEqual("104,850 (819.1 MB)", optimizer.Children.Single(p => p.Name == "Estimated Pages Cached").Value);
+        }
+
+        [TestMethod]
+        public void Parse_ReadsMemoryGrantFeedback()
+        {
+            var statement = InlinePlan.Parse(
+                """<MemoryGrantInfo SerialRequiredMemory="1024" SerialDesiredMemory="4096" IsMemoryGrantFeedbackAdjusted="Yes: Adjusting" LastRequestedMemory="2048" />""" +
+                InlinePlan.Op(1, "Sort", "Sort", ""));
+
+            Assert.AreEqual("Yes: Adjusting", statement.MemoryGrant!.IsMemoryGrantFeedbackAdjusted);
+            Assert.AreEqual(2048, statement.MemoryGrant.LastRequestedMemoryKb);
+
+            var memory = statement.Properties.Single(p => p.Name == "Memory Grant");
+            Assert.AreEqual("Yes: Adjusting", memory.Children.Single(p => p.Name == "Is Memory Grant Feedback Adjusted").Value);
+            Assert.AreEqual("2 MB", memory.Children.Single(p => p.Name == "Last Requested Memory").Value);
+        }
+
+        [TestMethod]
         public void Parse_LeavesOutParametersAndWaitsAPlanDoesNotHave()
         {
             var properties = TestPlans.Statement(TestPlans.KeyLookupSeek).Properties;
