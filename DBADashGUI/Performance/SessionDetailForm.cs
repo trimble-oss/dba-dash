@@ -52,18 +52,19 @@ namespace DBADashGUI.Performance
         /// <param name="context">The current context - used for object execution drill down.</param>
         /// <param name="staleWarning">Optional warning shown in the status bar - see <see cref="SessionDetailControl.StaleWarning"/>.</param>
         /// <param name="newWindow">Open in a new window instead of on a tab of the existing one (e.g. Ctrl+click).</param>
-        public static void Open(DataRowView row, DBADashContext context, string staleWarning = null, bool newWindow = false)
+        /// <param name="tab">Optional tab to show (e.g. <see cref="SessionDetailControl.WaitResourceTab"/>) - the first tab if omitted.</param>
+        public static void Open(DataRowView row, DBADashContext context, string staleWarning = null, bool newWindow = false, string tab = null)
         {
             var window = newWindow ? null : Current;
             if (window is null)
             {
                 window = current = new SessionDetailForm();
-                window.AddSession(row, context, staleWarning);
+                window.AddSession(row, context, staleWarning, tab);
                 window.ShowSingleInstance(forceNewInstance: newWindow);
                 return;
             }
 
-            window.AddSession(row, context, staleWarning);
+            window.AddSession(row, context, staleWarning, tab);
             if (window.WindowState == FormWindowState.Minimized) window.WindowState = FormWindowState.Normal;
             window.Activate();
         }
@@ -75,7 +76,7 @@ namespace DBADashGUI.Performance
                 .Where(s => s.Viewer is not null)
                 .ToList();
 
-        private void AddSession(DataRowView row, DBADashContext context, string staleWarning)
+        private void AddSession(DataRowView row, DBADashContext context, string staleWarning, string tab)
         {
             var instanceId = Convert.ToInt32(row["InstanceID"]);
             var sessionId = Convert.ToInt32(row["session_id"]);
@@ -87,10 +88,12 @@ namespace DBADashGUI.Performance
             if (open.Page is not null)
             {
                 tabs.SelectedTab = open.Page;
+                open.Viewer.SelectTab(tab);
                 return;
             }
 
             var viewer = new SessionDetailControl(row, context) { StaleWarning = staleWarning, Dock = DockStyle.Fill };
+            viewer.SelectTab(tab);
             var page = new TabPage();
             page.Controls.Add(viewer);
             viewer.TitleChanged += (_, _) =>
