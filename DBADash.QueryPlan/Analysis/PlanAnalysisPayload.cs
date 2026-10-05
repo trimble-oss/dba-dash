@@ -308,6 +308,10 @@ namespace DBADash.QueryPlan.Analysis
                 Add(stats, "Memory granted", grant.GrantedMemoryKb is { } granted ? $"{granted:N0} KB" : null);
                 Add(stats, "Memory used", grant.MaxUsedMemoryKb is { } maxUsed ? $"{maxUsed:N0} KB" : null);
                 Add(stats, "Waited for the grant", grant.GrantWaitTimeMs is { } wait ? PlanFormat.Duration(wait) : null);
+                // Feedback resizes the grant from one execution to the next, so the request here
+                // may not be the optimizer's estimate - these say whether, and from what.
+                Add(stats, "Memory grant feedback adjusted", grant.IsMemoryGrantFeedbackAdjusted);
+                Add(stats, "Memory requested by the previous execution", grant.LastRequestedMemoryKb is { } lastRequested ? $"{lastRequested:N0} KB" : null);
             }
 
             return stats;

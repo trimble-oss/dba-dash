@@ -43,6 +43,15 @@ namespace DBADash.QueryPlan.Model
         public long? GrantWaitTimeMs { get; internal set; }
 
         /// <summary>
+        /// Memory grant feedback's state for the plan, as showplan words it - e.g. "No: First
+        /// Execution", "Yes: Adjusting", "Yes: Stable".
+        /// </summary>
+        public string? IsMemoryGrantFeedbackAdjusted { get; internal set; }
+
+        /// <summary>What the previous execution requested, which feedback adjusts from.</summary>
+        public long? LastRequestedMemoryKb { get; internal set; }
+
+        /// <summary>
         /// The share of the grant that was used, from 0 to 1, or null when either figure is missing.
         /// A low value on a large grant is query memory other queries could not be granted, for
         /// nothing, and it is the number the grant warning is really about.

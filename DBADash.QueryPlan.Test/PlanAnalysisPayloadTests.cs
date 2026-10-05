@@ -46,6 +46,19 @@ namespace DBADash.QueryPlan.Test
         }
 
         [TestMethod]
+        public void Payload_SaysWhenMemoryGrantFeedbackHasResizedTheGrant()
+        {
+            var plan = InlinePlan.ParsePlan(
+                """<MemoryGrantInfo SerialRequiredMemory="1024" SerialDesiredMemory="4096" IsMemoryGrantFeedbackAdjusted="Yes: Adjusting" LastRequestedMemory="2048" />""" +
+                InlinePlan.Op(1, "Sort", "Sort", ""));
+
+            var payload = PlanAnalysisPayload.Build(plan, plan.Statements[0]);
+
+            CollectionAssert.Contains(payload.Statistics.ToList(), "Memory grant feedback adjusted: Yes: Adjusting");
+            CollectionAssert.Contains(payload.Statistics.ToList(), "Memory requested by the previous execution: 2,048 KB");
+        }
+
+        [TestMethod]
         public void Payload_IsAboutOneStatementOfABatchRatherThanTheDocument()
         {
             var plan = TestPlans.Load(TestPlans.Batch);
