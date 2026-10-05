@@ -255,6 +255,25 @@ namespace DBADashGUI.Performance
             base.OnClientSizeChanged(e);
             // Also catches a vertical scroll bar appearing when the panel's height is capped.
             InsightCard.FitToWidth(this);
+            RelayoutParent();
+        }
+
+        private bool relayoutPending;
+
+        /// <summary>
+        /// Re-wrapping the cards changes this panel's preferred height, but a width change arrives during the parent's
+        /// layout, which has already sized this panel from the old card heights (e.g. leaving a gap below the cards after
+        /// maximizing).  Lay the parent out again once that pass has finished so the auto size picks up the new height.
+        /// </summary>
+        private void RelayoutParent()
+        {
+            if (relayoutPending || !IsHandleCreated || Parent == null) return;
+            relayoutPending = true;
+            BeginInvoke(() =>
+            {
+                relayoutPending = false;
+                Parent?.PerformLayout(this, nameof(Height));
+            });
         }
 
         protected override void Dispose(bool disposing)
