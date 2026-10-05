@@ -1498,8 +1498,9 @@ namespace DBADashGUI.Performance
                         ShowRunningQueriesForSnapshotDate(row);
                         break;
                     }
+                // Open the session detail on the Wait Resource tab - it can decipher the wait resource via messaging (or show the script)
                 case "colWaitResource":
-                    DecipherWaitResource(row);
+                    ShowSessionDetail(row, SessionDetailControl.WaitResourceTab);
                     break;
 
                 case "colJobName":
@@ -1638,14 +1639,6 @@ namespace DBADashGUI.Performance
             planViewer.ShowSingleInstance();
         }
 
-        private static void DecipherWaitResource(DataRowView row)
-        {
-            var waitResource = Convert.ToString(row["wait_resource"]);
-            var instance = Convert.ToString(row["InstanceDisplayName"]);
-            var sql = SqlStrings.GetDecipherWaitResource(waitResource, instance);
-            Common.ShowCodeViewer(sql, "Decipher Wait Resource");
-        }
-
         private void GroupByFilter(DataGridViewCellEventArgs e, DataRowView row)
         {
             var colName = dgv.Columns[e.ColumnIndex].DataPropertyName;
@@ -1670,11 +1663,11 @@ namespace DBADashGUI.Performance
             tsBack.Enabled = true;
         }
 
-        private void ShowSessionDetail(DataRowView row)
+        private void ShowSessionDetail(DataRowView row, string tab = null)
         {
             // Ctrl+click opens the session in a new window instead of on a new tab of the existing one.
             var newWindow = (Control.ModifierKeys & Keys.Control) == Keys.Control;
-            SessionDetailForm.Open(row, CurrentContext, newWindow: newWindow);
+            SessionDetailForm.Open(row, CurrentContext, newWindow: newWindow, tab: tab);
         }
 
         /// <summary>

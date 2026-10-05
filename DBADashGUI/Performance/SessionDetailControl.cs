@@ -74,6 +74,9 @@ namespace DBADashGUI.Performance
         // True once the peer counts above have been computed (avoids recomputing / re-querying on tab reload).
         private bool peerCountsComputed;
 
+        /// <summary>Name of the Wait Resource tab - see <see cref="SelectTab"/>.</summary>
+        public const string WaitResourceTab = "Wait Resource";
+
         private readonly Dictionary<TabPage, Func<TabPage, Task>> loaders = new();
         private readonly HashSet<TabPage> loadedTabs = new();
 
@@ -761,7 +764,7 @@ DBCC FREEPROCCACHE({planHandle});";
 
             if (HasWaitResource())
             {
-                AddTab("Wait Resource", LoadWaitResource);
+                AddTab(WaitResourceTab, LoadWaitResource);
             }
 
             if (IsBlocking())
@@ -787,6 +790,17 @@ DBCC FREEPROCCACHE({planHandle});";
             var page = new TabPage(title) { Name = title };
             tabs.TabPages.Add(page);
             loaders.Add(page, loader);
+        }
+
+        /// <summary>
+        /// Bring the named tab to the front (e.g. <see cref="WaitResourceTab"/>).  Does nothing if the tab isn't shown for
+        /// this session.  Safe to call before the control loads - the selected tab is the one loaded first.
+        /// </summary>
+        public void SelectTab(string title)
+        {
+            if (string.IsNullOrEmpty(title)) return;
+            var page = tabs.TabPages[title];
+            if (page != null) tabs.SelectedTab = page;
         }
 
         private bool HasObject() =>
@@ -1724,6 +1738,16 @@ DBCC FREEPROCCACHE({planHandle});";
             };
             btnDecipher.Click += async (_, _) => await DecipherWaitResource(split, btnDecipher);
             toolbar.Items.Add(btnDecipher);
+
+            // The manual script - for users who want to run it themselves or don't have messaging
+            var btnScript = new ToolStripButton("Script")
+            {
+                DisplayStyle = ToolStripItemDisplayStyle.ImageAndText,
+                Image = Properties.Resources.SQLScript_16x,
+                ToolTipText = "Show a script to decipher the wait resource that you can run on the source instance."
+            };
+            btnScript.Click += (_, _) => ShowDecipherScript(Convert.ToString(Row["wait_resource"].DBNullToNull()));
+            toolbar.Items.Add(btnScript);
 
             page.Controls.Add(split);
             page.Controls.Add(toolbar);
