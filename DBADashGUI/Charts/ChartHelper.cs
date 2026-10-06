@@ -393,7 +393,7 @@ namespace DBADashGUI.Charts
             // Context menu for chart actions (copy/save)
             AddChartContextMenu(chart, dt);
 
-            // PieChart currently doesn't use the Cartesian custom tooltip helper
+            chart.EnableCustomTooltips();
 
             return chart;
         }
@@ -546,10 +546,14 @@ namespace DBADashGUI.Charts
                     {
                         try
                         {
+                            // Pause custom tooltip while context menu is open (lighter than full disable)
                             if (chart is CartesianChart cart)
                             {
-                                // Pause custom tooltip while context menu is open (lighter than full disable)
                                 try { cart.PauseCustomTooltips(); } catch { }
+                            }
+                            else if (chart is PieChart pie)
+                            {
+                                try { pie.PauseCustomTooltips(); } catch { }
                             }
                         }
                         catch (Exception ex)
@@ -566,6 +570,10 @@ namespace DBADashGUI.Charts
                             if (chart is CartesianChart cart)
                             {
                                 try { cart.ResumeCustomTooltips(); } catch { }
+                            }
+                            else if (chart is PieChart pie)
+                            {
+                                try { pie.ResumeCustomTooltips(); } catch { }
                             }
                         }
                         catch (Exception ex)

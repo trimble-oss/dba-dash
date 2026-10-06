@@ -1,4 +1,5 @@
-﻿using DBADashGUI.Theme;
+﻿using DBADashGUI.Charts;
+using DBADashGUI.Theme;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
@@ -17,6 +18,7 @@ namespace DBADashGUI.Performance
         public MemoryUsage()
         {
             InitializeComponent();
+            pieChart1.EnableCustomTooltips();
             ChartView = ChartViews.Pie; // Update control visibility
         }
 
