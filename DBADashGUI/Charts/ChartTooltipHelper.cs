@@ -18,12 +18,12 @@ using System.Windows.Forms;
 namespace DBADashGUI.Charts
 {
     /// <summary>
-    /// Helper class to add custom tooltips to CartesianChart controls that can overflow chart boundaries
+    /// Helper class to add custom tooltips to CartesianChart and PieChart controls that can overflow chart boundaries
     /// </summary>
     internal static class ChartTooltipHelper
     {
-        private static readonly ConditionalWeakTable<CartesianChart, TooltipForm> _tooltipForms = new();
-        private static readonly ConditionalWeakTable<CartesianChart, TooltipState> _tooltipStates = new();
+        private static readonly ConditionalWeakTable<Control, TooltipForm> _tooltipForms = new();
+        private static readonly ConditionalWeakTable<Control, TooltipState> _tooltipStates = new();
 
         private const int TooltipShowDelayMs = 100; // Delay before showing tooltip when mouse stops
         private const int SlowMovementThresholdMs = 50; // Time between point changes to be considered "slow movement"
@@ -66,6 +66,8 @@ namespace DBADashGUI.Charts
             public int LastPointIndex { get; set; } = -1;
             public int LastPointCount { get; set; } = 0;
             public int LastHighlightIndex { get; set; } = -1;
+            public ISeries LastSeries { get; set; } // Pie charts: the slice under the mouse (each slice is a series)
+            public Dictionary<ISeries, int> PieSliceRows { get; set; } // Pie charts: tooltip row index of each slice
             public Timer ShowTimer { get; set; }
             public bool IsTooltipVisible { get; set; } = false;
             public DateTime? PendingDate { get; set; }
@@ -393,7 +395,46 @@ namespace DBADashGUI.Charts
         {
             // Hide built-in LiveCharts tooltips
             chart.TooltipPosition = LiveChartsCore.Measure.TooltipPosition.Hidden;
+            AttachTooltip(chart, valueFormatter);
 
+            // Wire up mouse events
+            chart.MouseMove -= Chart_MouseMove;
+            chart.MouseMove += Chart_MouseMove;
+            chart.MouseLeave -= Chart_MouseLeave;
+            chart.MouseLeave += Chart_MouseLeave;
+        }
+
+        /// <summary>
+        /// Enable custom tooltips for a PieChart. This hides the built-in tooltips and shows the slice under the mouse
+        /// in the same floating tooltip used by cartesian charts.
+        /// </summary>
+        /// <param name="chart">The chart to add custom tooltips to</param>
+        public static void EnableCustomTooltips(this PieChart chart)
+        {
+            EnableCustomTooltips(chart, null);
+        }
+
+        /// <summary>
+        /// Enable custom tooltips for a PieChart with a custom value formatter.
+        /// </summary>
+        /// <param name="chart">The chart to add custom tooltips to</param>
+        /// <param name="valueFormatter">Optional custom formatter for tooltip values. If null, uses the series ToolTipLabelFormatter.</param>
+        public static void EnableCustomTooltips(this PieChart chart, TooltipValueFormatter valueFormatter)
+        {
+            chart.TooltipPosition = LiveChartsCore.Measure.TooltipPosition.Hidden;
+            AttachTooltip(chart, valueFormatter);
+
+            chart.MouseMove -= PieChart_MouseMove;
+            chart.MouseMove += PieChart_MouseMove;
+            chart.MouseLeave -= Chart_MouseLeave;
+            chart.MouseLeave += Chart_MouseLeave;
+        }
+
+        /// <summary>
+        /// Creates the tooltip form and state for a chart, or updates the formatter if they already exist
+        /// </summary>
+        private static void AttachTooltip(Control chart, TooltipValueFormatter valueFormatter)
+        {
             // Create tooltip form if it doesn't exist
             if (!_tooltipForms.TryGetValue(chart, out var tooltipForm))
             {
@@ -444,13 +485,13 @@ namespace DBADashGUI.Charts
                                 catch (ObjectDisposedException)
                                 {
                                     // Chart was disposed during positioning; fully disable custom tooltips for this chart
-                                    try { DisableCustomTooltips(chart); } catch { }
+                                    try { DisableCustomTooltipsCore(chart); } catch { }
                                     return;
                                 }
                                 catch (InvalidOperationException)
                                 {
                                     // In case the control handle/state is invalid, disable tooltips
-                                    try { DisableCustomTooltips(chart); } catch { }
+                                    try { DisableCustomTooltipsCore(chart); } catch { }
                                     return;
                                 }
 
@@ -469,6 +510,10 @@ namespace DBADashGUI.Charts
                 };
 
                 _tooltipStates.Add(chart, state);
+
+                // The tooltip is a window of its own rather than a child of the chart, so release it with the chart
+                chart.Disposed -= Chart_Disposed;
+                chart.Disposed += Chart_Disposed;
             }
             else
             {
@@ -478,24 +523,48 @@ namespace DBADashGUI.Charts
                     state.ValueFormatter = valueFormatter;
                 }
             }
-
-            // Wire up mouse events
-            chart.MouseMove -= Chart_MouseMove;
-            chart.MouseMove += Chart_MouseMove;
-            chart.MouseLeave -= Chart_MouseLeave;
-            chart.MouseLeave += Chart_MouseLeave;
         }
 
         /// <summary>
         /// Disable custom tooltips for a CartesianChart and restore default behavior
         /// </summary>
         /// <param name="chart">The chart to disable custom tooltips for</param>
-        public static void DisableCustomTooltips(this CartesianChart chart)
+        public static void DisableCustomTooltips(this CartesianChart chart) => DisableCustomTooltipsCore(chart);
+
+        /// <summary>
+        /// Disable custom tooltips for a PieChart and restore default behavior
+        /// </summary>
+        /// <param name="chart">The chart to disable custom tooltips for</param>
+        public static void DisableCustomTooltips(this PieChart chart) => DisableCustomTooltipsCore(chart);
+
+        private static void Chart_Disposed(object sender, EventArgs e)
+        {
+            if (sender is not Control chart) return;
+            try { ReleaseTooltip(chart); } catch (Exception ex) { Debug.WriteLine($"ChartTooltipHelper.Chart_Disposed error: {ex}"); }
+        }
+
+        private static void DisableCustomTooltipsCore(Control chart)
         {
             if (chart == null) return;
 
+            ReleaseTooltip(chart);
+
+            // Re-enable built-in tooltips
+            if (chart is IChartView view)
+            {
+                view.TooltipPosition = chart is PieChart ? LiveChartsCore.Measure.TooltipPosition.Auto : LiveChartsCore.Measure.TooltipPosition.Top;
+            }
+        }
+
+        /// <summary>
+        /// Unwires the chart and disposes its tooltip form and timer
+        /// </summary>
+        private static void ReleaseTooltip(Control chart)
+        {
             chart.MouseMove -= Chart_MouseMove;
+            chart.MouseMove -= PieChart_MouseMove;
             chart.MouseLeave -= Chart_MouseLeave;
+            chart.Disposed -= Chart_Disposed;
 
             if (_tooltipStates.TryGetValue(chart, out var state))
             {
@@ -510,9 +579,6 @@ namespace DBADashGUI.Charts
                 tooltipForm.Dispose();
                 _tooltipForms.Remove(chart);
             }
-
-            // Re-enable built-in tooltips
-            chart.TooltipPosition = LiveChartsCore.Measure.TooltipPosition.Top;
         }
 
         /// <summary>
@@ -520,23 +586,31 @@ namespace DBADashGUI.Charts
         /// Hides any visible tooltip and stops the show-timer. Use ResumeCustomTooltips to resume.
         /// </summary>
         /// <param name="chart">The chart to pause custom tooltips for</param>
-        public static void PauseCustomTooltips(this CartesianChart chart)
+        public static void PauseCustomTooltips(this CartesianChart chart) => PauseCustomTooltipsCore(chart);
+
+        /// <summary>
+        /// Pause custom tooltips for a PieChart without tearing down internal state. Use ResumeCustomTooltips to resume.
+        /// </summary>
+        /// <param name="chart">The chart to pause custom tooltips for</param>
+        public static void PauseCustomTooltips(this PieChart chart) => PauseCustomTooltipsCore(chart);
+
+        private static void PauseCustomTooltipsCore(Control chart)
         {
             if (chart == null) return;
 
             try
             {
+                _tooltipForms.TryGetValue(chart, out var tooltipForm);
                 if (_tooltipStates.TryGetValue(chart, out var state))
                 {
-                    try { state.ShowTimer?.Stop(); } catch { }
-                    state.IsTooltipVisible = false;
-                    state.PendingSeriesData = null;
+                    // Forget the point/slice under the mouse too, otherwise after resuming, moves over the same point
+                    // look unchanged and the tooltip stays hidden until the mouse reaches a different one
+                    try { ResetTooltipState(state, tooltipForm); } catch { }
                     state.IsPaused = true;
                 }
-
-                if (_tooltipForms.TryGetValue(chart, out var tooltipForm))
+                else
                 {
-                    try { tooltipForm.Hide(); } catch { }
+                    try { tooltipForm?.Hide(); } catch { }
                 }
             }
             catch (Exception ex)
@@ -550,7 +624,15 @@ namespace DBADashGUI.Charts
         /// normal mouse movement will restart tooltip behavior.
         /// </summary>
         /// <param name="chart">The chart to resume custom tooltips for</param>
-        public static void ResumeCustomTooltips(this CartesianChart chart)
+        public static void ResumeCustomTooltips(this CartesianChart chart) => ResumeCustomTooltipsCore(chart);
+
+        /// <summary>
+        /// Resume custom tooltips for a PieChart previously paused via PauseCustomTooltips.
+        /// </summary>
+        /// <param name="chart">The chart to resume custom tooltips for</param>
+        public static void ResumeCustomTooltips(this PieChart chart) => ResumeCustomTooltipsCore(chart);
+
+        private static void ResumeCustomTooltipsCore(Control chart)
         {
             if (chart == null) return;
 
@@ -563,7 +645,7 @@ namespace DBADashGUI.Charts
                     try { state.ShowTimer?.Stop(); } catch { }
                     // Resume handling of mouse events
                     state.IsPaused = false;
-                    // Do not auto-start the timer here; Chart_MouseMove will start it when appropriate
+                    // Do not auto-start the timer here; the mouse move handler will start it when appropriate
                 }
             }
             catch (Exception ex)
@@ -800,20 +882,7 @@ namespace DBADashGUI.Charts
                         }
                     }
 
-                    // Always update position if tooltip is visible, but only if position actually changed
-                    if (state.IsTooltipVisible && tooltipForm.Visible)
-                    {
-                        var screenPt = chart.PointToScreen(e.Location);
-                        var newTooltipPos = new Point(screenPt.X + TooltipOffsetX, screenPt.Y + TooltipOffsetY);
-
-                        // Only update if moved by more than a few pixels to reduce flicker
-                        if (Math.Abs(newTooltipPos.X - state.LastTooltipPosition.X) > 3 ||
-                            Math.Abs(newTooltipPos.Y - state.LastTooltipPosition.Y) > 3)
-                        {
-                            PositionTooltip(chart, tooltipForm, e.Location);
-                            state.LastTooltipPosition = tooltipForm.Location;
-                        }
-                    }
+                    FollowMouse(chart, tooltipForm, state, e.Location);
                 }
                 else
                 {
@@ -849,7 +918,158 @@ namespace DBADashGUI.Charts
             state.LastPointIndex = -1;
             state.LastPointCount = 0;
             state.LastHighlightIndex = -1;
+            state.LastSeries = null;
             tooltipForm?.Hide();
+        }
+
+        /// <summary>
+        /// Always update position if tooltip is visible, but only if position actually changed
+        /// </summary>
+        private static void FollowMouse(Control chart, TooltipForm tooltipForm, TooltipState state, Point mouseLocation)
+        {
+            if (!state.IsTooltipVisible || !tooltipForm.Visible) return;
+
+            var screenPt = chart.PointToScreen(mouseLocation);
+            var newTooltipPos = new Point(screenPt.X + TooltipOffsetX, screenPt.Y + TooltipOffsetY);
+
+            // Only update if moved by more than a few pixels to reduce flicker
+            if (Math.Abs(newTooltipPos.X - state.LastTooltipPosition.X) > 3 ||
+                Math.Abs(newTooltipPos.Y - state.LastTooltipPosition.Y) > 3)
+            {
+                PositionTooltip(chart, tooltipForm, mouseLocation);
+                state.LastTooltipPosition = tooltipForm.Location;
+            }
+        }
+
+        /// <summary>
+        /// Lists every slice of the pie with the one under the mouse highlighted.
+        /// The rows are built when the mouse enters the pie so they reflect the current data - moving between slices only
+        /// moves the highlight and other moves just reposition the tooltip.
+        /// LiveCharts hit tests slices against their drawn shape, so the tolerance search used for cartesian points isn't needed.
+        /// </summary>
+        private static void PieChart_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (sender is not PieChart chart) return;
+            if (!_tooltipForms.TryGetValue(chart, out var tooltipForm)) return;
+            if (!_tooltipStates.TryGetValue(chart, out var state)) return;
+            if (state.IsPaused) return;
+
+            try
+            {
+                // Ignore tiny jitters so they don't reset the tooltip delay timer
+                if (state.LastMousePosition == Point.Empty ||
+                    Math.Abs(e.X - state.LastMousePosition.X) > MouseJitterThreshold ||
+                    Math.Abs(e.Y - state.LastMousePosition.Y) > MouseJitterThreshold)
+                {
+                    state.LastMouseMoveTime = DateTime.Now;
+                    state.LastMousePosition = e.Location;
+                }
+
+                LiveChartsCore.Kernel.ChartPoint point = null;
+                foreach (var p in chart.GetPointsAt(new LiveChartsCore.Drawing.LvcPointD(e.X, e.Y)))
+                {
+                    point = p;
+                    break;
+                }
+
+                if (point == null)
+                {
+                    // Off the pie (legend, donut hole, margins)
+                    if (state.LastSeries != null || state.ShowTimer.Enabled || tooltipForm.Visible)
+                    {
+                        ResetTooltipState(state, tooltipForm);
+                    }
+                    return;
+                }
+
+                state.PendingMouseLocation = e.Location;
+
+                var series = point.Context.Series;
+                if (!ReferenceEquals(series, state.LastSeries))
+                {
+                    var entering = state.LastSeries == null;
+                    state.LastSeries = series;
+
+                    if (entering || state.PieSliceRows == null || !state.PieSliceRows.ContainsKey(series))
+                    {
+                        var seriesData = GetPieSliceRows(chart, state);
+                        var highlightIndex = GetPieHighlightIndex(state, series);
+                        state.PendingDate = null;
+                        state.PendingXLabel = null;
+                        state.PendingSeriesData = seriesData;
+                        state.PendingHighlightIndex = highlightIndex;
+
+                        if (state.IsTooltipVisible)
+                        {
+                            tooltipForm.SetContent(null, null, seriesData, highlightIndex);
+                        }
+                        else if (!state.ShowTimer.Enabled)
+                        {
+                            state.ShowTimer.Start();
+                        }
+                    }
+                    else
+                    {
+                        // Same slices - just move the highlight
+                        state.PendingHighlightIndex = GetPieHighlightIndex(state, series);
+                        if (state.IsTooltipVisible)
+                        {
+                            tooltipForm.SetHighlight(state.PendingHighlightIndex);
+                        }
+                    }
+                }
+
+                FollowMouse(chart, tooltipForm, state, e.Location);
+            }
+            catch
+            {
+                // Suppress any errors during tooltip display
+                ResetTooltipState(state, tooltipForm);
+            }
+        }
+
+        /// <summary>
+        /// Builds a tooltip row for each visible slice in series order (the legend order) and records each slice's row
+        /// </summary>
+        private static List<(string name, string value, Color color)> GetPieSliceRows(PieChart chart, TooltipState state)
+        {
+            var rows = new List<(string name, string value, Color color)>();
+            var rowIndexes = new Dictionary<ISeries, int>(ReferenceEqualityComparer.Instance);
+            if (chart.Series != null)
+            {
+                foreach (var series in chart.Series)
+                {
+                    if (!series.IsVisible) continue;
+
+                    LiveChartsCore.Kernel.ChartPoint point = null;
+                    foreach (var p in series.Fetch(chart.CoreChart))
+                    {
+                        point = p;
+                        break;
+                    }
+                    if (point == null) continue;
+
+                    var value = state.ValueFormatter != null ? state.ValueFormatter(point) : series.GetPrimaryToolTipText(point);
+                    if (string.IsNullOrEmpty(value))
+                    {
+                        value = point.Coordinate.PrimaryValue.ToString("N2");
+                    }
+
+                    rowIndexes[series] = rows.Count;
+                    rows.Add((series.Name ?? "Value", value, GetSeriesColor(series)));
+                }
+            }
+            state.PieSliceRows = rowIndexes;
+            return rows;
+        }
+
+        /// <summary>
+        /// Row to highlight for the slice under the mouse. Like cartesian charts, a single row isn't highlighted.
+        /// </summary>
+        private static int GetPieHighlightIndex(TooltipState state, ISeries series)
+        {
+            if (state.PieSliceRows == null || state.PieSliceRows.Count < 2) return -1;
+            return state.PieSliceRows.TryGetValue(series, out var index) ? index : -1;
         }
 
         /// <summary>
@@ -1129,7 +1349,7 @@ namespace DBADashGUI.Charts
             return u * u * u * p0 + 3 * u * u * t * p1 + 3 * u * t * t * p2 + t * t * t * p3;
         }
 
-        private static void PositionTooltip(CartesianChart chart, TooltipForm tooltipForm, Point mouseLocation)
+        private static void PositionTooltip(Control chart,TooltipForm tooltipForm, Point mouseLocation)
         {
             try
             {
@@ -1242,6 +1462,9 @@ namespace DBADashGUI.Charts
                     StackedColumnSeries<ObservablePoint> scso => scso.Stroke as SolidColorPaint ?? scso.Fill as SolidColorPaint,
                     ColumnSeries<ObservablePoint> cso => cso.Fill as SolidColorPaint ?? cso.Stroke as SolidColorPaint,
                     ScatterSeries<ObservablePoint> sso => sso.Stroke as SolidColorPaint ?? sso.Fill as SolidColorPaint,
+                    // Pie slices are drawn with Fill - Stroke is the border between slices
+                    PieSeries<ObservableValue> pso => pso.Fill as SolidColorPaint ?? pso.Stroke as SolidColorPaint,
+                    PieSeries<double> psd => psd.Fill as SolidColorPaint ?? psd.Stroke as SolidColorPaint,
                     _ => null
                 };
 
@@ -1265,7 +1488,7 @@ namespace DBADashGUI.Charts
                 var strokeVal = strokeProp?.GetValue(series) as SolidColorPaint;
                 var fillVal = fillProp?.GetValue(series) as SolidColorPaint;
 
-                var paintRef = strokeVal ?? fillVal;
+                var paintRef = series is IPieSeries ? fillVal ?? strokeVal : strokeVal ?? fillVal;
                 if (paintRef?.Color is SKColor skColor2)
                 {
                     return Color.FromArgb(skColor2.Alpha, skColor2.Red, skColor2.Green, skColor2.Blue);
@@ -1337,7 +1560,7 @@ namespace DBADashGUI.Charts
 
         private static void Chart_MouseLeave(object sender, EventArgs e)
         {
-            if (sender is not CartesianChart chart) return;
+            if (sender is not Control chart) return;
 
             if (_tooltipStates.TryGetValue(chart, out var state))
             {
@@ -1347,6 +1570,7 @@ namespace DBADashGUI.Charts
                 state.LastPointIndex = -1;
                 state.LastPointCount = 0;
                 state.LastHighlightIndex = -1;
+                state.LastSeries = null;
                 state.LastMousePosition = Point.Empty;
                 state.LastTooltipPosition = Point.Empty;
             }

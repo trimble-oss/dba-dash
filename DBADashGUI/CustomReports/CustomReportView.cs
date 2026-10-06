@@ -608,6 +608,7 @@ namespace DBADashGUI.CustomReports
                         try
                         {
                             if (chart is CartesianChart cartesianChart) cartesianChart.DisableCustomTooltips();
+                            else if (chart is PieChart pieChart) pieChart.DisableCustomTooltips();
                         }
                         catch (Exception ex)
                         {
