@@ -13,6 +13,7 @@
     [credential_id]         INT            NULL,
     [owning_principal_id]   INT            NULL,
     [is_fixed_role]         BIT            NOT NULL,
+    [password_last_set_time] DATETIME      NULL,
     CONSTRAINT [PK_ServerPrincipals] PRIMARY KEY CLUSTERED ([InstanceID] ASC, [principal_id] ASC),
     CONSTRAINT [FK_ServerPrincipals_Instances] FOREIGN KEY ([InstanceID]) REFERENCES [dbo].[Instances] ([InstanceID])
 );
