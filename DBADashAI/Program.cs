@@ -573,6 +573,12 @@ ApplyAuthAndRateLimit(app.MapPost("/api/ai/ask", async (
                         tr.Data
                     })
                 }),
+            ToolRuns = toolResults.Select(tr => new AiAskToolRun
+            {
+                Tool = tr.Tool,
+                RowCount = tr.RowCount,
+                ExecutionMs = tr.ExecutionMs
+            }).ToList(),
             Evidence = rankedEvidence,
             ToolExecutionMs = toolResults.Sum(t => t.ExecutionMs),
             ConfidenceScore = confidence.score,
@@ -611,6 +617,83 @@ ApplyAuthAndRateLimit(app.MapPost("/api/ai/ask", async (
         telemetry.Fail(requestId, ex);
         return Results.Problem(
             title: "AI request failed",
+            detail: $"RequestId={requestId}. {ex.Message}",
+            statusCode: StatusCodes.Status500InternalServerError);
+    }
+}));
+
+// A follow-up to /ask.  The tools are not run again: the caller sends back the data the first answer
+// was built from, and the opening prompt is rebuilt from it here, so the conversation stays about the
+// data that was on screen when it started.
+ApplyAuthAndRateLimit(app.MapPost("/api/ai/ask/follow-up", async (
+    AiAskFollowUpRequest request,
+    IEnumerable<IAiTool> tools,
+    AiChatClient aiChat,
+    AiRequestTelemetryService telemetry,
+    AiSummaryFormatter summaryFormatter,
+    AiRcaTemplateService rcaTemplateService,
+    IConfiguration config,
+    CancellationToken cancellationToken) =>
+{
+    var validationError = request.Validate(tools.Select(t => t.Name).ToList());
+    if (!string.IsNullOrWhiteSpace(validationError))
+    {
+        return Results.BadRequest(new { error = validationError });
+    }
+
+    var toolResults = request.ToToolResults();
+    if (toolResults is null)
+    {
+        return Results.BadRequest(new { error = "Data is not the shape ToolRuns describes." });
+    }
+
+    var requestId = Guid.NewGuid().ToString("N");
+    var totalSw = telemetry.Start(requestId, request.Question, "ask-follow-up");
+
+    var model = request.ModelOverride
+                ?? AiChatClient.ConfiguredModel(config)
+                ?? "unknown";
+
+    try
+    {
+        var toolNames = toolResults.Select(t => t.Tool).ToList();
+        var rcaTemplate = rcaTemplateService.GetTemplate(request.OriginalQuestion, toolNames);
+        var evidence = request.Evidence.OrderBy(e => e.Rank).ToList();
+        var prompt = summaryFormatter.BuildSummaryPayload(request.OriginalQuestion, toolResults, evidence,
+            string.IsNullOrWhiteSpace(request.ConfidenceLabel) ? "Low" : request.ConfidenceLabel!, rcaTemplate);
+
+        var messages = AiConversation.Build(prompt, request.History, request.Question);
+        var result = await aiChat.ChatAsync(messages, cancellationToken, request.ModelOverride);
+
+        if (!result.Success)
+        {
+            return AnalysisFailure(telemetry, requestId, "AI follow-up failed", result,
+                result.Failure == AiChatFailure.TooLarge
+                    ? "The conversation has outgrown the model's context window.  Ask a new question to start again."
+                    : null);
+        }
+
+        totalSw.Stop();
+        telemetry.Complete(requestId, "ask-follow-up", 0, 0, totalSw.ElapsedMilliseconds, 0, "n/a");
+
+        return Results.Ok(new AiAskFollowUpResponse
+        {
+            RequestId = requestId,
+            Answer = result.Text,
+            Model = model,
+            TotalExecutionMs = totalSw.ElapsedMilliseconds
+        });
+    }
+    catch (OperationCanceledException)
+    {
+        telemetry.Fail(requestId, new TimeoutException("AI request cancelled or timed out."));
+        return Results.StatusCode(StatusCodes.Status499ClientClosedRequest);
+    }
+    catch (Exception ex)
+    {
+        telemetry.Fail(requestId, ex);
+        return Results.Problem(
+            title: "AI follow-up failed",
             detail: $"RequestId={requestId}. {ex.Message}",
             statusCode: StatusCodes.Status500InternalServerError);
     }

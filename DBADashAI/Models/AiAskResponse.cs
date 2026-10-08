@@ -15,6 +15,12 @@ namespace DBADashAI.Models
         /// </summary>
         public JsonElement Data { get; set; }
 
+        /// <summary>
+        /// The tools that ran, in the order their data appears in <see cref="Data"/>.  Sent back with a
+        /// follow-up question so the service can rebuild the prompt the first answer came from.
+        /// </summary>
+        public List<AiAskToolRun> ToolRuns { get; set; } = [];
+
         public string? Summary { get; set; }
 
         public List<AiEvidenceItem> Evidence { get; set; } = [];
