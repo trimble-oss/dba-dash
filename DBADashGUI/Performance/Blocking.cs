@@ -76,6 +76,63 @@ namespace DBADashGUI.Performance
         // Track total deadlock count for button display
         private long _totalDeadlockCount = 0;
 
+        // True when the deadlock markers come from the Deadlocks collection rather than the performance counter.
+        // See dbo.Deadlocks_Get.
+        private bool _deadlocksCollected;
+
+        // True when the Deadlocks collection is enabled for the instance, whichever source the chart uses.  Decides
+        // which report the chart drills into.
+        private bool _deadlockCollectionEnabled;
+
+        // The counter is engine wide, and on Azure SQL DB the engine is shared - it can report deadlocks that never
+        // touched this database (#1939).
+        private bool IsAzureDB => CurrentContext?.EngineEdition == Microsoft.SqlServer.Management.Common.DatabaseEngineEdition.SqlDatabase;
+
+        private string DeadlockSeriesName => _deadlocksCollected
+            ? "Deadlocks"
+            : "Deadlocks" + (DatabaseID > 0 ? " (Instance)" : "") + (IsAzureDB ? " (counter)" : ""); // At database level, the counter is instance-wide so clarify in legend
+
+        private string DeadlockTooltipText
+        {
+            get
+            {
+                var sb = new StringBuilder();
+                if (_deadlockCollectionEnabled)
+                {
+                    sb.AppendLine("Show Deadlocks");
+                    sb.AppendLine("Opens the Deadlocks report, built from the deadlocks stored by the Deadlocks collection." +
+                                  (DatabaseID > 0 ? "  Filtered to the selected database." : ""));
+                }
+                else
+                {
+                    sb.AppendLine("Show Deadlocks (sp_BlitzLock)");
+                    sb.AppendLine("Runs sp_BlitzLock on the monitored instance via the messaging feature to retrieve deadlocks from the system_health extended event." +
+                                  (DatabaseID > 0 ? "  Returns deadlocks for the selected database." : ""));
+                }
+
+                if (_deadlocksCollected)
+                {
+                    sb.Append("Chart values are deadlocks stored by the Deadlocks collection." +
+                              (DatabaseID > 0 ? "  Only deadlocks involving the selected database are counted." : ""));
+                    return sb.ToString();
+                }
+
+                sb.AppendLine("Chart values are derived from the \"Number of Deadlocks/sec\" performance counter, converted to cumulative counts.  Minor rounding differences may occur.");
+                if (IsAzureDB)
+                {
+                    sb.AppendLine("On Azure SQL Database the counter covers the shared database engine and can include deadlocks outside this database.  " +
+                                  (_deadlockCollectionEnabled
+                                      ? "Switch View > Deadlock Counts to Deadlock Collection for accurate counts."
+                                      : "Enable the Deadlocks collection for accurate counts."));
+                }
+                if (DatabaseID > 0)
+                {
+                    sb.AppendLine("At database level, the chart still reflects instance-level counts.");
+                }
+                return sb.ToString().TrimEnd();
+            }
+        }
+
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool CloseVisible
         {
@@ -121,7 +178,7 @@ namespace DBADashGUI.Performance
             return dt;
         }
 
-        private (DataTable dt, int dateGroupingMin) GetDeadlocksDT()
+        private (DataTable dt, int dateGroupingMin, bool isCollected, bool isCollectionEnabled) GetDeadlocksDT()
         {
             using var cn = new SqlConnection(Common.ConnectionString);
             using var cmd = new SqlCommand("dbo.Deadlocks_Get", cn) { CommandType = CommandType.StoredProcedure };
@@ -132,10 +189,16 @@ namespace DBADashGUI.Performance
             cmd.Parameters.AddWithValue("@ToDate", DateRange.ToUTC);
             var dateGroupingMin = DateHelper.DateGrouping(DateRange.DurationMins, 200);
             cmd.Parameters.AddWithValue("@DateGroupingMin", dateGroupingMin);
+            cmd.Parameters.AddIfGreaterThanZero("@DatabaseID", DatabaseID);
+            cmd.Parameters.AddWithValue("@PreferCollected", !Metric.DeadlockCountsFromCounter);
+            var pIsCollected = cmd.Parameters.Add("@IsCollected", SqlDbType.Bit);
+            pIsCollected.Direction = ParameterDirection.Output;
+            var pIsCollectionEnabled = cmd.Parameters.Add("@IsCollectionEnabled", SqlDbType.Bit);
+            pIsCollectionEnabled.Direction = ParameterDirection.Output;
             cmd.CommandTimeout = Config.DefaultCommandTimeout;
             DataTable dt = new();
             da.Fill(dt);
-            return (dt, dateGroupingMin);
+            return (dt, dateGroupingMin, pIsCollected.Value is true, pIsCollectionEnabled.Value is true);
         }
 
         private double MaxPointShapeDiameter => maxBlockedTime switch
@@ -161,6 +224,8 @@ namespace DBADashGUI.Performance
                 field = value;
                 blockingSnapshotsToolStripMenuItem.Checked = value.BlockingSnapshots;
                 deadlocksToolStripMenuItem.Checked = value.Deadlocks;
+                deadlockCountsCollectionToolStripMenuItem.Checked = !value.DeadlockCountsFromCounter;
+                deadlockCountsCounterToolStripMenuItem.Checked = value.DeadlockCountsFromCounter;
             }
         } = new();
 
@@ -189,6 +254,11 @@ namespace DBADashGUI.Performance
                     var result = GetDeadlocksDT();
                     deadlockDt = result.dt;
                     _deadlockDateGroupingMin = result.dateGroupingMin;
+                    _deadlocksCollected = result.isCollected;
+                    _deadlockCollectionEnabled = result.isCollectionEnabled;
+                    // The native report needs no messaging or community tools - only the collection.
+                    tsDeadlocks.Visible = tsDeadlocks.Enabled = HasDeadlockReportAccess || _deadlockCollectionEnabled;
+                    tsDeadlocks.ToolTipText = DeadlockTooltipText;
                 }
                 else
                 {
@@ -341,7 +411,7 @@ namespace DBADashGUI.Performance
                     _deadlockSeries = new ScatterSeries<ObservablePoint, RectangleGeometry>
                     {
                         Values = deadlockPoints,
-                        Name = "Deadlocks" + (DatabaseID > 0 ? " (Instance)" : ""), // At database level, deadlocks are instance-wide so clarify in legend
+                        Name = DeadlockSeriesName,
                         GeometrySize = 8,
                         Fill = new SolidColorPaint(DashColors.Fail.ToSKColor()),
                         ScalesYAt = SeparateDeadlockAxis ? 1 : 0
@@ -551,6 +621,12 @@ namespace DBADashGUI.Performance
                 var idx = firstPoint.Index;
                 if (idx < 0 || idx >= _deadlockRows.Count) return;
                 var deadlockRow = _deadlockRows[idx];
+                // Collected deadlocks carry the exact window the point counted.
+                if (deadlockRow["FromDate"] != DBNull.Value && deadlockRow["ToDate"] != DBNull.Value)
+                {
+                    _ = ShowDeadlockReportAsync((DateTime)deadlockRow["FromDate"], (DateTime)deadlockRow["ToDate"]);
+                    return;
+                }
                 var snapshotDateUtc = (DateTime)deadlockRow["SnapshotDate"];
                 // Determine the report date range represented by this deadlock snapshot.
                 // Start = PreviousSnapshotDate (if available) or snapshot minus 1 minute as a safe default.
@@ -643,6 +719,18 @@ namespace DBADashGUI.Performance
             RefreshData();
         }
 
+        private void DeadlockCountsCollection_Click(object sender, EventArgs e) => SetDeadlockCountsFromCounter(false);
+
+        private void DeadlockCountsCounter_Click(object sender, EventArgs e) => SetDeadlockCountsFromCounter(true);
+
+        private void SetDeadlockCountsFromCounter(bool fromCounter)
+        {
+            Metric.DeadlockCountsFromCounter = fromCounter;
+            deadlockCountsCollectionToolStripMenuItem.Checked = !fromCounter;
+            deadlockCountsCounterToolStripMenuItem.Checked = fromCounter;
+            RefreshData();
+        }
+
         private async void ShowDeadlocks_Click(object sender, EventArgs e)
         {
             await ShowDeadlockReportAsync(DateRange.FromUTC, DateRange.ToUTC);
@@ -674,6 +762,15 @@ namespace DBADashGUI.Performance
                 // window rather than to the global date filter.
                 SetParameter(nativeParams, "@FromDate", fromUtc);
                 SetParameter(nativeParams, "@ToDate", toUtc);
+                // At database level the chart counts only deadlocks involving the database, so the report does too.
+                if (DatabaseID > 0 && !string.IsNullOrEmpty(CurrentContext.DatabaseName))
+                {
+                    nativeParams.RemoveAll(p => p.Param.ParameterName.Equals("@DatabaseName", StringComparison.OrdinalIgnoreCase));
+                    nativeParams.Add(new CustomSqlParameter
+                    {
+                        Param = new SqlParameter("@DatabaseName", SqlDbType.NVarChar, 128) { Value = CurrentContext.DatabaseName }
+                    });
+                }
 
                 var nativeViewer = new CustomReportViewer { Context = nativeContext, CustomParams = nativeParams };
                 return nativeViewer.ShowDialogAsync();

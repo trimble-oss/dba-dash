@@ -20,7 +20,7 @@
 	is what dbo.DeadlockGraph_Get fetches one graph by when a reader asks to see it.
 
 	Note dbo.Deadlocks_Get is a different thing: it drives the deadlock markers on the performance
-	chart from a performance counter, and needs no collection enabled.  This reads collected graphs.
+	chart - from these same rows where the collection is enabled, from a performance counter otherwise.
 */
 CREATE PROC dbo.DeadlockSummary_Get(
 	@InstanceIDs IDs READONLY,

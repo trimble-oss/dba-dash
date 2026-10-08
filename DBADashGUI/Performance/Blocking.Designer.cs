@@ -40,6 +40,10 @@
             tsView = new System.Windows.Forms.ToolStripDropDownButton();
             blockingSnapshotsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             deadlocksToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            deadlockCountsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            deadlockCountsCollectionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            deadlockCountsCounterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             tsDeadlocks = new System.Windows.Forms.ToolStripButton();
             chartBlocking = new LiveChartsCore.SkiaSharpView.WinForms.CartesianChart();
             toolStrip1.SuspendLayout();
@@ -90,7 +94,7 @@
             // tsView
             // 
             tsView.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            tsView.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { blockingSnapshotsToolStripMenuItem, deadlocksToolStripMenuItem });
+            tsView.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { blockingSnapshotsToolStripMenuItem, deadlocksToolStripMenuItem, toolStripSeparator1, deadlockCountsToolStripMenuItem });
             tsView.Image = (System.Drawing.Image)resources.GetObject("tsView.Image");
             tsView.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsView.Name = "tsView";
@@ -116,6 +120,36 @@
             deadlocksToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             deadlocksToolStripMenuItem.Text = "Deadlocks";
             deadlocksToolStripMenuItem.Click += DeadlocksSelection_Click;
+            // 
+            // toolStripSeparator1
+            // 
+            toolStripSeparator1.Name = "toolStripSeparator1";
+            toolStripSeparator1.Size = new System.Drawing.Size(221, 6);
+            // 
+            // deadlockCountsToolStripMenuItem
+            // 
+            deadlockCountsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { deadlockCountsCollectionToolStripMenuItem, deadlockCountsCounterToolStripMenuItem });
+            deadlockCountsToolStripMenuItem.Name = "deadlockCountsToolStripMenuItem";
+            deadlockCountsToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            deadlockCountsToolStripMenuItem.Text = "Deadlock Counts";
+            // 
+            // deadlockCountsCollectionToolStripMenuItem
+            // 
+            deadlockCountsCollectionToolStripMenuItem.Checked = true;
+            deadlockCountsCollectionToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            deadlockCountsCollectionToolStripMenuItem.Name = "deadlockCountsCollectionToolStripMenuItem";
+            deadlockCountsCollectionToolStripMenuItem.Size = new System.Drawing.Size(420, 26);
+            deadlockCountsCollectionToolStripMenuItem.Text = "Deadlock Collection (where enabled)";
+            deadlockCountsCollectionToolStripMenuItem.ToolTipText = "Count the deadlocks stored by the Deadlocks collection.  Exact, and filtered to the database at database level.  History starts when the collection was enabled.\nFalls back to the performance counter where the collection is not enabled.";
+            deadlockCountsCollectionToolStripMenuItem.Click += DeadlockCountsCollection_Click;
+            // 
+            // deadlockCountsCounterToolStripMenuItem
+            // 
+            deadlockCountsCounterToolStripMenuItem.Name = "deadlockCountsCounterToolStripMenuItem";
+            deadlockCountsCounterToolStripMenuItem.Size = new System.Drawing.Size(420, 26);
+            deadlockCountsCounterToolStripMenuItem.Text = "Performance Counter (longer history)";
+            deadlockCountsCounterToolStripMenuItem.ToolTipText = "Derive counts from the \"Number of Deadlocks/sec\" performance counter.  Covers the full counter history, but counts are instance-wide.\nOn Azure SQL Database the counter covers the shared engine and can include deadlocks outside this database.";
+            deadlockCountsCounterToolStripMenuItem.Click += DeadlockCountsCounter_Click;
             // 
             // tsDeadlocks
             // 
@@ -194,6 +228,10 @@
         private System.Windows.Forms.ToolStripDropDownButton tsView;
         private System.Windows.Forms.ToolStripMenuItem blockingSnapshotsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem deadlocksToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripMenuItem deadlockCountsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem deadlockCountsCollectionToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem deadlockCountsCounterToolStripMenuItem;
         private System.Windows.Forms.ToolStripButton tsDeadlocks;
     }
 }
