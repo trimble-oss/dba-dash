@@ -1,5 +1,6 @@
 ﻿CREATE PROC dbo.AvailabilityGroup_Get(
-    @InstanceID INT
+    @InstanceID INT,
+    @RoleChangeDays INT=30
 )
 AS
 SELECT D.name AS [Database],
@@ -56,3 +57,11 @@ AND D.IsActive=1
 ORDER BY HADR.is_local DESC,
          AG.name,
          D.name;
+
+DECLARE @InstanceIDs dbo.IDs
+INSERT INTO @InstanceIDs(ID) VALUES(@InstanceID)
+
+/* Role changes for availability groups this instance is part of, including those reported by other monitored replicas */
+EXEC dbo.AvailabilityGroupRoleChanges_Get @InstanceIDs = @InstanceIDs,
+                                          @Days = @RoleChangeDays,
+                                          @IncludeOtherReplicas = 1;

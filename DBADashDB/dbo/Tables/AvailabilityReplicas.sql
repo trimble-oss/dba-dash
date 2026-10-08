@@ -21,6 +21,17 @@
        primary_role_allow_connections_desc AS (CASE primary_role_allow_connections WHEN 2 THEN N'ALL' WHEN 3 THEN N'READ_WRITE' ELSE CONVERT(NVARCHAR(60),primary_role_allow_connections) END),
        secondary_role_allow_connections_desc AS (CASE secondary_role_allow_connections WHEN 0 THEN N'NO' WHEN 1 THEN N'READ_ONLY' WHEN 2 THEN N'ALL' ELSE CONVERT(NVARCHAR(60),secondary_role_allow_connections) END),
        seeding_mode_desc AS (CASE seeding_mode WHEN 0 THEN N'AUTOMATIC' WHEN 1 THEN N'MANUAL' ELSE CONVERT(NVARCHAR(60),seeding_mode) END),
+       is_local BIT NULL,
+       role TINYINT NULL,
+       operational_state TINYINT NULL,
+       connected_state TINYINT NULL,
+       recovery_health TINYINT NULL,
+       synchronization_health TINYINT NULL,
+       role_desc AS (CASE role WHEN 0 THEN N'RESOLVING' WHEN 1 THEN N'PRIMARY' WHEN 2 THEN N'SECONDARY' ELSE CONVERT(NVARCHAR(60),role) END),
+       operational_state_desc AS (CASE operational_state WHEN 0 THEN N'PENDING_FAILOVER' WHEN 1 THEN N'PENDING' WHEN 2 THEN N'ONLINE' WHEN 3 THEN N'OFFLINE' WHEN 4 THEN N'FAILED' WHEN 5 THEN N'FAILED_NO_QUORUM' ELSE CONVERT(NVARCHAR(60),operational_state) END),
+       connected_state_desc AS (CASE connected_state WHEN 0 THEN N'DISCONNECTED' WHEN 1 THEN N'CONNECTED' ELSE CONVERT(NVARCHAR(60),connected_state) END),
+       recovery_health_desc AS (CASE recovery_health WHEN 0 THEN N'ONLINE_IN_PROGRESS' WHEN 1 THEN N'ONLINE' ELSE CONVERT(NVARCHAR(60),recovery_health) END),
+       synchronization_health_desc AS (CASE synchronization_health WHEN 0 THEN N'NOT_HEALTHY' WHEN 1 THEN N'PARTIALLY_HEALTHY' WHEN 2 THEN N'HEALTHY' ELSE CONVERT(NVARCHAR(60),synchronization_health) END),
 	   CONSTRAINT FK_AvailabilityReplicas_Instances FOREIGN KEY(InstanceID) REFERENCES dbo.Instances(InstanceID),
 	   CONSTRAINT PK_AvailabilityReplicas PRIMARY KEY(InstanceID,replica_id)
 )

@@ -55,6 +55,9 @@ BEGIN
 	DELETE dbo.Alerts
 	WHERE InstanceID=@InstanceID
 
+	DELETE dbo.AvailabilityGroupRoleChanges
+	WHERE InstanceID = @InstanceID
+
 	DELETE dbo.AvailabilityGroups
 	WHERE InstanceID = @InstanceID
 

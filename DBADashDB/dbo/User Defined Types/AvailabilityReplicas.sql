@@ -14,5 +14,11 @@
        backup_priority INT NULL,
        read_only_routing_url NVARCHAR(256) NULL,
        seeding_mode TINYINT NULL,
-       read_write_routing_url NVARCHAR(256) NULL
+       read_write_routing_url NVARCHAR(256) NULL,
+       is_local BIT NULL,
+       role TINYINT NULL,
+       operational_state TINYINT NULL,
+       connected_state TINYINT NULL,
+       recovery_health TINYINT NULL,
+       synchronization_health TINYINT NULL
 )
