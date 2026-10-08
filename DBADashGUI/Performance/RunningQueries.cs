@@ -146,6 +146,12 @@ namespace DBADashGUI.Performance
         private static string IdleThresholdInfo =>
             $"Red = Sleeping session with an open transaction that has been idle for longer than {TimeSpan.FromSeconds(Config.IdleCriticalThresholdForSleepingSessionWithOpenTran).Humanize(maxUnit: TimeUnit.Year, precision: 3)}.\nYellow=Sleeping session with an open transaction that has been idle for longer than {TimeSpan.FromSeconds(Config.IdleWarningThresholdForSleepingSessionWithOpenTran).Humanize(maxUnit: TimeUnit.Year, precision: 3)}.";
 
+        private const string TempDBAllocationWaitToolTip =
+            "Page latch (PAGELATCH_*) waits on tempdb allocation pages (PFS, GAM, SGAM).\nIndicates tempdb allocation contention - typically resolved with multiple, evenly-sized tempdb data files.\n\nYellow = queries waiting on tempdb allocation pages with a recorded wait time.";
+
+        private const string TempDBMetadataWaitToolTip =
+            "Page latch (PAGELATCH_*) waits on tempdb pages that are not allocation pages.\nUsually tempdb metadata contention (system tables updated as temp objects are created/dropped) - typically resolved with memory-optimized tempdb metadata (SQL 2019+), temp table caching or reducing temp object creation.\nCan also be a hot page within a temp table.\n\nYellow = queries waiting on tempdb non-allocation pages with a recorded wait time.";
+
         private DataGridViewColumn[] RunningQueryColumns =>
             new DataGridViewColumn[]
             {
@@ -951,6 +957,9 @@ namespace DBADashGUI.Performance
 
             var hasTempDbSummary = dt.Columns.Contains("TempDBCurrentMB") &&
                                    dt.AsEnumerable().Any(r => r["TempDBCurrentMB"] != DBNull.Value);
+            // NULL for snapshots collected before allocation/metadata contention was tracked
+            var hasTempDbContention = dt.Columns.Contains("TempDBAllocationWaitCount") &&
+                                      dt.AsEnumerable().Any(r => r["TempDBAllocationWaitCount"] != DBNull.Value);
             dgv.Columns.Clear();
             dgv.AutoGenerateColumns = false;
             dgv.Columns.AddRange(
@@ -1054,6 +1063,46 @@ namespace DBADashGUI.Performance
                     DataPropertyName = "TempDBWaitTime",
                     SortMode = DataGridViewColumnSortMode.Automatic,
                     DefaultCellStyle = Common.DataGridViewNumericCellStyle
+                },
+                new DataGridViewTextBoxColumn()
+                {
+                    Name = "colTempDBAllocationWaitCount",
+                    HeaderText = "TempDB Allocation Wait Count",
+                    DataPropertyName = "TempDBAllocationWaitCount",
+                    ToolTipText = TempDBAllocationWaitToolTip,
+                    SortMode = DataGridViewColumnSortMode.Automatic,
+                    DefaultCellStyle = Common.DataGridViewNumericCellStyle,
+                    Visible = hasTempDbContention
+                },
+                new DataGridViewTextBoxColumn()
+                {
+                    Name = "colTempDBAllocationWaitTime",
+                    HeaderText = "TempDB Allocation Wait Time",
+                    DataPropertyName = "TempDBAllocationWaitTime",
+                    ToolTipText = TempDBAllocationWaitToolTip,
+                    SortMode = DataGridViewColumnSortMode.Automatic,
+                    DefaultCellStyle = Common.DataGridViewNumericCellStyle,
+                    Visible = hasTempDbContention
+                },
+                new DataGridViewTextBoxColumn()
+                {
+                    Name = "colTempDBMetadataWaitCount",
+                    HeaderText = "TempDB Metadata Wait Count",
+                    DataPropertyName = "TempDBMetadataWaitCount",
+                    ToolTipText = TempDBMetadataWaitToolTip,
+                    SortMode = DataGridViewColumnSortMode.Automatic,
+                    DefaultCellStyle = Common.DataGridViewNumericCellStyle,
+                    Visible = hasTempDbContention
+                },
+                new DataGridViewTextBoxColumn()
+                {
+                    Name = "colTempDBMetadataWaitTime",
+                    HeaderText = "TempDB Metadata Wait Time",
+                    DataPropertyName = "TempDBMetadataWaitTime",
+                    ToolTipText = TempDBMetadataWaitToolTip,
+                    SortMode = DataGridViewColumnSortMode.Automatic,
+                    DefaultCellStyle = Common.DataGridViewNumericCellStyle,
+                    Visible = hasTempDbContention
                 },
                 new DataGridViewTextBoxColumn()
                 {
@@ -1844,6 +1893,16 @@ namespace DBADashGUI.Performance
                 0; // Reset the scroll position if we click refresh as it's likely we are interested in new snapshots.
         }
 
+        /// <summary>Highlight tempdb contention cells when queries in the snapshot were waiting with a recorded wait time.  A latch with no wait time is likely a transient blip.</summary>
+        private void SetTempDBContentionStatus(DataGridViewCellFormattingEventArgs e, string waitTimeMsColumn)
+        {
+            var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
+            var waitMs = Convert.ToInt64(row[waitTimeMsColumn].DBNullToNull());
+            dgv.Rows[e.RowIndex].Cells[e.ColumnIndex].SetStatusColor(waitMs > 0
+                ? DBADashStatus.DBADashStatusEnum.Warning
+                : DBADashStatus.DBADashStatusEnum.NA);
+        }
+
         private void Dgv_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
             if (dgv.Columns[e.ColumnIndex].Name == "colQueryPlan")
@@ -1896,6 +1955,14 @@ namespace DBADashGUI.Performance
                             :
                             DBADashStatus.DBADashStatusEnum.NA;
                 dgv.Rows[e.RowIndex].Cells[e.ColumnIndex].SetStatusColor(status);
+            }
+            else if (new[] { "colTempDBAllocationWaitCount", "colTempDBAllocationWaitTime" }.Contains(dgv.Columns[e.ColumnIndex].Name))
+            {
+                SetTempDBContentionStatus(e, "TempDBAllocationWaitTimeMs");
+            }
+            else if (new[] { "colTempDBMetadataWaitCount", "colTempDBMetadataWaitTime" }.Contains(dgv.Columns[e.ColumnIndex].Name))
+            {
+                SetTempDBContentionStatus(e, "TempDBMetadataWaitTimeMs");
             }
             else if (dgv.Columns[e.ColumnIndex].Name == "colStatus")
             {

@@ -179,7 +179,11 @@ BEGIN
 		SleepingSessionsCount,
 		SleepingSessionsMaxIdleTimeMs,
 		OldestTransactionMs,
-		TempDBCurrentPageCount
+		TempDBCurrentPageCount,
+		TempDBAllocationWaitCount,
+		TempDBAllocationWaitTimeMs,
+		TempDBMetadataWaitCount,
+		TempDBMetadataWaitTimeMs
     )
     SELECT	@InstanceID as InstanceID,
             R.SnapshotDateUTC,
@@ -199,8 +203,12 @@ BEGIN
 			SUM(CASE WHEN R.open_transaction_count>0 AND R.status='sleeping' THEN 1 ELSE 0 END) AS SleepingSessionsCount,
 			MAX(CASE WHEN R.open_transaction_count>0 AND R.status='sleeping' THEN DATEDIFF_BIG(ms,R.last_request_end_time_utc,R.SnapshotDateUTC) ELSE NULL END) AS SleepingSessionsMaxIdleTimeMs,
 			MAX(CASE WHEN calc.TransactionDurationMs<0 THEN 0 ELSE calc.TransactionDurationMs END) AS OldestTransactionMs,
-			SUM(CASE WHEN R.tempdb_alloc_page_count < R.tempdb_dealloc_page_count THEN 0 ELSE (R.tempdb_alloc_page_count - R.tempdb_dealloc_page_count) END) AS TempDBCurrentPageCount
-    FROM @RunningQueriesDD R 
+			SUM(CASE WHEN R.tempdb_alloc_page_count < R.tempdb_dealloc_page_count THEN 0 ELSE (R.tempdb_alloc_page_count - R.tempdb_dealloc_page_count) END) AS TempDBCurrentPageCount,
+			SUM(CASE WHEN latch.TempDBLatchType = 'Allocation' THEN 1 ELSE 0 END) AS TempDBAllocationWaitCount,
+			SUM(CASE WHEN latch.TempDBLatchType = 'Allocation' THEN CAST(R.wait_time AS BIGINT) ELSE 0 END) AS TempDBAllocationWaitTimeMs,
+			SUM(CASE WHEN latch.TempDBLatchType = 'Metadata' THEN 1 ELSE 0 END) AS TempDBMetadataWaitCount,
+			SUM(CASE WHEN latch.TempDBLatchType = 'Metadata' THEN CAST(R.wait_time AS BIGINT) ELSE 0 END) AS TempDBMetadataWaitTimeMs
+    FROM @RunningQueriesDD R
     CROSS APPLY(SELECT 	/* 
 						If the total_elapsed_time and calculated duration are within 500ms or the calculated duration is negative and total_elapsed_time is less than 30 seconds, use total_elapsed_time.  
 						total_elapsed_time might offer better precision, but if it differs too much from the calculated duration, it might contain an error. #1491.  
@@ -218,6 +226,16 @@ BEGIN
 			                    OR wait_resource LIKE 'RID: 2:%'
 			                    THEN 1 ELSE 0 END AS IsTempDB
                 ) calc
+    OUTER APPLY dbo.SplitWaitResource(CASE WHEN R.wait_type LIKE 'PAGELATCH[_]%' THEN R.wait_resource ELSE NULL END) WR
+    CROSS APPLY(SELECT	/*
+							Page latch (in-memory) waits on tempdb pages.  Lock waits on tempdb objects are blocking and PAGEIOLATCH is I/O, so neither counts as contention.
+							Allocation: PFS/GAM/SGAM pages.
+							Metadata: 'Other' (non-system) pages.  Usually system table (metadata) contention from temp object create/drop, but can also be a hot page in a user temp table.
+						*/
+						CASE WHEN WR.wait_database_id = 2 AND WR.page_type IN('PFS','GAM','SGAM') THEN 'Allocation'
+							WHEN WR.wait_database_id = 2 AND WR.page_type = 'Other' THEN 'Metadata'
+							ELSE NULL END AS TempDBLatchType
+				) latch
     LEFT JOIN dbo.WaitType WT ON R.wait_type  = WT.WaitType
     GROUP BY R.SnapshotDateUTC
 
@@ -240,9 +258,13 @@ BEGIN
 			SleepingSessionsCount,
 			SleepingSessionsMaxIdleTimeMs,
 			OldestTransactionMs,
-			TempDBCurrentPageCount
+			TempDBCurrentPageCount,
+			TempDBAllocationWaitCount,
+			TempDBAllocationWaitTimeMs,
+			TempDBMetadataWaitCount,
+			TempDBMetadataWaitTimeMs
 		)
-		VALUES(@InstanceID,@SnapshotDate,0,0,0,0,0,0,0,0,0,0,0,NULL,NULL,NULL)
+		VALUES(@InstanceID,@SnapshotDate,0,0,0,0,0,0,0,0,0,0,0,NULL,NULL,NULL,0,0,0,0)
 	END
     /* Running Queries replaces legacy blocking snapshot collection */
     INSERT INTO dbo.BlockingSnapshotSummary(

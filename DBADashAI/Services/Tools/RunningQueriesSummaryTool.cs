@@ -26,7 +26,7 @@ namespace DBADashAI.Services.Tools
             "head blocker", "blocking session", "blocked by", "who is blocking",
             "memory grant", "granted memory", "resource_semaphore",
             "sleeping session", "idle session", "open transaction", "forgotten transaction",
-            "tempdb pressure", "tempdb usage", "tempdb alloc",
+            "tempdb pressure", "tempdb usage", "tempdb alloc", "tempdb contention", "tempdb metadata",
             "session", "spid", "what is running",
             "elapsed time", "running for", "how long"
         ];

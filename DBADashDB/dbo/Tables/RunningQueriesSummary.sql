@@ -15,5 +15,9 @@
 	SleepingSessionsMaxIdleTimeMs BIGINT NULL,
 	OldestTransactionMs BIGINT NULL,
 	TempDBCurrentPageCount BIGINT NULL,
+	TempDBAllocationWaitCount INT NULL,
+	TempDBAllocationWaitTimeMs BIGINT NULL,
+	TempDBMetadataWaitCount INT NULL,
+	TempDBMetadataWaitTimeMs BIGINT NULL,
 	CONSTRAINT PK_RunningQueriesSummary PRIMARY KEY(InstanceID,SnapshotDateUTC) WITH (DATA_COMPRESSION = PAGE) ON PS_RunningQueriesSummary(SnapshotDateUTC)
 ) ON PS_RunningQueriesSummary(SnapshotDateUTC)
