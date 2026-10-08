@@ -73,7 +73,7 @@ namespace DBADashGUI.AI
     private readonly Button btnAsk = new() { Text = "Ask", Dock = DockStyle.Fill, MinimumSize = new System.Drawing.Size(0, 36) };
     private readonly TextBox txtSummary = new() { Dock = DockStyle.Fill, Multiline = true, ScrollBars = ScrollBars.Vertical, ReadOnly = true };
     private readonly TextBox txtJson = new() { Dock = DockStyle.Fill, Multiline = true, ScrollBars = ScrollBars.Both, ReadOnly = true, WordWrap = false };
-    private readonly WebView2Wrapper webViewSummary = new() { Dock = DockStyle.Fill };
+    private readonly AiConversationView conversationView = new() { Dock = DockStyle.Fill };
     private readonly TabControl tabSummary = new() { Dock = DockStyle.Fill };
     private readonly TabPage tabRenderedSummary = new("Rendered");
     private readonly TabPage tabRawSummary = new("Raw");
@@ -88,6 +88,46 @@ namespace DBADashGUI.AI
     private string? _lastRequestId;
     private string? _lastToolName;
     private string? _lastQuestionExcerpt;
+
+    // The answer on screen and what it was built from, so a follow-up can be asked about it.  Null
+    // before anything has been asked, and the context is null when the service is too old to take one.
+    private AiConversation? _conversation;
+    private FollowUpContext? _followUp;
+
+    // Bumped whenever the answer is cleared - a new question, or a repository refresh.  A request
+    // that finds it changed while it was waiting belongs to an answer that is gone, possibly from a
+    // different service, and must not install its result or touch the controls the newer state owns.
+    private int _answerGeneration;
+
+    /// <summary>
+    /// What the first answer was built from, as the /ask response returned it.  Sent back verbatim
+    /// with every follow-up: the service keeps no conversation and does not re-run the tools, so the
+    /// conversation stays about the data that was on screen when it started.
+    /// </summary>
+    private sealed record FollowUpContext(string OriginalQuestion, JsonElement ToolRuns, JsonElement Data, JsonElement Evidence, string? ConfidenceLabel)
+    {
+        /// <summary>Null when the response has no tool runs - a service that predates follow-ups.</summary>
+        internal static FollowUpContext? From(string question, JsonElement root)
+        {
+            if (!root.TryGetProperty("toolRuns", out var toolRuns)
+                || toolRuns.ValueKind != JsonValueKind.Array
+                || toolRuns.GetArrayLength() == 0
+                || !root.TryGetProperty("data", out var data))
+            {
+                return null;
+            }
+
+            var evidence = root.TryGetProperty("evidence", out var ev) && ev.ValueKind == JsonValueKind.Array
+                ? ev.Clone()
+                : JsonDocument.Parse("[]").RootElement.Clone();
+            var confidence = root.TryGetProperty("confidenceLabel", out var conf) && conf.ValueKind == JsonValueKind.String
+                ? conf.GetString()
+                : null;
+
+            // Cloned: the elements outlive the document they were parsed from.
+            return new FollowUpContext(question, toolRuns.Clone(), data.Clone(), evidence, confidence);
+        }
+    }
 
     private readonly GroupBox jsonGroup = new() { Text = "Tool Output (JSON)", Dock = DockStyle.Fill };
     private readonly TableLayoutPanel root = new() { Dock = DockStyle.Fill };
@@ -185,7 +225,12 @@ namespace DBADashGUI.AI
     {
         try
         {
-            // Clear previous state
+            // Clear previous state.  The answer goes too: it was about a repository that may no longer
+            // be the one being viewed, and a follow-up would carry its data to a service that is not.
+            ResetAnswer();
+            // Any request still in flight is now stale and will leave the controls alone, so they are
+            // put back here instead.
+            SetBusy(false);
             _allExamples.Clear();
             cboCategory.Items.Clear();
             cboModel.Items.Clear();
@@ -499,7 +544,7 @@ namespace DBADashGUI.AI
         questionPanel.Controls.Add(progressRunning, 1, 2);
 
         // ── AI Summary section ─────────────────────────────────────────────
-        tabRenderedSummary.Controls.Add(webViewSummary);
+        tabRenderedSummary.Controls.Add(conversationView);
         tabRawSummary.Controls.Add(txtSummary);
         tabSummary.TabPages.Add(tabRenderedSummary);
         tabSummary.TabPages.Add(tabRawSummary);
@@ -789,6 +834,7 @@ namespace DBADashGUI.AI
     private void WireEvents()
     {
         btnAsk.Click += async (_, _) => await AskAsync();
+        conversationView.QuestionAsked += async (_, question) => await AskFollowUpAsync(question);
         btnThumbsUp.Click += async (_, _) => await SendFeedbackAsync(helpful: true);
         btnThumbsDown.Click += async (_, _) => await SendFeedbackAsync(helpful: false);
         _initRetryTimer.Tick += async (_, _) =>
@@ -828,102 +874,65 @@ namespace DBADashGUI.AI
             return;
         }
 
+        var question = txtQuestion.Text;
+
+        // A new question is a new conversation.
+        ResetAnswer();
+        var generation = _answerGeneration;
+
         try
         {
             btnAsk.Enabled = false;
             SetBusy(true, "Running AI analysis...");
-            txtSummary.Text = string.Empty;
-            txtJson.Text = string.Empty;
-            lblConfidence.Visible = false;
-            btnThumbsUp.Enabled = false;
-            btnThumbsDown.Enabled = false;
-            _lastRequestId = null;
-            _lastToolName = null;
-            _lastQuestionExcerpt = null;
-
-            // Get API key from repository database
-            var apiKey = await GetRequestApiKeyAsync();
 
             var selectedModel = (cboModel.SelectedItem as ModelItem)?.ModelName;
             var payload = new
             {
-                question = txtQuestion.Text,
+                question,
                 toolName = _configuredToolName,
                 includeAiSummary = _configuredIncludeSummary,
                 maxRows = _configuredMaxRows,
                 modelOverride = string.IsNullOrWhiteSpace(selectedModel) ? (string?)null : selectedModel
             };
 
-            using var request = new HttpRequestMessage(HttpMethod.Post, BuildUrl("/api/ai/ask"));
-            request.Content = JsonContent.Create(payload);
-
-            // Add API key header if available
-            AddApiKeyHeader(request, apiKey);
-
-            using var response = await HttpClient.SendAsync(request);
-            var body = await response.Content.ReadAsStringAsync();
-
-            // If 401 Unauthorized, invalidate cache and retry once
-            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            var (response, body) = await PostJsonAsync("/api/ai/ask", payload);
+            if (generation != _answerGeneration)
             {
-                AIApiKeyProvider.InvalidateCache();
-                apiKey = await AIApiKeyProvider.GetApiKeyAsync();
-
-                using var retryRequest = new HttpRequestMessage(HttpMethod.Post, BuildUrl("/api/ai/ask"));
-                retryRequest.Content = JsonContent.Create(payload);
-
-                AddApiKeyHeader(retryRequest, apiKey);
-
-                using var retryResponse = await HttpClient.SendAsync(retryRequest);
-                body = await retryResponse.Content.ReadAsStringAsync();
-
-                if (!retryResponse.IsSuccessStatusCode)
-                {
-                    txtJson.Text = body;
-                    MessageBox.Show($"AI request failed: {(int)retryResponse.StatusCode} {retryResponse.ReasonPhrase}\n\nPlease ensure the AI service is running and the API key is configured in the database.", 
-                        "AI Assistant", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                txtJson.Text = PrettyJson(body);
-                using var retryDoc = JsonDocument.Parse(body);
-                if (retryDoc.RootElement.TryGetProperty("summary", out var retrySummaryElement))
-                {
-                    txtSummary.Text = retrySummaryElement.GetString() ?? string.Empty;
-                    await RenderSummaryMarkdownAsync(txtSummary.Text);
-                }
-                else
-                {
-                    tabSummary.SelectedTab = tabRawSummary;
-                }
+                response.Dispose();
                 return;
             }
 
-            if (!response.IsSuccessStatusCode)
+            using (response)
             {
-                txtJson.Text = body;
-                MessageBox.Show($"AI request failed: {(int)response.StatusCode} {response.ReasonPhrase}", "AI Assistant", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
+                if (!response.IsSuccessStatusCode)
+                {
+                    txtJson.Text = body;
+                    var hint = response.StatusCode == System.Net.HttpStatusCode.Unauthorized
+                        ? "\n\nPlease ensure the AI service is running and the API key is configured in the database."
+                        : string.Empty;
+                    MessageBox.Show($"AI request failed: {AIServiceErrors.Describe(response, body)}{hint}",
+                        "AI Assistant", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
             }
 
             txtJson.Text = PrettyJson(body);
 
             using var doc = JsonDocument.Parse(body);
+            var root = doc.RootElement;
 
-            // Capture response metadata for feedback submission
-            _lastRequestId = doc.RootElement.TryGetProperty("requestId", out var ridEl) ? ridEl.GetString() : null;
-            _lastToolName = doc.RootElement.TryGetProperty("tool", out var toolEl) ? toolEl.GetString() : null;
-            _lastQuestionExcerpt = txtQuestion.Text.Length <= 120 ? txtQuestion.Text : txtQuestion.Text[..120];
+            // Capture response metadata for feedback submission.  Feedback stays with this first
+            // answer through any follow-ups: it tunes which tools a question is routed to, and a
+            // follow-up is answered from the same tools' data.
+            _lastRequestId = root.TryGetProperty("requestId", out var ridEl) ? ridEl.GetString() : null;
+            _lastToolName = root.TryGetProperty("tool", out var toolEl) ? toolEl.GetString() : null;
+            _lastQuestionExcerpt = question.Length <= 120 ? question : question[..120];
 
             // Show confidence label
-            if (doc.RootElement.TryGetProperty("confidenceLabel", out var confEl))
+            if (root.TryGetProperty("confidenceLabel", out var confEl))
             {
                 lblConfidence.Text = $"Confidence: {confEl.GetString()}";
                 lblConfidence.Visible = true;
-            }
-            else
-            {
-                lblConfidence.Visible = false;
             }
 
             // Enable feedback buttons only when we have a valid request to reference
@@ -931,25 +940,186 @@ namespace DBADashGUI.AI
             btnThumbsUp.Enabled = hasFeedbackTarget;
             btnThumbsDown.Enabled = hasFeedbackTarget;
 
-            if (doc.RootElement.TryGetProperty("summary", out var summaryElement))
-            {
-                txtSummary.Text = summaryElement.GetString() ?? string.Empty;
-                await RenderSummaryMarkdownAsync(txtSummary.Text);
-            }
-            else
+            var summary = root.TryGetProperty("summary", out var summaryElement) && summaryElement.ValueKind == JsonValueKind.String
+                ? summaryElement.GetString()
+                : null;
+
+            if (string.IsNullOrWhiteSpace(summary))
             {
                 tabSummary.SelectedTab = tabRawSummary;
+                return;
             }
+
+            // The opening turn keeps the question it answered, so the transcript says what was asked
+            // even after the question box has been edited.
+            _conversation = AiConversation.Start();
+            _conversation.Add(new AiConversation.Turn(question, summary, null, DateTime.UtcNow));
+            _followUp = FollowUpContext.From(question, root);
+
+            await ShowConversationAsync();
         }
-        catch (Exception ex)
+        catch (Exception ex) when (generation == _answerGeneration)
         {
             MessageBox.Show(ex.Message, "AI Assistant", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
+        catch
+        {
+            // Stale: the answer it was for has gone, and so has anyone waiting to hear about it.
+        }
         finally
         {
-            btnAsk.Enabled = true;
-            SetBusy(false);
+            if (generation == _answerGeneration)
+            {
+                btnAsk.Enabled = true;
+                SetBusy(false);
+                UpdateFollowUpState();
+            }
         }
+    }
+
+    private async Task AskFollowUpAsync(string question)
+    {
+        var conversation = _conversation;
+        var context = _followUp;
+        if (conversation is null || context is null) return;
+
+        var generation = _answerGeneration;
+        var answered = false;
+
+        try
+        {
+            btnAsk.Enabled = false;
+            conversationView.SetCanAsk(false, "Waiting for the model...");
+            SetBusy(true, "Asking follow-up question...");
+
+            var selectedModel = (cboModel.SelectedItem as ModelItem)?.ModelName;
+            var payload = new
+            {
+                originalQuestion = context.OriginalQuestion,
+                toolRuns = context.ToolRuns,
+                data = context.Data,
+                evidence = context.Evidence,
+                confidenceLabel = context.ConfidenceLabel,
+                history = conversation.ToHistory(),
+                question,
+                modelOverride = string.IsNullOrWhiteSpace(selectedModel) ? (string?)null : selectedModel
+            };
+
+            var (response, body) = await PostJsonAsync("/api/ai/ask/follow-up", payload);
+            // A new question or a repository refresh replaced this conversation while the answer was on its way.
+            if (generation != _answerGeneration)
+            {
+                response.Dispose();
+                return;
+            }
+
+            using (response)
+            {
+                if (!response.IsSuccessStatusCode)
+                {
+                    MessageBox.Show($"AI follow-up failed: {AIServiceErrors.Describe(response, body)}",
+                        "AI Assistant", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+            }
+
+            using var doc = JsonDocument.Parse(body);
+            var root = doc.RootElement;
+            var answer = root.TryGetProperty("answer", out var answerEl) ? answerEl.GetString() : null;
+            if (string.IsNullOrWhiteSpace(answer))
+            {
+                MessageBox.Show("The AI service returned an empty answer.", "AI Assistant", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var model = root.TryGetProperty("model", out var modelEl) ? modelEl.GetString() : null;
+            conversation.Add(new AiConversation.Turn(question, answer, model, DateTime.UtcNow));
+            answered = true;
+
+            await ShowConversationAsync();
+        }
+        catch (Exception ex) when (generation == _answerGeneration)
+        {
+            MessageBox.Show(ex.Message, "AI Assistant", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+        catch
+        {
+            // Stale: the answer it was for has gone, and so has anyone waiting to hear about it.
+        }
+        finally
+        {
+            if (generation == _answerGeneration)
+            {
+                btnAsk.Enabled = true;
+                SetBusy(false);
+                UpdateFollowUpState();
+
+                // A question that got no answer goes back in the box rather than being lost.
+                if (answered) conversationView.FocusQuestion();
+                else conversationView.RestoreQuestion(question);
+            }
+        }
+    }
+
+    /// <summary>Clears the answer, the conversation and everything that refers to them.</summary>
+    private void ResetAnswer()
+    {
+        txtSummary.Text = string.Empty;
+        txtJson.Text = string.Empty;
+        lblConfidence.Visible = false;
+        btnThumbsUp.Enabled = false;
+        btnThumbsDown.Enabled = false;
+        _lastRequestId = null;
+        _lastToolName = null;
+        _lastQuestionExcerpt = null;
+        _conversation = null;
+        _answerGeneration++;
+        _followUp = null;
+        conversationView.Clear();
+    }
+
+    private void UpdateFollowUpState()
+    {
+        if (_conversation is null)
+        {
+            conversationView.SetCanAsk(false);
+        }
+        else if (_followUp is null)
+        {
+            conversationView.SetCanAsk(false, "The AI service needs to be updated before follow-up questions can be asked.");
+        }
+        else
+        {
+            conversationView.SetCanAsk(true);
+        }
+    }
+
+    /// <summary>
+    /// Posts JSON to the service, retrying once with a refreshed API key on a 401.  The caller
+    /// disposes the response.
+    /// </summary>
+    private async Task<(HttpResponseMessage Response, string Body)> PostJsonAsync(string path, object payload)
+    {
+        var apiKey = await GetRequestApiKeyAsync();
+        var response = await SendPostAsync(path, payload, apiKey);
+
+        if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            response.Dispose();
+            AIApiKeyProvider.InvalidateCache();
+            apiKey = await AIApiKeyProvider.GetApiKeyAsync();
+            response = await SendPostAsync(path, payload, apiKey);
+        }
+
+        return (response, await response.Content.ReadAsStringAsync());
+    }
+
+    private async Task<HttpResponseMessage> SendPostAsync(string path, object payload, string? apiKey)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, BuildUrl(path));
+        request.Content = JsonContent.Create(payload);
+        AddApiKeyHeader(request, apiKey);
+        return await HttpClient.SendAsync(request);
     }
 
     private async Task SendFeedbackAsync(bool helpful)
@@ -984,24 +1154,18 @@ namespace DBADashGUI.AI
         }
     }
 
-    private async Task RenderSummaryMarkdownAsync(string markdown)
+    private async Task ShowConversationAsync()
     {
-        if (string.IsNullOrWhiteSpace(markdown))
-        {
-            tabSummary.SelectedTab = tabRawSummary;
-            return;
-        }
+        var conversation = _conversation;
+        if (conversation is null) return;
 
-        try
+        // Raw is the Markdown as written, for copying out; the view renders it, falling back to plain
+        // text itself when WebView2 is unavailable.
+        txtSummary.Text = conversation.ToMarkdown().Replace("\r\n", "\n").Replace("\n", Environment.NewLine);
+
+        if (await conversationView.ShowAsync(conversation, () => ReferenceEquals(conversation, _conversation)))
         {
-            // Shared with the deadlock viewer's analysis, so a generated answer looks the same
-            // wherever it is read.
-            var success = await webViewSummary.NavigateToLargeString(MarkdownRenderer.ToThemedHtml(markdown));
-            tabSummary.SelectedTab = success ? tabRenderedSummary : tabRawSummary;
-        }
-        catch
-        {
-            tabSummary.SelectedTab = tabRawSummary;
+            tabSummary.SelectedTab = tabRenderedSummary;
         }
     }
 
