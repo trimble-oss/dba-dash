@@ -17,6 +17,10 @@ FROM (
 			CAST(CriticalWaitTime AS DECIMAL(28,9)) AS [Critical Wait Time (ms)],
 			CAST(TempDBWaitCount AS DECIMAL(28,9)) AS [TempDB Wait Count],
 			CAST(TempDBWaitTimeMs AS DECIMAL(28,9)) AS [TempDB Wait Time (ms)],
+			CAST(TempDBAllocationWaitCount AS DECIMAL(28,9)) AS [TempDB Allocation Wait Count],
+			CAST(TempDBAllocationWaitTimeMs AS DECIMAL(28,9)) AS [TempDB Allocation Wait Time (ms)],
+			CAST(TempDBMetadataWaitCount AS DECIMAL(28,9)) AS [TempDB Metadata Wait Count],
+			CAST(TempDBMetadataWaitTimeMs AS DECIMAL(28,9)) AS [TempDB Metadata Wait Time (ms)],
 			CAST(SleepingSessionsCount AS DECIMAL(28,9)) AS [Sleeping Sessions Count],
 			CAST(SleepingSessionsMaxIdleTimeMs AS DECIMAL(28,9)) AS [Sleeping Sessions Max Idle Time (ms)],
 			CAST(ISNULL(OldestTransactionMs,0) AS DECIMAL(28,9)) AS [Oldest Transaction (ms)]
@@ -32,7 +36,11 @@ UNPIVOT(
 							[Critical Wait Count], 
 							[Critical Wait Time (ms)], 
 							[TempDB Wait Count], 
-							[TempDB Wait Time (ms)], 
+							[TempDB Wait Time (ms)],
+							[TempDB Allocation Wait Count],
+							[TempDB Allocation Wait Time (ms)],
+							[TempDB Metadata Wait Count],
+							[TempDB Metadata Wait Time (ms)],
 							[Sleeping Sessions Count], 
 							[Sleeping Sessions Max Idle Time (ms)],
 							[Oldest Transaction (ms)]

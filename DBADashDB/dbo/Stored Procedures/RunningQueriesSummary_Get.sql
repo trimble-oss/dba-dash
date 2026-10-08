@@ -27,10 +27,18 @@ SELECT TOP(@MaxRows) I.InstanceID,
        MaxIdleHD.HumanDuration as MaxIdleTime,
        S.OldestTransactionMs,
        OldestTranHD.HumanDuration AS OldestTransaction,
-       S.TempDBCurrentPageCount / 128.0 AS TempDBCurrentMB
+       S.TempDBCurrentPageCount / 128.0 AS TempDBCurrentMB,
+       S.TempDBAllocationWaitCount,
+       S.TempDBAllocationWaitTimeMs,
+       TempDBAllocHD.HumanDuration AS TempDBAllocationWaitTime,
+       S.TempDBMetadataWaitCount,
+       S.TempDBMetadataWaitTimeMs,
+       TempDBMetaHD.HumanDuration AS TempDBMetadataWaitTime
 FROM dbo.RunningQueriesSummary S
 JOIN dbo.Instances I ON I.InstanceID = S.InstanceID
 CROSS APPLY dbo.MillisecondsToHumanDuration (S.LongestRunningQueryMs) LongestHD
+CROSS APPLY dbo.MillisecondsToHumanDuration (S.TempDBAllocationWaitTimeMs) TempDBAllocHD
+CROSS APPLY dbo.MillisecondsToHumanDuration (S.TempDBMetadataWaitTimeMs) TempDBMetaHD
 CROSS APPLY dbo.MillisecondsToHumanDuration (S.BlockedQueriesWaitMs) BlockedHD
 CROSS APPLY dbo.MillisecondsToHumanDuration (S.TempDBWaitTimeMs) TempDBHD
 CROSS APPLY dbo.MillisecondsToHumanDuration (S.SleepingSessionsMaxIdleTimeMs) MaxIdleHD

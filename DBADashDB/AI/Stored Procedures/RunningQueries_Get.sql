@@ -20,7 +20,11 @@ SELECT TOP (@MaxRows)
     rqs.SleepingSessionsCount,
     rqs.SleepingSessionsMaxIdleTimeMs,
     rqs.OldestTransactionMs,
-    rqs.TempDBCurrentPageCount
+    rqs.TempDBCurrentPageCount,
+    rqs.TempDBAllocationWaitCount,
+    rqs.TempDBAllocationWaitTimeMs,
+    rqs.TempDBMetadataWaitCount,
+    rqs.TempDBMetadataWaitTimeMs
 FROM dbo.RunningQueriesSummary rqs
 INNER JOIN dbo.Instances i ON i.InstanceID = rqs.InstanceID
 WHERE rqs.SnapshotDateUTC >= DATEADD(HOUR, -@HoursBack, SYSUTCDATETIME())
