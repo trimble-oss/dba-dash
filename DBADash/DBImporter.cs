@@ -298,6 +298,14 @@ namespace DBADash
                     dtIdentityColumns.Columns.Add("schema_name", typeof(string));
                 }
             }
+            if (data.Tables.Contains("ServerPrincipals"))
+            {
+                var dtServerPrincipals = data.Tables["ServerPrincipals"];
+                if (!dtServerPrincipals!.Columns.Contains("password_last_set_time"))
+                {
+                    dtServerPrincipals.Columns.Add("password_last_set_time", typeof(DateTime));
+                }
+            }
             if (data.Tables.Contains("Corruption"))
             {
                 var dtCorruption = data.Tables["Corruption"];

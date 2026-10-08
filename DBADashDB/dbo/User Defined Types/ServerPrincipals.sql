@@ -12,5 +12,6 @@
     [credential_id]         INT            NULL,
     [owning_principal_id]   INT            NULL,
     [is_fixed_role]         BIT            NOT NULL,
+    [password_last_set_time] DATETIME      NULL,
     PRIMARY KEY CLUSTERED ([principal_id] ASC));
 

@@ -22,7 +22,8 @@ BEGIN
 	    default_language_name,
 	    credential_id,
 	    owning_principal_id,
-	    is_fixed_role
+	    is_fixed_role,
+	    password_last_set_time
 	)
 	SELECT @InstanceID,
 			name,
@@ -37,7 +38,8 @@ BEGIN
            default_language_name,
            credential_id,
            owning_principal_id,
-           is_fixed_role
+           is_fixed_role,
+           password_last_set_time
 	FROM @ServerPrincipals
 	
 

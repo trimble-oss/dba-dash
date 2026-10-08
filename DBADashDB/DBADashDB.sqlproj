@@ -988,6 +988,7 @@
     <Build Include="dbo\Functions\DatabaseSettingsUnpivot_Get.sql" />
     <Build Include="dbo\Stored Procedures\DeletedDatabases_Get.sql" />
     <Build Include="dbo\Stored Procedures\NewDatabases_Get.sql" />
+    <Build Include="dbo\Stored Procedures\SQLLoginPasswordAge_Get.sql" />
     <Build Include="Database.sql" />
     <Build Include="Storage\PF_FailedLogins.sql" />
     <Build Include="dbo\User Defined Types\FailedLogins.sql" />
