@@ -29,7 +29,8 @@ namespace DBADashGUI.HA
                     {
                         ParamName = "@InstanceIDs",
                         ParamType = "IDS"
-                    }
+                    },
+                    RoleChangeDaysParam
                 }
             },
             CustomReportResults = new Dictionary<int, CustomReportResult>
@@ -293,7 +294,8 @@ namespace DBADashGUI.HA
                             }}
                         }
                     }
-                }
+                },
+                { 1, RoleChangesResult() }
             }
         };
 
@@ -312,7 +314,8 @@ namespace DBADashGUI.HA
                     {
                         ParamName = "@InstanceID",
                         ParamType = "INT"
-                    }
+                    },
+                    RoleChangeDaysParam
                 }
             },
             CustomReportResults = new Dictionary<int, CustomReportResult>
@@ -461,8 +464,66 @@ namespace DBADashGUI.HA
                             }}
                         }
                     }
-                }
+                },
+                { 1, RoleChangesResult() }
             }
+        };
+
+        /// <summary>
+        /// Role changes detected by comparing the local replica role between AvailabilityReplicas snapshots.  The change
+        /// happened somewhere between Changed After and Changed Before.
+        /// </summary>
+        private static CustomReportResult RoleChangesResult() => new()
+        {
+            ResultName = "Role Changes",
+            Columns = new Dictionary<string, ColumnMetadata>
+            {
+                { "InstanceID", new ColumnMetadata { Visible = false } },
+                { "Instance", new ColumnMetadata {
+                    Link = new DrillDownLinkColumnInfo()
+                }},
+                { "Availability Group", new ColumnMetadata() },
+                { "Replica Server", new ColumnMetadata() },
+                { "Change", new ColumnMetadata {
+                    Highlighting = new CellHighlightingRuleSet
+                    {
+                        Rules = new List<CellHighlightingRule>
+                        {
+                            new()
+                            {
+                                Status = DBADashStatusEnum.Warning,
+                                Value1 = "Became Primary"
+                            },
+                            new()
+                            {
+                                Status = DBADashStatusEnum.Information,
+                                ConditionType = ConditionTypes.All
+                            }
+                        },
+                        TargetColumn = "Change"
+                    }
+                }},
+                { "Previous Role", new ColumnMetadata() },
+                { "New Role", new ColumnMetadata() },
+                { "Changed After", new ColumnMetadata {
+                    FormatString = "G",
+                    Description = "Snapshot prior to the role change"
+                }},
+                { "Changed Before", new ColumnMetadata {
+                    FormatString = "G",
+                    Description = "Snapshot where the role change was detected"
+                }},
+                { "Detection Window", new ColumnMetadata {
+                    Description = "Time between snapshots.  The role change happened within this window"
+                }},
+                { "Source", new ColumnMetadata { Visible = false } }
+            }
+        };
+
+        private static Param RoleChangeDaysParam => new()
+        {
+            ParamName = "@RoleChangeDays",
+            ParamType = "INT"
         };
 
         #endregion "Report Definitions"

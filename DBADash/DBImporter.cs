@@ -148,6 +148,19 @@ namespace DBADash
                     dtDatabasesHADR.Columns.Add("last_commit_time", typeof(DateTimeOffset));
                 }
             }
+            if (data.Tables.Contains("AvailabilityReplicas"))
+            {
+                var dtReplicas = data.Tables["AvailabilityReplicas"];
+                if (!dtReplicas!.Columns.Contains("role"))
+                {
+                    dtReplicas.Columns.Add("is_local", typeof(bool));
+                    dtReplicas.Columns.Add("role", typeof(byte));
+                    dtReplicas.Columns.Add("operational_state", typeof(byte));
+                    dtReplicas.Columns.Add("connected_state", typeof(byte));
+                    dtReplicas.Columns.Add("recovery_health", typeof(byte));
+                    dtReplicas.Columns.Add("synchronization_health", typeof(byte));
+                }
+            }
             if (data.Tables.Contains("Databases"))
             {
                 var dtDB = data.Tables["Databases"];

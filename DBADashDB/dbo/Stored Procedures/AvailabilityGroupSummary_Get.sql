@@ -1,5 +1,6 @@
 ﻿CREATE PROC dbo.AvailabilityGroupSummary_Get(
-    @InstanceIDs IDs READONLY
+    @InstanceIDs IDs READONLY,
+    @RoleChangeDays INT=30
 )
 AS
 WITH T AS (
@@ -87,4 +88,8 @@ SELECT T.InstanceID,
 FROM T
 OUTER APPLY dbo.SecondsToHumanDuration(T.[Max Secondary Lag (sec)]) AS HDLag
 OUTER APPLY dbo.SecondsToHumanDuration(T.[Max Estimated Data Loss (sec)]) AS HDDataLoss
-OUTER APPLY dbo.SecondsToHumanDuration(T.[Max Estimated Recovery Time (sec)]) AS HDRecovery
+OUTER APPLY dbo.SecondsToHumanDuration(T.[Max Estimated Recovery Time (sec)]) AS HDRecovery;
+
+/* Role changes for availability groups on the instances in context */
+EXEC dbo.AvailabilityGroupRoleChanges_Get @InstanceIDs = @InstanceIDs,
+                                          @Days = @RoleChangeDays;
