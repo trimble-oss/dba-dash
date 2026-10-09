@@ -1,4 +1,5 @@
-﻿using DBADash.Deadlocks;
+﻿using DBADash.AvailabilityGroups;
+using DBADash.Deadlocks;
 using DBADash.SlowQueries;
 using DBADash.InstanceMetadata;
 using Microsoft.Data.SqlClient;
@@ -90,7 +91,8 @@ namespace DBADash
         ResourceGovernorResourcePools,
         ScheduleInfo,
         PerfmonCounters,
-        Deadlocks
+        Deadlocks,
+        AGHealthEvents
     }
 
     public enum HostPlatform
@@ -156,6 +158,12 @@ namespace DBADash
         /// </summary>
         private (string Key, SlowQueryCollectionState State)? pendingSlowQueryCursor;
 
+        /// <summary>
+        /// Where this run's AlwaysOn_health read got to.  Held until written, as <see cref="pendingDeadlockCursor"/> is.
+        /// See <see cref="CommitReadPositions"/>.
+        /// </summary>
+        private (string Key, AGHealthEventCollectionState State)? pendingAGHealthEventCursor;
+
         // SqlClient connections never issue SET ARITHABORT ON, and ARITHABORT is only implicitly ON when
         // ANSI_WARNINGS is ON *and* the connection database's compatibility level is >= 90.  On instances
         // where the connection database is at compatibility level 80 (or has ANSI_WARNINGS OFF) any collection
@@ -201,6 +209,12 @@ namespace DBADash
         /// Dash does not own, so an on-demand run neither creates nor alters anything on the instance.</para>
         /// </summary>
         public string OnDemandDeadlockXESessionName { get; set; }
+
+        /// <summary>
+        /// Check AlwaysOn_health now even where a recent check found nothing to collect - see
+        /// <see cref="AGHealthEventCollector.RecheckInterval"/>.  Set for a collection the user triggered.
+        /// </summary>
+        public bool ForceAGHealthEventsCheck { get; set; }
 
         public const int DefaultIdentityCollectionThreshold = 5;
 
@@ -865,7 +879,7 @@ namespace DBADash
                 // Collection type only applies to Azure master db
                 return false;
             }
-            else if (!IsHadrEnabled & (collectionType == CollectionType.AvailabilityGroups || collectionType == CollectionType.AvailabilityReplicas || collectionType == CollectionType.DatabasesHADR))
+            else if (!IsHadrEnabled & (collectionType == CollectionType.AvailabilityGroups || collectionType == CollectionType.AvailabilityReplicas || collectionType == CollectionType.DatabasesHADR || collectionType == CollectionType.AGHealthEvents))
             {
                 // Availability group collection and Hadr isn't enabled.
                 return false;
@@ -879,7 +893,7 @@ namespace DBADash
             {
                 return IsResourceGovernorApplicable();
             }
-            else if ((new[] { CollectionType.Backups, CollectionType.DatabaseMirroring, CollectionType.LogRestores, CollectionType.AvailabilityGroups, CollectionType.AvailabilityReplicas, CollectionType.DatabasesHADR }).Contains(collectionType)
+            else if ((new[] { CollectionType.Backups, CollectionType.DatabaseMirroring, CollectionType.LogRestores, CollectionType.AvailabilityGroups, CollectionType.AvailabilityReplicas, CollectionType.DatabasesHADR, CollectionType.AGHealthEvents }).Contains(collectionType)
                         && engineEdition == DatabaseEngineEdition.SqlManagedInstance)
             {
                 // Don't need to collect these types for Azure MI
@@ -909,6 +923,11 @@ namespace DBADash
                 // off, which is what lets the user run it once from the GUI - see OnDemandDeadlockXESessionName.
                 return IsXESupported && !isAzureMasterDB &&
                        (Source.IsDeadlockCollectionEnabled || !string.IsNullOrWhiteSpace(OnDemandDeadlockXESessionName));
+            }
+            else if (collectionType == CollectionType.AGHealthEvents)
+            {
+                // Reads the AlwaysOn_health XE session.  HADR and Azure checks are above.
+                return IsXESupported;
             }
             else if (collectionType == CollectionType.Instance)
             {
@@ -1119,9 +1138,24 @@ namespace DBADash
         /// inserts events newer than those it holds, so a re-read after a failed write costs only the read.  The
         /// default ring buffer mode has no position: its buffer is emptied as it is read, as it always has been.
         /// </summary>
-        public void CommitReadPositions()
+        /// <param name="includeAGHealthEvents">
+        /// False when the data hasn't been durably written yet - see the S3 path in <see cref="Messaging.CollectionMessage"/>.
+        /// The AlwaysOn_health position is then left where it was, so the next run reads those events again rather than
+        /// losing them if the upload fails.  Cheap: the session is quiet, and the repository discards events it already holds.
+        /// </param>
+        public void CommitReadPositions(bool includeAGHealthEvents = true)
         {
             CommitDeadlockCursor();
+            if (!includeAGHealthEvents)
+            {
+                pendingAGHealthEventCursor = null;
+            }
+            else if (pendingAGHealthEventCursor != null)
+            {
+                var (agKey, agState) = pendingAGHealthEventCursor.Value;
+                AGHealthEventCursorStore.Commit(agKey, agState);
+                pendingAGHealthEventCursor = null;
+            }
             if (pendingSlowQueryCursor == null) return;
             var (key, state) = pendingSlowQueryCursor.Value;
             SlowQueryCursorStore.Commit(key, state);
@@ -1357,6 +1391,10 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             else if (collectionType == CollectionType.Deadlocks)
             {
                 await CollectDeadlocksAsync();
+            }
+            else if (collectionType == CollectionType.AGHealthEvents)
+            {
+                await CollectAGHealthEventsAsync();
             }
             else if (collectionType == CollectionType.PerformanceCounters)
             {
@@ -1638,6 +1676,50 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             ds.Tables.Remove(dt);
             dt.TableName = "PerformanceCounters";
             return dt;
+        }
+
+        /// <summary>
+        /// Reads availability group events from AlwaysOn_health - see <see cref="AGHealthEventCollector"/>.
+        ///
+        /// <para>An instance with no availability groups, or where AlwaysOn_health isn't running, is skipped until
+        /// <see cref="AGHealthEventCollector.RecheckInterval"/> has passed, so it costs nothing between checks.  The
+        /// table goes over either way - it is empty when there is nothing to collect - so the collection date advances and
+        /// the collection isn't reported as overdue.</para>
+        /// </summary>
+        private async Task CollectAGHealthEventsAsync()
+        {
+            if (!ForceAGHealthEventsCheck && AGHealthEventCollector.IsSkipped(ConnectionID))
+            {
+                AddDT(AGHealthEventCollector.CreateTable());
+                return;
+            }
+
+            var state = AGHealthEventCursorStore.GetPending(ConnectionID);
+            var result = await AGHealthEventCollector.CollectAsync(ConnectionString, state, CancellationToken.None);
+            var statusChanged = AGHealthEventCollector.RecordStatus(ConnectionID, result.Status);
+
+            switch (result.Status)
+            {
+                case AGHealthEventCollector.CollectionStatus.Collected:
+                    // Held rather than saved: the position moves once these events have reached a destination.
+                    pendingAGHealthEventCursor = (ConnectionID, state);
+                    break;
+                case AGHealthEventCollector.CollectionStatus.NoAvailabilityGroups when statusChanged:
+                    Log.Information("No availability groups on {instance}.  AGHealthEvents collection will be checked again in {interval}",
+                        instanceName, AGHealthEventCollector.RecheckInterval);
+                    break;
+                case AGHealthEventCollector.CollectionStatus.SessionUnavailable when statusChanged:
+                    LogDBError(CollectionType.AGHealthEvents.ToString(),
+                        $"The {AGHealthEventCollector.SessionName} extended events session is not running or has no event_file target.  Failover times will be estimated from AvailabilityReplicas snapshots.  Start the session to capture exact failover times and reasons.  The session will be checked again every {AGHealthEventCollector.RecheckInterval.TotalMinutes:N0} minutes.",
+                        "Collect[Warning]");
+                    break;
+            }
+
+            AddDT(result.Events);
+            if (result.Events.Rows.Count > 0)
+            {
+                Log.Debug("Collected {count} AlwaysOn_health event(s) on {instance}", result.Events.Rows.Count, instanceName);
+            }
         }
 
         private async Task CollectDeadlocksAsync()

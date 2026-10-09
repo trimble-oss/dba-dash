@@ -946,6 +946,7 @@ namespace DBADashGUI.CustomReports
             // Called for every refresh path, including the initial auto-load from SetContext.
             ApplyStatusFilterParams();
             OnBeforeRefresh();
+            BeforeRefresh?.Invoke(this, EventArgs.Empty);
 
             if (Report is DirectExecutionReport)
             {
@@ -2634,6 +2635,36 @@ namespace DBADashGUI.CustomReports
         /// </summary>
         protected virtual void OnBeforeRefresh()
         {
+        }
+
+        /// <summary>
+        /// Raised at the start of every <see cref="RefreshData"/>, after <see cref="OnBeforeRefresh"/>.  The equivalent hook
+        /// for a control that hosts this view rather than deriving from it - set parameter values with
+        /// <see cref="SetParameterValue"/>.
+        /// </summary>
+        public event EventHandler BeforeRefresh;
+
+        /// <summary>
+        /// Sets a report parameter's value so it's used instead of the procedure's default.  Does nothing if the report
+        /// doesn't have the parameter.
+        ///
+        /// <para>Copy on write: a new list is published rather than an element replaced, because a refresh already in
+        /// flight enumerates <see cref="customParams"/> on a background task (see <see cref="RefreshDataRepository"/>) and
+        /// changing the list under it would fail that enumeration.  The parameter is cloned rather than mutated, so it keeps
+        /// its metadata and a navigation state captured earlier keeps its original value.</para>
+        /// </summary>
+        public void SetParameterValue(string parameterName, object value)
+        {
+            var current = customParams;
+            var idx = current.FindIndex(p =>
+                p.Param.ParameterName.Equals(parameterName, StringComparison.OrdinalIgnoreCase));
+            if (idx < 0) return;
+            var param = (SqlParameter)((ICloneable)current[idx].Param).Clone();
+            param.Value = value ?? DBNull.Value;
+            customParams = new List<CustomSqlParameter>(current)
+            {
+                [idx] = new CustomSqlParameter { Param = param, UseDefaultValue = false }
+            };
         }
 
         #region Status filter

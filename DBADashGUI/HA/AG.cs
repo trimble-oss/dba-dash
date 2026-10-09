@@ -20,7 +20,9 @@ namespace DBADashGUI.HA
             ProcedureName = "AvailabilityGroupSummary_Get",
             QualifiedProcedureName = "dbo.AvailabilityGroupSummary_Get",
             ReportName = "Availability Group Summary",
-            TriggerCollectionTypes = new List<string>() { CollectionType.AvailabilityGroups.ToString(), CollectionType.AvailabilityReplicas.ToString(), CollectionType.DatabasesHADR.ToString() },
+            // The only user parameters are the events date range, which the toolbar date picker sets
+            HideParametersButton = true,
+            TriggerCollectionTypes = new List<string>() { CollectionType.AvailabilityGroups.ToString(), CollectionType.AvailabilityReplicas.ToString(), CollectionType.DatabasesHADR.ToString(), CollectionType.AGHealthEvents.ToString() },
             Params = new Params
             {
                 ParamList = new List<Param>
@@ -30,7 +32,8 @@ namespace DBADashGUI.HA
                         ParamName = "@InstanceIDs",
                         ParamType = "IDS"
                     },
-                    RoleChangeDaysParam
+                    EventsFromDateParam,
+                    EventsToDateParam
                 }
             },
             CustomReportResults = new Dictionary<int, CustomReportResult>
@@ -305,7 +308,9 @@ namespace DBADashGUI.HA
             ProcedureName = "AvailabilityGroup_Get",
             QualifiedProcedureName = "dbo.AvailabilityGroup_Get",
             ReportName = "Availability Group Detail",
-            TriggerCollectionTypes = new List<string>() { CollectionType.AvailabilityGroups.ToString(), CollectionType.AvailabilityReplicas.ToString(), CollectionType.DatabasesHADR.ToString() },
+            // The only user parameters are the events date range, which the toolbar date picker sets
+            HideParametersButton = true,
+            TriggerCollectionTypes = new List<string>() { CollectionType.AvailabilityGroups.ToString(), CollectionType.AvailabilityReplicas.ToString(), CollectionType.DatabasesHADR.ToString(), CollectionType.AGHealthEvents.ToString() },
             Params = new Params
             {
                 ParamList = new List<Param>
@@ -315,7 +320,8 @@ namespace DBADashGUI.HA
                         ParamName = "@InstanceID",
                         ParamType = "INT"
                     },
-                    RoleChangeDaysParam
+                    EventsFromDateParam,
+                    EventsToDateParam
                 }
             },
             CustomReportResults = new Dictionary<int, CustomReportResult>
@@ -465,12 +471,13 @@ namespace DBADashGUI.HA
                         }
                     }
                 },
-                { 1, RoleChangesResult() }
+                { 1, RoleChangesResult() },
+                { 2, HealthEventsResult() }
             }
         };
 
         /// <summary>
-        /// Role changes detected by comparing the local replica role between AvailabilityReplicas snapshots.  The change
+        /// Role changes captured from AlwaysOn_health (exact times) or detected by comparing AvailabilityReplicas snapshots.  The change
         /// happened somewhere between Changed After and Changed Before.
         /// </summary>
         private static CustomReportResult RoleChangesResult() => new()
@@ -507,23 +514,61 @@ namespace DBADashGUI.HA
                 { "New Role", new ColumnMetadata() },
                 { "Changed After", new ColumnMetadata {
                     FormatString = "G",
-                    Description = "Snapshot prior to the role change"
+                    Description = "XE: when the replica left its previous role.  Snapshot: the snapshot before the role change was detected"
                 }},
                 { "Changed Before", new ColumnMetadata {
                     FormatString = "G",
-                    Description = "Snapshot where the role change was detected"
+                    Description = "XE: when the replica reached its new role.  Snapshot: the snapshot where the role change was detected"
                 }},
-                { "Detection Window", new ColumnMetadata {
-                    Description = "Time between snapshots.  The role change happened within this window"
+                { "Duration", new ColumnMetadata {
+                    Description = "XE: how long the role change took.  Snapshot: time between snapshots - the role change happened within this window"
                 }},
-                { "Source", new ColumnMetadata { Visible = false } }
+                { "Failover Type", new ColumnMetadata {
+                    Description = "Manual, Forced or Automatic - from the AlwaysOn_health events around the role change"
+                }},
+                { "Reason", new ColumnMetadata {
+                    Description = "From the AlwaysOn_health events around the role change: the failover statement, a health check error, a replica stopping, the HADR manager going offline, lease expiry or an HADR error"
+                }},
+                { "Source", new ColumnMetadata {
+                    Description = "XE: captured from the AlwaysOn_health extended events session.  Snapshot: detected by comparing AvailabilityReplicas snapshots"
+                }}
             }
         };
 
-        private static Param RoleChangeDaysParam => new()
+        /// <summary>AlwaysOn_health events collected from the instance.</summary>
+        private static CustomReportResult HealthEventsResult() => new()
         {
-            ParamName = "@RoleChangeDays",
-            ParamType = "INT"
+            ResultName = "AlwaysOn Health Events",
+            Columns = new Dictionary<string, ColumnMetadata>
+            {
+                { "Event Time", new ColumnMetadata { FormatString = "yyyy-MM-dd HH:mm:ss.fff" } },
+                { "Event", new ColumnMetadata() },
+                { "Availability Group", new ColumnMetadata() },
+                { "Replica", new ColumnMetadata() },
+                { "Database", new ColumnMetadata() },
+                { "Component", new ColumnMetadata {
+                    Description = "sp_server_diagnostics component that reported an error"
+                }},
+                { "Previous State", new ColumnMetadata() },
+                { "Current State", new ColumnMetadata() },
+                { "DDL Action", new ColumnMetadata() },
+                { "DDL Phase", new ColumnMetadata() },
+                { "Error Number", new ColumnMetadata() },
+                { "Details", new ColumnMetadata() }
+            }
+        };
+
+        /// <summary>UTC date range for role changes and AlwaysOn_health events - set from <see cref="eventsDateRange"/>.</summary>
+        private static Param EventsFromDateParam => new()
+        {
+            ParamName = "@EventsFromDate",
+            ParamType = "DATETIME2"
+        };
+
+        private static Param EventsToDateParam => new()
+        {
+            ParamName = "@EventsToDate",
+            ParamType = "DATETIME2"
         };
 
         #endregion "Report Definitions"
@@ -544,13 +589,36 @@ namespace DBADashGUI.HA
             new("Configure Metrics (Instance)")
             { DisplayStyle = ToolStripItemDisplayStyle.Text };
 
+        /// <summary>
+        /// Date range for the Role Changes and AlwaysOn Health Events results.  The tab's own rather than the global time
+        /// filter: failovers are rare, so the useful range is days or months, where the global filter defaults to an hour.
+        /// The current AG state results aren't affected.
+        /// </summary>
+        private readonly DateRangeToolStripMenuItem eventsDateRange = new()
+        {
+            DefaultTimeSpan = TimeSpan.FromDays(30),
+            MinimumTimeSpan = TimeSpan.FromHours(1),
+            ToolTipText = "Date range for role changes and AlwaysOn health events"
+        };
+
         public AG()
         {
             InitializeComponent();
             metricsConfigMenuItem.DropDownItems.Add(metricsConfigRootMenuItem);
             metricsConfigMenuItem.DropDownItems.Add(metricsConfigInstanceMenuItem);
+            eventsDateRange.SetTimeSpan(eventsDateRange.DefaultTimeSpan);
+            eventsDateRange.DateRangeChanged += (sender, e) =>
+            {
+                if (customReportView1.Report != null) customReportView1.RefreshData();
+            };
+            customReportView1.BeforeRefresh += (sender, e) =>
+            {
+                customReportView1.SetParameterValue("@EventsFromDate", eventsDateRange.DateFromUtc);
+                customReportView1.SetParameterValue("@EventsToDate", eventsDateRange.DateToUtc);
+            };
             customReportView1.PostGridRefresh += PostGridRefresh;
             customReportView1.ToolStrip.Items.Add(navigateBackMenuItem);
+            customReportView1.ToolStrip.Items.Add(eventsDateRange);
             customReportView1.ToolStrip.Items.Add(metricsConfigMenuItem);
             navigateBackMenuItem.Click += (sender, e) => NavigateBack();
             metricsConfigRootMenuItem.Click += (sender, e) => ConfigureMetrics(-1);

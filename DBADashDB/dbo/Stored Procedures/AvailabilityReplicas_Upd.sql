@@ -27,8 +27,8 @@ BEGIN TRAN;
 		ReplicaServerName,
 		PreviousRole,
 		NewRole,
-		PreviousSnapshotDate,
-		SnapshotDate,
+		ChangedAfter,
+		ChangedBefore,
 		Source
 	)
 	SELECT	@InstanceID,

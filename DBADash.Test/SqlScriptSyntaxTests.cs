@@ -186,6 +186,12 @@ namespace DBADash.Test
             AssertParses("backfill session start (database scoped)", DeadlockCollector.BuildSessionStartSql(true));
         }
 
+        [TestMethod]
+        public void AGHealthEventsProbeParses()
+        {
+            AssertParses("AlwaysOn_health probe", DBADash.AvailabilityGroups.AGHealthEventCollector.ProbeSql);
+        }
+
         /// <summary>
         /// Rebuilds every statement <paramref name="script"/> assembles by concatenation and parses each.
         /// </summary>

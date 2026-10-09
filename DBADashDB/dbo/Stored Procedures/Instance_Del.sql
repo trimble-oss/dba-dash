@@ -58,6 +58,9 @@ BEGIN
 	DELETE dbo.AvailabilityGroupRoleChanges
 	WHERE InstanceID = @InstanceID
 
+	DELETE dbo.AvailabilityGroupHealthEvents
+	WHERE InstanceID = @InstanceID
+
 	DELETE dbo.AvailabilityGroups
 	WHERE InstanceID = @InstanceID
 

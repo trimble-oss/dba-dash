@@ -1236,7 +1236,8 @@ FROM (VALUES('dbo','ObjectExecutionStats',120),
 				('dbo','ResourceGovernorWorkloadGroupsMetrics',90),
 				('dbo','ResourceGovernorResourcePoolsMetrics',90),
 				('XE','XETraceSession',30),
-				('XE','XETraceEvent',30)
+				('XE','XETraceEvent',30),
+				('dbo','AvailabilityGroupHealthEvents',365)
 				) AS t(SchemaName,TableName,RetentionDays)
 WHERE NOT EXISTS(SELECT 1
 				FROM dbo.DataRetention DR

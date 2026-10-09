@@ -141,6 +141,7 @@ namespace DBADash.Messaging
             collector.FailedLoginsBackfillMinutes = cfg.FailedLoginsBackfillMinutes ?? CollectionConfig.DefaultFailedLoginsBackfillMinutes;
             collector.DeadlockXERingBufferKB = cfg.GetDeadlockXERingBufferKB();
             collector.OnDemandDeadlockXESessionName = onDemandDeadlockSession;
+            collector.ForceAGHealthEventsCheck = true;
             await collector.CollectAsync(standardCollections.ToArray());
             await collector.CollectAsync(customCollections);
 
@@ -167,8 +168,9 @@ namespace DBADash.Messaging
             {
                 // The caller uploads this to the agent's S3 path and reports a failure there to the user, who can
                 // run the collection again - the collector does not outlive the return, so the read position moves
-                // here rather than after that upload.
-                collector.CommitReadPositions();
+                // here rather than after that upload.  Except for AlwaysOn_health, where re-reading is cheap and deduplicated,
+                // so the position isn't moved until a scheduled run has written its data.
+                collector.CommitReadPositions(includeAGHealthEvents: false);
                 op.Complete();
                 return collector.Data;
             }
