@@ -60,27 +60,36 @@ BEGIN
 		- as dbo.DeadlockCharts_Get does. */
 	DECLARE @BucketMins INT = CASE WHEN @DateGroupingMin < 1 THEN 1 ELSE @DateGroupingMin END
 
-	SELECT	DG.DateGroup AS SnapshotDate,
-			DG.DateGroup AS PreviousSnapshotDate,
-			CAST(COUNT(*) AS BIGINT) AS DeadlockCount,
-			/* The window the point counted, start inclusive and end exclusive - what dbo.DeadlockScope expects. */
-			DG.DateGroup AS FromDate,
-			DATEADD(MINUTE, @BucketMins, DG.DateGroup) AS ToDate
-	FROM dbo.Deadlocks D
-	CROSS APPLY dbo.DateGroupingMins(D.EventTime, @BucketMins) DG
-	WHERE D.InstanceID = @InstanceID
-	AND D.EventTime >= @FromDate
-	AND D.EventTime < @ToDate
-	AND (@DatabaseID IS NULL
-		OR EXISTS(	SELECT 1
-					FROM dbo.DeadlockProcesses P
-					WHERE P.InstanceID = D.InstanceID
-					AND P.EventTime = D.EventTime
-					AND P.DeadlockHash = D.DeadlockHash
-					AND P.DatabaseID = @DatabaseID
-					)
-		)
-	GROUP BY DG.DateGroup
+	/*	The window the point counted, start inclusive and end exclusive - what dbo.DeadlockScope expects.
+		Buckets are aligned to the epoch rather than to @FromDate, so the first and last can extend past the
+		requested range.  Clamped to it: the deadlocks outside it weren't counted, so the drill-through must
+		not show them, and a first point plotted before @FromDate falls off the chart's X axis. */
+	SELECT	B.FromDate AS SnapshotDate,
+			B.FromDate AS PreviousSnapshotDate,
+			B.DeadlockCount,
+			B.FromDate,
+			B.ToDate
+	FROM (
+		SELECT	CASE WHEN DG.DateGroup < @FromDate THEN @FromDate ELSE DG.DateGroup END AS FromDate,
+				CASE WHEN DATEADD(MINUTE, @BucketMins, DG.DateGroup) > @ToDate THEN @ToDate
+					ELSE DATEADD(MINUTE, @BucketMins, DG.DateGroup) END AS ToDate,
+				CAST(COUNT(*) AS BIGINT) AS DeadlockCount
+		FROM dbo.Deadlocks D
+		CROSS APPLY dbo.DateGroupingMins(D.EventTime, @BucketMins) DG
+		WHERE D.InstanceID = @InstanceID
+		AND D.EventTime >= @FromDate
+		AND D.EventTime < @ToDate
+		AND (@DatabaseID IS NULL
+			OR EXISTS(	SELECT 1
+						FROM dbo.DeadlockProcesses P
+						WHERE P.InstanceID = D.InstanceID
+						AND P.EventTime = D.EventTime
+						AND P.DeadlockHash = D.DeadlockHash
+						AND P.DatabaseID = @DatabaseID
+						)
+			)
+		GROUP BY DG.DateGroup
+		) B
 	ORDER BY SnapshotDate DESC
 	OPTION(RECOMPILE)
 
