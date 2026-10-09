@@ -372,6 +372,7 @@ namespace DBADashService
             // the timer that stops with the process.
             DeadlockCursorStore.Flush();
             DBADash.SlowQueries.SlowQueryCursorStore.Flush();
+            DBADash.AvailabilityGroups.AGHealthEventCursorStore.Flush();
 
             Log.Information("Shutdown Scheduler");
             await scheduler.Shutdown();

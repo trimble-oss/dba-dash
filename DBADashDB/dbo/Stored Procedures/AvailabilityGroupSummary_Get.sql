@@ -1,6 +1,7 @@
 ﻿CREATE PROC dbo.AvailabilityGroupSummary_Get(
     @InstanceIDs IDs READONLY,
-    @RoleChangeDays INT=30
+    @EventsFromDate DATETIME2(3)=NULL, /* UTC date range for role changes and AlwaysOn_health events.  NULL for the last 30 days */
+    @EventsToDate DATETIME2(3)=NULL
 )
 AS
 WITH T AS (
@@ -92,4 +93,5 @@ OUTER APPLY dbo.SecondsToHumanDuration(T.[Max Estimated Recovery Time (sec)]) AS
 
 /* Role changes for availability groups on the instances in context */
 EXEC dbo.AvailabilityGroupRoleChanges_Get @InstanceIDs = @InstanceIDs,
-                                          @Days = @RoleChangeDays;
+                                          @FromDate = @EventsFromDate,
+                                          @ToDate = @EventsToDate;

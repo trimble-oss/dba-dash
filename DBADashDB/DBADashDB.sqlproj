@@ -593,6 +593,12 @@
     <Build Include="dbo\Stored Procedures\AvailabilityGroupInstances_Get.sql" />
     <Build Include="dbo\Tables\AvailabilityGroupRoleChanges.sql" />
     <Build Include="dbo\Stored Procedures\AvailabilityGroupRoleChanges_Get.sql" />
+    <Build Include="dbo\Tables\AvailabilityGroupHealthEvents.sql" />
+    <Build Include="dbo\User Defined Types\AGHealthEvents.sql" />
+    <Build Include="dbo\Stored Procedures\AGHealthEvents_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\AvailabilityGroupHealthEvents_Get.sql" />
+    <Build Include="Storage\PF_AvailabilityGroupHealthEvents.sql" />
+    <Build Include="Storage\PS_AvailabilityGroupHealthEvents.sql" />
     <Build Include="dbo\User Defined Types\JobSteps.sql" />
     <Build Include="dbo\Tables\JobSteps.sql" />
     <Build Include="dbo\Stored Procedures\JobSteps_Upd.sql" />

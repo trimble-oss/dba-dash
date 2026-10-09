@@ -27,7 +27,7 @@ namespace DBADashGUI.Messaging
         private static readonly List<CollectionType> RecentlyTriggeredExcludedList = new()
         {
             CollectionType.RunningQueries, CollectionType.AvailabilityGroups, CollectionType.AvailabilityReplicas,
-            CollectionType.DatabasesHADR, CollectionType.RunningJobs
+            CollectionType.DatabasesHADR, CollectionType.RunningJobs, CollectionType.AGHealthEvents
         };
 
         public static async Task TriggerCollection(string connectionID, CollectionType type, int collectAgentID, int importAgentID, ISetStatus control)

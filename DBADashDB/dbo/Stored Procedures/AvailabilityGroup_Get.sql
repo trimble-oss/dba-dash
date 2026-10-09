@@ -1,6 +1,7 @@
 ﻿CREATE PROC dbo.AvailabilityGroup_Get(
     @InstanceID INT,
-    @RoleChangeDays INT=30
+    @EventsFromDate DATETIME2(3)=NULL, /* UTC date range for role changes and AlwaysOn_health events.  NULL for the last 30 days */
+    @EventsToDate DATETIME2(3)=NULL
 )
 AS
 SELECT D.name AS [Database],
@@ -63,5 +64,11 @@ INSERT INTO @InstanceIDs(ID) VALUES(@InstanceID)
 
 /* Role changes for availability groups this instance is part of, including those reported by other monitored replicas */
 EXEC dbo.AvailabilityGroupRoleChanges_Get @InstanceIDs = @InstanceIDs,
-                                          @Days = @RoleChangeDays,
+                                          @FromDate = @EventsFromDate,
+                                          @ToDate = @EventsToDate,
                                           @IncludeOtherReplicas = 1;
+
+/* AlwaysOn_health events collected from this instance */
+EXEC dbo.AvailabilityGroupHealthEvents_Get @InstanceID = @InstanceID,
+                                           @FromDate = @EventsFromDate,
+                                           @ToDate = @EventsToDate;

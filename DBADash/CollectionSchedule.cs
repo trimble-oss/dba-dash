@@ -63,6 +63,7 @@ namespace DBADashService
                     
                             /* Deadlocks default schedule is every 5 minutes, but also requires enablement for each instance */
                             {CollectionType.Deadlocks, new CollectionSchedule() {Schedule = every5min, RunOnServiceStart = false} },
+                            {CollectionType.AGHealthEvents, new CollectionSchedule() {Schedule = every5min, RunOnServiceStart = false} },
 
                             {CollectionType.ServerPrincipals, new CollectionSchedule(){ Schedule = midnight } },
                             {CollectionType.ServerRoleMembers, new CollectionSchedule(){ Schedule = midnight } },
