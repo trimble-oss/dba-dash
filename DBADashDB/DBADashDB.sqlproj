@@ -571,6 +571,7 @@
     <Build Include="dbo\Stored Procedures\ObjectExecutionStatsSummary_Get.sql" />
     <Build Include="dbo\Stored Procedures\DDL_Get.sql" />
     <Build Include="dbo\Stored Procedures\DBObjects_Get.sql" />
+    <Build Include="dbo\Stored Procedures\DBObjectInfo_Get.sql" />
     <Build Include="dbo\Stored Procedures\DatabasesByInstance_Get.sql" />
     <Build Include="dbo\Tables\PerformanceCounters_60MIN.sql" />
     <Build Include="Storage\PF_PerformanceCounters_60MIN.sql" />

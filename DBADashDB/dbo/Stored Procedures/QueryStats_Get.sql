@@ -8,6 +8,8 @@ CREATE PROC dbo.QueryStats_Get (
     @GroupBy VARCHAR(20) = 'Family',
     @QueryHash VARCHAR(20) = NULL,
     @StatementID BIGINT = NULL,
+    /* The statements that ran under one plan shape, at plan grain - see the drill down comment below */
+    @PlanHash VARCHAR(20) = NULL,
     /*
         The series label a chart slice was drilled into: either a qualified object name, or the short label
         the charts report builds from a statement's own text for a statement with no object.  Matched against
@@ -55,9 +57,10 @@ END
 /*
     A drill down carries its filter rather than its grain, so the grain follows from the filter: asking for
     one family's rows means its statements, and asking for one statement's rows means its plans.  This is
-    what lets the grid link straight down the hierarchy with nothing but a column to parameter mapping.
+    what lets the grid link straight down the hierarchy with nothing but a column to parameter mapping.  A plan
+    hash is a plan shape, so its rows are at plan grain too: a row per statement that ran under it.
 */
-IF @StatementID IS NOT NULL
+IF @StatementID IS NOT NULL OR @PlanHash IS NOT NULL
     SET @GroupBy = 'Plan'
 ELSE IF @QueryHash IS NOT NULL
     SET @GroupBy = 'Statement'
@@ -266,6 +269,9 @@ FROM (/* The part hour at the start of the window, from the raw rows */
                    AND Q.SnapshotDate < @ToExclusive) R) F
 WHERE (@StatementID IS NULL OR F.StatementID = @StatementID)
 AND (@QueryHash IS NULL OR F.StatementID IN (SELECT S.StatementID FROM #FamilyStatements S))
+/*  The parameter is converted rather than every row's hash.  Not a seek - the plan hash isn't in the key - but a
+    filter on the rows the window reads anyway. */
+AND (@PlanHash IS NULL OR F.query_plan_hash = CONVERT(BINARY(8), @PlanHash, 1))
 GROUP BY F.InstanceID, F.StatementID, F.query_plan_hash
 OPTION (RECOMPILE);
 

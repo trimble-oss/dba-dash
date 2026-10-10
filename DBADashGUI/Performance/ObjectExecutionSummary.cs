@@ -35,19 +35,37 @@ namespace DBADashGUI.Performance
         private string ObjectName => CurrentContext.Type.IsQueryStoreObjectType() ? CurrentContext.ObjectName : string.Empty;
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public bool UseGlobalTime { get => !tsDateRange.Visible; set => tsDateRange.Visible = !value; }
+        public bool UseGlobalTime { get => hostDateRange == null && !tsDateRange.Visible; set => tsDateRange.Visible = !value && hostDateRange == null; }
 
-        private DateTime FromUTC => UseGlobalTime
+        private DateRangeToolStripMenuItem hostDateRange;
+
+        /// <summary>
+        /// A date range owned by the window hosting the control, used instead of the control's own - e.g. the object detail
+        /// window's, which all its tabs share.  The control's own picker is hidden.  The host refreshes the control when it
+        /// changes.
+        /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public DateRangeToolStripMenuItem HostDateRange
+        {
+            get => hostDateRange;
+            set
+            {
+                hostDateRange = value;
+                if (value != null) tsDateRange.Visible = false;
+            }
+        }
+
+        private DateTime FromUTC => hostDateRange?.DateFromUtc ?? (UseGlobalTime
             ? DateRange.FromUTC
-            : tsDateRange.DateFromUtc;
+            : tsDateRange.DateFromUtc);
 
-        private DateTime ToUTC => UseGlobalTime
+        private DateTime ToUTC => hostDateRange?.DateToUtc ?? (UseGlobalTime
             ? DateRange.ToUTC
-            : tsDateRange.DateToUtc;
+            : tsDateRange.DateToUtc);
 
-        private TimeSpan SelectedTimeSpan => UseGlobalTime
+        private TimeSpan SelectedTimeSpan => hostDateRange?.ActualTimeSpan ?? (UseGlobalTime
             ? DateRange.TimeSpan
-            : tsDateRange.SelectedTimeSpan ?? TimeSpan.FromMinutes(60);
+            : tsDateRange.SelectedTimeSpan ?? TimeSpan.FromMinutes(60));
 
         private DBADashContext CurrentContext;
 
@@ -127,6 +145,7 @@ namespace DBADashGUI.Performance
                                                                         new DataGridViewTextBoxColumn()  { Name = "Total Writes", Visible=false,DataPropertyName = "total_writes", DefaultCellStyle = new DataGridViewCellStyle() { Format = "#,##0" } },
                                                                         new DataGridViewTextBoxColumn()  { Name = "Avg Writes",Visible=false, DataPropertyName = "avg_writes", DefaultCellStyle = new DataGridViewCellStyle() { Format = "#,##0" } },
                                                                         new DataGridViewTextBoxColumn()  { Name = "Period Time (sec)",Visible=false, DataPropertyName = "period_time_sec", DefaultCellStyle = new DataGridViewCellStyle() { Format = "#,##0.###" } },
+                                                                        new DataGridViewLinkColumn() { Name = "Query Stats", Text = "Query Stats", UseColumnTextForLinkValue = true, ToolTipText = "Statement level stats for the object, in the object detail window" },
                                                                         new DataGridViewLinkColumn() { Name = "Query Store", Text = "Query Store", UseColumnTextForLinkValue = true }
         };
 
@@ -156,7 +175,7 @@ namespace DBADashGUI.Performance
                     col.Visible = true;
                     _cols.Add(col);
                     displayIdx += 1;
-                    if (CompareFrom <= DateTime.MinValue) continue;
+                    if (CompareFrom <= DateTime.MinValue || col is DataGridViewLinkColumn) continue; // A link has nothing to compare
                     var compareCol = new DataGridViewTextBoxColumn
                     {
                         Name = "Compare " + col.Name,
@@ -318,7 +337,7 @@ namespace DBADashGUI.Performance
 
         private void ObjectExecutionSummary_Load(object sender, EventArgs e)
         {
-            if (UseGlobalTime) return;
+            if (UseGlobalTime || hostDateRange != null) return;
             if (DateRange.SelectedTimeSpan.HasValue)
             {
                 tsDateRange.SetTimeSpan(DateRange.SelectedTimeSpan.Value);
@@ -428,6 +447,11 @@ namespace DBADashGUI.Performance
             if (dgv.Columns[e.ColumnIndex].Name == "Name")
             {
                 RefreshChart((long)row["ObjectID"], (string)row["ObjectName"]);
+            }
+            else if (dgv.Columns[e.ColumnIndex].Name == "Query Stats")
+            {
+                // Inside the object detail window this just brings its Query Stats tab to the front
+                DetailForm.OpenObject((int)row["InstanceID"], (long)row["ObjectID"], tab: DetailControlBase.QueryStatsTab);
             }
             else if (dgv.Columns[e.ColumnIndex].Name == "Query Store")
             {

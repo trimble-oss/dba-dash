@@ -1502,11 +1502,11 @@ namespace DBADashGUI.Performance
                     break;
 
                 case "colQueryPlanHash":
-                    LoadQueryStore(row, false, true);
+                    ShowHashDetail(row, QueryHashDetailControl.HashKind.PlanHash);
                     break;
 
                 case "colQueryHash":
-                    LoadQueryStore(row, true, false);
+                    ShowHashDetail(row, QueryHashDetailControl.HashKind.QueryHash);
                     break;
 
                 case "colPlanHandle":
@@ -1621,15 +1621,9 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private void ShowObject(DataRowView row)
-        {
-            var context = CurrentContext.DeepCopy();
-            context.ObjectID = row.Row.Field<long>("DBADashObjectID");
-            context.ObjectName = row.Row.Field<string>("ObjectName");
-            context.InstanceID = row.Row.Field<int>("InstanceID");
-            context.Type = SQLTreeItem.TreeType.StoredProcedure;
-            Common.ShowObjectExecutionSummary(context, ParentForm);
-        }
+        private static void ShowObject(DataRowView row) =>
+            DetailForm.OpenObject(row.Row.Field<int>("InstanceID"), row.Row.Field<long>("DBADashObjectID"),
+                objectName: row.Row.Field<string>("ObjectName"));
 
         private static void ShowJob(DataRowView row)
         {
@@ -1656,36 +1650,17 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private static void LoadQueryStore(DataRowView row, bool isQueryHash, bool isPlanHash)
+        /// <summary>
+        /// The hash's detail window: its Query Stats, Running Queries and Query Store.  Opens on Query Stats, or on Query
+        /// Store where the instance doesn't collect query stats and the session's database has Query Store on.
+        /// </summary>
+        private static void ShowHashDetail(DataRowView row, QueryHashDetailControl.HashKind kind)
         {
-            var db = Convert.ToString(row["database_name"].DBNullToNull());
-            var planHash = row.GetHexStringColumnAsByteArray("query_plan_hash");
-            var queryHash = row.GetHexStringColumnAsByteArray("query_hash");
-            var instanceID = Convert.ToInt32(row["InstanceID"]);
+            var hash = Convert.ToString(row[kind == QueryHashDetailControl.HashKind.QueryHash ? "query_hash" : "query_plan_hash"].DBNullToNull());
+            if (string.IsNullOrWhiteSpace(hash)) return;
             var isQueryStoreOn = row["is_query_store_on"] != DBNull.Value && Convert.ToBoolean(row["is_query_store_on"]);
-            if (!isQueryStoreOn)
-            {
-                MessageBox.Show("Query store is not enabled for this database", "Warning", MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-                return;
-            }
-
-            var context = CommonData.GetDBADashContext(instanceID);
-            if (!context.CanMessage)
-            {
-                MessageBox.Show("You don't have access to the messaging feature required to access query store",
-                    "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-            context.DatabaseName = db;
-
-            var planViewer = new QueryStoreViewer()
-            {
-                PlanHash = isPlanHash ? planHash : null,
-                QueryHash = isQueryHash ? queryHash : null,
-                Context = context
-            };
-            planViewer.ShowSingleInstance();
+            DetailForm.OpenHash(kind, Convert.ToInt32(row["InstanceID"]), hash,
+                Convert.ToString(row["database_name"].DBNullToNull()), isQueryStoreOn);
         }
 
         private void GroupByFilter(DataGridViewCellEventArgs e, DataRowView row)

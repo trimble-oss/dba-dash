@@ -506,22 +506,6 @@ namespace DBADashGUI
             }
         }
 
-        public static void ShowObjectExecutionSummary(DBADashContext context, Form parent)
-        {
-            Form objectExecutionForm;
-            objectExecutionForm = new Form()
-            {
-                Text = context.ObjectName,
-                Width = parent.Width / 2,
-                Height = parent.Height / 2
-            };
-            var oes = new ObjectExecutionSummary() { Dock = DockStyle.Fill, UseGlobalTime = false };
-            oes.SetContext(context);
-            objectExecutionForm.Controls.Add(oes);
-
-            objectExecutionForm.ShowSingleInstance();
-        }
-
         public static void KeyPressAllowNumericOnly(object sender, KeyPressEventArgs e)
         {
             if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar) && e.KeyChar != '.' && e.KeyChar != '-')

@@ -42,7 +42,25 @@ namespace DBADashGUI.Performance
         public long? PlanId { get; set; }
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public bool UseGlobalTime { get => !tsDateRange.Visible; set => tsDateRange.Visible = !value; }
+        public bool UseGlobalTime { get => hostDateRange == null && !tsDateRange.Visible; set => tsDateRange.Visible = !value && hostDateRange == null; }
+
+        private DateRangeToolStripMenuItem hostDateRange;
+
+        /// <summary>
+        /// A date range owned by the window hosting the control, used instead of the control's own - e.g. the object detail
+        /// window's, which all its tabs share.  The control's own picker is hidden.  The host refreshes the control when it
+        /// changes.
+        /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public DateRangeToolStripMenuItem HostDateRange
+        {
+            get => hostDateRange;
+            set
+            {
+                hostDateRange = value;
+                if (value != null) tsDateRange.Visible = false;
+            }
+        }
 
         public void SetContext(DBADashContext _context)
         {
@@ -80,13 +98,13 @@ namespace DBADashGUI.Performance
         private bool IncludeWaits => includeWaitsToolStripMenuItem.Checked && includeWaitsToolStripMenuItem.Enabled;
         private const string messageSentMessage = "Message sent...";
 
-        private DateTimeOffset FromOffset => UseGlobalTime
-            ? new DateTimeOffset(DateRange.FromUTC, TimeSpan.Zero)
-            : new DateTimeOffset(tsDateRange.DateFromUtc, TimeSpan.Zero);
+        private DateTimeOffset FromOffset => new(hostDateRange?.DateFromUtc ?? (UseGlobalTime
+            ? DateRange.FromUTC
+            : tsDateRange.DateFromUtc), TimeSpan.Zero);
 
-        private DateTimeOffset ToOffset => UseGlobalTime
-            ? new DateTimeOffset(DateRange.ToUTC, TimeSpan.Zero)
-            : new DateTimeOffset(tsDateRange.DateToUtc, TimeSpan.Zero);
+        private DateTimeOffset ToOffset => new(hostDateRange?.DateToUtc ?? (UseGlobalTime
+            ? DateRange.ToUTC
+            : tsDateRange.DateToUtc), TimeSpan.Zero);
 
         public async void RefreshData()
         {
@@ -724,7 +742,7 @@ namespace DBADashGUI.Performance
 
         private void QueryStoreTopQueries_Load(object sender, EventArgs e)
         {
-            if (UseGlobalTime) return;
+            if (UseGlobalTime || hostDateRange != null) return;
             if (DateRange.SelectedTimeSpan.HasValue)
             {
                 tsDateRange.SetTimeSpan(DateRange.SelectedTimeSpan.Value);

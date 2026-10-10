@@ -264,12 +264,11 @@ namespace DBADashGUI.CustomReports
                         {
                             DisplayIndex = 31,
                             Alias = "Query Hash",
-                            Description = "The shape of the query, shared by every literal variant of it and comparable across instances of the same major version.  Also stored on running queries, so the same value links the two.  Click to look the query up in Query Store, which needs Query Store enabled on the database and messaging enabled for the instance.",
-                            Link = new QueryStoreLinkColumnInfo
+                            Description = "The shape of the query, shared by every literal variant of it and comparable across instances of the same major version.  Also stored on running queries, so the same value links the two.  Click for the query hash's detail window: its statements across the instance, the running queries caught with it, and Query Store, which needs Query Store enabled on the database and messaging enabled for the instance.  Opens on the statements.",
+                            Link = new QueryHashDetailLinkColumnInfo
                             {
                                 TargetColumn = "QueryHash",
-                                TargetColumnLinkType = QueryStoreLinkColumnInfo.QueryStoreLinkColumnType.QueryHash,
-                                InstanceIdColumn = "InstanceID",
+                                Kind = Performance.QueryHashDetailControl.HashKind.QueryHash,
                                 DatabaseNameColumn = "Database"
                             }
                         },
@@ -277,12 +276,11 @@ namespace DBADashGUI.CustomReports
                         {
                             DisplayIndex = 32,
                             Alias = "Plan Hash",
-                            Description = "The plan shape, where the row ran under exactly one.  Blank means more than one, which the Plans column counts, or a rollup row that has no plan of its own.  Click to look the plan up in Query Store.  The Plan column opens the plan captured with the statistics.",
-                            Link = new QueryStoreLinkColumnInfo
+                            Description = "The plan shape, where the row ran under exactly one.  Blank means more than one, which the Plans column counts, or a rollup row that has no plan of its own.  Click for the plan hash's detail window: the statements that ran under it, the running queries caught with it, and Query Store.  Opens on the statements.  The Plan column opens the plan captured with the statistics.",
+                            Link = new QueryHashDetailLinkColumnInfo
                             {
                                 TargetColumn = "PlanHash",
-                                TargetColumnLinkType = QueryStoreLinkColumnInfo.QueryStoreLinkColumnType.PlanHash,
-                                InstanceIdColumn = "InstanceID",
+                                Kind = Performance.QueryHashDetailControl.HashKind.PlanHash,
                                 DatabaseNameColumn = "Database"
                             }
                         },
@@ -391,6 +389,8 @@ namespace DBADashGUI.CustomReports
                     // needs nothing but a column to parameter mapping.
                     new() { ParamName = "@QueryHash", ParamType = "VARCHAR" },
                     new() { ParamName = "@StatementID", ParamType = "BIGINT" },
+                    // The statements that ran under one plan shape - the plan hash detail window's Query Stats tab
+                    new() { ParamName = "@PlanHash", ParamType = "VARCHAR" },
                     // Set when a chart slice is drilled into: an object name, or the label built from a
                     // statement's own text.  Also usable as a filter from the Parameters dialog.
                     new() { ParamName = "@ObjectName", ParamType = "NVARCHAR" },
