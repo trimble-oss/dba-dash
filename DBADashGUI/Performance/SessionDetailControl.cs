@@ -757,6 +757,12 @@ DBCC FREEPROCCACHE({planHandle});";
             if (HasObject())
             {
                 AddTab("Object Execution", LoadObjectExecution);
+                AddTab("Schema History", LoadSchemaHistory);
+            }
+
+            if (HasQueryHash())
+            {
+                AddTab("Query Stats", LoadQueryStats);
             }
 
             AddTab("Session History", LoadSessionHistory);
@@ -806,6 +812,9 @@ DBCC FREEPROCCACHE({planHandle});";
         private bool HasObject() =>
             Row.Row.Table.Columns.Contains("DBADashObjectID") && Row["DBADashObjectID"] != DBNull.Value &&
             Row["ObjectName"] != DBNull.Value && !string.IsNullOrEmpty(Convert.ToString(Row["ObjectName"]));
+
+        private bool HasQueryHash() =>
+            Row.Row.Table.Columns.Contains("query_hash") && !string.IsNullOrWhiteSpace(Convert.ToString(Row["query_hash"].DBNullToNull()));
 
         /// <summary>True if this query is blocking one or more other sessions (directly or indirectly).</summary>
         private bool IsBlocking() =>
@@ -1654,14 +1663,47 @@ DBCC FREEPROCCACHE({planHandle});";
 
         private Task LoadObjectExecution(TabPage page)
         {
-            var context = Context.DeepCopy();
+            // Not from Context, which is null when the session was opened from a Running Queries grid embedded in
+            // another window, and whose own object (a tree node's) isn't this one anyway.
+            var context = CommonData.GetDBADashContext(InstanceID);
             context.ObjectID = Row.Row.Field<long>("DBADashObjectID");
             context.ObjectName = Row.Row.Field<string>("ObjectName");
-            context.InstanceID = InstanceID;
             context.Type = SQLTreeItem.TreeType.StoredProcedure;
             var oes = new ObjectExecutionSummary { Dock = DockStyle.Fill, UseGlobalTime = false };
             page.Controls.Add(oes);
             oes.SetContext(context);
+            page.ApplyTheme();
+            return Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// The schema history of the object the session was running - whether it changed shortly before a problem is
+        /// often the first question.  Shows a message where the instance has no schema snapshots.
+        /// </summary>
+        private async Task LoadSchemaHistory(TabPage page)
+        {
+            var history = new ObjectSchemaHistory { Dock = DockStyle.Fill };
+            page.Controls.Add(history);
+            await history.LoadAsync(Row.Row.Field<long>("DBADashObjectID"));
+            page.ApplyTheme();
+        }
+
+        /// <summary>
+        /// The statements with the query hash of the one the session was running: the same query in every procedure
+        /// and ad hoc batch it ran in, with its resource usage over time.  The object's own statements are a click
+        /// away on the Object Execution tab's Query Stats link.
+        /// </summary>
+        private Task LoadQueryStats(TabPage page)
+        {
+            var panel = new QueryStatsPanel { Dock = DockStyle.Fill };
+            page.Controls.Add(panel);
+            // An older snapshot (e.g. opened from Killed Sessions) is outside the global window - show the hours around
+            // it instead.  The statement's stats are collected after it completes, so the window runs on past the snapshot.
+            if (SnapshotDateUtc < DateRange.FromUTC || SnapshotDateUtc > DateRange.ToUTC)
+            {
+                panel.SetDateRangeUtc(SnapshotDateUtc.AddHours(-1), SnapshotDateUtc.AddHours(1));
+            }
+            panel.ShowQueryHash(InstanceID, Convert.ToString(Row["query_hash"]));
             page.ApplyTheme();
             return Task.CompletedTask;
         }

@@ -331,13 +331,46 @@ namespace DBADashGUI.CustomReports
     }
 
     /// <summary>
-    /// Opens the Object Execution stats for the module a row names - the link the object name on Slow
-    /// Queries gives, made available to a report grid.
+    /// Opens the detail window for the query hash or plan hash a row holds: its Query Stats, Running Queries and Query
+    /// Store.  The row's database scopes Query Store; Query Stats and Running Queries are read across the instance.
+    /// </summary>
+    public class QueryHashDetailLinkColumnInfo : LinkColumnInfo
+    {
+        /// <summary>The column holding the hash as a 0x hex string.</summary>
+        public string TargetColumn { get; set; }
+
+        [JsonConverter(typeof(StringEnumConverter))]
+        public Performance.QueryHashDetailControl.HashKind Kind { get; set; }
+
+        public string InstanceIDColumn { get; set; } = "InstanceID";
+
+        /// <summary>Optional column naming the database to search Query Store in - every database without one.</summary>
+        public string DatabaseNameColumn { get; set; }
+
+        /// <summary>The tab to open on - if not set, Query Stats, or Query Store where the instance doesn't collect query stats.</summary>
+        public string Tab { get; set; }
+
+        public override void Navigate(DBADashContext context, DataGridViewRow row, int selectedTableIndex, ContainerControl sender)
+        {
+            if (GetValue(row, TargetColumn) is not string hash || string.IsNullOrWhiteSpace(hash)) return;
+            var instanceId = GetValue(row, InstanceIDColumn) as int? ?? context.InstanceID;
+            Performance.DetailForm.OpenHash(Kind, instanceId, hash, GetValue(row, DatabaseNameColumn) as string, tab: Tab);
+        }
+
+        private static object GetValue(DataGridViewRow row, string columnName) =>
+            string.IsNullOrEmpty(columnName) || row?.DataGridView?.Columns.Contains(columnName) != true
+                ? null
+                : row.Cells[columnName].Value.DBNullToNull();
+    }
+
+    /// <summary>
+    /// Opens the object detail window, on its Object Execution tab, for the module a row names - the link the
+    /// object name on Slow Queries gives, made available to a report grid.
     ///
     /// The name may be one, two or three part.  Deadlocks record the module the way the execution stack
-    /// reports it, "Sales.dbo.usp_UpdateOrder", and the parts are what the lookup needs: the stats are
-    /// filtered on the bare object name, and the database part is resolved to the repository's DatabaseID
-    /// so a procedure that shares its name with one in another database is not reported as one object.
+    /// reports it, "Sales.dbo.usp_UpdateOrder", and the parts are what the lookup needs: the database part
+    /// is resolved to the repository's DatabaseID so a procedure that shares its name with one in another
+    /// database is not reported as one object.
     ///
     /// The module's own database is used rather than the process's current database, because an EXEC
     /// across databases leaves the process in the caller's database while the object lives in the other.
@@ -359,55 +392,18 @@ namespace DBADashGUI.CustomReports
         {
             if (GetValue(row, TargetColumn) is not string name || string.IsNullOrWhiteSpace(name)) return;
 
-            var parts = SplitName(name);
-            if (parts.ObjectName == null) return;
-
             var instanceId = GetValue(row, InstanceIDColumn) as int? ?? context.InstanceID;
-            var databaseName = parts.DatabaseName ?? GetValue(row, DatabaseNameColumn) as string;
-            // -1 for a database that isn't in the repository - dropped, renamed, or never collected.  The
-            // object name filter still applies, so the stats open on the instance instead of on nothing.
-            var databaseId = CommonData.GetDatabaseID(instanceId, databaseName);
-
-            var newContext = (DBADashContext)context.Clone();
-            newContext.InstanceID = instanceId;
-            newContext.DatabaseID = databaseId > 0 ? databaseId : 0;
-            newContext.DatabaseName = databaseName;
-            newContext.SchemaName = parts.SchemaName;
-            newContext.ObjectName = parts.ObjectName;
-            // The stats are looked up by name.  An ObjectID carried in from wherever the report was opened
-            // belongs to a different object and would filter this one out entirely.
-            newContext.ObjectID = 0;
-            newContext.Type = SQLTreeItem.TreeType.StoredProcedure;
-
-            var parent = sender?.ParentForm ?? Main.MainFormInstance;
-            if (parent == null) return;
-            Common.ShowObjectExecutionSummary(newContext, parent);
+            // Looked up by name, with the database part of a three part name taking precedence over the column.  An
+            // ObjectID carried in the context from wherever the report was opened belongs to a different object, so
+            // it isn't passed on.
+            Performance.DetailForm.OpenObject(instanceId, databaseName: GetValue(row, DatabaseNameColumn) as string,
+                objectName: name, tab: Performance.ObjectDetailControl.ObjectExecutionTab);
         }
 
         private static object GetValue(DataGridViewRow row, string columnName) =>
             string.IsNullOrEmpty(columnName) || row?.DataGridView?.Columns.Contains(columnName) != true
                 ? null
                 : row.Cells[columnName].Value.DBNullToNull();
-
-        /// <summary>
-        /// Splits a qualified name into its parts, counting back from the object name so that a one or two
-        /// part name is handled the same way.  Brackets are trimmed; a name with a dot inside brackets is
-        /// not something SQL Server reports here.
-        /// </summary>
-        private static (string DatabaseName, string SchemaName, string ObjectName) SplitName(string name)
-        {
-            var parts = name.Split('.');
-
-            string Part(int partsFromEnd)
-            {
-                var index = parts.Length - partsFromEnd;
-                if (index < 0) return null;
-                var part = parts[index].Trim().Trim('[', ']').Trim();
-                return string.IsNullOrWhiteSpace(part) ? null : part;
-            }
-
-            return (Part(3), Part(2), Part(1));
-        }
     }
 
     /// <summary>

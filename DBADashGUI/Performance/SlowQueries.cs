@@ -39,6 +39,13 @@ namespace DBADashGUI
         private string groupBy = "InstanceDisplayName";
         private bool savedLayoutLoaded;
 
+        /// <summary>
+        /// Show one object's slow queries - the bare object name, as the capture records it, with the database from the
+        /// context.  Kept when the filters are reset, as the database is.  Set before <see cref="SetContext"/>.
+        /// </summary>
+        [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+        public string FixedObjectName { get; set; }
+
         public string DBName => CurrentContext.DatabaseName;
         private bool IsDBLevel => !string.IsNullOrEmpty(CurrentContext.DatabaseName);
 
@@ -56,8 +63,18 @@ namespace DBADashGUI
         private DateTime FromLocal = DateTime.MinValue;
         private DateTime ToLocal = DateTime.MaxValue;
 
-        private DateTime From => DateRange.FromUTC > FromLocal ? DateRange.FromUTC : FromLocal;
-        private DateTime To => DateRange.ToUTC < ToLocal ? DateRange.ToUTC : ToLocal;
+        /// <summary>
+        /// A date range owned by the window hosting the control, used instead of the global time filter - e.g. the object
+        /// detail window's own.  The host refreshes the control when it changes.
+        /// </summary>
+        [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+        public DateRangeToolStripMenuItem HostDateRange { get; set; }
+
+        private DateTime RangeFromUtc => HostDateRange?.DateFromUtc ?? DateRange.FromUTC;
+        private DateTime RangeToUtc => HostDateRange?.DateToUtc ?? DateRange.ToUTC;
+
+        private DateTime From => RangeFromUtc > FromLocal ? RangeFromUtc : FromLocal;
+        private DateTime To => RangeToUtc < ToLocal ? RangeToUtc : ToLocal;
 
         private bool IsFiltered() => txtText.Text.Length > 0 ||
                                      txtClient.Text.Length > 0 ||
@@ -171,7 +188,13 @@ namespace DBADashGUI
             rpccompletedToolStripMenuItem.Checked = false;
             sqlbatchcompletedToolStripMenuItem.Checked = false;
             ResetTime();
-            if (IsDBLevel)
+            if (!string.IsNullOrEmpty(FixedObjectName))
+            {
+                // Grouped by object there would be one row.  By app rather than by time: the window is usually an hour
+                txtObject.Text = FixedObjectName;
+                groupBy = "client_app_name";
+            }
+            else if (IsDBLevel)
             {
                 groupBy = "object_name";
             }
@@ -418,7 +441,7 @@ namespace DBADashGUI
         private void TimeCustomToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var top = Convert.ToInt32(tsTop.Tag);
-            var grouping = (int)(DateRange.TimeSpan.TotalMinutes / top);
+            var grouping = (int)(RangeToUtc.Subtract(RangeFromUtc).TotalMinutes / top);
             grouping = grouping switch
             {
                 < 5 => 5,
@@ -929,16 +952,9 @@ namespace DBADashGUI
             }
         }
 
-        private void ShowObject(DataRowView row)
-        {
-            var context = CurrentContext.DeepCopy();
-            context.DatabaseID = row.Row.Field<int>("DatabaseID");
-            context.ObjectName = row.Row.Field<string>("object_name");
-            context.InstanceID = row.Row.Field<int>("InstanceID");
-            context.Type = SQLTreeItem.TreeType.StoredProcedure;
-
-            Common.ShowObjectExecutionSummary(context, ParentForm);
-        }
+        private static void ShowObject(DataRowView row) =>
+            DetailForm.OpenObject(row.Row.Field<int>("InstanceID"), databaseId: row.Row.Field<int>("DatabaseID"),
+                objectName: row.Row.Field<string>("object_name"));
 
         private void Filter_KeyPress(object sender, KeyPressEventArgs e)
         {

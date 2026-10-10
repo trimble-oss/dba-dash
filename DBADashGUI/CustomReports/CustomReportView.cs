@@ -178,6 +178,14 @@ namespace DBADashGUI.CustomReports
 
         private ToolStripButton tsSwitchReport;
 
+        /// <summary>
+        /// Offer the report's <see cref="CustomReport.SwitchTo"/> button.  Off for a host that filters the report on a
+        /// parameter the switch target doesn't declare - the target would open unfiltered, showing far more than the
+        /// host is about.
+        /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool AllowSwitchReport { get; set; } = true;
+
         /// <summary>Straight after Back, so the two ways of moving between reports sit together.</summary>
         private void AddSwitchReportButton()
         {
@@ -189,7 +197,7 @@ namespace DBADashGUI.CustomReports
         private void UpdateSwitchReportButton()
         {
             if (tsSwitchReport == null) return;
-            var target = Report?.SwitchTo;
+            var target = AllowSwitchReport ? Report?.SwitchTo : null;
             tsSwitchReport.Visible = target != null;
             if (target == null) return;
             tsSwitchReport.Text = target.Text;

@@ -325,6 +325,51 @@ namespace DBADashGUI
             return dt;
         }
 
+        /// <summary>
+        /// The objects matching what is known about one - see dbo.DBObjectInfo_Get.  By ObjectID when it's greater than
+        /// zero, otherwise by name on the instance, narrowed by database and schema where they're given.
+        /// </summary>
+        public static async Task<DataTable> GetDBObjectInfoAsync(long objectId, int instanceId, int databaseId, string schemaName, string objectName, CancellationToken token = default)
+        {
+            await using var cn = new SqlConnection(Common.ConnectionString);
+            await using var cmd = new SqlCommand("dbo.DBObjectInfo_Get", cn) { CommandType = CommandType.StoredProcedure };
+            if (objectId > 0)
+            {
+                cmd.Parameters.AddWithValue("ObjectID", objectId);
+            }
+            else
+            {
+                cmd.Parameters.AddWithValue("InstanceID", instanceId);
+                cmd.Parameters.AddWithValue("ObjectName", objectName);
+                cmd.Parameters.AddIfGreaterThanZero("DatabaseID", databaseId);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("SchemaName", schemaName);
+            }
+            await cn.OpenAsync(token);
+            await using var rdr = await cmd.ExecuteReaderAsync(token);
+            var dt = new DataTable();
+            dt.Load(rdr);
+            return dt;
+        }
+
+        /// <summary>
+        /// True if the instance has a collection of the given type that isn't disabled - e.g. "QueryStats", which is only
+        /// collected where it's been configured for the connection.
+        /// </summary>
+        public static async Task<bool> IsCollectionEnabledAsync(int instanceId, string reference, CancellationToken token = default)
+        {
+            await using var cn = new SqlConnection(Common.ConnectionString);
+            await using var cmd = new SqlCommand("dbo.CollectionDates_Get", cn) { CommandType = CommandType.StoredProcedure };
+            cmd.Parameters.AddWithValue("InstanceIDs", instanceId.ToString());
+            cmd.Parameters.AddWithValue("IncludeDisabled", false);
+            await cn.OpenAsync(token);
+            await using var rdr = await cmd.ExecuteReaderAsync(token);
+            while (await rdr.ReadAsync(token))
+            {
+                if (string.Equals(rdr["Reference"] as string, reference, StringComparison.OrdinalIgnoreCase)) return true;
+            }
+            return false;
+        }
+
         public static DataTable GetCounters()
         {
             var key = "Counters";
