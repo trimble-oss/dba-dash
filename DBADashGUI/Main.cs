@@ -185,7 +185,9 @@ namespace DBADashGUI
                             azureDBNode.AddDeadlocksFolder(reports?.InstanceLevelReports);
                         }
                         AzureNode.Nodes.Add(azureDBNode);
-                        azureDBNode.AddDatabaseFolders();
+                        // The query stats reports are the Query Stats tab on this node, as on an instance node
+                        azureDBNode.AddDatabaseFolders(reports?.DatabaseLevelReports
+                            .Where(r => !QueryStatsReportProcedures.Contains(r.ProcedureName)));
                         azureDBNode.AddInstanceActionsContextMenu();
                     }
                     else
@@ -474,6 +476,13 @@ namespace DBADashGUI
             queryStatsSourceContext = nodeContext;
             var context = (DBADashContext)nodeContext.Clone();
             context.Report = queryStatsView.Report;
+            // An Azure database is an instance of its own, so the whole instance is the database.  Filtering on it as
+            // well would only drop what couldn't be put in it - statements whose database didn't resolve - and leave
+            // the figures short of the totals the coverage chart reports.
+            if (context.Type == SQLTreeItem.TreeType.AzureDatabase)
+            {
+                context.DatabaseID = 0;
+            }
             return context;
         }
 
@@ -1549,7 +1558,7 @@ namespace DBADashGUI
                 allowedTabs.AddRange(new[]
                 {
                     tabPerformance, tabAzureSummary, tabAzureDB, tabMetrics,tabDBADashAlerts, tabSlowQueries, tabObjectExecutionSummary,
-                    tabWaits, tabRunningQueries, tabFiles, tabTopQueries, tabQueryStoreForcedPlans, tabTuningRecommendations
+                    tabQueryStats, tabWaits, tabRunningQueries, tabFiles, tabTopQueries, tabQueryStoreForcedPlans, tabTuningRecommendations
                 });
             }
             else if (n.Type == SQLTreeItem.TreeType.Instance)

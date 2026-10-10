@@ -812,7 +812,8 @@ namespace DBADashGUI
         public static IEnumerable<CustomReport> ExcludeDeadlockReports(IEnumerable<CustomReport> reports) =>
             reports.Where(r => !DeadlockReportProcedures.Contains(r.ProcedureName));
 
-        public void AddDatabaseFolders()
+        /// <param name="reports">The reports for the database's Reports folder.  All the database level reports when null.</param>
+        public void AddDatabaseFolders(IEnumerable<CustomReport> reports = null)
         {
             var nTables = NewFolder("Tables", "U", true);
             var nViews = NewFolder("Views", "V", true);
@@ -830,7 +831,7 @@ namespace DBADashGUI
             var nXML = NewFolder("XML Schema Collections", "XSC", true);
             var nSeq = NewFolder("Sequences", "SO", true);
             var nTriggers = NewFolder("Triggers", "TA,TR", true);
-            AddReportsFolder(CustomReports.CustomReports.GetCustomReports().DatabaseLevelReports, new[] { InstanceID });
+            AddReportsFolder(reports ?? CustomReports.CustomReports.GetCustomReports().DatabaseLevelReports, new[] { InstanceID });
             AddCommunityTools();
             AddCustomToolsFolder();
             nTypes.Nodes.Add(nTableTypes);
