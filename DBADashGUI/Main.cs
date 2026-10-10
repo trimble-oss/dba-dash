@@ -1172,7 +1172,21 @@ namespace DBADashGUI
                 dbVersion = DBValidations.GetDBVersion(connectionString);
             }
             var compare = (new Version(appVersion.Major, appVersion.Minor)).CompareTo(new Version(dbVersion.Version.Major, dbVersion.Version.Minor));
-            if (compare < 0)
+            if (compare != 0 && Updates.GuiInstaller.IsInstalled)
+            {
+                // Installed by the setup program: install the repository's version, whether that's newer or older.
+                var outcome = await Updates.GuiInstaller.OfferRepositoryVersionAsync(this, appVersion, dbVersion.Version);
+                if (outcome == Updates.GuiInstaller.Outcome.Installing)
+                {
+                    Application.Exit();
+                    throw new OperationCanceledException();
+                }
+                if (outcome == Updates.GuiInstaller.Outcome.Declined)
+                {
+                    MessageBox.Show($"The version of this GUI app ({appVersion.Major}.{appVersion.Minor}) doesn't match the repository database ({dbVersion.Version.Major}.{dbVersion.Version.Minor}). You might experience issues using the GUI.", "WARNING", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+            else if (compare < 0)
             {
                 var promptUpgrade = MessageBox.Show($"The version of this GUI app ({appVersion.Major}.{appVersion.Minor}) is OLDER than the repository database. Please upgrade to version {dbVersion.Version.Major}.{dbVersion.Version.Minor}{Environment.NewLine}Would you like to run the upgrade script now?", "Upgrade GUI", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                 if (promptUpgrade == DialogResult.Yes)

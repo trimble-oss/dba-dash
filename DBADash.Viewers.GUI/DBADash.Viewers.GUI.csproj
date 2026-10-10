@@ -35,6 +35,7 @@
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" />
     <PackageReference Include="Serilog" />
     <PackageReference Include="SkiaSharp.Views.WindowsForms" />
+    <PackageReference Include="Velopack" />
   </ItemGroup>
 
   <ItemGroup>
