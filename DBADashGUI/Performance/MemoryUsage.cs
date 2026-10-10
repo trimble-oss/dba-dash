@@ -9,7 +9,9 @@ using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Windows.Forms;
+using LiveChartsCore.Measure;
 
 namespace DBADashGUI.Performance
 {
@@ -19,8 +21,30 @@ namespace DBADashGUI.Performance
         {
             InitializeComponent();
             pieChart1.EnableCustomTooltips();
+            // Separate chart from chartClerk so the two views don't share axes/legend/context menu state
+            chartStacked = new LiveChartsCore.SkiaSharpView.WinForms.CartesianChart { Dock = DockStyle.Fill, Visible = false };
+            splitContainer1.Panel1.Controls.Add(chartStacked);
+            chartStacked.BringToFront();
+            foreach (var (measure, alias) in StackedMeasures)
+            {
+                tsStacked.DropDownItems.Add(new ToolStripMenuItem(alias, null, TsStackedMeasure_Click) { Tag = measure });
+            }
             ChartView = ChartViews.Pie; // Update control visibility
         }
+
+        private static readonly (string Measure, string Alias)[] StackedMeasures =
+        {
+            ("pages_kb", "Pages KB"),
+            ("virtual_memory_committed_kb", "Virtual Memory Committed KB"),
+            ("awe_allocated_kb", "AWE Allocated KB"),
+            ("shared_memory_reserved_kb", "Shared Memory Reserved KB"),
+            ("shared_memory_committed_kb", "Shared Memory Committed KB")
+        };
+
+        private readonly LiveChartsCore.SkiaSharpView.WinForms.CartesianChart chartStacked;
+        private string stackedMeasure = "pages_kb";
+        private const int StackedTopClerks = 10;
+        private const int StackedMaxColumns = 65;
 
         private int InstanceID;
 
@@ -29,6 +53,7 @@ namespace DBADashGUI.Performance
         private bool isCountersRefreshed;
         private List<int> MemoryCounters;
         private int dateGrouping;
+        private bool isStackedDateGrouping; // Whether dateGrouping was set for the stacked chart.  Survives switching to the pie chart and back so the line chart doesn't inherit the coarser stacked grouping
         private static readonly int MaxChartPoints = 1000;
         private string selectedClerk;
         private string selectedCounter;
@@ -40,7 +65,8 @@ namespace DBADashGUI.Performance
         {
             Pie,
             PerformanceCounter,
-            MemoryClerk
+            MemoryClerk,
+            Stacked
         }
 
         private ChartViews ChartView
@@ -55,6 +81,10 @@ namespace DBADashGUI.Performance
                 {
                     return ChartViews.PerformanceCounter;
                 }
+                else if (chartStacked.Visible)
+                {
+                    return ChartViews.Stacked;
+                }
                 else
                 {
                     return ChartViews.MemoryClerk;
@@ -65,8 +95,9 @@ namespace DBADashGUI.Performance
                 pieChart1.Visible = value == ChartViews.Pie;
                 performanceCounters1.Visible = value == ChartViews.PerformanceCounter;
                 chartClerk.Visible = value == ChartViews.MemoryClerk;
-                tsDateGroup.Visible = value == ChartViews.MemoryClerk;
-                tsAgg.Visible = value == ChartViews.MemoryClerk;
+                chartStacked.Visible = value == ChartViews.Stacked;
+                tsDateGroup.Visible = value is ChartViews.MemoryClerk or ChartViews.Stacked;
+                tsAgg.Visible = value is ChartViews.MemoryClerk or ChartViews.Stacked;
                 tsPieChart.Enabled = value != ChartViews.Pie;
             }
         }
@@ -92,10 +123,21 @@ namespace DBADashGUI.Performance
         {
             if (Math.Abs(DateRange.DurationMins - previousDurationMins) > 5)
             {
-                dateGrouping = DateHelper.DateGrouping(DateRange.DurationMins, MaxChartPoints);
-                tsDateGroup.Text = DateHelper.DateGroupString(dateGrouping);
-                previousDurationMins = DateRange.DurationMins;
+                ApplyDefaultDateGrouping(ChartView);
             }
+        }
+
+        /// <summary>
+        /// Line chart can show up to MaxChartPoints.  Stacked columns need fewer, wider columns to be readable so use the same grouping as other stacked column charts (Waits etc).
+        /// </summary>
+        private void ApplyDefaultDateGrouping(ChartViews view)
+        {
+            dateGrouping = view == ChartViews.Stacked
+                ? DateHelper.DateGrouping(DateRange.DurationMins, StackedMaxColumns, 1)
+                : DateHelper.DateGrouping(DateRange.DurationMins, MaxChartPoints);
+            isStackedDateGrouping = view == ChartViews.Stacked;
+            tsDateGroup.Text = DateHelper.DateGroupString(dateGrouping);
+            previousDurationMins = DateRange.DurationMins;
         }
 
         private void RefreshCurrentTab()
@@ -130,6 +172,10 @@ namespace DBADashGUI.Performance
             if (ChartView == ChartViews.MemoryClerk)
             {
                 ShowMemoryUsageForClerk();
+            }
+            else if (ChartView == ChartViews.Stacked)
+            {
+                ShowStackedMemoryUsage();
             }
         }
 
@@ -309,6 +355,10 @@ namespace DBADashGUI.Performance
                     SetAggregation(maxToolStripMenuItem);
                     break;
             }
+            if (isStackedDateGrouping)
+            {
+                ApplyDefaultDateGrouping(ChartViews.MemoryClerk);
+            }
             ShowMemoryUsageForClerk();
         }
 
@@ -357,6 +407,71 @@ namespace DBADashGUI.Performance
 
             chartClerk.AddDataTable(dt, columns, "SnapshotDate", false);
             tsAgg.Enabled = dateGrouping > 0;
+        }
+
+        private void ShowStackedMemoryUsage()
+        {
+            ChartView = ChartViews.Stacked;
+            foreach (ToolStripMenuItem item in tsStacked.DropDownItems)
+            {
+                item.Checked = (string)item.Tag == stackedMeasure;
+            }
+
+            var dt = GetMemoryClerkUsageStacked(dateGrouping, tsAgg.Text, stackedMeasure);
+            var points = dt.AsEnumerable().Select(r => r["SnapshotDate"]).Distinct().Count();
+            if (points > MaxChartPoints)
+            {
+                MessageBox.Show("Max Chart points exceeded.  Please select a narrower date range or increase the date grouping.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            var alias = StackedMeasures.First(m => m.Measure == stackedMeasure).Alias;
+            var config = new ChartConfiguration
+            {
+                XColumn = "SnapshotDate",
+                MetricColumn = stackedMeasure,
+                SeriesColumn = "MemoryClerkType",
+                ChartType = ChartTypes.StackedColumn,
+                LegendPosition = LegendPosition.Right,
+                XAxisMin = DateRange.FromUTC.ToAppTimeZone(),
+                XAxisMax = DateRange.ToUTC.ToAppTimeZone(),
+                YAxisLabel = dateGrouping > 0 ? $"{alias} ({tsAgg.Text})" : alias,
+                YAxisFormat = "N0",
+                YAxisMin = 0,
+                DateUnit = dateGrouping > 0 ? TimeSpan.FromMinutes(dateGrouping) : null
+            };
+            ChartHelper.UpdateChart(chartStacked, dt, config);
+            tsAgg.Enabled = dateGrouping > 0;
+        }
+
+        private DataTable GetMemoryClerkUsageStacked(int? dateGrouping, string agg, string measure)
+        {
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.MemoryClerkUsageStacked_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+            cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
+            cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
+            cmd.Parameters.AddWithValue("Mins", dateGrouping);
+            cmd.Parameters.AddWithValue("Agg", agg);
+            cmd.Parameters.AddWithValue("Measure", measure);
+            cmd.Parameters.AddWithValue("Top", StackedTopClerks);
+            var dt = new DataTable();
+            da.Fill(dt);
+            DateHelper.ConvertUTCToAppTimeZone(ref dt);
+            return dt;
+        }
+
+        private void TsStackedMeasure_Click(object sender, EventArgs e)
+        {
+            stackedMeasure = (string)((ToolStripMenuItem)sender).Tag;
+            if (!isStackedDateGrouping)
+            {
+                // Max/Min per clerk summed into a stack doesn't represent total memory at any point in time - Avg does
+                SetAggregation(avgToolStripMenuItem);
+                ApplyDefaultDateGrouping(ChartViews.Stacked);
+            }
+            ShowStackedMemoryUsage();
         }
 
         private DataTable GetMemoryClerkUsage(string clerk, int? dateGrouping, string agg, string measure)
@@ -468,9 +583,10 @@ namespace DBADashGUI.Performance
         {
             var ts = (ToolStripMenuItem)sender;
             dateGrouping = Convert.ToInt32(ts.Tag);
+            isStackedDateGrouping = ChartView == ChartViews.Stacked;
             tsDateGroup.Text = DateHelper.DateGroupString(dateGrouping);
             previousDurationMins = DateRange.DurationMins;
-            ShowMemoryUsageForClerk();
+            RefreshClerkLineChart();
         }
 
         private void PerformanceCounterSummaryGrid1_CounterSelected(object sender, PerformanceCounterSummaryGrid.CounterSelectedEventArgs e)
@@ -492,7 +608,7 @@ namespace DBADashGUI.Performance
         private void TsAGG_Click(object sender, EventArgs e)
         {
             SetAggregation(sender as ToolStripMenuItem);
-            ShowMemoryUsageForClerk();
+            RefreshClerkLineChart();
         }
 
         private void SetAggregation(ToolStripMenuItem menuItem)

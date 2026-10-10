@@ -704,6 +704,7 @@
     <Build Include="dbo\Stored Procedures\MemoryUsage_Upd.sql" />
     <Build Include="dbo\Stored Procedures\MemoryUsage_Get.sql" />
     <Build Include="dbo\Stored Procedures\MemoryClerkUsage_Get.sql" />
+    <Build Include="dbo\Stored Procedures\MemoryClerkUsageStacked_Get.sql" />
     <Build Include="dbo\Stored Procedures\MemoryConfig_Get.sql" />
     <Build Include="dbo\Stored Procedures\MemoryCounters_Get.sql" />
     <Build Include="dbo\Stored Procedures\JobStats_Get.sql" />

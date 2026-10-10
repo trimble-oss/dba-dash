@@ -57,6 +57,7 @@ namespace DBADashGUI.Performance
             minToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             maxToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             tsPieChart = new System.Windows.Forms.ToolStripButton();
+            tsStacked = new System.Windows.Forms.ToolStripDropDownButton();
             tab1 = new ThemedTabControl();
             tabClerks = new System.Windows.Forms.TabPage();
             tabConfig = new System.Windows.Forms.TabPage();
@@ -163,7 +164,7 @@ namespace DBADashGUI.Performance
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsDateGroup, tsAgg, tsPieChart });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, tsDateGroup, tsAgg, tsPieChart, tsStacked });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
@@ -258,6 +259,17 @@ namespace DBADashGUI.Performance
             tsPieChart.Size = new System.Drawing.Size(29, 24);
             tsPieChart.Text = "Pie Chart";
             tsPieChart.Click += TsPieChart_Click;
+            //
+            // tsStacked
+            //
+            tsStacked.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            tsStacked.Image = Properties.Resources.StackedColumnChart_24x;
+            tsStacked.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsStacked.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
+            tsStacked.Name = "tsStacked";
+            tsStacked.Size = new System.Drawing.Size(34, 24);
+            tsStacked.Text = "Stacked Chart";
+            tsStacked.ToolTipText = "Memory usage over time by memory clerk (stacked)";
             // 
             // tab1
             // 
@@ -467,6 +479,7 @@ namespace DBADashGUI.Performance
         private System.Windows.Forms.ToolStripMenuItem minToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem maxToolStripMenuItem;
         private System.Windows.Forms.ToolStripButton tsPieChart;
+        private System.Windows.Forms.ToolStripDropDownButton tsStacked;
         private LiveChartsCore.SkiaSharpView.WinForms.PieChart pieChart1;
     }
 }
