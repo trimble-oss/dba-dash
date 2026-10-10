@@ -266,9 +266,16 @@ JOIN dbo.QueryStatements s WITH (FORCESEEK)
 
     Not a shape's handle, which is a different variant almost every interval.  It is its example's, and only
     changes with its template - below.
+
+    A moved handle clears the label, which was cut from the old handle's text.  It is set again below from
+    the new handle's text, at once if that text is already stored, which is the usual case: text is imported
+    ahead of the statistics.
 */
 UPDATE s
     SET s.LastSeen = @SnapshotDate,
+        s.StatementLabel = CASE WHEN ISNULL(t.sql_handle, s.sql_handle) <> ISNULL(s.sql_handle, 0x) THEN NULL
+                                ELSE s.StatementLabel
+                           END,
         s.sql_handle = ISNULL(t.sql_handle, s.sql_handle),
         s.object_id = ISNULL(t.object_id, s.object_id)
 FROM dbo.QueryStatements s WITH (FORCESEEK (PK_QueryStatements (StatementID)))
@@ -328,6 +335,27 @@ AND NOT EXISTS (SELECT 1
                 FROM dbo.QueryText QT
                 WHERE QT.sql_handle = t.sql_handle)
 GROUP BY t.sql_handle;
+
+/*
+    The label the reports show a statement by, for the statements in this collection that have none yet: new
+    ones, a module whose handle just moved, a shape whose template just arrived, and any whose text has only
+    now been collected.  Worked out here, once, rather than by every report that shows it - see
+    dbo.QueryStatements.StatementLabel.  Limited to what this collection touched, so the cost is per new
+    statement, not per stored one; a statement with no text yet is looked at again each time it is seen
+    until its text arrives.
+*/
+UPDATE s
+    SET s.StatementLabel = ST.Label
+FROM dbo.QueryStatements s WITH (FORCESEEK (PK_QueryStatements (StatementID)))
+JOIN (SELECT DISTINCT StatementID
+      FROM #QueryStats
+      WHERE StatementID IS NOT NULL) t
+    ON t.StatementID = s.StatementID
+CROSS APPLY dbo.QueryStatementText(s.sql_handle, s.statement_start_offset, s.statement_end_offset,
+                                   s.StatementType, s.StatementTemplate) ST
+WHERE s.StatementLabel IS NULL
+AND s.StatementType NOT IN (2, 3, 4)
+AND ST.Label IS NOT NULL;
 
 /*
     The plans the collector fetched, each for the statement and plan shape of the row it came on.  Only where there

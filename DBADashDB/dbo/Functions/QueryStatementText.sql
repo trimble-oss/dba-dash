@@ -11,9 +11,10 @@
 	example itself, so a shape whose template has not arrived yet shows nothing rather than one variant's
 	values - the example is still a click away, labelled as one, through dbo.QueryStatementBatchText_Get.
 
-	Exists as a function because two procedures need the label to agree exactly: the charts report builds a
-	series name from it, and the grid report filters on that name when a chart slice is drilled into.  Two
-	copies of the expression would work until someone changed one of them.
+	The label is not read from here by the reports.  QueryStats_Upd stores it as dbo.QueryStatements.StatementLabel
+	when the text arrives, because flattening the text is slow enough to dominate a report that labels a few
+	thousand statements, and the label only changes when the text does.  The reports read the stored column, so
+	the charts report and the grid report that filters on its series names agree by reading the same value.
 
 	Inline table valued, used through APPLY, so it folds into the calling query rather than being called per
 	row like a scalar function would be - and the batch it looks up is only looked up for the statements that
@@ -35,16 +36,12 @@ SELECT StatementText = F.StatementText,
 			becomes a space, and runs of spaces collapse to one, so a statement written across six indented
 			lines reads as one line of words.  Carriage return, line feed and tab are the three that matter;
 			a tab left in place renders as a missing-glyph box in a chart legend, which is what gave this
-			away.  Then cut to a length that fits a legend or a grouped grid row.
+			away.  Then cut to a length that fits a tooltip or a legend-less chart: sixty characters is most
+			of a SELECT list and none of the FROM or WHERE, so statements that differ only past that point
+			would read identically - which is exactly the case where a reader is trying to tell two apart.
+			The sixty character cut, for a legend or a grouped grid row, is StatementLabelShort on the table.
 	   */
-	   Label = NULLIF(LEFT(F.Flat, 60), '') COLLATE DATABASE_DEFAULT,
-	   /*
-			The same label with room to say something.  Sixty characters is most of a SELECT list and none of
-			the FROM or WHERE, so statements that differ only past that point read identically - which is
-			exactly the case where a reader is trying to tell two of them apart.  Used where the label is read
-			one at a time, in a tooltip or a legend-less chart, rather than in a list of ten.
-	   */
-	   LabelLong = NULLIF(LEFT(F.Flat, 160), '') COLLATE DATABASE_DEFAULT
+	   Label = NULLIF(LEFT(F.Flat, 160), '') COLLATE DATABASE_DEFAULT
 FROM (
 	SELECT T.StatementText,
 		   /*
