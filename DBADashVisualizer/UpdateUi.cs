@@ -70,7 +70,7 @@ namespace DBADashVisualizer
         /// </summary>
         private static UpdateManager CreateInstallerManager()
         {
-            // Setting this to a folder that holds a built feed - what Scripts/Pack-VisualizerInstaller.ps1 writes - or to the
+            // Setting this to a folder that holds a built feed - what Scripts/Pack-Installer.ps1 writes - or to the
             // URL of one, tries an installer release before it is published.
             var feed = Environment.GetEnvironmentVariable("DBADASH_VISUALIZER_UPDATE_FEED");
             if (!string.IsNullOrWhiteSpace(feed)) return new UpdateManager(feed);
@@ -267,49 +267,8 @@ namespace DBADashVisualizer
             var info = _pending;
             if (info == null) return;
 
-            var cancel = TaskDialogButton.Cancel;
-            var bar = new TaskDialogProgressBar { Minimum = 0, Maximum = 100 };
-            using var cancellation = new CancellationTokenSource();
-            var completed = false;
-            Exception failure = null;
-            var ui = SynchronizationContext.Current;
-
-            var page = new TaskDialogPage
-            {
-                Caption = _appName,
-                Heading = $"Downloading version {release.Version}",
-                Text = "The update is installed when you close the app.",
-                ProgressBar = bar,
-                Buttons = { cancel },
-                AllowCancel = true
-            };
-
-            cancel.Click += (_, _) => cancellation.Cancel();
-            page.Created += async (_, _) =>
-            {
-                try
-                {
-                    // Progress is reported from the download's thread, and the dialog belongs to this one.
-                    await _installer.DownloadUpdatesAsync(info,
-                        percent => ui?.Post(_ => bar.Value = Math.Clamp(percent, 0, 100), null),
-                        cancelToken: cancellation.Token);
-                    completed = true;
-                }
-                catch (OperationCanceledException)
-                {
-                }
-                catch (Exception ex)
-                {
-                    failure = ex;
-                }
-                finally
-                {
-                    // Closes the dialog: the button's own answer isn't wanted.
-                    if (!cancellation.IsCancellationRequested) cancel.PerformClick();
-                }
-            };
-
-            Show(page);
+            var completed = UpdateDownloadDialog.Download(Owner, _installer, info, _appName,
+                $"Downloading version {release.Version}", "The update is installed when you close the app.", out var failure);
 
             if (failure != null)
             {

@@ -106,7 +106,7 @@ The Visualizer is released with DBA Dash, at the same version.
 2. **Sign.**  `Scripts/SignRelease.ps1` signs `DBADash*.exe` in each `-unsigned.zip` of the draft release - including
    `DBADashVisualizer.exe` - and uploads `DBADash_Visualizer_<version>.zip` alongside.  The in-app update check only offers a
    release with a zip that isn't `-unsigned`.
-3. **Installer.**  Run `Scripts/Pack-VisualizerInstaller.ps1 -Upload` on the corporate network, after step 2.  It takes the
+3. **Installer.**  Run `Scripts/Pack-Installer.ps1 -App Visualizer -Upload` on the corporate network, after step 2.  It takes the
    Visualizer zip from the draft release, packs it with [Velopack](https://velopack.io) (`vpk`), signs what identifies the app -
    `DBADashVisualizer.exe` if the zip didn't already have it signed, Velopack's launcher stub and updater (`Squirrel.exe`) and the
    setup - through `SignFiles.exe`, checks the signatures, and adds these to the draft release:
@@ -129,7 +129,7 @@ The winget package hasn't been through winget's own review yet.  Install, upgrad
 `winget install --manifest` / `winget upgrade --manifest` against a release on a fork - including upgrading a copy that had
 already updated itself in the meantime - so it's only the real submission and the community index that are untested.
 
-To try the installer channel before publishing, build both versions with `Pack-VisualizerInstaller.ps1 -ZipPath <zip>
+To try the installer channel before publishing, build both versions with `Pack-Installer.ps1 -App Visualizer -ZipPath <zip>
 -SkipSigning`, install the earlier setup, and set the environment variable `DBADASH_VISUALIZER_UPDATE_FEED` to the folder that
 holds the later one's output before starting the app: it then looks there for updates instead of GitHub.
 

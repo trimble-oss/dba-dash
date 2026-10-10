@@ -322,7 +322,8 @@ namespace DBADash.SSMSExtension
                    ?? ExeFromProgIdCommand(VisualizerDeadlockProgIdCommandKey)
                    ?? ExeFromProgIdCommand(GuiQueryPlanProgIdCommandKey)
                    ?? ExeFromProgIdCommand(GuiDeadlockProgIdCommandKey)
-                   ?? DefaultVelopackInstallPath()
+                   ?? DefaultVelopackInstallPath("DBADash_Visualizer", VisualizerExeName)
+                   ?? DefaultVelopackInstallPath("DBADash_GUI", GuiExeName)
                    ?? FindOnPath(VisualizerExeName)
                    ?? FindOnPath(GuiExeName);
         }
@@ -351,14 +352,14 @@ namespace DBADash.SSMSExtension
             return end > 1 ? command.Substring(1, end - 1) : null;
         }
 
-        /// <summary>Matches the packId/mainExe Pack-VisualizerInstaller.ps1 hands to Velopack. The full
-        /// GUI has no equivalent well-known install path - it ships as a zip the user extracts wherever
-        /// they like, so for that one there's only the registry and the remembered/browsed path.</summary>
-        private static string DefaultVelopackInstallPath()
+        /// <summary>Where the setup program installs the app: the packId/mainExe Pack-Installer.ps1
+        /// hands to Velopack. A copy of either app extracted from its zip can be anywhere, so for that
+        /// there's only the registry and the remembered/browsed path.</summary>
+        private static string DefaultVelopackInstallPath(string packId, string exeName)
         {
             var path = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "DBADash_Visualizer", "current", VisualizerExeName);
+                packId, "current", exeName);
             return File.Exists(path) ? path : null;
         }
 

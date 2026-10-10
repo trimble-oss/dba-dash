@@ -18,6 +18,7 @@ using DBADashGUI.DBADashAlerts;
 using LiveChartsCore.SkiaSharpView;
 using Serilog;
 using DBADashGUI.Viewers;
+using Velopack;
 
 namespace DBADashGUI
 {
@@ -29,6 +30,13 @@ namespace DBADashGUI
         [STAThread]
         private static void Main(string[] args)
         {
+            // A copy from the setup program is started by its installer with a switch to install, update or uninstall it.
+            // Velopack handles that and ends the process; for any other start, including a copy from the zip, it does
+            // nothing.  It has to come first.
+            VelopackApp.Build()
+                .OnBeforeUninstallFastCallback(_ => RemoveRegistrations())
+                .Run();
+
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
@@ -158,6 +166,25 @@ namespace DBADashGUI
         /// last window is closed.
         /// </summary>
         private static void RunViewers(IEnumerable<string> files) => ViewerApp.Run(files);
+
+        /// <summary>
+        /// On uninstall, takes out the Open with entries for .sqlplan and .xdl if they are for this copy.  The Start menu
+        /// shortcut is the installer's, and it removes it.
+        /// </summary>
+        private static void RemoveRegistrations()
+        {
+            try
+            {
+                foreach (var association in FileAssociation.All)
+                {
+                    if (association.IsRegisteredToThisCopy) association.Unregister();
+                }
+            }
+            catch (Exception)
+            {
+                // The uninstall carries on regardless: a stale Open with entry is harmless, a failed uninstall is not.
+            }
+        }
 
         private static void SetFileAssociation(bool register)
         {
