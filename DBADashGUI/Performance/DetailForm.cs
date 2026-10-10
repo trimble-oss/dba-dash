@@ -47,10 +47,10 @@ namespace DBADashGUI.Performance
                 : Application.OpenForms.OfType<DetailForm>().LastOrDefault();
 
         /// <summary>
-        /// Show an object.  Pass whatever is known about it: an ObjectID alone is enough, otherwise the instance and the
-        /// object's name, with its database and schema where they're known.
+        /// Show an object.  Pass the instance and whatever else is known about the object: its ObjectID is enough,
+        /// otherwise its name, with its database and schema where they're known.
         /// </summary>
-        /// <param name="instanceId">The instance the object is on.</param>
+        /// <param name="instanceId">The instance the object is on - required.</param>
         /// <param name="objectId">The repository's ObjectID (dbo.DBObjects), or zero if it isn't known.</param>
         /// <param name="databaseId">The repository's DatabaseID, or zero if it isn't known.</param>
         /// <param name="databaseName">The database name, used where <paramref name="databaseId"/> isn't known.</param>
@@ -65,7 +65,8 @@ namespace DBADashGUI.Performance
             string schemaName = null, string objectName = null, string tab = null)
         {
             var parts = SplitName(objectName);
-            if (objectId <= 0 && (instanceId <= 0 || parts.ObjectName == null)) return;
+            // The instance is needed up front - for its name, its messaging and Query Store support - before the lookup
+            if (instanceId <= 0 || (objectId <= 0 && parts.ObjectName == null)) return;
             schemaName = parts.SchemaName ?? schemaName;
             if (parts.DatabaseName != null && !string.Equals(parts.DatabaseName, databaseName, StringComparison.OrdinalIgnoreCase))
             {
@@ -97,21 +98,27 @@ namespace DBADashGUI.Performance
                 tab);
         }
 
-        /// <summary>Bring an item already open to the front, or open it on a tab of the current window.</summary>
+        /// <summary>
+        /// Bring an item already open to the front, or open it on a tab of the current window.  Ctrl+click always opens a
+        /// new window, even for an item that's open - e.g. to look at it over two time windows side by side.
+        /// </summary>
         private static void Open(Func<DetailControlBase, bool> isSame, Func<DetailControlBase> create, string tab)
         {
-            // An item already open anywhere is brought to the front rather than opened a second time
-            foreach (var form in Application.OpenForms.OfType<DetailForm>().Where(f => !f.IsDisposed))
+            var newWindow = (ModifierKeys & Keys.Control) == Keys.Control;
+            if (!newWindow)
             {
-                var open = form.Items.FirstOrDefault(i => isSame(i.Viewer));
-                if (open.Page is null) continue;
-                form.tabs.SelectedTab = open.Page;
-                open.Viewer.SelectTab(tab);
-                form.ShowInFront();
-                return;
+                // An item already open anywhere is brought to the front rather than opened a second time
+                foreach (var form in Application.OpenForms.OfType<DetailForm>().Where(f => !f.IsDisposed))
+                {
+                    var open = form.Items.FirstOrDefault(i => isSame(i.Viewer));
+                    if (open.Page is null) continue;
+                    form.tabs.SelectedTab = open.Page;
+                    open.Viewer.SelectTab(tab);
+                    form.ShowInFront();
+                    return;
+                }
             }
 
-            var newWindow = (ModifierKeys & Keys.Control) == Keys.Control;
             var window = newWindow ? null : Current;
             var viewer = create();
             viewer.Dock = DockStyle.Fill;
@@ -135,19 +142,42 @@ namespace DBADashGUI.Performance
 
         /// <summary>
         /// Splits a qualified name into its parts, counting back from the object name so that a one, two or three part
-        /// name is handled the same way.  Brackets are trimmed.
+        /// name is handled the same way.  A dot inside [brackets] or "quotes" is part of the name rather than a separator,
+        /// so [dbo].[usp.Get] is one schema and one object; the delimiters are removed, and ]] or "" inside them is read as
+        /// one ] or ".
         /// </summary>
         private static (string DatabaseName, string SchemaName, string ObjectName) SplitName(string name)
         {
             if (string.IsNullOrWhiteSpace(name)) return (null, null, null);
-            var parts = name.Split('.');
+            var parts = new List<string>();
+            var part = new System.Text.StringBuilder();
+            char? closing = null; // The delimiter that ends the part being read, while inside one
+            for (var i = 0; i < name.Length; i++)
+            {
+                var c = name[i];
+                if (closing.HasValue)
+                {
+                    if (c != closing) part.Append(c);
+                    else if (i + 1 < name.Length && name[i + 1] == closing) part.Append(name[++i]); // Escaped
+                    else closing = null;
+                }
+                else if (c == '[') closing = ']';
+                else if (c == '"') closing = '"';
+                else if (c == '.')
+                {
+                    parts.Add(part.ToString());
+                    part.Clear();
+                }
+                else part.Append(c);
+            }
+            parts.Add(part.ToString());
 
             string Part(int partsFromEnd)
             {
-                var index = parts.Length - partsFromEnd;
+                var index = parts.Count - partsFromEnd;
                 if (index < 0) return null;
-                var part = parts[index].Trim().Trim('[', ']').Trim();
-                return string.IsNullOrWhiteSpace(part) ? null : part;
+                var value = parts[index].Trim();
+                return value.Length == 0 ? null : value;
             }
 
             return (Part(3), Part(2), Part(1));
