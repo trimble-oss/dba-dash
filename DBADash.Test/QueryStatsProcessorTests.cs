@@ -1139,5 +1139,35 @@ namespace DBADash.Test
             Assert.AreEqual(TimeSpan.FromHours(1), config.GetMaxScheduleInterval(source, CollectionType.QueryStats),
                 "the connection's own schedule wins");
         }
+
+        /// <summary>
+        /// The service config tool sets the top N and the plan cap, and replaces a connection it updates with one built
+        /// from its form - so every other query stats setting has to be carried over, or an update quietly resets it.
+        /// A setting added later fails here until it is copied too.
+        /// </summary>
+        [TestMethod]
+        public void UpdatingAConnectionKeepsTheQueryStatsSettingsTheToolDoesNotShow()
+        {
+            var onForm = new[] { nameof(DBADashSource.QueryStatsTopN), nameof(DBADashSource.QueryStatsPlansPerCollection) };
+            var settings = typeof(DBADashSource).GetProperties()
+                .Where(p => p.Name.StartsWith("QueryStats") && p.PropertyType == typeof(int) && p.CanWrite && !onForm.Contains(p.Name))
+                .ToList();
+            Assert.IsTrue(settings.Count > 0);
+
+            var existing = new DBADashSource("Data Source=.;Integrated Security=True");
+            var value = 12345;
+            foreach (var setting in settings)
+            {
+                setting.SetValue(existing, value++);
+            }
+
+            var updated = new DBADashSource("Data Source=.;Integrated Security=True");
+            updated.CopyQueryStatsTuningFrom(existing);
+
+            foreach (var setting in settings)
+            {
+                Assert.AreEqual(setting.GetValue(existing), setting.GetValue(updated), setting.Name);
+            }
+        }
     }
 }

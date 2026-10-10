@@ -295,6 +295,23 @@ namespace DBADash
         [DefaultValue(0)]
         public int QueryStatsPlanCPUThresholdMs { get; set; }
 
+        /// <summary>
+        /// Take the query stats settings that are only set in the config file from <paramref name="other"/>.  The service
+        /// config tool replaces a connection it updates with one built from its form, which has only the top N and the
+        /// plan cap, so without this an update would put the rest back to their defaults.
+        /// </summary>
+        public void CopyQueryStatsTuningFrom(DBADashSource other)
+        {
+            QueryStatsMaxStatementsPerFamily = other.QueryStatsMaxStatementsPerFamily;
+            QueryStatsMaxPlansPerStatement = other.QueryStatsMaxPlansPerStatement;
+            QueryStatsSingleExecutionThresholdMs = other.QueryStatsSingleExecutionThresholdMs;
+            QueryStatsBaselineMaxEntries = other.QueryStatsBaselineMaxEntries;
+            QueryStatsMaxReadDurationMs = other.QueryStatsMaxReadDurationMs;
+            QueryStatsMaxLookbackMinutes = other.QueryStatsMaxLookbackMinutes;
+            QueryStatsTextHandlesPerCollection = other.QueryStatsTextHandlesPerCollection;
+            QueryStatsPlanCPUThresholdMs = other.QueryStatsPlanCPUThresholdMs;
+        }
+
         /// <summary>True when a top N is configured for the QueryStats collection.  Zero is the off switch,
         /// and the default - see <see cref="QueryStatsTopN"/>.</summary>
         [JsonIgnore]

@@ -94,6 +94,34 @@ namespace DBADashServiceConfig
                 opt.CheckedChanged += (_, _) => UpdateDeadlockOptionsEnabled();
             }
             UpdateDeadlockOptionsEnabled();
+
+            toolTip1.SetToolTip(chkCollectQueryStats,
+                "Statement level resource usage, read from sys.dm_exec_query_stats every collection and diffed against the previous read.\r\n" +
+                "Off by default: reading the plan cache costs in proportion to the size of the cache, so it's a decision to make per connection.");
+            toolTip1.SetToolTip(numQueryStatsTopN, QueryStatsTopNToolTip);
+            toolTip1.SetToolTip(numQueryStatsPlans, QueryStatsPlansToolTip);
+            UpdateQueryStatsOptionsEnabled();
+        }
+
+        private const string QueryStatsTopNToolTip =
+            "The number of query families kept per ranking measure each collection.  Seven measures are ranked and the results combined, so the number of queries stored is usually close to this but can reach seven times it, plus any query kept for one slow execution.\r\n" +
+            "Everything below the cut is rolled up rather than discarded, so the totals for an interval stay correct whatever this is set to.  Raising it buys detail, not accuracy.  50 suits most instances.";
+
+        private const string QueryStatsPlansToolTip =
+            "0 - query stats collects no plans.  Plans can still be fetched from the plan cache from the grid, with messaging enabled.\r\n" +
+            "Any other value - the most plans one collection fetches, for the plan shapes of the queries it stored.  50 by default.\r\n" +
+            "Each plan shape's plan is sent once a day rather than every collection, so once the plans in use have been sent a collection only fetches the ones that are new.  The cap bites after a restart, and the heaviest plans are fetched first.";
+
+        /// <summary>The top N on the Query Stats tab - zero, the off switch, when collection isn't ticked.  See
+        /// <see cref="DBADashSource.QueryStatsTopN"/>.</summary>
+        private int SelectedQueryStatsTopN => chkCollectQueryStats.Checked ? (int)numQueryStatsTopN.Value : 0;
+
+        private void ChkCollectQueryStats_CheckedChanged(object sender, EventArgs e) => UpdateQueryStatsOptionsEnabled();
+
+        private void UpdateQueryStatsOptionsEnabled()
+        {
+            numQueryStatsTopN.Enabled = chkCollectQueryStats.Checked;
+            numQueryStatsPlans.Enabled = chkCollectQueryStats.Checked;
         }
 
         /// <summary>
@@ -342,6 +370,8 @@ namespace DBADashServiceConfig
                 KeepSlowQueryXESessionRunning = chkKeepSlowQuerySessionRunning.Checked,
                 DeadlockXESessionName = SelectedDeadlockXESessionName,
                 BackfillDeadlocksFromSystemHealth = chkBackfillDeadlocks.Checked,
+                QueryStatsTopN = SelectedQueryStatsTopN,
+                QueryStatsPlansPerCollection = (int)numQueryStatsPlans.Value,
                 RunningQueryPlanThreshold = chkCollectPlans.Checked
                     ? new PlanCollectionThreshold()
                     {
@@ -491,6 +521,7 @@ namespace DBADashServiceConfig
                                 // would also rebuild the event file session for no reason.
                                 src.SlowQueryEventFileMaxSizeMB = existingConnection.SlowQueryEventFileMaxSizeMB;
                                 src.SlowQueryEventFileMaxRolloverFiles = existingConnection.SlowQueryEventFileMaxRolloverFiles;
+                                src.CopyQueryStatsTuningFrom(existingConnection);
                                 hasUpdateApproval = true;
                             }
                             else
@@ -1841,6 +1872,11 @@ namespace DBADashServiceConfig
                 chkSlowQueryThreshold.Checked = (src.SlowQueryThresholdMs != -1);
                 SelectedDeadlockXESessionName = src.DeadlockXESessionName;
                 chkBackfillDeadlocks.Checked = src.BackfillDeadlocksFromSystemHealth;
+                chkCollectQueryStats.Checked = src.IsQueryStatsCollectionEnabled;
+                numQueryStatsTopN.Value = src.IsQueryStatsCollectionEnabled
+                    ? Math.Clamp(src.QueryStatsTopN, (int)numQueryStatsTopN.Minimum, (int)numQueryStatsTopN.Maximum)
+                    : 50;
+                numQueryStatsPlans.Value = Math.Clamp(src.QueryStatsPlansPerCollection, (int)numQueryStatsPlans.Minimum, (int)numQueryStatsPlans.Maximum);
                 chkScriptJobs.Checked = src.ScriptAgentJobs;
                 numSlowQueryThreshold.Value = chkSlowQueryThreshold.Checked ? src.SlowQueryThresholdMs : 0;
 
@@ -3950,6 +3986,46 @@ namespace DBADashServiceConfig
             MessageBox.Show(
                 $"Deadlock configuration applied to {applied} connection(s).",
                 "Apply Deadlock Configuration", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void ApplyQueryStatsConfigToAll(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            //  Not files or S3 paths: the collection reads the plan cache, so only a SQL connection has one
+            var sqlSources = collectionConfig?.SourceConnections?
+                .Where(src => src.SourceConnection is { Type: ConnectionType.SQL })
+                .ToList();
+            if (sqlSources is not { Count: > 0 })
+            {
+                MessageBox.Show("There are no SQL source connections to apply the query stats configuration to.",
+                    "Apply Query Stats Configuration", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            var topN = SelectedQueryStatsTopN;
+            var plans = (int)numQueryStatsPlans.Value;
+            var description = topN > 0
+                ? $"Collect query stats with a top N of {topN} and up to {plans} plans per collection"
+                : "Switch query stats collection off";
+
+            if (MessageBox.Show(
+                    $"{description} for all {sqlSources.Count} existing SQL source connection(s)?",
+                    "Apply Query Stats Configuration", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+            {
+                return;
+            }
+
+            foreach (var src in sqlSources)
+            {
+                src.QueryStatsTopN = topN;
+                src.QueryStatsPlansPerCollection = plans;
+            }
+
+            SetJson();
+            dgvConnections.Refresh();
+
+            MessageBox.Show(
+                $"Query stats configuration applied to {sqlSources.Count} connection(s).",
+                "Apply Query Stats Configuration", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         /// <summary>

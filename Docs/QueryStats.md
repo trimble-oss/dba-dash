@@ -64,7 +64,7 @@ The plan cache only holds cumulative counters, per cached plan, per statement, s
 
 ## Turning it on
 
-The collection is off by default. Setting **Query Stats Top N** for a connection in the service config tool (`QueryStatsTopN`) switches it on. Reading `sys.dm_exec_query_stats` walks the plan cache, so its cost depends on the size of that cache rather than on anything the query can filter. That is a decision to make per connection rather than impose on every upgrade.
+The collection is off by default. Setting a top N (`QueryStatsTopN`) switches it on: in the service config tool, on the **Query Stats** tab when adding connections (with a link there to apply it to every existing connection), or per connection in the **Query Stats Top N** column of the grid. Reading `sys.dm_exec_query_stats` walks the plan cache, so its cost depends on the size of that cache rather than on anything the query can filter. That is a decision to make per connection rather than impose on every upgrade.
 
 The default schedule is every 5 minutes (`CollectionSchedule`), not on service start. As for other collections, its collection dates thresholds default to ones derived from the schedule it runs on.
 
@@ -317,7 +317,7 @@ A stacked column chart of a measure (CPU, duration, executions, reads or writes)
 
 ## Configuration reference
 
-Per connection, on `DBADashSource` (service config file). Only `QueryStatsTopN` and `QueryStatsPlansPerCollection` are in the service config tool's grid.
+Per connection, on `DBADashSource` (service config file). Only `QueryStatsTopN` and `QueryStatsPlansPerCollection` are in the service config tool, on the **Query Stats** tab and in the grid. The rest are kept when the tool updates a connection.
 
 | Setting | Default | Meaning |
 |---|---|---|

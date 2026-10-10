@@ -34,6 +34,7 @@ namespace DBADashServiceConfig
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ServiceConfig));
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             errorProvider1 = new System.Windows.Forms.ErrorProvider(components);
             bttnSave = new System.Windows.Forms.Button();
             label5 = new System.Windows.Forms.Label();
@@ -198,6 +199,14 @@ namespace DBADashServiceConfig
             lnkApplyDeadlockConfigurationToAll = new System.Windows.Forms.LinkLabel();
             txtDeadlockSessionName = new System.Windows.Forms.TextBox();
             optDisableDeadlock = new System.Windows.Forms.RadioButton();
+            tabQueryStats = new System.Windows.Forms.TabPage();
+            lnkApplyQueryStatsConfigurationToAll = new System.Windows.Forms.LinkLabel();
+            lblQueryStatsNote = new System.Windows.Forms.Label();
+            numQueryStatsPlans = new System.Windows.Forms.NumericUpDown();
+            lblQueryStatsPlans = new System.Windows.Forms.Label();
+            numQueryStatsTopN = new System.Windows.Forms.NumericUpDown();
+            lblQueryStatsTopN = new System.Windows.Forms.Label();
+            chkCollectQueryStats = new System.Windows.Forms.CheckBox();
             bttnAdd = new System.Windows.Forms.Button();
             groupBox1 = new System.Windows.Forms.GroupBox();
             bttnPermissionsHelper = new System.Windows.Forms.Button();
@@ -255,6 +264,9 @@ namespace DBADashServiceConfig
             grpRunningQueryThreshold.SuspendLayout();
             tabAddConnectionOther.SuspendLayout();
             tabDeadlocks.SuspendLayout();
+            tabQueryStats.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)numQueryStatsPlans).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)numQueryStatsTopN).BeginInit();
             groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvConnections).BeginInit();
             tabDest.SuspendLayout();
@@ -903,7 +915,7 @@ namespace DBADashServiceConfig
             chkBackfillDeadlocks.CheckState = System.Windows.Forms.CheckState.Checked;
             chkBackfillDeadlocks.Location = new System.Drawing.Point(23, 142);
             chkBackfillDeadlocks.Name = "chkBackfillDeadlocks";
-            chkBackfillDeadlocks.Size = new System.Drawing.Size(328, 24);
+            chkBackfillDeadlocks.Size = new System.Drawing.Size(257, 24);
             chkBackfillDeadlocks.TabIndex = 5;
             chkBackfillDeadlocks.Text = "Backfill history from system health";
             toolTip1.SetToolTip(chkBackfillDeadlocks, "After the first collection, read the system_health session once in the background for the deadlocks from before the dedicated session started.  Later collections use the dedicated session only.");
@@ -1658,6 +1670,7 @@ namespace DBADashServiceConfig
             tabSrcOptions.Controls.Add(tabRunningQueries);
             tabSrcOptions.Controls.Add(tabAddConnectionOther);
             tabSrcOptions.Controls.Add(tabDeadlocks);
+            tabSrcOptions.Controls.Add(tabQueryStats);
             tabSrcOptions.DrawMode = System.Windows.Forms.TabDrawMode.OwnerDrawFixed;
             tabSrcOptions.Location = new System.Drawing.Point(16, 27);
             tabSrcOptions.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
@@ -1808,7 +1821,7 @@ namespace DBADashServiceConfig
             lblSlowQueryCaptureMode.AutoSize = true;
             lblSlowQueryCaptureMode.Location = new System.Drawing.Point(620, 8);
             lblSlowQueryCaptureMode.Name = "lblSlowQueryCaptureMode";
-            lblSlowQueryCaptureMode.Size = new System.Drawing.Size(103, 20);
+            lblSlowQueryCaptureMode.Size = new System.Drawing.Size(107, 20);
             lblSlowQueryCaptureMode.TabIndex = 19;
             lblSlowQueryCaptureMode.Text = "Capture mode:";
             // 
@@ -1828,7 +1841,7 @@ namespace DBADashServiceConfig
             lblSlowQueryXESessionName.AutoSize = true;
             lblSlowQueryXESessionName.Location = new System.Drawing.Point(620, 41);
             lblSlowQueryXESessionName.Name = "lblSlowQueryXESessionName";
-            lblSlowQueryXESessionName.Size = new System.Drawing.Size(111, 20);
+            lblSlowQueryXESessionName.Size = new System.Drawing.Size(102, 20);
             lblSlowQueryXESessionName.TabIndex = 21;
             lblSlowQueryXESessionName.Text = "Session name:";
             // 
@@ -1847,7 +1860,7 @@ namespace DBADashServiceConfig
             chkKeepSlowQuerySessionRunning.Location = new System.Drawing.Point(620, 71);
             chkKeepSlowQuerySessionRunning.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             chkKeepSlowQuerySessionRunning.Name = "chkKeepSlowQuerySessionRunning";
-            chkKeepSlowQuerySessionRunning.Size = new System.Drawing.Size(321, 24);
+            chkKeepSlowQuerySessionRunning.Size = new System.Drawing.Size(297, 24);
             chkKeepSlowQuerySessionRunning.TabIndex = 23;
             chkKeepSlowQuerySessionRunning.Text = "Keep session running when service stops";
             chkKeepSlowQuerySessionRunning.UseVisualStyleBackColor = true;
@@ -2125,7 +2138,7 @@ namespace DBADashServiceConfig
             // 
             lnkApplyDeadlockConfigurationToAll.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
             lnkApplyDeadlockConfigurationToAll.AutoSize = true;
-            lnkApplyDeadlockConfigurationToAll.Location = new System.Drawing.Point(671, 20);
+            lnkApplyDeadlockConfigurationToAll.Location = new System.Drawing.Point(650, 17);
             lnkApplyDeadlockConfigurationToAll.Name = "lnkApplyDeadlockConfigurationToAll";
             lnkApplyDeadlockConfigurationToAll.Size = new System.Drawing.Size(382, 20);
             lnkApplyDeadlockConfigurationToAll.TabIndex = 6;
@@ -2151,6 +2164,94 @@ namespace DBADashServiceConfig
             optDisableDeadlock.TabStop = true;
             optDisableDeadlock.Text = "Disable Capture";
             optDisableDeadlock.UseVisualStyleBackColor = true;
+            // 
+            // tabQueryStats
+            // 
+            tabQueryStats.Controls.Add(lnkApplyQueryStatsConfigurationToAll);
+            tabQueryStats.Controls.Add(lblQueryStatsNote);
+            tabQueryStats.Controls.Add(numQueryStatsPlans);
+            tabQueryStats.Controls.Add(lblQueryStatsPlans);
+            tabQueryStats.Controls.Add(numQueryStatsTopN);
+            tabQueryStats.Controls.Add(lblQueryStatsTopN);
+            tabQueryStats.Controls.Add(chkCollectQueryStats);
+            tabQueryStats.Location = new System.Drawing.Point(4, 39);
+            tabQueryStats.Name = "tabQueryStats";
+            tabQueryStats.Padding = new System.Windows.Forms.Padding(3);
+            tabQueryStats.Size = new System.Drawing.Size(1059, 178);
+            tabQueryStats.TabIndex = 6;
+            tabQueryStats.Text = "Query Stats";
+            tabQueryStats.UseVisualStyleBackColor = true;
+            // 
+            // lnkApplyQueryStatsConfigurationToAll
+            // 
+            lnkApplyQueryStatsConfigurationToAll.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            lnkApplyQueryStatsConfigurationToAll.AutoSize = true;
+            lnkApplyQueryStatsConfigurationToAll.Location = new System.Drawing.Point(650, 17);
+            lnkApplyQueryStatsConfigurationToAll.Name = "lnkApplyQueryStatsConfigurationToAll";
+            lnkApplyQueryStatsConfigurationToAll.Size = new System.Drawing.Size(392, 20);
+            lnkApplyQueryStatsConfigurationToAll.TabIndex = 6;
+            lnkApplyQueryStatsConfigurationToAll.TabStop = true;
+            lnkApplyQueryStatsConfigurationToAll.Text = "Apply query stats configuration to all existing connections";
+            lnkApplyQueryStatsConfigurationToAll.LinkClicked += ApplyQueryStatsConfigToAll;
+            // 
+            // lblQueryStatsNote
+            // 
+            lblQueryStatsNote.AutoSize = true;
+            lblQueryStatsNote.Location = new System.Drawing.Point(23, 132);
+            lblQueryStatsNote.Name = "lblQueryStatsNote";
+            lblQueryStatsNote.Size = new System.Drawing.Size(692, 20);
+            lblQueryStatsNote.TabIndex = 5;
+            lblQueryStatsNote.Text = "Totals are correct at any Top N - queries below the cut are rolled up.  Raising it adds detail and storage.";
+            // 
+            // numQueryStatsPlans
+            // 
+            numQueryStatsPlans.Enabled = false;
+            numQueryStatsPlans.Location = new System.Drawing.Point(230, 90);
+            numQueryStatsPlans.Maximum = new decimal(new int[] { 10000, 0, 0, 0 });
+            numQueryStatsPlans.Name = "numQueryStatsPlans";
+            numQueryStatsPlans.Size = new System.Drawing.Size(100, 27);
+            numQueryStatsPlans.TabIndex = 4;
+            numQueryStatsPlans.Value = new decimal(new int[] { 50, 0, 0, 0 });
+            // 
+            // lblQueryStatsPlans
+            // 
+            lblQueryStatsPlans.AutoSize = true;
+            lblQueryStatsPlans.Location = new System.Drawing.Point(43, 92);
+            lblQueryStatsPlans.Name = "lblQueryStatsPlans";
+            lblQueryStatsPlans.Size = new System.Drawing.Size(141, 20);
+            lblQueryStatsPlans.TabIndex = 3;
+            lblQueryStatsPlans.Text = "Plans per collection:";
+            // 
+            // numQueryStatsTopN
+            // 
+            numQueryStatsTopN.Enabled = false;
+            numQueryStatsTopN.Location = new System.Drawing.Point(230, 54);
+            numQueryStatsTopN.Maximum = new decimal(new int[] { 10000, 0, 0, 0 });
+            numQueryStatsTopN.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            numQueryStatsTopN.Name = "numQueryStatsTopN";
+            numQueryStatsTopN.Size = new System.Drawing.Size(100, 27);
+            numQueryStatsTopN.TabIndex = 2;
+            numQueryStatsTopN.Value = new decimal(new int[] { 50, 0, 0, 0 });
+            // 
+            // lblQueryStatsTopN
+            // 
+            lblQueryStatsTopN.AutoSize = true;
+            lblQueryStatsTopN.Location = new System.Drawing.Point(43, 56);
+            lblQueryStatsTopN.Name = "lblQueryStatsTopN";
+            lblQueryStatsTopN.Size = new System.Drawing.Size(52, 20);
+            lblQueryStatsTopN.TabIndex = 1;
+            lblQueryStatsTopN.Text = "Top N:";
+            // 
+            // chkCollectQueryStats
+            // 
+            chkCollectQueryStats.AutoSize = true;
+            chkCollectQueryStats.Location = new System.Drawing.Point(23, 16);
+            chkCollectQueryStats.Name = "chkCollectQueryStats";
+            chkCollectQueryStats.Size = new System.Drawing.Size(406, 24);
+            chkCollectQueryStats.TabIndex = 0;
+            chkCollectQueryStats.Text = "Collect query stats (statement level, from the plan cache)";
+            chkCollectQueryStats.UseVisualStyleBackColor = true;
+            chkCollectQueryStats.CheckedChanged += ChkCollectQueryStats_CheckedChanged;
             // 
             // bttnAdd
             // 
@@ -2217,6 +2318,7 @@ namespace DBADashServiceConfig
             // dgvConnections
             // 
             dgvConnections.AllowUserToAddRows = false;
+            dgvConnections.AllowUserToOrderColumns = true;
             dgvConnections.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             dgvConnections.BackgroundColor = System.Drawing.Color.White;
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
@@ -2236,9 +2338,18 @@ namespace DBADashServiceConfig
             dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
             dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
             dgvConnections.DefaultCellStyle = dataGridViewCellStyle2;
+            dgvConnections.EnableHeadersVisualStyles = false;
             dgvConnections.Location = new System.Drawing.Point(16, 27);
             dgvConnections.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             dgvConnections.Name = "dgvConnections";
+            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle3.BackColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle3.Font = new System.Drawing.Font("Segoe UI", 9F);
+            dataGridViewCellStyle3.ForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
+            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.Color.FromArgb(255, 255, 255);
+            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dgvConnections.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
             dgvConnections.RowHeadersWidth = 51;
             dgvConnections.Size = new System.Drawing.Size(1067, 308);
             dgvConnections.TabIndex = 23;
@@ -2561,6 +2672,10 @@ namespace DBADashServiceConfig
             tabAddConnectionOther.PerformLayout();
             tabDeadlocks.ResumeLayout(false);
             tabDeadlocks.PerformLayout();
+            tabQueryStats.ResumeLayout(false);
+            tabQueryStats.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)numQueryStatsPlans).EndInit();
+            ((System.ComponentModel.ISupportInitialize)numQueryStatsTopN).EndInit();
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)dgvConnections).EndInit();
@@ -2767,6 +2882,14 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.RadioButton optCustomDeadlockSession;
         private System.Windows.Forms.RadioButton optSystemHealthDeadlock;
         private System.Windows.Forms.LinkLabel lnkApplyDeadlockConfigurationToAll;
+        private System.Windows.Forms.TabPage tabQueryStats;
+        private System.Windows.Forms.CheckBox chkCollectQueryStats;
+        private System.Windows.Forms.Label lblQueryStatsTopN;
+        private System.Windows.Forms.NumericUpDown numQueryStatsTopN;
+        private System.Windows.Forms.Label lblQueryStatsPlans;
+        private System.Windows.Forms.NumericUpDown numQueryStatsPlans;
+        private System.Windows.Forms.Label lblQueryStatsNote;
+        private System.Windows.Forms.LinkLabel lnkApplyQueryStatsConfigurationToAll;
     }
 }
 
