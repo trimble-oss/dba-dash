@@ -953,8 +953,9 @@ namespace DBADashGUI
         }
 
         private static void ShowObject(DataRowView row) =>
+            // The name as well as the id, so the database still scopes the tabs if the object isn't in the repository
             DetailForm.OpenObject(row.Row.Field<int>("InstanceID"), databaseId: row.Row.Field<int>("DatabaseID"),
-                objectName: row.Row.Field<string>("object_name"));
+                databaseName: row.Row.Field<string>("DatabaseName"), objectName: row.Row.Field<string>("object_name"));
 
         private void Filter_KeyPress(object sender, KeyPressEventArgs e)
         {
