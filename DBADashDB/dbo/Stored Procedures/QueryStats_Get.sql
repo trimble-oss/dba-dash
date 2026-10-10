@@ -326,16 +326,11 @@ WHERE (@DatabaseID IS NULL
        OR S.DatabaseID = @DatabaseID)
 AND (@ExcludeRollups = 0 OR S.StatementType NOT IN (2, 3, 4))
 /*  Matched against the object and against the statement label, because a chart series is named by whichever
-    of the two it has - see the @ObjectName comment above.  The label is cut from the batch text, so it is only
-    worked out when a drill-down asks for it, and then once per statement and plan rather than per interval. */
+    of the two it has - see the @ObjectName comment above.  The stored short label, which is the column the chart
+    names the series from, so the two cannot disagree about where the label was cut. */
 AND (@ObjectName IS NULL
      OR S.SchemaName + '.' + S.ObjectName = @ObjectName
-     OR EXISTS (SELECT 1
-                FROM dbo.QueryStatements L
-                CROSS APPLY dbo.QueryStatementText(L.sql_handle, L.statement_start_offset, L.statement_end_offset,
-                                                   L.StatementType, L.StatementTemplate) ST
-                WHERE L.StatementID = S.StatementID
-                AND ST.Label = @ObjectName))
+     OR S.StatementLabelShort = @ObjectName)
 OPTION (RECOMPILE);
 
 SELECT InstanceID,

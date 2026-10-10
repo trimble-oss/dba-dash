@@ -50,6 +50,18 @@ CREATE TABLE dbo.QueryStatements (
         other type, which is shown as its own text.
     */
     StatementTemplate NVARCHAR(MAX) NULL,
+    /*
+        The statement as a single line of words, cut to fit a tooltip - see dbo.QueryStatementText, which is the
+        one place it is worked out.  Stored rather than worked out by the reports because working it out means
+        cutting the statement from its batch and flattening it, which is slow on long text and was most of the
+        cost of the charts report - for a label that only changes when the text does.  Set by QueryStats_Upd
+        once the text is there, and cleared there when a module's handle moves, so it follows the text.  Null
+        until then, and for the rollups, which have no text.
+    */
+    StatementLabel NVARCHAR(160) NULL,
+    /*  The same label cut to fit a legend, and the value a chart slice drills into the grid with.  Computed so
+        the chart that makes it and the grid that filters on it cannot disagree about where to cut. */
+    StatementLabelShort AS CONVERT(NVARCHAR(60), LEFT(StatementLabel, 60)),
     CONSTRAINT PK_QueryStatements PRIMARY KEY CLUSTERED (StatementID ASC),
     CONSTRAINT UQ_QueryStatements_InstanceID_StatementKey UNIQUE (InstanceID ASC, StatementKey ASC),
     CONSTRAINT FK_QueryStatements_Instances FOREIGN KEY (InstanceID) REFERENCES dbo.Instances (InstanceID),
