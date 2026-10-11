@@ -40,7 +40,8 @@ namespace DBADashGUI.Viewers
 
         public bool CanShowQueryStore => CanLookupPlans;
 
-        public bool CanShowQueryStoreForHash => CanLookupPlans;
+        /// <summary>The detail window reads Query Stats from the repository, so it only needs the instance.</summary>
+        public bool CanShowHashDetail => _context is { InstanceID: > 0 };
 
         public void ShowQueryStore(string databaseName, string objectName)
         {
@@ -56,22 +57,22 @@ namespace DBADashGUI.Viewers
         }
 
         /// <summary>
-        /// The plan doesn't say which database it ran in, so this searches the database the viewer was opened for where
-        /// the context has one (Running Queries passes the session's database), and every database otherwise.
+        /// Opens the detail window for the hash: its Query Stats, Running Queries and Query Store.
+        /// The plan doesn't say which database it ran in, so Query Store is searched in the database the viewer was opened
+        /// for where the context has one (Running Queries passes the session's database), and every database otherwise.
         /// </summary>
-        public void ShowQueryStoreForHash(string queryHash, string queryPlanHash)
+        public void ShowHashDetail(string queryHash, string queryPlanHash)
         {
-            if (_context == null) return;
+            if (!CanShowHashDetail) return;
 
-            var frm = new QueryStoreViewer
+            if (!string.IsNullOrEmpty(queryHash))
             {
-                Context = _context.DeepCopy(),
-                QueryHash = queryHash?.HexStringToByteArray(),
-                PlanHash = queryPlanHash?.HexStringToByteArray()
-            };
-            if (frm.QueryHash == null && frm.PlanHash == null) return;
-
-            frm.ShowSingleInstance();
+                DetailForm.OpenHash(QueryHashDetailControl.HashKind.QueryHash, _context.InstanceID, queryHash, _context.DatabaseName);
+            }
+            else if (!string.IsNullOrEmpty(queryPlanHash))
+            {
+                DetailForm.OpenHash(QueryHashDetailControl.HashKind.PlanHash, _context.InstanceID, queryPlanHash, _context.DatabaseName);
+            }
         }
     }
 }
