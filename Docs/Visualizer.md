@@ -112,7 +112,15 @@ Delete `%LOCALAPPDATA%\DBADash\Visualizer` to remove the settings, whichever way
 
 ## For maintainers
 
-The Visualizer is released with DBA Dash, at the same version.
+The Visualizer is released with DBA Dash, at the same version.  The release is three steps:
+
+- Run the *Tag and Create Release* workflow (step 1 below).
+- Run `Scripts/Complete-Release.ps1` on the corporate network.  It does steps 2 and 3 for the Visualizer, and the same for the
+  GUI installer (see [GUIInstaller.md](GUIInstaller.md#for-maintainers)), against the draft release, then checks that every file
+  the release should have is there and nothing unsigned is left.  Run again, it skips the signing if it's done.
+- Review and publish the draft (step 4), then do winget (step 5).
+
+What each step does, and the scripts to run one on its own:
 
 1. **Build.**  The *Tag and Create Release* workflow runs `Scripts/Publish-Visualizer.ps1 -Unsigned`, which publishes the app,
    removes the debug symbols, checks that nothing that belongs to the rest of DBA Dash (the service, SMO, the AWS SDK...) came
