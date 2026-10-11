@@ -308,17 +308,17 @@ namespace DBADashGUI.QueryPlans
                 _graphControl.RevealOperator(op);
             };
             // Evaluated once, as the deadlock viewer does: it can take a round trip to the repository to answer.
-            if (host is { CanShowQueryStoreForHash: true })
+            if (host is { CanShowHashDetail: true })
             {
-                _properties.ShowQueryStore = (queryHash, planHash) =>
+                _properties.ShowHashDetail = (queryHash, planHash) =>
                 {
                     try
                     {
-                        host.ShowQueryStoreForHash(queryHash, planHash);
+                        host.ShowHashDetail(queryHash, planHash);
                     }
                     catch (Exception ex)
                     {
-                        CommonShared.ShowExceptionDialog(ex, "Error opening Query Store");
+                        CommonShared.ShowExceptionDialog(ex, "Error opening hash detail");
                     }
                 };
             }

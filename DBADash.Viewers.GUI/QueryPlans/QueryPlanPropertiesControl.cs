@@ -206,11 +206,11 @@ namespace DBADashGUI.QueryPlans
         }
 
         /// <summary>
-        /// Opens Query Store for a query hash or a query plan hash (the other null), which makes the statement's hash
+        /// Shows the detail for a query hash or a query plan hash (the other null), which makes the statement's hash
         /// rows links.  Null when the viewer has no instance to look them up on.
         /// </summary>
         [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
-        public Action<string, string> ShowQueryStore { get; set; }
+        public Action<string, string> ShowHashDetail { get; set; }
 
         /// <summary>
         /// Raised when a card's link asks to go to an operator - the one a warning is on, or the one
@@ -322,7 +322,7 @@ namespace DBADashGUI.QueryPlans
                         Title = ViewerTitle(property.Name),
                         FullText = property.ReadableValue,
                         AlwaysLink = property.IsExpression,
-                        Open = QueryStoreLink(property, depth)
+                        Open = HashDetailLink(property, depth)
                     };
 
                 if (hasScript)
@@ -333,7 +333,7 @@ namespace DBADashGUI.QueryPlans
                 else if (InfoAt(index) is { Open: not null })
                 {
                     _grid.Rows[index].Cells[ValueColumnIndex].ToolTipText =
-                        "Click to look this " + property.Name.ToLowerInvariant() + " up in Query Store.";
+                        "Click to show this " + property.Name.ToLowerInvariant() + " in Query Stats, Running Queries and Query Store.";
                 }
 
                 if (property.IsExpression && ShowsExpressionValues(property.Name))
@@ -402,12 +402,12 @@ namespace DBADashGUI.QueryPlans
         }
 
         /// <summary>
-        /// The statement's query hash and query plan hash open Query Store, when the host can show it.  Operators have
+        /// The statement's query hash and query plan hash open their detail, when the host can show it.  Operators have
         /// no hash properties, so only the statement's top level rows are considered.
         /// </summary>
-        private Action QueryStoreLink(PlanProperty property, int depth)
+        private Action HashDetailLink(PlanProperty property, int depth)
         {
-            if (ShowQueryStore is not { } show || depth != 0 || _node?.Operator is not null || string.IsNullOrEmpty(property.Value)) return null;
+            if (ShowHashDetail is not { } show || depth != 0 || _node?.Operator is not null || string.IsNullOrEmpty(property.Value)) return null;
 
             var hash = property.Value;
             return property.Name switch
