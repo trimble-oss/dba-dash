@@ -1250,7 +1250,9 @@ FROM (VALUES('dbo','ObjectExecutionStats',120),
 				('XE','XETraceEvent',30),
 				('dbo','AvailabilityGroupHealthEvents',365),
 				('dbo','LatchStats',120),
-				('dbo','LatchStats_60MIN',730)
+				('dbo','SpinlockStats',120),
+				('dbo','LatchStats_60MIN',730),
+				('dbo','SpinlockStats_60MIN',730)
 				) AS t(SchemaName,TableName,RetentionDays)
 WHERE NOT EXISTS(SELECT 1
 				FROM dbo.DataRetention DR
@@ -1290,6 +1292,34 @@ WHEN MATCHED AND (NULLIF(S.Description, T.Description) IS NOT NULL OR T.Descript
 WHEN NOT MATCHED BY TARGET THEN
 	INSERT(LatchClass,Description)
 	VALUES(S.LatchClass,S.Description)
+WHEN NOT MATCHED BY SOURCE AND T.Description IS NOT NULL THEN
+	UPDATE SET T.Description = NULL;
+
+/*	Descriptions for the spinlocks most often behind spinlock contention.  Other spinlocks are added by
+	dbo.SpinlockStats_Upd as they are collected, with no description.
+	Sources: Microsoft's sys.dm_os_spinlock_stats documentation, the "Diagnose and resolve spinlock contention"
+	whitepaper (SQLCAT) and the Microsoft KB articles referenced.  Most spinlocks are documented only as "Internal use
+	only" - only describe a spinlock where there is a published explanation, and don't guess from the name.  This list
+	is authoritative: descriptions for spinlocks no longer listed here are removed.  */
+MERGE INTO dbo.Spinlock AS T
+USING (VALUES
+	(N'LOCK_HASH',N'Protects the lock manager hash table that holds the locks currently held.  Contention comes from many threads frequently acquiring the same lock - for example, a shared lock on a frequently read row such as reference data.  Spreading out that data, row versioning (optimistic concurrency) and optimized locking can reduce it.  On SQL Server 2008 to 2014, many connections to the same database could also cause contention on DATABASE locks - see KB2926217 (trace flag 1236, the default from SQL Server 2012 SP3 and 2014 SP1).'),
+	(N'SOS_CACHESTORE',N'Synchronizes access to in-memory caches such as the plan cache and the temp table cache.  What contention means depends on which cache is involved.  Microsoft has observed contention from stored procedure calls that are not schema-qualified (each call looks up the user''s default schema) - fully qualify object names and use parameterized queries to reduce the work done per call.'),
+	(N'LOCK_RW_SECURITY_CACHE',N'Protects cache entries for security tokens and access checks (the TokenAndPermUserStore cache).  Large numbers of spins can occur if that cache grows continuously - see the access check cache server configuration options and trace flags 4610 and 4618.  Named SECURITY_CACHE before SQL Server 2016 CU2.'),
+	(N'SECURITY_CACHE',N'Protects cache entries for security tokens and access checks (the TokenAndPermUserStore cache).  Large numbers of spins can occur if that cache grows continuously - see the access check cache server configuration options and trace flags 4610 and 4618.  Renamed to LOCK_RW_SECURITY_CACHE in SQL Server 2016 CU2.'),
+	(N'DBTABLE',N'Controls access to the in-memory structure, one per database, that holds the database properties.  Microsoft has published scalability improvements for SQL Server 2014 and 2016 that optimize the database containment check.'),
+	(N'DP_LIST',N'Controls access to the list of dirty pages for a database using indirect checkpoint (including tempdb from SQL Server 2016).  Known issues are fixed in KB4497928 and KB4040276; trace flag 3468 disables indirect checkpoint for tempdb.'),
+	(N'BACKUP_CTX',N'Protects the list of pages involved in I/O while a database is being backed up.  High spins can occur when long checkpoints or lazy writer activity happen during backups.  Use indirect checkpoint, give the instance enough memory to minimize lazy writer activity, and avoid running too many backups at once.'),
+	(N'LOGCACHE_ACCESS',N'Used by transaction logging (otherwise undocumented).  Severe contention on this spinlock followed by contention on LOGFLUSHQ, with online transaction processing workloads on SQL Server 2019, is a known issue fixed in a cumulative update - see KB4538017.'),
+	(N'LOGFLUSHQ',N'Used by transaction logging (otherwise undocumented).  Contention following contention on LOGCACHE_ACCESS on SQL Server 2019 is a known issue fixed in a cumulative update - see KB4538017.'),
+	(N'SOS_BLOCKALLOCPARTIALLIST',N'Undocumented.  Contention with trace flag 834 (large page allocations for the buffer pool) enabled on SQL Server 2019 is a known issue fixed in a cumulative update - see KB4537710.')
+) AS S(SpinlockName,Description)
+ON T.SpinlockName = S.SpinlockName
+WHEN MATCHED AND (NULLIF(S.Description, T.Description) IS NOT NULL OR T.Description IS NULL) THEN
+	UPDATE SET T.Description = S.Description
+WHEN NOT MATCHED BY TARGET THEN
+	INSERT(SpinlockName,Description)
+	VALUES(S.SpinlockName,S.Description)
 WHEN NOT MATCHED BY SOURCE AND T.Description IS NOT NULL THEN
 	UPDATE SET T.Description = NULL;
 

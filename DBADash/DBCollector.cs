@@ -95,7 +95,8 @@ namespace DBADash
         Deadlocks,
         AGHealthEvents,
         QueryStats,
-        LatchStats
+        LatchStats,
+        SpinlockStats
     }
 
     public enum HostPlatform

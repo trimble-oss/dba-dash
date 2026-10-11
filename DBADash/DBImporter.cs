@@ -396,7 +396,7 @@ namespace DBADash
             "RunningQueries", "QueryText", "QueryPlans", "InternalPerformanceCounters", "MemoryUsage",
             "SessionWaits", "IdentityColumns", "RunningJobs", "TableSize", "ServerServices","ObjectExecutionStatsLegacy",
             "AvailableProcs", "FailedLogins", "RunningQueriesCursors","ResourceGovernorWorkloadGroups", "ResourceGovernorResourcePools",
-            "DatabaseExtendedProperties", "AGHealthEvents", "LatchStats"
+            "DatabaseExtendedProperties", "AGHealthEvents", "LatchStats", "SpinlockStats"
         ];
 
         private async Task UpdateOfflineAsync()

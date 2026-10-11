@@ -1,0 +1,3 @@
+CREATE PARTITION SCHEME [PS_SpinlockStats]
+    AS PARTITION [PF_SpinlockStats]
+    ALL TO ([PRIMARY])
