@@ -284,7 +284,8 @@ namespace DBADashGUI
             XETraceSessions,
             MultiInstanceXE,
             QueryStats,
-            Latches
+            Latches,
+            Spinlocks
         }
 
         private static readonly List<Main.Tabs> InstanceOnlyTabs = new() { Main.Tabs.PerformanceSummary, Tabs.Metrics, Tabs.Waits, Tabs.Memory, Tabs.RunningQueries };
@@ -327,6 +328,7 @@ namespace DBADashGUI
         private TabPage tabPoolsAndGroups;
         private TabPage tabPerformance;
         private TabPage tabLatches;
+        private TabPage tabSpinlocks;
         private TabPage tabDatabaseExtendedProperties;
         private TabPage tabAIAssistant;
         private AIAssistantControl aiAssistantControl;
@@ -431,6 +433,14 @@ namespace DBADashGUI
             {
                 Dock = DockStyle.Fill,
                 Report = LatchStatsReport.Instance,
+                PreventReportOverwrite = true
+            });
+
+            tabSpinlocks = new TabPage("Spinlocks") { Name = Tabs.Spinlocks.TabName() };
+            tabSpinlocks.Controls.Add(new CustomReportView()
+            {
+                Dock = DockStyle.Fill,
+                Report = SpinlockStatsReport.Instance,
                 PreventReportOverwrite = true
             });
 
@@ -557,7 +567,7 @@ namespace DBADashGUI
             (new List<TabPage>()
             {
                 tabPerformanceSummary, tabPerformance, tabSlowQueries, tabAzureDB, tabAzureSummary, tabMetrics,
-                tabObjectExecutionSummary, tabWaits, tabRunningQueries, tabMemory, tabJobStats, tabJobTimeline, tabDrivePerformance, tabTopQueries, tabOfflineInstances, tabPoolsAndGroups, tabLatches
+                tabObjectExecutionSummary, tabWaits, tabRunningQueries, tabMemory, tabJobStats, tabJobTimeline, tabDrivePerformance, tabTopQueries, tabOfflineInstances, tabPoolsAndGroups, tabLatches, tabSpinlocks
             }).Contains(tabs.SelectedTab) || (tabs.SelectedTab == tabCustomReport && (tv1.SelectedNode as SQLTreeItem)?.Report?.TimeFilterSupported == true)
             // The Deadlocks folder's tabs run reports too, and both of them are over a date range.
             || SelectedDeadlockTabReport(tv1.SelectedNode as SQLTreeItem)?.TimeFilterSupported == true
@@ -1602,6 +1612,12 @@ namespace DBADashGUI
                 if (n.Context.HasLatchStats)
                 {
                     allowedTabs.Insert(allowedTabs.IndexOf(tabWaits) + 1, tabLatches);
+                }
+                // Spinlock stats collection is off by default too - shown after Latches (or Waits if Latches isn't shown)
+                if (n.Context.HasSpinlockStats)
+                {
+                    var after = allowedTabs.Contains(tabLatches) ? tabLatches : tabWaits;
+                    allowedTabs.Insert(allowedTabs.IndexOf(after) + 1, tabSpinlocks);
                 }
             }
             else if (n.Type == SQLTreeItem.TreeType.AzureInstance)

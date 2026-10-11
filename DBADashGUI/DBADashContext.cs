@@ -62,6 +62,7 @@ namespace DBADashGUI
         private DatabaseEngineEdition? _engineEdition;
         private bool? _hasResourceGovernorWorkloadGroups;
         private bool? _hasLatchStats;
+        private bool? _hasSpinlockStats;
         private int? _utcOffset;
 
         public bool? HasInstanceMetadata
@@ -152,6 +153,21 @@ namespace DBADashGUI
         }
 
         /// <summary>
+        /// Spinlock stats collection is off by default.  True if it's enabled for the instance or there is data collected from when it was.
+        /// </summary>
+        public bool HasSpinlockStats
+        {
+            get
+            {
+                if (_hasSpinlockStats != null) return _hasSpinlockStats.Value;
+                GetAdditionalInfo();
+                _hasSpinlockStats ??= false;
+
+                return _hasSpinlockStats.Value;
+            }
+        }
+
+        /// <summary>
         /// UTC offset in minutes.  This is used to convert UTC times to local server time or local server time to UTC
         /// The offset is calculated as DATEDIFF(mi, GETDATE(), GETUTCDATE()) on the server.
         /// To convert UTC to local server time, subtract the offset.
@@ -183,6 +199,7 @@ namespace DBADashGUI
             _connectionID = (string)row["ConnectionID"];
             _hasResourceGovernorWorkloadGroups = (bool)row["HasResourceGovernorWorkloadGroups"];
             _hasLatchStats = row.Table.Columns.Contains("HasLatchStats") && row["HasLatchStats"] is true;
+            _hasSpinlockStats = row.Table.Columns.Contains("HasSpinlockStats") && row["HasSpinlockStats"] is true;
             try
             {
                 _productVersion = new Version((string)row["ProductVersion"]);

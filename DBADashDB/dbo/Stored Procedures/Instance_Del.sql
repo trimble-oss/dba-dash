@@ -462,6 +462,8 @@ BEGIN
 
 	EXEC dbo.LatchStats_Del @InstanceID=@InstanceID,@DaysToKeep=0
 
+	EXEC dbo.SpinlockStats_Del @InstanceID=@InstanceID,@DaysToKeep=0
+
 	DELETE dbo.IdentityColumnsHistory 
 	WHERE InstanceID = @InstanceID
 
@@ -475,6 +477,9 @@ BEGIN
 	WHERE InstanceID = @InstanceID
 
 	DELETE Staging.LatchStats
+	WHERE InstanceID = @InstanceID
+
+	DELETE Staging.SpinlockStats
 	WHERE InstanceID = @InstanceID
 
 	DELETE Staging.ObjectExecutionStats

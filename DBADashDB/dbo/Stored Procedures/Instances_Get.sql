@@ -35,6 +35,10 @@ SELECT  I.InstanceID,
 	CASE WHEN EXISTS(SELECT 1 FROM dbo.ScheduleInfo SI WHERE SI.InstanceID = I.InstanceID AND SI.Reference = ''LatchStats'' AND SI.IsEnabled = 1)
 			OR EXISTS(SELECT 1 FROM dbo.LatchStats_60MIN LS WHERE LS.InstanceID = I.InstanceID)
 		THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS HasLatchStats,
+	/* Spinlock stats collection is also off by default - same rule as above. */
+	CASE WHEN EXISTS(SELECT 1 FROM dbo.ScheduleInfo SI WHERE SI.InstanceID = I.InstanceID AND SI.Reference = ''SpinlockStats'' AND SI.IsEnabled = 1)
+			OR EXISTS(SELECT 1 FROM dbo.SpinlockStats_60MIN SS WHERE SS.InstanceID = I.InstanceID)
+		THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS HasSpinlockStats,
 	I.UTCOffset,
 	I.IsReadOnlyReplica
 FROM dbo.InstancesMatchingTags(@TagIDs) I

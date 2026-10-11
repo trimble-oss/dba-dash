@@ -82,6 +82,7 @@ namespace DBADash
         public static string AvailableCounters => GetSqlString("AvailableCounters");
         public static string FailedLogins => GetSqlString("FailedLogins");
         public static string LatchStats => GetSqlString("LatchStats");
+        public static string SpinlockStats => GetSqlString("SpinlockStats");
         public static string HasWorkloadGroups => GetSqlString("HasWorkloadGroups");
     }
 }
