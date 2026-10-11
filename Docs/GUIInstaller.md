@@ -17,12 +17,15 @@ of the machine.  See [Installing for all users](#installing-for-all-users).
 
 ## Updating
 
-The GUI has to be the same version as the repository database.  So an installed GUI doesn't update itself to the latest
-release: it installs the version of the repository it connects to.
+The GUI has to be on the same x.y version as the repository database.  A z release is a bug fix, with no repository changes
+or only compatible ones.  An installed GUI never updates past the repository's x.y.z: it installs the version of the
+repository it connects to, not the latest release.
 
-- When the repository has been upgraded, the GUI offers to update to the repository's version as it connects.  It downloads
-  the update, closes, installs it and starts again.
-- When the GUI is newer than the repository, it offers to install the repository's version in its place.
+- When the repository has been upgraded to a new x.y, the GUI offers to update to the repository's version as it connects.
+  It downloads the update, closes, installs it and starts again.
+- When only z differs, it doesn't ask.  **Upgrade** in the About box installs the repository's version, as long as it is
+  newer than the GUI.
+- When the GUI is on a newer x.y than the repository, it offers to install the repository's version in its place.
 - If there is no installer for the repository's version (an older release, or one without the GUI installer), it says so, and
   the GUI carries on as it is.
 

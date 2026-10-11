@@ -47,6 +47,14 @@ namespace DBADashGUI
             // The plan and deadlock viewers keep their settings with the GUI's, and offer what needs the repository.
             ViewerSettings.Store = new GuiViewerSettingsStore();
             ViewerLauncher.DefaultHost = new DBADashViewerHost();
+            if (Updates.GuiInstaller.IsInstalled)
+            {
+                // Upgrade in the About box installs the repository's version instead of running the upgrade script.
+                About.InstalledUpgrade = async (owner, repositoryVersion) =>
+                    await Updates.GuiInstaller.OfferRepositoryVersionAsync(owner,
+                        System.Reflection.Assembly.GetEntryAssembly().GetName().Version, repositoryVersion)
+                    == Updates.GuiInstaller.Outcome.Installing;
+            }
             ConfigureLogging();
             ConfigureCharts();
             try
