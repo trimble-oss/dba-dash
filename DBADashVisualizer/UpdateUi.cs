@@ -35,6 +35,12 @@ namespace DBADashVisualizer
         /// </summary>
         private readonly bool _installedBySetup;
 
+        /// <summary>
+        /// True for a copy the .msi installed for all users, under Program Files: installing an update asks for administrator
+        /// permission, and updates it for everyone.  Told apart by not being in the user's own LocalAppData.
+        /// </summary>
+        private readonly bool _installedForAllUsers;
+
         /// <summary>The version running - 4.19.0.</summary>
         internal static Version CurrentVersion
         {
@@ -50,6 +56,7 @@ namespace DBADashVisualizer
             _appName = appName;
             _installer = CreateInstallerManager();
             _installedBySetup = _installer.IsInstalled;
+            _installedForAllUsers = _installedBySetup && InstallScope.IsForAllUsers(AppContext.BaseDirectory);
 
             Func<CancellationToken, Task<ReleaseInfo>> getLatest;
             if (_installedBySetup)
@@ -225,7 +232,8 @@ namespace DBADashVisualizer
             notes.Click += (_, _) => Open(release.ReleaseUrl);
 
             var text = viaSetup
-                ? $"You are running {CurrentVersion}.\n\nThe update is downloaded now and installed when you close {_appName}."
+                ? $"You are running {CurrentVersion}.\n\nThe update is downloaded now and installed when you close {_appName}." +
+                  (_installedForAllUsers ? "  " + InstallScope.AdminNote : string.Empty)
                 : $"You are running {CurrentVersion}.\n\nDownload the zip and extract it over this folder to update.";
 
             var page = new TaskDialogPage
@@ -308,9 +316,11 @@ namespace DBADashVisualizer
             var website = new TaskDialogButton("Website");
             var autoCheck = new TaskDialogVerificationCheckBox("Check for updates automatically", _service.AutoCheck);
 
-            var installedNote = _installedBySetup
-                ? "Installed with the setup program - updates are installed for you.\n\n"
-                : string.Empty;
+            var installedNote = _installedForAllUsers
+                ? "Installed for all users - updates are installed for you, with administrator permission.\n\n"
+                : _installedBySetup
+                    ? "Installed with the setup program - updates are installed for you.\n\n"
+                    : string.Empty;
 
             var page = new TaskDialogPage
             {

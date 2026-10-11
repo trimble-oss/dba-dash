@@ -97,6 +97,7 @@ namespace DBADashGUI.Updates
                 return Outcome.Unavailable;
             }
 
+            var adminNote = InstallScope.IsForAllUsers(AppContext.BaseDirectory) ? "  " + InstallScope.AdminNote : string.Empty;
             var install = new TaskDialogButton(downgrade ? $"Install {target}" : "Update Now");
             var notNow = new TaskDialogButton("Not Now");
             var page = new TaskDialogPage
@@ -107,9 +108,9 @@ namespace DBADashGUI.Updates
                     : $"The repository database has been upgraded to {target}",
                 Text = downgrade
                     ? $"You are running {running}, and the repository database is on {target}.  The GUI is designed for the " +
-                      $"repository version it was released with.\n\nInstall {target}?  DBA Dash restarts to install it."
-                    : $"You are running {running}.  The GUI needs to be the same version as the repository database.\n\n" +
-                      "DBA Dash restarts to install the update.",
+                      $"repository version it was released with.\n\nInstall {target}?  DBA Dash restarts to install it." + adminNote
+                    : $"You are running {running}.  The GUI is designed for the repository version it was released with.\n\n" +
+                      "DBA Dash restarts to install the update." + adminNote,
                 Icon = downgrade ? TaskDialogIcon.Warning : TaskDialogIcon.Information,
                 Buttons = { install, notNow },
                 DefaultButton = install,

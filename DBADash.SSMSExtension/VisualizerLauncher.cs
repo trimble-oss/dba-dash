@@ -352,15 +352,43 @@ namespace DBADash.SSMSExtension
             return end > 1 ? command.Substring(1, end - 1) : null;
         }
 
-        /// <summary>Where the setup program installs the app: the packId/mainExe Pack-Installer.ps1
-        /// hands to Velopack. A copy of either app extracted from its zip can be anywhere, so for that
-        /// there's only the registry and the remembered/browsed path.</summary>
+        /// <summary>Where the setup program or .msi installs the app, from the packId/mainExe
+        /// Pack-Installer.ps1 hands to Velopack: under LocalAppData for the user, or - from the .msi, for
+        /// all users - wherever its Installed apps entry says, which is Program Files unless an admin chose
+        /// otherwise. A copy of either app extracted from its zip can be anywhere, so for that there's only
+        /// the registry and the remembered/browsed path.</summary>
         private static string DefaultVelopackInstallPath(string packId, string exeName)
         {
-            var path = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                packId, "current", exeName);
-            return File.Exists(path) ? path : null;
+            var roots = new[]
+            {
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), packId),
+                MsiInstallLocation(RegistryHive.CurrentUser, packId),
+                MsiInstallLocation(RegistryHive.LocalMachine, packId),
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), packId)
+            };
+            foreach (var root in roots)
+            {
+                if (string.IsNullOrEmpty(root)) continue;
+                var path = Path.Combine(root, "current", exeName);
+                if (File.Exists(path)) return path;
+            }
+            return null;
+        }
+
+        /// <summary>The install folder recorded in the Installed apps entry the Velopack .msi writes,
+        /// "MSI:&lt;packId&gt;" - in HKLM for an install for all users, HKCU for one user.</summary>
+        private static string MsiInstallLocation(RegistryHive hive, string packId)
+        {
+            try
+            {
+                using var root = RegistryKey.OpenBaseKey(hive, RegistryView.Registry64);
+                using var key = root.OpenSubKey($@"Software\Microsoft\Windows\CurrentVersion\Uninstall\MSI:{packId}");
+                return key?.GetValue("InstallLocation") as string;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         private static string RememberedPath()

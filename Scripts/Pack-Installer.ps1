@@ -6,6 +6,7 @@
     Turns the app's zip of a draft release into what its installer channel needs.  For the Visualizer:
 
       DBADash_Visualizer_Setup_<version>.exe    the setup program - one click, per user, no elevation
+      DBADash_Visualizer_Setup_<version>.msi    the same, as an .msi that asks whether to install for you or all users
       DBADash_Visualizer-<version>-full.nupkg   the package the updater installs
       DBADash_Visualizer-<version>-delta.nupkg  what changed since the last release, if there was one
       releases.win.json, RELEASES, assets.win.json   the feed the installed app reads to find updates
@@ -45,8 +46,9 @@
 .PARAMETER NoDelta
     Don't look for the previous release to build a delta from.  The first release has none, and it isn't needed: an update
     then downloads the whole package.
-.PARAMETER Msi
-    Also build an .msi, which offers to install for the current user or for all users of the machine.  See Docs/GUIInstaller.md.
+.PARAMETER NoMsi
+    Don't build the .msi.  It is built by default: it offers to install for the current user or for all users of the machine
+    (see Docs/Visualizer.md and Docs/GUIInstaller.md), and takes about a minute more.
 .PARAMETER Upload
     Add the files to the draft release with the GitHub CLI (gh).  Supports -WhatIf.
 .EXAMPLE
@@ -66,7 +68,7 @@ param (
     [string]$SignTool = "C:\Sign\SignFiles.exe",
     [switch]$SkipSigning,
     [switch]$NoDelta,
-    [switch]$Msi,
+    [switch]$NoMsi,
     [switch]$Upload
 )
 
@@ -185,7 +187,7 @@ try {
         "--shortcuts", "StartMenuRoot", "--noPortable", "--yes"
     )
 
-    if ($Msi) {
+    if (-not $NoMsi) {
         # The .msi asks whether to install for the current user (as the setup program does) or for all users of the machine,
         # under Program Files.  An install for all users needs elevation to install, and again to update.
         $packArgs += @("--msi", "--instLocation", "Either")
@@ -219,7 +221,7 @@ try {
     $setup = Join-Path $OutputFolder $setupName
 
     $msiName = $null
-    if ($Msi) {
+    if (-not $NoMsi) {
         $msiFile = Join-Path $OutputFolder "$packId-$channel.msi"
         if (-not (Test-Path $msiFile)) { throw "vpk didn't produce an .msi." }
         $msiName = "$($packId)_Setup_$tag.msi"

@@ -25,6 +25,18 @@ user only, so it needs no administrator rights: no questions, and no windows to 
 your Start menu and to *Installed apps*, and installs the .NET Desktop Runtime if you don't have it.  This is the one that
 updates itself.
 
+**MSI, for all users.**  `DBADash_Visualizer_Setup_<version>.msi`, from the same page, asks whether to install for you only or
+for everyone who uses the machine.  *Just me* is the same as the setup program.  *Everyone* installs under Program Files and
+needs administrator rights.  The app still updates itself, but installing an update asks for administrator permission, and
+updates it for every user.  To install for everyone without the dialogs - from a deployment tool, say:
+
+```
+msiexec /i DBADash_Visualizer_Setup_<version>.msi /qn ALLUSERS=1
+```
+
+Add `VELOPACK_INSTALLDIR="D:\Apps\DBADash_Visualizer"` to install somewhere other than Program Files.  Each user turns on the
+*Open with* entries for themselves, from the Settings menu: they are per user, whichever way the app was installed.
+
 **Zip.**  Download `DBADash_Visualizer_<version>.zip` from the same page and extract it to a folder of your choice.  Run
 `DBADashVisualizer.exe`.
 
@@ -75,6 +87,8 @@ if there is.  What it does about it depends on how you installed it:
 
 - **From the setup program:** choose *Install Update*.  It downloads the update, showing progress, and installs it when you close
   the Visualizer - your windows aren't closed to do it.  Only what changed is downloaded when it can be.
+- **From the MSI, for everyone:** the same, except that installing asks for administrator permission.  The update is for every
+  user of the machine.
 - **From the zip:** choose *Download*, then extract the new zip over the old folder (close the Visualizer first).
 - **With winget:** the same as the setup program, as that is what winget installs.  `winget upgrade Trimble.DBADashVisualizer`
   works as well.
@@ -84,8 +98,9 @@ Updates* in the Settings menu.
 
 ## Uninstall
 
-**Setup program:** uninstall *DBA Dash Visualizer* from *Installed apps*.  That removes the app, its Start menu entry and any
-*Open with* entries it added.
+**Setup program or MSI:** uninstall *DBA Dash Visualizer* from *Installed apps*.  That removes the app, its Start menu entry and
+any *Open with* entries it added for the user uninstalling it.  For an install for everyone, other users' *Open with* entries
+are left behind; they are harmless, and go if the user unticks them before the app is removed.
 
 **Winget:** `winget uninstall Trimble.DBADashVisualizer`, which is the same as uninstalling from *Installed apps*.
 
@@ -109,11 +124,11 @@ The Visualizer is released with DBA Dash, at the same version.
 3. **Installer.**  Run `Scripts/Pack-Installer.ps1 -App Visualizer -Upload` on the corporate network, after step 2.  It takes the
    Visualizer zip from the draft release, packs it with [Velopack](https://velopack.io) (`vpk`), signs what identifies the app -
    `DBADashVisualizer.exe` if the zip didn't already have it signed, Velopack's launcher stub and updater (`Squirrel.exe`) and the
-   setup - through `SignFiles.exe`, checks the signatures, and adds these to the draft release:
-   `DBADash_Visualizer_Setup_<version>.exe`, the `DBADash_Visualizer-<version>-full.nupkg` package (and a `-delta.nupkg` against
+   setup and .msi - through `SignFiles.exe`, checks the signatures, and adds these to the draft release:
+   `DBADash_Visualizer_Setup_<version>.exe`, `DBADash_Visualizer_Setup_<version>.msi` (`-NoMsi` leaves it out), the `DBADash_Visualizer-<version>-full.nupkg` package (and a `-delta.nupkg` against
    the previous release, if there is one), and the feed files `releases.win.json`, `RELEASES` and `assets.win.json` that installed
    copies read to find updates.  Velopack has to do the signing itself, part way through building, and the tool takes about half a
-   minute a file, so it signs only those few files - the whole thing takes around 4 minutes.  Try it out without signing or
+   minute a file, so it signs only those few files - the whole thing takes around 6 minutes.  Try it out without signing or
    uploading using `-ZipPath <zip> -SkipSigning`.
 4. **Publish** the release.  Installed copies find the update from the feed of the latest published release.
 5. **winget.**  Once the release is published, `Scripts/New-WingetManifest.ps1 -Version <version>` downloads the signed setup
