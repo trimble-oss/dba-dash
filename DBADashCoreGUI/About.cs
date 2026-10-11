@@ -102,6 +102,13 @@ namespace DBADashGUI
 
         #endregion Assembly Attribute Accessors
 
+        /// <summary>
+        /// Set by a GUI installed by its setup program, which updates itself to the repository's version rather than by the
+        /// upgrade script.  Offers to install the version passed - the repository's - and returns true when it is being
+        /// installed and the app is closing.
+        /// </summary>
+        public static Func<IWin32Window, Version, Task<bool>> InstalledUpgrade { get; set; }
+
         public Version DBVersion = new();
         public bool IncludePreRelease;
         public bool upgradeAvailable;
@@ -147,6 +154,17 @@ namespace DBADashGUI
                 upgradeIcon = MessageBoxIcon.Warning;
                 upgradeMessage = "The upgrade check hasn't completed yet.\nIf this server doesn't have internet access, an offline upgrade can be performed. See:\nhttps://dbadash.com/upgrades";
 
+                // An installed GUI goes to the repository's version - including a z (bug fix) release - and never past it.
+                // That doesn't need the latest release, so it doesn't wait for GitHub to answer.
+                var installedUpgradeAvailable = InstalledUpgrade != null && ThreePart(DBVersion) > ThreePart(Upgrade.CurrentVersion());
+                if (installedUpgradeAvailable)
+                {
+                    upgradeAvailable = true;
+                    SetFontStyle(lblLatest, FontStyle.Bold);
+                    lblLatest.Text = $"Latest Version (Upgrade to {ThreePart(DBVersion)} Available):";
+                    bttnUpgrade.Enabled = true;
+                }
+
                 Release release;
                 Version releaseVersion;
                 try
@@ -165,6 +183,15 @@ namespace DBADashGUI
                 lnkLatestRelease.Text = release.TagName + preReleaseLabel;
                 _latestReleaseUrl = release.Prerelease ? release.HtmlUrl : Upgrade.LatestVersionLink;
                 _latestReleaseTag = release.TagName;
+                if (InstalledUpgrade != null)
+                {
+                    if (installedUpgradeAvailable) return;
+                    upgradeMessage = Upgrade.IsUpgradeAvailable(release)
+                        ? "An upgrade is available.  Please upgrade the DBA Dash service first."
+                        : "No upgrades are available at this time";
+                    upgradeIcon = Upgrade.IsUpgradeAvailable(release) ? MessageBoxIcon.Warning : MessageBoxIcon.Information;
+                    return;
+                }
                 try
                 {
                     if (Upgrade.IsUpgradeAvailable(release))
@@ -200,6 +227,8 @@ namespace DBADashGUI
             }
         }
 
+        private static Version ThreePart(Version version) => new(version.Major, version.Minor, Math.Max(version.Build, 0));
+
         private static void SetFontStyle(Control control, FontStyle style)
         {
             if (control.Font.Style == style) return;
@@ -228,6 +257,12 @@ namespace DBADashGUI
             if (!upgradeAvailable)
             {
                 MessageBox.Show(upgradeMessage, "Upgrade", MessageBoxButtons.OK, upgradeIcon);
+                return;
+            }
+            if (InstalledUpgrade != null)
+            {
+                // Asks, downloads and installs; the app restarts at the repository's version.
+                if (await InstalledUpgrade(this, DBVersion)) System.Windows.Forms.Application.Exit();
                 return;
             }
             if (MessageBox.Show("Run script to upgrade to latest version of DBA Dash?", "Upgrade", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
