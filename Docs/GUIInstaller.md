@@ -52,8 +52,8 @@ copy.  Your connections and settings are kept in `%APPDATA%\DBADashGUI` and in t
 ## For maintainers
 
 The GUI installer is built from the signed GUI only zip, in the same way as the Visualizer's (see
-[Visualizer.md](Visualizer.md#for-maintainers)), with `Scripts/Pack-Installer.ps1 -App GUI -Upload` after `SignRelease.ps1`.
-It builds the .msi as well unless given `-NoMsi`.
+[Visualizer.md](Visualizer.md#for-maintainers)).  `Scripts/Complete-Release.ps1` does it as part of the release; on its own it's
+`Scripts/Pack-Installer.ps1 -App GUI -Upload`, after `SignRelease.ps1`.  It builds the .msi as well unless given `-NoMsi`.
 
 Every release needs it: an installed GUI reads the feed of the release for its repository's version
 (`https://github.com/trimble-oss/dba-dash/releases/download/<version>/releases.gui.json`), so a release without it can't be

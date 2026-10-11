@@ -21,7 +21,9 @@ param (
     # Pattern to match the executables to sign.  Defaults to "DBADash*.exe" which matches all executables starting with "DBADash".
     [string]$SignPattern = "DBADash*.exe",
     # Remove the original unsigned assets after signing and uploading the new signed assets.
-    [bool]$RemoveUnsigned = $true
+    [bool]$RemoveUnsigned = $true,
+    # The draft release to sign.  Defaults to the latest draft release.
+    [string]$Tag
 )
 
 $ErrorActionPreference = "Stop"
@@ -41,7 +43,7 @@ catch {
     exit 1
 }
 # Find the latest draft release in the repository
-$DraftRelease = gh api repos/$repo/releases | ConvertFrom-Json | Where-Object { $_.draft -eq $true } | Select-Object -First 1
+$DraftRelease = gh api repos/$repo/releases | ConvertFrom-Json | Where-Object { $_.draft -eq $true -and (-not $Tag -or $_.tag_name -eq $Tag) } | Select-Object -First 1
 
 # Check if a draft release was found
 if($null -eq $DraftRelease) {
