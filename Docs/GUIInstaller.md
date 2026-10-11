@@ -10,7 +10,7 @@ comes in, are unchanged.
 it.  It installs for your user only, so it needs no administrator rights.  It adds DBA Dash to your Start menu and to
 *Installed apps*, and installs the .NET Desktop Runtime if you don't have it.
 
-**MSI** (when the release has one).  `DBADash_GUI_Setup_<version>.msi` asks whether to install for you only or for all users
+**MSI.**  `DBADash_GUI_Setup_<version>.msi` asks whether to install for you only or for all users
 of the machine.  See [Installing for all users](#installing-for-all-users).
 
 **Zip.**  `DBADash_GUI_Only_<version>.zip`, extracted to a folder of your choice, as before.
@@ -53,7 +53,7 @@ copy.  Your connections and settings are kept in `%APPDATA%\DBADashGUI` and in t
 
 The GUI installer is built from the signed GUI only zip, in the same way as the Visualizer's (see
 [Visualizer.md](Visualizer.md#for-maintainers)), with `Scripts/Pack-Installer.ps1 -App GUI -Upload` after `SignRelease.ps1`.
-Add `-Msi` to build the .msi as well.
+It builds the .msi as well unless given `-NoMsi`.
 
 Every release needs it: an installed GUI reads the feed of the release for its repository's version
 (`https://github.com/trimble-oss/dba-dash/releases/download/<version>/releases.gui.json`), so a release without it can't be
