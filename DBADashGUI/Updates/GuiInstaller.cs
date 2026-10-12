@@ -97,7 +97,7 @@ namespace DBADashGUI.Updates
                 return Outcome.Unavailable;
             }
 
-            var adminNote = InstallScope.IsForAllUsers(AppContext.BaseDirectory) ? "  " + InstallScope.AdminNote : string.Empty;
+            var adminNote = InstallScope.IsForAllUsers(AppContext.BaseDirectory, manager.AppId) ? "  " + InstallScope.AdminNote : string.Empty;
             var install = new TaskDialogButton(downgrade ? $"Install {target}" : "Update Now");
             var notNow = new TaskDialogButton("Not Now");
             var page = new TaskDialogPage

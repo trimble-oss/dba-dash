@@ -1,33 +1,35 @@
 using DBADashGUI.Viewers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.IO;
 
 namespace DBADash.Viewers.GUI.Test
 {
-    /// <summary>Telling an install for all users from one for the current user, by where it is.</summary>
+    /// <summary>Telling an install for all users from one for the current user, by the folder the install for all users recorded.</summary>
     [TestClass]
     public class InstallScopeTests
     {
-        private static string LocalAppData => Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        private const string MachineInstall = @"D:\Apps\DBADash_Visualizer";
 
         [TestMethod]
-        public void UnderLocalAppDataIsForTheUser() =>
-            Assert.IsFalse(InstallScope.IsForAllUsers(Path.Combine(LocalAppData, "DBADash_Visualizer", "current")));
+        public void InTheInstallForAllUsersIsForAllUsers() =>
+            Assert.IsTrue(InstallScope.IsIn(@"D:\Apps\DBADash_Visualizer\current", MachineInstall));
 
         [TestMethod]
         public void CaseDoesNotMatter() =>
-            Assert.IsFalse(InstallScope.IsForAllUsers(Path.Combine(LocalAppData.ToUpperInvariant(), "DBADash_GUI", "current")));
+            Assert.IsTrue(InstallScope.IsIn(@"d:\apps\dbadash_visualizer\current", MachineInstall + "\\"));
 
         [TestMethod]
-        public void ProgramFilesIsForAllUsers() =>
-            Assert.IsTrue(InstallScope.IsForAllUsers(Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "DBADash_Visualizer", "current")));
+        public void APerUserInstallOnAnotherDriveIsNotForAllUsers() =>
+            Assert.IsFalse(InstallScope.IsIn(@"E:\Mine\DBADash_Visualizer\current", MachineInstall));
 
         [TestMethod]
         public void AFolderThatOnlyStartsWithTheSameNameIsNotInIt() =>
-            Assert.IsTrue(InstallScope.IsForAllUsers(LocalAppData + "Other\\DBADash_GUI\\current"));
+            Assert.IsFalse(InstallScope.IsIn(@"D:\Apps\DBADash_VisualizerOther\current", MachineInstall));
 
         [TestMethod]
-        public void NoPathIsNotForAllUsers() => Assert.IsFalse(InstallScope.IsForAllUsers(null));
+        public void NoInstallForAllUsersIsNotForAllUsers() =>
+            Assert.IsFalse(InstallScope.IsIn(@"C:\Program Files\DBADash_Visualizer\current", null));
+
+        [TestMethod]
+        public void NoPathIsNotForAllUsers() => Assert.IsFalse(InstallScope.IsIn(null, MachineInstall));
     }
 }

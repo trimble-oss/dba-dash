@@ -73,10 +73,15 @@ if(@($UnsignedAssets).Count -eq 0) {
 } else {
     Write-Host "Found $(@($UnsignedAssets).Count) unsigned zip files in the draft release." -ForegroundColor Green
 }
+# A previous run that failed part way may have uploaded some signed zips already - sign only the rest, so a rerun recovers
+$ToSign = @($UnsignedAssets | Where-Object { $_.name.Replace("-unsigned.zip", ".zip") -notin $Assets.name })
+if ($ToSign.Count -lt @($UnsignedAssets).Count) {
+    Write-Host "$(@($UnsignedAssets).Count - $ToSign.Count) already signed in the draft release - skipping them." -ForegroundColor Yellow
+}
 
 # Download all assets from the draft release (sequential processing to avoid rate limits)
 Write-Host "Downloading assets from draft release..." -ForegroundColor Cyan
-foreach ($asset in $UnsignedAssets) {
+foreach ($asset in $ToSign) {
     $fileName = $asset.name
     Write-Host "Downloading asset: $fileName" -ForegroundColor Cyan
     
@@ -197,7 +202,7 @@ foreach ($zipFile in $unsignedZips) {
   }
 }
 # Check if the number of assets in the draft release matches the expected count
-if (@(gh api $DraftRelease.assets_url | ConvertFrom-Json).Count -ne (@($Assets).Count + @($UnsignedAssets).Count)) {
+if (@(gh api $DraftRelease.assets_url | ConvertFrom-Json).Count -ne (@($Assets).Count + $ToSign.Count)) {
   Write-Host "File Count not expected" -ForegroundColor Yellow
   exit 1
 }
