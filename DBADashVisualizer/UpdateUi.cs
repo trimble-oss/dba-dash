@@ -56,7 +56,7 @@ namespace DBADashVisualizer
             _appName = appName;
             _installer = CreateInstallerManager();
             _installedBySetup = _installer.IsInstalled;
-            _installedForAllUsers = _installedBySetup && InstallScope.IsForAllUsers(AppContext.BaseDirectory);
+            _installedForAllUsers = _installedBySetup && InstallScope.IsForAllUsers(AppContext.BaseDirectory, _installer.AppId);
 
             Func<CancellationToken, Task<ReleaseInfo>> getLatest;
             if (_installedBySetup)
