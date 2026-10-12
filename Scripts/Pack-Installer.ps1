@@ -81,16 +81,18 @@ $repoRoot = Split-Path -Parent $PSScriptRoot
 $apps = @{
     Visualizer = @{
         Zip = "DBADash_Visualizer_"; PackId = "DBADash_Visualizer"; Exe = "DBADashVisualizer.exe"; Title = "DBA Dash Visualizer"
-        Channel = "win"; Icon = "DBADash.Viewers.GUI\Resources\PlanViewer.ico"
+        Channel = "win"; Icon = "DBADash.Viewers.GUI\Resources\PlanViewer.ico"; Art = "Assets\Installer\Visualizer"
     }
     GUI        = @{
         Zip = "DBADash_GUI_Only_"; PackId = "DBADash_GUI"; Exe = "DBADash.exe"; Title = "DBA Dash"
-        Channel = "gui"; Icon = "DBADashGUI\DBADash.ico"
+        Channel = "gui"; Icon = "DBADashGUI\DBADash.ico"; Art = "Assets\Installer\GUI"
     }
 }
 $cfg = $apps[$App]
 if (-not $OutputFolder) { $OutputFolder = Join-Path $repoRoot "DBADashBuild\$($App)Installer" }
 $icon = Join-Path $repoRoot $cfg.Icon
+# The installers' artwork, <art>_Splash.png and so on, drawn from the app's logo by Scripts/InstallerArt.cs
+$art = Join-Path $repoRoot $cfg.Art
 $exeName = $cfg.Exe
 $zipPrefix = $cfg.Zip
 $packId = $cfg.PackId
@@ -184,13 +186,18 @@ try {
         "--outputDir", $OutputFolder, "--packTitle", $cfg.Title, "--packAuthors", "Trimble, Inc.",
         "--icon", $icon, "--framework", "net10.0-x64-desktop", "--runtime", "win-x64",
         # The Start menu, and not the Desktop as well.  The zip has its own portable copy, so no portable package.
-        "--shortcuts", "StartMenuRoot", "--noPortable", "--yes"
+        "--shortcuts", "StartMenuRoot", "--noPortable", "--yes",
+        # Shown by the setup program while it installs, with a progress bar along the bottom.
+        "--splashImage", "$($art)_Splash.png", "--splashProgressColor", "#7fc3f0"
     )
 
     if (-not $NoMsi) {
         # The .msi asks whether to install for the current user (as the setup program does) or for all users of the machine,
         # under Program Files.  An install for all users needs elevation to install, and again to update.
         $packArgs += @("--msi", "--instLocation", "Either")
+        # The .msi's artwork: the brand panel behind the welcome and finish pages (493x312), and the strip across the top of the
+        # others (493x58).
+        $packArgs += @("--msiDialogBackground", "$($art)_Dialog.bmp", "--msiTopBanner", "$($art)_Banner.bmp")
     }
 
     if (-not $SkipSigning) {

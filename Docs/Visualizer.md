@@ -137,7 +137,8 @@ What each step does, and the scripts to run one on its own:
    the previous release, if there is one), and the feed files `releases.win.json`, `RELEASES` and `assets.win.json` that installed
    copies read to find updates.  Velopack has to do the signing itself, part way through building, and the tool takes about half a
    minute a file, so it signs only those few files - the whole thing takes around 6 minutes.  Try it out without signing or
-   uploading using `-ZipPath <zip> -SkipSigning`.
+   uploading using `-ZipPath <zip> -SkipSigning`.  The setup's splash and the .msi's artwork are in `Assets\Installer`, drawn
+   from the apps' logos by `dotnet run Scripts/InstallerArt.cs` - run it again after changing a logo.
 4. **Publish** the release.  Installed copies find the update from the feed of the latest published release.
 5. **winget.**  Once the release is published, `Scripts/New-WingetManifest.ps1 -Version <version>` downloads the signed setup
    program, works out its hash, writes the manifest under `DBADashBuild\winget` and validates it with `winget validate`.  The
