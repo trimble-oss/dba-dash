@@ -119,7 +119,8 @@
 );
 
 GO
-CREATE UNIQUE NONCLUSTERED INDEX IX_Databases_InstanceID_database_id_create_date
+/* Not unique: a dropped database row can share database_id/create_date with its replacement (e.g. restore as X_tmp, drop X, rename X_tmp => X) */
+CREATE NONCLUSTERED INDEX IX_Databases_InstanceID_database_id_create_date
     ON dbo.Databases(InstanceID ASC, database_id ASC, create_date ASC)
     INCLUDE(IsActive);
 
