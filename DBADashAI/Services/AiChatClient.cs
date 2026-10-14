@@ -98,6 +98,22 @@ namespace DBADashAI.Services
                         "AI summary is disabled. AI:Provider=Anthropic but Anthropic settings are incomplete.");
                 }
 
+                if (string.Equals(provider, "Bedrock", StringComparison.OrdinalIgnoreCase))
+                {
+                    var bedrockModel = modelOverride ?? _configuration["Bedrock:Model"];
+                    if (!IsBedrockRegion(_configuration["Bedrock:Region"]))
+                    {
+                        return AiChatResult.Failed(AiChatFailure.NotConfigured,
+                            "AI summary is disabled. Bedrock:Region must be an AWS region name, e.g. us-east-1.");
+                    }
+                    if (!string.IsNullOrWhiteSpace(bedrockModel))
+                    {
+                        return await SummarizeWithBedrockAsync(messages, bedrockModel, cancellationToken);
+                    }
+                    return AiChatResult.Failed(AiChatFailure.NotConfigured,
+                        "AI summary is disabled. AI:Provider=Bedrock but Bedrock:Model is not set.");
+                }
+
                 if (!string.IsNullOrWhiteSpace(azureEndpoint)
                     && !string.IsNullOrWhiteSpace(azureApiKey)
                     && !string.IsNullOrWhiteSpace(azureDeployment))
@@ -111,7 +127,7 @@ namespace DBADashAI.Services
                 }
 
                 return AiChatResult.Failed(AiChatFailure.NotConfigured,
-                    "AI summary is disabled. Configure AzureOpenAI:* or Anthropic:* settings, or set AI:Provider=Ollama and Ollama:Model.");
+                    "AI summary is disabled. Configure AzureOpenAI:* or Anthropic:* settings, or set AI:Provider to Bedrock or Ollama.");
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
@@ -310,6 +326,8 @@ namespace DBADashAI.Services
                 return NullIfBlank(configuration["AzureOpenAI:Deployment"]);
             if (string.Equals(provider, "Anthropic", StringComparison.OrdinalIgnoreCase))
                 return NullIfBlank(configuration["Anthropic:Model"]);
+            if (string.Equals(provider, "Bedrock", StringComparison.OrdinalIgnoreCase))
+                return NullIfBlank(configuration["Bedrock:Model"]);
 
             return NullIfBlank(configuration["AzureOpenAI:Deployment"]) ?? NullIfBlank(configuration["Anthropic:Model"]);
         }
@@ -448,6 +466,243 @@ namespace DBADashAI.Services
                 .ToList();
         }
 
+        /// <summary>
+        /// Amazon Bedrock, over the Converse API with a Bedrock API key - configured, or made from AWS
+        /// credentials (<see cref="BedrockKeyAsync"/>).
+        ///
+        /// Converse is the one request shape every chat model on Bedrock takes, so the same call works
+        /// for Claude, Llama, Mistral, Nova and the rest - the model is only a path segment.  Either key
+        /// is sent as a bearer token, so the request itself is the same whichever is used.
+        /// </summary>
+        private async Task<AiChatResult> SummarizeWithBedrockAsync(
+            IReadOnlyList<AiConversationTurn> messages,
+            string model,
+            CancellationToken cancellationToken)
+        {
+            string apiKey;
+            try
+            {
+                apiKey = await BedrockKeyAsync();
+            }
+            catch (Amazon.Runtime.AmazonClientException ex)
+            {
+                // No key and no credentials: a setting to fix, not a provider that failed.
+                _logger.LogWarning(ex, "No AWS credentials for Bedrock");
+                return AiChatResult.Failed(AiChatFailure.NotConfigured,
+                    "AI summary is disabled. Bedrock:ApiKey is not set and no AWS credentials were found"
+                    + (string.IsNullOrWhiteSpace(_configuration["Bedrock:Profile"]) ? "." : $" for profile '{LogSanitizer.SanitizeForLog(_configuration["Bedrock:Profile"]!)}'."));
+            }
+            // A model can be an ARN (an application inference profile, a provisioned model), whose
+            // slashes and colons have to stay inside the one path segment.
+            var requestUrl = new Uri(BedrockRuntimeUrl(_configuration) + "/model/" + Uri.EscapeDataString(model) + "/converse");
+
+            var payload = new Dictionary<string, object>
+            {
+                ["system"] = new[] { new { text = SystemPrompt } },
+                ["messages"] = messages
+                    .Select(m => (object)new { role = Role(m), content = new[] { new { text = m.Content } } })
+                    .ToArray()
+            };
+            // No temperature: one setting has to suit every model family on Bedrock, and some newer
+            // models refuse the parameter outright.  Left unset, max tokens is the model's own default -
+            // any fixed default would be over the output limit of the smaller models.
+            if (int.TryParse(_configuration["Bedrock:MaxTokens"], out var maxTokens) && maxTokens > 0)
+                payload["inferenceConfig"] = new { maxTokens };
+
+            var client = _httpClientFactory.CreateClient();
+            using var response = await PostWithRetryAsync(
+                client,
+                requestUrl,
+                () =>
+                {
+                    var req = new HttpRequestMessage(HttpMethod.Post, requestUrl);
+                    req.Headers.Add("Authorization", "Bearer " + SanitizeHeaderValue(apiKey));
+                    req.Content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+                    return req;
+                },
+                cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
+                var errorId = Guid.NewGuid().ToString("N")[..8];
+                _logger.LogError("Bedrock call failed. ErrorId={ErrorId}, Status={StatusCode}, URL={Url}, Body={Body}", LogSanitizer.SanitizeForLog(errorId), (int)response.StatusCode, requestUrl, LogSanitizer.TruncateAndSanitizeForLog(errorBody));
+                return ProviderFailure("Bedrock", (int)response.StatusCode, errorBody, errorId);
+            }
+
+            using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+            using var document = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken);
+
+            return AiChatResult.Answer(ExtractBedrockSummary(document.RootElement, "No summary returned by Bedrock."));
+        }
+
+        /// <summary>
+        /// Bedrock:ApiKey when there is one.  Otherwise a short-term key made from AWS credentials -
+        /// Bedrock:Profile, or the default chain (an IAM role, environment variables, the default
+        /// profile) - which is what AWS recommends over a long-term key outside of exploration.
+        /// </summary>
+        private Task<string> BedrockKeyAsync()
+        {
+            var apiKey = _configuration["Bedrock:ApiKey"];
+            return string.IsNullOrWhiteSpace(apiKey)
+                ? BedrockToken.CreateAsync(_configuration["Bedrock:Profile"], BedrockRegion(_configuration))
+                : Task.FromResult(apiKey);
+        }
+
+        internal static string BedrockRuntimeUrl(IConfiguration configuration) =>
+            $"https://bedrock-runtime.{BedrockRegion(configuration)}.amazonaws.com";
+
+        private static string BedrockControlUrl(IConfiguration configuration) =>
+            $"https://bedrock.{BedrockRegion(configuration)}.amazonaws.com";
+
+        /// <summary>
+        /// The region, checked before it becomes part of a host name: a typo should fail as a bad
+        /// setting, not send the key to a host other than AWS.
+        /// </summary>
+        private static string BedrockRegion(IConfiguration configuration)
+        {
+            var region = configuration["Bedrock:Region"]?.Trim() ?? string.Empty;
+            if (!IsBedrockRegion(region))
+                throw new InvalidOperationException($"Bedrock:Region '{LogSanitizer.SanitizeForLog(region)}' is not an AWS region name, e.g. us-east-1.");
+            return region;
+        }
+
+        internal static bool IsBedrockRegion(string? region) =>
+            region is not null && System.Text.RegularExpressions.Regex.IsMatch(region.Trim(), "^[a-z]{2}(-[a-z]+)+-[0-9]+$");
+
+        /// <summary>
+        /// The answer's text blocks.  A reasoning model also returns its thinking, in blocks of its own
+        /// (reasoningContent) that are left out - nobody asked to read it.
+        /// </summary>
+        internal static string ExtractBedrockSummary(JsonElement root, string fallbackMessage)
+        {
+            if (!root.TryGetProperty("output", out var output)
+                || output.ValueKind != JsonValueKind.Object
+                || !output.TryGetProperty("message", out var message)
+                || message.ValueKind != JsonValueKind.Object
+                || !message.TryGetProperty("content", out var content)
+                || content.ValueKind != JsonValueKind.Array)
+            {
+                return fallbackMessage;
+            }
+
+            var text = string.Join("\n", content.EnumerateArray()
+                .Where(e => e.ValueKind == JsonValueKind.Object
+                            && e.TryGetProperty("text", out var t)
+                            && t.ValueKind == JsonValueKind.String)
+                .Select(e => e.GetProperty("text").GetString())
+                .Where(s => !string.IsNullOrWhiteSpace(s)));
+
+            return string.IsNullOrWhiteSpace(text) ? fallbackMessage : text;
+        }
+
+        /// <summary>
+        /// The models this key can call in the configured region, as (ID, display name).
+        ///
+        /// Inference profiles come first.  Most current models can only be called through one - their
+        /// base model ID is refused for on-demand use - so for those the profile is the only entry that
+        /// works.  Base models follow, for the ones that can still be called directly.
+        /// </summary>
+        public async Task<IReadOnlyList<(string Id, string Name)>> GetBedrockModelsAsync(CancellationToken cancellationToken)
+        {
+            var baseUrl = BedrockControlUrl(_configuration);
+            var apiKey = await BedrockKeyAsync();
+
+            // Only fills a drop-down, so an unreachable region should not hold the GUI up for long.
+            var client = _httpClientFactory.CreateClient();
+            client.Timeout = TimeSpan.FromSeconds(10);
+
+            async Task<JsonDocument> GetAsync(string pathAndQuery)
+            {
+                using var request = new HttpRequestMessage(HttpMethod.Get, new Uri(baseUrl + pathAndQuery));
+                request.Headers.Add("Authorization", "Bearer " + SanitizeHeaderValue(apiKey));
+                using var response = await client.SendAsync(request, cancellationToken);
+                response.EnsureSuccessStatusCode();
+                await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+                return await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken);
+            }
+
+            // Every text model, whether or not it can be called directly: a profile says nothing about
+            // the model behind it, so this is what tells a chat model's profile from an embedding
+            // model's.
+            var chatModels = new Dictionary<string, (string Name, bool OnDemand)>(StringComparer.Ordinal);
+            using (var models = await GetAsync("/foundation-models?byOutputModality=TEXT"))
+            {
+                if (models.RootElement.TryGetProperty("modelSummaries", out var summaries) && summaries.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (var m in summaries.EnumerateArray())
+                    {
+                        var id = JsonString(m, "modelId");
+                        if (string.IsNullOrWhiteSpace(id)
+                            || !JsonStrings(m, "inputModalities").Contains("TEXT", StringComparer.OrdinalIgnoreCase)
+                            || (m.TryGetProperty("modelLifecycle", out var life)
+                                && string.Equals(JsonString(life, "status"), "LEGACY", StringComparison.OrdinalIgnoreCase)))
+                        {
+                            continue;
+                        }
+                        var name = JsonString(m, "modelName");
+                        chatModels[id] = (string.IsNullOrWhiteSpace(name) ? id : $"{JsonString(m, "providerName")} {name}".Trim(),
+                                          JsonStrings(m, "inferenceTypesSupported").Contains("ON_DEMAND", StringComparer.OrdinalIgnoreCase));
+                    }
+                }
+            }
+
+            var profiles = new List<(string Id, string Name)>();
+            foreach (var type in new[] { "APPLICATION", "SYSTEM_DEFINED" })
+            {
+                string? nextToken = null;
+                do
+                {
+                    using var page = await GetAsync($"/inference-profiles?maxResults=1000&type={type}"
+                        + (nextToken is null ? string.Empty : "&nextToken=" + Uri.EscapeDataString(nextToken)));
+                    var root = page.RootElement;
+                    if (root.TryGetProperty("inferenceProfileSummaries", out var summaries) && summaries.ValueKind == JsonValueKind.Array)
+                    {
+                        profiles.AddRange(summaries.EnumerateArray()
+                            .Where(p => !string.Equals(JsonString(p, "status"), "DISABLED", StringComparison.OrdinalIgnoreCase)
+                                        && ProfileModelIds(p).Any(chatModels.ContainsKey))
+                            // An application profile is called by its ARN, a system-defined one by its ID.
+                            .Select(p => (Id: (type == "APPLICATION" ? JsonString(p, "inferenceProfileArn") : null) ?? JsonString(p, "inferenceProfileId"),
+                                          Name: JsonString(p, "inferenceProfileName")))
+                            .Where(p => !string.IsNullOrWhiteSpace(p.Id))
+                            .Select(p => (p.Id!, string.IsNullOrWhiteSpace(p.Name) ? p.Id! : p.Name!)));
+                    }
+                    nextToken = JsonString(root, "nextToken");
+                } while (!string.IsNullOrEmpty(nextToken));
+            }
+
+            var foundation = chatModels
+                .Where(m => m.Value.OnDemand)
+                .Select(m => (Id: m.Key, m.Value.Name));
+
+            return profiles.OrderBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
+                .Concat(foundation.OrderBy(m => m.Name, StringComparer.OrdinalIgnoreCase))
+                .DistinctBy(m => m.Id, StringComparer.Ordinal)
+                .ToList();
+
+            // The base models a profile routes to, by ID: the part of each model ARN after foundation-model/.
+            static IEnumerable<string> ProfileModelIds(JsonElement profile) =>
+                profile.TryGetProperty("models", out var models) && models.ValueKind == JsonValueKind.Array
+                    ? models.EnumerateArray()
+                        .Select(m => JsonString(m, "modelArn"))
+                        .Where(arn => arn is not null && arn.Contains("foundation-model/", StringComparison.Ordinal))
+                        .Select(arn => arn![(arn!.IndexOf("foundation-model/", StringComparison.Ordinal) + "foundation-model/".Length)..])
+                    : Enumerable.Empty<string>();
+
+            static IEnumerable<string> JsonStrings(JsonElement element, string property) =>
+                element.TryGetProperty(property, out var values) && values.ValueKind == JsonValueKind.Array
+                    ? values.EnumerateArray().Where(v => v.ValueKind == JsonValueKind.String).Select(v => v.GetString()!)
+                    : Enumerable.Empty<string>();
+
+            static string? JsonString(JsonElement element, string property) =>
+                element.ValueKind == JsonValueKind.Object
+                && element.TryGetProperty(property, out var value)
+                && value.ValueKind == JsonValueKind.String
+                    ? value.GetString()
+                    : null;
+        }
+
+
         private static string ExtractAnthropicSummary(JsonElement root, string fallbackMessage)
         {
             if (!root.TryGetProperty("content", out var content) || content.ValueKind != JsonValueKind.Array)
@@ -531,8 +786,9 @@ namespace DBADashAI.Services
         ///
         /// No provider gives it a status code of its own.  Anthropic answers 413 for a request over
         /// the transport limit but 400 for a prompt over the model's context window, Azure OpenAI
-        /// answers 400 with the reason as a code in the body, and Ollama - told not to truncate -
-        /// answers 400 naming the context size.  So the body is what decides, and it is matched
+        /// answers 400 with the reason as a code in the body, Ollama - told not to truncate -
+        /// answers 400 naming the context size, and Bedrock answers 400 with a ValidationException
+        /// whose wording depends on the model behind it.  So the body is what decides, and it is matched
         /// loosely: the wording of these messages is not a contract.
         /// </summary>
         internal static bool IsTooLarge(int status, string body)
@@ -546,7 +802,9 @@ namespace DBADashAI.Services
                    || body.Contains("request_too_large", StringComparison.OrdinalIgnoreCase)
                    || body.Contains("string_above_max_length", StringComparison.OrdinalIgnoreCase)
                    || body.Contains("prompt is too long", StringComparison.OrdinalIgnoreCase)
-                   || body.Contains("maximum context length", StringComparison.OrdinalIgnoreCase);
+                   || body.Contains("maximum context length", StringComparison.OrdinalIgnoreCase)
+                   || body.Contains("input is too long", StringComparison.OrdinalIgnoreCase)
+                   || body.Contains("too many input tokens", StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -556,7 +814,8 @@ namespace DBADashAI.Services
         /// that crosses back to a caller, and left out altogether when the body is not the shape
         /// the providers document.
         ///
-        /// Ollama's error is a string rather than an object, and when it comes from the model runner
+        /// Bedrock's message sits at the top level rather than under an error.  Ollama's error is a
+        /// string rather than an object, and when it comes from the model runner
         /// that string is itself the documented shape, serialized a second time.
         /// </summary>
         internal static string? TooLargeDetail(string body, int depth = 0)
@@ -566,7 +825,12 @@ namespace DBADashAI.Services
                 using var document = JsonDocument.Parse(body);
 
                 if (!document.RootElement.TryGetProperty("error", out var error))
-                    return null;
+                {
+                    // Bedrock: no error object, just the message at the top.
+                    return document.RootElement.TryGetProperty("message", out var top) && top.ValueKind == JsonValueKind.String
+                        ? Clean(top.GetString())
+                        : null;
+                }
 
                 string? message = null;
                 if (error.ValueKind == JsonValueKind.Object
@@ -605,6 +869,7 @@ namespace DBADashAI.Services
             401 => "(unauthorized — API key may be invalid or expired)",
             403 => "(forbidden — check permissions on the AI resource)",
             404 => "(not found — check endpoint URL and deployment name)",
+            424 => "(model error — the model failed to process the request)",
             429 => "(rate limited — retry later)",
             500 => "(provider internal error)",
             502 => "(bad gateway — provider may be temporarily unavailable)",

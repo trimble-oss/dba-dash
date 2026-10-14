@@ -13,6 +13,7 @@ public partial class ServiceConfig
 {
     private Panel pnlAzure;
     private Panel pnlAnthropic;
+    private Panel pnlBedrock;
     private Panel pnlOllama;
     private ComboBox cboAiProvider;
     private NumericUpDown numAiPort;
@@ -30,6 +31,11 @@ public partial class ServiceConfig
     private TextBox txtAiAnthropicModel;
     private TextBox txtAiAnthropicVersion;
     private TextBox txtAiAnthropicMaxTokens;
+    private TextBox txtAiBedrockRegion;
+    private TextBox txtAiBedrockApiKey;
+    private TextBox txtAiBedrockProfile;
+    private TextBox txtAiBedrockModel;
+    private TextBox txtAiBedrockMaxTokens;
     private TextBox txtAiOllamaBaseUrl;
     private TextBox txtAiOllamaApiKey;
     private TextBox txtAiOllamaModel;
@@ -269,7 +275,7 @@ public partial class ServiceConfig
             Location = new Point(AiInputX, 46),
             Size = new Size(260, AiCtrlH)
         };
-        cboAiProvider.Items.AddRange(new object[] { "AzureOpenAI", "Anthropic", "Ollama" });
+        cboAiProvider.Items.AddRange(new object[] { "AzureOpenAI", "Anthropic", "Bedrock", "Ollama" });
         cboAiProvider.SelectedIndexChanged += (_, _) => UpdateProviderFieldVisibility();
         grpSettings.Controls.Add(cboAiProvider);
 
@@ -310,6 +316,33 @@ public partial class ServiceConfig
         txtAiAnthropicVersion   = AddPanelRow(pnlAnthropic, "Version:",   3);
         txtAiAnthropicMaxTokens = AddPanelRow(pnlAnthropic, "MaxTokens:", 4);
 
+        pnlBedrock = new Panel
+        {
+            Anchor = AnchorStyles.Top | AnchorStyles.Left,
+            Location = new Point(5, 40),
+            Size = new Size(panelWidth, 5 * AiRowH + 10),
+            Visible = false
+        };
+        txtAiBedrockRegion    = AddPanelRow(pnlBedrock, "Region:",    0);
+        txtAiBedrockModel     = AddPanelRow(pnlBedrock, "Model:",     1);
+        txtAiBedrockProfile   = AddPanelRow(pnlBedrock, "Profile:",   2);
+        txtAiBedrockApiKey    = AddPanelRow(pnlBedrock, "ApiKey:",    3, true);
+        txtAiBedrockMaxTokens = AddPanelRow(pnlBedrock, "MaxTokens:", 4);
+        _aiToolTip.SetToolTip(txtAiBedrockRegion, "AWS region to call Bedrock in, e.g. us-east-1.");
+        _aiToolTip.SetToolTip(txtAiBedrockProfile,
+            "Optional. AWS profile to take credentials from when no ApiKey is set.\n" +
+            "Leave blank (and ApiKey blank) to use the default AWS credentials: an IAM role (EC2, ECS, EKS),\n" +
+            "the AWS_* environment variables, or the default profile of the account the service runs as.\n" +
+            "A short-term Bedrock key is made from the credentials for each call - AWS's recommended setup.");
+        _aiToolTip.SetToolTip(txtAiBedrockApiKey,
+            "Optional. Amazon Bedrock API key. AWS recommends API keys for exploration only:\n" +
+            "leave blank to use AWS credentials instead (see Profile).");
+        _aiToolTip.SetToolTip(txtAiBedrockModel,
+            "Model ID or inference profile ID to use by default, e.g. us.anthropic.claude-sonnet-4-6.\n" +
+            "Most current models must be called through an inference profile (the ID with a region prefix such as us. or eu.).\n" +
+            "The GUI's model picker lists the models available to the key in the region.");
+        _aiToolTip.SetToolTip(txtAiBedrockMaxTokens, "Optional limit on the length of the answer. Leave blank for the model's default.");
+
         pnlOllama = new Panel
         {
             Anchor = AnchorStyles.Top | AnchorStyles.Left,
@@ -338,6 +371,7 @@ public partial class ServiceConfig
 
         grpConfig.Controls.Add(pnlAzure);
         grpConfig.Controls.Add(pnlAnthropic);
+        grpConfig.Controls.Add(pnlBedrock);
         grpConfig.Controls.Add(pnlOllama);
 
         tabAiService.Controls.Add(grpService);
@@ -372,6 +406,7 @@ public partial class ServiceConfig
         var p = cboAiProvider.SelectedItem?.ToString() ?? string.Empty;
         pnlAzure.Visible     = p.Equals("AzureOpenAI", StringComparison.OrdinalIgnoreCase);
         pnlAnthropic.Visible = p.Equals("Anthropic",   StringComparison.OrdinalIgnoreCase);
+        pnlBedrock.Visible   = p.Equals("Bedrock",     StringComparison.OrdinalIgnoreCase);
         pnlOllama.Visible    = p.Equals("Ollama",      StringComparison.OrdinalIgnoreCase);
     }
 
@@ -405,6 +440,12 @@ public partial class ServiceConfig
         txtAiAnthropicModel.Text     = j["Anthropic"]?["Model"]?.Value<string>()     ?? string.Empty;
         txtAiAnthropicVersion.Text   = j["Anthropic"]?["Version"]?.Value<string>()   ?? string.Empty;
         txtAiAnthropicMaxTokens.Text = j["Anthropic"]?["MaxTokens"]?.Value<string>() ?? string.Empty;
+
+        txtAiBedrockRegion.Text    = j["Bedrock"]?["Region"]?.Value<string>()    ?? string.Empty;
+        txtAiBedrockApiKey.Text    = GetPlainText(j["Bedrock"]?["ApiKey"]?.Value<string>());
+        txtAiBedrockProfile.Text   = j["Bedrock"]?["Profile"]?.Value<string>()   ?? string.Empty;
+        txtAiBedrockModel.Text     = j["Bedrock"]?["Model"]?.Value<string>()     ?? string.Empty;
+        txtAiBedrockMaxTokens.Text = j["Bedrock"]?["MaxTokens"]?.Value<string>() ?? string.Empty;
 
         txtAiOllamaBaseUrl.Text       = j["Ollama"]?["BaseUrl"]?.Value<string>()       ?? string.Empty;
         txtAiOllamaApiKey.Text        = GetPlainText(j["Ollama"]?["ApiKey"]?.Value<string>());
@@ -480,6 +521,13 @@ private static string GetPlainText(string value)
             j["Anthropic"]!["Model"]     = txtAiAnthropicModel.Text;
             j["Anthropic"]!["Version"]   = txtAiAnthropicVersion.Text;
             j["Anthropic"]!["MaxTokens"] = txtAiAnthropicMaxTokens.Text;
+
+            j["Bedrock"] ??= new JObject();
+            j["Bedrock"]!["Region"]    = txtAiBedrockRegion.Text.Trim();
+            j["Bedrock"]!["ApiKey"]    = GetStoredValue(txtAiBedrockApiKey.Text, isSecret: true);
+            j["Bedrock"]!["Profile"]   = txtAiBedrockProfile.Text.Trim();
+            j["Bedrock"]!["Model"]     = txtAiBedrockModel.Text;
+            j["Bedrock"]!["MaxTokens"] = txtAiBedrockMaxTokens.Text;
 
             j["Ollama"] ??= new JObject();
             j["Ollama"]!["BaseUrl"]       = txtAiOllamaBaseUrl.Text;
