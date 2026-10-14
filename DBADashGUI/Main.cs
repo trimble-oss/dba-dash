@@ -164,6 +164,9 @@ namespace DBADashGUI
                             azureDBNode.Text = db + " (read-only)";
                             azureDBNode.IsReadOnlyReplica = true;
                         }
+                        // Added to the tree before anything reads its Context, which is cached on first use and
+                        // takes the instance name (and so MasterInstanceID, used for the elastic pool) from the parent
+                        AzureNode.Nodes.Add(azureDBNode);
                         azureDBNode.Nodes.AddRange(new TreeNode[] {
                             new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration),
                             new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks)
@@ -184,7 +187,6 @@ namespace DBADashGUI
                         {
                             azureDBNode.AddDeadlocksFolder(reports?.InstanceLevelReports);
                         }
-                        AzureNode.Nodes.Add(azureDBNode);
                         // The query stats reports are the Query Stats tab on this node, as on an instance node
                         azureDBNode.AddDatabaseFolders(reports?.DatabaseLevelReports
                             .Where(r => !QueryStatsReportProcedures.Contains(r.ProcedureName)));
