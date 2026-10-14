@@ -309,6 +309,13 @@ ApplyAuth(app.MapGet("/api/ai/diagnostics", (IConfiguration config, IHttpClientF
     var anthropicModel = config["Anthropic:Model"] ?? "(not set)";
     var anthropicVersion = config["Anthropic:Version"] ?? "(not set)";
 
+    var bedrockRegion = config["Bedrock:Region"] ?? "(not set)";
+    var bedrockKey = string.IsNullOrWhiteSpace(config["Bedrock:ApiKey"]) ? "(not set)" : "***set***";
+    var bedrockAuthentication = !string.IsNullOrWhiteSpace(config["Bedrock:ApiKey"]) ? "API key"
+        : string.IsNullOrWhiteSpace(config["Bedrock:Profile"]) ? "AWS credentials (default chain)"
+        : $"AWS credentials (profile {config["Bedrock:Profile"]})";
+    var bedrockModel = config["Bedrock:Model"] ?? "(not set)";
+
     var ollamaBaseUrl = AiChatClient.OllamaBaseUrl(config);
     var ollamaKey = string.IsNullOrWhiteSpace(config["Ollama:ApiKey"]) ? "(not set)" : "***set***";
     var ollamaModel = config["Ollama:Model"] ?? "(not set)";
@@ -324,6 +331,7 @@ ApplyAuth(app.MapGet("/api/ai/diagnostics", (IConfiguration config, IHttpClientF
         repository = repoSafe,
         azureOpenAI = new { endpoint = azureEndpoint, apiKey = azureKey, deployment = azureDeployment },
         anthropic = new { baseUrl = anthropicUrl, apiKey = anthropicKey, model = anthropicModel, version = anthropicVersion },
+        bedrock = new { region = bedrockRegion, authentication = bedrockAuthentication, apiKey = bedrockKey, model = bedrockModel },
         ollama = new { baseUrl = ollamaBaseUrl, apiKey = ollamaKey, model = ollamaModel, contextLength = ollamaContextLength },
         security = new { enabled = securityEnabledStatus },
         systemPrompt = new { source = systemPromptLoader.Source, length = systemPromptLoader.Prompt.Length },
@@ -471,6 +479,21 @@ ApplyAuth(app.MapGet("/api/ai/models", async (SqlToolExecutor sql, IConfiguratio
             catch (Exception ex)
             {
                 logger.LogWarning(ex, "Could not list Ollama models");
+                return Results.Ok(Array.Empty<object>());
+            }
+        }
+
+        // Likewise Bedrock: the models on offer depend on the account and region.
+        if (string.Equals(config["AI:Provider"]?.Trim(), "Bedrock", StringComparison.OrdinalIgnoreCase))
+        {
+            try
+            {
+                var available = await aiChat.GetBedrockModelsAsync(cancellationToken);
+                return Results.Ok(available.Select(m => new { modelName = m.Id, displayName = m.Name }).ToList());
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Could not list Bedrock models");
                 return Results.Ok(Array.Empty<object>());
             }
         }

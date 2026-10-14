@@ -147,6 +147,7 @@ namespace DBADashGUI.AI
     private string? _serviceUrl = null; // Resolved by AIServiceDiscovery, not hardcoded
     private AIServiceDiscovery.ServiceSource _serviceSource = AIServiceDiscovery.ServiceSource.None;
     private string? _provider = null;
+    private string? _configuredModel = null;
     // One-shot timer: retries InitializeAsync when the API key was unavailable at startup
     // (e.g. GUI connected before the service finished its registration delay).
     private readonly System.Windows.Forms.Timer _initRetryTimer = new() { Interval = 10_000 };
@@ -235,6 +236,7 @@ namespace DBADashGUI.AI
             cboCategory.Items.Clear();
             cboModel.Items.Clear();
             _provider = null;
+            _configuredModel = null;
             lblStatus.Visible = false;
             btnAsk.Enabled = true;
             IsServiceAvailable = false;
@@ -396,6 +398,9 @@ namespace DBADashGUI.AI
         using var doc = JsonDocument.Parse(body);
         _provider = doc.RootElement.TryGetProperty("provider", out var providerElement)
             ? providerElement.GetString()
+            : null;
+        _configuredModel = AIModelMenu.SupportsModelChoice(_provider)
+            ? AIModelMenu.ConfiguredModel(doc.RootElement, _provider!)
             : null;
     }
 
@@ -783,9 +788,24 @@ namespace DBADashGUI.AI
             System.Diagnostics.Debug.WriteLine($"Failed to load models: {ex.Message}");
         }
 
-        cboModel.Items.Insert(0, new ModelItem("", "(Default - configured model)"));
+        cboModel.Items.Insert(0, new ModelItem("", _configuredModel is null ? "(Default - configured model)" : $"(Default - {_configuredModel})"));
 
         cboModel.SelectedIndex = 0;
+        FitDropDownWidth();
+    }
+
+    /// <summary>
+    /// The list as wide as its longest entry, however narrow the box: a model's name and ID are what
+    /// tell it from the next one, and both are at the end of the line.  Capped to the screen.
+    /// </summary>
+    private void FitDropDownWidth()
+    {
+        var widest = cboModel.Items.Cast<object>()
+            .Select(item => TextRenderer.MeasureText(item.ToString(), cboModel.Font).Width)
+            .DefaultIfEmpty(0)
+            .Max() + SystemInformation.VerticalScrollBarWidth + 8;
+        var screen = Screen.FromControl(cboModel).WorkingArea.Width;
+        cboModel.DropDownWidth = Math.Max(cboModel.Width, Math.Min(widest, screen / 2));
     }
 
     private async Task ParseModelsFromResponse(HttpResponseMessage response)
@@ -799,7 +819,7 @@ namespace DBADashGUI.AI
             var displayName = item.GetProperty("displayName").GetString() ?? string.Empty;
             if (!string.IsNullOrWhiteSpace(displayName))
             {
-                cboModel.Items.Add(new ModelItem(modelName, displayName));
+                cboModel.Items.Add(new ModelItem(modelName, AIModelMenu.Label(modelName, displayName)));
             }
         }
     }
@@ -844,6 +864,8 @@ namespace DBADashGUI.AI
         };
         _toolTip.SetToolTip(btnThumbsUp, "This response was helpful");
         _toolTip.SetToolTip(btnThumbsDown, "This response was not helpful");
+        // The box is narrower than most model names: the full one, ID included, is in the tooltip.
+        cboModel.SelectedIndexChanged += (_, _) => _toolTip.SetToolTip(cboModel, cboModel.SelectedItem?.ToString());
         cboCategory.SelectedIndexChanged += (_, _) =>
         {
             if (_seedingExamples) return;

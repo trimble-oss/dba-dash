@@ -14,9 +14,9 @@ namespace DBADashGUI.AI
     /// A "Model" menu for the AI analysis tabs: the configured model, or one of the others the service
     /// will accept.
     ///
-    /// Only shown where there is a choice.  Anthropic and Ollama take a model per request - for Ollama
-    /// the list is whatever is installed on the server - while Azure OpenAI is addressed by deployment,
-    /// so there is nothing to pick from.
+    /// Only shown where there is a choice.  Anthropic, Bedrock and Ollama take a model per request - for
+    /// Bedrock the list is what the account can call in its region, for Ollama whatever is installed on
+    /// the server - while Azure OpenAI is addressed by deployment, so there is nothing to pick from.
     /// </summary>
     internal sealed class AIModelMenu
     {
@@ -148,14 +148,25 @@ namespace DBADashGUI.AI
             var list = models.RootElement.EnumerateArray()
                 .Select(m => (Name: String(m, "modelName"), Display: String(m, "displayName")))
                 .Where(m => !string.IsNullOrWhiteSpace(m.Name))
-                .Select(m => (m.Name!, string.IsNullOrWhiteSpace(m.Display) ? m.Name! : m.Display!))
+                .Select(m => (m.Name!, Label(m.Name!, m.Display)))
                 .ToList();
 
             return (list, configured);
         }
 
+        /// <summary>
+        /// A model as the reader sees it: the friendly name, with the ID it goes by in the settings -
+        /// "EU Anthropic Claude Sonnet 4.6 (eu.anthropic.claude-sonnet-4-6)" - so a model found here
+        /// can be configured as the default.
+        /// </summary>
+        internal static string Label(string name, string? display) =>
+            string.IsNullOrWhiteSpace(display) || string.Equals(display, name, StringComparison.OrdinalIgnoreCase)
+                ? name
+                : $"{display} ({name})";
+
         internal static bool SupportsModelChoice(string? provider) =>
             string.Equals(provider, "Anthropic", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(provider, "Bedrock", StringComparison.OrdinalIgnoreCase)
             || string.Equals(provider, "Ollama", StringComparison.OrdinalIgnoreCase);
 
         private ToolStripMenuItem NewItem(string? model, string text)
@@ -180,9 +191,10 @@ namespace DBADashGUI.AI
         }
 
         /// <summary>The configured model's name as diagnostics reports it, where it is set.</summary>
-        private static string? ConfiguredModel(JsonElement diagnostics, string provider)
+        internal static string? ConfiguredModel(JsonElement diagnostics, string provider)
         {
-            var section = provider.Equals("Ollama", StringComparison.OrdinalIgnoreCase) ? "ollama" : "anthropic";
+            // Diagnostics names each provider's section in camel case: "Bedrock" -> "bedrock".
+            var section = provider.Trim().ToLowerInvariant();
             if (!diagnostics.TryGetProperty(section, out var settings)) return null;
 
             var model = String(settings, "model");
