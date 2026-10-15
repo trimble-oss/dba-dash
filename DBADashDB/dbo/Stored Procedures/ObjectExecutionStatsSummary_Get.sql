@@ -8,7 +8,7 @@
 		@InstanceID INT=NULL,
 		@DatabaseID INT=NULL,
 		@Types VARCHAR(200)=NULL, -- 'P,FN,TR,TA,PC,X'
-		@Use60MIN BIT=NULL, /* NULL: whole hours from the hourly rollup, part hours from the raw rows.  0: raw rows only.  1: hourly rollup only */
+		@Use60MIN BIT=NULL, /* NULL: whole hours from the hourly rollup, part hours from the raw rows (raw rows only for a time of day or weekday filter with a part hour @UTCOffset).  0: raw rows only.  1: hourly rollup only */
 		@Use60MINCompare BIT=NULL, /* As @Use60MIN, for the compare period */
 		@ObjectID BIGINT=NULL,
 		@ObjectName SYSNAME=NULL,
@@ -73,6 +73,14 @@ BEGIN
 	SELECT @From = CASE WHEN @Period = 0 THEN @FromDate ELSE @CompareFrom END,
 		   @To = CASE WHEN @Period = 0 THEN @ToDate ELSE @CompareTo END,
 		   @Use = CASE WHEN @Period = 0 THEN @Use60MIN ELSE @Use60MINCompare END
+
+	/*
+		An hourly row is filtered on the local time of its hour's start.  With an offset that isn't a whole number of
+		hours every hourly row straddles two local hours, and the one at local midnight two days, so a time of day or
+		weekday filter can only be applied exactly to the raw rows.
+	*/
+	IF @Use IS NULL AND @UTCOffset % 60 <> 0 AND (@HasHours = 1 OR @HasDaysOfWeek = 1)
+		SET @Use = 0
 
 	IF @From IS NOT NULL AND @To IS NOT NULL
 	BEGIN
