@@ -11,6 +11,7 @@ AS
 	Spinlock stats for an instance over a date range.
 	Result 0: Summary by spinlock
 	Result 1: @Measure per second over time (as Value) for the top @TopN spinlocks by that measure, with the remainder rolled into "Other"
+	Result 2: CPU over time in the same buckets, drawn over the chart of result 1
 
 	Spins are the CPU burned spinning, so they show which spinlocks cost the most.  Backoffs are where spinning
 	gave up and the thread slept - a sign the contention is bad enough to hurt, rather than just a busy spinlock.
@@ -217,3 +218,30 @@ JOIN #Coverage C ON C.DateGroup = S.DateGroup
 GROUP BY S.DateGroup,
 		CASE WHEN T.SpinlockID IS NULL THEN 'Other' ELSE SL.SpinlockName END
 ORDER BY SnapshotDate,SpinlockName
+
+/*	2 - CPU in the chart's buckets.  Spinning burns CPU, so this shows whether CPU rises with the spins - the
+	symptom that makes spinlock contention worth investigating (the SQLCAT spinlock contention guidance looks for
+	CPU and spins rising out of proportion to throughput).  Averaged over the bucket as in the CPU chart, from the
+	hourly table where the buckets are a whole number of hours, as for the spinlock data.  Covers the whole range
+	rather than only where spinlock stats were collected, as CPU either side of that is context too.  */
+SELECT	CAST(DG.DateGroup AS DATETIME2(2)) AS SnapshotDate,
+		SUM(C.SumSQLProcessCPU*1.0)/SUM(C.SampleCount) AS SQLProcessCPU,
+		SUM(C.SumTotalCPU*1.0)/SUM(C.SampleCount) AS TotalCPU,
+		MAX(C.MaxTotalCPU) AS MaxTotalCPU
+FROM (	SELECT EventTime,SumSQLProcessCPU,SumTotalCPU,SampleCount,MaxTotalCPU
+		FROM dbo.CPU
+		WHERE @Use60MIN = 0
+		AND InstanceID = @InstanceID
+		AND EventTime >= @FromDate
+		AND EventTime < @ToDate
+		UNION ALL
+		SELECT EventTime,SumSQLProcessCPU,SumTotalCPU,SampleCount,MaxTotalCPU
+		FROM dbo.CPU_60MIN
+		WHERE @Use60MIN = 1
+		AND InstanceID = @InstanceID
+		AND EventTime >= @FromDate
+		AND EventTime < @ToDate
+	) C
+CROSS APPLY dbo.DateGroupingMins(C.EventTime,@DateGroupingMin) DG
+GROUP BY DG.DateGroup
+ORDER BY SnapshotDate
