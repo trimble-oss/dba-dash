@@ -92,11 +92,9 @@ SELECT @FromDate = ISNULL(@FromDate, DATEADD(hh, -1, SYSUTCDATETIME())),
     met, since the instance alone is a seek, so it cannot fail the query.
 */
 DECLARE @ToExclusive DATETIME2(3) = DATEADD(MILLISECOND, 1, @ToDate)
-DECLARE @HourFrom DATETIME2(3) = (SELECT DateGroup FROM dbo.DateGroupingMins(@FromDate, 60))
-DECLARE @HourTo DATETIME2(3) = (SELECT DateGroup FROM dbo.DateGroupingMins(@ToExclusive, 60))
+DECLARE @HourFrom DATETIME2(3), @HourTo DATETIME2(3)
 
-IF @HourFrom < @FromDate SET @HourFrom = DATEADD(HOUR, 1, @HourFrom)
-IF @HourFrom >= @HourTo SELECT @HourFrom = @ToExclusive, @HourTo = @ToExclusive
+SELECT @HourFrom = HourFrom, @HourTo = HourTo FROM dbo.RollupRanges(@FromDate, @ToExclusive, NULL)
 
 CREATE TABLE #Scope (InstanceID INT NOT NULL PRIMARY KEY);
 

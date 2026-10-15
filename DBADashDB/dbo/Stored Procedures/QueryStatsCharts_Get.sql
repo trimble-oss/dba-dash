@@ -119,11 +119,10 @@ SET @DateGroupingMin = CASE WHEN @DateGroupingMin < 1 THEN 1 ELSE @DateGroupingM
     whole number of hours reads the raw rows alone.
 */
 DECLARE @ToExclusive DATETIME2(3) = DATEADD(MILLISECOND, 1, @ToDate)
-DECLARE @HourFrom DATETIME2(3) = (SELECT DateGroup FROM dbo.DateGroupingMins(@FromDate, 60))
-DECLARE @HourTo DATETIME2(3) = (SELECT DateGroup FROM dbo.DateGroupingMins(@ToExclusive, 60))
+DECLARE @HourFrom DATETIME2(3), @HourTo DATETIME2(3)
 
-IF @HourFrom < @FromDate SET @HourFrom = DATEADD(HOUR, 1, @HourFrom)
-IF @HourFrom >= @HourTo OR @DateGroupingMin % 60 <> 0 SELECT @HourFrom = @ToExclusive, @HourTo = @ToExclusive
+SELECT @HourFrom = HourFrom, @HourTo = HourTo
+FROM dbo.RollupRanges(@FromDate, @ToExclusive, CASE WHEN @DateGroupingMin % 60 <> 0 THEN CAST(0 AS BIT) END)
 
 /*
     What each bucket actually covered, per instance.  Per instance and not summed across them, because a
