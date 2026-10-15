@@ -241,6 +241,11 @@ namespace DBADash.QueryPlan.Interaction
                     wraps: true));
             }
 
+            if (op.SetPredicate is { } set)
+            {
+                rows.Add(new PlanTooltipRow("Set predicate", PlanFormat.SingleLine(set, maxPredicateLength), wraps: true));
+            }
+
             // The operator's own warnings and the plan level ones traced to it, which is where a
             // conversion the whole statement was warned about actually happens.
             var warnings = op.Warnings.Concat(node.Statement.WarningsFor(op)).ToList();

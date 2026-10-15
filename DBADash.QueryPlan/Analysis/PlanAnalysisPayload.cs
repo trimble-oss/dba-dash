@@ -381,6 +381,7 @@ namespace DBADash.QueryPlan.Analysis
 
                 if (!string.IsNullOrWhiteSpace(op.SeekPredicate)) parts.Add("seek " + PlanFormat.SingleLine(op.SeekPredicate!, 200));
                 if (!string.IsNullOrWhiteSpace(op.Predicate)) parts.Add("predicate " + PlanFormat.SingleLine(op.Predicate!, 200));
+                if (!string.IsNullOrWhiteSpace(op.SetPredicate)) parts.Add("set " + PlanFormat.SingleLine(op.SetPredicate!, 200));
 
                 foreach (var warning in op.Warnings)
                 {

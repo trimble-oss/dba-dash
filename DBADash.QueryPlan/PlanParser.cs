@@ -594,6 +594,7 @@ namespace DBADash.QueryPlan
                 operatorNode.Objects = ChildElements(body, "Object").Select(ParseObject).ToList();
                 operatorNode.Predicate = ScalarString(ChildElements(body, "Predicate").FirstOrDefault());
                 operatorNode.SeekPredicate = DescribeSeekPredicates(body);
+                operatorNode.SetPredicate = DescribeSetPredicates(body);
             }
 
             if (operatorNode.IsPartitioned) operatorNode.Partitions = ParsePartitions(relOp, body);
@@ -1140,6 +1141,7 @@ namespace DBADash.QueryPlan
 
             AddExpression(properties, "Seek Predicates", node.SeekPredicate);
             AddExpression(properties, "Predicate", node.Predicate);
+            AddExpression(properties, "Set Predicate", node.SetPredicate);
 
             // A startup filter tests its predicate once, before running its input at all, so a
             // branch under it with no executions was skipped rather than broken.
@@ -1296,6 +1298,27 @@ namespace DBADash.QueryPlan
             }
 
             return parts.Count == 0 ? null : string.Join(", ", parts);
+        }
+
+        /// <summary>
+        /// The assignments an insert, update or merge makes.  A SimpleUpdate has one SetPredicate; an
+        /// Update can have several, and a MERGE has one per action, told apart by SetPredicateType -
+        /// which is shown only where there is more than one, as it says nothing otherwise.
+        /// </summary>
+        private static string? DescribeSetPredicates(XElement body)
+        {
+            var predicates = ChildElements(body, "SetPredicate")
+                .Select(p => (Type: Attribute(p, "SetPredicateType"), Text: ScalarString(p)))
+                .Where(p => !string.IsNullOrEmpty(p.Text))
+                .ToList();
+
+            return predicates.Count switch
+            {
+                0 => null,
+                1 => predicates[0].Text,
+                _ => string.Join(Environment.NewLine, predicates.Select(p =>
+                    string.IsNullOrEmpty(p.Type) ? p.Text : p.Type + ": " + p.Text))
+            };
         }
 
         /// <summary>

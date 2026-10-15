@@ -71,6 +71,7 @@ namespace DBADash.QueryPlan.Model
             yield return op.LogicalOp;
             yield return op.Predicate;
             yield return op.SeekPredicate;
+            yield return op.SetPredicate;
 
             // Unbracketed as well as bracketed, so dbo.Orders and [dbo].[Orders] both find it.
             foreach (var target in op.Objects)
