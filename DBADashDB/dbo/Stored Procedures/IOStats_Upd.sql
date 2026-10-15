@@ -200,7 +200,7 @@ BEGIN
 				T.io_stall_write_ms += S.io_stall_write_ms,
 				T.sample_ms_diff += S.sample_ms_diff,
 				T.MaxReadLatency = CASE WHEN S.MaxReadLatency > t.MaxReadLatency THEN S.MaxReadLatency ELSE T.MaxReadLatency END,
-				T.MaxWriteLatency = CASE WHEN S.MaxWriteLatency > t.MaxWriteLatency THEN S.MaxReadLatency ELSE T.MaxReadLatency END,
+				T.MaxWriteLatency = CASE WHEN S.MaxWriteLatency > t.MaxWriteLatency THEN S.MaxWriteLatency ELSE T.MaxWriteLatency END,
 				T.MaxLatency = CASE WHEN S.MaxLatency > t.MaxLatency THEN S.MaxLatency ELSE T.MaxLatency END,
 				T.MaxReadIOPs = CASE WHEN S.MaxReadIOPs > t.MaxReadIOPs THEN S.MaxReadIOPs ELSE T.MaxReadIOPs END,
 				T.MaxWriteIOPs = CASE WHEN S.MaxWriteIOPs > t.MaxWriteIOPs THEN S.MaxWriteIOPs ELSE T.MaxWriteIOPs END,

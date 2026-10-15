@@ -120,7 +120,7 @@ SELECT I.InstanceID,
 	SUM(Log90) AS Log90,
 	SUM(Log100) AS Log100,'
 	ELSE '' END + '
-	SUM(CPU10+CPU20+CPU30+CPU40+CPU50+CPU70+CPU80+CPU90+CPU100) AS TotalSamples,
+	SUM(CPU10+CPU20+CPU30+CPU40+CPU50+CPU60+CPU70+CPU80+CPU90+CPU100) AS TotalSamples,
 	PSS.avg_allocated_storage_percent as current_allocated_storage_percent, 
 	PSS.elastic_pool_storage_limit_mb/1024.0 as current_elastic_pool_storage_limit_gb,
 	PSS.elastic_pool_storage_used_mb/1024.0 as current_elastic_pool_storage_used_gb,

@@ -117,7 +117,7 @@ WITH agg AS(
 		SUM(Log90) AS Log90,
 		SUM(Log100) AS Log100,'
 		ELSE '' END + '
-		SUM(CPU10+CPU20+CPU30+CPU40+CPU50+CPU70+CPU80+CPU90+CPU100) AS TotalSamples
+		SUM(CPU10+CPU20+CPU30+CPU40+CPU50+CPU60+CPU70+CPU80+CPU90+CPU100) AS TotalSamples
 	FROM ' + CASE WHEN @Use60MIN=1 THEN 'dbo.AzureDBResourceStats_60MIN' ELSE 'dbo.AzureDBResourceStats_Raw' END + ' RS
 	WHERE RS.end_time>=@FromDate
 	AND RS.end_time <@ToDate
