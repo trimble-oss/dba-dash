@@ -29,9 +29,8 @@ SET DATEFIRST 1 /* Start week on Monday */
 	the whole window either read every raw row of a long window or, for a window that didn't start on the hour,
 	left out the part hour - all of it, for a window that started after the last whole hour.
 
-	Each period is split into three half open ranges: [@From, @HourFrom) and [@HourTo, @To) from the raw rows, and
-	[@HourFrom, @HourTo) from the rollup.  Each range is a seek per instance on the clustered key, as in
-	dbo.QueryStats_Get, which has the measurements behind the shape.
+	Each period is split into three half open ranges by dbo.RollupRanges.  Each range is a seek per instance on the
+	clustered key, as in dbo.QueryStats_Get, which has the measurements behind the shape.
 */
 DECLARE @HasDaysOfWeek BIT = CASE WHEN EXISTS(SELECT 1 FROM @DaysOfWeek) THEN 1 ELSE 0 END
 DECLARE @HasHours BIT = CASE WHEN EXISTS(SELECT 1 FROM @Hours) THEN 1 ELSE 0 END
@@ -77,13 +76,8 @@ BEGIN
 
 	IF @From IS NOT NULL AND @To IS NOT NULL
 	BEGIN
-		/* The start of the first hour inside the window and the end of the last.  @To is exclusive. */
-		SELECT @HourFrom = DateGroup FROM dbo.DateGroupingMins(@From, 60)
-		SELECT @HourTo = DateGroup FROM dbo.DateGroupingMins(@To, 60)
-		IF @HourFrom < @From SET @HourFrom = DATEADD(HOUR, 1, @HourFrom)
-		IF @Use = 1 SELECT @HourFrom = @From, @HourTo = @To
-		/* No whole hour inside the window: all of it is read from the raw rows, as the first range */
-		ELSE IF @HourFrom >= @HourTo OR @Use = 0 SELECT @HourFrom = @To, @HourTo = @To
+		/* @To is exclusive */
+		SELECT @HourFrom = HourFrom, @HourTo = HourTo FROM dbo.RollupRanges(@From, @To, @Use)
 
 		IF @Debug = 1
 			PRINT CONCAT('Period ', @Period, ': raw [', @From, ', ', @HourFrom, ') hourly [', @HourFrom, ', ', @HourTo, ') raw [', @HourTo, ', ', @To, ')')

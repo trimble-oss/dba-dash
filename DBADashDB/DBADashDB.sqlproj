@@ -514,6 +514,7 @@
     <Build Include="dbo\Functions\AzureDBMasterInstance.sql" />
     <Build Include="dbo\Stored Procedures\AzureServiceObjectivesHistory_Get.sql" />
     <Build Include="dbo\Functions\DateGroupingMins.sql" />
+    <Build Include="dbo\Functions\RollupRanges.sql" />
     <Build Include="dbo\Stored Procedures\DBConfigurationHistory_Get.sql" />
     <Build Include="dbo\Stored Procedures\DBConfiguration_Get.sql" />
     <Build Include="dbo\Tables\DBOptionsHistory.sql" />
