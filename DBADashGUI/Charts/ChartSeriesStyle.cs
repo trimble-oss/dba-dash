@@ -42,6 +42,12 @@ namespace DBADashGUI.Charts
         public ChartMarkers Marker { get; init; } = ChartMarkers.Default;
 
         /// <summary>
+        /// Width of a line series' line and marker outlines.  Null for the width the theme gives lines.  Only
+        /// applies with <see cref="Color"/>, as the line is repainted in that colour - and only to lines.
+        /// </summary>
+        public double? StrokeThickness { get; init; }
+
+        /// <summary>
         /// Convenience for report definitions, which have the palette as <see cref="Color"/> values:
         /// <c>ChartSeriesStyle.FromColor(DashColors.Fail, ChartMarkers.Square)</c>.
         /// </summary>

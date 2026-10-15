@@ -541,7 +541,12 @@ namespace DBADashGUI.CustomReports
             {
                 var config = GetChartConfiguration();
                 var tableIndex = (int)cboResults.SelectedValue;
-                var chart = ChartHelper.GetChartControlFromDataTable(ReportDS.Tables[tableIndex], config);
+                // Overlays aren't edited here, but the preview should look like the chart will
+                var overlays = ExistingOverlays?
+                    .Where(o => o?.Overlay != null && o.TableIndex >= 0 && o.TableIndex < ReportDS.Tables.Count)
+                    .Select(o => new ChartOverlayData(o.Overlay, ReportDS.Tables[o.TableIndex]))
+                    .ToList();
+                var chart = ChartHelper.GetChartControlFromDataTable(ReportDS.Tables[tableIndex], config, overlays);
                 var pnl = _chartLayoutHelper.CreateResizablePanel(chart, null, false, config.ChartTitle);
 
                 pnlChart.Controls.Clear();
@@ -562,13 +567,19 @@ namespace DBADashGUI.CustomReports
             numRadius.Enabled = chkDoughnut.Checked;
         }
 
+        /// <summary>
+        /// The overlays of the chart being edited.  This dialog doesn't edit them, so they're kept as they are.
+        /// </summary>
+        private List<CustomReportChartOverlay> ExistingOverlays =>
+            ChartId.HasValue && ChartId.Value < Report.Charts.Count ? Report.Charts[ChartId.Value].Overlays : null;
+
         private void Add_Click(object sender, EventArgs e)
         {
             try
             {
                 var config = GetChartConfiguration();
                 config.Validate();
-                var chart = new CustomReportChart() { Config = config, TableIndex = (int)cboResults.SelectedValue };
+                var chart = new CustomReportChart() { Config = config, TableIndex = (int)cboResults.SelectedValue, Overlays = ExistingOverlays };
                 if (ChartId.HasValue)
                 {
                     Report.Charts[ChartId.Value] = chart;
