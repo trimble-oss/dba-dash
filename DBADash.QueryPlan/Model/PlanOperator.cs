@@ -177,6 +177,12 @@ namespace DBADash.QueryPlan.Model
         public string? SeekPredicate { get; internal set; }
 
         /// <summary>
+        /// The values an insert, update or merge writes - the SET of an UPDATE, or the columns an
+        /// INSERT fills.  A MERGE has one for each of its actions, labelled with which.
+        /// </summary>
+        public string? SetPredicate { get; internal set; }
+
+        /// <summary>
         /// The values this operator works out and names - see <see cref="PlanExpression"/>.  The
         /// statement holds all of them together; this is the ones that happen here, which is what
         /// says whether a name on this operator's output list is one it computed or one it was

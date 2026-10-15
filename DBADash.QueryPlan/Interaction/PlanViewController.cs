@@ -791,6 +791,7 @@ namespace DBADash.QueryPlan.Interaction
                    Contains(op.LogicalOp, text) ||
                    Contains(op.Predicate, text) ||
                    Contains(op.SeekPredicate, text) ||
+                   Contains(op.SetPredicate, text) ||
                    op.Objects.Any(o => Contains(o.ToString(), text)) ||
                    op.OutputList.Any(c => Contains(c.ToString(), text));
         }

@@ -155,6 +155,63 @@ namespace DBADash.QueryPlan.Test
         }
 
         [TestMethod]
+        public void Parse_DescribesWhatAnUpdateSets()
+        {
+            // UPDATE ... SET Amount = 10 WHERE ID = 1, as a trivial plan: the SetPredicate sits beside
+            // the seek in the SimpleUpdate.
+            var statement = InlinePlan.Parse("""
+                <RelOp NodeId="0" PhysicalOp="Clustered Index Update" LogicalOp="Update" EstimateRows="1" EstimatedTotalSubtreeCost="0.01">
+                  <OutputList />
+                  <SimpleUpdate DMLRequestSort="0">
+                    <Object Database="[Sales]" Schema="[dbo]" Table="[Orders]" Index="[PK_Orders]" IndexKind="Clustered" Storage="RowStore" />
+                    <SeekPredicateNew>
+                      <SeekKeys>
+                        <Prefix ScanType="EQ">
+                          <RangeColumns><ColumnReference Database="[Sales]" Schema="[dbo]" Table="[Orders]" Column="ID" /></RangeColumns>
+                          <RangeExpressions><ScalarOperator ScalarString="(1)"><Const ConstValue="(1)" /></ScalarOperator></RangeExpressions>
+                        </Prefix>
+                      </SeekKeys>
+                    </SeekPredicateNew>
+                    <SetPredicate>
+                      <ScalarOperator ScalarString="[Sales].[dbo].[Orders].[Amount] = (10.00)" />
+                    </SetPredicate>
+                  </SimpleUpdate>
+                </RelOp>
+                """);
+
+            var update = TestPlans.Operator(statement, 0);
+            Assert.AreEqual("ID = (1)", update.SeekPredicate);
+            Assert.AreEqual("[Sales].[dbo].[Orders].[Amount] = (10.00)", update.SetPredicate);
+            Assert.AreEqual(update.SetPredicate, update.Properties.Single(p => p.Name == "Set Predicate").Value);
+        }
+
+        [TestMethod]
+        public void Parse_LabelsEachActionOfAMerge()
+        {
+            // A MERGE that inserts and updates has a SetPredicate for each, and they would be
+            // indistinguishable without the type.
+            var statement = InlinePlan.Parse(
+                """
+                <RelOp NodeId="0" PhysicalOp="Clustered Index Merge" LogicalOp="Merge" EstimateRows="1" EstimatedTotalSubtreeCost="0.01">
+                  <OutputList />
+                  <Update DMLRequestSort="0" ActionColumn="Action1004">
+                    <Object Database="[Sales]" Schema="[dbo]" Table="[Orders]" Index="[PK_Orders]" IndexKind="Clustered" Storage="RowStore" />
+                    <SetPredicate SetPredicateType="Update"><ScalarOperator ScalarString="[Sales].[dbo].[Orders].[Amount] = [s].[Amount]" /></SetPredicate>
+                    <SetPredicate SetPredicateType="Insert"><ScalarOperator ScalarString="[Sales].[dbo].[Orders].[ID] = [s].[ID],[Sales].[dbo].[Orders].[Amount] = [s].[Amount]" /></SetPredicate>
+                """ +
+                InlinePlan.Op(1, "Constant Scan", "Constant Scan", "") +
+                """
+                  </Update>
+                </RelOp>
+                """);
+
+            Assert.AreEqual(
+                "Update: [Sales].[dbo].[Orders].[Amount] = [s].[Amount]" + Environment.NewLine +
+                "Insert: [Sales].[dbo].[Orders].[ID] = [s].[ID],[Sales].[dbo].[Orders].[Amount] = [s].[Amount]",
+                TestPlans.Operator(statement, 0).SetPredicate);
+        }
+
+        [TestMethod]
         public void Parse_ReadsMissingIndexesAndWritesARunnableCreateStatement()
         {
             var statement = TestPlans.Statement(TestPlans.KeyLookupSeek);
