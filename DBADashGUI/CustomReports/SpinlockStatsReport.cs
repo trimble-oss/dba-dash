@@ -1,4 +1,5 @@
 using DBADashGUI.Charts;
+using LiveChartsCore.Measure;
 using System.Collections.Generic;
 
 namespace DBADashGUI.CustomReports
@@ -44,6 +45,43 @@ namespace DBADashGUI.CustomReports
                         SeriesColumn = "SpinlockName",
                         YAxisFormat = "N1",
                         YAxisMin = 0
+                    },
+                    // SQL Server's CPU on an axis of its own on the right, as spinning burns CPU in the SQL Server
+                    // process - spins rising with it is what makes spinlock contention worth looking at.  Total CPU
+                    // is in the CPU result set but not drawn: a second line needs a second colour the columns don't
+                    // use, and there isn't one that reads well on both themes.  The colour is purple as it's outside
+                    // the theme palettes (Material 500 / 200), whose nine colours the columns can use all of.
+                    Overlays = new List<CustomReportChartOverlay>
+                    {
+                        new()
+                        {
+                            TableIndex = 2,
+                            Overlay = new ChartOverlay
+                            {
+                                MetricColumns = new[] { "SQLProcessCPU" },
+                                SeriesNames = new Dictionary<string, string>
+                                {
+                                    ["SQLProcessCPU"] = "SQL Server CPU %"
+                                },
+                                SeriesStyles = new Dictionary<string, ChartSeriesStyle>
+                                {
+                                    // Thinner than the theme's lines (4) so it doesn't dominate the columns
+                                    ["SQLProcessCPU"] = new ChartSeriesStyle { Color = "#9C27B0", StrokeThickness = 2 }
+                                },
+                                YAxis = new YAxisConfiguration
+                                {
+                                    Name = "CPU",
+                                    Label = "CPU %",
+                                    Format = "0",
+                                    MinLimit = 0,
+                                    MaxLimit = 100,
+                                    Position = AxisPosition.End
+                                },
+                                // Straight lines - smoothing overshoots a step in CPU, showing values that never happened
+                                LineSmoothness = 0,
+                                GeometrySize = 0
+                            }
+                        }
                     }
                 }
             },
@@ -184,6 +222,18 @@ namespace DBADashGUI.CustomReports
                         ["BackoffsPerSec"] = new ColumnMetadata { Alias = "Backoffs/sec", FormatString = "N2" },
                         ["SleepTimeMsPerSec"] = new ColumnMetadata { Alias = "Sleep Time (ms/sec)", FormatString = "N2" },
                         ["SpinsPerCollision"] = new ColumnMetadata { Alias = "Spins/Collision", FormatString = "N1" }
+                    }
+                },
+                // Drawn over the chart (see Overlays above) and available as a grid too
+                [2] = new CustomReportResult
+                {
+                    ResultName = "CPU",
+                    Columns = new Dictionary<string, ColumnMetadata>
+                    {
+                        ["SnapshotDate"] = new ColumnMetadata { Alias = "Snapshot Date" },
+                        ["SQLProcessCPU"] = new ColumnMetadata { Alias = "SQL Server CPU %", FormatString = "N1", Description = "Average CPU used by SQL Server over the interval." },
+                        ["TotalCPU"] = new ColumnMetadata { Alias = "Total CPU %", FormatString = "N1", Description = "Average CPU used by everything on the server over the interval." },
+                        ["MaxTotalCPU"] = new ColumnMetadata { Alias = "Max Total CPU %", FormatString = "N0", Description = "Highest total CPU in any one minute of the interval." }
                     }
                 }
             },
