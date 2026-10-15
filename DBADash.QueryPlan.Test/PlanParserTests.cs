@@ -128,6 +128,33 @@ namespace DBADash.QueryPlan.Test
         }
 
         [TestMethod]
+        public void Parse_DescribesTheSeekOfASimpleUpdate()
+        {
+            // DELETE ... WHERE Code = @1 seeks within the Clustered Index Delete itself, with the
+            // SeekPredicateNew straight under the SimpleUpdate rather than wrapped in SeekPredicates.
+            var statement = InlinePlan.Parse("""
+                <RelOp NodeId="0" PhysicalOp="Clustered Index Delete" LogicalOp="Delete" EstimateRows="1" EstimatedTotalSubtreeCost="0.01">
+                  <OutputList />
+                  <SimpleUpdate DMLRequestSort="0">
+                    <Object Database="[Sales]" Schema="[dbo]" Table="[Orders]" Index="[PK_Orders]" IndexKind="Clustered" Storage="RowStore" />
+                    <SeekPredicateNew>
+                      <SeekKeys>
+                        <Prefix ScanType="EQ">
+                          <RangeColumns><ColumnReference Database="[Sales]" Schema="[dbo]" Table="[Orders]" Column="Code" /></RangeColumns>
+                          <RangeExpressions><ScalarOperator ScalarString="[@1]"><Identifier><ColumnReference Column="@1" /></Identifier></ScalarOperator></RangeExpressions>
+                        </Prefix>
+                      </SeekKeys>
+                    </SeekPredicateNew>
+                  </SimpleUpdate>
+                </RelOp>
+                """);
+
+            var delete = TestPlans.Operator(statement, 0);
+            Assert.AreEqual("Code = [@1]", delete.SeekPredicate);
+            Assert.AreEqual("Orders.PK_Orders", delete.PrimaryObject!.ShortName);
+        }
+
+        [TestMethod]
         public void Parse_ReadsMissingIndexesAndWritesARunnableCreateStatement()
         {
             var statement = TestPlans.Statement(TestPlans.KeyLookupSeek);

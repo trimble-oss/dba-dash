@@ -1227,13 +1227,6 @@ namespace DBADash.QueryPlan
                     .FirstOrDefault(value => !string.IsNullOrEmpty(value));
 
         /// <summary>
-        /// The seek predicates, as the column-and-range pairs a reader thinks in.
-        ///
-        /// Worth the effort rather than dumping the XML: the difference between a seek predicate and
-        /// a residual predicate is the difference between an index working and an index being read
-        /// end to end, and the plan does not say which is which anywhere else.
-        /// </summary>
-        /// <summary>
         /// The names of the elements that actually hold a seek's column and range, whatever is
         /// wrapped around them.
         ///
@@ -1247,44 +1240,58 @@ namespace DBADash.QueryPlan
             "Prefix", "StartRange", "EndRange", "IsNotNull"
         };
 
+        /// <summary>
+        /// The elements under an operator's body that hold its seek.  A seek or a lookup wraps them
+        /// in SeekPredicates; a SimpleUpdate - the Clustered Index Delete or Update that a single
+        /// table DML statement seeks with - holds its SeekPredicate or SeekPredicateNew directly.
+        /// </summary>
+        private static IEnumerable<XElement> SeekRanges(XElement body) =>
+            body.Elements()
+                .Where(e => e.Name.LocalName is "SeekPredicates" or "SeekPredicate" or "SeekPredicateNew")
+                .SelectMany(p => p.Descendants())
+                .Where(e => SeekRangeElements.Contains(e.Name.LocalName));
+
+        /// <summary>
+        /// The seek predicates, as the column-and-range pairs a reader thinks in.
+        ///
+        /// Worth the effort rather than dumping the XML: the difference between a seek predicate and
+        /// a residual predicate is the difference between an index working and an index being read
+        /// end to end, and the plan does not say which is which anywhere else.
+        /// </summary>
         private static string? DescribeSeekPredicates(XElement body)
         {
             var parts = new List<string>();
 
-            foreach (var predicates in ChildElements(body, "SeekPredicates"))
+            foreach (var range in SeekRanges(body))
             {
-                foreach (var range in predicates.Descendants()
-                             .Where(e => SeekRangeElements.Contains(e.Name.LocalName)))
+                var scanType = Attribute(range, "ScanType");
+
+                var columns = ChildElements(range, "RangeColumns")
+                    .SelectMany(c => ChildElements(c, "ColumnReference"))
+                    .Select(c => Attribute(c, "Column"))
+                    .Where(name => !string.IsNullOrEmpty(name))
+                    .ToList();
+
+                var expressions = ChildElements(range, "RangeExpressions")
+                    .SelectMany(e => ChildElements(e, "ScalarOperator"))
+                    .Select(s => Attribute(s, "ScalarString"))
+                    .Where(value => !string.IsNullOrEmpty(value))
+                    .ToList();
+
+                if (columns.Count == 0 && expressions.Count == 0) continue;
+
+                var op = OperatorFor(scanType);
+
+                for (var i = 0; i < Math.Max(columns.Count, expressions.Count); i++)
                 {
-                    var scanType = Attribute(range, "ScanType");
+                    var column = i < columns.Count ? columns[i] : null;
+                    var expression = i < expressions.Count ? expressions[i] : null;
 
-                    var columns = ChildElements(range, "RangeColumns")
-                        .SelectMany(c => ChildElements(c, "ColumnReference"))
-                        .Select(c => Attribute(c, "Column"))
-                        .Where(name => !string.IsNullOrEmpty(name))
-                        .ToList();
-
-                    var expressions = ChildElements(range, "RangeExpressions")
-                        .SelectMany(e => ChildElements(e, "ScalarOperator"))
-                        .Select(s => Attribute(s, "ScalarString"))
-                        .Where(value => !string.IsNullOrEmpty(value))
-                        .ToList();
-
-                    if (columns.Count == 0 && expressions.Count == 0) continue;
-
-                    var op = OperatorFor(scanType);
-
-                    for (var i = 0; i < Math.Max(columns.Count, expressions.Count); i++)
-                    {
-                        var column = i < columns.Count ? columns[i] : null;
-                        var expression = i < expressions.Count ? expressions[i] : null;
-
-                        parts.Add(column is null
-                            ? expression!
-                            : expression is null
-                                ? column + " " + op
-                                : column + " " + op + " " + expression);
-                    }
+                    parts.Add(column is null
+                        ? expression!
+                        : expression is null
+                            ? column + " " + op
+                            : column + " " + op + " " + expression);
                 }
             }
 
@@ -1316,9 +1323,7 @@ namespace DBADash.QueryPlan
 
             int? start = null, end = null;
 
-            foreach (var range in ChildElements(body, "SeekPredicates")
-                         .SelectMany(p => p.Descendants())
-                         .Where(e => SeekRangeElements.Contains(e.Name.LocalName)))
+            foreach (var range in SeekRanges(body))
             {
                 var columns = ChildElements(range, "RangeColumns").SelectMany(c => ChildElements(c, "ColumnReference")).ToList();
                 var expressions = ChildElements(range, "RangeExpressions").SelectMany(e => ChildElements(e, "ScalarOperator")).ToList();
