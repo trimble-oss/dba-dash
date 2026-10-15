@@ -18,6 +18,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -202,7 +203,8 @@ namespace DBADashGUI.Charts
         /// <summary>
         /// Returns either a Cartesian chart or a Pie chart control depending on the configuration.
         /// </summary>
-        internal static Control GetChartControlFromDataTable(DataTable dt, ChartConfigurationBase config)
+        /// <param name="overlays">Series to draw over a cartesian chart from other tables - see <see cref="ChartOverlay"/>.  Ignored for a pie chart.</param>
+        internal static Control GetChartControlFromDataTable(DataTable dt, ChartConfigurationBase config, IReadOnlyList<ChartOverlayData> overlays = null)
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
             if (config.ChartType == ChartTypes.Pie)
@@ -218,7 +220,7 @@ namespace DBADashGUI.Charts
             // For non-pie chart types we require a full ChartConfiguration instance
             if (config is ChartConfiguration cartesianConfig)
             {
-                var c = GetChartFromDataTable(dt, cartesianConfig);
+                var c = GetChartFromDataTable(dt, cartesianConfig, overlays);
                 return c;
             }
             throw new ArgumentException("Non-pie charts require a ChartConfiguration instance", nameof(config));
@@ -787,8 +789,9 @@ namespace DBADashGUI.Charts
                 // Lines and stacked areas.  A stroke of zero thickness draws nothing, so a stroke the theme
                 // has not painted yet - it paints on first draw, which is after this - takes the theme width.
                 case ILineSeries lineSeries:
-                    lineSeries.Stroke = Repaint(lineSeries.Stroke, color, DefaultLineStrokeThickness);
-                    lineSeries.GeometryStroke = Repaint(lineSeries.GeometryStroke, color, DefaultLineStrokeThickness);
+                    var thickness = (float?)style.StrokeThickness;
+                    lineSeries.Stroke = Repaint(lineSeries.Stroke, color, thickness ?? DefaultLineStrokeThickness, thickness.HasValue);
+                    lineSeries.GeometryStroke = Repaint(lineSeries.GeometryStroke, color, thickness ?? DefaultLineStrokeThickness, thickness.HasValue);
                     lineSeries.GeometryFill = Repaint(lineSeries.GeometryFill, color, 0);
                     if (lineSeries.Fill is not null)
                     {
@@ -803,8 +806,19 @@ namespace DBADashGUI.Charts
             }
         }
 
-        private static SolidColorPaint Repaint(Paint existing, SKColor color, float thicknessWhenUnpainted) =>
-            new(color) { StrokeThickness = existing?.StrokeThickness ?? thicknessWhenUnpainted };
+        /// <param name="thicknessWhenUnpainted">Used where the theme hasn't painted the series yet, or always with <paramref name="overrideThickness"/>.</param>
+        /// <remarks>
+        /// A series the theme hasn't painted has <see cref="Paint.Default"/> rather than null - a placeholder with a
+        /// width of 1 that the theme replaces on first draw.  Keeping that width would draw a recoloured line at
+        /// 1 rather than at the theme's width.
+        /// </remarks>
+        private static SolidColorPaint Repaint(Paint existing, SKColor color, float thicknessWhenUnpainted, bool overrideThickness = false) =>
+            new(color)
+            {
+                StrokeThickness = overrideThickness || existing is null || ReferenceEquals(existing, Paint.Default)
+                    ? thicknessWhenUnpainted
+                    : existing.StrokeThickness
+            };
 
         /// <summary>
         /// The colour/marker override for a series, if the configuration names one.  The key is the metric
@@ -987,7 +1001,8 @@ namespace DBADashGUI.Charts
         /// <param name="dt">DataTable containing the chart data</param>
         /// <param name="config">Chart configuration settings</param>
         /// <returns>A configured CartesianChart control</returns>
-        internal static CartesianChart GetChartFromDataTable(DataTable dt, ChartConfiguration config)
+        /// <param name="overlays">Series to draw over the chart from other tables - see <see cref="ChartOverlay"/>.</param>
+        internal static CartesianChart GetChartFromDataTable(DataTable dt, ChartConfiguration config, IReadOnlyList<ChartOverlayData> overlays = null)
         {
             var chart = new CartesianChart
             {
@@ -995,7 +1010,7 @@ namespace DBADashGUI.Charts
                 Dock = DockStyle.Fill
             };
 
-            ConfigureChart(chart, dt, config);
+            ConfigureChart(chart, dt, config, overlays);
 
             // Enable custom tooltips to prevent truncation at chart boundaries
             chart.EnableCustomTooltips();
@@ -1012,7 +1027,8 @@ namespace DBADashGUI.Charts
         /// <param name="chart">The existing CartesianChart to update</param>
         /// <param name="dt">DataTable containing the chart data</param>
         /// <param name="config">Chart configuration settings</param>
-        internal static void UpdateChart(CartesianChart chart, DataTable dt, ChartConfiguration config)
+        /// <param name="overlays">Series to draw over the chart from other tables - see <see cref="ChartOverlay"/>.</param>
+        internal static void UpdateChart(CartesianChart chart, DataTable dt, ChartConfiguration config, IReadOnlyList<ChartOverlayData> overlays = null)
         {
             ArgumentNullException.ThrowIfNull(chart);
 
@@ -1023,7 +1039,7 @@ namespace DBADashGUI.Charts
             {
                 if (chart.InvokeRequired)
                 {
-                    chart.Invoke(new Action(() => UpdateChart(chart, dt, config)));
+                    chart.Invoke(new Action(() => UpdateChart(chart, dt, config, overlays)));
                     return;
                 }
             }
@@ -1032,7 +1048,7 @@ namespace DBADashGUI.Charts
                 // Chart is already disposed; nothing to update.
                 return;
             }
-            ConfigureChart(chart, dt, config);
+            ConfigureChart(chart, dt, config, overlays);
 
             // Ensure custom tooltips are enabled
             chart.EnableCustomTooltips();
@@ -1109,12 +1125,18 @@ namespace DBADashGUI.Charts
         /// <summary>
         /// Configures a CartesianChart with data and settings
         /// </summary>
-        private static void ConfigureChart(CartesianChart chart, DataTable dt, ChartConfiguration config)
+        private static void ConfigureChart(CartesianChart chart, DataTable dt, ChartConfiguration config, IReadOnlyList<ChartOverlayData> overlays = null)
         {
             ValidateConfiguration(dt, config);
 
             var labelPaint = CreateLabelPaint();
             var series = CreateSeriesFromDataTable(dt, config, out var categories);
+
+            // Determine X axis kind to create appropriate axes
+            var xKind = DetectXAxisKind(dt, config.XColumn);
+            var overlaySeries = CreateOverlaySeries(overlays, config, xKind);
+            // The axis spans the overlays too, but the date unit (the width of a column) is the chart's own
+            var allSeries = series.Concat(overlaySeries.SelectMany(o => o.Series)).ToList();
 
             // Only extract date range from series if not fully specified in config
             DateTime minDate, maxDate;
@@ -1125,13 +1147,11 @@ namespace DBADashGUI.Charts
             }
             else
             {
-                (minDate, maxDate) = GetDateRangeFromSeries(series);
+                (minDate, maxDate) = GetDateRangeFromSeries(allSeries);
                 minDate = config.XAxisMin ?? minDate;
                 maxDate = config.XAxisMax ?? maxDate;
             }
 
-            // Determine X axis kind to create appropriate axes
-            var xKind = DetectXAxisKind(dt, config.XColumn);
             Axis[] xAxes;
             if (xKind == XAxisKind.DateTime)
             {
@@ -1165,9 +1185,25 @@ namespace DBADashGUI.Charts
 
             var yAxes = CreateYAxes(config, labelPaint);
 
-            chart.Series = series;
+            // An overlay with an axis of its own gets it after the chart's axes, so the chart's axis indexes
+            // are the same with or without overlays.
+            var allYAxes = yAxes.ToList();
+            foreach (var (overlay, overlaySeriesList) in overlaySeries)
+            {
+                if (overlay.YAxis == null) continue;
+                var axis = CreateYAxis(overlay.YAxis, labelPaint);
+                // The chart's own axis draws the grid.  A second set of lines at a different scale is noise.
+                axis.ShowSeparatorLines = false;
+                allYAxes.Add(axis);
+                foreach (var s in overlaySeriesList)
+                {
+                    SetScalesYAt(s, allYAxes.Count - 1);
+                }
+            }
+
+            chart.Series = allSeries;
             chart.XAxes = xAxes;
-            chart.YAxes = yAxes;
+            chart.YAxes = allYAxes.ToArray();
 
             // Assign series to Y-axes
             // Priority: ColumnAxisNames (name-based) > MetricColumnAxisMap (index-based)
@@ -1183,6 +1219,91 @@ namespace DBADashGUI.Charts
             chart.LegendPosition = config.LegendPosition;
             chart.LegendTextPaint = labelPaint;
             chart.LegendTextSize = DBADashUser.ChartAxisLabelFontSize;
+        }
+
+        /// <summary>
+        /// Series drawn over a chart from other tables, which is recorded so <see cref="FindSourceRow"/> knows
+        /// their points didn't come from the chart's own table.
+        /// </summary>
+        private static readonly ConditionalWeakTable<ISeries, ChartOverlay> OverlaySeries = new();
+
+        /// <summary>
+        /// True for a series drawn from a <see cref="ChartOverlay"/> rather than from the chart's own table.
+        /// </summary>
+        internal static bool IsOverlaySeries(ISeries series) => series != null && OverlaySeries.TryGetValue(series, out _);
+
+        /// <summary>
+        /// The series for each overlay that can be drawn on the chart.  An overlay that doesn't fit - a missing
+        /// column, or X values of a different kind to the chart's - is left off rather than failing the chart,
+        /// which still means something without it.
+        /// </summary>
+        private static List<(ChartOverlay Overlay, List<ISeries> Series)> CreateOverlaySeries(IReadOnlyList<ChartOverlayData> overlays, ChartConfiguration config, XAxisKind chartXKind)
+        {
+            var result = new List<(ChartOverlay, List<ISeries>)>();
+            if (overlays == null) return result;
+
+            foreach (var (overlay, table) in overlays)
+            {
+                if (overlay == null || table == null) continue;
+                try
+                {
+                    overlay.Validate();
+                }
+                catch (InvalidOperationException ex)
+                {
+                    Debug.WriteLine($"Chart overlay skipped - {ex.Message}");
+                    continue;
+                }
+
+                var xColumn = overlay.XColumn ?? config.XColumn;
+                if (!table.Columns.Contains(xColumn))
+                {
+                    Debug.WriteLine($"Chart overlay skipped - column '{xColumn}' not found");
+                    continue;
+                }
+                var xKind = DetectXAxisKind(table, xColumn);
+                if (xKind != chartXKind || xKind == XAxisKind.Category)
+                {
+                    Debug.WriteLine($"Chart overlay skipped - its X values ({xKind}) don't fit the chart's X axis ({chartXKind})");
+                    continue;
+                }
+
+                var lineSmoothness = overlay.LineSmoothness ?? ChartConfiguration.DefaultLineSmoothness;
+                var seriesList = new List<ISeries>();
+                foreach (var metricColumn in overlay.MetricColumns)
+                {
+                    if (!table.Columns.Contains(metricColumn))
+                    {
+                        Debug.WriteLine($"Chart overlay series skipped - column '{metricColumn}' not found");
+                        continue;
+                    }
+                    var name = GetFriendlyColumnName(metricColumn, overlay.SeriesNames);
+                    var style = overlay.SeriesStyles != null && overlay.SeriesStyles.TryGetValue(metricColumn, out var s) ? s : null;
+
+                    ISeries series = null;
+                    if (xKind == XAxisKind.DateTime)
+                    {
+                        var values = ExtractDateTimePoints(table.AsEnumerable(), xColumn, metricColumn);
+                        if (values.Length > 0)
+                            series = CreateSeriesForGroup(name, values, overlay.ChartType, lineSmoothness, overlay.GeometrySize, false, style);
+                    }
+                    else
+                    {
+                        var values = ExtractNumericPoints(table.AsEnumerable(), xColumn, metricColumn);
+                        if (values.Length > 0)
+                            series = CreateSeriesForGroup(name, values, overlay.ChartType, lineSmoothness, overlay.GeometrySize, false, style);
+                    }
+                    if (series == null) continue;
+
+                    OverlaySeries.AddOrUpdate(series, overlay);
+                    seriesList.Add(series);
+                }
+                if (seriesList.Count > 0)
+                {
+                    result.Add((overlay, seriesList));
+                }
+            }
+            return result;
         }
 
         private static void ValidateConfiguration(DataTable dt, ChartConfiguration config)
@@ -1361,13 +1482,17 @@ namespace DBADashGUI.Charts
         /// Converts a column name to a friendly display name by adding spaces before capitals
         /// and handling common abbreviations (e.g., "SizeGB" -> "Size (GB)", "UsedMB" -> "Used (MB)")
         /// </summary>
-        private static string GetFriendlyColumnName(string columnName, ChartConfigurationBase config)
+        private static string GetFriendlyColumnName(string columnName, ChartConfigurationBase config) =>
+            GetFriendlyColumnName(columnName, config.SeriesNames);
+
+        /// <param name="seriesNames">Overrides - key = column name.  May be null.</param>
+        private static string GetFriendlyColumnName(string columnName, Dictionary<string, string> seriesNames)
         {
             if (string.IsNullOrWhiteSpace(columnName))
                 return columnName;
 
             // Check if there's an override in the configuration
-            if (config.SeriesNames != null && config.SeriesNames.TryGetValue(columnName, out var customName))
+            if (seriesNames != null && seriesNames.TryGetValue(columnName, out var customName))
                 return customName;
 
             var result = columnName;
@@ -1593,6 +1718,8 @@ namespace DBADashGUI.Charts
         /// </summary>
         private static DataRow FindCartesianSourceRow(DataTable dt, ChartConfiguration config, ChartPoint point)
         {
+            // An overlay's point came from another table, so whichever row of this one shares its X value isn't it
+            if (IsOverlaySeries(point.Context?.Series)) return null;
             if (string.IsNullOrWhiteSpace(config.XColumn) || !dt.Columns.Contains(config.XColumn)) return null;
             var x = point.Coordinate.SecondaryValue;
             if (double.IsNaN(x)) return null;
@@ -1679,46 +1806,7 @@ namespace DBADashGUI.Charts
             // If multiple Y-axes are configured, use them
             if (config.YAxes != null && config.YAxes.Length > 0)
             {
-                var axes = new Axis[config.YAxes.Length];
-                for (int i = 0; i < config.YAxes.Length; i++)
-                {
-                    var axisConfig = config.YAxes[i];
-                    var axis = new Axis
-                    {
-                        LabelsPaint = labelPaint,
-                        TextSize = labelFontSize,
-                        MinLimit = axisConfig.MinLimit ?? 0,
-                        Name = axisConfig.Label,
-                        NamePaint = labelPaint,
-                        NameTextSize = nameFontSize,
-                        Position = axisConfig.Position,
-                        Padding = DefaultYAxisPadding
-                    };
-
-                    if (axisConfig.MaxLimit.HasValue)
-                        axis.MaxLimit = axisConfig.MaxLimit.Value;
-
-                    if (!string.IsNullOrEmpty(axisConfig.Format))
-                    {
-                        // Capture format locally to avoid closure issues and guard against invalid format strings
-                        var fmt = axisConfig.Format;
-                        axis.Labeler = value =>
-                        {
-                            try
-                            {
-                                return value.ToString(fmt, CultureInfo.InvariantCulture);
-                            }
-                            catch (FormatException)
-                            {
-                                // Fall back to a safe invariant format if the provided format is invalid
-                                return value.ToString(CultureInfo.InvariantCulture);
-                            }
-                        };
-                    }
-
-                    axes[i] = axis;
-                }
-                return axes;
+                return config.YAxes.Select(axisConfig => CreateYAxis(axisConfig, labelPaint)).ToArray();
             }
 
             // Otherwise, create a single Y-axis using legacy properties
@@ -1756,6 +1844,57 @@ namespace DBADashGUI.Charts
             }
 
             return new Axis[] { yAxis };
+        }
+
+        private static Axis CreateYAxis(YAxisConfiguration axisConfig, SolidColorPaint labelPaint)
+        {
+            var axis = new Axis
+            {
+                LabelsPaint = labelPaint,
+                TextSize = DBADashUser.ChartAxisLabelFontSize,
+                MinLimit = axisConfig.MinLimit ?? 0,
+                Name = axisConfig.Label,
+                NamePaint = labelPaint,
+                NameTextSize = DBADashUser.ChartAxisNameFontSize,
+                Position = axisConfig.Position,
+                Padding = DefaultYAxisPadding
+            };
+
+            if (axisConfig.MaxLimit.HasValue)
+                axis.MaxLimit = axisConfig.MaxLimit.Value;
+
+            if (!string.IsNullOrEmpty(axisConfig.Format))
+            {
+                // Capture format locally to avoid closure issues and guard against invalid format strings
+                var fmt = axisConfig.Format;
+                axis.Labeler = value =>
+                {
+                    try
+                    {
+                        return value.ToString(fmt, CultureInfo.InvariantCulture);
+                    }
+                    catch (FormatException)
+                    {
+                        // Fall back to a safe invariant format if the provided format is invalid
+                        return value.ToString(CultureInfo.InvariantCulture);
+                    }
+                };
+            }
+
+            return axis;
+        }
+
+        /// <summary>
+        /// Draws a series against the Y axis at <paramref name="axisIndex"/>.  ScalesYAt is declared on each series
+        /// type rather than on ISeries, hence the reflection.
+        /// </summary>
+        private static void SetScalesYAt(ISeries series, int axisIndex)
+        {
+            var property = series.GetType().GetProperty("ScalesYAt");
+            if (property != null && property.CanWrite)
+            {
+                property.SetValue(series, axisIndex);
+            }
         }
 
         /// <summary>

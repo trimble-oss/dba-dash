@@ -81,6 +81,7 @@ namespace DBADashGUI.Charts
             public string PendingXLabel { get; set; }
             public List<(string name, string value, Color color)> PendingSeriesData { get; set; }
             public int PendingHighlightIndex { get; set; } = -1;
+            public int PendingSeparatorIndex { get; set; } = -1; // Row the overlay series start at, -1 for none
             public Point PendingMouseLocation { get; set; }
             public DateTime LastMouseMoveTime { get; set; } = DateTime.MinValue;
             public DateTime LastPointChangeTime { get; set; } = DateTime.MinValue;
@@ -109,6 +110,14 @@ namespace DBADashGUI.Charts
             private TableLayoutPanel _layout;
             private List<(Panel namePanel, Label valueLabel)> _seriesControls = new();
             private int _highlightedIndex = -1; // Index into series of the item under the mouse, -1 for none
+            private int _separatorIndex = -1; // Index into series of the row a separator is drawn above, -1 for none
+            private readonly Pen _separatorPen;
+
+            /// <summary>
+            /// Extra space above the row a separator is drawn over.  The separator is drawn in that row's top margin
+            /// rather than as a row of its own, so row numbers still match series indexes for the highlight.
+            /// </summary>
+            private const int SeparatorGap = 9;
 
             public TooltipForm()
             {
@@ -128,6 +137,7 @@ namespace DBADashGUI.Charts
                 _highlightFont = new Font("Segoe UI", 9F, FontStyle.Bold);
                 _highlightBrush = new SolidBrush(DashColors.TrimbleBlue);
                 _highlightColorBoxPen = new Pen(HighlightTextColor); // Keeps the series color visible against the highlight
+                _separatorPen = new Pen(TextColor);
 
                 // Enhanced double buffering to reduce flicker
                 SetStyle(ControlStyles.OptimizedDoubleBuffer |
@@ -154,6 +164,7 @@ namespace DBADashGUI.Charts
                     _highlightFont?.Dispose();
                     _highlightBrush?.Dispose();
                     _highlightColorBoxPen?.Dispose();
+                    _separatorPen?.Dispose();
                 }
                 base.Dispose(disposing);
             }
@@ -220,26 +231,42 @@ namespace DBADashGUI.Charts
 
             private void Layout_CellPaint(object sender, TableLayoutCellPaintEventArgs e)
             {
-                if (_highlightedIndex < 0) return;
                 var headerRows = _dateLabel != null ? 1 : 0;
-                if (e.Row != _highlightedIndex + headerRows) return;
+                var isSeparatorRow = _separatorIndex > 0 && e.Row == _separatorIndex + headerRows;
 
-                e.Graphics.FillRectangle(_highlightBrush, e.CellBounds);
-                if (e.Column == 0 && _highlightedIndex < _seriesControls.Count)
+                if (_highlightedIndex >= 0 && e.Row == _highlightedIndex + headerRows)
                 {
-                    var namePanel = _seriesControls[_highlightedIndex].namePanel;
-                    var colorBox = namePanel.Controls[0];
-                    e.Graphics.DrawRectangle(_highlightColorBoxPen, namePanel.Left + colorBox.Left - 1, namePanel.Top + colorBox.Top - 1, colorBox.Width + 1, colorBox.Height + 1);
+                    // The separator row's cell includes the gap above it, which the highlight leaves alone
+                    var bounds = isSeparatorRow
+                        ? Rectangle.FromLTRB(e.CellBounds.Left, e.CellBounds.Top + SeparatorGap, e.CellBounds.Right, e.CellBounds.Bottom)
+                        : e.CellBounds;
+                    e.Graphics.FillRectangle(_highlightBrush, bounds);
+                    if (e.Column == 0 && _highlightedIndex < _seriesControls.Count)
+                    {
+                        var namePanel = _seriesControls[_highlightedIndex].namePanel;
+                        var colorBox = namePanel.Controls[0];
+                        e.Graphics.DrawRectangle(_highlightColorBoxPen, namePanel.Left + colorBox.Left - 1, namePanel.Top + colorBox.Top - 1, colorBox.Width + 1, colorBox.Height + 1);
+                    }
+                }
+
+                if (isSeparatorRow)
+                {
+                    // Drawn in each column's cell, which meet, so it reads as one line across the tooltip
+                    var y = e.CellBounds.Top + SeparatorGap / 2;
+                    e.Graphics.DrawLine(_separatorPen, e.CellBounds.Left, y, e.CellBounds.Right, y);
                 }
             }
 
-            public void SetContent(DateTime? date, string xLabel, List<(string name, string value, Color color)> series, int highlightIndex)
+            /// <param name="separatorIndex">Index into <paramref name="series"/> of the row to draw a separator above - the
+            /// first of the series overlaid on the chart from another table.  -1 for none.</param>
+            public void SetContent(DateTime? date, string xLabel, List<(string name, string value, Color color)> series, int highlightIndex, int separatorIndex = -1)
             {
-                // Try to reuse existing controls if structure is the same (same series count, same header visibility)
+                // Try to reuse existing controls if structure is the same (same series count, same header visibility, separator in the same place)
                 var hasHeader = date.HasValue || !string.IsNullOrEmpty(xLabel);
                 bool canReuse = _layout != null &&
                                series.Count == _seriesControls.Count &&
-                               (hasHeader == (_dateLabel != null));
+                               (hasHeader == (_dateLabel != null)) &&
+                               separatorIndex == _separatorIndex;
 
                 if (canReuse)
                 {
@@ -288,6 +315,7 @@ namespace DBADashGUI.Charts
                     _borderPanel.Controls.Clear();
                     _seriesControls.Clear();
                     _highlightedIndex = -1;
+                    _separatorIndex = separatorIndex;
 
                     _layout = new TableLayoutPanel
                     {
@@ -325,14 +353,19 @@ namespace DBADashGUI.Charts
                     }
 
                     // Series lines with two columns: name (with color) and value
+                    var seriesIndex = 0;
                     foreach (var (name, value, color) in series)
                     {
+                        // Room above the row for the separator - see SeparatorGap
+                        var topMargin = separatorIndex > 0 && seriesIndex == separatorIndex ? 2 + SeparatorGap : 2;
+                        seriesIndex++;
+
                         // Left column: color box + series name
                         var namePanel = new Panel
                         {
                             AutoSize = true,
                             Height = 16,
-                            Margin = new Padding(0, 2, 10, 2),
+                            Margin = new Padding(0, topMargin, 10, 2),
                             Padding = new Padding(0),
                             BackColor = Color.Transparent
                         };
@@ -372,7 +405,7 @@ namespace DBADashGUI.Charts
                             Font = _normalFont,
                             ForeColor = TextColor,
                             TextAlign = ContentAlignment.MiddleRight,
-                            Margin = new Padding(0, 2, 0, 2),
+                            Margin = new Padding(0, topMargin, 0, 2),
                             Padding = new Padding(0),
                             Anchor = AnchorStyles.Right,
                             BackColor = Color.Transparent
@@ -496,7 +529,7 @@ namespace DBADashGUI.Charts
 
                             if (state.PendingSeriesData != null && state.PendingSeriesData.Count > 0)
                             {
-                                tooltipForm.SetContent(state.PendingDate, state.PendingXLabel, state.PendingSeriesData, state.PendingHighlightIndex);
+                                tooltipForm.SetContent(state.PendingDate, state.PendingXLabel, state.PendingSeriesData, state.PendingHighlightIndex, state.PendingSeparatorIndex);
                                 try
                                 {
                                     PositionTooltip(chart, tooltipForm, state.PendingMouseLocation);
@@ -741,6 +774,16 @@ namespace DBADashGUI.Charts
                     }
                 }
 
+                // Series overlaid from another table (CPU over spinlocks, say) are listed after the chart's own, with a
+                // separator above them.  Reordered before the highlight is worked out so its index matches the rows.
+                var separatorIndex = -1;
+                if (points.Any(p => ChartHelper.IsOverlaySeries(p.Context.Series)))
+                {
+                    points = points.OrderBy(p => ChartHelper.IsOverlaySeries(p.Context.Series)).ToList(); // Stable, so each group keeps its order
+                    var chartPointCount = points.Count(p => !ChartHelper.IsOverlaySeries(p.Context.Series));
+                    separatorIndex = chartPointCount > 0 ? chartPointCount : -1;
+                }
+
                 if (points.Count > 0)
                 {
                     var firstPoint = points[0];
@@ -863,10 +906,11 @@ namespace DBADashGUI.Charts
                         {
                             // Tooltip already showing: keep it visible and update immediately
                             // User has already indicated they want to see tooltips
-                            tooltipForm.SetContent(dateTime, xLabel, seriesData, highlightIndex);
+                            tooltipForm.SetContent(dateTime, xLabel, seriesData, highlightIndex, separatorIndex);
                             state.PendingDate = dateTime;
                             state.PendingXLabel = xLabel;
                             state.PendingSeriesData = seriesData;
+                            state.PendingSeparatorIndex = separatorIndex;
                             state.PendingMouseLocation = e.Location;
                         }
                         else
@@ -875,6 +919,7 @@ namespace DBADashGUI.Charts
                             state.PendingDate = dateTime;
                             state.PendingXLabel = xLabel;
                             state.PendingSeriesData = seriesData;
+                            state.PendingSeparatorIndex = separatorIndex;
                             state.PendingMouseLocation = e.Location;
 
                             // Start timer if not already running

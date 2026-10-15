@@ -1301,7 +1301,7 @@ namespace DBADashGUI.CustomReports
                     // If this is a CartesianChart, update in place
                     if (chart is CartesianChart cchart && chartConfig is ChartConfiguration crc)
                     {
-                        ChartHelper.UpdateChart(cchart, dt, crc);
+                        ChartHelper.UpdateChart(cchart, dt, crc, GetChartOverlays(chartWrapper));
                     }
                     else
                     {
@@ -1309,7 +1309,7 @@ namespace DBADashGUI.CustomReports
                         var parent = chart.Parent;
                         try
                         {
-                            var newChart = ChartHelper.GetChartControlFromDataTable(dt, chartConfig);
+                            var newChart = ChartHelper.GetChartControlFromDataTable(dt, chartConfig, GetChartOverlays(chartWrapper));
                             newChart.Tag = chartWrapper;
                             AttachChartDrillDown(newChart, chartWrapper);
 
@@ -1369,6 +1369,16 @@ namespace DBADashGUI.CustomReports
                 }
             }
         }
+
+        /// <summary>
+        /// The chart's overlays with the result sets they're drawn from.  An overlay whose result set the report
+        /// didn't return - a proc that returns only a message in some cases - is left off.
+        /// </summary>
+        private List<ChartOverlayData> GetChartOverlays(CustomReportChart chartWrapper) =>
+            chartWrapper.Overlays?
+                .Where(o => o?.Overlay != null && reportDS != null && o.TableIndex >= 0 && o.TableIndex < reportDS.Tables.Count)
+                .Select(o => new ChartOverlayData(o.Overlay, reportDS.Tables[o.TableIndex]))
+                .ToList();
 
         /// <summary>
         /// The chart configuration to draw with, which is the report's own unless the chart asked to be drawn
@@ -1600,7 +1610,7 @@ namespace DBADashGUI.CustomReports
                     var dt = reportDS.Tables[chartWrapper.TableIndex];
                     try
                     {
-                        chartControl = ChartHelper.GetChartControlFromDataTable(dt, chartConfig);
+                        chartControl = ChartHelper.GetChartControlFromDataTable(dt, chartConfig, GetChartOverlays(chartWrapper));
                     }
                     // ArgumentException for a missing column, InvalidOperationException from the config's own
                     // Validate - both mean "this data can't drive this chart".

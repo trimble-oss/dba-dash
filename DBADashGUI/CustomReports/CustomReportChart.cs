@@ -75,6 +75,12 @@ namespace DBADashGUI.CustomReports
         public List<string> DrillDownExcludedValues { get; init; }
 
         /// <summary>
+        /// Series drawn over this chart from other result sets - CPU as a line over a chart of what might be
+        /// using it.  See <see cref="Charts.ChartOverlay"/>.  Cartesian charts only.
+        /// </summary>
+        public List<CustomReportChartOverlay> Overlays { get; init; }
+
+        /// <summary>
         /// Persisted state for the metric control. This is the `IMetric` POCO
         /// instance. When present it will be assigned to the control's `Metric`
         /// property so the control's setter can update UI. Assigning a non-null
@@ -92,5 +98,19 @@ namespace DBADashGUI.CustomReports
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// An overlay with the result set it's drawn from - the overlay's counterpart of the
+    /// <see cref="CustomReportChart.Config"/> and <see cref="CustomReportChart.TableIndex"/> pair.
+    /// </summary>
+    public record CustomReportChartOverlay
+    {
+        /// <summary>
+        /// Index of the DataTable in the report DataSet the overlay is drawn from.
+        /// </summary>
+        public int TableIndex { get; init; }
+
+        public Charts.ChartOverlay Overlay { get; init; }
     }
 }
