@@ -1252,7 +1252,12 @@ FROM (VALUES('dbo','ObjectExecutionStats',120),
 				('dbo','LatchStats',120),
 				('dbo','SpinlockStats',120),
 				('dbo','LatchStats_60MIN',730),
-				('dbo','SpinlockStats_60MIN',730)
+				('dbo','SpinlockStats_60MIN',730),
+				/* At least as long as the tables above - their rates divide by the time recorded in these */
+				('dbo','LatchStatsCollection',120),
+				('dbo','SpinlockStatsCollection',120),
+				('dbo','LatchStatsCollection_60MIN',730),
+				('dbo','SpinlockStatsCollection_60MIN',730)
 				) AS t(SchemaName,TableName,RetentionDays)
 WHERE NOT EXISTS(SELECT 1
 				FROM dbo.DataRetention DR

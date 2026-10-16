@@ -6,7 +6,6 @@ CREATE TABLE dbo.SpinlockStats_60MIN (
     spins BIGINT NOT NULL,
     sleep_time BIGINT NOT NULL,
     backoffs BIGINT NOT NULL,
-    sample_ms_diff INT NOT NULL,
     CONSTRAINT PK_SpinlockStats_60MIN PRIMARY KEY CLUSTERED (InstanceID ASC, SnapshotDate ASC, SpinlockID ASC) WITH (DATA_COMPRESSION = PAGE) ON PS_SpinlockStats_60MIN(SnapshotDate),
     CONSTRAINT FK_SpinlockStats_60MIN_Instances FOREIGN KEY (InstanceID) REFERENCES dbo.Instances (InstanceID),
     CONSTRAINT FK_SpinlockStats_60MIN_Spinlock FOREIGN KEY (SpinlockID) REFERENCES dbo.Spinlock (SpinlockID)

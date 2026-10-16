@@ -54,45 +54,55 @@ BEGIN
 END
 SET @DateGroupingMin = CASE WHEN @DateGroupingMin < 1 THEN 1 ELSE @DateGroupingMin END
 
-/* The hourly aggregation is used where the buckets are an hour or more - nothing is lost by it at that grain */
-DECLARE @Use60MIN BIT = CASE WHEN @DateGroupingMin >= 60 AND @DateGroupingMin % 60 = 0 THEN 1 ELSE 0 END
+/*	Whole hours come from the hourly rollups and the part hours at either end of the range from the raw rows, so a
+	range that doesn't start and end on the hour isn't widened or narrowed to whole hours.  Only where the buckets are
+	a whole number of hours - an hour's rows can be added into a bucket of an hour, six or a day but not split into
+	smaller ones, so other buckets read the raw rows alone.  See dbo.RollupRanges.  */
+DECLARE @HourFrom DATETIME2(2), @HourTo DATETIME2(2)
+SELECT @HourFrom = HourFrom, @HourTo = HourTo
+FROM dbo.RollupRanges(@FromDate, @ToDate, CASE WHEN @DateGroupingMin % 60 <> 0 THEN CAST(0 AS BIT) END)
 
 CREATE TABLE #Latch(
 	LatchClassID SMALLINT NOT NULL,
-	SnapshotDate DATETIME2(2) NOT NULL,
 	waiting_requests_count BIGINT NOT NULL,
 	wait_time_ms BIGINT NOT NULL,
-	sample_ms_diff INT NOT NULL,
 	/* The measure being charted, so ranking and the chart value don't need to repeat the CASE */
-	measure BIGINT NULL,
+	measure BIGINT NOT NULL,
 	/* The chart bucket, which the peak rates in the summary are also taken over */
-	DateGroup DATETIME2(2) NULL
+	DateGroup DATETIME2(2) NOT NULL
 )
 
-IF @Use60MIN = 1
-BEGIN
-	INSERT INTO #Latch(LatchClassID,SnapshotDate,waiting_requests_count,wait_time_ms,sample_ms_diff)
-	SELECT LatchClassID,SnapshotDate,waiting_requests_count,wait_time_ms,sample_ms_diff
-	FROM dbo.LatchStats_60MIN
-	WHERE InstanceID = @InstanceID
-	AND SnapshotDate >= @FromDate
-	AND SnapshotDate < @ToDate
-END
-ELSE
-BEGIN
-	INSERT INTO #Latch(LatchClassID,SnapshotDate,waiting_requests_count,wait_time_ms,sample_ms_diff)
-	SELECT LatchClassID,SnapshotDate,waiting_requests_count,wait_time_ms,sample_ms_diff
-	FROM dbo.LatchStats
-	WHERE InstanceID = @InstanceID
-	AND SnapshotDate >= @FromDate
-	AND SnapshotDate < @ToDate
-END
-
-UPDATE L
-SET L.measure = CASE @Measure WHEN 'WaitingRequests' THEN L.waiting_requests_count ELSE L.wait_time_ms END,
-	L.DateGroup = DG.DateGroup
-FROM #Latch L
+INSERT INTO #Latch(LatchClassID,waiting_requests_count,wait_time_ms,measure,DateGroup)
+SELECT	L.LatchClassID,
+		SUM(L.waiting_requests_count),
+		SUM(L.wait_time_ms),
+		SUM(CASE @Measure WHEN 'WaitingRequests' THEN L.waiting_requests_count ELSE L.wait_time_ms END),
+		DG.DateGroup
+FROM (	/* The part hour at the start of the range, from the raw rows */
+		SELECT LatchClassID,SnapshotDate,waiting_requests_count,wait_time_ms
+		FROM dbo.LatchStats
+		WHERE InstanceID = @InstanceID
+		AND SnapshotDate >= @FromDate
+		AND SnapshotDate < @HourFrom
+		UNION ALL
+		/* The whole hours, from the rollup */
+		SELECT LatchClassID,SnapshotDate,waiting_requests_count,wait_time_ms
+		FROM dbo.LatchStats_60MIN
+		WHERE InstanceID = @InstanceID
+		AND SnapshotDate >= @HourFrom
+		AND SnapshotDate < @HourTo
+		UNION ALL
+		/* The part hour at the end */
+		SELECT LatchClassID,SnapshotDate,waiting_requests_count,wait_time_ms
+		FROM dbo.LatchStats
+		WHERE InstanceID = @InstanceID
+		AND SnapshotDate >= @HourTo
+		AND SnapshotDate < @ToDate
+	) L
 CROSS APPLY dbo.DateGroupingMins(L.SnapshotDate,@DateGroupingMin) DG
+GROUP BY L.LatchClassID,
+		DG.DateGroup
+OPTION(RECOMPILE)
 
 DECLARE @TotalWaitMs DECIMAL(38,3)
 SELECT @TotalWaitMs = SUM(wait_time_ms)
@@ -100,30 +110,39 @@ FROM #Latch
 
 /*	Rates are per second of time the collection covers, as in the Waits report.  The collection is off by default, so
 	it may be switched on and off around an investigation - dividing by the date range would understate the rate.
-	Each row's sample_ms_diff is the time since the previous snapshot (an hour's worth of snapshots in the hourly table),
-	and is the same for every row of a snapshot, so it's counted once per snapshot.  This covers gaps in collection,
-	partial buckets at the ends of the range, and a long interval after the service or collection was stopped (which is
-	averaged over its length rather than shown as a spike).
-	A snapshot where no latch class was waited on produces no rows, so its time isn't counted.  That only happens on an
-	instance with almost no latch activity, where it inflates rates that are tiny anyway.  */
-SELECT	SnapshotDate,
-		DateGroup,
-		MAX(sample_ms_diff) AS sample_ms_diff
-INTO #Snapshots
-FROM #Latch
-GROUP BY SnapshotDate,
-		DateGroup
+	The time covered is recorded per snapshot in dbo.LatchStatsCollection (an hour's worth of snapshots in the hourly
+	table), including snapshots where no latch class was waited on.  This covers gaps in collection, partial buckets
+	at the ends of the range, and a long interval after the service or collection was stopped (which is averaged over
+	its length rather than shown as a spike).
+	Seconds covered by each chart bucket - for the chart, and for the peak rates in the summary.  */
+SELECT	DG.DateGroup,
+		SUM(CAST(C.sample_ms_diff AS BIGINT))/1000.0 AS CoveredSec
+INTO #Coverage
+FROM (	SELECT SnapshotDate,sample_ms_diff
+		FROM dbo.LatchStatsCollection
+		WHERE InstanceID = @InstanceID
+		AND SnapshotDate >= @FromDate
+		AND SnapshotDate < @HourFrom
+		UNION ALL
+		SELECT SnapshotDate,sample_ms_diff
+		FROM dbo.LatchStatsCollection_60MIN
+		WHERE InstanceID = @InstanceID
+		AND SnapshotDate >= @HourFrom
+		AND SnapshotDate < @HourTo
+		UNION ALL
+		SELECT SnapshotDate,sample_ms_diff
+		FROM dbo.LatchStatsCollection
+		WHERE InstanceID = @InstanceID
+		AND SnapshotDate >= @HourTo
+		AND SnapshotDate < @ToDate
+	) C
+CROSS APPLY dbo.DateGroupingMins(C.SnapshotDate,@DateGroupingMin) DG
+GROUP BY DG.DateGroup
+OPTION(RECOMPILE)
 
 DECLARE @CoveredSec DECIMAL(38,3)
-SELECT @CoveredSec = NULLIF(SUM(CAST(sample_ms_diff AS BIGINT)),0)/1000.0
-FROM #Snapshots
-
-/* Seconds covered by each chart bucket - for the chart, and for the peak rates in the summary */
-SELECT	DateGroup,
-		SUM(CAST(sample_ms_diff AS BIGINT))/1000.0 AS CoveredSec
-INTO #Coverage
-FROM #Snapshots
-GROUP BY DateGroup
+SELECT @CoveredSec = NULLIF(SUM(CoveredSec),0)
+FROM #Coverage
 
 /*	Peak rate for each latch class - the highest of its rates in the chart buckets.  The summary rates are averages
 	over the whole range, so a burst of contention can be lost in them on a longer range. */

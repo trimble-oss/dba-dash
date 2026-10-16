@@ -1112,6 +1112,18 @@
     <Build Include="dbo\Stored Procedures\SpinlockStats_Upd.sql" />
     <Build Include="dbo\Stored Procedures\SpinlockStats_Get.sql" />
     <Build Include="dbo\Stored Procedures\SpinlockStats_Del.sql" />
+    <Build Include="Storage\PF_LatchStatsCollection.sql" />
+    <Build Include="Storage\PS_LatchStatsCollection.sql" />
+    <Build Include="Storage\PF_LatchStatsCollection_60MIN.sql" />
+    <Build Include="Storage\PS_LatchStatsCollection_60MIN.sql" />
+    <Build Include="dbo\Tables\LatchStatsCollection.sql" />
+    <Build Include="dbo\Tables\LatchStatsCollection_60MIN.sql" />
+    <Build Include="Storage\PF_SpinlockStatsCollection.sql" />
+    <Build Include="Storage\PS_SpinlockStatsCollection.sql" />
+    <Build Include="Storage\PF_SpinlockStatsCollection_60MIN.sql" />
+    <Build Include="Storage\PS_SpinlockStatsCollection_60MIN.sql" />
+    <Build Include="dbo\Tables\SpinlockStatsCollection.sql" />
+    <Build Include="dbo\Tables\SpinlockStatsCollection_60MIN.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
