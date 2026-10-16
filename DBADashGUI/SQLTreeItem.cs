@@ -285,6 +285,10 @@ namespace DBADashGUI
                 case TreeType.AgentJob:
                     AddAgentJobContextMenuItems();
                     break;
+
+                case TreeType.DatabasesFolder or TreeType.AgentJobs:
+                    AddFilterContextMenu();
+                    break;
             }
         }
 
@@ -419,6 +423,12 @@ namespace DBADashGUI
 
         private void SetIcon()
         {
+            if (IsFiltered)
+            {
+                ImageIndex = 6; // FilterFolderOpened_16x.png
+                SelectedImageIndex = ImageIndex;
+                return;
+            }
             switch (Type)
             {
                 case TreeType.DBADashRoot:
@@ -984,7 +994,10 @@ namespace DBADashGUI
             ContextMenuStrip ??= new ContextMenuStrip();
             var mnuFilter = new ToolStripMenuItem("Filter") { Image = Resources.Filter_16x };
             mnuFilter.Click += MnuFilter_Click;
-            ContextMenuStrip.Items.Add(mnuFilter);
+            var mnuClearFilter = new ToolStripMenuItem("Clear Filter") { Image = Resources.Eraser_16x };
+            mnuClearFilter.Click += MnuClearFilter_Click;
+            ContextMenuStrip.Items.AddRange(new ToolStripItem[] { mnuFilter, mnuClearFilter });
+            ContextMenuStrip.Opening += (_, _) => mnuClearFilter.Visible = IsFiltered;
         }
 
         public void AddInstanceActionsContextMenu()
@@ -1101,46 +1114,118 @@ namespace DBADashGUI
             }
         }
 
-        public string FilterText = "";
+        /// <summary>
+        /// Text the child nodes are filtered on (case-insensitive contains).  Empty when the node isn't filtered.
+        /// </summary>
+        public string FilterText { get; private set; } = string.Empty;
+
+        public bool IsFiltered => !string.IsNullOrEmpty(FilterText);
+
+        /// <summary>
+        /// Filter was applied by a filtered parent folder (e.g. System Databases within Databases) rather than by the user
+        /// on this node, so it is cleared again when the parent's filter changes.
+        /// </summary>
+        private bool isFilterInherited;
+
+        /// <summary>
+        /// The full set of child nodes while a filter is applied.  Empty when the node isn't filtered - Nodes is then the full set.
+        /// </summary>
+        private readonly List<SQLTreeItem> unfilteredNodes = new();
+
+        /// <summary>
+        /// Children haven't been loaded yet - the node only holds the placeholder that triggers a lazy load on expand.
+        /// </summary>
+        private bool IsChildrenLoaded => !(Nodes.Count == 1 && Nodes[0] is SQLTreeItem { Type: TreeType.DummyNode });
 
         private void MnuFilter_Click(object sender, EventArgs e)
         {
             var filter = FilterText;
-            if (CommonShared.ShowInputDialog(ref filter, "Filter") == DialogResult.OK)
+            if (CommonShared.ShowInputDialog(ref filter, "Filter", default, "Show items containing:") == DialogResult.OK)
             {
                 Filter(filter);
             }
         }
 
-        private readonly List<SQLTreeItem> unfilteredNodes = new();
+        private void MnuClearFilter_Click(object sender, EventArgs e) => Filter(string.Empty);
 
+        /// <summary>
+        /// Show only the child nodes whose name contains <paramref name="filter"/>.  Child folders that have been loaded
+        /// (e.g. System Databases) are searched too.  An empty filter shows all child nodes.
+        /// </summary>
         public void Filter(string filter)
         {
-            Expand();
+            filter = filter?.Trim() ?? string.Empty;
+            isFilterInherited = false;
+            if (!IsChildrenLoaded)
+            {
+                // Children are loaded asynchronously on expand.  The filter is applied once they arrive - see ChildrenLoaded.
+                FilterText = filter;
+                SetIcon();
+                Expand();
+                return;
+            }
+            TreeView?.BeginUpdate();
+            try
+            {
+                ApplyFilter(filter);
+            }
+            finally
+            {
+                TreeView?.EndUpdate();
+            }
+            if (IsFiltered) Expand();
+        }
+
+        /// <summary>
+        /// Call after the child nodes have been (re)loaded so any filter on this node is applied to the new set.
+        /// </summary>
+        public void ChildrenLoaded()
+        {
+            unfilteredNodes.Clear();
+            if (IsFiltered)
+            {
+                ApplyFilter(FilterText);
+            }
+        }
+
+        /// <summary>
+        /// Apply the filter to the child nodes.  Returns true if any child node is visible.
+        /// </summary>
+        private bool ApplyFilter(string filter)
+        {
             if (unfilteredNodes.Count == 0)
             {
-                foreach (SQLTreeItem itm in Nodes)
+                unfilteredNodes.AddRange(Nodes.Cast<SQLTreeItem>());
+            }
+            FilterText = filter;
+            var visible = new List<TreeNode>();
+            var expand = new List<SQLTreeItem>();
+            foreach (var n in unfilteredNodes)
+            {
+                if (!IsFiltered || n.Text.Contains(filter, StringComparison.CurrentCultureIgnoreCase))
                 {
-                    unfilteredNodes.Add(itm)
-;
+                    // Name matches so show everything under it
+                    if (n.isFilterInherited) n.ApplyFilter(string.Empty);
+                    visible.Add(n);
+                }
+                else if (n.Type == TreeType.Folder && n.IsChildrenLoaded && (!n.IsFiltered || n.isFilterInherited))
+                {
+                    n.isFilterInherited = true;
+                    if (!n.ApplyFilter(filter)) continue;
+                    visible.Add(n);
+                    expand.Add(n);
                 }
             }
             Nodes.Clear();
-            foreach (var n in unfilteredNodes.Where(n => string.IsNullOrEmpty(filter) || n.Text.Contains(filter, StringComparison.CurrentCultureIgnoreCase)))
+            Nodes.AddRange(visible.ToArray());
+            expand.ForEach(n => n.Expand());
+            if (!IsFiltered)
             {
-                Nodes.Add(n);
+                unfilteredNodes.Clear();
+                isFilterInherited = false;
             }
-            if (unfilteredNodes.Count == Nodes.Count)
-            {
-                ImageIndex = 3;
-                SelectedImageIndex = 3;
-            }
-            else
-            {
-                ImageIndex = 6;
-                SelectedImageIndex = 6;
-            }
-            FilterText = filter;
+            SetIcon();
+            return visible.Count > 0;
         }
 
         private bool IsThisInstance(int InstanceID)
