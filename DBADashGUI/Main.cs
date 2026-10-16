@@ -1596,10 +1596,15 @@ namespace DBADashGUI
                     tabPerformance, tabAzureSummary, tabAzureDB, tabMetrics,tabDBADashAlerts, tabSlowQueries, tabObjectExecutionSummary,
                     tabQueryStats, tabWaits, tabRunningQueries, tabFiles, tabTopQueries, tabQueryStoreForcedPlans, tabTuningRecommendations
                 });
-                // Latch stats can be collected for Azure SQL DB too (spinlock stats can't) - only shown where it's enabled or has data
+                // Latch and spinlock stats can be collected for Azure SQL DB too - only shown where enabled or there's data, as for an instance
                 if (n.Context.HasLatchStats)
                 {
                     allowedTabs.Insert(allowedTabs.IndexOf(tabWaits) + 1, tabLatches);
+                }
+                if (n.Context.HasSpinlockStats)
+                {
+                    var after = allowedTabs.Contains(tabLatches) ? tabLatches : tabWaits;
+                    allowedTabs.Insert(allowedTabs.IndexOf(after) + 1, tabSpinlocks);
                 }
             }
             else if (n.Type == SQLTreeItem.TreeType.Instance)
