@@ -1492,6 +1492,10 @@ namespace DBADashGUI
                                     { DriveName = driveLetter, ForeColor = color }).Cast<TreeNode>().ToArray());
         }
 
+        private static SQLTreeItem FindDatabaseNode(SQLTreeItem dbFolder, string database) =>
+            dbFolder?.Nodes.Cast<SQLTreeItem>()
+                .FirstOrDefault(d => string.Equals(d.DatabaseName, database, StringComparison.CurrentCultureIgnoreCase));
+
         private static async Task ExpandDatabasesAsync(SQLTreeItem dbFolder)
         {
             List<TreeNode> nodesToAdd = new();
@@ -1936,64 +1940,42 @@ namespace DBADashGUI
                 n.Nodes.Add(loading);
                 tv1.Refresh();
 
-                if (n.Type == SQLTreeItem.TreeType.Instance)
+                switch (n.Type)
                 {
-                    ExpandInstance(n);
-                    if (n.Nodes.Contains(loading)) n.Nodes.Remove(loading);
-                    n.Expand();
-                    return;
-                }
+                    case SQLTreeItem.TreeType.Instance:
+                        ExpandInstance(n);
+                        break;
 
-                if (n.Type == SQLTreeItem.TreeType.DatabasesFolder)
-                {
-                    await ExpandDatabasesAsync(n);
-                    if (n.Nodes.Contains(loading)) n.Nodes.Remove(loading);
-                    n.Expand();
-                    return;
-                }
+                    case SQLTreeItem.TreeType.DatabasesFolder:
+                        await ExpandDatabasesAsync(n);
+                        break;
 
-                if (n.Type == SQLTreeItem.TreeType.AgentJobs)
-                {
-                    await ExpandJobsAsync(n);
-                    if (n.Nodes.Contains(loading)) n.Nodes.Remove(loading);
-                    n.Expand();
-                    return;
-                }
+                    case SQLTreeItem.TreeType.AgentJobs:
+                        await ExpandJobsAsync(n);
+                        break;
 
-                if (n.Type == SQLTreeItem.TreeType.AgentJob)
-                {
-                    await ExpandJobStepsAsync(n);
-                    if (n.Nodes.Contains(loading)) n.Nodes.Remove(loading);
-                    n.Expand();
-                    return;
-                }
+                    case SQLTreeItem.TreeType.AgentJob:
+                        await ExpandJobStepsAsync(n);
+                        break;
 
-                if (n.Type == SQLTreeItem.TreeType.Database)
-                {
-                    n.AddDatabaseFolders();
-                    if (n.Nodes.Contains(loading)) n.Nodes.Remove(loading);
-                    n.Expand();
-                    return;
-                }
+                    case SQLTreeItem.TreeType.Database:
+                        n.AddDatabaseFolders();
+                        break;
 
-                if (n.Type == SQLTreeItem.TreeType.Storage)
-                {
-                    await ExpandStorageAsync(n);
-                    if (n.Nodes.Contains(loading)) n.Nodes.Remove(loading);
-                    n.Expand();
-                    return;
-                }
+                    case SQLTreeItem.TreeType.Storage:
+                        await ExpandStorageAsync(n);
+                        break;
 
-                if (n.Type == SQLTreeItem.TreeType.CustomToolsFolder)
-                {
-                    await n.AddCustomToolsAsync();
-                    if (n.Nodes.Contains(loading)) n.Nodes.Remove(loading);
-                    n.Expand();
-                    return;
-                }
+                    case SQLTreeItem.TreeType.CustomToolsFolder:
+                        await n.AddCustomToolsAsync();
+                        break;
 
-                await ExpandObjectsAsync(n);
+                    default:
+                        await ExpandObjectsAsync(n);
+                        break;
+                }
                 if (n.Nodes.Contains(loading)) n.Nodes.Remove(loading);
+                n.ChildrenLoaded();
                 n.Expand();
             }
         }
@@ -2411,8 +2393,13 @@ namespace DBADashGUI
                         nInstance.Expand();
                         var dbFolder = nInstance.FindChildOfType(SQLTreeItem.TreeType.DatabasesFolder);
                         dbFolder?.Expand();
-                        var db = dbFolder?.Nodes.Cast<SQLTreeItem>()
-                            .FirstOrDefault(d => string.Equals(d.DatabaseName, e.Database, StringComparison.CurrentCultureIgnoreCase));
+                        var db = FindDatabaseNode(dbFolder, e.Database);
+                        if (db == null && dbFolder is { IsFiltered: true })
+                        {
+                            // The database could be hidden by the folder filter
+                            dbFolder.Filter(string.Empty);
+                            db = FindDatabaseNode(dbFolder, e.Database);
+                        }
                         if (db == null)
                         {
                             MessageBox.Show("Database not found: " + e.Database, "Warning", MessageBoxButtons.OK,
