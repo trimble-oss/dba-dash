@@ -33,6 +33,12 @@ namespace DBADash.QueryPlan.Model
         public string? Storage { get; internal set; }
 
         /// <summary>
+        /// A table variable, or a table-valued parameter, which showplan names as the query does:
+        /// @t, with no database or schema.
+        /// </summary>
+        public bool IsTableVariable => Table is { Length: > 1 } name && name[0] == '@';
+
+        /// <summary>
         /// What the node caption shows: the table, then the index when there is one, then the alias.
         /// Deliberately short - the database and schema are the same for nearly every operator in a
         /// plan, so spending node width on them buys nothing.  The full name is a tooltip away.

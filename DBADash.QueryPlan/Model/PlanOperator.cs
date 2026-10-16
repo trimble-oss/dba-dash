@@ -69,6 +69,13 @@ namespace DBADash.QueryPlan.Model
         /// </summary>
         public double? EstimateRowsWithoutRowGoal { get; internal set; }
 
+        /// <summary>
+        /// How many rows the optimiser believed the table it reads held when it compiled the plan,
+        /// where showplan says.  Zero on a table variable read by a plan compiled before the table
+        /// was filled, which is why that plan was costed for one row.
+        /// </summary>
+        public double? TableCardinality { get; internal set; }
+
         public double EstimateIO { get; internal set; }
 
         public double EstimateCPU { get; internal set; }

@@ -98,6 +98,59 @@ namespace DBADash.QueryPlan.Test
         /// <summary>The query above as an estimated plan, with no partitions accessed to go by.</summary>
         public const string PartitionEliminationLessThanEstimated = "PartitionEliminationLessThanEstimated";
 
+        // Captured from SQL Server 2025 (17.0.4025.3, Express) on LocalDB, over dbo.Nums (N int primary
+        // key, Grp int, Pad char(200)) holding 200,000 rows.  @t is (N int primary key, Grp int), filled
+        // with the 50,000 rows N <= 50000, and the query reads Grp = 5 (486 rows) joined back to Nums.
+        // dbo.MSTVF(@Max) is a multi-statement function returning the same rows N <= @Max.
+
+        /// <summary>The read of @t at compatibility level 170: deferred compilation knew it held 50,000 rows.</summary>
+        public const string TableVariableDeferred = "TableVariableDeferred";
+
+        /// <summary>The same read at compatibility level 140: compiled while @t was empty, so costed for one row.</summary>
+        public const string TableVariableCompiledEmpty = "TableVariableCompiledEmpty";
+
+        /// <summary>INSERT @t SELECT ...: serial, with the table variable non-parallel reason.</summary>
+        public const string TableVariableInsert = "TableVariableInsert";
+
+        /// <summary>The DECLARE, INSERT and SELECT batch as an estimated plan at level 170: the read is costed for one row.</summary>
+        public const string TableVariableEstimated = "TableVariableEstimated";
+
+        /// <summary>dbo.MSTVF(50000) joined to Nums at level 170: interleaved execution ran it first.</summary>
+        public const string FunctionInterleaved = "FunctionInterleaved";
+
+        /// <summary>The same query run again from cache: still flagged as interleaved, still compiled for 50,000 rows.</summary>
+        public const string FunctionInterleavedReused = "FunctionInterleavedReused";
+
+        /// <summary>
+        /// dbo.MSTVF(40000) grouped, at level 170, read from the plan cache: interleaved when it was
+        /// compiled, so estimated at 40,000 rows, with no run figures and nothing else to say so.
+        /// </summary>
+        public const string FunctionCachedInterleaved = "FunctionCachedInterleaved";
+
+        /// <summary>The same query at level 130: no interleaved execution, so the fixed guess of 100 rows.</summary>
+        public const string FunctionFixedGuess = "FunctionFixedGuess";
+
+        /// <summary>The same query as an estimated plan at level 170, with the function body's statements.</summary>
+        public const string FunctionEstimated = "FunctionEstimated";
+
+        /// <summary>
+        /// (VALUES (1000), (2000)) CROSS APPLY dbo.MSTVF(v.m) at level 170: a lone Table-valued function
+        /// operator run once per outer row, not interleaved.
+        /// </summary>
+        public const string FunctionCrossApply = "FunctionCrossApply";
+
+        /// <summary>
+        /// STRING_SPLIT('1,2,3,4,5', ',') joined to Nums: a built-in table-valued function, estimated
+        /// at its fixed guess of 50 rows, returning 5.
+        /// </summary>
+        public const string StringSplit = "StringSplit";
+
+        /// <summary>
+        /// sys.dm_exec_requests CROSS APPLY sys.dm_exec_sql_text: two DMVs, SYSREQUESTS returning its
+        /// estimated 77 rows, and FNGETSQL run once for each, at a row a call, returning 1 row in all.
+        /// </summary>
+        public const string BuiltInFunctions = "BuiltInFunctions";
+
         public static string Xml(string name)
         {
             var assembly = Assembly.GetExecutingAssembly();

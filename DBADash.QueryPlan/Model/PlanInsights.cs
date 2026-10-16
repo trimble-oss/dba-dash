@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using DBADash.QueryPlan.Layout;
 
 namespace DBADash.QueryPlan.Model
 {
@@ -172,6 +173,13 @@ namespace DBADash.QueryPlan.Model
 
             if (OptionalParametersInsight(statement) is { } optional) insights.Add(optional);
 
+            var tableVariables = TableVariableInsight(statement, PlanTableVariables.OperatorsIn(statement));
+            if (tableVariables is not null) insights.Add(tableVariables);
+
+            insights.AddRange(PlanTableVariables.FunctionsIn(statement).Select(call => FunctionInsight(statement, call)));
+
+            if (BuiltInFunctionsInsight(PlanTableVariables.BuiltInFunctionsIn(statement)) is { } builtIn) insights.Add(builtIn);
+
             insights.AddRange(statement.Operators
                 .OrderBy(op => op.NodeId)
                 .Select(op => PartitionEliminationInsight(op, statement))
@@ -200,8 +208,12 @@ namespace DBADash.QueryPlan.Model
                     dependsOnPlanKind: true));
             }
 
-            // Said above, as part of the scalar UDF card, rather than repeated here as a plain reason code.
-            if (!IsUdfNonParallelReason(statement.NonParallelPlanReason) && !string.IsNullOrEmpty(statement.NonParallelPlanReason))
+            // Said above, as part of the scalar UDF or table variable card, rather than repeated here
+            // as a plain reason code.
+            var explainedAbove = IsUdfNonParallelReason(statement.NonParallelPlanReason) ||
+                                 (tableVariables is not null && IsTableVariableNonParallelReason(statement.NonParallelPlanReason));
+
+            if (!explainedAbove && !string.IsNullOrEmpty(statement.NonParallelPlanReason))
             {
                 insights.Add(PlanInsight.Analysis(
                     PlanWarningSeverity.Information,
@@ -250,6 +262,11 @@ namespace DBADash.QueryPlan.Model
                     ? new[] { OptionalParametersInsight(statement, [use], onOneOperator: true) }
                     : Enumerable.Empty<PlanInsight>())
                 .Concat(PartitionEliminationInsight(op, statement) is { } partitions ? new[] { partitions } : Enumerable.Empty<PlanInsight>())
+                .Concat(PlanTableVariables.Touches(op) ? new[] { TableVariableInsight(statement, [op])! } : Enumerable.Empty<PlanInsight>())
+                .Concat(PlanTableVariables.FunctionCallFor(op, statement) is { } call
+                    ? new[] { FunctionInsight(statement, call) }
+                    : Enumerable.Empty<PlanInsight>())
+                .Concat(PlanTableVariables.IsBuiltInFunction(op) ? new[] { BuiltInFunctionsInsight([op])! } : Enumerable.Empty<PlanInsight>())
                 .ToList();
         }
 
@@ -858,6 +875,279 @@ namespace DBADash.QueryPlan.Model
 
             return text.Substring(start);
         }
+
+        /// <summary>
+        /// The table variables in <paramref name="operators"/> - see <see cref="PlanTableVariables"/>:
+        /// that they have no statistics, how many rows the optimizer believed each held when it
+        /// compiled the plan, and what they mean for a parallel plan.  Information, as using one is
+        /// a choice with trade-offs rather than a fault; the misestimate it causes shows on the
+        /// arrows.  Null when there are no operators.
+        /// </summary>
+        private static PlanInsight? TableVariableInsight(PlanStatement statement, IReadOnlyList<PlanOperator> operators)
+        {
+            if (operators.Count == 0) return null;
+
+            var names = operators.SelectMany(PlanTableVariables.NamesOn).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+            var one = names.Count == 1;
+
+            var text = new StringBuilder(one ? "Table variable " : "Table variables ")
+                .Append(PlanFormat.List(names, MaxNamedParameters))
+                .Append(one ? " has" : " have")
+                .Append(" no statistics, so the optimizer has to guess how many rows match a predicate or join on ")
+                .Append(one ? "it" : "them")
+                .Append('.');
+
+            // What the optimizer believed each held, from the first read of it: a write doesn't say.
+            var reads = operators
+                .Where(op => op.TableCardinality is not null && !PlanTableVariables.Modifies(op))
+                .GroupBy(op => PlanTableVariables.NamesOn(op).First(), StringComparer.OrdinalIgnoreCase)
+                .Select(g => (Name: g.Key, Read: g.First()))
+                .ToList();
+
+            var compiledEmpty = false;
+            var compiledFilled = false;
+
+            foreach (var (name, read) in reads)
+            {
+                if (read.TableCardinality == 0)
+                {
+                    compiledEmpty = true;
+                    text.Append(" The plan was compiled while ").Append(name).Append(" was empty, so it is costed for one row");
+
+                    if (read.ActualRows is { } actual and > 1)
+                    {
+                        text.Append(", but ").Append(Nodes([read])).Append(" returned ").Append(RowCount(actual));
+                    }
+
+                    text.Append('.');
+                    continue;
+                }
+
+                compiledFilled = true;
+                var held = read.TableCardinality!.Value;
+                text.Append(" The optimizer knew ").Append(name).Append(" held ").Append(RowCount(held)).Append(" when it compiled the plan");
+
+                // Without a predicate the estimate is the table's size, and there was nothing to guess.
+                var estimate = read.EstimateRowsAllExecutions ?? read.EstimatedTotalRows;
+                if (Math.Abs(estimate - held) >= 1)
+                {
+                    text.Append(", but not how many of them match: it estimated ")
+                        .Append(RowCount(estimate))
+                        .Append(" for ")
+                        .Append(Nodes([read]));
+
+                    if (read.ActualRows is { } actual) text.Append(", which returned ").Append(PlanFormat.Rows(actual));
+                }
+
+                text.Append('.');
+            }
+
+            if (compiledEmpty)
+            {
+                // Checked at levels 140 and 170: a SHOWPLAN plan reads zero at both, as nothing runs
+                // to fill the table.  A plan from the cache or Query Store has no run figures either,
+                // but a run compiled it, and the plan doesn't reliably say which of the two it is.
+                text.Append(" Table variable deferred compilation (compatibility level 150, SQL Server 2019, and above) compiles a statement with the " +
+                            "table's row count the first time it runs, and later runs reuse that plan; OPTION (RECOMPILE) compiles it with the current count every time.")
+                    .Append(statement.IsActualPlan
+                        ? " This plan was compiled with neither, or while the table was empty."
+                        : " An estimated plan (SET SHOWPLAN_XML, or Display Estimated Execution Plan) always shows one row, as nothing runs to fill the table; " +
+                          "a plan from the plan cache or Query Store was compiled with neither, or while the table was empty.");
+
+                text.Append(" A plan costed for one row looks cheap, which favors nested loops joins and a serial plan.");
+            }
+            else if (compiledFilled && !PlanOptionalParameters.HasRecompileHint(statement.StatementText))
+            {
+                text.Append(" Unless the statement recompiles, later runs reuse this plan however many rows the table holds then.");
+            }
+
+            var modified = operators.Where(PlanTableVariables.Modifies)
+                .SelectMany(PlanTableVariables.NamesOn)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            text.Append(modified.Count > 0 || IsTableVariableNonParallelReason(statement.NonParallelPlanReason)
+                ? " This statement changes " + (modified.Count > 0 ? PlanFormat.List(modified, MaxNamedParameters) : "a table variable") +
+                  ", so it runs on a single thread: SQL Server never uses a parallel plan for a statement that modifies a table variable."
+                : " Reading a table variable can use a parallel plan, but the statement that fills it always runs on a single thread.");
+
+            // A bare newline: a card's label counts "\r\n" as two characters and draws it as one.
+            // INSERT ... SELECT runs in parallel only into a heap or a clustered columnstore index, and
+            // only with TABLOCK, from compatibility level 130.
+            text.Append("\nFor more than a few rows, consider a temp table (#table) instead: it has statistics, and filling one can use a parallel plan - " +
+                        "SELECT ... INTO can, and so can INSERT ... SELECT into a heap with a TABLOCK hint (compatibility level 130, SQL Server 2016, and above).");
+
+            return PlanInsight.Analysis(PlanWarningSeverity.Information, TableVariableTitle, text.ToString(), operators);
+        }
+
+        /// <summary>
+        /// A call to a user-defined table-valued function - see <see cref="PlanFunctionCall"/>: the
+        /// optimizer can't see inside it, so its row count is a guess unless interleaved execution
+        /// ran it first.  Information, for the same reason as the table variable card.
+        /// </summary>
+        private static PlanInsight FunctionInsight(PlanStatement statement, PlanFunctionCall call)
+        {
+            var function = call.Function;
+            var calls = function.Runtime?.LogicalExecutions ?? (long)Math.Round(function.EstimatedExecutions);
+            var text = new StringBuilder();
+
+            if (call.IsMultiStatement)
+            {
+                text.Append("Multi-statement table-valued function ").Append(call.Name)
+                    .Append(": SQL Server runs it to fill a table variable with its rows, then reads them from there. ")
+                    .Append("The work inside it isn't shown in this plan, its rows have no statistics, and filling the table variable runs on a single thread.");
+            }
+            else
+            {
+                // Called with arguments from the outer query, a multi-statement function streams its
+                // rows like a CLR one does, and the plan doesn't say which it is.
+                text.Append("Table-valued function ").Append(call.Name)
+                    .Append(" (a multi-statement or CLR function): the work inside it isn't shown in this plan, and the optimizer can't see how many rows it returns.");
+            }
+
+            // What this run returned.  A function that fills a table returns its rows through a scan
+            // of that table, and its own operator counts none; the scan has to have run once for its
+            // rows read to be the table's size.
+            var returned = call.Readers.Count > 0
+                ? call.Readers.FirstOrDefault(r => r.Runtime is { LogicalExecutions: 1 } && IsScan(r.Kind))?.Runtime is { } scan
+                    ? scan.ActualRowsRead ?? scan.ActualRows
+                    : (long?)null
+                : function.Runtime?.ActualRows;
+
+            // Interleaved execution compiles the plan for the count the function returned, which the
+            // read of its table records.  Neither of the fixed guesses on a plan with no run figures
+            // means the same, as only a run is flagged: checked on a cached plan at level 170, which
+            // carries the count and nothing else to say how it got it.
+            var compiledFor = call.Readers.Select(r => r.TableCardinality).FirstOrDefault(c => c is not null) ?? function.EstimateRows;
+            var fixedGuess = function.EstimateRows is 100 or 1;
+
+            if (call.IsInterleaved || (call.IsMultiStatement && !function.HasRuntime && !fixedGuess))
+            {
+                text.Append(call.IsInterleaved
+                        ? " Interleaved execution ran it before the rest of the plan was compiled, so the plan was built for the " + RowCount(compiledFor) + " it returned then."
+                        : " The plan was compiled for " + RowCount(compiledFor) + ", not a fixed guess: interleaved execution ran the function before compiling " +
+                          "the rest of the plan, and that is how many it returned.");
+
+                if (call.IsInterleaved && returned is { } now && now != (long)compiledFor)
+                {
+                    text.Append(" This run it returned ").Append(RowCount(now)).Append('.');
+                }
+
+                text.Append(" Later runs reuse the plan, however many rows the function returns.");
+            }
+            else if (call.IsMultiStatement)
+            {
+                // The fixed guesses, checked at compatibility levels 110 (legacy estimator), 130 and 170.
+                text.Append(function.EstimateRows switch
+                {
+                    100 => " The optimizer used its fixed guess for a multi-statement function, 100 rows (the legacy cardinality estimator, from before SQL Server 2014, guesses 1)",
+                    1 => " The optimizer used the legacy cardinality estimator's fixed guess for a multi-statement function, 1 row (SQL Server 2014's estimator and later guess 100)",
+                    _ => " The optimizer estimated " + RowCount(function.EstimateRows)
+                });
+
+                if (returned is { } actual) text.Append(", and it returned ").Append(RowCount(actual));
+
+                // Checked: not interleaved below level 140, nor in INSERT ... SELECT.
+                text.Append(". Interleaved execution (compatibility level 140, SQL Server 2017, and above) runs a multi-statement function " +
+                            "before compiling the rest of the plan, and plans for the rows it returns. ")
+                    .Append(statement.IsActualPlan
+                        ? "It didn't here: it needs level 140 or above, doesn't apply in a statement that modifies data, and can be switched off " +
+                          "with the INTERLEAVED_EXECUTION_TVF database scoped configuration or the DISABLE_INTERLEAVED_EXECUTION_TVF hint."
+                        : "It only happens when the query runs, and not in a statement that modifies data, so an estimated plan (SET SHOWPLAN_XML, or " +
+                          "Display Estimated Execution Plan) always shows the fixed guess; a plan from the plan cache or Query Store that shows it was " +
+                          "compiled without interleaved execution.");
+            }
+            else
+            {
+                text.Append(" The optimizer estimated ").Append(RowCount(function.EstimateRows));
+                if (calls > 1) text.Append(" per call");
+
+                if (returned is { } actual)
+                {
+                    text.Append(", and it returned ").Append(RowCount(actual));
+                    if (calls > 1) text.Append(" over ").Append(calls.ToString("N0", CultureInfo.CurrentCulture)).Append(" calls");
+                }
+
+                text.Append('.');
+
+                // Checked: CROSS APPLY dbo.MSTVF(v.m) runs once per outer row, and isn't interleaved.
+                if (calls > 1)
+                {
+                    text.Append(" If it is a multi-statement function, interleaved execution can't improve the estimate: " +
+                                "it doesn't apply when the function's arguments come from the outer query, as they do when it runs once per outer row.");
+                }
+            }
+
+            text.Append("\nIf it can be written as an inline table-valued function (RETURNS TABLE AS RETURN SELECT ...), SQL Server expands it " +
+                        "into the calling query, where the optimizer estimates it like the rest of the query.");
+
+            return PlanInsight.Analysis(PlanWarningSeverity.Information, FunctionTitle, text.ToString(), call.Operators);
+        }
+
+        private static bool IsScan(PlanOperatorKind kind) =>
+            kind is PlanOperatorKind.TableScan or PlanOperatorKind.ClusteredIndexScan or PlanOperatorKind.NonClusteredIndexScan;
+
+        /// <summary>
+        /// The built-in table-valued functions in <paramref name="functions"/> - DMVs, STRING_SPLIT,
+        /// OPENJSON - said once for all of them: a query over the DMVs reads half a dozen, and a card
+        /// each would bury everything else.  Names the one whose estimate was furthest out, where a
+        /// run says so.  Null when there are none.
+        /// </summary>
+        private static PlanInsight? BuiltInFunctionsInsight(IReadOnlyList<PlanOperator> functions)
+        {
+            if (functions.Count == 0) return null;
+
+            // As the plan names them - SYSSESSIONS rather than sys.dm_exec_sessions - which is what
+            // the operators show.
+            var names = functions.Select(f => f.PrimaryObject?.Table is { Length: > 0 } table ? table : f.DisplayName)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+            var one = names.Count == 1;
+
+            var text = new StringBuilder(one ? "Built-in table-valued function " : "Built-in table-valued functions ")
+                .Append(PlanFormat.List(names, MaxNamedFunctions))
+                .Append(": the optimizer has no statistics on the rows ")
+                .Append(one ? "it returns, so its estimate is" : "they return, so their estimates are")
+                .Append(" often a fixed guess, and the work ")
+                .Append(one ? "it does" : "they do")
+                .Append(" isn't shown in this plan.");
+
+            var worst = functions
+                .Where(f => f.RowEstimateError >= PlanLayoutEngine.EstimateMismatchThreshold)
+                .OrderByDescending(f => f.RowEstimateError)
+                .FirstOrDefault();
+
+            if (worst is not null)
+            {
+                text.Append(functions.Count == 1 ? " It was estimated at " : " The furthest out was " + Nodes([worst]) + ": estimated at ")
+                    .Append(RowCount(worst.EstimateRowsAllExecutions!.Value))
+                    .Append(worst.Runtime!.LogicalExecutions > 1
+                        ? " over " + worst.Runtime.LogicalExecutions.ToString("N0", CultureInfo.CurrentCulture) + " calls"
+                        : string.Empty)
+                    .Append(functions.Count == 1 ? " and returned " : ", it returned ")
+                    .Append(RowCount(worst.Runtime!.ActualRows))
+                    .Append('.');
+            }
+
+            text.Append("\nWhere a wrong estimate leads to a poor join or memory grant, putting the function's rows in a temp table first gives the optimizer statistics on them.");
+
+            return PlanInsight.Analysis(PlanWarningSeverity.Information, BuiltInFunctionsTitle, text.ToString(), functions);
+        }
+
+        /// <summary>The most built-in functions the card names before the rest are counted.</summary>
+        private const int MaxNamedFunctions = 4;
+
+        private const string BuiltInFunctionsTitle = "Built-in table-valued functions";
+
+        /// <summary>A row count with its noun: "1 row", "486 rows".</summary>
+        private static string RowCount(double rows) => PlanFormat.Rows(rows) + (rows == 1 ? " row" : " rows");
+
+        private const string TableVariableTitle = "Table variable";
+
+        private const string FunctionTitle = "Table-valued function";
+
+        private static bool IsTableVariableNonParallelReason(string? reason) =>
+            string.Equals(reason, PlanTableVariables.NonParallelPlanReason, StringComparison.OrdinalIgnoreCase);
 
         /// <summary>The most parameters an optional parameters card names before the rest are counted.</summary>
         private const int MaxNamedParameters = 4;

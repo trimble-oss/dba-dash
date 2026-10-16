@@ -47,6 +47,12 @@ namespace DBADash.QueryPlan.Model
         /// <summary>Batch mode row batches, present only for batch mode operators.</summary>
         public long? Batches { get; internal set; }
 
+        /// <summary>
+        /// True on a multi-statement table-valued function that interleaved execution ran before the
+        /// rest of the plan was compiled.  Only a run's figures say so.
+        /// </summary>
+        public bool IsInterleavedExecuted { get; internal set; }
+
         /// <summary>Memory granted to the operator for its input phase, in KB.</summary>
         public long? InputMemoryGrantKb { get; internal set; }
 
@@ -170,6 +176,9 @@ namespace DBADash.QueryPlan.Model
 
         /// <summary>Row or Batch.  Batch mode on a row store operator is worth noticing.</summary>
         public string? ActualExecutionMode { get; }
+
+        /// <summary>See <see cref="PlanThreadCounters.IsInterleavedExecuted"/>.</summary>
+        public bool IsInterleavedExecuted => Threads.Any(t => t.IsInterleavedExecuted);
 
         /// <summary>
         /// How unevenly the rows were spread across threads: the busiest thread's share divided by
