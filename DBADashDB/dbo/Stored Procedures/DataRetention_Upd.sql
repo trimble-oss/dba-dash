@@ -5,6 +5,19 @@
 	@Validate BIT=1
 )
 AS
+/* A linked table's retention follows another table's - see dbo.DataRetentionLink */
+DECLARE @Source NVARCHAR(257)
+SELECT @Source = SourceSchemaName + '.' + SourceTableName
+FROM dbo.DataRetentionLink
+WHERE SchemaName = @SchemaName
+AND TableName = @TableName
+
+IF @Source IS NOT NULL
+BEGIN
+	RAISERROR('Retention for %s.%s is the same as %s.  Set the retention for %s instead.',11,1,@SchemaName,@TableName,@Source,@Source)
+	RETURN
+END
+
 UPDATE dbo.DataRetention
 	SET RetentionDays = @RetentionDays
 WHERE TableName =@TableName

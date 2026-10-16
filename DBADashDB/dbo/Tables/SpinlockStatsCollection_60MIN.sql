@@ -1,6 +1,6 @@
 /*
 	dbo.SpinlockStatsCollection rolled up by the hour, for the hours dbo.SpinlockStats_60MIN holds.
-	Keep its retention at least as long as dbo.SpinlockStats_60MIN's.
+	Its retention is dbo.SpinlockStats_60MIN's - see dbo.DataRetentionLink.
 */
 CREATE TABLE dbo.SpinlockStatsCollection_60MIN (
     InstanceID INT NOT NULL,

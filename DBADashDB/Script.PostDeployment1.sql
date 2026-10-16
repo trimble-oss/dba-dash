@@ -1205,14 +1205,9 @@ FROM (VALUES('dbo','ObjectExecutionStats',120),
 				/* Denser than any other performance table: statement level rather than module level.  Long
 				   retention belongs to the hourly rollup, QueryStats_60MIN. */
 				('dbo','QueryStats',30),
-				/* Every rate the query stats reports show divides by the time recorded here, so keep this at
-				   least as long as QueryStats */
-				('dbo','QueryStatsCollection',30),
 				/* A year rather than the two the other hourly tables keep: statement level is still many rows
 				   per hour, and statements and their text are kept for as long as anything here refers to them */
 				('dbo','QueryStats_60MIN',365),
-				/* At least as long as QueryStats_60MIN, for the same reason as QueryStatsCollection */
-				('dbo','QueryStatsCollection_60MIN',365),
 				('dbo','Waits',120),
 				('dbo','DBIOStats',120),
 				('dbo','CPU',365),
@@ -1236,14 +1231,11 @@ FROM (VALUES('dbo','ObjectExecutionStats',120),
 				('dbo','SessionWaits',30),
 				('dbo','IdentityColumnsHistory',730),
 				('dbo','Deadlocks',365),
-				('dbo','DeadlockProcesses',365),
-				('dbo','DeadlockResources',365),
 				('dbo','DeadlockXml',90),
 				('dbo','TableSize',730),
 				('Alert','ClosedAlerts',180),
 				('dbo','OfflineInstances',730),
 				('dbo','FailedLogins',90 ),
-				('dbo','RunningQueriesCursors',30),
 				('dbo','ResourceGovernorWorkloadGroupsMetrics',90),
 				('dbo','ResourceGovernorResourcePoolsMetrics',90),
 				('XE','XETraceSession',30),
@@ -1252,17 +1244,22 @@ FROM (VALUES('dbo','ObjectExecutionStats',120),
 				('dbo','LatchStats',120),
 				('dbo','SpinlockStats',120),
 				('dbo','LatchStats_60MIN',730),
-				('dbo','SpinlockStats_60MIN',730),
-				/* At least as long as the tables above - their rates divide by the time recorded in these */
-				('dbo','LatchStatsCollection',120),
-				('dbo','SpinlockStatsCollection',120),
-				('dbo','LatchStatsCollection_60MIN',730),
-				('dbo','SpinlockStatsCollection_60MIN',730)
+				('dbo','SpinlockStats_60MIN',730)
 				) AS t(SchemaName,TableName,RetentionDays)
 WHERE NOT EXISTS(SELECT 1
 				FROM dbo.DataRetention DR
 				WHERE DR.TableName = T.TableName
 				AND DR.SchemaName = T.SchemaName)
+
+/*	Tables in dbo.DataRetentionLink follow another table's retention, so they have no row of their own.  Rows from
+	before they were linked are removed - the retention of the table they follow applies instead.  */
+DELETE DR
+FROM dbo.DataRetention DR
+WHERE EXISTS(	SELECT 1
+				FROM dbo.DataRetentionLink L
+				WHERE L.SchemaName = DR.SchemaName
+				AND L.TableName = DR.TableName
+				)
 
 /*	Descriptions for the latch classes most often behind latch contention.  Other classes are added by
 	dbo.LatchStats_Upd as they are collected, with no description.

@@ -11,7 +11,29 @@ namespace DBADashGUI
         public DataRetention()
         {
             InitializeComponent();
+            // The table a linked table's retention follows - see dbo.DataRetentionLink.  Shown after the retention it explains.
+            dgv.Columns.Insert(dgv.Columns["colRetentionDays"].Index + 1, new DataGridViewTextBoxColumn
+            {
+                Name = "colRetentionLinkedTo",
+                DataPropertyName = "RetentionLinkedTo",
+                HeaderText = "Same As",
+                ReadOnly = true
+            });
+            dgv.DataBindingComplete += Dgv_DataBindingComplete;
             this.ApplyTheme();
+        }
+
+        private static bool IsLinked(DataGridViewRow row) => row.Cells["colRetentionLinkedTo"].Value is string;
+
+        /// <summary>A linked table's retention is set on the table it follows, so its retention isn't shown as a link to edit</summary>
+        private void Dgv_DataBindingComplete(object sender, DataGridViewBindingCompleteEventArgs e)
+        {
+            foreach (DataGridViewRow row in dgv.Rows)
+            {
+                if (!IsLinked(row)) continue;
+                row.Cells["colRetentionDays"] = new DataGridViewTextBoxCell { Value = row.Cells["colRetentionDays"].Value };
+                row.Cells["colRetentionDays"].ReadOnly = true;
+            }
         }
 
         private void DataRetention_Load(object sender, EventArgs e)
@@ -54,7 +76,7 @@ namespace DBADashGUI
 
         private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex < 0 || dgv.Columns[e.ColumnIndex].Name != "colRetentionDays") return;
+            if (e.RowIndex < 0 || dgv.Columns[e.ColumnIndex].Name != "colRetentionDays" || IsLinked(dgv.Rows[e.RowIndex])) return;
             var days = (int)dgv[e.ColumnIndex, e.RowIndex].Value;
             var sDays = days.ToString();
             var tableName = (string)dgv["colTableName", e.RowIndex].Value;

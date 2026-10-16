@@ -6,11 +6,13 @@ WITH A AS (
 	SELECT	DR.SchemaName, 
 			DR.TableName,
 			DR.RetentionDays, 
+			/* The table a linked table's retention follows - it can't be set on the linked table itself */
+			DR.SourceSchemaName + '.' + DR.SourceTableName AS RetentionLinkedTo,
 			DATEDIFF(d,MIN(PH.UpperBound),GETUTCDATE()) ActualRetention,
 			MIN(UpperBound) DataFrom
-	FROM dbo.DataRetention DR
+	FROM dbo.DataRetentionEffective DR
 	LEFT JOIN dbo.PartitionHelper PH ON PH.SchemaName = DR.SchemaName AND PH.TableName = DR.TableName AND PH.partition_number=1
-	GROUP BY DR.SchemaName,DR.TableName,DR.RetentionDays
+	GROUP BY DR.SchemaName,DR.TableName,DR.RetentionDays,DR.SourceSchemaName,DR.SourceTableName
 )
 , B AS (
 	SELECT	s.name as SchemaName, 
@@ -27,6 +29,7 @@ SELECT	B.SchemaName,
 		B.TableName,
 		B.SizeMB,
 		A.RetentionDays,
+		A.RetentionLinkedTo,
 		A.ActualRetention,
 		A.DataFrom 
 FROM B

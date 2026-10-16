@@ -1124,6 +1124,8 @@
     <Build Include="Storage\PS_SpinlockStatsCollection_60MIN.sql" />
     <Build Include="dbo\Tables\SpinlockStatsCollection.sql" />
     <Build Include="dbo\Tables\SpinlockStatsCollection_60MIN.sql" />
+    <Build Include="dbo\Views\DataRetentionLink.sql" />
+    <Build Include="dbo\Views\DataRetentionEffective.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

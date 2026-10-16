@@ -30,7 +30,8 @@ BEGIN
 		SELECT	DR.SchemaName,
 				DR.TableName,
 				DR.RetentionDays
-		FROM dbo.DataRetention DR
+		/* Linked tables are purged by the retention of the table they follow - see dbo.DataRetentionLink */
+		FROM dbo.DataRetentionEffective DR
 		WHERE DR.RetentionDays > 0
 		AND EXISTS(	SELECT 1
 					FROM dbo.PartitionHelper PH
