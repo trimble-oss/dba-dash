@@ -981,6 +981,7 @@ namespace DBADashGUI
         {
             var isExpanded = IsExpanded;
             Nodes.Clear();
+            unfilteredNodes.Clear(); // Cached children are stale - the filter is re-applied to the reloaded set
             AddDummyNode();
             Collapse();
             if (isExpanded)
@@ -1133,9 +1134,15 @@ namespace DBADashGUI
         private readonly List<SQLTreeItem> unfilteredNodes = new();
 
         /// <summary>
-        /// Children haven't been loaded yet - the node only holds the placeholder that triggers a lazy load on expand.
+        /// Child nodes are being loaded - see BeginLoadChildren/ChildrenLoaded.  Nodes holds a Loading... placeholder.
         /// </summary>
-        private bool IsChildrenLoaded => !(Nodes.Count == 1 && Nodes[0] is SQLTreeItem { Type: TreeType.DummyNode });
+        private bool isLoadingChildren;
+
+        /// <summary>
+        /// False if the children haven't been loaded yet (the node only holds the placeholder that triggers a lazy load
+        /// on expand) or are still loading.
+        /// </summary>
+        private bool IsChildrenLoaded => !isLoadingChildren && !(Nodes.Count == 1 && Nodes[0] is SQLTreeItem { Type: TreeType.DummyNode });
 
         private void MnuFilter_Click(object sender, EventArgs e)
         {
@@ -1177,10 +1184,20 @@ namespace DBADashGUI
         }
 
         /// <summary>
+        /// Call before (re)loading the child nodes.  Any filter is applied once loading completes - see ChildrenLoaded.
+        /// </summary>
+        public void BeginLoadChildren()
+        {
+            isLoadingChildren = true;
+            unfilteredNodes.Clear();
+        }
+
+        /// <summary>
         /// Call after the child nodes have been (re)loaded so any filter on this node is applied to the new set.
         /// </summary>
         public void ChildrenLoaded()
         {
+            isLoadingChildren = false;
             unfilteredNodes.Clear();
             if (IsFiltered)
             {
@@ -1208,10 +1225,18 @@ namespace DBADashGUI
                     if (n.isFilterInherited) n.ApplyFilter(string.Empty);
                     visible.Add(n);
                 }
-                else if (n.Type == TreeType.Folder && n.IsChildrenLoaded && (!n.IsFiltered || n.isFilterInherited))
+                else if (n.Type == TreeType.Folder && n.IsChildrenLoaded)
                 {
-                    n.isFilterInherited = true;
-                    if (!n.ApplyFilter(filter)) continue;
+                    if (n.IsFiltered && !n.isFilterInherited)
+                    {
+                        // Folder has its own filter - keep it, showing the folder if any of the children it shows match
+                        if (!n.Nodes.Cast<SQLTreeItem>().Any(c => c.Text.Contains(filter, StringComparison.CurrentCultureIgnoreCase))) continue;
+                    }
+                    else
+                    {
+                        n.isFilterInherited = true;
+                        if (!n.ApplyFilter(filter)) continue;
+                    }
                     visible.Add(n);
                     expand.Add(n);
                 }
