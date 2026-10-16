@@ -1395,12 +1395,32 @@ namespace DBADashGUI.CustomReports
 
             // The result sets have already been converted to the app time zone for display, so the bounds have
             // to be in the same terms as the points they are bounding.
+            var axisMin = range.FromUtc.ToAppTimeZone();
+            // A bucket is stamped with its start, so where the range doesn't start on a bucket boundary the first
+            // bucket is stamped before the range - 12:00 for an hourly chart from 12:45.  The axis starts there
+            // instead, as it would without the range, so that bucket's activity isn't drawn off the chart.
+            if (FirstXValue(chartWrapper.TableIndex, config.XColumn) is { } firstX && firstX < axisMin)
+            {
+                axisMin = firstX;
+            }
             return config with
             {
-                XAxisMin = range.FromUtc.ToAppTimeZone(),
+                XAxisMin = axisMin,
                 XAxisMax = range.ToUtc.ToAppTimeZone(),
                 FixXAxisToRange = true
             };
+        }
+
+        /// <summary>The earliest date in a chart's X column, or null where the result set or column isn't there or has no dates</summary>
+        private DateTime? FirstXValue(int tableIndex, string xColumn)
+        {
+            if (reportDS == null || tableIndex < 0 || tableIndex >= reportDS.Tables.Count) return null;
+            var dt = reportDS.Tables[tableIndex];
+            if (string.IsNullOrEmpty(xColumn) || !dt.Columns.Contains(xColumn)) return null;
+            return dt.Rows.Cast<DataRow>()
+                .Select(r => r[xColumn] as DateTime?)
+                .Where(d => d.HasValue)
+                .Min();
         }
 
         /// <summary>

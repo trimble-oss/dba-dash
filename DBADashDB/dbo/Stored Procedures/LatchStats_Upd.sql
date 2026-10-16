@@ -25,12 +25,21 @@ BEGIN
     FROM dbo.LatchClass WITH(UPDLOCK,HOLDLOCK)
 END
 
-BEGIN TRAN
-
 DECLARE @PreviousSnapshotDate DATETIME2(3)
 SELECT @PreviousSnapshotDate = MAX(SnapshotDate)
 FROM Staging.LatchStats
 WHERE InstanceID = @InstanceID
+
+/*  A snapshot older than the baseline (a file imported out of order) has nothing to add: its interval was covered
+    by the snapshots since, and replacing the baseline with it would have the next snapshot diffed against older
+    values - counting the activity in between twice.  The same snapshot imported again carries on, so a retry still
+    rebuilds the hourly rollup, and the check below stops it being diffed twice.  */
+IF @SnapshotDate < @PreviousSnapshotDate
+BEGIN
+    RETURN
+END
+
+BEGIN TRAN
 
 /*  The interval is diffed where there's a previous snapshot (NULL fails the test), it's no more than 36 hours old,
     and this snapshot hasn't already been imported.  */
@@ -95,13 +104,26 @@ SELECT @MaxDate = ISNULL(MAX(SnapshotDate),'19000101')
 FROM dbo.LatchStatsCollection_60MIN
 WHERE InstanceID = @InstanceID
 
+/*  Rebuilt from the first hour that still has raw rows, which is the latest hour in the rollup unless the raw rows
+    for it have been purged - collection switched off for longer than the raw retention, then on again.  That hour
+    can't be rebuilt, so it's kept as it is rather than deleted.  NULL where there are no raw rows since, which
+    leaves the rollup alone (nothing compares >= NULL).  */
+DECLARE @RebuildFrom DATETIME2(2)
+SELECT @RebuildFrom = DG.DateGroup
+FROM (  SELECT MIN(SnapshotDate) AS SnapshotDate
+        FROM dbo.LatchStatsCollection
+        WHERE InstanceID = @InstanceID
+        AND SnapshotDate >= @MaxDate
+    ) C
+CROSS APPLY dbo.DateGroupingMins(C.SnapshotDate,60) DG
+
 DELETE dbo.LatchStatsCollection_60MIN
 WHERE InstanceID = @InstanceID
-AND SnapshotDate >= @MaxDate
+AND SnapshotDate >= @RebuildFrom
 
 DELETE dbo.LatchStats_60MIN
 WHERE InstanceID = @InstanceID
-AND SnapshotDate >= @MaxDate
+AND SnapshotDate >= @RebuildFrom
 
 INSERT INTO dbo.LatchStatsCollection_60MIN
 (
@@ -115,11 +137,11 @@ SELECT C.InstanceID,
 FROM dbo.LatchStatsCollection C
 CROSS APPLY dbo.DateGroupingMins(C.SnapshotDate,60) DG
 WHERE C.InstanceID = @InstanceID
-AND C.SnapshotDate >= @MaxDate
+AND C.SnapshotDate >= @RebuildFrom
 AND C.SnapshotDate < @Tomorrow
 GROUP BY C.InstanceID,
     DG.DateGroup
-OPTION(OPTIMIZE FOR(@MaxDate='99991231'))
+OPTION(OPTIMIZE FOR(@RebuildFrom='99991231'))
 
 INSERT INTO dbo.LatchStats_60MIN
 (
@@ -137,12 +159,12 @@ SELECT L.InstanceID,
 FROM dbo.LatchStats L
 CROSS APPLY dbo.DateGroupingMins(L.SnapshotDate,60) DG
 WHERE L.InstanceID = @InstanceID
-AND L.SnapshotDate >= @MaxDate
+AND L.SnapshotDate >= @RebuildFrom
 AND L.SnapshotDate < @Tomorrow
 GROUP BY L.InstanceID,
     DG.DateGroup,
     L.LatchClassID
-OPTION(OPTIMIZE FOR(@MaxDate='99991231'))
+OPTION(OPTIMIZE FOR(@RebuildFrom='99991231'))
 
 COMMIT
 /* **************** */
