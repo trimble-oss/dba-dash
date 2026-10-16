@@ -154,6 +154,56 @@ namespace DBADash.Test
             Assert.AreEqual(expected, token);
         }
 
+        /// <summary>Answers requests in turn, one response each.</summary>
+        private sealed class SequenceHandler(params (HttpStatusCode Status, string Body)[] responses) : HttpMessageHandler
+        {
+            public List<string> Bodies { get; } = new();
+
+            protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            {
+                Bodies.Add(request.Content is null ? string.Empty : await request.Content.ReadAsStringAsync(cancellationToken));
+                var (status, body) = responses[Bodies.Count - 1];
+                return new HttpResponseMessage(status) { Content = new StringContent(body, Encoding.UTF8, "application/json") };
+            }
+        }
+
+        private static AiChatClient Create(IConfiguration config, HttpMessageHandler handler) =>
+            new(config, new FakeFactory(handler), NullLogger<AiChatClient>.Instance,
+                new SystemPromptLoader(config, NullLogger<SystemPromptLoader>.Instance));
+
+        [TestMethod]
+        public async Task SystemPromptRefused_IsResentInTheFirstMessage()
+        {
+            var handler = new SequenceHandler(
+                (HttpStatusCode.BadRequest, """{"message":"This model doesn't support system messages."}"""),
+                (HttpStatusCode.OK, Answer));
+            var config = Config();
+            var client = Create(config, handler);
+
+            var result = await client.ChatAsync(Question, CancellationToken.None);
+
+            Assert.AreEqual("Lock order.", result.Text);
+            Assert.AreEqual(2, handler.Bodies.Count);
+            using var retry = JsonDocument.Parse(handler.Bodies[1]);
+            Assert.IsFalse(retry.RootElement.TryGetProperty("system", out _));
+            var text = retry.RootElement.GetProperty("messages")[0].GetProperty("content")[0].GetProperty("text").GetString()!;
+            var systemPrompt = new SystemPromptLoader(config, NullLogger<SystemPromptLoader>.Instance).Prompt;
+            StringAssert.StartsWith(text, systemPrompt);
+            StringAssert.EndsWith(text, "Why did this deadlock?");
+        }
+
+        [TestMethod]
+        public async Task OtherBadRequests_AreNotResent()
+        {
+            var handler = new SequenceHandler((HttpStatusCode.BadRequest, """{"message":"The provided model identifier is invalid."}"""));
+            var client = Create(Config(), handler);
+
+            var result = await client.ChatAsync(Question, CancellationToken.None);
+
+            Assert.AreEqual(AiChatFailure.Provider, result.Failure);
+            Assert.AreEqual(1, handler.Bodies.Count);
+        }
+
         [TestMethod]
         public async Task InputTooLong_IsTooLarge_WithBedrocksOwnWords()
         {

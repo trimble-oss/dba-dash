@@ -496,45 +496,91 @@ namespace DBADashAI.Services
             // slashes and colons have to stay inside the one path segment.
             var requestUrl = new Uri(BedrockRuntimeUrl(_configuration) + "/model/" + Uri.EscapeDataString(model) + "/converse");
 
-            var payload = new Dictionary<string, object>
-            {
-                ["system"] = new[] { new { text = SystemPrompt } },
-                ["messages"] = messages
-                    .Select(m => (object)new { role = Role(m), content = new[] { new { text = m.Content } } })
-                    .ToArray()
-            };
-            // No temperature: one setting has to suit every model family on Bedrock, and some newer
-            // models refuse the parameter outright.  Left unset, max tokens is the model's own default -
-            // any fixed default would be over the output limit of the smaller models.
-            if (int.TryParse(_configuration["Bedrock:MaxTokens"], out var maxTokens) && maxTokens > 0)
-                payload["inferenceConfig"] = new { maxTokens };
-
             var client = _httpClientFactory.CreateClient();
-            using var response = await PostWithRetryAsync(
-                client,
-                requestUrl,
-                () =>
-                {
-                    var req = new HttpRequestMessage(HttpMethod.Post, requestUrl);
-                    req.Headers.Add("Authorization", "Bearer " + SanitizeHeaderValue(apiKey));
-                    req.Content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-                    return req;
-                },
-                cancellationToken);
-
-            if (!response.IsSuccessStatusCode)
+            var response = await SendAsync(systemField: true);
+            try
             {
-                var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
-                var errorId = Guid.NewGuid().ToString("N")[..8];
-                _logger.LogError("Bedrock call failed. ErrorId={ErrorId}, Status={StatusCode}, URL={Url}, Body={Body}", LogSanitizer.SanitizeForLog(errorId), (int)response.StatusCode, requestUrl, LogSanitizer.TruncateAndSanitizeForLog(errorBody));
-                return ProviderFailure("Bedrock", (int)response.StatusCode, errorBody, errorId);
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
+
+                    // Converse takes a system prompt for most models but not all, and Bedrock gives no
+                    // reliable way to ask which - inference profiles and ARNs least of all.  A model that
+                    // refuses it gets the same instructions at the start of the first message instead.
+                    if (IsSystemPromptRefused((int)response.StatusCode, errorBody))
+                    {
+                        _logger.LogInformation("Bedrock model {Model} takes no system prompt; sending it in the first message", LogSanitizer.SanitizeForLog(model));
+                        response.Dispose();
+                        response = await SendAsync(systemField: false);
+                        if (!response.IsSuccessStatusCode)
+                            errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
+                    }
+
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        var errorId = Guid.NewGuid().ToString("N")[..8];
+                        _logger.LogError("Bedrock call failed. ErrorId={ErrorId}, Status={StatusCode}, URL={Url}, Body={Body}", LogSanitizer.SanitizeForLog(errorId), (int)response.StatusCode, requestUrl, LogSanitizer.TruncateAndSanitizeForLog(errorBody));
+                        return ProviderFailure("Bedrock", (int)response.StatusCode, errorBody, errorId);
+                    }
+                }
+
+                using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+                using var document = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken);
+
+                return AiChatResult.Answer(ExtractBedrockSummary(document.RootElement, "No summary returned by Bedrock."));
+            }
+            finally
+            {
+                response.Dispose();
             }
 
-            using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-            using var document = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken);
+            Task<HttpResponseMessage> SendAsync(bool systemField)
+            {
+                var firstUser = systemField ? -1 : messages.ToList().FindIndex(m => !m.IsAssistant);
+                var payload = new Dictionary<string, object>
+                {
+                    ["messages"] = messages
+                        .Select((m, i) => (object)new
+                        {
+                            role = Role(m),
+                            content = new[] { new { text = i == firstUser ? SystemPrompt + "\n\n" + m.Content : m.Content } }
+                        })
+                        .ToArray()
+                };
+                if (systemField)
+                    payload["system"] = new[] { new { text = SystemPrompt } };
+                // No temperature: one setting has to suit every model family on Bedrock, and some newer
+                // models refuse the parameter outright.  Left unset, max tokens is the model's own default -
+                // any fixed default would be over the output limit of the smaller models.
+                if (int.TryParse(_configuration["Bedrock:MaxTokens"], out var maxTokens) && maxTokens > 0)
+                    payload["inferenceConfig"] = new { maxTokens };
 
-            return AiChatResult.Answer(ExtractBedrockSummary(document.RootElement, "No summary returned by Bedrock."));
+                return PostWithRetryAsync(
+                    client,
+                    requestUrl,
+                    () =>
+                    {
+                        var req = new HttpRequestMessage(HttpMethod.Post, requestUrl);
+                        req.Headers.Add("Authorization", "Bearer " + SanitizeHeaderValue(apiKey));
+                        req.Content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+                        return req;
+                    },
+                    cancellationToken);
+            }
         }
+
+        /// <summary>
+        /// Whether Bedrock refused a request because the model takes no system prompt.  Matched loosely,
+        /// as the wording comes from the model's provider and is not a contract: a 400 naming the system
+        /// prompt as unsupported or not allowed, and not about size - that is a different thing to fix.
+        /// </summary>
+        internal static bool IsSystemPromptRefused(int status, string body) =>
+            status == 400
+            && !string.IsNullOrEmpty(body)
+            && !IsTooLarge(status, body)
+            && body.Contains("system", StringComparison.OrdinalIgnoreCase)
+            && (body.Contains("support", StringComparison.OrdinalIgnoreCase)
+                || body.Contains("not allowed", StringComparison.OrdinalIgnoreCase));
 
         /// <summary>
         /// Bedrock:ApiKey when there is one.  Otherwise a short-term key made from AWS credentials -
