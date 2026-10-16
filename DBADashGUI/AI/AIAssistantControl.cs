@@ -349,6 +349,7 @@ namespace DBADashGUI.AI
         var showModelSelector = ProviderSupportsModelSelection;
         cboModel.Visible = showModelSelector;
         lblModel.Visible = showModelSelector;
+        FitModelPicker();
     }
 
     private async Task LoadProviderAsync()
@@ -526,23 +527,29 @@ namespace DBADashGUI.AI
             Margin = new Padding(2, 4, 0, 4)
         };
 
-        // Model label + combo in a small panel, placed top-right alongside the Question label
-        var modelHeaderPanel = new TableLayoutPanel
+        // The Question label, and the model picker on the right across both columns: model names
+        // with their IDs are long, and the Ask button's column is far too narrow to show them.  The
+        // picker is as wide as its longest entry (FitModelPicker).
+        headerPanel = new TableLayoutPanel
         {
             Dock = DockStyle.Fill,
-            ColumnCount = 2,
+            ColumnCount = 3,
             RowCount = 1,
             AutoSize = true,
             Margin = new Padding(0)
         };
-        modelHeaderPanel.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-        modelHeaderPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-        modelHeaderPanel.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        modelHeaderPanel.Controls.Add(lblModel, 0, 0);
-        modelHeaderPanel.Controls.Add(cboModel, 1, 0);
+        headerPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        headerPanel.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+        headerPanel.ColumnStyles.Add(modelColumn);
+        headerPanel.Resize += (_, _) => FitModelPicker();
+        headerPanel.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        headerPanel.Controls.Add(questionLabel, 0, 0);
+        headerPanel.Controls.Add(lblModel, 1, 0);
+        headerPanel.Controls.Add(cboModel, 2, 0);
 
-        questionPanel.Controls.Add(questionLabel, 0, 0);
-        questionPanel.Controls.Add(modelHeaderPanel, 1, 0);
+        questionPanel.Controls.Add(headerPanel, 0, 0);
+        questionPanel.SetColumnSpan(headerPanel, 2);
+        FitModelPicker();
         questionPanel.Controls.Add(txtQuestion, 0, 1);
         questionPanel.Controls.Add(btnAsk, 1, 1);
         questionPanel.Controls.Add(lblStatus, 0, 2);
@@ -791,21 +798,31 @@ namespace DBADashGUI.AI
         cboModel.Items.Insert(0, new ModelItem("", _configuredModel is null ? "(Default - configured model)" : $"(Default - {_configuredModel})"));
 
         cboModel.SelectedIndex = 0;
-        FitDropDownWidth();
+        FitModelPicker();
     }
 
+    private TableLayoutPanel headerPanel = null!;
+
+    /// <summary>The model picker's column, sized by <see cref="FitModelPicker"/>.</summary>
+    private readonly ColumnStyle modelColumn = new(SizeType.Absolute, 180);
+
     /// <summary>
-    /// The list as wide as its longest entry, however narrow the box: a model's name and ID are what
-    /// tell it from the next one, and both are at the end of the line.  Capped to the screen.
+    /// The model picker as wide as its longest entry - a model's name and ID are what tell it from the
+    /// next one, and both are at the end of the line - but no more than 60% of the row, and no less
+    /// than the Ask button's column.  The list then matches the box: it opens rightwards from the box's
+    /// left edge, and a list wider than a box at the right of the screen would run off it.
     /// </summary>
-    private void FitDropDownWidth()
+    private void FitModelPicker()
     {
+        if (headerPanel is null) return;
         var widest = cboModel.Items.Cast<object>()
             .Select(item => TextRenderer.MeasureText(item.ToString(), cboModel.Font).Width)
             .DefaultIfEmpty(0)
-            .Max() + SystemInformation.VerticalScrollBarWidth + 8;
-        var screen = Screen.FromControl(cboModel).WorkingArea.Width;
-        cboModel.DropDownWidth = Math.Max(cboModel.Width, Math.Min(widest, screen / 2));
+            .Max() + 2 * SystemInformation.VerticalScrollBarWidth + 8; // The box's button, and the list's scroll bar
+        // No picker (Azure OpenAI): the column goes, rather than leaving a gap.
+        var width = !ProviderSupportsModelSelection ? 0
+            : Math.Max(LogicalToDeviceUnits(180), Math.Min(widest, headerPanel.ClientSize.Width * 6 / 10));
+        if ((int)modelColumn.Width != width) modelColumn.Width = width;
     }
 
     private async Task ParseModelsFromResponse(HttpResponseMessage response)
@@ -866,6 +883,7 @@ namespace DBADashGUI.AI
         _toolTip.SetToolTip(btnThumbsDown, "This response was not helpful");
         // The box is narrower than most model names: the full one, ID included, is in the tooltip.
         cboModel.SelectedIndexChanged += (_, _) => _toolTip.SetToolTip(cboModel, cboModel.SelectedItem?.ToString());
+        cboModel.DropDown += (_, _) => cboModel.DropDownWidth = Math.Max(1, cboModel.Width);
         cboCategory.SelectedIndexChanged += (_, _) =>
         {
             if (_seedingExamples) return;
