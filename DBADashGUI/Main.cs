@@ -1472,9 +1472,13 @@ namespace DBADashGUI
                                     { DriveName = driveLetter, ForeColor = color }).Cast<TreeNode>().ToArray());
         }
 
+        /// <summary>
+        /// Find a database in the Databases folder, including the System Databases sub-folder
+        /// </summary>
         private static SQLTreeItem FindDatabaseNode(SQLTreeItem dbFolder, string database) =>
             dbFolder?.Nodes.Cast<SQLTreeItem>()
-                .FirstOrDefault(d => string.Equals(d.DatabaseName, database, StringComparison.CurrentCultureIgnoreCase));
+                .SelectMany(n => n.Type == SQLTreeItem.TreeType.Folder ? n.Nodes.Cast<SQLTreeItem>() : new[] { n })
+                .FirstOrDefault(d => d.Type == SQLTreeItem.TreeType.Database && string.Equals(d.DatabaseName, database, StringComparison.CurrentCultureIgnoreCase));
 
         private static async Task ExpandDatabasesAsync(SQLTreeItem dbFolder)
         {
@@ -1884,8 +1888,33 @@ namespace DBADashGUI
 
         private async void Tv1_BeforeExpand(object sender, TreeViewCancelEventArgs e)
         {
-            var n = e.Node.AsSQLTreeItem();
-            if (n.Nodes.Count == 1 && n.Nodes[0].AsSQLTreeItem().Type == SQLTreeItem.TreeType.DummyNode)
+            await LoadChildNodesAsync(e.Node.AsSQLTreeItem());
+        }
+
+        /// <summary>
+        /// Child node loads in progress, so a caller can wait for a load that expanding the node started.
+        /// </summary>
+        private readonly Dictionary<SQLTreeItem, Task> childNodeLoads = new();
+
+        /// <summary>
+        /// Load the child nodes of a node that is lazy loaded on expand.  Completes once the children are loaded - unlike
+        /// Expand(), which returns as soon as the load starts.  Does nothing if the children are already loaded.
+        /// </summary>
+        private Task LoadChildNodesAsync(SQLTreeItem n)
+        {
+            if (childNodeLoads.TryGetValue(n, out var load)) return load;
+            if (!(n.Nodes.Count == 1 && n.Nodes[0].AsSQLTreeItem().Type == SQLTreeItem.TreeType.DummyNode)) return Task.CompletedTask;
+            load = LoadChildNodesInternalAsync(n);
+            if (!load.IsCompleted)
+            {
+                childNodeLoads[n] = load;
+            }
+            return load;
+        }
+
+        private async Task LoadChildNodesInternalAsync(SQLTreeItem n)
+        {
+            try
             {
                 // Show a minimal visual indicator while async expand completes.
                 n.Nodes.Clear();
@@ -1936,6 +1965,10 @@ namespace DBADashGUI
                 if (n.Nodes.Contains(loading)) n.Nodes.Remove(loading);
                 n.ChildrenLoaded();
                 n.Expand();
+            }
+            finally
+            {
+                childNodeLoads.Remove(n);
             }
         }
 
@@ -2351,7 +2384,11 @@ namespace DBADashGUI
                     {
                         nInstance.Expand();
                         var dbFolder = nInstance.FindChildOfType(SQLTreeItem.TreeType.DatabasesFolder);
-                        dbFolder?.Expand();
+                        if (dbFolder != null)
+                        {
+                            await LoadChildNodesAsync(dbFolder);
+                            dbFolder.Expand();
+                        }
                         var db = FindDatabaseNode(dbFolder, e.Database);
                         if (db == null && dbFolder is { IsFiltered: true })
                         {
