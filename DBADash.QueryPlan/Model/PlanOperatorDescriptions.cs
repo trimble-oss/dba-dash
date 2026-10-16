@@ -146,7 +146,7 @@ namespace DBADash.QueryPlan.Model
             PlanOperatorKind.RemoteQuery =>
                 "Work done on another server - a linked server or external data source. The remote side's own plan is not part of this one.",
             PlanOperatorKind.TableValuedFunction =>
-                "Runs a table-valued function that is not expanded into the plan - a multi-statement function or a built-in one - and stores the rows it returns in an internal table that another operator reads. The function's own statements are not shown in this plan, and the estimate of how many rows it returns is often a fixed guess.",
+                "Runs a table-valued function that is not expanded into the plan: a multi-statement function, a CLR function, or a built-in one such as a DMV, STRING_SPLIT or OPENJSON. A multi-statement function usually fills a table variable with its rows, which another operator then reads; the others pass their rows straight on. The work inside the function is not shown in this plan, and the estimate of how many rows it returns is often a fixed guess.",
 
             PlanOperatorKind.NestedLoops =>
                 "Joins two inputs by reading the top (outer) input a row at a time and, for each row, running the bottom (inner) input to find its matches. Efficient when the outer input is small and the inner side can seek; slow when the inner side runs many times over many rows.",

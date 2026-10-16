@@ -571,6 +571,7 @@ namespace DBADash.QueryPlan
                 Depth = depth,
                 EstimateRows = Double(Attribute(relOp, "EstimateRows")) ?? 0,
                 EstimateRowsWithoutRowGoal = Double(Attribute(relOp, "EstimateRowsWithoutRowGoal")),
+                TableCardinality = Double(Attribute(relOp, "TableCardinality")),
                 EstimateIO = Double(Attribute(relOp, "EstimateIO")) ?? 0,
                 EstimateCPU = Double(Attribute(relOp, "EstimateCPU")) ?? 0,
                 EstimateRebinds = Double(Attribute(relOp, "EstimateRebinds")),
@@ -683,6 +684,7 @@ namespace DBADash.QueryPlan
                     ActualLobLogicalReads = Long(Attribute(thread, "ActualLobLogicalReads")),
                     ActualLobPhysicalReads = Long(Attribute(thread, "ActualLobPhysicalReads")),
                     ActualExecutionMode = Attribute(thread, "ActualExecutionMode"),
+                    IsInterleavedExecuted = Bool(Attribute(thread, "IsInterleavedExecuted")) ?? false,
                     Batches = Long(Attribute(thread, "Batches")),
                     InputMemoryGrantKb = Long(Attribute(thread, "InputMemoryGrant")),
                     OutputMemoryGrantKb = Long(Attribute(thread, "OutputMemoryGrant")),
@@ -1045,6 +1047,7 @@ namespace DBADash.QueryPlan
                 Add(properties, "Estimated Rows Without Row Goal", PlanFormat.Rows(withoutRowGoal));
             }
 
+            if (node.TableCardinality is { } cardinality) Add(properties, "Table Cardinality", PlanFormat.Rows(cardinality));
             if (node.AvgRowSize is { } rowSize) Add(properties, "Estimated Row Size", rowSize.ToString("0", CultureInfo.InvariantCulture) + " B");
             if (node.EstimateRebinds is { } rebinds) Add(properties, "Estimated Rebinds", PlanFormat.Rows(rebinds));
             if (node.EstimateRewinds is { } rewinds) Add(properties, "Estimated Rewinds", PlanFormat.Rows(rewinds));
@@ -1099,6 +1102,7 @@ namespace DBADash.QueryPlan
                 if (runtime.ActualScans is { } scans) Add(children, "Actual Scans", PlanFormat.Rows(scans));
                 if (runtime.Batches is { } batches) Add(children, "Batches", PlanFormat.Rows(batches));
                 Add(children, "Actual Execution Mode", runtime.ActualExecutionMode);
+                if (runtime.IsInterleavedExecuted) Add(children, "Interleaved Execution", PlanFormat.Boolean(true));
 
                 if (runtime.WorkerThreadCount > 0)
                 {
@@ -1209,7 +1213,7 @@ namespace DBADash.QueryPlan
 
         private static readonly HashSet<string> KnownRelOpAttributes = new(StringComparer.Ordinal)
         {
-            "NodeId", "PhysicalOp", "LogicalOp", "EstimateRows", "EstimateRowsWithoutRowGoal",
+            "NodeId", "PhysicalOp", "LogicalOp", "EstimateRows", "EstimateRowsWithoutRowGoal", "TableCardinality",
             "EstimateIO", "EstimateCPU", "EstimateRebinds", "EstimateRewinds", "EstimatedExecutionMode",
             "EstimatedTotalSubtreeCost", "AvgRowSize", "Parallel", "Partitioned"
         };
