@@ -88,12 +88,19 @@ namespace DBADashGUI.QueryPlans
             AddDataBars();
             _grid.CellFormatting += Grid_CellFormatting;
             _grid.CellToolTipTextNeeded += Grid_CellToolTipTextNeeded;
+            AddStatementMenuItems();
 
             Controls.Add(_grid);
         }
 
         /// <summary>Raised when the reader picks a statement.</summary>
         public event EventHandler<PlanStatement> StatementSelected;
+
+        /// <summary>Raised to compare the shown statement, as the before side, with the one given.</summary>
+        public event EventHandler<PlanStatement> CompareRequested;
+
+        /// <summary>Raised to open the statement given on a tab of its own, as a plan in its own right.</summary>
+        public event EventHandler<PlanStatement> OpenInNewTabRequested;
 
         /// <summary>How many statements are listed.</summary>
         public int Count => _summaries.Count;
@@ -387,6 +394,50 @@ namespace DBADashGUI.QueryPlans
             {
                 _syncing = false;
             }
+        }
+
+        /// <summary>
+        /// Compare and open in a new tab, at the top of a row's right click menu.  Two queries run
+        /// together in SSMS come back as one plan of two statements, and setting them side by side is
+        /// the usual reason for opening it - so the list of statements is where it is offered.
+        /// </summary>
+        private void AddStatementMenuItems()
+        {
+            PlanStatement clicked = null;
+
+            var compare = new ToolStripMenuItem("Compare With Shown Statement", Resources.PlanCompare_16x, (_, _) =>
+            {
+                if (clicked is not null) CompareRequested?.Invoke(this, clicked);
+            });
+            var openInNewTab = new ToolStripMenuItem("Open Statement in New Tab", null, (_, _) =>
+            {
+                if (clicked is not null) OpenInNewTabRequested?.Invoke(this, clicked);
+            })
+            {
+                ToolTipText = "Open this statement's plan on a tab of its own."
+            };
+
+            _grid.CellContextMenu.Items.Insert(0, compare);
+            _grid.CellContextMenu.Items.Insert(1, openInNewTab);
+            _grid.CellContextMenu.Items.Insert(2, new ToolStripSeparator());
+
+            _grid.CellContextMenuOpening += (_, e) =>
+            {
+                clicked = e.RowIndex >= 0 ? StatementAt(_grid.Rows[e.RowIndex]) : null;
+
+                // A statement with no plan - an IF, a SET - has nothing to compare or show on a tab.
+                var hasPlan = clicked is { HasPlan: true } && !string.IsNullOrEmpty(clicked.Xml);
+                var isShown = ReferenceEquals(clicked, _shown);
+
+                compare.Text = _summaries.FirstOrDefault(s => ReferenceEquals(s.Statement, _shown)) is { } shown
+                    ? "Compare With Statement " + shown.Ordinal.ToString(CultureInfo.InvariantCulture)
+                    : "Compare With Shown Statement";
+                compare.Enabled = hasPlan && !isShown && _shown is { HasPlan: true };
+                compare.ToolTipText = isShown
+                    ? "This is the statement shown.  Right click another statement to compare it with this one."
+                    : "Compare the statement shown, as the before side, with this one.";
+                openInNewTab.Enabled = hasPlan;
+            };
         }
 
         /// <summary>Rows were created or reordered: point at the shown statement and size them.</summary>
