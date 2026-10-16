@@ -35,3 +35,27 @@ BEGIN
 	IF @@ROWCOUNT < @BatchSize
 		BREAK
 END
+
+WHILE 1=1
+BEGIN
+	DELETE TOP(@BatchSize)
+	FROM dbo.SpinlockStatsCollection
+	WHERE InstanceID = @InstanceID
+	AND SnapshotDate < @MaxDate
+	OPTION(RECOMPILE)
+
+	IF @@ROWCOUNT < @BatchSize
+		BREAK
+END
+
+WHILE 1=1
+BEGIN
+	DELETE TOP(@BatchSize)
+	FROM dbo.SpinlockStatsCollection_60MIN
+	WHERE InstanceID = @InstanceID
+	AND SnapshotDate < @MaxDate
+	OPTION(RECOMPILE)
+
+	IF @@ROWCOUNT < @BatchSize
+		BREAK
+END

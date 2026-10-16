@@ -32,28 +32,36 @@ SELECT @PreviousSnapshotDate = MAX(SnapshotDate)
 FROM Staging.LatchStats
 WHERE InstanceID = @InstanceID
 
-/*	Only latch classes with waits are collected, so a class missing from the previous snapshot had a count of zero
-	then and its current values are all new.  This also holds after a restart or a DBCC SQLPERF('sys.dm_os_latch_stats',CLEAR),
-	as the reset happened after the previous snapshot.  */
-INSERT INTO dbo.LatchStats(InstanceID,SnapshotDate,LatchClassID,waiting_requests_count,wait_time_ms,sample_ms_diff)
-SELECT @InstanceID,
-       @SnapshotDate,
-       LC.LatchClassID,
-       L2.waiting_requests_count - ISNULL(L1.waiting_requests_count,0),
-       L2.wait_time_ms - ISNULL(L1.wait_time_ms,0),
-       DATEDIFF(ms,@PreviousSnapshotDate,@SnapshotDate)
-FROM @LatchStats L2
-JOIN dbo.LatchClass LC ON LC.LatchClass = L2.latch_class
-LEFT JOIN Staging.LatchStats L1 ON L1.InstanceID = @InstanceID
-                               AND L1.latch_class = L2.latch_class
-/* A counter going backwards means a restart or a DBCC SQLPERF('sys.dm_os_latch_stats',CLEAR) between snapshots */
-WHERE L2.waiting_requests_count >= ISNULL(L1.waiting_requests_count,0)
-AND L2.wait_time_ms >= ISNULL(L1.wait_time_ms,0)
-AND (L2.waiting_requests_count > ISNULL(L1.waiting_requests_count,0) OR L2.wait_time_ms > ISNULL(L1.wait_time_ms,0))
-/* NULL where there's no previous snapshot, so nothing is inserted */
-AND @PreviousSnapshotDate < @SnapshotDate
-AND DATEDIFF(mi,@PreviousSnapshotDate,@SnapshotDate) < 2160
-AND NOT EXISTS(SELECT 1 FROM dbo.LatchStats L WHERE L.InstanceID = @InstanceID AND L.SnapshotDate = @SnapshotDate);
+/*  The interval is diffed where there's a previous snapshot (NULL fails the test), it's no more than 36 hours old,
+    and this snapshot hasn't already been imported.  */
+IF @PreviousSnapshotDate < @SnapshotDate
+    AND DATEDIFF(mi,@PreviousSnapshotDate,@SnapshotDate) < 2160
+    AND NOT EXISTS(SELECT 1 FROM dbo.LatchStatsCollection C WHERE C.InstanceID = @InstanceID AND C.SnapshotDate = @SnapshotDate)
+BEGIN
+    /*  The time covered is recorded whether or not any latch class was waited on in the interval.  An idle interval
+        adds no rows to dbo.LatchStats, and dbo.LatchStats_Get divides by the time recorded here, so leaving it out
+        would overstate the rates.  */
+    INSERT INTO dbo.LatchStatsCollection(InstanceID,SnapshotDate,sample_ms_diff)
+    VALUES(@InstanceID,@SnapshotDate,DATEDIFF(ms,@PreviousSnapshotDate,@SnapshotDate));
+
+    /*	Only latch classes with waits are collected, so a class missing from the previous snapshot had a count of zero
+	    then and its current values are all new.  This also holds after a restart or a DBCC SQLPERF('sys.dm_os_latch_stats',CLEAR),
+	    as the reset happened after the previous snapshot.  */
+    INSERT INTO dbo.LatchStats(InstanceID,SnapshotDate,LatchClassID,waiting_requests_count,wait_time_ms)
+    SELECT @InstanceID,
+           @SnapshotDate,
+           LC.LatchClassID,
+           L2.waiting_requests_count - ISNULL(L1.waiting_requests_count,0),
+           L2.wait_time_ms - ISNULL(L1.wait_time_ms,0)
+    FROM @LatchStats L2
+    JOIN dbo.LatchClass LC ON LC.LatchClass = L2.latch_class
+    LEFT JOIN Staging.LatchStats L1 ON L1.InstanceID = @InstanceID
+                                   AND L1.latch_class = L2.latch_class
+    /* A counter going backwards means a restart or a DBCC SQLPERF('sys.dm_os_latch_stats',CLEAR) between snapshots */
+    WHERE L2.waiting_requests_count >= ISNULL(L1.waiting_requests_count,0)
+    AND L2.wait_time_ms >= ISNULL(L1.wait_time_ms,0)
+    AND (L2.waiting_requests_count > ISNULL(L1.waiting_requests_count,0) OR L2.wait_time_ms > ISNULL(L1.wait_time_ms,0));
+END
 
 DELETE Staging.LatchStats WHERE InstanceID = @InstanceID;
 
@@ -76,63 +84,64 @@ FROM @LatchStats;
 
 COMMIT
 
-/* Update 60min aggregation */
+/*  Update 60min aggregation.  An hour in the rollup is exactly the raw rows whose snapshot falls in it, so
+    dbo.LatchStats_Get can read whole hours from here and the part hours at either end of a range from the raw rows.  */
 BEGIN TRAN
 
 DECLARE @Tomorrow DATETIME2(2) = CAST(DATEADD(d,1,GETUTCDATE()) AS DATE)
 DECLARE @MaxDate DATETIME2(2)
+/* From the coverage rollup - the latest hour may have no latch rows if nothing was waited on */
 SELECT @MaxDate = ISNULL(MAX(SnapshotDate),'19000101')
-FROM dbo.LatchStats_60MIN
+FROM dbo.LatchStatsCollection_60MIN
 WHERE InstanceID = @InstanceID
+
+DELETE dbo.LatchStatsCollection_60MIN
+WHERE InstanceID = @InstanceID
+AND SnapshotDate >= @MaxDate
 
 DELETE dbo.LatchStats_60MIN
 WHERE InstanceID = @InstanceID
-AND SnapshotDate = @MaxDate
+AND SnapshotDate >= @MaxDate
 
-/*	sample_ms_diff is the time the hour's snapshots cover, which is what dbo.LatchStats_Get divides by.  Every row of a
-	snapshot has the same sample_ms_diff, so it's summed once per snapshot rather than per latch class - a class
-	that wasn't waited on in every snapshot would otherwise understate it.  */
-;WITH Coverage AS (
-    SELECT DG.DateGroup,
-        SUM(S.sample_ms_diff) AS sample_ms_diff
-    FROM (  SELECT SnapshotDate,
-                MAX(sample_ms_diff) AS sample_ms_diff
-            FROM dbo.LatchStats
-            WHERE InstanceID = @InstanceID
-            AND SnapshotDate >= @MaxDate
-            AND SnapshotDate < @Tomorrow
-            AND sample_ms_diff < 86400000
-            GROUP BY SnapshotDate
-        ) S
-    CROSS APPLY dbo.DateGroupingMins(S.SnapshotDate,60) DG
-    GROUP BY DG.DateGroup
+INSERT INTO dbo.LatchStatsCollection_60MIN
+(
+    InstanceID,
+    SnapshotDate,
+    sample_ms_diff
 )
+SELECT C.InstanceID,
+    DG.DateGroup AS SnapshotDate,
+    SUM(C.sample_ms_diff) AS sample_ms_diff
+FROM dbo.LatchStatsCollection C
+CROSS APPLY dbo.DateGroupingMins(C.SnapshotDate,60) DG
+WHERE C.InstanceID = @InstanceID
+AND C.SnapshotDate >= @MaxDate
+AND C.SnapshotDate < @Tomorrow
+GROUP BY C.InstanceID,
+    DG.DateGroup
+OPTION(OPTIMIZE FOR(@MaxDate='99991231'))
+
 INSERT INTO dbo.LatchStats_60MIN
 (
     InstanceID,
     SnapshotDate,
     LatchClassID,
     waiting_requests_count,
-    wait_time_ms,
-    sample_ms_diff
+    wait_time_ms
 )
 SELECT L.InstanceID,
     DG.DateGroup AS SnapshotDate,
     L.LatchClassID,
     SUM(L.waiting_requests_count) AS waiting_requests_count,
-    SUM(L.wait_time_ms) AS wait_time_ms,
-    C.sample_ms_diff
+    SUM(L.wait_time_ms) AS wait_time_ms
 FROM dbo.LatchStats L
 CROSS APPLY dbo.DateGroupingMins(L.SnapshotDate,60) DG
-JOIN Coverage C ON C.DateGroup = DG.DateGroup
 WHERE L.InstanceID = @InstanceID
 AND L.SnapshotDate >= @MaxDate
 AND L.SnapshotDate < @Tomorrow
-AND L.sample_ms_diff < 86400000
 GROUP BY L.InstanceID,
     DG.DateGroup,
-    L.LatchClassID,
-    C.sample_ms_diff
+    L.LatchClassID
 OPTION(OPTIMIZE FOR(@MaxDate='99991231'))
 
 COMMIT

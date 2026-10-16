@@ -33,6 +33,8 @@ VALUES -- Daily Partitions
 	('XE','XETraceEvent','d',14,CAST(1 AS BIT)),
 	('dbo','LatchStats','d',14,CAST(1 AS BIT)),
 	('dbo','SpinlockStats','d',14,CAST(1 AS BIT)),
+	('dbo','LatchStatsCollection','d',14,CAST(1 AS BIT)),
+	('dbo','SpinlockStatsCollection','d',14,CAST(1 AS BIT)),
 	-- Monthly Partitions
 	('dbo','AzureDBElasticPoolResourceStats_60MIN','m',3,CAST(1 AS BIT)),
 	('dbo','AzureDBResourceStats_60MIN','m',3,CAST(1 AS BIT)),
@@ -41,6 +43,8 @@ VALUES -- Daily Partitions
 	('dbo','Waits_60MIN','m',3,CAST(1 AS BIT)),
 	('dbo','LatchStats_60MIN','m',3,CAST(1 AS BIT)),
 	('dbo','SpinlockStats_60MIN','m',3,CAST(1 AS BIT)),
+	('dbo','LatchStatsCollection_60MIN','m',3,CAST(1 AS BIT)),
+	('dbo','SpinlockStatsCollection_60MIN','m',3,CAST(1 AS BIT)),
 	('dbo','ObjectExecutionStats_60MIN','m',3,CAST(1 AS BIT)),
 	('dbo','PerformanceCounters_60MIN','m',3,CAST(1 AS BIT)),
 	('dbo','JobStats_60MIN','m',3,CAST(1 AS BIT)),

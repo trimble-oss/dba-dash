@@ -35,3 +35,27 @@ BEGIN
 	IF @@ROWCOUNT < @BatchSize
 		BREAK
 END
+
+WHILE 1=1
+BEGIN
+	DELETE TOP(@BatchSize)
+	FROM dbo.LatchStatsCollection
+	WHERE InstanceID = @InstanceID
+	AND SnapshotDate < @MaxDate
+	OPTION(RECOMPILE)
+
+	IF @@ROWCOUNT < @BatchSize
+		BREAK
+END
+
+WHILE 1=1
+BEGIN
+	DELETE TOP(@BatchSize)
+	FROM dbo.LatchStatsCollection_60MIN
+	WHERE InstanceID = @InstanceID
+	AND SnapshotDate < @MaxDate
+	OPTION(RECOMPILE)
+
+	IF @@ROWCOUNT < @BatchSize
+		BREAK
+END

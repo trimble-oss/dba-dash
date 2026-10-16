@@ -58,47 +58,59 @@ BEGIN
 END
 SET @DateGroupingMin = CASE WHEN @DateGroupingMin < 1 THEN 1 ELSE @DateGroupingMin END
 
-/* The hourly aggregation is used where the buckets are an hour or more - nothing is lost by it at that grain */
-DECLARE @Use60MIN BIT = CASE WHEN @DateGroupingMin >= 60 AND @DateGroupingMin % 60 = 0 THEN 1 ELSE 0 END
+/*	Whole hours come from the hourly rollups and the part hours at either end of the range from the raw rows, so a
+	range that doesn't start and end on the hour isn't widened or narrowed to whole hours.  Only where the buckets are
+	a whole number of hours - an hour's rows can be added into a bucket of an hour, six or a day but not split into
+	smaller ones, so other buckets read the raw rows alone.  See dbo.RollupRanges.  */
+DECLARE @HourFrom DATETIME2(2), @HourTo DATETIME2(2)
+SELECT @HourFrom = HourFrom, @HourTo = HourTo
+FROM dbo.RollupRanges(@FromDate, @ToDate, CASE WHEN @DateGroupingMin % 60 <> 0 THEN CAST(0 AS BIT) END)
 
 CREATE TABLE #Spinlock(
 	SpinlockID SMALLINT NOT NULL,
-	SnapshotDate DATETIME2(2) NOT NULL,
 	collisions BIGINT NOT NULL,
 	spins BIGINT NOT NULL,
 	sleep_time BIGINT NOT NULL,
 	backoffs BIGINT NOT NULL,
-	sample_ms_diff INT NOT NULL,
 	/* The measure being charted, so ranking and the chart value don't need to repeat the CASE */
-	measure BIGINT NULL,
+	measure BIGINT NOT NULL,
 	/* The chart bucket, which the peak rates in the summary are also taken over */
-	DateGroup DATETIME2(2) NULL
+	DateGroup DATETIME2(2) NOT NULL
 )
 
-IF @Use60MIN = 1
-BEGIN
-	INSERT INTO #Spinlock(SpinlockID,SnapshotDate,collisions,spins,sleep_time,backoffs,sample_ms_diff)
-	SELECT SpinlockID,SnapshotDate,collisions,spins,sleep_time,backoffs,sample_ms_diff
-	FROM dbo.SpinlockStats_60MIN
-	WHERE InstanceID = @InstanceID
-	AND SnapshotDate >= @FromDate
-	AND SnapshotDate < @ToDate
-END
-ELSE
-BEGIN
-	INSERT INTO #Spinlock(SpinlockID,SnapshotDate,collisions,spins,sleep_time,backoffs,sample_ms_diff)
-	SELECT SpinlockID,SnapshotDate,collisions,spins,sleep_time,backoffs,sample_ms_diff
-	FROM dbo.SpinlockStats
-	WHERE InstanceID = @InstanceID
-	AND SnapshotDate >= @FromDate
-	AND SnapshotDate < @ToDate
-END
-
-UPDATE S
-SET S.measure = CASE @Measure WHEN 'Spins' THEN S.spins WHEN 'Backoffs' THEN S.backoffs WHEN 'Collisions' THEN S.collisions ELSE S.sleep_time END,
-	S.DateGroup = DG.DateGroup
-FROM #Spinlock S
+INSERT INTO #Spinlock(SpinlockID,collisions,spins,sleep_time,backoffs,measure,DateGroup)
+SELECT	S.SpinlockID,
+		SUM(S.collisions),
+		SUM(S.spins),
+		SUM(S.sleep_time),
+		SUM(S.backoffs),
+		SUM(CASE @Measure WHEN 'Spins' THEN S.spins WHEN 'Backoffs' THEN S.backoffs WHEN 'Collisions' THEN S.collisions ELSE S.sleep_time END),
+		DG.DateGroup
+FROM (	/* The part hour at the start of the range, from the raw rows */
+		SELECT SpinlockID,SnapshotDate,collisions,spins,sleep_time,backoffs
+		FROM dbo.SpinlockStats
+		WHERE InstanceID = @InstanceID
+		AND SnapshotDate >= @FromDate
+		AND SnapshotDate < @HourFrom
+		UNION ALL
+		/* The whole hours, from the rollup */
+		SELECT SpinlockID,SnapshotDate,collisions,spins,sleep_time,backoffs
+		FROM dbo.SpinlockStats_60MIN
+		WHERE InstanceID = @InstanceID
+		AND SnapshotDate >= @HourFrom
+		AND SnapshotDate < @HourTo
+		UNION ALL
+		/* The part hour at the end */
+		SELECT SpinlockID,SnapshotDate,collisions,spins,sleep_time,backoffs
+		FROM dbo.SpinlockStats
+		WHERE InstanceID = @InstanceID
+		AND SnapshotDate >= @HourTo
+		AND SnapshotDate < @ToDate
+	) S
 CROSS APPLY dbo.DateGroupingMins(S.SnapshotDate,@DateGroupingMin) DG
+GROUP BY S.SpinlockID,
+		DG.DateGroup
+OPTION(RECOMPILE)
 
 DECLARE @TotalSpins DECIMAL(38,3)
 SELECT @TotalSpins = SUM(spins)
@@ -106,30 +118,39 @@ FROM #Spinlock
 
 /*	Rates are per second of time the collection covers, as in the Waits report.  The collection is off by default, so
 	it may be switched on and off around an investigation - dividing by the date range would understate the rate.
-	Each row's sample_ms_diff is the time since the previous snapshot (an hour's worth of snapshots in the hourly table),
-	and is the same for every row of a snapshot, so it's counted once per snapshot.  This covers gaps in collection,
-	partial buckets at the ends of the range, and a long interval after the service or collection was stopped (which is
+	The time covered is recorded per snapshot in dbo.SpinlockStatsCollection (an hour's worth of snapshots in the
+	hourly table), including snapshots where no spinlock had any activity.  This covers gaps in collection, partial
+	buckets at the ends of the range, and a long interval after the service or collection was stopped (which is
 	averaged over its length rather than shown as a spike).
-	A snapshot where no spinlock had any activity produces no rows, so its time isn't counted - in practice spinlocks
-	are busy enough on any running instance for this not to matter.  */
-SELECT	SnapshotDate,
-		DateGroup,
-		MAX(sample_ms_diff) AS sample_ms_diff
-INTO #Snapshots
-FROM #Spinlock
-GROUP BY SnapshotDate,
-		DateGroup
+	Seconds covered by each chart bucket - for the chart, and for the peak rates in the summary.  */
+SELECT	DG.DateGroup,
+		SUM(CAST(C.sample_ms_diff AS BIGINT))/1000.0 AS CoveredSec
+INTO #Coverage
+FROM (	SELECT SnapshotDate,sample_ms_diff
+		FROM dbo.SpinlockStatsCollection
+		WHERE InstanceID = @InstanceID
+		AND SnapshotDate >= @FromDate
+		AND SnapshotDate < @HourFrom
+		UNION ALL
+		SELECT SnapshotDate,sample_ms_diff
+		FROM dbo.SpinlockStatsCollection_60MIN
+		WHERE InstanceID = @InstanceID
+		AND SnapshotDate >= @HourFrom
+		AND SnapshotDate < @HourTo
+		UNION ALL
+		SELECT SnapshotDate,sample_ms_diff
+		FROM dbo.SpinlockStatsCollection
+		WHERE InstanceID = @InstanceID
+		AND SnapshotDate >= @HourTo
+		AND SnapshotDate < @ToDate
+	) C
+CROSS APPLY dbo.DateGroupingMins(C.SnapshotDate,@DateGroupingMin) DG
+GROUP BY DG.DateGroup
+OPTION(RECOMPILE)
 
 DECLARE @CoveredSec DECIMAL(38,3)
-SELECT @CoveredSec = NULLIF(SUM(CAST(sample_ms_diff AS BIGINT)),0)/1000.0
-FROM #Snapshots
-
-/* Seconds covered by each chart bucket - for the chart, and for the peak rates in the summary */
-SELECT	DateGroup,
-		SUM(CAST(sample_ms_diff AS BIGINT))/1000.0 AS CoveredSec
-INTO #Coverage
-FROM #Snapshots
-GROUP BY DateGroup
+SELECT @CoveredSec = NULLIF(SUM(CoveredSec),0)
+FROM #Coverage
 
 /*	Spinning burns CPU, so spins are also given per CPU - the same rate is a much bigger share of a small server.
 	scheduler_count (user schedulers configured in the SQL Server process) rather than cpu_count (logical CPUs on the
@@ -221,8 +242,8 @@ ORDER BY SnapshotDate,SpinlockName
 
 /*	2 - CPU in the chart's buckets.  Spinning burns CPU, so this shows whether CPU rises with the spins - the
 	symptom that makes spinlock contention worth investigating (the SQLCAT spinlock contention guidance looks for
-	CPU and spins rising out of proportion to throughput).  Averaged over the bucket as in the CPU chart, from the
-	hourly table where the buckets are a whole number of hours, as for the spinlock data.  Covers the whole range
+	CPU and spins rising out of proportion to throughput).  Averaged over the bucket as in the CPU chart, with whole
+	hours from the hourly table and part hours from the raw rows, as for the spinlock data.  Covers the whole range
 	rather than only where spinlock stats were collected, as CPU either side of that is context too.  */
 SELECT	CAST(DG.DateGroup AS DATETIME2(2)) AS SnapshotDate,
 		SUM(C.SumSQLProcessCPU*1.0)/SUM(C.SampleCount) AS SQLProcessCPU,
@@ -230,18 +251,23 @@ SELECT	CAST(DG.DateGroup AS DATETIME2(2)) AS SnapshotDate,
 		MAX(C.MaxTotalCPU) AS MaxTotalCPU
 FROM (	SELECT EventTime,SumSQLProcessCPU,SumTotalCPU,SampleCount,MaxTotalCPU
 		FROM dbo.CPU
-		WHERE @Use60MIN = 0
-		AND InstanceID = @InstanceID
+		WHERE InstanceID = @InstanceID
 		AND EventTime >= @FromDate
-		AND EventTime < @ToDate
+		AND EventTime < @HourFrom
 		UNION ALL
 		SELECT EventTime,SumSQLProcessCPU,SumTotalCPU,SampleCount,MaxTotalCPU
 		FROM dbo.CPU_60MIN
-		WHERE @Use60MIN = 1
-		AND InstanceID = @InstanceID
-		AND EventTime >= @FromDate
+		WHERE InstanceID = @InstanceID
+		AND EventTime >= @HourFrom
+		AND EventTime < @HourTo
+		UNION ALL
+		SELECT EventTime,SumSQLProcessCPU,SumTotalCPU,SampleCount,MaxTotalCPU
+		FROM dbo.CPU
+		WHERE InstanceID = @InstanceID
+		AND EventTime >= @HourTo
 		AND EventTime < @ToDate
 	) C
 CROSS APPLY dbo.DateGroupingMins(C.EventTime,@DateGroupingMin) DG
 GROUP BY DG.DateGroup
 ORDER BY SnapshotDate
+OPTION(RECOMPILE)
