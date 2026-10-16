@@ -353,6 +353,8 @@ namespace DBADashGUI.QueryPlans
                 menu.Opening += (_, _) => EnableParameterCopyItems(runtime, compiled);
             }
             _statements.StatementSelected += (_, statement) => Show(statement);
+            _statements.CompareRequested += (_, statement) => ViewerForm.OpenPlanComparison(this, this, statement);
+            _statements.OpenInNewTabRequested += (_, statement) => OpenStatementInNewTab(statement);
 
             _statements.Show(PlanStatementSummary.For(_plan));
 
@@ -1227,14 +1229,28 @@ namespace DBADashGUI.QueryPlans
                     menu.DropDownItems.Add(new ToolStripMenuItem("No other plans open") { Enabled = false });
                 }
 
-                // Another statement of this same plan - a procedure's statements are often worth setting side by side.
-                if (_plan.StatementsWithPlans.FirstOrDefault(s => !ReferenceEquals(s, CurrentStatement)) is { } another)
+                // Another statement of this same plan - two queries run together in SSMS come back as
+                // one plan, and a procedure's statements are often worth setting side by side too.
+                var statements = _plan.Statements.ToList();
+                var anothers = _plan.StatementsWithPlans.Where(s => !ReferenceEquals(s, CurrentStatement)).ToList();
+                if (anothers.Count > 0)
                 {
-                    menu.DropDownItems.Add(new ToolStripMenuItem("With Another Statement in This Plan", null,
-                        (_, _) => ViewerForm.OpenPlanComparison(this, this, another))
+                    var another = new ToolStripMenuItem("With Another Statement in This Plan")
                     {
-                        ToolTipText = "Compare this statement with another of the same plan - choose which from the After list."
-                    });
+                        ToolTipText = "Compare the statement shown with another of the same plan."
+                    };
+                    foreach (var statement in anothers)
+                    {
+                        var ordinal = statements.IndexOf(statement) + 1;
+                        another.DropDownItems.Add(new ToolStripMenuItem(
+                            ordinal.ToString(CultureInfo.InvariantCulture) + ". " + statement.Caption, null,
+                            (_, _) => ViewerForm.OpenPlanComparison(this, this, statement))
+                        {
+                            ToolTipText = statement.StatementText is { Length: > 500 } text ? text[..500] + "…" : statement.StatementText
+                        });
+                    }
+
+                    menu.DropDownItems.Add(another);
                 }
 
                 menu.DropDownItems.Add(new ToolStripSeparator());
@@ -2483,6 +2499,35 @@ namespace DBADashGUI.QueryPlans
 
             var number = _plan.Statements.ToList().IndexOf(_current) + 1;
             return name + " - statement " + number.ToString(CultureInfo.InvariantCulture);
+        }
+
+        /// <summary>
+        /// Open one statement on a tab of its own, as a plan in its own right - the same document
+        /// Save Statement Plan XML writes.  Its tab can then be compared with this one, or with any
+        /// other, like a plan opened from a file.
+        /// </summary>
+        private void OpenStatementInNewTab(PlanStatement statement)
+        {
+            if (statement is not { HasPlan: true } || string.IsNullOrEmpty(statement.Xml)) return;
+
+            try
+            {
+                var xml = PlanParser.ExtractStatementXml(_sourceXml, statement);
+                var plan = PlanParser.Parse(xml);
+
+                // Named after this tab when it has a file name, so the two read as related; otherwise
+                // left to the viewer, which names it after the statement's own text.
+                var number = _plan.Statements.ToList().IndexOf(statement) + 1;
+                var fileName = string.IsNullOrEmpty(_fileName)
+                    ? null
+                    : Path.GetFileNameWithoutExtension(_fileName) + " - statement " + number.ToString(CultureInfo.InvariantCulture) + ".sqlplan";
+
+                ViewerForm.OpenQueryPlanBeside(this, plan, xml, fileName, _host);
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex, "Error opening statement");
+            }
         }
 
         /// <summary>

@@ -200,8 +200,19 @@ namespace DBADashGUI.QueryPlans
             };
         }
 
-        /// <summary>What the comparison's tab is called: both plans' titles.</summary>
-        public string Title => Shorten(_before.Title, 20) + " vs " + Shorten(_after.Title, 20);
+        /// <summary>
+        /// What the comparison's tab is called: both plans' titles, with the statement numbers where
+        /// a plan has more than one.  Two statements of the same plan are named once, otherwise the
+        /// tab would read as the plan compared with itself.
+        /// </summary>
+        public string Title =>
+            ReferenceEquals(_before.Plan, _after.Plan)
+                ? Shorten(_before.Title, 30) + " " + StatementNumber(_before) + " vs " + StatementNumber(_after)
+                : Shorten(_before.Title, 20) + StatementSuffix(_before) + " vs " + Shorten(_after.Title, 20) + StatementSuffix(_after);
+
+        private static string StatementNumber(PlanCompareSide side) => "#" + side.Ordinal.ToString(CultureInfo.InvariantCulture);
+
+        private static string StatementSuffix(PlanCompareSide side) => side.Plan.Statements.Count > 1 ? " " + StatementNumber(side) : string.Empty;
 
         public string TabToolTip => "Before: " + _before.Caption + Environment.NewLine + "After: " + _after.Caption;
 

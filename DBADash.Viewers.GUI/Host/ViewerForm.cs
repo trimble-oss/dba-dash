@@ -483,6 +483,22 @@ namespace DBADashGUI.Viewers
         }
 
         /// <summary>
+        /// Shows a plan on a tab of the window <paramref name="from"/> is on - one statement of the
+        /// plan it shows, opened on its own.  A plan already open there is brought to the front rather
+        /// than opened a second time.
+        /// </summary>
+        internal static void OpenQueryPlanBeside(Control from, ExecutionPlan plan, string sourceXml, string fileName, IViewerHost host)
+        {
+            if (from?.FindForm() is not ViewerForm window)
+            {
+                OpenQueryPlan(plan, sourceXml, fileName, host);
+                return;
+            }
+
+            window.AddQueryPlanTab(plan, sourceXml, fileName, host);
+        }
+
+        /// <summary>
         /// Opens a plan file on a tab of the window <paramref name="from"/> is on - or finds it, if it's open already - and
         /// returns its viewer.  Null when the file couldn't be opened, or is the plan <paramref name="from"/> already
         /// shows, either of which has been reported.
