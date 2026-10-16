@@ -328,7 +328,7 @@ Configure the service on the AI Service tab, or by editing `appsettings.local.js
 
 The GUI uses the following priority order to locate the AI service:
 
-1. **Local probe** — always checks `http://localhost:5055` (or the URL in user settings) first. If reachable, uses it with no authentication. The health endpoint returns a repository fingerprint; if the local service is pointed at a different database than the GUI is connected to, a warning is shown and the tab is disabled.
+1. **Local probe** — always checks `http://localhost:5055` first. If reachable, uses it with no authentication. The health endpoint returns a repository fingerprint; if the local service is pointed at a different database than the GUI is connected to, a warning is shown and the tab is disabled - unless the repository registers a different service, which is then used instead.
 2. **Repository database** — if no local service responds, reads `AI.ServiceConfig` for the shared service URL and API key registered by the central deployment.
 
 If neither source is available the AI Assistant tab is hidden.
@@ -388,4 +388,4 @@ Shared mode only. The GUI retrieves the API key from the database automatically.
 
 ### Port conflict
 
-Change `Registration:Port` in `appsettings.json` and restart. In local mode the GUI will probe `http://localhost:{port}` — update user settings in the GUI Options if using a non-default port.
+Change the port on the **AI Service** tab of the DBADashServiceConfig tool (**Port**, under Registration), or set `Registration:Port` in `appsettings.json`, and restart the service. The GUI's local probe only checks `http://localhost:5055`, so a local-mode service on another port isn't found. To run on another port - for example a second AI service on the same machine - also set **Service URL** on the same tab (`Registration:ServiceUrl`, e.g. `http://localhost:5056`) so the GUI finds it through the repository. A service on the default port that belongs to a different repository is then ignored in favour of the registered one.
