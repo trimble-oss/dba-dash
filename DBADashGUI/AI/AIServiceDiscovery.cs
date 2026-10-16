@@ -37,6 +37,12 @@ namespace DBADashGUI.AI
             /// </summary>
             public bool RepositoryMismatch { get; set; }
             /// <summary>
+            /// True when the local service reported a repository fingerprint and it matches the GUI's
+            /// repository - positive proof, where <see cref="RepositoryMismatch"/> false may only mean
+            /// one side had no fingerprint.
+            /// </summary>
+            public bool RepositoryMatch { get; set; }
+            /// <summary>
             /// True when the calling DB user is a member of AIUser, AIService,
             /// db_owner, or sysadmin — i.e. they received the real ApiKey value
             /// rather than the DDM-masked placeholder.  Always true for the local
@@ -127,6 +133,7 @@ namespace DBADashGUI.AI
                     IsActive = true,
                     Source = ServiceSource.Local,
                     RepositoryMismatch = mismatch,
+                    RepositoryMatch = serviceFingerprint != null && guiFingerprint != null && !mismatch,
                     HasApiKeyAccess = true  // No DB auth check needed for loopback
                 };
             }
@@ -148,6 +155,17 @@ namespace DBADashGUI.AI
             try
             {
                 var repoInfo = await TryGetRepositoryServiceAsync();
+
+                // The repository registers a different service - another port, or another machine -
+                // so the local one is not it, and the key is not the local one's.  Sending it there
+                // only gets a 401 (two AI services on one machine, the other on the default port).
+                // The registered service is the one for this repository, unless the local one shows
+                // it is too: a local-mode service on the same repository needs no key at all.
+                if (repoInfo?.ServiceUrl is { Length: > 0 } registeredUrl && !IsSameService(registeredUrl, localInfo.ServiceUrl))
+                {
+                    return localInfo.RepositoryMatch ? localInfo : repoInfo;
+                }
+
                 if (repoInfo?.ApiKey != null && !string.IsNullOrWhiteSpace(repoInfo.ApiKey))
                 {
                     localInfo.ApiKey = repoInfo.ApiKey;
@@ -169,6 +187,27 @@ namespace DBADashGUI.AI
                 System.Diagnostics.Debug.WriteLine($"AIServiceDiscovery: failed to merge repository API key: {ex.Message}");
             }
             return localInfo;
+        }
+
+        /// <summary>
+        /// Whether a registered URL is the service found at the local URL: the same scheme and port,
+        /// on a host that is this machine.  Registrations are usually by machine name or FQDN, which
+        /// the local probe reaches as localhost.
+        /// </summary>
+        internal static bool IsSameService(string registeredUrl, string? localUrl)
+        {
+            if (!Uri.TryCreate(registeredUrl, UriKind.Absolute, out var registered)
+                || !Uri.TryCreate(localUrl, UriKind.Absolute, out var local))
+                return false;
+
+            if (registered.Port != local.Port
+                || !string.Equals(registered.Scheme, local.Scheme, StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            var host = registered.Host;
+            return registered.IsLoopback
+                   || string.Equals(host, Environment.MachineName, StringComparison.OrdinalIgnoreCase)
+                   || host.StartsWith(Environment.MachineName + ".", StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
