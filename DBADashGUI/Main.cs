@@ -1914,18 +1914,19 @@ namespace DBADashGUI
 
         private async Task LoadChildNodesInternalAsync(SQLTreeItem n)
         {
+            // Show a minimal visual indicator while async expand completes.
+            n.BeginLoadChildren();
+            n.Nodes.Clear();
+            var loading = new SQLTreeItem("Loading...", SQLTreeItem.TreeType.Folder) { ForeColor = Color.Gray };
             try
             {
-                // Show a minimal visual indicator while async expand completes.
-                n.Nodes.Clear();
-                var loading = new SQLTreeItem("Loading...", SQLTreeItem.TreeType.Folder) { ForeColor = Color.Gray };
-                try
-                {
-                    loading.NodeFont = new Font(tv1.Font, FontStyle.Italic);
-                }
-                catch { }
+                loading.NodeFont = new Font(tv1.Font, FontStyle.Italic);
+            }
+            catch { }
 
-                n.Nodes.Add(loading);
+            n.Nodes.Add(loading);
+            try
+            {
                 tv1.Refresh();
 
                 switch (n.Type)
@@ -1962,14 +1963,14 @@ namespace DBADashGUI
                         await ExpandObjectsAsync(n);
                         break;
                 }
-                if (n.Nodes.Contains(loading)) n.Nodes.Remove(loading);
-                n.ChildrenLoaded();
-                n.Expand();
             }
             finally
             {
+                if (n.Nodes.Contains(loading)) n.Nodes.Remove(loading);
+                n.ChildrenLoaded();
                 childNodeLoads.Remove(n);
             }
+            n.Expand();
         }
 
         private static async Task ExpandJobStepsAsync(SQLTreeItem n)
