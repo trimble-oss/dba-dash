@@ -2,7 +2,7 @@
 	One row per spinlock stats snapshot that was diffed, whether or not any spinlock had any activity in it.  This is
 	the time the collection covered, which dbo.SpinlockStats_Get divides by - an idle interval adds no rows to
 	dbo.SpinlockStats, so taking the time from there would leave it out and overstate the rates.
-	Keep its retention at least as long as dbo.SpinlockStats'.
+	Its retention is dbo.SpinlockStats' - see dbo.DataRetentionLink.
 */
 CREATE TABLE dbo.SpinlockStatsCollection (
     InstanceID INT NOT NULL,

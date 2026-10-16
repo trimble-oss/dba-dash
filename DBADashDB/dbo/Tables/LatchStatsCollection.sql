@@ -2,7 +2,7 @@
 	One row per latch stats snapshot that was diffed, whether or not any latch class was waited on in it.  This is
 	the time the collection covered, which dbo.LatchStats_Get divides by - an idle interval adds no rows to
 	dbo.LatchStats, so taking the time from there would leave it out and overstate the rates.
-	Keep its retention at least as long as dbo.LatchStats'.
+	Its retention is dbo.LatchStats' - see dbo.DataRetentionLink.
 */
 CREATE TABLE dbo.LatchStatsCollection (
     InstanceID INT NOT NULL,

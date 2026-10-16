@@ -1,6 +1,6 @@
 /*
 	dbo.LatchStatsCollection rolled up by the hour, for the hours dbo.LatchStats_60MIN holds.
-	Keep its retention at least as long as dbo.LatchStats_60MIN's.
+	Its retention is dbo.LatchStats_60MIN's - see dbo.DataRetentionLink.
 */
 CREATE TABLE dbo.LatchStatsCollection_60MIN (
     InstanceID INT NOT NULL,

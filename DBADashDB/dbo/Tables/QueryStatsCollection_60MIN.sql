@@ -3,8 +3,8 @@
     collections covered and what they could not account for.  A rate over months then divides by the time that was
     actually watched, as a rate over minutes does.
 
-    Kept the same way as dbo.QueryStats_60MIN, in the same transaction.  Keep its retention at least as long as that
-    table's: every rate the reports show for the hours it holds divides by the time recorded here.
+    Kept the same way as dbo.QueryStats_60MIN, in the same transaction.  Its retention is that table's (see
+    dbo.DataRetentionLink): every rate the reports show for the hours it holds divides by the time recorded here.
 */
 CREATE TABLE dbo.QueryStatsCollection_60MIN (
     InstanceID INT NOT NULL,

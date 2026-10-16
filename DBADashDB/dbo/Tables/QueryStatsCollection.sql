@@ -7,10 +7,10 @@
     complete" lives here rather than being inferred from the absence of rows.
 
     Partitioned on a scheme of its own rather than dbo.QueryStats', so partition maintenance purges it by its
-    own retention.  Sharing the function left it to dbo.QueryStats' cleanup, which merges the boundaries of the
+    own partitions.  Sharing the function left it to dbo.QueryStats' cleanup, which merges the boundaries of the
     partitions it truncates, so this table's old rows were merged into the first partition and never removed.
-    Keep its retention at least as long as dbo.QueryStats': every rate the reports show for a window divides by
-    the time recorded here.
+    Its retention is dbo.QueryStats' (see dbo.DataRetentionLink): every rate the reports show for a window divides
+    by the time recorded here.
 */
 CREATE TABLE dbo.QueryStatsCollection (
     InstanceID INT NOT NULL,
