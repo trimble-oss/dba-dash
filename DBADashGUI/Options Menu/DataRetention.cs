@@ -25,14 +25,27 @@ namespace DBADashGUI
 
         private static bool IsLinked(DataGridViewRow row) => row.Cells["colRetentionLinkedTo"].Value is string;
 
-        /// <summary>A linked table's retention is set on the table it follows, so its retention isn't shown as a link to edit</summary>
+        /// <summary>Retention is set on tables with a row in dbo.DataRetention.  A linked table follows another table's
+        /// retention, and a table without a row (shown with Show All Tables) isn't meant to have one.</summary>
+        private static bool IsConfigurable(DataGridViewRow row) => !IsLinked(row) && row.Cells["colRetentionDays"].Value is int;
+
+        /// <summary>Rows whose retention can't be set here aren't shown as a link to edit, and are greyed out</summary>
         private void Dgv_DataBindingComplete(object sender, DataGridViewBindingCompleteEventArgs e)
         {
             foreach (DataGridViewRow row in dgv.Rows)
             {
-                if (!IsLinked(row)) continue;
-                row.Cells["colRetentionDays"] = new DataGridViewTextBoxCell { Value = row.Cells["colRetentionDays"].Value };
+                if (IsConfigurable(row)) continue;
+                var linkedTo = row.Cells["colRetentionLinkedTo"].Value as string;
+                row.Cells["colRetentionDays"] = new DataGridViewTextBoxCell
+                {
+                    Value = row.Cells["colRetentionDays"].Value,
+                    ToolTipText = linkedTo != null
+                        ? $"Same as {linkedTo}.  Set the retention for {linkedTo} instead."
+                        : "Data retention isn't managed for this table."
+                };
                 row.Cells["colRetentionDays"].ReadOnly = true;
+                // Muted text rather than the theme's Disabled colours, which are a solid fill for status cells.  Gray5 reads as muted on the light and dark grid backgrounds.
+                row.DefaultCellStyle.ForeColor = DashColors.Gray5;
             }
         }
 
@@ -76,7 +89,7 @@ namespace DBADashGUI
 
         private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex < 0 || dgv.Columns[e.ColumnIndex].Name != "colRetentionDays" || IsLinked(dgv.Rows[e.RowIndex])) return;
+            if (e.RowIndex < 0 || dgv.Columns[e.ColumnIndex].Name != "colRetentionDays" || !IsConfigurable(dgv.Rows[e.RowIndex])) return;
             var days = (int)dgv[e.ColumnIndex, e.RowIndex].Value;
             var sDays = days.ToString();
             var tableName = (string)dgv["colTableName", e.RowIndex].Value;
