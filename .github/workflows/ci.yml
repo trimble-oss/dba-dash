@@ -94,6 +94,13 @@ jobs:
           sqlcmd -S localhost -U sa -P dbatools.I0 -d tempdb -Q "SELECT @@version as Version;"
           sqlcmd -S localhost -U sa -P dbatools.I0 -d tempdb -Q "SELECT SERVERPROPERTY('Collation') AS Collation;"
 
+      # Tests that need a SQL instance (e.g. messaging permissions) - run against each SQL version and the binary collation.
+      # With the connection string set they fail rather than being skipped if the instance isn't available.
+      - name: Test against SQL ${{ matrix.sql-version }}
+        run: dotnet test DBADash.Test/DBADash.Test.csproj --filter "TestCategory=SqlServer" --verbosity normal
+        env:
+          DBADASH_TEST_SQL: "Data Source=localhost;UID=sa;pwd=dbatools.I0;Encrypt=True;TrustServerCertificate=True;"
+
       - name: Create Identity Test DB
         run: | 
           sqlcmd -S localhost -U sa -P dbatools.I0 -d tempdb -Q "CREATE DATABASE TestIdentity"

@@ -335,14 +335,15 @@ namespace DBADashGUI
             if (!CanMessage)
                 return false;
 
-            if (Enum.TryParse(typeof(ProcedureExecutionMessage.CommunityProcs), procName, true, out _))
+            // Community or custom proc decided as the service and repository do - the repository checks the same role
+            if (ProcedureExecutionMessage.IsCommunityProc(schemaName, procName))
             {
                 return (DBADashUser.CommunityScripts &&
                     (CollectAgent.IsAllowAllScripts || CollectAgent.AllowedScripts.Contains(procName)));
             }
 
             return DBADashUser.CustomTools &&
-                   CollectAgent.AllowedCustomProcs.Contains(procName) || CollectAgent.AllowedCustomProcs.Contains(schemaName + "." + procName) || CollectAgent.AllowedCustomProcs.Contains(schemaName.SqlQuoteName() + "." + procName.SqlQuoteName());
+                   (CollectAgent.AllowedCustomProcs.Contains(procName) || CollectAgent.AllowedCustomProcs.Contains(schemaName + "." + procName) || CollectAgent.AllowedCustomProcs.Contains(schemaName.SqlQuoteName() + "." + procName.SqlQuoteName()));
         }
 
         public DBADashAgent ImportAgent => ImportAgentID == null ? null : CommonData.GetDBADashAgent((int)ImportAgentID);
