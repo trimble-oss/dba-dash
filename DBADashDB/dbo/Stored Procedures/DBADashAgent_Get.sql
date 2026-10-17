@@ -17,6 +17,7 @@ SELECT DBADashAgentID,
        AllowedCustomProcs,
        ManageXESessions,
        WatchXESessions,
-       AdhocXEEnabled
+       AdhocXEEnabled,
+       ScheduleChangesEnabled
 FROM dbo.DBADashAgent
 WHERE DBADashAgentID = @DBADashAgentID

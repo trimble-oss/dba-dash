@@ -439,9 +439,21 @@ namespace DBADash
             cmd.Parameters.AddWithValue("CollectAgentID", collectAgent.GetDBADashAgentID(connectionString));
             cmd.Parameters.AddWithValue("ImportAgentID", importAgent.GetDBADashAgentID(connectionString));
             cmd.Parameters.AddWithValue("SnapshotDate", snapshotDate);
+            // A table-valued parameter is matched by column position, so a file from an older service that predates
+            // temporary schedules needs the column adding before it fits the type.
+            if (!dt.Columns.Contains("TemporaryUntil"))
+            {
+                dt.Columns.Add("TemporaryUntil", typeof(DateTime));
+            }
             if (dt.Rows.Count > 0)
             {
                 cmd.Parameters.AddWithValue("ScheduleInfo", dt);
+            }
+            // Not sent by older services - leave the instance's pause state alone rather than clearing it
+            if (agentRow.Table.Columns.Contains("CollectionsPausedUntil"))
+            {
+                cmd.Parameters.AddWithValue("HasPauseInfo", true);
+                cmd.Parameters.AddWithValue("CollectionsPausedUntil", agentRow["CollectionsPausedUntil"]);
             }
             await cmd.ExecuteNonQueryAsync();
         }
@@ -897,7 +909,8 @@ namespace DBADash
                 AllowedCustomProcsCSV = row.Table.Columns.Contains("AllowedCustomProcs") && row["AllowedCustomProcs"] != DBNull.Value ? (string)row["AllowedCustomProcs"] : string.Empty,
                 ManageXESessions = row.Table.Columns.Contains("ManageXESessions") && row["ManageXESessions"] != DBNull.Value ? (string)row["ManageXESessions"] : null,
                 WatchXESessions = row.Table.Columns.Contains("WatchXESessions") && row["WatchXESessions"] != DBNull.Value ? (string)row["WatchXESessions"] : null,
-                AdhocXEEnabled = row.Table.Columns.Contains("AdhocXEEnabled") && row["AdhocXEEnabled"] != DBNull.Value && (bool)row["AdhocXEEnabled"]
+                AdhocXEEnabled = row.Table.Columns.Contains("AdhocXEEnabled") && row["AdhocXEEnabled"] != DBNull.Value && (bool)row["AdhocXEEnabled"],
+                ScheduleChangesEnabled = row.Table.Columns.Contains("ScheduleChangesEnabled") && row["ScheduleChangesEnabled"] != DBNull.Value && (bool)row["ScheduleChangesEnabled"]
             };
         }
 

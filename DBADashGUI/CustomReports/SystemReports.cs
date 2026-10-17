@@ -17,6 +17,7 @@ namespace DBADashGUI.CustomReports
             Add(NewDatabasesReport.Instance);
             Add(QueryStatsChartsReport.Instance);
             Add(QueryStatsReport.Instance);
+            Add(UserActionsReport.Instance);
             Add(ServerRoleMembersReport.Instance);
             Add(ServerServicesReport.Instance);
             Add(SQLLoginPasswordAgeReport.Instance);

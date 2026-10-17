@@ -7,12 +7,13 @@ using System.Windows.Forms;
 using System.Diagnostics;
 using DBADashGUI.Theme;
 
-namespace DBADashServiceConfig
+namespace DBADashGUI
 {
     /// <summary>
     /// WinForms dialog that helps construct and edit Quartz-style cron expressions.
     /// The control delegates parsing and day-token utilities to <see cref="CronParser"/>.
     /// </summary>
+    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
     public partial class CronExpressionBuilder : Form
     {
         private CronParser.FrequencyMode SelectedFrequencyMode => _frequencyModes != null && cboFrequency.SelectedIndex >= 0 && cboFrequency.SelectedIndex < _frequencyModes.Length

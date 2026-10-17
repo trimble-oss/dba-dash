@@ -212,11 +212,9 @@ namespace DBADash.Messaging
             List<CollectionType> standardCollections, Dictionary<string, CustomCollection> customCollections,
             string connectionID, bool ignoreDisabledSchedule)
         {
-            // Effective schedule = agent/config schedule overlaid with any per-source overrides (mirrors the
-            // resolution the scheduler uses when deciding what to collect automatically).
-            var schedule = (src.CollectionSchedules is { Count: > 0 })
-                ? CollectionSchedules.Combine(cfg.GetSchedules(), src.CollectionSchedules)
-                : cfg.GetSchedules();
+            // Effective schedule = agent/config schedule overlaid with any per-source and temporary overrides (mirrors
+            // the resolution the scheduler uses when deciding what to collect automatically).
+            var schedule = cfg.GetEffectiveSchedules(src);
 
             var disabled = new List<string>();
             var configurationDisabled = new List<string>();

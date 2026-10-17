@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DBADash;
+using DBADashGUI;
 using DBADashGUI.Theme;
 using Microsoft.Data.SqlClient;
 

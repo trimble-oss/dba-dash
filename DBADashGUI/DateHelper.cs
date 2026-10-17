@@ -156,6 +156,22 @@ namespace DBADashGUI
             return TimeZoneInfo.ConvertTimeToUtc(value, AppTimeZone);
         }
 
+        /// <summary>
+        /// Converts a time in the app time zone to UTC.  False when the time doesn't exist in the app time zone - it's in
+        /// the hour skipped when the clocks go forward - where <see cref="AppTimeZoneToUtc"/> would throw.
+        /// </summary>
+        public static bool TryAppTimeZoneToUtc(this DateTime value, out DateTime utc)
+        {
+            var unspecified = DateTime.SpecifyKind(value, DateTimeKind.Unspecified);
+            if (AppTimeZone.IsInvalidTime(unspecified))
+            {
+                utc = default;
+                return false;
+            }
+            utc = TimeZoneInfo.ConvertTimeToUtc(unspecified, AppTimeZone);
+            return true;
+        }
+
         public static DateTimeOffset ToAppTimeZone(this DateTimeOffset value)
         {
             return TimeZoneInfo.ConvertTime(value, AppTimeZone);

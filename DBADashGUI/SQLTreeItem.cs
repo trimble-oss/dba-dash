@@ -328,6 +328,44 @@ namespace DBADashGUI
         public bool IsVisibleInSummary
         { get => isVisibleInSummary; set { isVisibleInSummary = value; SetIcon(); } }
 
+        private DateTime? collectionsPausedUntilUtc;
+        private string pausedSuffix = string.Empty;
+
+        /// <summary>
+        /// When scheduled collections for the instance are paused until (UTC), or null.  Shown on the node - a suffix,
+        /// colour and tooltip - so a paused instance stands out in the tree.  See <see cref="UpdatePausedIndicator"/>.
+        /// </summary>
+        public DateTime? CollectionsPausedUntilUtc
+        {
+            get => collectionsPausedUntilUtc;
+            set
+            {
+                collectionsPausedUntilUtc = value;
+                UpdatePausedIndicator();
+            }
+        }
+
+        /// <summary>Shows or clears the paused indicator.  Called periodically so it disappears when the pause ends.</summary>
+        public void UpdatePausedIndicator()
+        {
+            var baseText = pausedSuffix.Length > 0 && Text.EndsWith(pausedSuffix) ? Text[..^pausedSuffix.Length] : Text;
+            if (collectionsPausedUntilUtc > DateTime.UtcNow)
+            {
+                pausedSuffix = $" (paused until {CollectionDates.PauseCollections.FormatPausedUntil(collectionsPausedUntilUtc.Value)})";
+                ForeColor = DashColors.Warning;
+                ToolTipText = CollectionDates.PauseCollections.PausedToolTip(collectionsPausedUntilUtc.Value);
+            }
+            else
+            {
+                collectionsPausedUntilUtc = null;
+                pausedSuffix = string.Empty;
+                ForeColor = Color.Empty;
+                ToolTipText = string.Empty;
+            }
+            var newText = baseText + pausedSuffix;
+            if (Text != newText) Text = newText;
+        }
+
         private string instanceName;
         private int instanceID;
 
@@ -1004,7 +1042,24 @@ namespace DBADashGUI
         public void AddInstanceActionsContextMenu()
         {
             ContextMenuStrip ??= new ContextMenuStrip();
-            if (!DBADashUser.IsAdmin) return;
+
+            // Allowed by its own role, so offered outside the admin-only Instance Actions to users who aren't admins
+            var scheduleMenus = new List<ToolStripItem>();
+            if (DBADashUser.AllowScheduleChanges)
+            {
+                var mnuPauseCollections = new ToolStripMenuItem("Pause/Resume Collections...") { Image = Resources.StopTime_16x };
+                mnuPauseCollections.Click += MnuPauseCollections_Click;
+                var mnuConfigureSchedule = new ToolStripMenuItem("Configure Schedule...") { Image = Resources.Time_16x };
+                mnuConfigureSchedule.Click += (_, _) => ConfigureScheduleAsync(serviceLevel: false);
+                var mnuConfigureServiceSchedule = new ToolStripMenuItem("Configure Service Schedule...");
+                mnuConfigureServiceSchedule.Click += (_, _) => ConfigureScheduleAsync(serviceLevel: true);
+                scheduleMenus.AddRange(new ToolStripItem[] { mnuPauseCollections, mnuConfigureSchedule, mnuConfigureServiceSchedule });
+            }
+            if (!DBADashUser.IsAdmin)
+            {
+                ContextMenuStrip.Items.AddRange(scheduleMenus.ToArray());
+                return;
+            }
 
             var mnuInstanceActions = new ToolStripMenuItem("Instance Actions") { Image = Resources.DatabaseSettings_16x };
 
@@ -1033,7 +1088,43 @@ namespace DBADashGUI
                     mnuInstanceActions.DropDownItems.AddRange(new ToolStripItem[] { mnuDelete });
                     break;
             }
+            for (var i = scheduleMenus.Count - 1; i >= 0; i--)
+            {
+                mnuInstanceActions.DropDownItems.Insert(0, scheduleMenus[i]);
+            }
             ContextMenuStrip.Items.Add(mnuInstanceActions);
+        }
+
+        private async void ConfigureScheduleAsync(bool serviceLevel)
+        {
+            try
+            {
+                var result = await CollectionDates.ConfigureSchedule.ConfigureAsync(TreeView, InstanceID, serviceLevel, (_, _, _) => { });
+                if (result != null)
+                {
+                    MessageBox.Show(TreeView, result.Message, "Configure Schedule", MessageBoxButtons.OK, result.Icon);
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex);
+            }
+        }
+
+        private async void MnuPauseCollections_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var result = await CollectionDates.PauseCollections.PauseOrResumeAsync(TreeView, new[] { InstanceID }, (_, _, _) => { });
+                if (result != null)
+                {
+                    MessageBox.Show(TreeView, result.Message, "Pause Collections", MessageBoxButtons.OK, result.Icon);
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex);
+            }
         }
 
         private async void MnuAddAlertBlackout_Click(object sender, EventArgs e)
@@ -1092,6 +1183,8 @@ namespace DBADashGUI
                 Context.InstanceName = name;
                 instanceName = name;
                 Text = name;
+                pausedSuffix = string.Empty;
+                UpdatePausedIndicator();
                 RefreshNode();
             }
             catch (Exception ex)

@@ -5,7 +5,8 @@
 RETURNS TABLE
 AS
 RETURN
-SELECT CASE WHEN EXISTS(
+SELECT CASE WHEN I.CollectionsPausedUntil > SYSUTCDATETIME() THEN CAST(1 AS BIT) /* Collections paused from the GUI - alerts are muted until they resume */
+			WHEN EXISTS(
 				SELECT 1 
 				FROM Alert.BlackoutPeriod BP 
 				OUTER APPLY(SELECT SYSDATETIMEOFFSET() AT TIME ZONE TimeZone AS CurrentTime) AS TZ

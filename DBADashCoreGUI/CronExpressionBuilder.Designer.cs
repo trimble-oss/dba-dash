@@ -1,4 +1,4 @@
-namespace DBADashServiceConfig
+namespace DBADashGUI
 {
     partial class CronExpressionBuilder
     {

@@ -734,7 +734,8 @@ namespace DBADash
                 new DataColumn("AllowedCustomProcs",typeof(string)),
                 new DataColumn("ManageXESessions", typeof(string)),
                 new DataColumn("WatchXESessions", typeof(string)),
-                new DataColumn("AdhocXEEnabled", typeof(bool))
+                new DataColumn("AdhocXEEnabled", typeof(bool)),
+                new DataColumn("ScheduleChangesEnabled", typeof(bool))
             });
             if (dt.Rows.Count == 0)
             {
@@ -758,6 +759,7 @@ namespace DBADash
             dt.Rows[0]["ManageXESessions"] = (object)dashAgent.ManageXESessions ?? DBNull.Value;
             dt.Rows[0]["WatchXESessions"] = (object)dashAgent.WatchXESessions ?? DBNull.Value;
             dt.Rows[0]["AdhocXEEnabled"] = dashAgent.AdhocXEEnabled;
+            dt.Rows[0]["ScheduleChangesEnabled"] = dashAgent.ScheduleChangesEnabled;
         }
 
         public async Task GetInstanceAsync()

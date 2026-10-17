@@ -74,9 +74,7 @@ namespace DBADashService
                 // blocked by the instance being offline (see ScheduleInfoReporter).
                 try
                 {
-                    var effectiveSchedule = Source.CollectionSchedules is { Count: > 0 }
-                        ? CollectionSchedules.Combine(config.GetSchedules(), Source.CollectionSchedules)
-                        : config.GetSchedules();
+                    var effectiveSchedule = config.GetEffectiveSchedules(Source);
                     var effectiveCustomCollections = Source.CustomCollections.CombineCollections(config.CustomCollections);
                     await ScheduleInfoReporter.ReportAsync(Source, effectiveSchedule, effectiveCustomCollections, config);
                 }
@@ -84,6 +82,13 @@ namespace DBADashService
                 {
                     Log.Error(ex, "Error reporting schedule info for instance {instance}", Source.SourceConnection.ConnectionForPrint);
                 }
+            }
+
+            // After schedule info, which also reports the pause to the repository
+            if (CollectionPauseStore.Current.IsPaused(Source.ConnectionID, out var pausedUntil))
+            {
+                Log.Debug("Skipping {types} for {instance} - collections are paused until {pausedUntil:u}", types, Source.ConnectionID, pausedUntil);
+                return;
             }
 
             try

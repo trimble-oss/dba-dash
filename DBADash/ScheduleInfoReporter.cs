@@ -1,7 +1,10 @@
 using Serilog;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DBADash;
 
@@ -18,6 +21,34 @@ namespace DBADashService
     /// </summary>
     public static class ScheduleInfoReporter
     {
+        private const int ReportParallelism = 4;
+
+        /// <summary>
+        /// Reports the effective schedule for each of <paramref name="sources"/> - after a schedule change, pause or
+        /// temporary schedule ending, so the repository reflects it straight away rather than at the next service start.
+        /// A failure for one source is logged and doesn't stop the others.  Returns a description of each failure, so a
+        /// caller can tell the user the repository doesn't reflect the change (e.g. that a pause isn't muting alerts).
+        /// </summary>
+        public static async Task<List<string>> ReportAsync(IEnumerable<DBADashSource> sources, CollectionConfig config, CancellationToken cancellationToken = default)
+        {
+            var failures = new ConcurrentBag<string>();
+            var options = new ParallelOptions { MaxDegreeOfParallelism = ReportParallelism, CancellationToken = cancellationToken };
+            await Parallel.ForEachAsync(sources, options, async (src, _) =>
+            {
+                try
+                {
+                    var effectiveCustomCollections = src.CustomCollections.CombineCollections(config.CustomCollections);
+                    await ReportAsync(src, config.GetEffectiveSchedules(src), effectiveCustomCollections, config);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Error reporting schedule info for {instance}", src.SourceConnection.ConnectionForPrint);
+                    failures.Add($"{src.ConnectionID ?? src.SourceConnection.ConnectionForPrint}: {(ex as AggregateException)?.InnerExceptions.FirstOrDefault()?.Message ?? ex.Message}");
+                }
+            });
+            return failures.ToList();
+        }
+
         public static async Task ReportAsync(DBADashSource source, CollectionSchedules effectiveSchedule,
             Dictionary<string, CustomCollection> effectiveCustomCollections, CollectionConfig config)
         {
@@ -52,13 +83,14 @@ namespace DBADashService
                 }
             }
 
-            var ds = BuildDataSet(source, effectiveSchedule, effectiveCustomCollections);
+            var ds = BuildDataSet(source, effectiveSchedule, effectiveCustomCollections,
+                CollectionPauseStore.Current.IsPaused(source.ConnectionID, out var pausedUntil) ? pausedUntil : null);
             var fileName = DBADashSource.GenerateFileName(source.SourceConnection.ConnectionForFileName + "_ScheduleInfo");
             await DestinationHandling.WriteAllDestinationsAsync(ds, fileName, config);
         }
 
         private static DataSet BuildDataSet(DBADashSource source, CollectionSchedules effectiveSchedule,
-            Dictionary<string, CustomCollection> effectiveCustomCollections)
+            Dictionary<string, CustomCollection> effectiveCustomCollections, DateTime? collectionsPausedUntil)
         {
             var ds = new DataSet("ScheduleInfo");
 
@@ -76,6 +108,10 @@ namespace DBADashService
             dtAgent.Rows[0]["SnapshotDateUTC"] = DateTime.UtcNow;
             dtAgent.Rows[0]["Instance"] = source.ConnectionID;
             dtAgent.Rows[0]["DBName"] = "ScheduleInfo";
+            // When scheduled collections for the instance are paused (null = not paused).  The repository mutes alerts
+            // for the instance and doesn't report its collections as overdue until then.
+            dtAgent.Columns.Add("CollectionsPausedUntil", typeof(DateTime));
+            dtAgent.Rows[0]["CollectionsPausedUntil"] = (object)collectionsPausedUntil ?? DBNull.Value;
             ds.Tables.Add(dtAgent);
 
             var dt = new DataTable("ScheduleInfo");
@@ -84,7 +120,10 @@ namespace DBADashService
             dt.Columns.Add("RunOnServiceStart", typeof(bool));
             dt.Columns.Add("MaxIntervalMinutes", typeof(decimal));
             dt.Columns.Add("IsInstanceOverride", typeof(bool));
+            // When the schedule is a temporary one (see TemporaryScheduleStore), the time it reverts.  Null otherwise.
+            dt.Columns.Add("TemporaryUntil", typeof(DateTime));
 
+            var temporary = TemporaryScheduleStore.Current.Get(source.ConnectionID);
             foreach (var (type, schedule) in effectiveSchedule)
             {
                 if (type == CollectionType.SchemaSnapshot && source.SchemaSnapshotDBs is not { Length: > 0 })
@@ -97,7 +136,8 @@ namespace DBADashService
                 }
                 AddRow(dt, type.ToString(),
                     source.IsCollectionDisabledByConfiguration(type) ? DisabledSchedule : schedule,
-                    source.CollectionSchedules != null && source.CollectionSchedules.ContainsKey(type));
+                    source.CollectionSchedules != null && source.CollectionSchedules.ContainsKey(type),
+                    temporary != null && temporary.TryGetValue(type, out var temporarySchedule) ? temporarySchedule.UntilUtc : null);
             }
 
             // Custom collections self-report to dbo.CollectionDates as 'UserData.{name}' (see the generated
@@ -120,7 +160,7 @@ namespace DBADashService
         private static readonly CollectionSchedule DisabledSchedule =
             new() { Schedule = string.Empty, RunOnServiceStart = false };
 
-        private static void AddRow(DataTable dt, string reference, CollectionSchedule schedule, bool isInstanceOverride)
+        private static void AddRow(DataTable dt, string reference, CollectionSchedule schedule, bool isInstanceOverride, DateTime? temporaryUntil = null)
         {
             var row = dt.NewRow();
             row["Reference"] = reference;
@@ -128,6 +168,7 @@ namespace DBADashService
             row["RunOnServiceStart"] = schedule.RunOnServiceStart;
             row["MaxIntervalMinutes"] = CronParser.TryGetMaxIntervalMinutes(schedule.Schedule, out var minutes) ? (decimal)minutes : DBNull.Value;
             row["IsInstanceOverride"] = isInstanceOverride;
+            row["TemporaryUntil"] = (object)temporaryUntil ?? DBNull.Value;
             dt.Rows.Add(row);
         }
     }

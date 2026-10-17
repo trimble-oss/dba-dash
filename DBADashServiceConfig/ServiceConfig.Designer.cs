@@ -82,6 +82,7 @@ namespace DBADashServiceConfig
             txtWatchXESessions = new System.Windows.Forms.TextBox();
             chkAllowPlanForcing = new System.Windows.Forms.CheckBox();
             chkAllowKillSession = new System.Windows.Forms.CheckBox();
+            chkAllowScheduleChanges = new System.Windows.Forms.CheckBox();
             chkEnableMessaging = new System.Windows.Forms.CheckBox();
             txtAllowedCustomProcs = new System.Windows.Forms.TextBox();
             txtAllowedJobs = new System.Windows.Forms.TextBox();
@@ -821,7 +822,19 @@ namespace DBADashServiceConfig
             toolTip1.SetToolTip(chkAllowKillSession, "Allow access to kill sessions via the messaging feature");
             chkAllowKillSession.UseVisualStyleBackColor = true;
             chkAllowKillSession.CheckedChanged += ChkAllowKillSession_CheckedChanged;
-            // 
+            //
+            // chkAllowScheduleChanges
+            //
+            chkAllowScheduleChanges.AutoSize = true;
+            chkAllowScheduleChanges.Location = new System.Drawing.Point(430, 25);
+            chkAllowScheduleChanges.Name = "chkAllowScheduleChanges";
+            chkAllowScheduleChanges.Size = new System.Drawing.Size(195, 24);
+            chkAllowScheduleChanges.TabIndex = 7;
+            chkAllowScheduleChanges.Text = "Allow Schedule Changes";
+            toolTip1.SetToolTip(chkAllowScheduleChanges, "Allow collection schedules to be enabled, disabled or changed, and collections to be paused for a period, from the GUI via the messaging feature.  Changes are saved to ServiceConfig.json and applied without a service restart.");
+            chkAllowScheduleChanges.UseVisualStyleBackColor = true;
+            chkAllowScheduleChanges.CheckedChanged += ChkAllowScheduleChanges_CheckedChanged;
+            //
             // chkEnableMessaging
             // 
             chkEnableMessaging.AutoSize = true;
@@ -1507,6 +1520,7 @@ namespace DBADashServiceConfig
             grpMessaging.Controls.Add(txtAllowScripts);
             grpMessaging.Controls.Add(chkAllowPlanForcing);
             grpMessaging.Controls.Add(chkAllowKillSession);
+            grpMessaging.Controls.Add(chkAllowScheduleChanges);
             grpMessaging.Controls.Add(label8);
             grpMessaging.Controls.Add(label6);
             grpMessaging.Controls.Add(txtSQS);
@@ -2803,6 +2817,7 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.CheckBox chkAllowPlanForcing;
         private System.Windows.Forms.CheckBox chkAllowKillSession;
+        private System.Windows.Forms.CheckBox chkAllowScheduleChanges;
         private System.Windows.Forms.Button bttnCheckConnections;
         private System.Windows.Forms.ComboBox cboDeleteAction;
         private System.Windows.Forms.Label label12;

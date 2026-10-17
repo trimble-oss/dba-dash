@@ -43,6 +43,11 @@ namespace DBADashGUI.CollectionDates
             tsTriggerWarningAndCritical = new System.Windows.Forms.ToolStripMenuItem();
             tsTriggerSelected = new System.Windows.Forms.ToolStripMenuItem();
             tsTriggerAll = new System.Windows.Forms.ToolStripMenuItem();
+            tsPauseCollections = new System.Windows.Forms.ToolStripButton();
+            tsConfigureSchedule = new System.Windows.Forms.ToolStripDropDownButton();
+            tsConfigureInstanceSchedule = new System.Windows.Forms.ToolStripMenuItem();
+            tsConfigureServiceSchedule = new System.Windows.Forms.ToolStripMenuItem();
+            tsServiceInstances = new System.Windows.Forms.ToolStripMenuItem();
             dgvCollectionDates = new DBADashDataGridView();
             statusStrip1 = new System.Windows.Forms.StatusStrip();
             lblStatus = new System.Windows.Forms.ToolStripStatusLabel();
@@ -59,6 +64,8 @@ namespace DBADashGUI.CollectionDates
             CronExpression = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ScheduleDescription = new System.Windows.Forms.DataGridViewTextBoxColumn();
             RunOnServiceStart = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            colEditSchedule = new System.Windows.Forms.DataGridViewLinkColumn();
+            colPausedUntil = new System.Windows.Forms.DataGridViewTextBoxColumn();
             MaxIntervalMinutes = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ConfiguredLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
             Configure = new System.Windows.Forms.DataGridViewLinkColumn();
@@ -72,7 +79,7 @@ namespace DBADashGUI.CollectionDates
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, statusFilterToolStrip1, tsClearFilter, tsTriggerMenu });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopy, tsExcel, statusFilterToolStrip1, tsClearFilter, tsTriggerMenu, tsPauseCollections, tsConfigureSchedule });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new System.Drawing.Size(1357, 27);
@@ -159,7 +166,55 @@ namespace DBADashGUI.CollectionDates
             tsTriggerAll.Size = new System.Drawing.Size(213, 26);
             tsTriggerAll.Text = "All";
             tsTriggerAll.Click += tsTriggerAll_Click;
-            // 
+            //
+            // tsPauseCollections
+            //
+            tsPauseCollections.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            tsPauseCollections.Image = Properties.Resources.StopTime_16x;
+            tsPauseCollections.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsPauseCollections.Name = "tsPauseCollections";
+            tsPauseCollections.Size = new System.Drawing.Size(150, 24);
+            tsPauseCollections.Text = "Pause Collections";
+            tsPauseCollections.ToolTipText = "Pause or resume all scheduled collections for the instances of the selected rows.  Alerts are muted while paused.";
+            tsPauseCollections.Visible = false;
+            tsPauseCollections.Click += TsPauseCollections_Click;
+            //
+            // tsConfigureSchedule
+            //
+            tsConfigureSchedule.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            tsConfigureSchedule.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { tsConfigureInstanceSchedule, tsConfigureServiceSchedule, tsServiceInstances });
+            tsConfigureSchedule.Image = Properties.Resources.Time_16x;
+            tsConfigureSchedule.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsConfigureSchedule.Name = "tsConfigureSchedule";
+            tsConfigureSchedule.Size = new System.Drawing.Size(170, 24);
+            tsConfigureSchedule.Text = "Configure Schedule";
+            tsConfigureSchedule.ToolTipText = "Configure all collection schedules - including collections that are disabled - for the instance of the selected row, or for its service";
+            tsConfigureSchedule.Visible = false;
+            //
+            // tsConfigureInstanceSchedule
+            //
+            tsConfigureInstanceSchedule.Name = "tsConfigureInstanceSchedule";
+            tsConfigureInstanceSchedule.Size = new System.Drawing.Size(224, 26);
+            tsConfigureInstanceSchedule.Text = "Instance...";
+            tsConfigureInstanceSchedule.ToolTipText = "Change the instance's schedule, permanently or temporarily";
+            tsConfigureInstanceSchedule.Click += TsConfigureInstanceSchedule_Click;
+            //
+            // tsConfigureServiceSchedule
+            //
+            tsConfigureServiceSchedule.Name = "tsConfigureServiceSchedule";
+            tsConfigureServiceSchedule.Size = new System.Drawing.Size(224, 26);
+            tsConfigureServiceSchedule.Text = "Service...";
+            tsConfigureServiceSchedule.ToolTipText = "Change the schedule for every instance collected by the instance's service";
+            tsConfigureServiceSchedule.Click += TsConfigureServiceSchedule_Click;
+            //
+            // tsServiceInstances
+            //
+            tsServiceInstances.Name = "tsServiceInstances";
+            tsServiceInstances.Size = new System.Drawing.Size(224, 26);
+            tsServiceInstances.Text = "Service Instances...";
+            tsServiceInstances.ToolTipText = "List the instances collected by the instance's service - those a change to the service schedule applies to - with any schedules of their own";
+            tsServiceInstances.Click += TsServiceInstances_Click;
+            //
             // dgvCollectionDates
             // 
             dgvCollectionDates.AllowUserToAddRows = false;
@@ -175,7 +230,7 @@ namespace DBADashGUI.CollectionDates
             dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
             dgvCollectionDates.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             dgvCollectionDates.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvCollectionDates.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { Instance, Reference, WarningThreshold, CriticalThreshold, IsScheduleThreshold, SnapshotAge, HeartbeatDate, SnapshotDate, NextFireTime, ScheduleLevel, CronExpression, ScheduleDescription, RunOnServiceStart, MaxIntervalMinutes, ConfiguredLevel, Configure, ConfigureRoot, colRun });
+            dgvCollectionDates.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { Instance, Reference, WarningThreshold, CriticalThreshold, IsScheduleThreshold, SnapshotAge, HeartbeatDate, SnapshotDate, NextFireTime, ScheduleLevel, CronExpression, ScheduleDescription, RunOnServiceStart, colEditSchedule, colPausedUntil, MaxIntervalMinutes, ConfiguredLevel, Configure, ConfigureRoot, colRun });
             dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle2.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
             dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 9F);
@@ -310,7 +365,7 @@ namespace DBADashGUI.CollectionDates
             ScheduleLevel.MinimumWidth = 6;
             ScheduleLevel.Name = "ScheduleLevel";
             ScheduleLevel.ReadOnly = true;
-            ScheduleLevel.ToolTipText = "Indicates whether the schedule is configured at service level or customized for this instance. Schedules are configured using the service configuration tool.";
+            ScheduleLevel.ToolTipText = "Indicates whether the schedule is configured at service level or customized for this instance. Schedules are configured using the service configuration tool, or with Edit Schedule if the service allows schedule changes.";
             ScheduleLevel.Width = 110;
             // 
             // CronExpression
@@ -342,7 +397,31 @@ namespace DBADashGUI.CollectionDates
             RunOnServiceStart.ReadOnly = true;
             RunOnServiceStart.ToolTipText = "Indicates whether the collection runs when the service is started instead of waiting for the next scheduled execution";
             RunOnServiceStart.Width = 130;
-            // 
+            //
+            // colEditSchedule
+            //
+            colEditSchedule.HeaderText = "Edit Schedule";
+            colEditSchedule.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            colEditSchedule.MinimumWidth = 6;
+            colEditSchedule.Name = "colEditSchedule";
+            colEditSchedule.ReadOnly = true;
+            colEditSchedule.Text = "Edit Schedule";
+            colEditSchedule.ToolTipText = "Enable, disable or change the schedule for this collection.  Requires schedule changes to be allowed in the service configuration tool.";
+            colEditSchedule.UseColumnTextForLinkValue = true;
+            colEditSchedule.Visible = false;
+            colEditSchedule.Width = 110;
+            //
+            // colPausedUntil
+            //
+            colPausedUntil.DataPropertyName = "CollectionsPausedUntil";
+            colPausedUntil.HeaderText = "Paused Until";
+            colPausedUntil.MinimumWidth = 6;
+            colPausedUntil.Name = "colPausedUntil";
+            colPausedUntil.ReadOnly = true;
+            colPausedUntil.ToolTipText = "Scheduled collections for the instance are paused until this time.  Alerts are muted and collections aren't reported as overdue while paused.";
+            colPausedUntil.Visible = false;
+            colPausedUntil.Width = 120;
+            //
             // MaxIntervalMinutes
             // 
             MaxIntervalMinutes.DataPropertyName = "MaxIntervalMinutes";
@@ -452,5 +531,12 @@ namespace DBADashGUI.CollectionDates
         private System.Windows.Forms.DataGridViewLinkColumn Configure;
         private System.Windows.Forms.DataGridViewLinkColumn ConfigureRoot;
         private System.Windows.Forms.DataGridViewLinkColumn colRun;
+        private System.Windows.Forms.DataGridViewLinkColumn colEditSchedule;
+        private System.Windows.Forms.ToolStripButton tsPauseCollections;
+        private System.Windows.Forms.ToolStripDropDownButton tsConfigureSchedule;
+        private System.Windows.Forms.ToolStripMenuItem tsConfigureInstanceSchedule;
+        private System.Windows.Forms.ToolStripMenuItem tsConfigureServiceSchedule;
+        private System.Windows.Forms.ToolStripMenuItem tsServiceInstances;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colPausedUntil;
     }
 }

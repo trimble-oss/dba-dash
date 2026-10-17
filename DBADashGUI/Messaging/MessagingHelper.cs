@@ -2,6 +2,7 @@
 using DBADashGUI.Interface;
 using Microsoft.Data.SqlClient;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Threading;
@@ -114,6 +115,44 @@ namespace DBADashGUI.Messaging
                         break;
                 }
             }
+        }
+
+        /// <summary>The outcome of a message sent with <see cref="SendAndWaitAsync"/>.</summary>
+        /// <param name="Succeeded">True if the service replied with success</param>
+        /// <param name="Error">Why it failed, when it didn't succeed</param>
+        /// <param name="Data">Data returned with a successful reply, if any</param>
+        public sealed record MessageOutcome(bool Succeeded, string Error, DataSet Data)
+        {
+            /// <summary>Warnings returned with a successful reply - see <see cref="MessageWarnings"/>.</summary>
+            public List<string> Warnings => MessageWarnings.Read(Data);
+        }
+
+        /// <summary>
+        /// Sends a message and waits for the service's reply, for callers that only need the outcome: whether it
+        /// succeeded, the error if not, and any data or warnings returned.  Progress is shown with <paramref name="setStatus"/>.
+        /// <paramref name="messageGroup"/> identifies the message, e.g. to match it to an audit record; a new one by default.
+        /// </summary>
+        public static async Task<MessageOutcome> SendAndWaitAsync(MessageBase message, int importAgentID, SetStatusDelegate setStatus,
+            Guid? messageGroup = null)
+        {
+            var succeeded = false;
+            string error = null;
+            DataSet data = null;
+            await SendMessageAndProcessReply(message, importAgentID, setStatus,
+                (reply, _, _) =>
+                {
+                    succeeded = reply.Type == ResponseMessage.ResponseTypes.Success;
+                    if (succeeded)
+                    {
+                        data = reply.Data;
+                    }
+                    else
+                    {
+                        error = reply.Message;
+                    }
+                    return Task.CompletedTask;
+                }, messageGroup ?? Guid.NewGuid());
+            return new MessageOutcome(succeeded, succeeded ? null : error ?? "No response from the service", data);
         }
 
         /// <summary>

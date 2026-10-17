@@ -50,6 +50,15 @@ namespace DBADashService
             }
         }
 
+        /// <summary>Forget the sources for jobs that have been deleted (when collections are rescheduled after a schedule change).</summary>
+        public static void RemoveSources(IEnumerable<string> jobKeys)
+        {
+            foreach (var jobKey in jobKeys)
+            {
+                _sourcesByJob.TryRemove(jobKey, out _);
+            }
+        }
+
         private static IReadOnlyCollection<DBADashSource> GetSourcesForJob(string jobKey)
         {
             if (!string.IsNullOrEmpty(jobKey) && _sourcesByJob.TryGetValue(jobKey, out var bucket) && bucket.Count > 0)

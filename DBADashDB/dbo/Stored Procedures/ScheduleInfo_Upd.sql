@@ -3,7 +3,9 @@ CREATE PROC [dbo].[ScheduleInfo_Upd](
 	@CollectAgentID INT,
 	@ImportAgentID INT,
 	@SnapshotDate DATETIME2(2),
-	@ScheduleInfo dbo.ScheduleInfo READONLY
+	@ScheduleInfo dbo.ScheduleInfo READONLY,
+	@HasPauseInfo BIT=0, /* Older services don't report a pause - leave CollectionsPausedUntil alone */
+	@CollectionsPausedUntil DATETIME2(3)=NULL
 )
 AS
 SET XACT_ABORT ON
@@ -42,7 +44,8 @@ BEGIN
 		RunOnServiceStart,
 		MaxIntervalMinutes,
 		IsInstanceOverride,
-		SnapshotDate
+		SnapshotDate,
+		TemporaryUntil
 	)
 	SELECT @InstanceID,
 		S.Reference,
@@ -50,8 +53,24 @@ BEGIN
 		S.RunOnServiceStart,
 		S.MaxIntervalMinutes,
 		S.IsInstanceOverride,
-		@SnapshotDate
+		@SnapshotDate,
+		S.TemporaryUntil
 	FROM @ScheduleInfo S
+
+	IF @HasPauseInfo = 1
+	BEGIN
+		/*	CollectionsPausedUntil holds the end of the latest pause rather than going back to NULL.  When the service
+			reports no pause, a pause still in effect here has been resumed early, so it ends now.  Keeping the end time
+			gives collections a grace period after a pause - see CollectionDatesStatus */
+		UPDATE dbo.Instances
+		SET CollectionsPausedUntil = Calc.CollectionsPausedUntil
+		FROM dbo.Instances
+		CROSS APPLY(SELECT CASE WHEN @CollectionsPausedUntil IS NOT NULL THEN @CollectionsPausedUntil
+							WHEN Instances.CollectionsPausedUntil > SYSUTCDATETIME() THEN SYSUTCDATETIME()
+							ELSE Instances.CollectionsPausedUntil END AS CollectionsPausedUntil) Calc
+		WHERE InstanceID = @InstanceID
+		AND EXISTS(SELECT Instances.CollectionsPausedUntil EXCEPT SELECT Calc.CollectionsPausedUntil)
+	END
 
 	EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,
 	                             @Reference = @Ref,

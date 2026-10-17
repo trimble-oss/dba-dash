@@ -1,6 +1,8 @@
 ﻿using DBADash;
+using DBADash.Messaging;
 using DBADashGUI.Interface;
 using DBADashGUI.Messaging;
+using DBADashService;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
@@ -89,10 +91,12 @@ namespace DBADashGUI.CollectionDates
             dt.Columns.Add("NextFireTime", typeof(DateTime));
             dt.Columns.Add("ScheduleDescription", typeof(string));
             dt.Columns.Add("ScheduleLevel", typeof(string));
+            dt.Columns.Add("RawSchedule", typeof(string)); // Schedule as reported, before it's replaced with a display label - for Edit Schedule
             var now = DateTimeOffset.UtcNow;
             foreach (DataRow row in dt.Rows)
             {
                 var schedule = row["Schedule"] == DBNull.Value ? null : (string)row["Schedule"];
+                row["RawSchedule"] = (object)schedule ?? DBNull.Value;
                 // No ScheduleInfo row at all (schedule is null) means the service hasn't reported its
                 // schedule yet - distinct from an explicitly disabled schedule (schedule == "").
                 var notReported = schedule == null;
@@ -102,9 +106,11 @@ namespace DBADashGUI.CollectionDates
                 var disabledLabel = runOnServiceStart ? "Startup Only" : "Disabled";
                 row["NextFireTime"] = (object)CronNextFireTime.TryGetNextFireTimeUtc(schedule, now) ?? DBNull.Value;
                 row["ScheduleDescription"] = notReported ? "Not Reported" : CronParser.GetScheduleDescriptionSafe(schedule, runOnServiceStart: runOnServiceStart);
-                row["ScheduleLevel"] = row["IsInstanceOverride"] == DBNull.Value
-                    ? string.Empty
-                    : (bool)row["IsInstanceOverride"] ? "Instance" : "Service";
+                row["ScheduleLevel"] = row["TemporaryUntil"] is DateTime temporaryUntil // UTC - this runs before the time zone conversion
+                    ? $"Temporary until {PauseCollections.FormatPausedUntil(temporaryUntil)}"
+                    : row["IsInstanceOverride"] == DBNull.Value
+                        ? string.Empty
+                        : (bool)row["IsInstanceOverride"] ? "Instance" : "Service";
                 row["Schedule"] = notReported ? "Not Reported" : (string.IsNullOrEmpty(schedule) ? disabledLabel : schedule);
             }
         }
@@ -142,6 +148,101 @@ namespace DBADashGUI.CollectionDates
             dgvCollectionDates.Columns["colRun"]!.Visible = DBADashUser.AllowMessaging && dt.Rows.Cast<DataRow>().Any(r => r.Field<bool>("MessagingEnabled"));
             tsTriggerMenu.Visible = DBADashUser.AllowMessaging && dt.Rows.Cast<DataRow>().Any(r => r.Field<bool>("MessagingEnabled"));
             tsTriggerWarningAndCritical.Enabled = dt.Rows.Cast<DataRow>().Any(r => r.Field<bool>("MessagingEnabled") && r["Status"] is 1 or 2);
+            colEditSchedule.Visible = DBADashUser.AllowScheduleChanges && dt.Rows.Cast<DataRow>().Any(CanEditSchedule);
+            tsPauseCollections.Visible = DBADashUser.AllowScheduleChanges && dt.Rows.Cast<DataRow>().Any(r => r.Field<bool>("ScheduleChangesEnabled"));
+            tsConfigureSchedule.Visible = tsPauseCollections.Visible;
+            var pausedUntil = dt.Rows.Cast<DataRow>()
+                .Where(r => r["CollectionsPausedUntil"] != DBNull.Value)
+                .GroupBy(r => r.Field<int>("InstanceID"))
+                .Select(g => g.First().Field<DateTime>("CollectionsPausedUntil")) // Already in the app time zone
+                .ToList();
+            colPausedUntil.Visible = pausedUntil.Count > 0;
+            if (pausedUntil.Count > 0)
+            {
+                lblStatus.Visible = true;
+                SetStatus(pausedUntil.Count == 1 && InstanceIDs.Count == 1
+                        ? $"Collections are paused until {pausedUntil[0]:yyyy-MM-dd HH:mm}.  Alerts are muted until then."
+                        : $"Collections are paused for {pausedUntil.Count} instance(s) - see Paused Until.  Alerts are muted for them while paused.",
+                    null, DashColors.Information);
+            }
+        }
+
+        private void TsConfigureInstanceSchedule_Click(object sender, EventArgs e) => ConfigureScheduleAsync(serviceLevel: false);
+
+        private void TsConfigureServiceSchedule_Click(object sender, EventArgs e) => ConfigureScheduleAsync(serviceLevel: true);
+
+        /// <summary>The instance of the selected row - or the only instance shown.  Null (with a status message) when that isn't one instance.</summary>
+        private int? GetSelectedInstanceID()
+        {
+            var instanceIDs = dgvCollectionDates.SelectedCells.Cast<DataGridViewCell>()
+                .Select(cell => ((DataRowView)cell.OwningRow.DataBoundItem).Row.Field<int>("InstanceID"))
+                .Distinct().ToList();
+            if (instanceIDs.Count == 0 && InstanceIDs.Count == 1) instanceIDs.Add(InstanceIDs[0]);
+            if (instanceIDs.Count == 1) return instanceIDs[0];
+            SetStatus("Select a row for the instance", null, DashColors.Warning);
+            return null;
+        }
+
+        /// <summary>The full schedule dialog for the instance of the selected row, or for its service.</summary>
+        private async void ConfigureScheduleAsync(bool serviceLevel)
+        {
+            if (GetSelectedInstanceID() is not { } instanceID) return;
+            try
+            {
+                PersistFilter = dgvCollectionDates.RowFilter;
+                PersistSort = dgvCollectionDates.SortString;
+                var result = await ConfigureSchedule.ConfigureAsync(this, instanceID, serviceLevel, SetStatus);
+                if (result == null) return;
+                RefreshData();
+                SetStatus(result.Message, null, result.StatusColor);
+            }
+            catch (Exception ex)
+            {
+                SetStatus(ex.Message, ex.ToString(), DashColors.Fail);
+            }
+        }
+
+        /// <summary>Lists the instances collected by the selected row's service - those a change to the service schedule applies to.</summary>
+        private async void TsServiceInstances_Click(object sender, EventArgs e)
+        {
+            if (GetSelectedInstanceID() is not { } instanceID) return;
+            try
+            {
+                var result = await ConfigureSchedule.ShowServiceInstancesAsync(this, instanceID, SetStatus);
+                if (result != null)
+                {
+                    SetStatus(result.Message, null, result.StatusColor);
+                }
+            }
+            catch (Exception ex)
+            {
+                SetStatus(ex.Message, ex.ToString(), DashColors.Fail);
+            }
+        }
+
+        private async void TsPauseCollections_Click(object sender, EventArgs e)
+        {
+            var instanceIDs = dgvCollectionDates.SelectedCells.Cast<DataGridViewCell>()
+                .Select(cell => ((DataRowView)cell.OwningRow.DataBoundItem).Row.Field<int>("InstanceID"))
+                .Distinct().ToList();
+            if (instanceIDs.Count == 0)
+            {
+                SetStatus("Select the instances to pause", null, DashColors.Warning);
+                return;
+            }
+            PersistFilter = dgvCollectionDates.RowFilter;
+            PersistSort = dgvCollectionDates.SortString;
+            try
+            {
+                var result = await PauseCollections.PauseOrResumeAsync(this, instanceIDs, SetStatus);
+                if (result == null) return;
+                RefreshData();
+                SetStatus(result.Message, null, result.StatusColor);
+            }
+            catch (Exception ex)
+            {
+                SetStatus(ex.Message, ex.ToString(), DashColors.Fail);
+            }
         }
 
         private void Status_Selected(object sender, EventArgs e)
@@ -213,6 +314,17 @@ namespace DBADashGUI.CollectionDates
                 }
                 await CollectionMessaging.TriggerCollection(instance, collection, collectAgentID, importAgentID, this);
             }
+            else if (e.ColumnIndex == colEditSchedule.Index)
+            {
+                try
+                {
+                    await EditSchedulesAsync(new List<DataRow> { row.Row });
+                }
+                catch (Exception ex)
+                {
+                    SetStatus(ex.Message, ex.ToString(), DashColors.Fail);
+                }
+            }
         }
 
         public void SetStatus(string message, string tooltip, Color color)
@@ -229,6 +341,10 @@ namespace DBADashGUI.CollectionDates
                 var Status = (DBADashStatus.DBADashStatusEnum)row["Status"];
 
                 dgvCollectionDates.Rows[idx].Cells["SnapshotAge"].SetStatusColor(Status);
+                if (row["CollectionsPausedUntil"] != DBNull.Value)
+                {
+                    dgvCollectionDates.Rows[idx].Cells["colPausedUntil"].SetColor(DashColors.BluePale, DashColors.BlueDark, DashColors.BlueLight, Color.White);
+                }
 
                 var configuredLevel = (string)row["ConfiguredLevel"];
                 dgvCollectionDates.Rows[idx].Cells["Configure"].Style.Font = configuredLevel == "Instance" ? new Font(dgvCollectionDates.Font, FontStyle.Bold) : new Font(dgvCollectionDates.Font, FontStyle.Regular);
@@ -312,5 +428,118 @@ namespace DBADashGUI.CollectionDates
             var rows = dgvCollectionDates.Rows.Cast<DataGridViewRow>().Select(r => ((DataRowView)r.DataBoundItem).Row).Where(CanRowBeTriggered).ToList();
             TriggerCollections(rows);
         }
+
+        /// <summary>
+        /// True if the collection's schedule can be changed from here: the collect agent allows schedule changes and it's
+        /// a built-in collection with a configurable schedule.  Custom collections are scheduled in the config tool.
+        /// </summary>
+        private static bool CanEditSchedule(DataRow row) =>
+            row.Field<bool>("ScheduleChangesEnabled")
+            && Enum.TryParse<CollectionType>(row.Field<string>("Reference"), out var type)
+            && CollectionScheduleUpdateMessage.IsConfigurable(type);
+
+        /// <summary>
+        /// Prompts for a new schedule for the collections in <paramref name="rows"/> and sends it to the service(s) that
+        /// collect them: one message per instance for an instance level override, or one per service for a service
+        /// level change.  Rows that can't be edited are skipped.
+        /// </summary>
+        private async Task EditSchedulesAsync(List<DataRow> rows)
+        {
+            if (!DBADashUser.AllowScheduleChanges)
+            {
+                SetStatus("You don't have permission to change collection schedules.  Membership of the AllowScheduleChanges role is required.", null, DashColors.Fail);
+                return;
+            }
+
+            var editable = rows.Where(CanEditSchedule).ToList();
+            if (editable.Count == 0)
+            {
+                MessageBox.Show("The schedule can't be changed for the selected collections.\n\nSchedule changes must be allowed in the service configuration tool for the service that collects the instance.  Custom collections are scheduled in the service configuration tool.",
+                    "Edit Schedule", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            var skipped = rows.Count - editable.Count;
+
+            var collectAgents = editable.Select(r => r.Field<int>("CollectAgentID")).Distinct()
+                .ToDictionary(id => id, id => DBADashAgent.GetDBADashAgent(Common.ConnectionString, id));
+            var first = editable[0];
+            // A temporary schedule isn't the normal schedule this dialog changes, so it isn't offered as the current one -
+            // accepting it unchanged would make it permanent.  (Already in the app time zone.)
+            var temporaryUntil = first["TemporaryUntil"] == DBNull.Value ? (DateTime?)null : first.Field<DateTime>("TemporaryUntil");
+            using var frm = new EditCollectionSchedule
+            {
+                CollectionTypes = editable.Select(r => Enum.Parse<CollectionType>(r.Field<string>("Reference"))).Distinct().ToList(),
+                InstanceNames = editable.Select(r => r.Field<string>("InstanceDisplayName")).Distinct().ToList(),
+                ServiceNames = collectAgents.Values.Select(ServiceName).Distinct().ToList(),
+                CurrentSchedule = first["RawSchedule"] == DBNull.Value || temporaryUntil.HasValue
+                    ? null
+                    : new CollectionSchedule
+                    {
+                        Schedule = first.Field<string>("RawSchedule"),
+                        RunOnServiceStart = first["RunOnServiceStart"] != DBNull.Value && first.Field<bool>("RunOnServiceStart")
+                    },
+                Note = temporaryUntil.HasValue
+                    ? $"A temporary schedule is in effect until {temporaryUntil:yyyy-MM-dd HH:mm}.  This changes the normal schedule - use Configure Schedule to change or end the temporary one."
+                    : null
+            };
+            if (frm.ShowDialog(this) != DialogResult.OK) return;
+
+            var isInstanceScope = frm.Scope == CollectionScheduleUpdateMessage.ScheduleScopes.Instance;
+            var groups = editable
+                .GroupBy(r => isInstanceScope ? r.Field<int>("InstanceID") : r.Field<int>("CollectAgentID"))
+                .Select(g => g.ToList())
+                .ToList();
+
+            PersistFilter = dgvCollectionDates.RowFilter;
+            PersistSort = dgvCollectionDates.SortString;
+            var failed = 0;
+            string lastError = null;
+            var warnings = new List<string>();
+            foreach (var group in groups)
+            {
+                var row = group[0];
+                var collectAgent = collectAgents[row.Field<int>("CollectAgentID")];
+                var importAgentID = row.Field<int>("ImportAgentID");
+                var target = isInstanceScope ? row.Field<string>("InstanceDisplayName") : ServiceName(collectAgent);
+                var message = new CollectionScheduleUpdateMessage
+                {
+                    Scope = frm.Scope,
+                    ConnectionID = isInstanceScope ? row.Field<string>("ConnectionID") : null,
+                    Changes = group.Select(r => Enum.Parse<CollectionType>(r.Field<string>("Reference"))).Distinct()
+                        .ToDictionary(type => type, _ => frm.Schedule),
+                    CollectAgent = collectAgent,
+                    ImportAgent = DBADashAgent.GetDBADashAgent(Common.ConnectionString, importAgentID)
+                };
+
+                SetStatus($"Updating schedule for {target}...", null, DashColors.Information);
+                var outcome = await UserActionLog.SendLoggedAsync(message, importAgentID, row.Field<int>("CollectAgentID"),
+                    isInstanceScope ? new[] { row.Field<int>("InstanceID") } : Array.Empty<int>(),
+                    UserActionLog.ActionSchedule, UserActionLog.ScheduleChangeDetails(message), SetStatus);
+                if (outcome.Succeeded)
+                {
+                    warnings.AddRange(outcome.Warnings);
+                }
+                else
+                {
+                    failed++;
+                    lastError = outcome.Error;
+                }
+            }
+
+            RefreshData();
+            var skippedText = skipped > 0 ? $"  {skipped} selected collection(s) skipped as their schedule can't be changed here." : string.Empty;
+            var warningText = warnings.Count > 0 ? "  Warning: " + string.Join("  ", warnings) : string.Empty;
+            if (failed == 0)
+            {
+                SetStatus($"Schedule updated for {groups.Count} {(isInstanceScope ? "instance(s)" : "service(s)")}.{skippedText}{warningText}", null,
+                    warnings.Count > 0 ? DashColors.Warning : DashColors.Success);
+            }
+            else
+            {
+                SetStatus($"Schedule update failed for {failed} of {groups.Count} {(isInstanceScope ? "instance(s)" : "service(s)")}: {lastError}{skippedText}{warningText}", lastError, DashColors.Fail);
+            }
+        }
+
+        private static string ServiceName(DBADashAgent agent) => $"{agent.AgentHostName}\\{agent.AgentServiceName}";
     }
 }

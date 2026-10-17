@@ -45,9 +45,13 @@ SELECT CD.InstanceID,
 	   SI.RunOnServiceStart,
 	   SI.MaxIntervalMinutes,
 	   SI.IsInstanceOverride,
+	   CASE WHEN SI.TemporaryUntil > SYSUTCDATETIME() THEN SI.TemporaryUntil END AS TemporaryUntil,
 	   ImportAgentID,
 	   CollectAgentID,
-	   CASE WHEN IA.MessagingEnabled=1 AND CA.MessagingEnabled=1 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS MessagingEnabled
+	   CASE WHEN IA.MessagingEnabled=1 AND CA.MessagingEnabled=1 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS MessagingEnabled,
+	   /* The collect agent owns the schedule, so it must allow the change.  The request is routed via the import agent like any other message. */
+	   CASE WHEN IA.MessagingEnabled=1 AND CA.MessagingEnabled=1 AND CA.ScheduleChangesEnabled=1 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS ScheduleChangesEnabled,
+	   CASE WHEN I.CollectionsPausedUntil > SYSUTCDATETIME() THEN I.CollectionsPausedUntil END AS CollectionsPausedUntil
 FROM dbo.CollectionDatesStatus CD
 JOIN dbo.Instances I ON I.InstanceID = CD.InstanceID
 JOIN dbo.DBADashAgent IA ON I.ImportAgentID = IA.DBADashAgentID

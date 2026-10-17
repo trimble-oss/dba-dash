@@ -118,6 +118,21 @@ namespace DBADash
         public bool AllowKillSession { get; set; }
 
         /// <summary>
+        /// Collection schedules can be changed from the GUI when enabled.  The service applies the change to
+        /// ServiceConfig.json (taking a backup first) and reschedules its collections without a restart.  Also allows
+        /// collections to be paused for a period.  When false, <see cref="Messaging.CollectionScheduleUpdateMessage"/> and
+        /// <see cref="Messaging.CollectionPauseMessage"/> are rejected.
+        /// </summary>
+        public bool AllowScheduleChanges { get; set; }
+
+        /// <summary>
+        /// Set by the service so that a schedule change made via messaging can take effect without a restart.  Rebuilds
+        /// the collection jobs from the current config.  Null outside the service (e.g. the config tools).
+        /// </summary>
+        [JsonIgnore]
+        public Func<Task> RescheduleCollectionsAsync { get; set; }
+
+        /// <summary>
         /// Ad-hoc extended-events tracing must be explicitly enabled on the service (mirrors
         /// <see cref="AllowKillSession"/>).  When false, <see cref="Messaging.XETraceMessage"/> is rejected.
         /// </summary>
@@ -370,15 +385,25 @@ namespace DBADash
         }
 
         /// <summary>
+        /// The schedule <paramref name="source"/> actually runs on: the service schedule (<paramref name="serviceSchedules"/>,
+        /// defaulting to <see cref="GetSchedules"/>), then the source's own overrides, then any temporary schedules in
+        /// <see cref="TemporaryScheduleStore"/>.  Always a new collection, so the caller can modify it.
+        /// </summary>
+        public CollectionSchedules GetEffectiveSchedules(DBADashSource source, CollectionSchedules serviceSchedules = null)
+        {
+            var schedules = CollectionSchedules.Combine(serviceSchedules ?? GetSchedules(), source.CollectionSchedules);
+            var temporary = TemporaryScheduleStore.Current.GetOverrides(source.ConnectionID);
+            return temporary == null ? schedules : CollectionSchedules.Combine(schedules, temporary);
+        }
+
+        /// <summary>
         /// The longest normal gap between runs of <paramref name="type"/> for <paramref name="source"/>, from the
-        /// schedule it actually runs on: the agent's, with any the source overrides laid over it.  Null when the
+        /// schedule it actually runs on - see <see cref="GetEffectiveSchedules"/>.  Null when the
         /// collection has no schedule, or one <see cref="CronParser"/> can't size.
         /// </summary>
         public TimeSpan? GetMaxScheduleInterval(DBADashSource source, CollectionType type)
         {
-            var schedules = source.CollectionSchedules is { Count: > 0 }
-                ? CollectionSchedules.Combine(GetSchedules(), source.CollectionSchedules)
-                : GetSchedules();
+            var schedules = GetEffectiveSchedules(source);
             return schedules.TryGetValue(type, out var schedule)
                    && CronParser.TryGetMaxIntervalMinutes(schedule.Schedule, out var minutes)
                 ? TimeSpan.FromMinutes(minutes)
@@ -606,7 +631,10 @@ namespace DBADash
 
         public void AddConnections(List<DBADashSource> connections)
         {
-            SourceConnections.AddRange(connections);
+            lock (SourceConnections)
+            {
+                SourceConnections.AddRange(connections);
+            }
         }
 
         public List<DBADashSource> AddAzureDBs()
@@ -622,7 +650,10 @@ namespace DBADash
         public List<DBADashSource> AddAzureDBs(DBADashSource masterConnection)
         {
             var newConnections = GetNewAzureDBConnections(masterConnection);
-            SourceConnections.AddRange(newConnections);
+            lock (SourceConnections)
+            {
+                SourceConnections.AddRange(newConnections);
+            }
             return newConnections;
         }
 
