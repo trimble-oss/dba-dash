@@ -675,6 +675,7 @@ namespace DBADash.QueryPlan
                     ActualRows = Long(Attribute(thread, "ActualRows")) ?? 0,
                     ActualRowsRead = Long(Attribute(thread, "ActualRowsRead")),
                     ActualExecutions = Long(Attribute(thread, "ActualExecutions")) ?? 0,
+                    ActualEndOfScans = Long(Attribute(thread, "ActualEndOfScans")),
                     ActualElapsedMs = Long(Attribute(thread, "ActualElapsedms")),
                     ActualCpuMs = Long(Attribute(thread, "ActualCPUms")),
                     ActualScans = Long(Attribute(thread, "ActualScans")),

@@ -34,9 +34,11 @@ namespace DBADash.QueryPlan.Model
 
         /// <summary>
         /// A table variable, or a table-valued parameter, which showplan names as the query does:
-        /// @t, with no database or schema.
+        /// @t, with no database or schema.  A permanent table can be named [@t] too, but always has
+        /// its schema.
         /// </summary>
-        public bool IsTableVariable => Table is { Length: > 1 } name && name[0] == '@';
+        public bool IsTableVariable =>
+            Table is { Length: > 1 } name && name[0] == '@' && string.IsNullOrEmpty(Database) && string.IsNullOrEmpty(Schema);
 
         /// <summary>
         /// What the node caption shows: the table, then the index when there is one, then the alias.

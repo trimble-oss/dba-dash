@@ -928,11 +928,13 @@ namespace DBADash.QueryPlan.Model
                 text.Append(" The optimizer knew ").Append(name).Append(" held ").Append(RowCount(held)).Append(" when it compiled the plan");
 
                 // Without a predicate the estimate is the table's size, and there was nothing to guess.
-                var estimate = read.EstimateRowsAllExecutions ?? read.EstimatedTotalRows;
-                if (Math.Abs(estimate - held) >= 1)
+                // Compared per execution, as the table's size is: a scan of 100 rows on the inner side
+                // of a loop that runs ten times is estimated at 1,000 in all, and guessed nothing.
+                // Shown in all, though, alongside the node's actual rows, which are in all too.
+                if (Math.Abs(read.EstimateRows - held) >= 1)
                 {
                     text.Append(", but not how many of them match: it estimated ")
-                        .Append(RowCount(estimate))
+                        .Append(RowCount(read.EstimateRowsAllExecutions ?? read.EstimatedTotalRows))
                         .Append(" for ")
                         .Append(Nodes([read]));
 
@@ -1006,20 +1008,30 @@ namespace DBADash.QueryPlan.Model
             }
 
             // What this run returned.  A function that fills a table returns its rows through a scan
-            // of that table, and its own operator counts none; the scan has to have run once for its
-            // rows read to be the table's size.
+            // of that table, and its own operator counts none.  The scan's rows read are the table's
+            // size only if it ran once and read to the end - a TOP, an EXISTS or a merge join can stop
+            // it early - and its rows out only if it had no predicate to filter them, too.
             var returned = call.Readers.Count > 0
-                ? call.Readers.FirstOrDefault(r => r.Runtime is { LogicalExecutions: 1 } && IsScan(r.Kind))?.Runtime is { } scan
-                    ? scan.ActualRowsRead ?? scan.ActualRows
-                    : (long?)null
+                ? call.Readers.FirstOrDefault(r => IsScan(r.Kind) && r.Runtime is { LogicalExecutions: 1 } run &&
+                                                   run.ActualEndOfScans is { } ends && ends >= run.ActualExecutions) is { Runtime: { } scan } reader
+                    ? scan.ActualRowsRead ?? (string.IsNullOrEmpty(reader.Predicate) ? scan.ActualRows : null)
+                    : null
                 : function.Runtime?.ActualRows;
 
             // Interleaved execution compiles the plan for the count the function returned, which the
-            // read of its table records.  Neither of the fixed guesses on a plan with no run figures
-            // means the same, as only a run is flagged: checked on a cached plan at level 170, which
-            // carries the count and nothing else to say how it got it.
+            // read of its table records.  Anything but the estimator's fixed guess on a plan with no run
+            // figures means the same, as only a run is flagged: checked on a cached plan at level 170,
+            // which carries the count and nothing else to say how it got it.  The guess is 1 with the
+            // legacy estimator (model version 70) and 100 from SQL Server 2014's on; either, where the
+            // plan doesn't say which estimator.
+            var guess = statement.CardinalityEstimationModelVersion switch
+            {
+                null or "" => (double?)null,
+                "70" => 1,
+                _ => 100
+            };
             var compiledFor = call.Readers.Select(r => r.TableCardinality).FirstOrDefault(c => c is not null) ?? function.EstimateRows;
-            var fixedGuess = function.EstimateRows is 100 or 1;
+            var fixedGuess = guess is { } g ? function.EstimateRows == g : function.EstimateRows is 100 or 1;
 
             if (call.IsInterleaved || (call.IsMultiStatement && !function.HasRuntime && !fixedGuess))
             {
@@ -1033,7 +1045,10 @@ namespace DBADash.QueryPlan.Model
                     text.Append(" This run it returned ").Append(RowCount(now)).Append('.');
                 }
 
-                text.Append(" Later runs reuse the plan, however many rows the function returns.");
+                if (!PlanOptionalParameters.HasRecompileHint(statement.StatementText))
+                {
+                    text.Append(" Later runs reuse the plan, however many rows the function returns.");
+                }
             }
             else if (call.IsMultiStatement)
             {
@@ -1054,8 +1069,9 @@ namespace DBADash.QueryPlan.Model
                         ? "It didn't here: it needs level 140 or above, doesn't apply in a statement that modifies data, and can be switched off " +
                           "with the INTERLEAVED_EXECUTION_TVF database scoped configuration or the DISABLE_INTERLEAVED_EXECUTION_TVF hint."
                         : "It only happens when the query runs, and not in a statement that modifies data, so an estimated plan (SET SHOWPLAN_XML, or " +
-                          "Display Estimated Execution Plan) always shows the fixed guess; a plan from the plan cache or Query Store that shows it was " +
-                          "compiled without interleaved execution.");
+                          "Display Estimated Execution Plan) always shows the fixed guess. A plan from the plan cache or Query Store that shows it was " +
+                          "compiled without interleaved execution - unless the function happened to return exactly that many rows when interleaved " +
+                          "execution ran it, which such a plan can't tell apart, as only a run's figures flag it.");
             }
             else
             {
