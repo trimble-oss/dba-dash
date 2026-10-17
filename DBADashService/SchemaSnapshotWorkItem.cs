@@ -28,6 +28,11 @@ namespace DBADashService
                 Log.Warning("Connection to {Connection} is offline.  Skipping schema snapshot", Source.ConnectionID ?? Source.SourceConnection.ConnectionForPrint);
                 return;
             }
+            if (CollectionPauseStore.Current.IsPaused(Source.ConnectionID, out var pausedUntil))
+            {
+                Log.Information("Collections for {Connection} are paused until {pausedUntil:u}.  Skipping schema snapshot", Source.ConnectionID, pausedUntil);
+                return;
+            }
             await SchemaSnapshotDB.GenerateSchemaSnapshots(SchedulerServiceConfig.Config, Source);
         }
     }

@@ -2,6 +2,7 @@
 using DBADash;
 using DBADash.InstanceMetadata;
 using DBADash.Messaging;
+using DBADashGUI;
 using DBADashGUI.Theme;
 using Humanizer;
 using Microsoft.Data.SqlClient;
@@ -1403,6 +1404,7 @@ namespace DBADashServiceConfig
                 txtSQS.Text = collectionConfig.ServiceSQSQueueUrl;
                 chkAllowPlanForcing.Checked = collectionConfig.AllowPlanForcing;
                 chkAllowKillSession.Checked = collectionConfig.AllowKillSession;
+                chkAllowScheduleChanges.Checked = collectionConfig.AllowScheduleChanges;
                 chkAllowAdhocXE.Checked = collectionConfig.AllowAdhocXE;
                 txtManageXESessions.Text = collectionConfig.ManageXESessions;
                 txtWatchXESessions.Text = collectionConfig.WatchXESessions;
@@ -2984,6 +2986,12 @@ namespace DBADashServiceConfig
         private void ChkAllowKillSession_CheckedChanged(object sender, EventArgs e)
         {
             collectionConfig.AllowKillSession = chkAllowKillSession.Checked;
+            SetJson();
+        }
+
+        private void ChkAllowScheduleChanges_CheckedChanged(object sender, EventArgs e)
+        {
+            collectionConfig.AllowScheduleChanges = chkAllowScheduleChanges.Checked;
             SetJson();
         }
 

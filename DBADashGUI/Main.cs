@@ -89,6 +89,7 @@ namespace DBADashGUI
                     var showInSummary = (bool)row["ShowInSummary"];
                     var tagGroup = Convert.ToString(row["TagGroup"]);
                     var isReadOnlyReplica = row.Table.Columns.Contains("IsReadOnlyReplica") && row["IsReadOnlyReplica"] != DBNull.Value && (bool)row["IsReadOnlyReplica"];
+                    var collectionsPausedUntil = row.Table.Columns.Contains("CollectionsPausedUntil") ? (DateTime?)row["CollectionsPausedUntil"].DBNullToNull() : null;
 
                     if (currentTagGroup != tagGroup && !string.IsNullOrEmpty(tagGroup))
                     {
@@ -164,6 +165,7 @@ namespace DBADashGUI
                             azureDBNode.Text = db + " (read-only)";
                             azureDBNode.IsReadOnlyReplica = true;
                         }
+                        azureDBNode.CollectionsPausedUntilUtc = collectionsPausedUntil;
                         // Added to the tree before anything reads its Context, which is cached on first use and
                         // takes the instance name (and so MasterInstanceID, used for the elastic pool) from the parent
                         AzureNode.Nodes.Add(azureDBNode);
@@ -198,7 +200,8 @@ namespace DBADashGUI
                         {
                             InstanceID = instanceID,
                             EngineEdition = edition,
-                            IsVisibleInSummary = showInSummary
+                            IsVisibleInSummary = showInSummary,
+                            CollectionsPausedUntilUtc = collectionsPausedUntil
                         };
                         // No read-only suffix for regular instances: the display name is ConnectionID-based (which
                         // already carries the "|ReadOnly" suffix) and manually overridable, and Updateability reflects
@@ -372,6 +375,57 @@ namespace DBADashGUI
             try { this.ApplyTheme(); } catch { }
             MainFormInstance = this;
             SetSingleInstance(Settings.Default.ChildFormSingleInstance);
+            WatchCollectionPauses();
+        }
+
+        /// <summary>
+        /// Keeps the paused indicator on instance nodes current: set straight away when collections are paused or resumed
+        /// from the GUI, and cleared once a pause ends rather than waiting for the tree to be reloaded.
+        /// </summary>
+        private void WatchCollectionPauses()
+        {
+            Action<IReadOnlyCollection<int>, DateTime?> onPauseChanged = (instanceIDs, pausedUntilUtc) =>
+            {
+                this.Invoke(() =>
+                {
+                    foreach (var node in InstanceNodes().Where(n => instanceIDs.Contains(n.InstanceID)))
+                    {
+                        node.CollectionsPausedUntilUtc = pausedUntilUtc;
+                    }
+                });
+            };
+            CollectionDates.PauseCollections.PauseChanged += onPauseChanged;
+            FormClosed += (_, _) => CollectionDates.PauseCollections.PauseChanged -= onPauseChanged;
+
+            var pauseTimer = new System.Windows.Forms.Timer { Interval = 60000, Enabled = true };
+            pauseTimer.Tick += (_, _) =>
+            {
+                foreach (var node in InstanceNodes().Where(n => n.CollectionsPausedUntilUtc.HasValue))
+                {
+                    node.UpdatePausedIndicator();
+                }
+            };
+            Disposed += (_, _) => pauseTimer.Dispose();
+        }
+
+        /// <summary>Instance and Azure DB nodes in the tree, without descending into the instances themselves.</summary>
+        private IEnumerable<SQLTreeItem> InstanceNodes()
+        {
+            var pending = new Stack<TreeNode>(tv1.Nodes.Cast<TreeNode>());
+            while (pending.Count > 0)
+            {
+                if (pending.Pop() is not SQLTreeItem node) continue;
+                switch (node.Type)
+                {
+                    case SQLTreeItem.TreeType.Instance or SQLTreeItem.TreeType.AzureDatabase:
+                        yield return node;
+                        break;
+
+                    case SQLTreeItem.TreeType.DBADashRoot or SQLTreeItem.TreeType.InstanceFolder or SQLTreeItem.TreeType.AzureInstance:
+                        foreach (TreeNode child in node.Nodes) pending.Push(child);
+                        break;
+                }
+            }
         }
 
         /// <summary>

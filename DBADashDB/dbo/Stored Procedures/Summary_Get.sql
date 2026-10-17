@@ -131,8 +131,14 @@ SELECT 	InstanceID,
 		CAST(0 AS BIT) AS IsAzure,
 		OfflineSince,
 		LastFail,
-		OSInfoSnapshotDate
+		OSInfoSnapshotDate,
+		Paused.CollectionsPausedUntil,
+		CASE WHEN Paused.CollectionsPausedUntil IS NULL THEN 0 ELSE 1 END AS PausedCount
 FROM dbo.Summary S
+/* Live rather than from the cached summary, so a pause shows straight away and disappears when it ends */
+OUTER APPLY(SELECT CASE WHEN I.CollectionsPausedUntil > SYSUTCDATETIME() THEN I.CollectionsPausedUntil END AS CollectionsPausedUntil
+			FROM dbo.Instances I
+			WHERE I.InstanceID = S.InstanceID) Paused
 WHERE EXISTS	(	
 				SELECT 1 
 				FROM #Instances T 
@@ -205,8 +211,13 @@ SELECT 	NULL AS InstanceID,
 		CAST(1 AS BIT) AS IsAzure,
 		MIN(OfflineSince) AS OfflineSince,
 		MAX(LastFail) AS LastFail,
-		MIN(OSInfoSnapshotDate) AS OSInfoSnapshotDate
+		MIN(OSInfoSnapshotDate) AS OSInfoSnapshotDate,
+		MAX(Paused.CollectionsPausedUntil) AS CollectionsPausedUntil,
+		COUNT(Paused.CollectionsPausedUntil) AS PausedCount
 FROM dbo.Summary S
+OUTER APPLY(SELECT CASE WHEN I.CollectionsPausedUntil > SYSUTCDATETIME() THEN I.CollectionsPausedUntil END AS CollectionsPausedUntil
+			FROM dbo.Instances I
+			WHERE I.InstanceID = S.InstanceID) Paused
 WHERE EXISTS	(	
 				SELECT 1 
 				FROM #Instances T 

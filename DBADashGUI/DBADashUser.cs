@@ -40,6 +40,9 @@ namespace DBADashGUI
 
         public static bool AllowWatchXE;
 
+        /// <summary>Member of the AllowScheduleChanges role (or admin) - can change collection schedules via the service.</summary>
+        public static bool AllowScheduleChanges;
+
         public static TimeZoneInfo UserTimeZone = TimeZoneInfo.Local;
 
         public static HashSet<string> Roles;
@@ -161,6 +164,7 @@ namespace DBADashGUI
                 AllowAdhocXE = (IsInRole("AdhocXE") && AllowMessaging) || IsAdmin;
                 AllowManageXE = (IsInRole("ManageXE") && AllowMessaging) || IsAdmin;
                 AllowWatchXE = (IsInRole("WatchXE") && AllowMessaging) || IsAdmin;
+                AllowScheduleChanges = (IsInRole("AllowScheduleChanges") && AllowMessaging) || IsAdmin;
                 if (pTZ.Value != DBNull.Value)
                 {
                     var tzID = (string)pTZ.Value;

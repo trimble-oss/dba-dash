@@ -317,6 +317,13 @@ namespace DBADashGUI
                     isFocusedRow = true;
                     statusColumns["JobStatus"] = true;
                 }
+                // A paused instance's collections report N/A, which would hide the column showing the pause (and the row in
+                // the focused view) - but a pause is something to notice, so always show it
+                if (row.Table.Columns.Contains("CollectionsPausedUntil") && row["CollectionsPausedUntil"] != DBNull.Value)
+                {
+                    isFocusedRow = true;
+                    statusColumns["SnapshotAgeStatus"] = true;
+                }
                 row["IsFocusedRow"] = isFocusedRow;
                 lastRefresh = (DateTime)row["RefreshDate"];
             }
@@ -467,6 +474,28 @@ namespace DBADashGUI
                     {
                         dgvSummary.Rows[idx].Cells["SnapshotAgeStatus"].Value = TimeSpan.FromMinutes(snapshotAgeMin).Humanize(minUnit: TimeUnit.Minute, maxUnit: TimeUnit.Year) + " to " + TimeSpan.FromMinutes(snapshotAgeMax).Humanize(minUnit: TimeUnit.Minute, maxUnit: TimeUnit.Year);
                     }
+                }
+                // A pause takes over the collection dates cell (and its status colour) so it can't be missed - unless
+                // collections that aren't paused (other databases on an Azure server) have a problem, which still shows
+                if (row.Row.Table.Columns.Contains("CollectionsPausedUntil") && row["CollectionsPausedUntil"] is DateTime pausedUntil)
+                {
+                    var pausedCount = Convert.ToInt32(row["PausedCount"]);
+                    var pausedCell = dgvSummary.Rows[idx].Cells["SnapshotAgeStatus"];
+                    var pausedText = isAzure
+                        ? $"{pausedCount} DB(s) paused"
+                        : $"Paused until {CollectionDates.PauseCollections.FormatPausedUntil(pausedUntil)}";
+                    var snapshotStatus = (DBADashStatusEnum)Convert.ToInt32(row["SnapshotAgeStatus"] == DBNull.Value ? 3 : row["SnapshotAgeStatus"]);
+                    if (snapshotStatus is DBADashStatusEnum.Warning or DBADashStatusEnum.Critical)
+                    {
+                        pausedCell.Value = $"{pausedCell.Value} ({pausedText})";
+                    }
+                    else
+                    {
+                        pausedCell.Value = pausedText;
+                        pausedCell.SetColor(DashColors.BluePale, DashColors.BlueDark, DashColors.BlueLight, Color.White);
+                    }
+                    pausedCell.ToolTipText = CollectionDates.PauseCollections.PausedToolTip(pausedUntil);
+                    dgvSummary.Rows[idx].Cells["Instance"].ToolTipText = pausedCell.ToolTipText;
                 }
                 if (row["DaysSinceLastGoodCheckDB"] != DBNull.Value)
                 {

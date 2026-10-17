@@ -29,8 +29,24 @@ namespace DBADashService
         public readonly CollectionConfig config;
         private System.Timers.Timer azureScanForNewDBsTimer;
         private System.Timers.Timer folderCleanupTimer;
-        private readonly CollectionSchedules schedules;
+        private CollectionSchedules schedules;
         private MessageProcessing messageProcessing;
+
+        /// <summary>
+        /// Quartz job group for the collection jobs of SQL instances: the jobs a schedule change rebuilds.  Import jobs
+        /// for folder/S3 sources stay in the default group as their schedule is fixed - rebuilding them could start a
+        /// second import of the same folder while one is still running.
+        /// </summary>
+        private const string CollectionJobGroup = "Collection";
+
+        /// <summary>Serializes creating collection jobs, so a schedule change can't interleave with scheduling a newly discovered source.</summary>
+        private readonly SemaphoreSlim scheduleLock = new(1, 1);
+
+        /// <summary>Set once the collections have been scheduled at startup.  A schedule change before then is applied afterwards.</summary>
+        private volatile bool initialSchedulingComplete;
+
+        /// <summary>1 when a schedule change is waiting to be applied - see <see cref="RescheduleCollectionsAsync"/>.</summary>
+        private int reschedulePending;
         private CollectionWorkQueue workQueue;
         private readonly ConcurrentBag<Task> backgroundTasks = new();
         private CancellationTokenSource backgroundTasksCts;
@@ -62,6 +78,7 @@ namespace DBADashService
         {
             config = SchedulerServiceConfig.Config;
             schedules = config.GetSchedules();
+            config.RescheduleCollectionsAsync = RescheduleCollectionsAsync;
             if (config.CollectionSchedules != null)
             {
                 Log.Information("Custom schedules set at agent level");
@@ -286,6 +303,8 @@ namespace DBADashService
         {
             const int workQueueTimeout = 20;
             const int backgroundTaskTimeout = 20;
+
+            temporaryScheduleTimer?.Dispose();
 
             // Cancel all background tasks immediately so they can start shutting down
             if (backgroundTasksCts != null)
@@ -614,29 +633,65 @@ namespace DBADashService
                     !string.IsNullOrEmpty(config.AllowedScripts));
         }
 
+        /// <summary>
+        /// Sources with jobs from traditional scheduling.  A source discovered at runtime is added to the config before
+        /// it's scheduled, so a reschedule in between can schedule it first - this stops it being scheduled twice.
+        /// Guarded by <see cref="scheduleLock"/>.
+        /// </summary>
+        private readonly HashSet<DBADashSource> scheduledSources = new(ReferenceEqualityComparer.Instance);
+
         private async Task ScheduleSourceAsync(DBADashSource src)
         {
-            var cfgString = JsonConvert.SerializeObject(src);
-            CollectionSchedules srcSchedule;
-            if (src.CollectionSchedules is { Count: > 0 })
+            await scheduleLock.WaitAsync();
+            try
             {
-                srcSchedule = CollectionSchedules.Combine(schedules, src.CollectionSchedules);
-                Log.Information("Custom schedule defined for instance: {instance}", src.SourceConnection.ConnectionForPrint);
+                if (scheduledSources.Contains(src))
+                {
+                    Log.Debug("{source} has already been scheduled", src.SourceConnection.ConnectionForPrint);
+                    return;
+                }
+                await ScheduleSourceCoreAsync(src, runOnStart: true);
             }
-            else
+            finally
             {
-                srcSchedule = schedules;
+                scheduleLock.Release();
+            }
+        }
+
+        /// <summary>Traditional scheduling for one source.  Caller holds <see cref="scheduleLock"/>.</summary>
+        /// <param name="src">Source to schedule</param>
+        /// <param name="runOnStart">False when rescheduling after a schedule change - the service start collections have already run.</param>
+        /// <param name="errors">When supplied, a job that can't be scheduled is recorded here and the source's other jobs are still scheduled.  Otherwise it throws.</param>
+        private async Task ScheduleSourceCoreAsync(DBADashSource src, bool runOnStart, ICollection<Exception> errors = null)
+        {
+            scheduledSources.Add(src);
+
+            bool TryScheduleJob(string schedule, IJobDetail job)
+            {
+                try
+                {
+                    ScheduleJob(schedule, job, startNow: runOnStart);
+                    return true;
+                }
+                catch (Exception ex) when (errors != null)
+                {
+                    Log.Error(ex, "Error scheduling job for {source} on schedule {schedule}", src.SourceConnection.ConnectionForPrint, schedule);
+                    errors.Add(ex);
+                    return false;
+                }
             }
 
-            if (config.EnabledMetadataProviders.Count == 0)
+            var cfgString = JsonConvert.SerializeObject(src);
+            if (src.CollectionSchedules is { Count: > 0 })
             {
-                srcSchedule.Remove(CollectionType.InstanceMetadata);
+                Log.Information("Custom schedule defined for instance: {instance}", src.SourceConnection.ConnectionForPrint);
             }
+            var srcSchedule = GetCombinedSchedule(src);
             var customCollections = src.CustomCollections.CombineCollections(config.CustomCollections);
 
             var onStartCollections = RemoveNotApplicableCollections(srcSchedule.OnServiceStartCollection).Where(typ => typ != CollectionType.SchemaSnapshot);
 
-            if (srcSchedule.OnServiceStartCollection.Any())
+            if (runOnStart && srcSchedule.OnServiceStartCollection.Any())
             {
                 Log.Information("Trigger on startup collections for {source} to collect {collection}", src.SourceConnection.ConnectionForPrint, onStartCollections);
                 var onStartCustom = customCollections
@@ -675,9 +730,9 @@ namespace DBADashService
                                 continue; // No collections to schedule for this time slot
                             }
 
-                            var job = GetJob(collections, src, cfgString, custom, s.Key);
+                            var job = GetJob(collections, src, cfgString, custom, s.Key, CollectionJobGroup);
                             Log.Information("Add schedule for {source} to collect {collection},{custom} on schedule {schedule}", src.SourceConnection.ConnectionForPrint, collections, custom.Keys, s.Key);
-                            ScheduleJob(s.Key, job);
+                            TryScheduleJob(s.Key, job);
                         }
 
                         if (src.SchemaSnapshotDBs is { Length: > 0 })
@@ -687,15 +742,14 @@ namespace DBADashService
                             {
                                 Log.Information("Add schedule for {source} to collect Schema Snapshots on schedule {schedule}", src.SourceConnection.ConnectionForPrint, snapshotSchedule.NormalizedSchedule);
                                 var job = JobBuilder.Create<SchemaSnapshotJob>()
+                                    .WithIdentity(Guid.NewGuid().ToString(), CollectionJobGroup)
                                     .UsingJobData("Source", src.SourceConnection.ConnectionString)
                                     .UsingJobData("CFG", cfgString)
                                     .UsingJobData("SchemaSnapshotDBs", src.SchemaSnapshotDBs)
                                     .UsingJobData("Schedule", snapshotSchedule.NormalizedSchedule)
                                     .Build();
 
-                                ScheduleJob(snapshotSchedule.NormalizedSchedule, job);
-
-                                if (snapshotSchedule.RunOnServiceStart)
+                                if (TryScheduleJob(snapshotSchedule.NormalizedSchedule, job) && runOnStart && snapshotSchedule.RunOnServiceStart)
                                 {
                                     await scheduler.TriggerJob(job.Key);
                                 }
@@ -739,6 +793,11 @@ namespace DBADashService
             {
                 await ScheduleCollectionsAsync(config.SourceConnections.ToList());
             }
+
+            initialSchedulingComplete = true;
+            await ApplyPendingRescheduleAsync(); // A schedule change received while starting up
+            temporaryScheduleTimer = new System.Threading.Timer(_ => _ = ExpireTemporarySchedulesAsync(), null,
+                TemporaryScheduleCheckInterval, TemporaryScheduleCheckInterval);
 
             backgroundTasks.Add(ScheduleAndRunAzureScanAsync());
 
@@ -788,11 +847,135 @@ namespace DBADashService
             });
         }
 
+        private System.Threading.Timer temporaryScheduleTimer;
+        private int expiringTemporarySchedules; // re-entrancy guard for the timer (0 = idle, 1 = running)
+
+        /// <summary>How often to check for temporary schedules that have ended - so one reverts within this long of ending.</summary>
+        private static readonly TimeSpan TemporaryScheduleCheckInterval = TimeSpan.FromMinutes(1);
+
+        /// <summary>
+        /// Reverts instances whose temporary schedules (see <see cref="TemporaryScheduleStore"/>) have ended to their
+        /// normal schedule, and reports it so the repository stops showing the temporary one.
+        /// </summary>
+        private async Task ExpireTemporarySchedulesAsync()
+        {
+            if (Interlocked.CompareExchange(ref expiringTemporarySchedules, 1, 0) != 0) return;
+            try
+            {
+                var expired = TemporaryScheduleStore.Current.RemoveExpired();
+                if (expired.Count == 0) return;
+                Log.Information("Temporary schedules ended for {instances}.  Reverting to their normal schedule", expired);
+                await RescheduleCollectionsAsync();
+
+                List<DBADashSource> sources;
+                lock (config.SourceConnections)
+                {
+                    sources = config.SourceConnections
+                        .Where(s => expired.Contains(s.ConnectionID, StringComparer.OrdinalIgnoreCase))
+                        .ToList();
+                }
+                await ScheduleInfoReporter.ReportAsync(sources, config);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error reverting temporary schedules");
+            }
+            finally
+            {
+                Interlocked.Exchange(ref expiringTemporarySchedules, 0);
+            }
+        }
+
+        /// <summary>
+        /// Applies a collection schedule change made while the service is running (see
+        /// <see cref="CollectionConfig.RescheduleCollectionsAsync"/>).  The config has already been updated.  A change
+        /// received before the collections have been scheduled at startup is applied once they have been.
+        /// </summary>
+        private async Task RescheduleCollectionsAsync()
+        {
+            Interlocked.Exchange(ref reschedulePending, 1);
+            if (!initialSchedulingComplete)
+            {
+                Log.Information("Schedule change will be applied once the collections have been scheduled at startup");
+                return;
+            }
+            await ApplyPendingRescheduleAsync();
+        }
+
+        /// <summary>
+        /// Rebuilds the collection jobs for SQL instances from the current config, if a schedule change is pending.  The
+        /// jobs are shared between instances with queue-based scheduling, so rebuilding them all is simpler and safer than
+        /// working out which ones a change affects - it only creates jobs, it doesn't run collections.  Collection state
+        /// (WorkItemState) is keyed by source rather than job so it carries over, and service start collections aren't
+        /// repeated.  A job that can't be scheduled doesn't stop the others being recreated - the errors are thrown
+        /// together at the end so the change is reported as failed.
+        /// </summary>
+        private async Task ApplyPendingRescheduleAsync()
+        {
+            if (Interlocked.Exchange(ref reschedulePending, 0) == 0) return;
+
+            await scheduleLock.WaitAsync();
+            var errors = new List<Exception>();
+            try
+            {
+                schedules = config.GetSchedules();
+
+                var jobKeys = await scheduler.GetJobKeys(GroupMatcher<JobKey>.GroupEquals(CollectionJobGroup));
+                await scheduler.DeleteJobs(jobKeys);
+                ScheduledCollectionJob.RemoveSources(jobKeys.Select(k => k.Name));
+
+                List<DBADashSource> sources;
+                lock (config.SourceConnections)
+                {
+                    sources = config.SourceConnections.Where(s => s.SourceConnection.Type == ConnectionType.SQL).ToList();
+                }
+
+                if (config.IsUseQueueBasedScheduling())
+                {
+                    await ScheduleCollectionsWithQueueCoreAsync(sources, runOnStart: false, errors);
+                }
+                else
+                {
+                    scheduledSources.RemoveWhere(s => s.SourceConnection.Type == ConnectionType.SQL);
+                    foreach (var src in sources)
+                    {
+                        try
+                        {
+                            await ScheduleSourceCoreAsync(src, runOnStart: false, errors);
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error(ex, "Error rescheduling collections for {source}", src.SourceConnection.ConnectionForPrint);
+                            errors.Add(ex);
+                        }
+                    }
+                }
+                Log.Information("Collections rescheduled after schedule change.  Replaced {jobCount} jobs for {sourceCount} instances", jobKeys.Count, sources.Count);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error rescheduling collections after schedule change.  Restart the service to apply the change");
+                throw;
+            }
+            finally
+            {
+                scheduleLock.Release();
+            }
+
+            if (errors.Count > 0)
+            {
+                throw new AggregateException($"Rescheduled collections, but {errors.Count} schedule(s) couldn't be scheduled - see the service log", errors);
+            }
+        }
+
+        /// <summary>
+        /// The schedule for <paramref name="src"/>: the service schedule with the source's and any temporary overrides laid over it.  Always
+        /// a copy, so removing collections from it doesn't change the service schedule (which can be the shared
+        /// <see cref="CollectionSchedules.DefaultSchedules"/>).
+        /// </summary>
         private CollectionSchedules GetCombinedSchedule(DBADashSource src)
         {
-            var s = (src.CollectionSchedules is { Count: > 0 })
-                ? CollectionSchedules.Combine(schedules, src.CollectionSchedules)
-                : schedules;
+            var s = config.GetEffectiveSchedules(src, schedules);
 
             if (config.EnabledMetadataProviders.Count == 0)
             {
@@ -819,8 +1002,26 @@ namespace DBADashService
 
         private async Task ScheduleCollectionsWithQueueAsync(List<DBADashSource> connections)
         {
+            await scheduleLock.WaitAsync();
+            try
+            {
+                await ScheduleCollectionsWithQueueCoreAsync(connections, runOnStart: true);
+            }
+            finally
+            {
+                scheduleLock.Release();
+            }
+        }
+
+        /// <summary>Queue-based scheduling.  Caller holds <see cref="scheduleLock"/>.</summary>
+        /// <param name="connections">Sources to schedule</param>
+        /// <param name="runOnStart">False when rescheduling after a schedule change - the service start collections have already run.</param>
+        /// <param name="errors">When supplied, a job that can't be scheduled is recorded here and the others are still scheduled.  Otherwise it throws.</param>
+        private async Task ScheduleCollectionsWithQueueCoreAsync(List<DBADashSource> connections, bool runOnStart, ICollection<Exception> errors = null)
+        {
             // Schedule -> (Types, Sources, CustomCollectionsForSchedule)
             var scheduleGroups = new Dictionary<string, (CollectionType[] Types, List<DBADashSource> Sources, Dictionary<string, CustomCollection> Custom)>();
+            var importKeys = new HashSet<string>();
 
             foreach (var src in connections.Where(src => src.SourceConnection.Type == ConnectionType.SQL))
             {
@@ -847,6 +1048,13 @@ namespace DBADashService
                         .Where(c => c.Value.NormalizedSchedule == scheduleKey)
                         .ToDictionary(c => c.Key, c => c.Value);
 
+                    // Nothing to collect on this schedule (e.g. only AvailableProcs, which isn't needed).  An empty batch
+                    // would have the same key as the import job on the same schedule and take over its sources.
+                    if (collections.Length == 0 && customForSchedule.Count == 0)
+                    {
+                        continue;
+                    }
+
                     var finalKey = BuildScheduleGroupKey(scheduleKey, collections, customForSchedule.Keys);
 
                     if (!scheduleGroups.TryGetValue(finalKey, out var bucket))
@@ -859,13 +1067,17 @@ namespace DBADashService
                 }
 
                 // Enqueue on-start grouped by priority (reuse the precomputed customCollections)
-                await EnqueueOnStartByPriorityAsync(src, srcSchedule, customCollections);
+                if (runOnStart)
+                {
+                    await EnqueueOnStartByPriorityAsync(src, srcSchedule, customCollections);
+                }
             }
             foreach (var src in connections.Where(src => src.SourceConnection.Type != ConnectionType.SQL))
             {
                 // Non-SQL sources (Directory, AWSS3) - single import schedule
                 var scheduleKey = CollectionSchedule.DefaultImportSchedule.NormalizedSchedule;
                 var finalKey = BuildScheduleGroupKey(scheduleKey, Array.Empty<CollectionType>(), null);
+                importKeys.Add(finalKey);
                 if (!scheduleGroups.TryGetValue(finalKey, out var bucket))
                 {
                     bucket = (Array.Empty<CollectionType>(), new List<DBADashSource>(), new Dictionary<string, CustomCollection>());
@@ -884,7 +1096,7 @@ namespace DBADashService
                     sources.Count, schedule, string.Join(", ", types.Select(t => t.ToString())));
 
                 var job = JobBuilder.Create<ScheduledCollectionJob>()
-                    .WithIdentity($"ScheduledCollection_{kvp.Key}")
+                    .WithIdentity($"ScheduledCollection_{kvp.Key}", importKeys.Contains(kvp.Key) ? JobKey.DefaultGroup : CollectionJobGroup)
                     .UsingJobData("Schedule", schedule)
                     .UsingJobData("Types", JsonConvert.SerializeObject(types))
                     .UsingJobData("CustomCollections", JsonConvert.SerializeObject(customForSchedule))
@@ -895,7 +1107,15 @@ namespace DBADashService
                 ScheduledCollectionJob.UpsertSources(job.Key.Name, sources);
 
                 // Ensure job exists (no duplicate scheduling)
-                EnsureScheduledJob(schedule, job);
+                try
+                {
+                    EnsureScheduledJob(schedule, job, startNow: runOnStart);
+                }
+                catch (Exception ex) when (errors != null)
+                {
+                    Log.Error(ex, "Error scheduling {types} on schedule {schedule} for {instanceCount} instances", types, schedule, sources.Count);
+                    errors.Add(ex);
+                }
             }
         }
 
@@ -999,9 +1219,10 @@ namespace DBADashService
             return idx <= 0 ? groupKey : groupKey.Substring(0, idx);
         }
 
-        private static IJobDetail GetJob(CollectionType[] types, DBADashSource src, string cfgString, Dictionary<string, CustomCollection> customCollections, string schedule)
+        private static IJobDetail GetJob(CollectionType[] types, DBADashSource src, string cfgString, Dictionary<string, CustomCollection> customCollections, string schedule, string group = null)
         {
             return JobBuilder.Create<DBADashJob>()
+                     .WithIdentity(Guid.NewGuid().ToString(), group ?? JobKey.DefaultGroup)
                      .UsingJobData("Type", JsonConvert.SerializeObject(types))
                      .UsingJobData("Source", src.ConnectionString)
                      .UsingJobData("CFG", cfgString)
@@ -1013,48 +1234,44 @@ namespace DBADashService
                     .Build();
         }
 
-        private void ScheduleJob(string schedule, IJobDetail job)
+        private void ScheduleJob(string schedule, IJobDetail job, bool startNow = true)
         {
-            ITrigger trigger;
-            ArgumentNullException.ThrowIfNull(schedule);
-            if (int.TryParse(schedule, out var seconds)) // If it's an int, schedule is interval in seconds, otherwise use cron trigger
-            {
-                trigger = TriggerBuilder.Create()
-                 .StartNow()
-                 .WithSimpleSchedule(x =>
-                     x.WithInterval(TimeSpan.FromSeconds(seconds))
-                    .RepeatForever()
-                    )
-                 .Build();
-            }
-            else
-            {
-                if (!CronExpression.TryParse(schedule, out _))
-                    throw new ArgumentException($"Invalid cron expression: {schedule}", nameof(schedule));
-                trigger = TriggerBuilder.Create()
-                 .StartNow()
-                 .WithCronSchedule(schedule)
-                 .Build();
-            }
-            scheduler.ScheduleJob(job, trigger).ConfigureAwait(false).GetAwaiter().GetResult();
+            scheduler.ScheduleJob(job, BuildTrigger(schedule, startNow)).ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
-        private void EnsureScheduledJob(string schedule, IJobDetail job)
+        private void EnsureScheduledJob(string schedule, IJobDetail job, bool startNow = true)
         {
-            ArgumentNullException.ThrowIfNull(schedule);
-
             if (scheduler.Exists(job.Key).ConfigureAwait(false).GetAwaiter().GetResult())
             {
                 return;
             }
 
-            ITrigger trigger = int.TryParse(schedule, out var seconds)
-                ? TriggerBuilder.Create().StartNow().WithSimpleSchedule(x => x.WithInterval(TimeSpan.FromSeconds(seconds)).RepeatForever()).Build()
-                : CronExpression.TryParse(schedule, out _)
-                    ? TriggerBuilder.Create().StartNow().WithCronSchedule(schedule).Build()
-                    : throw new ArgumentException($"Invalid cron expression: {schedule}", nameof(schedule));
+            scheduler.ScheduleJob(job, BuildTrigger(schedule, startNow)).ConfigureAwait(false).GetAwaiter().GetResult();
+        }
 
-            scheduler.ScheduleJob(job, trigger).ConfigureAwait(false).GetAwaiter().GetResult();
+        /// <summary>
+        /// A trigger for <paramref name="schedule"/>: an interval in seconds, or a cron expression.  An interval trigger
+        /// fires straight away when <paramref name="startNow"/>, as at service start; otherwise it first fires after one
+        /// interval, so rescheduling after a schedule change doesn't run every interval collection again immediately.
+        /// </summary>
+        private static ITrigger BuildTrigger(string schedule, bool startNow)
+        {
+            ArgumentNullException.ThrowIfNull(schedule);
+            if (int.TryParse(schedule, out var seconds)) // If it's an int, schedule is interval in seconds, otherwise use cron trigger
+            {
+                var builder = TriggerBuilder.Create();
+                builder = startNow ? builder.StartNow() : builder.StartAt(DateTimeOffset.UtcNow.AddSeconds(seconds));
+                return builder
+                    .WithSimpleSchedule(x => x.WithInterval(TimeSpan.FromSeconds(seconds)).RepeatForever())
+                    .Build();
+            }
+
+            if (!CronExpression.TryParse(schedule, out _))
+                throw new ArgumentException($"Invalid cron expression: {schedule}", nameof(schedule));
+            return TriggerBuilder.Create()
+                .StartNow()
+                .WithCronSchedule(schedule)
+                .Build();
         }
 
         private async Task RemoveEventSessionsAsync()

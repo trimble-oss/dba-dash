@@ -93,6 +93,7 @@
     InstanceGroupName AS CASE WHEN EngineEdition=5 THEN Instance ELSE ISNULL(Alias,ConnectionID) END,
     LastMemoryDumpUTC AS CONVERT(DATETIME2,LastMemoryDump,1),
     IsReadOnlyReplica BIT NOT NULL CONSTRAINT DF_Instances_IsReadOnlyReplica DEFAULT(0),
+    CollectionsPausedUntil DATETIME2(3) NULL, /* UTC.  End of the latest pause of scheduled collections (paused while in the future) - reported by the service with the schedule info.  Alerts are muted while paused. */
     CONSTRAINT PK_Instances PRIMARY KEY CLUSTERED (InstanceID ASC),
     CONSTRAINT FK_Instances_CollectAgent FOREIGN KEY(CollectAgentID) REFERENCES dbo.DBADashAgent(DBADashAgentID),
     CONSTRAINT FK_Instances_ImportAgent FOREIGN KEY(ImportAgentID) REFERENCES dbo.DBADashAgent(DBADashAgentID)

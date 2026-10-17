@@ -552,6 +552,9 @@ BEGIN
 	DELETE dbo.KillSessionLog
 	WHERE InstanceID = @InstanceID
 
+	DELETE dbo.UserActionLog
+	WHERE InstanceID = @InstanceID
+
 	DELETE dbo.FlushPlanLog
 	WHERE InstanceID = @InstanceID
 

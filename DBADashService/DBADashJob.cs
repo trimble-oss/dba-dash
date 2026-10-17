@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using Quartz;
 using Serilog;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,6 +15,13 @@ namespace DBADashService
     public class DBADashJob : IJob
     {
         private static readonly CollectionConfig config = SchedulerServiceConfig.Config;
+
+        /// <summary>
+        /// Collections in progress, by the key the work queue uses to stop a collection overlapping itself
+        /// (<see cref="WorkItem.DedupKey"/>).  DisallowConcurrentExecution only covers a job key, and a schedule change
+        /// replaces the jobs with new ones, so a new job could otherwise start while the one it replaced is still running.
+        /// </summary>
+        private static readonly ConcurrentDictionary<string, byte> InProgress = new(StringComparer.Ordinal);
 
         public async ValueTask Execute(IJobExecutionContext context, System.Threading.CancellationToken cancellationToken = default)
         {
@@ -50,12 +58,26 @@ namespace DBADashService
                         {
                             Source = cfg,
                             Types = types,
-                            CustomCollections = customCollections,
+                            CustomCollections = customCollections ?? new Dictionary<string, CustomCollection>(),
                             Schedule = schedule,
                             PreviousFireTime = context.PreviousFireTimeUtc?.UtcDateTime
                         };
 
-                        await workItem.ExecuteAsync(config, cancellationToken);
+                        var inProgressKey = workItem.DedupKey;
+                        if (!InProgress.TryAdd(inProgressKey, 0))
+                        {
+                            Log.Warning("Skipping {job} for {instance}.  The previous run of these collections is still in progress.",
+                                context.JobDetail.Key, cfg.ConnectionID ?? cfg.SourceConnection.ConnectionForPrint);
+                            return;
+                        }
+                        try
+                        {
+                            await workItem.ExecuteAsync(config, cancellationToken);
+                        }
+                        finally
+                        {
+                            InProgress.TryRemove(inProgressKey, out _);
+                        }
                         break;
 
                     case ConnectionType.Invalid:
