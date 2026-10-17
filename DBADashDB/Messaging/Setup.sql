@@ -53,7 +53,8 @@ BEGIN
 	BEGIN
 		CREATE QUEUE DBADashServiceInitiatorQueue
 	END
-	GRANT RECEIVE ON dbo.DBADashServiceInitiatorQueue  TO Messaging
+	/* Replies are received with Messaging.ReceiveReplyFromServiceToGUI.  RECEIVE on the queue would allow a dialog to be begun from its service, sending any message to the service without the checks in Messaging.SendMessageFromGUIToService.  Revoked as it was granted by older versions. */
+	REVOKE RECEIVE ON dbo.DBADashServiceInitiatorQueue TO Messaging
 	IF NOT EXISTS(SELECT 1 FROM sys.services WHERE name = ''//dbadash.com/DBADashService/ComsInit'')
 	BEGIN
 		CREATE SERVICE [//dbadash.com/DBADashService/ComsInit]

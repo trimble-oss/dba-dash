@@ -1,7 +1,10 @@
 ﻿using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Data;
+using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
@@ -76,29 +79,95 @@ namespace DBADash.Messaging
 
         public byte[] Serialize()
         {
-            var typeName = GetType().AssemblyQualifiedName;
-            var json = SerializeString();
-            var jsonObject = JObject.Parse(json);
-            jsonObject["__type"] = typeName;
-            json = jsonObject.ToString();
+            var jsonObject = JObject.Parse(SerializeString());
+            jsonObject["__type"] = GetType().AssemblyQualifiedName;
+
+            // Non-ASCII characters are escaped as messages must be ASCII - see ReadMessageJson
+            using var sw = new StringWriter();
+            using (var writer = new JsonTextWriter(sw) { StringEscapeHandling = StringEscapeHandling.EscapeNonAscii })
+            {
+                jsonObject.WriteTo(writer);
+            }
 
             // Compress the payload
-            return Encoding.UTF8.GetBytes(json).Compress();
+            return Encoding.ASCII.GetBytes(sw.ToString()).Compress();
         }
 
+        /// <summary>
+        /// Message types the service accepts, by full name: the concrete <see cref="MessageBase"/> types in this assembly.
+        /// Messaging.SendMessageFromGUIToService lists the same types with the roles that can send them.
+        /// </summary>
+        public static readonly IReadOnlyDictionary<string, Type> MessageTypes = typeof(MessageBase).Assembly.GetExportedTypes()
+            .Where(t => t.IsSubclassOf(typeof(MessageBase)) && !t.IsAbstract)
+            .ToDictionary(t => t.FullName, StringComparer.Ordinal);
+
+        /// <summary>
+        /// Deserializes a message from the GUI.  Messaging.SendMessageFromGUIToService has checked the user can send this
+        /// type of message, so the message is rejected if it could be read differently here - see <see cref="ReadMessageJson"/>
+        /// and <see cref="ParseMessageObject"/>.
+        /// </summary>
         public static MessageBase Deserialize(byte[] compressedData)
         {
-            var json = Encoding.UTF8.GetString(compressedData.Decompress());
-            var jsonObject = JObject.Parse(json);
-            var typeName = jsonObject["__type"]?.ToString();
+            var json = ReadMessageJson(compressedData);
+            var type = GetMessageType(ParseMessageObject(json));
+            return (MessageBase)JsonConvert.DeserializeObject(json, type);
+        }
+
+        /// <summary>
+        /// Decompresses a message, which must be ASCII (tab, line feed, carriage return and printable characters) as in
+        /// Messaging.SendMessageFromGUIToService.  The repository reads the message in its own code page, so other
+        /// characters could be read differently there.  <see cref="Serialize"/> escapes them.
+        /// </summary>
+        public static string ReadMessageJson(byte[] compressedData)
+        {
+            var data = compressedData.Decompress();
+            if (data.Any(b => b is not (0x09 or 0x0A or 0x0D or (>= 0x20 and <= 0x7E))))
+            {
+                throw new ArgumentException("Invalid message.  Messages must be ASCII.");
+            }
+            return Encoding.ASCII.GetString(data);
+        }
+
+        /// <summary>
+        /// Parses a message as a JSON object, rejecting anything that could be read more than one way: content after the
+        /// object, or a property repeated.  Properties are matched to the message ignoring case, so repeats are found
+        /// ignoring case, and a property name must be ASCII so it's matched the same way here and in the repository.
+        /// </summary>
+        public static JObject ParseMessageObject(string json)
+        {
+            using var reader = new JsonTextReader(new StringReader(json)) { DateParseHandling = DateParseHandling.None };
+            var jsonObject = JObject.Load(reader, new JsonLoadSettings { DuplicatePropertyNameHandling = DuplicatePropertyNameHandling.Error });
+            if (reader.Read())
+            {
+                throw new ArgumentException("Invalid message.  Unexpected content after the message.");
+            }
+            if (jsonObject.Properties().Any(p => p.Name.Any(c => c > 0x7E)))
+            {
+                throw new ArgumentException("Invalid message.  Property names must be ASCII.");
+            }
+            var duplicate = jsonObject.Properties().GroupBy(p => p.Name, StringComparer.OrdinalIgnoreCase).FirstOrDefault(g => g.Count() > 1);
+            if (duplicate != null)
+            {
+                throw new ArgumentException($"Invalid message.  Duplicate property {duplicate.Key}.");
+            }
+            return jsonObject;
+        }
+
+        /// <summary>
+        /// The message type named by __type.  It's assembly qualified but only the type name is used: the type must be one
+        /// of <see cref="MessageTypes"/>, so a message can't make the service create any other type.
+        /// </summary>
+        public static Type GetMessageType(JObject jsonObject)
+        {
+            var typeName = jsonObject["__type"] is JValue { Type: JTokenType.String } value ? (string)value : null;
             if (string.IsNullOrEmpty(typeName))
             {
                 throw new ArgumentException("Type not found in message.");
             }
-            var type = Type.GetType(typeName);
-            return type == null
-                ? throw new ArgumentException($"Type {typeName} not found.")
-                : (MessageBase)JsonConvert.DeserializeObject(json, type);
+            var name = typeName.Split(',')[0].Trim(' ');
+            return MessageTypes.TryGetValue(name, out var type)
+                ? type
+                : throw new ArgumentException($"Type {typeName} is not a message type.");
         }
 
         protected void ThrowIfExpired()

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
+using Newtonsoft.Json;
 using Serilog;
 using SerilogTimings;
 using System;
@@ -14,11 +15,21 @@ namespace DBADash.Messaging
     {
         public string ConnectionID { get; set; }
 
+        /// <summary>The community proc to run, if <see cref="ProcedureName"/> is one - see <see cref="IsCommunityProc"/>.  Not serialized: it's set from <see cref="ProcedureName"/>.</summary>
+        [JsonIgnore]
         public CommunityProcs? CommunityProc
         {
-            get => Enum.TryParse<CommunityProcs>(ProcedureName, true, out var result) ? (CommunityProcs?)result : null;
+            get => IsCommunityProc(SchemaName, ProcedureName) ? Enum.Parse<CommunityProcs>(ProcedureName) : null;
             set => ProcedureName = value.ToString();
         }
+
+        /// <summary>
+        /// A community proc is named exactly (case sensitive) and in the dbo schema, or no schema.  Anything else is a custom proc.
+        /// Messaging.SendMessageFromGUIToService decides which role is needed to send the message the same way:
+        /// CommunityScripts for a community proc, CustomTools for a custom proc.
+        /// </summary>
+        public static bool IsCommunityProc(string schema, string proc) =>
+            (schema ?? "dbo") == "dbo" && proc != null && Enum.GetNames<CommunityProcs>().Contains(proc, StringComparer.Ordinal);
 
         public List<CustomSqlParameter> Parameters { get; set; }
 

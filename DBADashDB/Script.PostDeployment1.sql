@@ -11,6 +11,11 @@ GRANT EXECUTE ON SCHEMA::DBADash TO App;
 GRANT EXECUTE ON SCHEMA::UserReport TO RunUserReports;
 GRANT EXECUTE ON SCHEMA::UserAlert TO App;
 GRANT EXECUTE ON SCHEMA::Messaging TO Messaging;
+/* Granted by older versions of Messaging.Setup.  It allows a dialog to be begun from the queue's service, sending any message to the service without the checks in Messaging.SendMessageFromGUIToService. */
+IF OBJECT_ID('dbo.DBADashServiceInitiatorQueue') IS NOT NULL
+BEGIN
+	EXEC('REVOKE RECEIVE ON dbo.DBADashServiceInitiatorQueue TO Messaging')
+END
 GRANT EXECUTE ON SCHEMA::Alert TO App;
 GRANT SELECT ON SCHEMA::Alert TO App;
 GRANT SELECT ON SCHEMA::Alert TO AppReadOnly

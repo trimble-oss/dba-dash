@@ -2,7 +2,12 @@
 	@ConversationGroupID UNIQUEIDENTIFIER=NULL,
 	@Timeout INT=5000
 )
+WITH EXECUTE AS OWNER
 AS
+/*
+	Used by the GUI to receive replies from the service.  Runs as owner as Messaging members don't have RECEIVE on the
+	queue - it would allow them to send to the service without the checks in Messaging.SendMessageFromGUIToService.
+*/
 DECLARE @SQL NVARCHAR(MAX)
 SET @SQL = N'
 WAITFOR
