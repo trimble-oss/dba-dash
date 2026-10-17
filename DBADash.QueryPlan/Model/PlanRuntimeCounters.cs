@@ -24,6 +24,12 @@ namespace DBADash.QueryPlan.Model
 
         public long ActualExecutions { get; internal set; }
 
+        /// <summary>
+        /// Times the operator read to the end of its input.  Less than its executions when something
+        /// above stopped it early - a TOP, an EXISTS, a merge join that ran out of rows on its other side.
+        /// </summary>
+        public long? ActualEndOfScans { get; internal set; }
+
         /// <summary>Wall clock time for this thread, in milliseconds.</summary>
         public long? ActualElapsedMs { get; internal set; }
 
@@ -92,6 +98,7 @@ namespace DBADash.QueryPlan.Model
             // CPU is the opposite: every thread burned its own, so the cost to the server is the sum.
             ActualCpuMs = Sum(threads, t => t.ActualCpuMs);
 
+            ActualEndOfScans = Sum(threads, t => t.ActualEndOfScans);
             ActualScans = Sum(threads, t => t.ActualScans);
             ActualLogicalReads = Sum(threads, t => t.ActualLogicalReads);
             ActualPhysicalReads = Sum(threads, t => t.ActualPhysicalReads);
@@ -127,6 +134,9 @@ namespace DBADash.QueryPlan.Model
         public long? ActualRowsRead { get; }
 
         public long ActualExecutions { get; }
+
+        /// <summary>See <see cref="PlanThreadCounters.ActualEndOfScans"/>.  Summed over threads, like <see cref="ActualExecutions"/>.</summary>
+        public long? ActualEndOfScans { get; }
 
         /// <summary>The slowest thread's wall clock time - see the constructor for why not the sum.</summary>
         public long? ActualElapsedMs { get; }

@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Text.RegularExpressions;
 using DBADash.QueryPlan.Model;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -202,7 +203,8 @@ namespace DBADash.QueryPlan.Test
             StringAssert.Contains(card!.Text, "The optimizer used its fixed guess for a multi-statement function, 100 rows");
             StringAssert.Contains(card.Text,
                 "It only happens when the query runs, and not in a statement that modifies data, so an estimated plan (SET SHOWPLAN_XML, or Display Estimated Execution Plan) " +
-                "always shows the fixed guess; a plan from the plan cache or Query Store that shows it was compiled without interleaved execution.");
+                "always shows the fixed guess. A plan from the plan cache or Query Store that shows it was compiled without interleaved execution - unless the " +
+                "function happened to return exactly that many rows when interleaved execution ran it, which such a plan can't tell apart, as only a run's figures flag it.");
             Assert.IsFalse(card.Text.Contains("returned"), card.Text);
 
             var body = plan.Statements.Single(s => s.StatementText!.Contains("INSERT @r"));
@@ -286,6 +288,75 @@ namespace DBADash.QueryPlan.Test
         {
             Assert.IsNull(BuiltInCard(TestPlans.Statement(TestPlans.FunctionFixedGuess)));
             Assert.IsNull(BuiltInCard(TestPlans.Statement(TestPlans.FunctionCrossApply)));
+        }
+
+        /// <summary>A captured plan with <paramref name="find"/> replaced, for the cases no capture covers.</summary>
+        private static PlanStatement Variant(string plan, string find, string replace)
+        {
+            var xml = TestPlans.Xml(plan);
+            StringAssert.Contains(xml, find);
+            return PlanParser.Parse(xml.Replace(find, replace)).Statements.Single();
+        }
+
+        [TestMethod]
+        public void PermanentTableNamedLikeATableVariable_IsNotOne()
+        {
+            var statement = Variant(TestPlans.TableVariableInsert, "<Object Table=\"[@t]\"", "<Object Database=\"[TVTest]\" Schema=\"[dbo]\" Table=\"[@t]\"");
+
+            Assert.IsFalse(PlanTableVariables.Touches(TestPlans.Operator(statement, 0)));
+            Assert.IsNull(TableVariableCard(statement));
+        }
+
+        [TestMethod]
+        public void TableVariableReadOnTheInnerSideOfALoop_IsComparedPerExecution()
+        {
+            // Node 4 read every row of @t, ten times: 500,000 estimated in all, but nothing guessed.
+            var xml = TestPlans.Xml(TestPlans.TableVariableDeferred);
+            var node = new Regex("<RelOp NodeId=\"4\".*?</RunTimeInformation>", RegexOptions.Singleline);
+            Assert.IsTrue(node.IsMatch(xml));
+            xml = node.Replace(xml, m => m.Value
+                .Replace("EstimateRows=\"223.607\"", "EstimateRows=\"50000\"")
+                .Replace("ActualExecutions=\"1\"", "ActualExecutions=\"10\""), 1);
+            var statement = PlanParser.Parse(xml).Statements.Single(s => s.Operators.Any(op => op.NodeId == 4 && PlanTableVariables.Touches(op)));
+
+            var card = TableVariableCard(statement);
+            Assert.IsNotNull(card);
+            StringAssert.Contains(card!.Text, "The optimizer knew @t held 50,000 rows when it compiled the plan.");
+        }
+
+        [TestMethod]
+        public void ReturnTableScanStoppedEarly_DoesNotGiveTheFunctionsRowCount()
+        {
+            var statement = Variant(TestPlans.FunctionFixedGuess,
+                "ActualRowsRead=\"50000\" ActualEndOfScans=\"1\"", "ActualRowsRead=\"50000\" ActualEndOfScans=\"0\"");
+
+            var card = FunctionCard(statement);
+            Assert.IsNotNull(card);
+            StringAssert.Contains(card!.Text, "The optimizer used its fixed guess for a multi-statement function, 100 rows (the legacy cardinality estimator, from before SQL Server 2014, guesses 1).");
+            Assert.IsFalse(card.Text.Contains("it returned 50,000"), card.Text);
+        }
+
+        [TestMethod]
+        public void InterleavedFunction_WithRecompile_DoesNotSayLaterRunsReuseThePlan()
+        {
+            var statement = Variant(TestPlans.FunctionInterleaved, "GROUP BY f.Grp\"", "GROUP BY f.Grp OPTION (RECOMPILE)\"");
+
+            var card = FunctionCard(statement);
+            Assert.IsNotNull(card);
+            StringAssert.Contains(card!.Text, "so the plan was built for the 50,000 rows it returned then.");
+            Assert.IsFalse(card.Text.Contains("Later runs reuse the plan"), card.Text);
+        }
+
+        [TestMethod]
+        public void CachedPlan_CompiledForOneRow_WithTheNewEstimator_IsReadAsInterleaved()
+        {
+            // One row is the legacy estimator's guess, but this plan used the level 170 estimator, which guesses 100.
+            var statement = Variant(TestPlans.FunctionCachedInterleaved, "\"40000\"", "\"1\"");
+
+            var card = FunctionCard(statement);
+            Assert.IsNotNull(card);
+            StringAssert.Contains(card!.Text, " The plan was compiled for 1 row, not a fixed guess");
+            Assert.IsFalse(card.Text.Contains("legacy"), card.Text);
         }
     }
 }

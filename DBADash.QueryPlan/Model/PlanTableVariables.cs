@@ -60,21 +60,46 @@ namespace DBADash.QueryPlan.Model
             statement.Operators.Where(IsBuiltInFunction).OrderBy(op => op.NodeId).ToList();
 
         /// <summary>The user-defined table-valued functions the statement calls, in node order.</summary>
-        public static IReadOnlyList<PlanFunctionCall> FunctionsIn(PlanStatement statement) =>
-            statement.Operators
+        public static IReadOnlyList<PlanFunctionCall> FunctionsIn(PlanStatement statement)
+        {
+            var functions = statement.Operators
                 .Where(op => op.Kind == PlanOperatorKind.TableValuedFunction && !IsBuiltInFunction(op))
                 .OrderBy(op => op.NodeId)
-                .Select(function => new PlanFunctionCall(
-                    function,
-                    statement.Operators
-                        .Where(op => op != function && op.Objects.Any(o => SameCall(o, function.PrimaryObject!)))
-                        .OrderBy(op => op.NodeId)
-                        .ToList()))
                 .ToList();
+
+            var readers = statement.Operators
+                .Where(op => op.Kind != PlanOperatorKind.TableValuedFunction)
+                .Select(op => (Reader: op, Function: ProducerOf(op, functions)))
+                .Where(pair => pair.Function is not null)
+                .ToLookup(pair => pair.Function!, pair => pair.Reader);
+
+            return functions
+                .Select(function => new PlanFunctionCall(function, readers[function].OrderBy(op => op.NodeId).ToList()))
+                .ToList();
+        }
 
         /// <summary>The call a function's operator or a reader of its return table belongs to, or null.</summary>
         public static PlanFunctionCall? FunctionCallFor(PlanOperator op, PlanStatement statement) =>
             FunctionsIn(statement).FirstOrDefault(call => call.Function == op || call.Readers.Contains(op));
+
+        /// <summary>
+        /// The call whose return table <paramref name="op"/> reads, or null: the same function under the
+        /// same alias, filled beside it under the nearest Sequence above it.  An alias only names a call
+        /// within its own branch of the query, so two UNION ALL branches can both call it f; the plan's
+        /// shape is what tells their tables apart.
+        /// </summary>
+        private static PlanOperator? ProducerOf(PlanOperator op, IReadOnlyList<PlanOperator> functions)
+        {
+            var candidates = functions.Where(f => op.Objects.Any(o => SameCall(o, f.PrimaryObject!))).ToList();
+            if (candidates.Count == 0) return null;
+
+            for (var child = op; child.Parent is { } ancestor; child = ancestor)
+            {
+                if (candidates.FirstOrDefault(f => f.Parent == ancestor && f != child) is { } producer) return producer;
+            }
+
+            return null;
+        }
 
         /// <summary>The same function under the same alias: a query calling it twice reads two tables.</summary>
         private static bool SameCall(PlanObjectReference a, PlanObjectReference b) =>
