@@ -2,6 +2,7 @@
 using DBADashCoreGUI;
 using DBADash;
 using DBADash.Messaging;
+using DBADash.PerformanceAnalysis;
 using DBADashGUI.AI;
 using DBADashGUI.AgentJobs;
 using DBADashGUI.Changes;
@@ -481,6 +482,7 @@ namespace DBADashGUI
                 PreventReportOverwrite = true
             };
             tabPerformance.Controls.Add(perfView);
+            AddPerformanceAnalysisButton(perfView, PerformanceAnalysisFocus.General);
 
             tabLatches = new TabPage("Latches") { Name = Tabs.Latches.TabName() };
             tabLatches.Controls.Add(new CustomReportView()
@@ -605,6 +607,37 @@ namespace DBADashGUI
                 c.Invalidate(true);
                 c.Refresh();
             }
+        }
+
+        /// <summary>
+        /// Adds the AI performance analysis button to a report's toolbar.  The analysis is of the instance in
+        /// context - at database level, the instance the database is on - and not of Azure DB, whose charts
+        /// come from different collections.
+        /// </summary>
+        private static void AddPerformanceAnalysisButton(CustomReportView view, PerformanceAnalysisFocus focus)
+        {
+            var button = new ToolStripButton("AI Analysis", Properties.Resources.DeadlockAnalyse_16x)
+            {
+                DisplayStyle = ToolStripItemDisplayStyle.ImageAndText,
+                ToolTipText = focus == PerformanceAnalysisFocus.LatchesAndSpinlocks
+                    ? "Analyse latch and spinlock contention on this instance with AI.  You see what would be sent before anything is."
+                    : "Analyse this instance's performance with AI.  You see what would be sent before anything is."
+            };
+
+            button.Click += (_, _) =>
+            {
+                var context = view.CurrentContext;
+                if (context is not { InstanceID: > 0 } || context.Type == SQLTreeItem.TreeType.AzureDatabase)
+                {
+                    MessageBox.Show(view.FindForm(), "AI performance analysis is available for a SQL Server instance.  Select an instance in the tree.",
+                        "AI Analysis", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                PerformanceAnalysisForm.Open(view.FindForm(), context.InstanceID, context.InstanceName, focus);
+            };
+
+            view.ToolStrip.Items.Add(button);
         }
 
         private bool CurrentTabSupportsDayOfWeekFilter =>
