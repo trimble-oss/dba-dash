@@ -27,6 +27,45 @@ namespace DBADashGUI.Performance
             InitializeComponent();
             standardLayout = dgv.GetColumnLayout();
             dgv.RegisterClearFilter(tsClearFilter);
+            AddPerformanceAnalysis();
+        }
+
+        /// <summary>
+        /// AI analysis of one instance's performance over the selected range: a toolbar button for the
+        /// selected row (or the only one, at instance level), and the same on a row's context menu.
+        /// </summary>
+        private void AddPerformanceAnalysis()
+        {
+            var button = new ToolStripButton("AI Analysis", Properties.Resources.DeadlockAnalyse_16x)
+            {
+                DisplayStyle = ToolStripItemDisplayStyle.ImageAndText,
+                ToolTipText = "Analyse the selected instance's performance with AI.  You see what would be sent before anything is."
+            };
+            button.Click += (_, _) =>
+            {
+                var row = dgv.CurrentRow ?? (dgv.Rows.Count == 1 ? dgv.Rows[0] : null);
+                if (row is null)
+                {
+                    MessageBox.Show(this, "Select an instance in the grid to analyse.", "AI Analysis", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                OpenPerformanceAnalysis(row);
+            };
+            toolStrip1.Items.Add(button);
+
+            var menuItem = new ToolStripMenuItem("Analyse performance with AI...", Properties.Resources.DeadlockAnalyse_16x, (_, _) =>
+            {
+                if (dgv.ClickedRowIndex >= 0) OpenPerformanceAnalysis(dgv.Rows[dgv.ClickedRowIndex]);
+            });
+            dgv.CellContextMenu.Items.Insert(0, menuItem);
+            dgv.CellContextMenu.Items.Insert(1, new ToolStripSeparator());
+        }
+
+        private void OpenPerformanceAnalysis(DataGridViewRow row)
+        {
+            if (row.DataBoundItem is not DataRowView view) return;
+            AI.PerformanceAnalysisForm.Open(FindForm(), (int)view["InstanceID"], Convert.ToString(view["InstanceDisplayName"]));
         }
 
         public void SetContext(DBADashContext _context)
