@@ -161,6 +161,7 @@ builder.Services.AddScoped<AiRcaTemplateService>();
 builder.Services.AddScoped<AiDeadlockPromptBuilder>();
 builder.Services.AddScoped<DeadlockAnalysisStore>();
 builder.Services.AddScoped<AiPlanPromptBuilder>();
+builder.Services.AddScoped<AiPerformancePromptBuilder>();
 builder.Services.AddScoped<PlanAnalysisStore>();
 builder.Services.AddScoped<AiRunbookLinkService>();
 builder.Services.AddScoped<AiRiskForecastService>();
@@ -913,6 +914,81 @@ ApplyAuthAndRateLimit(app.MapPost("/api/ai/analyse-plan", async (
         telemetry.Fail(requestId, ex);
         return Results.Problem(
             title: "Query plan analysis failed",
+            detail: $"RequestId={requestId}. {ex.Message}",
+            statusCode: StatusCodes.Status500InternalServerError);
+    }
+}));
+
+// An instance's performance over a window, summarised by the caller from the charts' own procedures.
+// Unlike the deadlock and plan endpoints nothing is stored: the analysis is about a moment, and the
+// viewer keeps the conversation in memory for as long as the reader is asking about it.
+ApplyAuthAndRateLimit(app.MapPost("/api/ai/analyse-performance", async (
+    AiPerformanceAnalysisRequest request,
+    AiChatClient aiChat,
+    AiPerformancePromptBuilder promptBuilder,
+    AiRequestTelemetryService telemetry,
+    IConfiguration config,
+    CancellationToken cancellationToken) =>
+{
+    var validationError = request.Validate();
+    if (!string.IsNullOrWhiteSpace(validationError))
+    {
+        return Results.BadRequest(new { error = validationError });
+    }
+
+    var requestId = Guid.NewGuid().ToString("N");
+    var isFollowUp = request.History.Count > 0;
+    var totalSw = telemetry.Start(
+        requestId,
+        $"Performance {(isFollowUp ? "follow-up" : "analysis")} for instance {request.InstanceId}",
+        "performance-analysis");
+
+    var model = request.ModelOverride
+                ?? AiChatClient.ConfiguredModel(config)
+                ?? "unknown";
+
+    var conversationId = request.ConversationId ?? Guid.NewGuid();
+    var turnNumber = request.History.Count(t => t.IsAssistant) + 1;
+
+    try
+    {
+        // Rebuilt from the payload on every turn, so a follow-up cannot quietly change the figures the
+        // first answer was about.
+        var prompt = promptBuilder.Build(request);
+        var messages = AiConversation.Build(prompt, request.History, request.Question);
+        var result = await aiChat.ChatAsync(messages, cancellationToken, request.ModelOverride);
+
+        if (!result.Success)
+        {
+            return AnalysisFailure(telemetry, requestId, "Performance analysis failed", result,
+                result.Failure == AiChatFailure.TooLarge
+                    ? "Send it again with fewer sections or without the time series, or configure a model with a larger context window."
+                    : null);
+        }
+
+        totalSw.Stop();
+        telemetry.Complete(requestId, "performance-analysis", 1, 0, totalSw.ElapsedMilliseconds, 0, "n/a");
+
+        return Results.Ok(new AiPerformanceAnalysisResponse
+        {
+            RequestId = requestId,
+            Analysis = result.Text,
+            Model = model,
+            ConversationId = conversationId,
+            TurnNumber = turnNumber,
+            TotalExecutionMs = totalSw.ElapsedMilliseconds
+        });
+    }
+    catch (OperationCanceledException)
+    {
+        telemetry.Fail(requestId, new TimeoutException("AI request cancelled or timed out."));
+        return Results.StatusCode(StatusCodes.Status499ClientClosedRequest);
+    }
+    catch (Exception ex)
+    {
+        telemetry.Fail(requestId, ex);
+        return Results.Problem(
+            title: "Performance analysis failed",
             detail: $"RequestId={requestId}. {ex.Message}",
             statusCode: StatusCodes.Status500InternalServerError);
     }
