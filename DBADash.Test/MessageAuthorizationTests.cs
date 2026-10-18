@@ -88,8 +88,7 @@ namespace DBADash.Test
         public void SendProcListsTheCommunityProcs()
         {
             var sql = File.ReadAllText(SendProcPath);
-            var list = Regex.Match(sql, @"IN\((?<list>N'sp_[^)]*)\)").Groups["list"].Value;
-            var procs = Regex.Matches(list, @"N'(\w+)'").Select(m => m.Groups[1].Value).OrderBy(p => p).ToList();
+            var procs = Regex.Matches(sql, @"\(N'(sp_\w+)'\)").Select(m => m.Groups[1].Value).OrderBy(p => p).ToList();
 
             CollectionAssert.AreEqual(Enum.GetNames<ProcedureExecutionMessage.CommunityProcs>().OrderBy(p => p).ToList(), procs);
         }
@@ -102,6 +101,8 @@ namespace DBADash.Test
         [DataRow("other", "sp_Blitz", false)]
         [DataRow("dbo", "0", false)] // Enum value, not a name
         [DataRow("dbo", "sp_Blitz,sp_BlitzWho", false)]
+        [DataRow("dbo", "sp_Blitz ", false)] // Trailing space
+        [DataRow("dbo ", "sp_Blitz", false)]
         [DataRow("dbo", "MyProc", false)]
         public void IsCommunityProc(string? schema, string proc, bool expected)
         {
@@ -166,6 +167,9 @@ namespace DBADash.Test
         [DataRow("{\"__type\":\"DBADash.Messaging.CollectionMessage, DBADash\",\"__type\":\"DBADash.Messaging.KillSessionMessage, DBADash\"}")]
         [DataRow("{\"__type\":\"DBADash.Messaging.ProcedureExecutionMessage, DBADash\",\"ProcedureName\":\"sp_Blitz\",\"procedurename\":\"MyProc\"}")]
         [DataRow("{\"__type\":\"DBADash.Messaging.ProcedureExecutionMessage, DBADash\",\"\\u017FchemaName\":\"other\"}")] // Non-ASCII name - long s
+        [DataRow("{\"__type\":\"DBADash.Messaging.ProcedureExecutionMessage, DBADash\",\"EmbeddedScript \":0,\"ProcedureName\":\"MyProc\"}")] // Trailing space - matched by SQL's =
+        [DataRow("{\"__type \":\"DBADash.Messaging.KillSessionMessage, DBADash\",\"__type\":\"DBADash.Messaging.CollectionMessage, DBADash\"}")]
+        [DataRow("{\"__type\":\"DBADash.Messaging.CollectionMessage, DBADash\",\"\":1}")]
         [DataRow("{\"__type\":\"DBADash.Messaging.CollectionMessage, DBADash\"}{\"__type\":\"DBADash.Messaging.KillSessionMessage, DBADash\"}")]
         [DataRow("[{\"__type\":\"DBADash.Messaging.CollectionMessage, DBADash\"}]")]
         [DataRow("{\"ConnectionID\":\"SQL1\"}")]

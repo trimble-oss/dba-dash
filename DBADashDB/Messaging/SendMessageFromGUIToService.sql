@@ -18,8 +18,9 @@ AS
 	reaches by ownership chaining.
 
 	The payload is a message serialized as JSON and gzip compressed (MessageBase.Serialize).  It must be ASCII (other
-	characters are escaped) and property names can't be repeated, ignoring case, so this proc and the service read the
-	same message.  The service checks the same things before it processes or relays a message.
+	characters are escaped), property names must be identifiers (letters, digits and underscores) and can't be repeated,
+	ignoring case, so this proc and the service read the same message.  The service checks the same things before it
+	processes or relays a message.
 */
 SET NOCOUNT ON
 DECLARE @Json VARCHAR(MAX)
@@ -39,6 +40,21 @@ IF @Json IS NULL
 	OR ISJSON(@Json) = 0
 BEGIN
 	RAISERROR('Invalid message.',11,1);
+	RETURN
+END
+
+/*
+	Identifiers only: = ignores trailing spaces, so "EmbeddedScript " would match EmbeddedScript here while the service
+	ignores it as an unknown property.  LIKE doesn't ignore them.
+*/
+IF EXISTS(
+	SELECT 1
+	FROM OPENJSON(@Json)
+	WHERE [key] COLLATE Latin1_General_BIN2 LIKE N'%[^A-Za-z0-9_]%'
+	OR [key] = N''
+	)
+BEGIN
+	RAISERROR('Invalid message.  Property names must be identifiers.',11,1);
 	RETURN
 END
 
@@ -69,16 +85,34 @@ IF @MessageType = N'DBADash.Messaging.ProcedureExecutionMessage' COLLATE Latin1_
 BEGIN
 	/*
 		Embedded scripts need Messaging only.  Community scripts need CommunityScripts and anything else is a custom proc
-		that needs CustomTools.  Matches ProcedureExecutionMessage.ExecutionType - property names are matched ignoring
+		that needs CustomTools, as ProcedureExecutionMessage.IsCommunityProc decides.  Property names are matched ignoring
 		case as the service does, and an absent or null schema is dbo.
+
+		Only a number is an embedded script, as the GUI sends it - the service reads an empty string as no embedded
+		script.  Names are compared exactly, including their length as = ignores trailing spaces.
 	*/
+	DECLARE @IsEmbeddedScript BIT, @SchemaName NVARCHAR(MAX), @ProcedureName NVARCHAR(MAX)
+
+	SELECT	@IsEmbeddedScript = MAX(CASE WHEN UPPER([key]) = N'EMBEDDEDSCRIPT' AND type = 2 THEN 1 ELSE 0 END),
+			@SchemaName = MAX(CASE WHEN UPPER([key]) = N'SCHEMANAME' AND type <> 0 THEN value END),
+			@ProcedureName = MAX(CASE WHEN UPPER([key]) = N'PROCEDURENAME' AND type <> 0 THEN value END)
+	FROM OPENJSON(@Json)
+
+	SET @SchemaName = ISNULL(@SchemaName, N'dbo')
+
 	SELECT @ProcedureRole = CASE
-					WHEN EXISTS(SELECT 1 FROM OPENJSON(@Json) WHERE UPPER([key]) = N'EMBEDDEDSCRIPT' AND type <> 0) THEN NULL
-					WHEN ISNULL((SELECT value FROM OPENJSON(@Json) WHERE UPPER([key]) = N'SCHEMANAME' AND type <> 0),N'dbo') = N'dbo' COLLATE Latin1_General_BIN2
-						AND (SELECT value FROM OPENJSON(@Json) WHERE UPPER([key]) = N'PROCEDURENAME' AND type <> 0) COLLATE Latin1_General_BIN2
-								IN(N'sp_WhoIsActive',N'sp_Blitz',N'sp_BlitzFirst',N'sp_BlitzIndex',N'sp_BlitzCache',N'sp_BlitzWho',N'sp_LogHunter',
-									N'sp_PressureDetector',N'sp_BlitzLock',N'sp_BlitzBackups',N'sp_HumanEvents',N'sp_HealthParser',N'sp_QuickieStore',
-									N'sp_HumanEventsBlockViewer',N'sp_SrvPermissions',N'sp_DBPermissions',N'sp_IndexCleanup') THEN N'CommunityScripts'
+					WHEN @IsEmbeddedScript = 1 THEN NULL
+					WHEN @SchemaName = N'dbo' COLLATE Latin1_General_BIN2 AND DATALENGTH(@SchemaName) = DATALENGTH(N'dbo')
+						AND EXISTS(
+							SELECT 1
+							FROM (VALUES(N'sp_WhoIsActive'),(N'sp_Blitz'),(N'sp_BlitzFirst'),(N'sp_BlitzIndex'),(N'sp_BlitzCache'),(N'sp_BlitzWho'),
+									(N'sp_LogHunter'),(N'sp_PressureDetector'),(N'sp_BlitzLock'),(N'sp_BlitzBackups'),(N'sp_HumanEvents'),
+									(N'sp_HealthParser'),(N'sp_QuickieStore'),(N'sp_HumanEventsBlockViewer'),(N'sp_SrvPermissions'),
+									(N'sp_DBPermissions'),(N'sp_IndexCleanup')
+								) C(ProcedureName)
+							WHERE C.ProcedureName = @ProcedureName COLLATE Latin1_General_BIN2
+							AND DATALENGTH(C.ProcedureName) = DATALENGTH(@ProcedureName)
+							) THEN N'CommunityScripts'
 					ELSE N'CustomTools' END
 END
 

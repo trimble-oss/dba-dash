@@ -131,7 +131,9 @@ namespace DBADash.Messaging
         /// <summary>
         /// Parses a message as a JSON object, rejecting anything that could be read more than one way: content after the
         /// object, or a property repeated.  Properties are matched to the message ignoring case, so repeats are found
-        /// ignoring case, and a property name must be ASCII so it's matched the same way here and in the repository.
+        /// ignoring case.  Property names must be identifiers (letters, digits and underscores) so they're matched the
+        /// same way here and in the repository - SQL's = ignores trailing spaces, so "EmbeddedScript " would match
+        /// EmbeddedScript there but not here.
         /// </summary>
         public static JObject ParseMessageObject(string json)
         {
@@ -141,9 +143,9 @@ namespace DBADash.Messaging
             {
                 throw new ArgumentException("Invalid message.  Unexpected content after the message.");
             }
-            if (jsonObject.Properties().Any(p => p.Name.Any(c => c > 0x7E)))
+            if (jsonObject.Properties().Any(p => p.Name.Length == 0 || !p.Name.All(c => c is (>= 'A' and <= 'Z') or (>= 'a' and <= 'z') or (>= '0' and <= '9') or '_')))
             {
-                throw new ArgumentException("Invalid message.  Property names must be ASCII.");
+                throw new ArgumentException("Invalid message.  Property names must be identifiers.");
             }
             var duplicate = jsonObject.Properties().GroupBy(p => p.Name, StringComparer.OrdinalIgnoreCase).FirstOrDefault(g => g.Count() > 1);
             if (duplicate != null)
