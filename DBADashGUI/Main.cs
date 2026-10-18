@@ -485,20 +485,24 @@ namespace DBADashGUI
             AddPerformanceAnalysisButton(perfView, PerformanceAnalysisFocus.General);
 
             tabLatches = new TabPage("Latches") { Name = Tabs.Latches.TabName() };
-            tabLatches.Controls.Add(new CustomReportView()
+            var latchView = new CustomReportView()
             {
                 Dock = DockStyle.Fill,
                 Report = LatchStatsReport.Instance,
                 PreventReportOverwrite = true
-            });
+            };
+            tabLatches.Controls.Add(latchView);
+            AddPerformanceAnalysisButton(latchView, PerformanceAnalysisFocus.LatchesAndSpinlocks);
 
             tabSpinlocks = new TabPage("Spinlocks") { Name = Tabs.Spinlocks.TabName() };
-            tabSpinlocks.Controls.Add(new CustomReportView()
+            var spinlockView = new CustomReportView()
             {
                 Dock = DockStyle.Fill,
                 Report = SpinlockStatsReport.Instance,
                 PreventReportOverwrite = true
-            });
+            };
+            tabSpinlocks.Controls.Add(spinlockView);
+            AddPerformanceAnalysisButton(spinlockView, PerformanceAnalysisFocus.LatchesAndSpinlocks);
 
             tabDatabaseExtendedProperties = new TabPage("Extended Properties") { Name = Tabs.DatabaseExtendedProperties.TabName() };
             var extPropView = new CustomReportView()
