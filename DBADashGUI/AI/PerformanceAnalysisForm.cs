@@ -65,6 +65,33 @@ namespace DBADashGUI.AI
 
         private readonly ToolStripStatusLabel _status = new() { Spring = true, TextAlign = ContentAlignment.MiddleLeft };
 
+        private readonly ToolStripButton _submit;
+        private readonly AIModelMenu _model = new();
+        private readonly AiConversationView _conversation = new() { Dock = DockStyle.Fill };
+        private readonly TabControl _tabs = new() { Dock = DockStyle.Fill };
+        private readonly TabPage _analysisTab = new("Analysis") { ToolTipText = "The answer, and follow-up questions about it.  Kept until this window is closed." };
+
+        private AIServiceDiscovery.ServiceInfo _service;
+        private CancellationTokenSource _inFlight;
+
+        /// <summary>The exchange on screen, which a follow-up continues.  Null until something is asked.</summary>
+        private AiConversation _current;
+
+        /// <summary>
+        /// The payload <see cref="_current"/> was given, which is what its follow-ups carry.  Pinned rather than
+        /// rebuilt: the reader can change the sections or reload another window at any moment, and a follow-up
+        /// built from the current payload would hand the model figures it had never been shown while the exchange
+        /// on screen reads as though nothing moved.  Changed settings go with the next analysis instead.
+        /// </summary>
+        private PerformanceAnalysisPayload _conversationPayload;
+
+        // The status line is composed from these, each set independently - see UpdateStatus.
+        private string _loadNote;
+        private string _analysisNote;
+        private string _serviceNote;
+        private string _sizeNote;
+        private Color _statusColour = DashColors.Information;
+
         private PerformanceAnalysisOptions _options;
         private PerformanceAnalysisData _data;
         private PerformanceAnalysisPayload _payload;
@@ -78,6 +105,15 @@ namespace DBADashGUI.AI
             _instanceId = instanceId;
             _instance = instance;
             _options = PerformanceAnalysisOptions.Defaults(focus);
+
+            // Image and text: the caption says whether this starts a conversation or another one, and sending
+            // figures out of the estate is not something to leave to an icon alone.
+            _submit = new ToolStripButton("Submit for analysis", Properties.Resources.DeadlockAnalyse_16x, async (_, _) => await SubmitAsync())
+            {
+                DisplayStyle = ToolStripItemDisplayStyle.ImageAndText,
+                Enabled = false,
+                ToolTipText = "Send the request shown to the AI service for analysis."
+            };
 
             Text = $"AI Performance Analysis - {instance}";
             StartPosition = FormStartPosition.CenterParent;
@@ -111,8 +147,19 @@ namespace DBADashGUI.AI
             _sections.CellValidating += SectionsCellValidating;
             _sections.CellValueChanged += SectionsCellValueChanged;
 
-            Shown += async (_, _) => await LoadAsync();
-            FormClosed += (_, _) => _loading?.Cancel();
+            _conversation.QuestionAsked += async (_, question) => await SubmitAsync(question);
+
+            Shown += async (_, _) =>
+            {
+                _ = FindServiceAsync();
+                await LoadAsync();
+            };
+            FormClosed += (_, _) =>
+            {
+                _loading?.Cancel();
+                _inFlight?.Cancel();
+            };
+
 
             this.ApplyTheme();
         }
@@ -160,14 +207,30 @@ namespace DBADashGUI.AI
             left.Controls.Add(_sections);
             left.Controls.Add(window);
 
-            var tabs = new TabControl { Dock = DockStyle.Fill };
             var request = new TabPage("Request") { ToolTipText = "Exactly what will be sent to the AI service." };
             request.Controls.Add(_preview);
-            tabs.TabPages.Add(request);
+            _tabs.TabPages.Add(request);
+            _analysisTab.Controls.Add(_conversation);
+
+            var options = new ToolStripDropDownButton("Options", Properties.Resources.SettingsOutline_16x, (EventHandler)null)
+            {
+                DisplayStyle = ToolStripItemDisplayStyle.Text,
+                ToolTipText = "Options for the analysis request."
+            };
+            options.DropDownItems.Add(_model.Item);
+
+            var toolbar = new ToolStrip { GripStyle = ToolStripGripStyle.Hidden };
+            toolbar.Items.Add(_submit);
+            toolbar.Items.Add(new ToolStripSeparator());
+            toolbar.Items.Add(options);
+
+            var right = new Panel { Dock = DockStyle.Fill };
+            right.Controls.Add(_tabs);
+            right.Controls.Add(toolbar);
 
             var split = new SplitContainer { Dock = DockStyle.Fill, FixedPanel = FixedPanel.Panel1 };
             split.Panel1.Controls.Add(left);
-            split.Panel2.Controls.Add(tabs);
+            split.Panel2.Controls.Add(right);
 
             var statusBar = new StatusStrip { ShowItemToolTips = true, SizingGrip = false };
             statusBar.Items.Add(_status);
@@ -247,7 +310,8 @@ namespace DBADashGUI.AI
 
             if (!int.TryParse(Convert.ToString(e.FormattedValue), out var value) || value < 1 || value > PerformanceAnalysisOptions.MaxTopN)
             {
-                _status.Text = $"Top N is a number from 1 to {PerformanceAnalysisOptions.MaxTopN}.";
+                _loadNote = $"Top N is a number from 1 to {PerformanceAnalysisOptions.MaxTopN}.";
+                UpdateStatus();
                 e.Cancel = true;
             }
         }
@@ -281,7 +345,8 @@ namespace DBADashGUI.AI
         {
             if (_to.Value <= _from.Value)
             {
-                _status.Text = "The window must end after it starts.";
+                _loadNote = "The window must end after it starts.";
+                UpdateStatus();
                 return;
             }
 
@@ -293,7 +358,9 @@ namespace DBADashGUI.AI
             var window = PerformanceAnalysisWindow.Create(_from.Value.AppTimeZoneToUtc(), _to.Value.AppTimeZoneToUtc());
 
             _reload.Enabled = false;
-            _status.Text = "Loading performance data...";
+            _loadNote = "Loading performance data...";
+            _submit.Enabled = false;
+            UpdateStatus();
             _preview.Text = string.Empty;
 
             try
@@ -311,8 +378,8 @@ namespace DBADashGUI.AI
             }
             catch (Exception ex)
             {
-                _status.Text = $"Could not load performance data: {ex.Message}";
-                _status.ToolTipText = ex.ToString();
+                _loadNote = $"Could not load performance data: {ex.Message}";
+                UpdateStatus();
             }
             finally
             {
@@ -370,10 +437,137 @@ namespace DBADashGUI.AI
                 row.Cells[SizeColumn].ToolTipText = _data.Errors.TryGetValue(section, out var error) ? error : string.Empty;
             }
 
-            _status.Text = $"Request size: {PerformanceAnalysisPayload.DescribeSize(preview.Length)}" +
-                           (_payload.IsLarge ? ".  This is large - consider leaving out a section or a time series." : string.Empty);
-            _status.ForeColor = _payload.IsLarge ? DashColors.Warning : Color.Empty;
-            _status.ToolTipText = string.Empty;
+            _loadNote = null;
+            _sizeNote = $"Request size: {PerformanceAnalysisPayload.DescribeSize(preview.Length)}." +
+                        (_payload.IsLarge ? "  This is large - consider leaving out a section or a time series." : string.Empty);
+            _submit.Enabled = CanSubmit;
+            UpdateStatus();
+        }
+
+        private bool CanSubmit => _service is not null && _payload is { Sections.Count: > 0 } && _inFlight is null;
+
+        /// <summary>
+        /// Composes the status line from the things that arrive independently: the data loading, the
+        /// service being found, an answer coming back, and the size of the request.  Whichever lands last
+        /// must not erase the others.
+        /// </summary>
+        private void UpdateStatus()
+        {
+            // "Ready to submit" is only news before anything has been.  The absence of a service is worth
+            // saying throughout - it is why the button is disabled.
+            var serviceNote = _service is not null && _analysisNote is not null ? null : _serviceNote;
+            var parts = new[] { _loadNote, _analysisNote, serviceNote, _sizeNote }.Where(p => !string.IsNullOrEmpty(p)).ToList();
+
+            _status.Text = string.Join("  ", parts);
+            _status.ToolTipText = AIStatusText.ToolTip(parts);
+            _status.ForeColor = _payload is { IsLarge: true } && _statusColour == DashColors.Information
+                ? DashColors.Warning
+                : _statusColour;
+        }
+
+        private async Task FindServiceAsync()
+        {
+            _service = await QueryPlans.PlanAnalysisClient.FindServiceAsync();
+            if (IsDisposed) return;
+
+            _serviceNote = _service is null
+                ? "No AI service is configured, so nothing can be submitted."
+                : $"Ready to submit to {_service.ServiceUrl}.  Nothing is sent until you do.";
+            _submit.Enabled = CanSubmit;
+            UpdateStatus();
+            UpdateCanAsk();
+
+            // After the button: the model list is a nicety, and a slow answer to it should not keep the
+            // reader from submitting with the configured model.
+            await _model.LoadAsync(_service);
+        }
+
+        /// <summary>
+        /// Asks the model.  With no <paramref name="question"/> that starts a new conversation about the
+        /// request as it stands; with one it is the next turn of the conversation on screen, which goes up
+        /// with the request that conversation started from and everything said since.
+        ///
+        /// Nothing is stored.  The conversation lasts as long as this window.
+        /// </summary>
+        private async Task SubmitAsync(string question = null)
+        {
+            if (_payload is null || _service is null || _inFlight is not null) return;
+
+            var continuing = question is null ? null : _current;
+            if (question is not null && continuing is null) return;
+
+            var payload = continuing is null ? _payload : _conversationPayload;
+
+            _inFlight = new CancellationTokenSource();
+            _submit.Enabled = false;
+            UpdateCanAsk();
+            _analysisNote = question is null ? "Analysing..." : "Answering...";
+            _statusColour = DashColors.Information;
+            UpdateStatus();
+
+            try
+            {
+                var result = await PerformanceAnalysisClient.AnalyseAsync(payload, _service, _inFlight.Token, continuing, question, _model.SelectedModel);
+                if (IsDisposed) return;
+
+                if (!result.Success)
+                {
+                    _analysisNote = result.Error;
+                    _statusColour = DashColors.Fail;
+                    UpdateStatus();
+
+                    // The question went nowhere, so it comes back rather than being lost with the attempt.
+                    if (question is not null) _conversation.RestoreQuestion(question);
+                    return;
+                }
+
+                var conversation = continuing ?? AiConversation.Restore(result.ConversationId ?? Guid.NewGuid(), Array.Empty<AiConversation.Turn>());
+                conversation.Add(new AiConversation.Turn(question, result.Analysis ?? string.Empty, result.Model, result.GeneratedUtc ?? DateTime.UtcNow));
+
+                _current = conversation;
+                _conversationPayload = payload;
+
+                if (!_tabs.TabPages.Contains(_analysisTab)) _tabs.TabPages.Add(_analysisTab);
+                _tabs.SelectedTab = _analysisTab;
+                if (!await _conversation.ShowAsync(conversation, () => !IsDisposed && ReferenceEquals(conversation, _current))) return;
+
+                _analysisNote = $"Analysed by {result.Model ?? "the configured model"}.  Generated advice - check it against the charts before acting on it.";
+                _statusColour = DashColors.Success;
+                UpdateStatus();
+
+                _submit.Text = "Analyse again";
+                _submit.ToolTipText = "Start a new conversation from the request as it stands now.  To build on the analysis shown, ask a follow-up instead - " +
+                                      "it keeps the figures the analysis was given, whatever has changed since.";
+            }
+            finally
+            {
+                _inFlight?.Dispose();
+                _inFlight = null;
+
+                if (!IsDisposed)
+                {
+                    _submit.Enabled = CanSubmit;
+                    UpdateCanAsk();
+                    if (question is not null) _conversation.FocusQuestion();
+                }
+            }
+        }
+
+        /// <summary>Whether a follow-up can be asked: there has to be something to follow, a service, and nothing in flight.</summary>
+        private void UpdateCanAsk()
+        {
+            if (_service is null)
+            {
+                _conversation.SetCanAsk(false, "No AI service is configured, so follow-up questions cannot be asked.");
+            }
+            else if (_inFlight is not null)
+            {
+                _conversation.SetCanAsk(false, "Waiting for the model...");
+            }
+            else
+            {
+                _conversation.SetCanAsk(_current is { IsEmpty: false });
+            }
         }
 
         private static string DescribeTimeZone()
