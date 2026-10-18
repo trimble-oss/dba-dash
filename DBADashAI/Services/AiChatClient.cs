@@ -519,7 +519,7 @@ namespace DBADashAI.Services
                     if (!response.IsSuccessStatusCode)
                     {
                         var errorId = Guid.NewGuid().ToString("N")[..8];
-                        _logger.LogError("Bedrock call failed. ErrorId={ErrorId}, Status={StatusCode}, URL={Url}, Body={Body}", LogSanitizer.SanitizeForLog(errorId), (int)response.StatusCode, requestUrl, LogSanitizer.TruncateAndSanitizeForLog(errorBody));
+                        _logger.LogError("Bedrock call failed. ErrorId={ErrorId}, Status={StatusCode}, URL={Url}, Body={Body}", LogSanitizer.SanitizeForLog(errorId), (int)response.StatusCode, LogSanitizer.SanitizeForLog(requestUrl.ToString()), LogSanitizer.TruncateAndSanitizeForLog(errorBody));
                         return ProviderFailure("Bedrock", (int)response.StatusCode, errorBody, errorId);
                     }
                 }
