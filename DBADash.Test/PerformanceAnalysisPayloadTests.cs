@@ -1,0 +1,210 @@
+using System;
+using System.Data;
+using System.Linq;
+using DBADash.PerformanceAnalysis;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace DBADash.Test
+{
+    /// <summary>
+    /// What a performance analysis sends.  The preview the reader approves is this payload, so what it
+    /// leaves out matters as much as what it carries.
+    /// </summary>
+    [TestClass]
+    public class PerformanceAnalysisPayloadTests
+    {
+        private static readonly DateTime To = new(2026, 10, 18, 12, 0, 0, DateTimeKind.Utc);
+
+        private static PerformanceAnalysisData Data(TimeSpan? length = null) => new()
+        {
+            Window = PerformanceAnalysisWindow.Create(To - (length ?? TimeSpan.FromHours(24)), To),
+            Instance = "SQL01",
+            InstanceId = 1
+        };
+
+        private static PerformanceAnalysisPayload Build(PerformanceAnalysisData data, PerformanceAnalysisOptions? options = null) =>
+            PerformanceAnalysisPayload.Build(data, options ?? PerformanceAnalysisOptions.Defaults(PerformanceAnalysisFocus.General), t => t, "UTC");
+
+        private static string Section(PerformanceAnalysisPayload payload, PerformanceSection section) =>
+            payload.Sections.Single(s => s.Section == section).Content;
+
+        private static DataTable Waits(params (string Type, double MsPerSec)[] waits)
+        {
+            var table = new DataTable();
+            table.Columns.Add("WaitType", typeof(string));
+            table.Columns.Add("WaitTimeMsPerSec", typeof(double));
+            table.Columns.Add("SignalWaitPct", typeof(double));
+            table.Columns.Add("TotalWaitSec", typeof(double));
+            table.Columns.Add("SignalWaitSec", typeof(double));
+            table.Columns.Add("CriticalWait", typeof(int));
+            foreach (var (type, msPerSec) in waits)
+            {
+                table.Rows.Add(type, msPerSec, 0.1, msPerSec, msPerSec / 10, type == "RESOURCE_SEMAPHORE" ? 1 : 0);
+            }
+
+            return table;
+        }
+
+        private static DataTable Cpu(DateTime from, params (double Sql, double Other, double Max)[] points)
+        {
+            var table = new DataTable();
+            table.Columns.Add("EventTime", typeof(DateTime));
+            table.Columns.Add("SQLProcessCPU", typeof(double));
+            table.Columns.Add("OtherCPU", typeof(double));
+            table.Columns.Add("MaxCPU", typeof(double));
+            for (var i = 0; i < points.Length; i++)
+            {
+                table.Rows.Add(from.AddMinutes(30 * i), points[i].Sql, points[i].Other, points[i].Max);
+            }
+
+            return table;
+        }
+
+        [TestMethod]
+        public void Window_LongerThanAWeek_KeepsItsLastWeek()
+        {
+            var window = PerformanceAnalysisWindow.Create(To.AddDays(-30), To);
+
+            Assert.IsTrue(window.WasClamped);
+            Assert.AreEqual(To, window.ToUtc);
+            Assert.AreEqual(PerformanceAnalysisWindow.MaxLength, window.Length);
+        }
+
+        [TestMethod]
+        public void Window_BucketsKeepASeriesToAboutFortyEightPoints()
+        {
+            Assert.AreEqual(2, PerformanceAnalysisWindow.ChooseBucketMinutes(TimeSpan.FromHours(1)));
+            Assert.AreEqual(30, PerformanceAnalysisWindow.ChooseBucketMinutes(TimeSpan.FromHours(24)));
+            Assert.AreEqual(240, PerformanceAnalysisWindow.ChooseBucketMinutes(TimeSpan.FromDays(7)));
+        }
+
+        [TestMethod]
+        public void Baseline_IsAWeekEarlierInWholeHours()
+        {
+            // Whole hours, because the baseline comes from the hourly rollups: a part hour holds no hourly row.
+            var window = PerformanceAnalysisWindow.Create(new DateTime(2026, 10, 18, 9, 20, 0, DateTimeKind.Utc), new DateTime(2026, 10, 18, 9, 40, 0, DateTimeKind.Utc));
+
+            Assert.AreEqual(new DateTime(2026, 10, 11, 9, 0, 0, DateTimeKind.Utc), window.Baseline.FromUtc);
+            Assert.AreEqual(new DateTime(2026, 10, 11, 10, 0, 0, DateTimeKind.Utc), window.Baseline.ToUtc);
+        }
+
+        [TestMethod]
+        public void Sections_LeftOut_AreNotSent()
+        {
+            var options = PerformanceAnalysisOptions.Defaults(PerformanceAnalysisFocus.General);
+            options[PerformanceSection.Memory].Include = false;
+
+            var payload = Build(Data(), options);
+
+            Assert.IsFalse(payload.Sections.Any(s => s.Section == PerformanceSection.Memory));
+            Assert.IsFalse(payload.ToPreview().Contains("## Memory clerks"));
+        }
+
+        [TestMethod]
+        public void LatchFocus_SendsLatchesAndSpinlocksWithCpuAndWaitsAsContext()
+        {
+            var sections = Build(Data(), PerformanceAnalysisOptions.Defaults(PerformanceAnalysisFocus.LatchesAndSpinlocks))
+                .Sections.Select(s => s.Section).ToList();
+
+            CollectionAssert.AreEqual(
+                new[] { PerformanceSection.Context, PerformanceSection.CPU, PerformanceSection.Waits, PerformanceSection.Latches, PerformanceSection.Spinlocks },
+                sections);
+        }
+
+        [TestMethod]
+        public void Waits_AreRankedAndCappedAndComparedWithTheBaseline()
+        {
+            var data = Data();
+            data.Waits = Waits(("WRITELOG", 40), ("PAGEIOLATCH_SH", 100), ("CXPACKET", 5));
+            data.WaitsBaseline = Waits(("WRITELOG", 10), ("PAGEIOLATCH_SH", 100));
+            var options = PerformanceAnalysisOptions.Defaults(PerformanceAnalysisFocus.General);
+            options[PerformanceSection.Waits].TopN = 2;
+
+            var waits = Section(Build(data, options), PerformanceSection.Waits);
+
+            var pageIo = waits.IndexOf("PAGEIOLATCH_SH |", StringComparison.Ordinal);
+            var writeLog = waits.IndexOf("WRITELOG |", StringComparison.Ordinal);
+            Assert.IsTrue(pageIo >= 0 && writeLog > pageIo, "Ranked by ms/sec, worst first");
+            Assert.IsFalse(waits.Contains("CXPACKET |"), "Past the Top N");
+            StringAssert.Contains(waits, "Top 2 of 3 wait types");
+            StringAssert.Contains(waits, "| 10 | 4x");
+            StringAssert.Contains(waits, "| 100 | 1x");
+        }
+
+        [TestMethod]
+        public void Baseline_Off_LeavesOutEveryBaselineColumn()
+        {
+            var data = Data();
+            data.Waits = Waits(("WRITELOG", 40));
+            data.WaitsBaseline = Waits(("WRITELOG", 10));
+            var options = PerformanceAnalysisOptions.Defaults(PerformanceAnalysisFocus.General);
+            options.IncludeBaseline = false;
+
+            var payload = Build(data, options);
+
+            Assert.IsNull(payload.Baseline);
+            Assert.IsFalse(payload.ToPreview().Contains("baseline_", StringComparison.Ordinal));
+        }
+
+        [TestMethod]
+        public void Cpu_SummarisesTheWindowAndOnlySendsTheSeriesWhenAsked()
+        {
+            var data = Data();
+            data.Cpu = Cpu(To.AddHours(-2), (10, 1, 20), (30, 1, 90), (20, 1, 40), (40, 1, 50));
+            var options = PerformanceAnalysisOptions.Defaults(PerformanceAnalysisFocus.General);
+            options.IncludeBaseline = false;
+
+            var cpu = Section(Build(data, options), PerformanceSection.CPU);
+            StringAssert.Contains(cpu, "window | 25 | 1 | 26 |");
+            StringAssert.Contains(cpu, "| 90");
+            StringAssert.Contains(cpu, "Over time:");
+
+            options[PerformanceSection.CPU].TimeSeries = false;
+            Assert.IsFalse(Section(Build(data, options), PerformanceSection.CPU).Contains("Over time:"));
+        }
+
+        [TestMethod]
+        public void LatchesNotCollected_SaysSoRatherThanSendingNothing()
+        {
+            var message = new DataTable();
+            message.Columns.Add("Message", typeof(string));
+            message.Rows.Add("Enable the LatchStats collection in the service config tool to see data here.");
+            var data = Data();
+            data.Latches = new DataSet();
+            data.Latches.Tables.Add(message);
+
+            StringAssert.Contains(Section(Build(data), PerformanceSection.Latches), "Not collected");
+        }
+
+        [TestMethod]
+        public void SectionThatFailedToLoad_SaysWhyAndTheRestStillGo()
+        {
+            var data = Data();
+            data.Errors[PerformanceSection.IO] = "Timeout expired.";
+            data.Waits = Waits(("WRITELOG", 40));
+
+            var payload = Build(data);
+
+            StringAssert.Contains(Section(payload, PerformanceSection.IO), "Timeout expired.");
+            StringAssert.Contains(Section(payload, PerformanceSection.Waits), "WRITELOG");
+        }
+
+        [TestMethod]
+        public void ClampedWindow_IsSaidInTheNotes()
+        {
+            var payload = Build(Data(TimeSpan.FromDays(30)));
+
+            Assert.IsTrue(payload.Notes.Any(n => n.Contains("only its last 7 days")));
+        }
+
+        [TestMethod]
+        public void Numbers_KeepTheDigitsWorthReading()
+        {
+            Assert.AreEqual("1235", PerformanceAnalysisTable.Num(1234.5678));
+            Assert.AreEqual("12.3", PerformanceAnalysisTable.Num(12.34));
+            Assert.AreEqual("0.012", PerformanceAnalysisTable.Num(0.0123));
+            Assert.AreEqual("0", PerformanceAnalysisTable.Num(0));
+            Assert.AreEqual(string.Empty, PerformanceAnalysisTable.Num(null));
+        }
+    }
+}
