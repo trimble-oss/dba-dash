@@ -225,6 +225,9 @@ EXEC sp_executesql @SQL;");
         [DataRow("[{\"__type\":\"DBADash.Messaging.CollectionMessage, DBADash\"}]")]
         [DataRow("{\"__type\":\"DBADash.Messaging.CollectionMessage, DBADash\"}{\"__type\":\"DBADash.Messaging.KillSessionMessage, DBADash\"}")]
         [DataRow("{\"__type\":\"DBADash.Messaging.CollectionMessage, DBADash\" /* comment */}")]
+        [DataRow("{\"__type\":\"DBADash.Messaging.ProcedureExecutionMessage, DBADash\",\"EmbeddedScript \":0,\"ProcedureName\":\"MyProc\"}")] // = ignores trailing spaces
+        [DataRow("{\"__type \":\"DBADash.Messaging.CollectionMessage, DBADash\"}")]
+        [DataRow("{\"__type\":\"DBADash.Messaging.CollectionMessage, DBADash\",\"\":1}")]
         public void InvalidMessagesAreRejected(string json)
         {
             var payload = MessageAuthorizationTests.Payload(json);
@@ -397,6 +400,58 @@ AND m.name <> N'dbo'");
             var results = new List<string>();
             while (rdr.Read()) results.Add(rdr.GetString(0));
             return results;
+        }
+
+        /// <summary>
+        /// Procedure execution payloads the GUI doesn't send, read the same way as the service: an empty string isn't an
+        /// embedded script (the service reads it as none), and names are compared exactly - = ignores trailing spaces.
+        /// </summary>
+        [TestMethod]
+        [DataRow("\"EmbeddedScript\":\"\",\"ProcedureName\":\"MyProc\",\"SchemaName\":\"dbo\"", "MessagingOnly", false)]
+        [DataRow("\"EmbeddedScript\":\"\",\"ProcedureName\":\"MyProc\",\"SchemaName\":\"dbo\"", "CustomToolsUser", true)]
+        [DataRow("\"EmbeddedScript\":null,\"ProcedureName\":\"MyProc\",\"SchemaName\":\"dbo\"", "MessagingOnly", false)]
+        [DataRow("\"EmbeddedScript\":\"TuningRecommendations\",\"ProcedureName\":\"MyProc\"", "MessagingOnly", false)] // Only a number, as the GUI sends
+        [DataRow("\"ProcedureName\":\"sp_Blitz \",\"SchemaName\":\"dbo\"", "CommunityScriptsUser", false)]
+        [DataRow("\"ProcedureName\":\"sp_Blitz \",\"SchemaName\":\"dbo\"", "CustomToolsUser", true)]
+        [DataRow("\"ProcedureName\":\"sp_Blitz\",\"SchemaName\":\"dbo \"", "CommunityScriptsUser", false)]
+        [DataRow("\"ProcedureName\":\"sp_Blitz\",\"SchemaName\":\"dbo\"", "CommunityScriptsUser", true)]
+        public void ProcedureExecutionPayloadsAreReadAsTheServiceReadsThem(string properties, string user, bool expected)
+        {
+            var payload = MessageAuthorizationTests.Payload("{\"__type\":\"DBADash.Messaging.ProcedureExecutionMessage, DBADash\"," + properties + "}");
+
+            var error = Send(payload, user);
+
+            Assert.AreEqual(expected, error == null, error);
+        }
+
+        /// <summary>
+        /// Only db_owner (the service) can change an agent's registration - it decides where messages are relayed and
+        /// results written.  App can execute dbo procs, including DBADashAgent_Upd and Instance_Upd, which calls it.
+        /// </summary>
+        [TestMethod]
+        [DataRow("MessagingApp")]
+        [DataRow("AppOnly")]
+        [DataRow("AllOtherRoles")]
+        public void AgentRegistrationCantBeChanged(string user)
+        {
+            using var cn = Open();
+            Execute(cn, $"UPDATE dbo.DBADashAgent SET ServiceSQSQueueUrl = N'https://sqs.registered', S3Path = N's3://registered' WHERE DBADashAgentID = {AgentID}");
+
+            Assert.IsNotNull(Run(cn, user, "DECLARE @ID INT; EXEC dbo.DBADashAgent_Upd @AgentHostName = N'Host', @AgentServiceName = N'Service', @AgentVersion = '1', @AgentPath = N'Path', @ServiceSQSQueueUrl = N'https://sqs.other', @S3Path = N's3://other', @DBADashAgentID = @ID OUT;", Array.Empty<byte>()));
+            Run(cn, user, "DECLARE @ID INT; EXEC dbo.Instance_Upd @ConnectionID = N'AgentTest', @Instance = N'AgentTest', @SnapshotDate = '2026-01-01', @AgentHostName = N'Host', @AgentServiceName = N'Service', @InstanceID = @ID OUT;", Array.Empty<byte>());
+            Assert.IsNotNull(Run(cn, user, $"UPDATE dbo.DBADashAgent SET ServiceSQSQueueUrl = N'https://sqs.other' WHERE DBADashAgentID = @AgentID", Array.Empty<byte>()));
+            Assert.IsNotNull(Run(cn, user, "EXEC Messaging.Setup @DBADashAgentID = @AgentID, @Enable = 0", Array.Empty<byte>()));
+
+            using var cmd = new SqlCommand($"SELECT CONCAT(ServiceSQSQueueUrl, N'|', S3Path, N'|', MessagingEnabled) FROM dbo.DBADashAgent WHERE DBADashAgentID = {AgentID}", cn);
+            Assert.AreEqual("https://sqs.registered|s3://registered|1", (string)cmd.ExecuteScalar());
+        }
+
+        [TestMethod]
+        public void ServiceCanRegisterAgents()
+        {
+            using var cn = Open();
+
+            Assert.IsNull(Run(cn, null, "DECLARE @ID INT; EXEC dbo.DBADashAgent_Upd @AgentHostName = N'Host2', @AgentServiceName = N'Service2', @AgentVersion = '1', @AgentPath = N'Path', @ServiceSQSQueueUrl = N'https://sqs.host2', @DBADashAgentID = @ID OUT;", Array.Empty<byte>()));
         }
 
         [TestMethod]

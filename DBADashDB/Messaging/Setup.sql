@@ -3,6 +3,13 @@
 	@Enable BIT=1
 )
 AS
+/* Called by the service, which is db_owner.  Messaging members can execute procs in this schema, and the update to dbo.DBADashAgent below would run by ownership chaining. */
+IF ISNULL(IS_ROLEMEMBER('db_owner'),0) = 0
+BEGIN
+	RAISERROR('db_owner membership is required to set up messaging.',11,1);
+	RETURN
+END
+
 DECLARE @SQL NVARCHAR(MAX)
 IF  ServerProperty('EngineEdition') = 5
 BEGIN

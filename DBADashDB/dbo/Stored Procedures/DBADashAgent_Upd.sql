@@ -19,6 +19,17 @@
 	@DBADashAgentID INT OUT
 )
 AS
+/*
+	Called by the service, which is db_owner.  An agent's registration decides where messages are relayed (SQS queue)
+	and where results are written (S3 path), so other users can't change it - App has EXECUTE on dbo, and could call
+	this directly or through Instance_Upd.
+*/
+IF ISNULL(IS_ROLEMEMBER('db_owner'),0) = 0
+BEGIN
+	RAISERROR('db_owner membership is required to register a DBA Dash agent.',11,1);
+	RETURN
+END
+
 DECLARE @UpdateAgent BIT = 0
 
 SELECT @DBADashAgentID = DBADashAgentID,
