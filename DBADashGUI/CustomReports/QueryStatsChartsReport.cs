@@ -51,6 +51,8 @@ namespace DBADashGUI.CustomReports
                 ToolTipText = "Switch to the grid of queries behind these charts",
                 Image = Properties.Resources.Table_16x
             },
+            // For a database, the note that some of its work may be in {Other databases}
+            ShowInfoMessages = true,
             ChartVisible = true,
             TableVisible = false,
             // Five charts: four columns leaves exactly the spare cells the layout gives to the first chart, so
@@ -153,6 +155,8 @@ namespace DBADashGUI.CustomReports
                     TableIndex = 3,
                     Title = "By Database",
                     Config = PieConfig("By Database"),
+                    // One slice once the tab is on a database
+                    HideWhenParameterSet = "@DatabaseID",
                     DrillDown = new DrillDownLinkColumnInfo
                     {
                         DrillDownMode = DrillDownMode.ExistingWindow,
@@ -179,6 +183,7 @@ namespace DBADashGUI.CustomReports
                         ValueColumn = "Value",
                         // Three slices at most, and each one matters however small: a two percent
                         // unattributed slice is still the answer to "why don't these numbers add up".
+                        // Two for a database, which has no unattributed figure of its own.
                         MinSlicePercent = 0,
                         InnerRadius = 0.5,
                         DataLabelMode = PieLabelMode.None

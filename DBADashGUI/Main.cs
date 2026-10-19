@@ -1685,7 +1685,7 @@ namespace DBADashGUI
             {
                 allowedTabs.AddRange(new[]
                 {
-                    tabPerformance, tabObjectExecutionSummary, tabSlowQueries, tabFiles, tabSnapshotSummary,
+                    tabPerformance, tabObjectExecutionSummary, tabQueryStats, tabSlowQueries, tabFiles, tabSnapshotSummary,
                     tabDBSpace, tabDBConfiguration, tabDBOptions,  tabQS,tabTopQueries, tabQueryStoreForcedPlans, tabTuningRecommendations
                 });
             }

@@ -337,6 +337,28 @@ AND (@ObjectName IS NULL
      OR S.StatementLabelShort = @ObjectName)
 OPTION (RECOMPILE);
 
+/*
+    For a database, whether the grid may be missing some of its work - see dbo.QueryStatsDatabaseNote.  The same
+    note as the charts give, as a message for the report to show.  Not for a drill-down, which has read only the
+    rows it drilled into, so has no instance figures to set the rollup against.  #Facts is from before the
+    database filter, so it has them otherwise.
+*/
+IF @DatabaseID > 0 AND @StatementID IS NULL AND @QueryHash IS NULL AND @PlanHash IS NULL AND @ObjectName IS NULL
+BEGIN
+    DECLARE @Note NVARCHAR(500)
+
+    SELECT @Note = dbo.QueryStatsDatabaseNote(
+                       MAX(CASE WHEN S.DatabaseID = @DatabaseID THEN 1 ELSE 0 END),
+                       SUM(CASE WHEN S.StatementType = 4 THEN F.WorkerTime END),
+                       SUM(F.WorkerTime))
+    FROM #Facts F
+    JOIN dbo.QueryStatements S ON S.StatementID = F.StatementID
+
+    /* As an argument rather than the message itself, which RAISERROR would read the % in as a format */
+    IF @Note IS NOT NULL
+        RAISERROR('%s', 0, 1, @Note) WITH NOWAIT;
+END
+
 SELECT InstanceID,
        DatabaseID,
        GroupKey,
@@ -500,6 +522,9 @@ OPTION (RECOMPILE);
     collection could not diff - a plan seen for the first time with an old compile time - so it is reported as
     a share of the total rather than hidden.  The collector estimates the window's share of it rather than
     sending the plans' whole life in cache, so the share compares like with like.
+
+    Blank for a database: unattributed work is only known for the instance, and as a share of one database's
+    work it would be the instance's problem drawn at the size of the database's.
 */
 SELECT I.InstanceDisplayName AS Instance,
        C.Collections,
@@ -507,10 +532,11 @@ SELECT I.InstanceDisplayName AS Instance,
        C.FirstCollections,
        CoveredMinutes = C.CoveredMicroseconds / 60000000.0,
        WindowMinutes = DATEDIFF(second, @FromDate, @ToDate) / 60.0,
-       UnattributedCPUms = C.UnattributedWorkerTime / 1000.0,
-       C.UnattributedExecutions,
-       PercentUnattributed = 100.0 * C.UnattributedWorkerTime
-                             / NULLIF(C.UnattributedWorkerTime + ISNULL(A.WorkerTime, 0), 0),
+       UnattributedCPUms = CASE WHEN @DatabaseID IS NULL THEN C.UnattributedWorkerTime / 1000.0 END,
+       UnattributedExecutions = CASE WHEN @DatabaseID IS NULL THEN C.UnattributedExecutions END,
+       PercentUnattributed = CASE WHEN @DatabaseID IS NULL
+                                  THEN 100.0 * C.UnattributedWorkerTime
+                                       / NULLIF(C.UnattributedWorkerTime + ISNULL(A.WorkerTime, 0), 0) END,
        RolledUpCPUms = ISNULL(A.RollupWorkerTime, 0) / 1000.0,
        PercentRolledUp = 100.0 * ISNULL(A.RollupWorkerTime, 0) / NULLIF(A.WorkerTime, 0),
        C.BaselineEvictions,

@@ -40,6 +40,9 @@ namespace DBADashGUI.CustomReports
 
         protected List<CustomSqlParameter> customParams = new();
 
+        /// <summary>The key a report's informational messages are kept under in its data set's extended properties - see <see cref="CustomReport.ShowInfoMessages"/>.</summary>
+        private const string InfoMessagesProperty = "InfoMessages";
+
         /// <summary>
         /// The parameter values this report is currently showing, including whatever the pickers and the
         /// parameters dialog have been set to.  Read by drill-downs that carry the report's filters into
@@ -1084,7 +1087,13 @@ namespace DBADashGUI.CustomReports
                     }
                 });
                 if (ReferenceEquals(cts, cancellationTokenSource))
-                    SetStatus("Completed", "Success", DashColors.Success);
+                {
+                    // A note from the procedure about these results says more than "Completed" does - see CustomReport.ShowInfoMessages
+                    if (reportDS?.ExtendedProperties[InfoMessagesProperty] is string infoMessages)
+                        SetStatus(infoMessages, infoMessages, DashColors.Warning);
+                    else
+                        SetStatus("Completed", "Success", DashColors.Success);
+                }
             }
             catch (SqlException ex) when (ex.Number == 201) // Parameter required
             {
@@ -1446,6 +1455,17 @@ namespace DBADashGUI.CustomReports
                 : null;
         }
 
+        /// <summary>
+        /// Whether the chart is drawn for the parameters the report ran with - see <see cref="CustomReportChart.HideWhenParameterSet"/>.
+        /// </summary>
+        private bool IsChartShown(CustomReportChart chart)
+        {
+            if (string.IsNullOrEmpty(chart.HideWhenParameterSet)) return true;
+            var value = customParams?.FirstOrDefault(p =>
+                p.Param.ParameterName.Equals(chart.HideWhenParameterSet, StringComparison.OrdinalIgnoreCase))?.Param.Value;
+            return value == null || value == DBNull.Value;
+        }
+
         private void GetChartPanels()
         {
             // Always move chartLayout to ChartPanel before any early return.
@@ -1480,7 +1500,13 @@ namespace DBADashGUI.CustomReports
             var parentPanel = ChartPanel;
             var enableResize = Report.Charts.Count > 0;
 
-            var layout = ChartHelper.CalculateLayout(Report.Charts.Count, Report.ChartLayoutRows, Report.ChartLayoutColumns);
+            var shownCharts = Report.Charts.Where(IsChartShown).ToList();
+            if (shownCharts.Count == 0) return;
+            // A column fewer for each chart left out, so a layout of one wide chart over a row of the rest keeps its
+            // shape rather than putting the wide one in a row of its own with a gap beside it.
+            var hiddenCharts = Report.Charts.Count - shownCharts.Count;
+            var layoutColumns = Report.ChartLayoutColumns > 0 ? Math.Max(1, Report.ChartLayoutColumns - hiddenCharts) : Report.ChartLayoutColumns;
+            var layout = ChartHelper.CalculateLayout(shownCharts.Count, Report.ChartLayoutRows, layoutColumns);
 
             // Configure TableLayoutPanel
             chartLayout.Controls.Clear();
@@ -1500,7 +1526,7 @@ namespace DBADashGUI.CustomReports
 
             // Generic spanning logic: compute occupancy grid and let the first chart span to use spare cells
             var totalCells = layout.rows * layout.columns;
-            var spare = Math.Max(0, totalCells - Report.Charts.Count);
+            var spare = Math.Max(0, totalCells - shownCharts.Count);
             var firstSpan = Math.Min(layout.columns, 1 + spare); // first chart occupies 1 + spare cells up to cols
 
             // occupancy grid
@@ -1528,8 +1554,11 @@ namespace DBADashGUI.CustomReports
             for (int idx = 0; idx < Report.Charts.Count; idx++)
             {
                 var chartWrapper = Report.Charts[idx];
+                if (!IsChartShown(chartWrapper)) continue;
                 var chartConfig = ResolveChartConfig(chartWrapper);
+                // The chart's index in the report rather than its place on screen: the edit menu acts on Report.Charts
                 var chartId = idx;
+                var position = shownCharts.IndexOf(chartWrapper);
 
                 Control chartControl = null;
                 Panel pnl = null;
@@ -1688,7 +1717,7 @@ namespace DBADashGUI.CustomReports
 
                 Charts.Add(chartControl);
 
-                if (idx == 0)
+                if (position == 0)
                 {
                     // place first spanning chart at top-left
                     chartLayout.Controls.Add(pnl, 0, 0);
@@ -1717,8 +1746,8 @@ namespace DBADashGUI.CustomReports
                     // Fallback: if not placed (shouldn't happen) put at next sequential position
                     if (!placed)
                     {
-                        var frow = idx / layout.columns;
-                        var fcol = idx % layout.columns;
+                        var frow = position / layout.columns;
+                        var fcol = position % layout.columns;
                         chartLayout.Controls.Add(pnl, fcol, frow);
                     }
                 }
@@ -1813,7 +1842,9 @@ namespace DBADashGUI.CustomReports
             if (!hasData && !hasCharts) return;
 
             SetChartTableLayout();
-            var currentSchema = (reportDS?.GetXmlSchema() ?? string.Empty) + "\n" + Report.Serialize();
+            // Which charts are shown is part of it: the same results with a chart left out are a different layout
+            var currentSchema = (reportDS?.GetXmlSchema() ?? string.Empty) + "\n" + Report.Serialize()
+                                + "\n" + string.Concat(Report.Charts?.Select(c => IsChartShown(c) ? '1' : '0') ?? Enumerable.Empty<char>());
             if (currentSchema == previousSchema)
             {
                 LoadResultsIntoExistingGrids();
@@ -2502,6 +2533,16 @@ namespace DBADashGUI.CustomReports
             await using var cn = new SqlConnection(Common.ConnectionString);
             await using var cmd = new SqlCommand(Report.QualifiedProcedureName, cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Config.DefaultCommandTimeout };
             using var da = new SqlDataAdapter(cmd);
+            var infoMessages = new List<string>();
+            if (Report.ShowInfoMessages)
+            {
+                // The procedure's own messages only - PRINT is 0 and an ad hoc RAISERROR 50000.  The engine's
+                // warnings come through the same event, and "Null value is eliminated by an aggregate" is not a
+                // note for anyone reading the report.
+                cn.InfoMessage += (_, e) => infoMessages.AddRange(e.Errors.Cast<SqlError>()
+                    .Where(err => err.Number is 0 or 50000)
+                    .Select(err => err.Message));
+            }
 
             // Add system parameters unless they are overridden by user supplied parameters for drill down reports
             var pInstanceIDs = customParams.FirstOrDefault(p => p.Param.ParameterName.Equals("@InstanceIDs", StringComparison.InvariantCultureIgnoreCase) && p.UseDefaultValue);
@@ -2552,7 +2593,7 @@ namespace DBADashGUI.CustomReports
                 pObjectID.Param.Value = context.ObjectID > 0 ? context.ObjectID : DBNull.Value;
             }
 
-            if (context.ObjectID > 0)
+            if (ContextIsObject)
             {
                 var pObjectName = customParams.FirstOrDefault(p =>
                     p.Param.ParameterName.Equals("@ObjectName", StringComparison.InvariantCultureIgnoreCase) &&
@@ -2603,8 +2644,22 @@ namespace DBADashGUI.CustomReports
             {
                 registration.Unregister();
             }
+            // Carried on the data set rather than in a field, so the messages stay with the results they were
+            // raised with when a newer run supersedes this one.
+            if (infoMessages.Count > 0)
+            {
+                ds.ExtendedProperties[InfoMessagesProperty] = string.Join(Environment.NewLine, infoMessages);
+            }
             return ds;
         }
+
+        /// <summary>
+        /// Whether the context is an object whose name the @ObjectName, @TableName and @SchemaName parameters can be
+        /// filled from.  Not a database: its node carries the database's own ObjectID and the database name as its
+        /// ObjectName, and passed as @ObjectName that filters a report down to nothing.
+        /// </summary>
+        private bool ContextIsObject =>
+            context.ObjectID > 0 && context.Type is not (SQLTreeItem.TreeType.Database or SQLTreeItem.TreeType.AzureDatabase);
 
         public void SetContext(DBADashContext _context)
         {
@@ -2896,9 +2951,9 @@ namespace DBADashGUI.CustomReports
                 p.UseDefaultValue = string.IsNullOrEmpty(context.DatabaseName) && Report is not SystemDirectExecutionReport; // SystemDirectExecutionReport are scripts with no parameter default value
             }
 
-            if (context.ObjectID > 0)
+            if (ContextIsObject)
             {
-                var objectParamName = string.IsNullOrEmpty(dxReport.ObjectParameterName) ? "@ObjectName" : dxReport.ObjectParameterName;
+                var objectParamName =string.IsNullOrEmpty(dxReport.ObjectParameterName) ? "@ObjectName" : dxReport.ObjectParameterName;
                 var schemaParamName = string.IsNullOrEmpty(dxReport.ObjectParameterName) ? "@SchemaName" : dxReport.ObjectParameterName;
 
                 var pObjectName = customParams.FirstOrDefault(p =>
