@@ -197,6 +197,46 @@ namespace DBADash.Test
             Assert.IsTrue(payload.Notes.Any(n => n.Contains("only its last 7 days")));
         }
 
+        private static DataTable Counters(params (string Object, string Counter, string Instance, double Avg)[] counters)
+        {
+            var table = new DataTable();
+            table.Columns.Add("object_name", typeof(string));
+            table.Columns.Add("counter_name", typeof(string));
+            table.Columns.Add("instance_name", typeof(string));
+            table.Columns.Add("AvgValue", typeof(double));
+            foreach (var (obj, counter, instance, avg) in counters)
+            {
+                table.Rows.Add(obj, counter, instance, avg);
+            }
+
+            return table;
+        }
+
+        [TestMethod]
+        public void Metrics_LeaveOutDBADashsOwnCounters()
+        {
+            // DBA Dash logs its own collection timings as counters; they are about the monitoring, not the instance.
+            var data = Data();
+            data.Metrics = Counters(
+                ("SQLServer:Buffer Manager", "Page life expectancy", "", 3000),
+                ("DBADash", "Collection Duration (ms)", "Alerts", 0.73));
+
+            var metrics = Section(Build(data), PerformanceSection.Metrics);
+
+            StringAssert.Contains(metrics, "Page life expectancy");
+            Assert.IsFalse(metrics.Contains("Collection Duration"));
+            StringAssert.Contains(metrics, "1 counters:");
+        }
+
+        [TestMethod]
+        public void Metrics_OnlyInternalCounters_IsNoData()
+        {
+            var data = Data();
+            data.Metrics = Counters(("DBADash", "Collection Duration (ms)", "Alerts", 0.73));
+
+            StringAssert.Contains(Section(Build(data), PerformanceSection.Metrics), "No performance counters");
+        }
+
         [TestMethod]
         public void Numbers_KeepTheDigitsWorthReading()
         {

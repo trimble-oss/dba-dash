@@ -156,6 +156,15 @@ namespace DBADash.PerformanceAnalysis
             };
         }
 
+        /// <summary>
+        /// The object name DBA Dash logs its own counters under - collection durations, plan counts.  They
+        /// are about the monitoring, not the instance, so they are left out of an analysis of the instance.
+        /// </summary>
+        public const string InternalCounterObject = "DBADash";
+
+        public static bool IsInternalCounter(DataRow row) =>
+            PerformanceAnalysisTable.Text(row, "object_name").Trim().Equals(InternalCounterObject, StringComparison.OrdinalIgnoreCase);
+
         private static string FormatFull(DateTime value) => value.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
 
         /// <summary>The per-section work, holding what every section needs.</summary>
@@ -504,13 +513,13 @@ namespace DBADash.PerformanceAnalysis
 
             private void Metrics(StringBuilder text, PerformanceSectionOptions section)
             {
-                if (!HasRows(_data.Metrics))
+                var rows = Rows(_data.Metrics).Where(r => !IsInternalCounter(r)).ToList();
+                if (rows.Count == 0)
                 {
                     text.AppendLine("No performance counters were collected in this window.");
                     return;
                 }
 
-                var rows = Rows(_data.Metrics).ToList();
                 var baseline = ByName(_data.MetricsBaseline, CounterName);
                 var top = Top(section, 40);
 
