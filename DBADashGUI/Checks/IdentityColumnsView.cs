@@ -1,6 +1,7 @@
 using DBADash;
 using DBADashGUI.CustomReports;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -11,6 +12,10 @@ namespace DBADashGUI.Checks
         private ToolStripDropDownButton tsConfigure;
         private ToolStripMenuItem configureInstanceThresholdsToolStripMenuItem;
         private ToolStripMenuItem configureDatabaseThresholdsToolStripMenuItem;
+        private ToolStripSeparator exclusionsSeparator;
+        private ToolStripMenuItem exclusionsRootToolStripMenuItem;
+        private ToolStripMenuItem exclusionsInstanceToolStripMenuItem;
+        private ToolStripMenuItem exclusionsDatabaseToolStripMenuItem;
 
         public IdentityColumnsView()
         {
@@ -26,7 +31,7 @@ namespace DBADashGUI.Checks
             tsConfigure = new ToolStripDropDownButton("Configure")
             {
                 Name = "tsConfigure",
-                ToolTipText = "Configure Identity Columns thresholds",
+                ToolTipText = "Configure Identity Columns thresholds and exclusions",
                 Image = Properties.Resources.SettingsOutline_16x,
                 DisplayStyle = ToolStripItemDisplayStyle.Image
             };
@@ -48,11 +53,43 @@ namespace DBADashGUI.Checks
                     ConfigureThresholds(id, context.DatabaseID, "");
             };
 
+            exclusionsRootToolStripMenuItem = new ToolStripMenuItem("Exclusions (Root)")
+            {
+                ToolTipText = "Exclude tables from identity column monitoring for all instances"
+            };
+            exclusionsRootToolStripMenuItem.Click += (_, _) => ConfigureExclusions(-1, -1);
+
+            exclusionsInstanceToolStripMenuItem = new ToolStripMenuItem("Exclusions (Instance)")
+            {
+                ToolTipText = "Exclude tables from identity column monitoring for the selected instance"
+            };
+            exclusionsInstanceToolStripMenuItem.Click += (_, _) =>
+            {
+                if (TryGetSingleInstanceId(out var id))
+                    ConfigureExclusions(id, -1);
+            };
+
+            exclusionsDatabaseToolStripMenuItem = new ToolStripMenuItem("Exclusions (Database)")
+            {
+                ToolTipText = "Exclude tables from identity column monitoring for the selected database"
+            };
+            exclusionsDatabaseToolStripMenuItem.Click += (_, _) =>
+            {
+                if (TryGetSingleInstanceId(out var id) && context.DatabaseID > 0)
+                    ConfigureExclusions(id, context.DatabaseID);
+            };
+
+            exclusionsSeparator = new ToolStripSeparator();
+
             tsConfigure.DropDownItems.AddRange(new ToolStripItem[]
             {
                 configureRootThresholdsToolStripMenuItem,
                 configureInstanceThresholdsToolStripMenuItem,
-                configureDatabaseThresholdsToolStripMenuItem
+                configureDatabaseThresholdsToolStripMenuItem,
+                exclusionsSeparator,
+                exclusionsRootToolStripMenuItem,
+                exclusionsInstanceToolStripMenuItem,
+                exclusionsDatabaseToolStripMenuItem
             });
 
             var insertAt = ToolStrip.Items.IndexOfKey("tsParams");
@@ -64,6 +101,14 @@ namespace DBADashGUI.Checks
         {
             configureInstanceThresholdsToolStripMenuItem.Enabled = TryGetSingleInstanceId(out _);
             configureDatabaseThresholdsToolStripMenuItem.Enabled = TryGetSingleInstanceId(out _) && context?.DatabaseID > 0;
+            // Exclusion config is available to admins and the App role only (not AppReadOnly).
+            var canConfigExclusions = DBADashUser.IsAdmin || DBADashUser.Roles.Contains("App");
+            exclusionsSeparator.Visible = canConfigExclusions;
+            exclusionsRootToolStripMenuItem.Visible = canConfigExclusions;
+            exclusionsInstanceToolStripMenuItem.Visible = canConfigExclusions;
+            exclusionsDatabaseToolStripMenuItem.Visible = canConfigExclusions;
+            exclusionsInstanceToolStripMenuItem.Enabled = TryGetSingleInstanceId(out _);
+            exclusionsDatabaseToolStripMenuItem.Enabled = TryGetSingleInstanceId(out _) && context?.DatabaseID > 0;
         }
 
         private bool TryGetSingleInstanceId(out int instanceId)
@@ -92,6 +137,21 @@ namespace DBADashGUI.Checks
             using var frm = new IdentityColumnsThresholdConfig { InstanceID = instanceID, DatabaseID = databaseID, ObjectName = objectName };
             frm.ShowDialog();
             if (frm.DialogResult == DialogResult.OK)
+            {
+                RefreshData();
+            }
+        }
+
+        private void ConfigureExclusions(int instanceId, int databaseId)
+        {
+            var instanceName = instanceId == -1
+                ? null
+                : CommonData.Instances?.Rows.Cast<DataRow>()
+                    .FirstOrDefault(r => r.Field<int>("InstanceID") == instanceId)?
+                    .Field<string>("InstanceDisplayName") ?? instanceId.ToString();
+            var levelName = databaseId == -1 ? instanceName : instanceName + " \\ " + context.DatabaseName;
+            using var frm = new IdentityColumnExclusionsConfig { InstanceID = instanceId, DatabaseID = databaseId, LevelName = levelName };
+            if (frm.ShowDialog() == DialogResult.OK)
             {
                 RefreshData();
             }
@@ -207,6 +267,7 @@ namespace DBADashGUI.Checks
                         ["DaysWarningThreshold"] = new() { Alias = "Warning Threshold (Days)", Visible = false },
                         ["DaysCriticalThreshold"] = new() { Alias = "Critical Threshold (Days)", Visible = false },
                         ["ThresholdConfigurationLevel"] = new() { Alias = "Config Level", Visible = false },
+                        ["ExcludedBy"] = new() { Alias = "Excluded By", Description = "Exclusion pattern that matched the table (Configure > Exclusions).  Excluded tables are reported with N/A status." },
                         ["Edit"] = new() { Alias = "Edit", Link = new EditThresholdLink(), Description = "Configure thresholds for this table" },
                         // Hidden columns
                         ["InstanceID"] = Hidden(),

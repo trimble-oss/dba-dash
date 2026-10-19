@@ -160,8 +160,8 @@ GROUP BY D.InstanceID
 /* Get max % used for each instance */
 SELECT	InstanceID,
 		MIN(NULLIF(IdentityStatus,3)) AS IdentityStatus,
-		MAX(pct_used) AS MaxIdentityPctUsed,
-		MIN(estimated_days) AS MinIdentityEstimatedDays
+		MAX(CASE WHEN IsExcluded = 0 THEN pct_used END) AS MaxIdentityPctUsed,
+		MIN(CASE WHEN IsExcluded = 0 THEN estimated_days END) AS MinIdentityEstimatedDays
 INTO #IdentityStatus
 FROM dbo.IdentityColumnsInfo I
 GROUP BY InstanceID

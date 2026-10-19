@@ -20,16 +20,19 @@ SELECT	IC.InstanceID,
 		IC.max_rows,
 		calc2.pct_used,
 		calc2.pct_free,
-		CASE	WHEN calc2.pct_used>THRES.PctUsedCriticalThreshold OR calc3.estimated_days <= THRES.DaysCriticalThreshold THEN 1 
+		CASE	WHEN excl.ObjectName IS NOT NULL THEN 3
+				WHEN calc2.pct_used>THRES.PctUsedCriticalThreshold OR calc3.estimated_days <= THRES.DaysCriticalThreshold THEN 1 
 				WHEN calc2.pct_used > THRES.PctUsedWarningThreshold OR calc3.estimated_days <= THRES.DaysWarningThreshold THEN 2 
 				WHEN THRES.PctUsedWarningThreshold IS NOT NULL OR THRES.PctUsedCriticalThreshold IS NOT NULL
 					OR THRES.DaysCriticalThreshold IS NOT NULL OR THRES.DaysWarningThreshold IS NOT NULL THEN 4 
 				ELSE 3 END AS IdentityStatus,
-		CASE	WHEN calc2.pct_used>THRES.PctUsedCriticalThreshold THEN 1 
+		CASE	WHEN excl.ObjectName IS NOT NULL THEN 3
+				WHEN calc2.pct_used>THRES.PctUsedCriticalThreshold THEN 1 
 				WHEN calc2.pct_used > THRES.PctUsedWarningThreshold THEN 2 
 				WHEN THRES.PctUsedWarningThreshold IS NOT NULL OR THRES.PctUsedCriticalThreshold IS NOT NULL THEN 4 
 				ELSE 3 END AS IdentityPctStatus,
-		CASE	WHEN calc3.estimated_days <= THRES.DaysCriticalThreshold THEN 1 
+		CASE	WHEN excl.ObjectName IS NOT NULL THEN 3
+				WHEN calc3.estimated_days <= THRES.DaysCriticalThreshold THEN 1 
 				WHEN calc3.estimated_days <= THRES.DaysWarningThreshold THEN 2 
 				WHEN THRES.DaysCriticalThreshold IS NOT NULL OR THRES.DaysWarningThreshold IS NOT NULL THEN 4 
 				ELSE 3 END AS IdentityDaysStatus,
@@ -49,7 +52,9 @@ SELECT	IC.InstanceID,
 		THRES.DaysWarningThreshold,
 		THRES.DaysCriticalThreshold,
 		I.ShowInSummary,
-		THRES.ThresholdConfigurationLevel
+		THRES.ThresholdConfigurationLevel,
+		CASE WHEN excl.ObjectName IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS IsExcluded,
+		CASE WHEN excl.ObjectName IS NULL THEN NULL ELSE CONCAT(excl.ObjectName,CASE WHEN excl.DatabaseID <> -1 THEN ' (Database)' WHEN excl.InstanceID <> -1 THEN ' (Instance)' ELSE ' (Root)' END) END AS ExcludedBy
 FROM dbo.IdentityColumns IC
 JOIN dbo.Instances I ON I.InstanceID = IC.InstanceID
 JOIN dbo.Databases D ON D.DatabaseID = IC.DatabaseID
@@ -95,5 +100,16 @@ OUTER APPLY(SELECT TOP(1)	ICT.PctUsedWarningThreshold,
 		AND (ICT.object_name = IC.object_name OR ICT.object_name = '')
 		ORDER BY ICT.InstanceID DESC,ICT.DatabaseID DESC, ICT.object_name DESC
 		)  AS THRES
+/* Table exclusions at root, instance or database level.  Matched against the table name and schema.table.  Only % is treated as a wildcard. [ and _ are escaped as they are valid in object names */
+OUTER APPLY(SELECT TOP(1) X.InstanceID,
+					X.DatabaseID,
+					X.ObjectName
+			FROM dbo.IdentityColumnExclusions X
+			CROSS APPLY(SELECT REPLACE(REPLACE(X.ObjectName,'[','[[]'),'_','[_]') AS Pattern) P
+			WHERE (X.InstanceID = IC.InstanceID OR X.InstanceID = -1)
+			AND (X.DatabaseID = IC.DatabaseID OR X.DatabaseID = -1)
+			AND (IC.object_name LIKE P.Pattern OR CONCAT(IC.schema_name,'.',IC.object_name) LIKE P.Pattern)
+			ORDER BY X.InstanceID DESC,X.DatabaseID DESC,X.ObjectName
+			) AS excl
 WHERE I.IsActive=1
 AND D.IsActive=1

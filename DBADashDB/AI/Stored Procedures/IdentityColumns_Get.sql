@@ -23,5 +23,6 @@ SELECT TOP (@MaxRows)
 FROM dbo.IdentityColumnsInfo ic
 WHERE (ic.IdentityStatus IN (1, 2) OR ic.pct_used > 0.5)
   AND ic.ShowInSummary = 1
+  AND ic.IsExcluded = 0
   AND (@InstanceFilter IS NULL OR ic.InstanceDisplayName LIKE @InstanceFilter + '%')
 ORDER BY ic.IdentityStatus ASC, ic.pct_used DESC
