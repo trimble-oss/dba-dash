@@ -56,6 +56,9 @@ namespace DBADashGUI.QueryPlans
 
         private PlanAnalysisPayload _payload;
         private AIServiceDiscovery.ServiceInfo _service;
+
+        /// <summary>Why <see cref="_service"/> is null - none configured, or no access to it.  Null until the lookup has run.</summary>
+        private string _noServiceReason;
         private CancellationTokenSource _inFlight;
 
         /// <summary>The exchange on screen, which a follow-up continues.  Null until something is asked or restored.</summary>
@@ -416,13 +419,17 @@ namespace DBADashGUI.QueryPlans
             // Started from the UI thread, so the continuation comes back to it: no Invoke, and no handle
             // check either - the tab has usually never been shown at this point, and waiting for a handle
             // would leave the button disabled until it was.
-            _service = await PlanAnalysisClient.FindServiceAsync();
+            var service = await PlanAnalysisClient.FindServiceAsync();
             if (IsDisposed) return;
+
+            // A service the user can't submit to - none configured, or no access to its API key - is no service
+            // here: the request stays on screen, the buttons stay off, and the status line says why.
+            _service = AIServiceAccess.Usable(service, out _noServiceReason);
 
             _submit.Enabled = _service is not null && _payload is not null;
 
             _serviceNote = _service is null
-                ? "No AI service is configured, so nothing can be submitted."
+                ? _noServiceReason
                 : $"Ready to submit to {_service.ServiceUrl}.  Nothing is sent until you do.";
 
             UpdateStatus();
@@ -577,7 +584,7 @@ namespace DBADashGUI.QueryPlans
         {
             if (_service is null)
             {
-                _conversation.SetCanAsk(false, "No AI service is configured, so follow-up questions cannot be asked.");
+                _conversation.SetCanAsk(false, _noServiceReason ?? AIServiceAccess.NotConfigured);
             }
             else if (_inFlight is not null)
             {
