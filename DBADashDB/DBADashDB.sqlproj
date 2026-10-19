@@ -853,6 +853,10 @@
     <Build Include="dbo\Stored Procedures\AlertThresholds_Upd.sql" />
     <Build Include="dbo\Stored Procedures\IdentityColumnThresholds_Get.sql" />
     <Build Include="dbo\Stored Procedures\IdentityColumnThresholds_Upd.sql" />
+    <Build Include="dbo\Tables\IdentityColumnExclusions.sql" />
+    <Build Include="dbo\User Defined Types\IdentityColumnExclusions.sql" />
+    <Build Include="dbo\Stored Procedures\IdentityColumnExclusions_Get.sql" />
+    <Build Include="dbo\Stored Procedures\IdentityColumnExclusions_Upd.sql" />
     <Build Include="dbo\Tables\InstanceSettings.sql" />
     <Build Include="dbo\Tables\Summary.sql" />
     <Build Include="dbo\Stored Procedures\Summary_Upd.sql" />

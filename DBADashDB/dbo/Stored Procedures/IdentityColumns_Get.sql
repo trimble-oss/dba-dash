@@ -46,7 +46,8 @@ SELECT ICI.InstanceID,
 	   ICI.PctUsedCriticalThreshold,
        ICI.DaysWarningThreshold,
        ICI.DaysCriticalThreshold,
-       ICI.ThresholdConfigurationLevel
+       ICI.ThresholdConfigurationLevel,
+       ICI.ExcludedBy
 FROM dbo.IdentityColumnsInfo ICI
 WHERE EXISTS(
 		SELECT 1 

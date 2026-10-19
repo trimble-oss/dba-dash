@@ -474,7 +474,10 @@ BEGIN
 	DELETE dbo.IdentityColumnsHistory 
 	WHERE InstanceID = @InstanceID
 
-	DELETE dbo.IdentityColumns 
+	DELETE dbo.IdentityColumns
+	WHERE InstanceID = @InstanceID
+
+	DELETE dbo.IdentityColumnExclusions
 	WHERE InstanceID = @InstanceID
 
 	DELETE dbo.Databases 
