@@ -288,6 +288,13 @@ BEGIN
 	DELETE dbo.LogRestoreThresholds
 	WHERE InstanceID = @InstanceID
 
+	DELETE dbo.LogShippingPairs
+	WHERE PrimaryInstanceID = @InstanceID
+	OR SecondaryInstanceID = @InstanceID
+
+	DELETE dbo.LogShippingExclusions
+	WHERE InstanceID = @InstanceID
+
 	DELETE LR 
 	FROM dbo.LogRestores LR
 	WHERE EXISTS(

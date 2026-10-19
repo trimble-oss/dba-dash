@@ -23,6 +23,11 @@ namespace DBADashGUI.LogShipping
         private ToolStripMenuItem mnuMetricsInstance;
         private ToolStripMenuItem mnuThresholdInstance;
         private ToolStripSeparator mnuConfigureSeparator;
+        private ToolStripMenuItem mnuPairs;
+        private ToolStripMenuItem mnuExclusionsRoot;
+        private ToolStripMenuItem mnuExclusionsInstance;
+        private ToolStripSeparator mnuExclusionsSeparator;
+        private ToolStripSeparator mnuPairsSeparator;
 
         public LogShippingView()
         {
@@ -59,10 +64,33 @@ namespace DBADashGUI.LogShipping
                 if (TryGetSingleInstanceId(out var id)) ConfigureMetrics(id);
             };
 
+            mnuPairs = new ToolStripMenuItem("Log Shipping Pairs (Missing Databases)")
+            {
+                ToolTipText = "Configure primary/secondary instance pairs to alert on databases that are not log shipped"
+            };
+            mnuPairs.Click += (_, _) => ConfigurePairs();
+
+            mnuExclusionsRoot = new ToolStripMenuItem("Exclusions (Root)")
+            {
+                ToolTipText = "Exclude databases from log shipping monitoring for all instances"
+            };
+            mnuExclusionsRoot.Click += (_, _) => ConfigureExclusions(-1);
+            mnuExclusionsInstance = new ToolStripMenuItem("Exclusions (Instance)")
+            {
+                ToolTipText = "Exclude databases from log shipping monitoring for the selected (secondary) instance"
+            };
+            mnuExclusionsInstance.Click += (_, _) =>
+            {
+                if (TryGetSingleInstanceId(out var id)) ConfigureExclusions(id);
+            };
+            mnuExclusionsSeparator = new ToolStripSeparator();
+
             mnuConfigureSeparator = new ToolStripSeparator();
+            mnuPairsSeparator = new ToolStripSeparator();
             tsConfigureLS.DropDownItems.AddRange(new ToolStripItem[]
             {
-                mnuThresholdRoot, mnuThresholdInstance, mnuConfigureSeparator, mnuMetricsRoot, mnuMetricsInstance
+                mnuThresholdRoot, mnuThresholdInstance, mnuExclusionsSeparator, mnuExclusionsRoot, mnuExclusionsInstance,
+                mnuConfigureSeparator, mnuMetricsRoot, mnuMetricsInstance, mnuPairsSeparator, mnuPairs
             });
 
             // Insert just after the Parameters button.  The status filter is added by the base class (the report
@@ -75,11 +103,17 @@ namespace DBADashGUI.LogShipping
         private void UpdateToolbarState()
         {
             var hasSingle = TryGetSingleInstanceId(out _);
-            // Metric collection config is available to admins and the App role only (not AppReadOnly).
+            // Metric collection, exclusion & log shipping pair config is available to admins and the App role only (not AppReadOnly).
             var canConfigMetrics = DBADashUser.IsAdmin || DBADashUser.Roles.Contains("App");
             mnuMetricsRoot.Visible = canConfigMetrics;
             mnuMetricsInstance.Visible = canConfigMetrics;
             mnuConfigureSeparator.Visible = canConfigMetrics;
+            mnuPairs.Visible = canConfigMetrics;
+            mnuPairsSeparator.Visible = canConfigMetrics;
+            mnuExclusionsRoot.Visible = canConfigMetrics;
+            mnuExclusionsInstance.Visible = canConfigMetrics;
+            mnuExclusionsSeparator.Visible = canConfigMetrics;
+            mnuExclusionsInstance.Enabled = hasSingle;
             mnuMetricsInstance.Enabled = hasSingle;
             mnuThresholdInstance.Enabled = hasSingle;
         }
@@ -151,6 +185,30 @@ namespace DBADashGUI.LogShipping
             }
         }
 
+        private void ConfigurePairs()
+        {
+            using var frm = new LogShippingPairsConfig();
+            frm.ShowDialog();
+            if (frm.HasChanges)
+            {
+                RefreshData();
+            }
+        }
+
+        private void ConfigureExclusions(int instanceId)
+        {
+            var levelName = instanceId == -1
+                ? null
+                : CommonData.Instances?.Rows.Cast<DataRow>()
+                    .FirstOrDefault(r => r.Field<int>("InstanceID") == instanceId)?
+                    .Field<string>("InstanceDisplayName");
+            using var frm = new LogShippingExclusionsConfig { InstanceID = instanceId, LevelName = levelName };
+            if (frm.ShowDialog() == DialogResult.OK)
+            {
+                RefreshData();
+            }
+        }
+
         private static void ConfigureMetrics(int instanceId)
         {
             using var metricsConfig = new RepositoryMetricsConfig
@@ -212,9 +270,14 @@ namespace DBADashGUI.LogShipping
             {
                 if (sender is not LogShippingView view) return;
                 var instanceId = row.Cells["InstanceID"].Value.DBNullToNull() as int? ?? -1;
-                var databaseId = DatabaseLevel
-                    ? row.Cells["DatabaseID"].Value.DBNullToNull() as int? ?? -1
-                    : -1;
+                var databaseId = -1;
+                if (DatabaseLevel)
+                {
+                    // Databases missing from the secondary have no DatabaseID (and no link text).  Don't fall back to
+                    // configuring the instance level thresholds from a database row.
+                    if (row.Cells["DatabaseID"].Value.DBNullToNull() is not int id) return;
+                    databaseId = id;
+                }
                 view.ConfigureThresholds(instanceId, databaseId);
             }
         }
@@ -272,35 +335,36 @@ namespace DBADashGUI.LogShipping
                         ["LogShippedDBCount"] = new ColumnMetadata { DisplayIndex = 4, Alias = "Log Shipped DBs" },
                         ["WarningCount"] = new ColumnMetadata { DisplayIndex = 5, Alias = "Warning" },
                         ["CriticalCount"] = new ColumnMetadata { DisplayIndex = 6, Alias = "Critical" },
-                        ["MaxTotalTimeBehindDuration"] = new ColumnMetadata { DisplayIndex = 7, Alias = "Max Total Time Behind" },
-                        ["MinTotalTimeBehindDuration"] = new ColumnMetadata { DisplayIndex = 8, Alias = "Min Total Time Behind" },
-                        ["AvgTotalTimeBehindDuration"] = new ColumnMetadata { DisplayIndex = 9, Alias = "Avg Total Time Behind" },
-                        ["MaxLatencyOfLastDuration"] = new ColumnMetadata { DisplayIndex = 10, Alias = "Max Latency of Last" },
-                        ["MinLatencyOfLastDuration"] = new ColumnMetadata { DisplayIndex = 11, Alias = "Min Latency of Last" },
-                        ["AvgLatencyOfLastDuration"] = new ColumnMetadata { DisplayIndex = 12, Alias = "Avg Latency of Last" },
-                        ["MaxTimeSinceLastDuration"] = new ColumnMetadata { DisplayIndex = 13, Alias = "Max Time Since Last" },
-                        ["MinTimeSinceLastDuration"] = new ColumnMetadata { DisplayIndex = 14, Alias = "Min Time Since Last" },
-                        ["AvgTimeSinceLastDuration"] = new ColumnMetadata { DisplayIndex = 15, Alias = "Avg Time Since Last" },
-                        ["SnapshotAgeDuration"] = new ColumnMetadata { DisplayIndex = 16, Alias = "Snapshot Age", Highlighting = SnapshotHighlight() },
-                        ["MinDateOfLastBackupRestored"] = new ColumnMetadata { DisplayIndex = 17, Alias = "Backup Date of Oldest File" },
-                        ["MaxDateOfLastBackupRestored"] = new ColumnMetadata { DisplayIndex = 18, Alias = "Backup Date of Newest File" },
-                        ["MinLastRestoreCompleted"] = new ColumnMetadata { DisplayIndex = 19, Alias = "Restore Date of Oldest File" },
-                        ["MaxLastRestoreCompleted"] = new ColumnMetadata { DisplayIndex = 20, Alias = "Restore Date of Newest File" },
-                        ["Configure"] = new ColumnMetadata { DisplayIndex = 21, Alias = "Configure", Link = new LogShippingConfigureThresholdLink { DatabaseLevel = false }, Description = "Configure instance-level thresholds", Highlighting = ConfiguredHighlight("InstanceLevelThreshold", "True") },
+                        ["MissingCount"] = new ColumnMetadata { DisplayIndex = 7, Alias = "Missing", Description = "Databases on the primary that are not log shipped to this instance.  Requires log shipping pairs to be configured." },
+                        ["MaxTotalTimeBehindDuration"] = new ColumnMetadata { DisplayIndex = 8, Alias = "Max Total Time Behind" },
+                        ["MinTotalTimeBehindDuration"] = new ColumnMetadata { DisplayIndex = 9, Alias = "Min Total Time Behind" },
+                        ["AvgTotalTimeBehindDuration"] = new ColumnMetadata { DisplayIndex = 10, Alias = "Avg Total Time Behind" },
+                        ["MaxLatencyOfLastDuration"] = new ColumnMetadata { DisplayIndex = 11, Alias = "Max Latency of Last" },
+                        ["MinLatencyOfLastDuration"] = new ColumnMetadata { DisplayIndex = 12, Alias = "Min Latency of Last" },
+                        ["AvgLatencyOfLastDuration"] = new ColumnMetadata { DisplayIndex = 13, Alias = "Avg Latency of Last" },
+                        ["MaxTimeSinceLastDuration"] = new ColumnMetadata { DisplayIndex = 14, Alias = "Max Time Since Last" },
+                        ["MinTimeSinceLastDuration"] = new ColumnMetadata { DisplayIndex = 15, Alias = "Min Time Since Last" },
+                        ["AvgTimeSinceLastDuration"] = new ColumnMetadata { DisplayIndex = 16, Alias = "Avg Time Since Last" },
+                        ["SnapshotAgeDuration"] = new ColumnMetadata { DisplayIndex = 17, Alias = "Snapshot Age", Highlighting = SnapshotHighlight() },
+                        ["MinDateOfLastBackupRestored"] = new ColumnMetadata { DisplayIndex = 18, Alias = "Backup Date of Oldest File" },
+                        ["MaxDateOfLastBackupRestored"] = new ColumnMetadata { DisplayIndex = 19, Alias = "Backup Date of Newest File" },
+                        ["MinLastRestoreCompleted"] = new ColumnMetadata { DisplayIndex = 20, Alias = "Restore Date of Oldest File" },
+                        ["MaxLastRestoreCompleted"] = new ColumnMetadata { DisplayIndex = 21, Alias = "Restore Date of Newest File" },
+                        ["Configure"] = new ColumnMetadata { DisplayIndex = 22, Alias = "Configure", Link = new LogShippingConfigureThresholdLink { DatabaseLevel = false }, Description = "Configure instance-level thresholds", Highlighting = ConfiguredHighlight("InstanceLevelThreshold", "True") },
                         // Numeric (minutes) columns - hidden by default, available via the column chooser.
-                        ["MaxTotalTimeBehind"] = Hidden(22),
-                        ["MinTotalTimeBehind"] = Hidden(23),
-                        ["AvgTotalTimeBehind"] = Hidden(24),
-                        ["MaxLatencyOfLast"] = Hidden(25),
-                        ["MinLatencyOfLast"] = Hidden(26),
-                        ["AvgLatencyOfLast"] = Hidden(27),
-                        ["MaxTimeSinceLast"] = Hidden(28),
-                        ["MinTimeSinceLast"] = Hidden(29),
-                        ["AvgTimeSinceLast"] = Hidden(30),
-                        ["SnapshotAge"] = Hidden(31),
-                        ["SnapshotAgeStatus"] = Hidden(32),
-                        ["InstanceLevelThreshold"] = Hidden(33),
-                        ["DatabaseLevelThresholds"] = Hidden(34),
+                        ["MaxTotalTimeBehind"] = Hidden(23),
+                        ["MinTotalTimeBehind"] = Hidden(24),
+                        ["AvgTotalTimeBehind"] = Hidden(25),
+                        ["MaxLatencyOfLast"] = Hidden(26),
+                        ["MinLatencyOfLast"] = Hidden(27),
+                        ["AvgLatencyOfLast"] = Hidden(28),
+                        ["MaxTimeSinceLast"] = Hidden(29),
+                        ["MinTimeSinceLast"] = Hidden(30),
+                        ["AvgTimeSinceLast"] = Hidden(31),
+                        ["SnapshotAge"] = Hidden(32),
+                        ["SnapshotAgeStatus"] = Hidden(33),
+                        ["InstanceLevelThreshold"] = Hidden(34),
+                        ["DatabaseLevelThresholds"] = Hidden(35),
                     }
                 },
                 [1] = new CustomReportResult
@@ -312,24 +376,30 @@ namespace DBADashGUI.LogShipping
                         ["DatabaseID"] = Hidden(1),
                         ["InstanceDisplayName"] = new ColumnMetadata { DisplayIndex = 2, Alias = "Instance" },
                         ["name"] = new ColumnMetadata { DisplayIndex = 3, Alias = "Database" },
-                        ["StatusDescription"] = new ColumnMetadata { DisplayIndex = 4, Alias = "Status", Highlighting = StatusHighlight() },
-                        ["Status"] = Hidden(5),
-                        ["restore_date"] = new ColumnMetadata { DisplayIndex = 6, Alias = "Restore Date" },
-                        ["backup_start_date"] = new ColumnMetadata { DisplayIndex = 7, Alias = "Backup Start Date" },
-                        ["TotalTimeBehindDuration"] = new ColumnMetadata { DisplayIndex = 8, Alias = "Total Time Behind" },
-                        ["LatencyOfLastDuration"] = new ColumnMetadata { DisplayIndex = 9, Alias = "Latency of Last" },
-                        ["TimeSinceLastDuration"] = new ColumnMetadata { DisplayIndex = 10, Alias = "Time Since Last" },
-                        ["SnapshotAgeDuration"] = new ColumnMetadata { DisplayIndex = 11, Alias = "Snapshot Age", Highlighting = SnapshotHighlight() },
-                        ["SnapshotDate"] = new ColumnMetadata { DisplayIndex = 12, Alias = "Snapshot Date" },
-                        ["last_file"] = new ColumnMetadata { DisplayIndex = 13, Alias = "Last File" },
-                        ["ThresholdConfiguredLevel"] = new ColumnMetadata { DisplayIndex = 14, Alias = "Threshold Level" },
-                        ["Configure"] = new ColumnMetadata { DisplayIndex = 15, Alias = "Configure", Link = new LogShippingConfigureThresholdLink { DatabaseLevel = true }, Description = "Configure database-level thresholds", Highlighting = ConfiguredHighlight("ThresholdConfiguredLevel", "Database") },
+                        ["PrimaryInstanceDisplayName"] = new ColumnMetadata { DisplayIndex = 4, Alias = "Primary Instance", Description = "Primary instance from the configured log shipping pairs" },
+                        ["StatusDescription"] = new ColumnMetadata { DisplayIndex = 5, Alias = "Status", Highlighting = StatusHighlight() },
+                        ["ExcludedBy"] = new ColumnMetadata { DisplayIndex = 6, Alias = "Excluded By", Description = "Exclusion pattern that matched the database (Configure > Exclusions)" },
+                        ["Status"] = Hidden(7),
+                        ["restore_date"] = new ColumnMetadata { DisplayIndex = 8, Alias = "Restore Date" },
+                        ["backup_start_date"] = new ColumnMetadata { DisplayIndex = 9, Alias = "Backup Start Date" },
+                        ["TotalTimeBehindDuration"] = new ColumnMetadata { DisplayIndex = 10, Alias = "Total Time Behind" },
+                        ["LatencyOfLastDuration"] = new ColumnMetadata { DisplayIndex = 11, Alias = "Latency of Last" },
+                        ["TimeSinceLastDuration"] = new ColumnMetadata { DisplayIndex = 12, Alias = "Time Since Last" },
+                        ["SnapshotAgeDuration"] = new ColumnMetadata { DisplayIndex = 13, Alias = "Snapshot Age", Highlighting = SnapshotHighlight() },
+                        ["SnapshotDate"] = new ColumnMetadata { DisplayIndex = 14, Alias = "Snapshot Date" },
+                        ["last_file"] = new ColumnMetadata { DisplayIndex = 15, Alias = "Last File" },
+                        ["ThresholdConfiguredLevel"] = new ColumnMetadata { DisplayIndex = 16, Alias = "Threshold Level" },
+                        ["Configure"] = new ColumnMetadata { DisplayIndex = 17, Alias = "Configure", Link = new LogShippingConfigureThresholdLink { DatabaseLevel = true }, Description = "Configure database-level thresholds", Highlighting = ConfiguredHighlight("ThresholdConfiguredLevel", "Database") },
                         // Numeric (minutes) columns - hidden by default, available via the column chooser.
-                        ["TotalTimeBehind"] = Hidden(16),
-                        ["LatencyOfLast"] = Hidden(17),
-                        ["TimeSinceLast"] = Hidden(18),
-                        ["SnapshotAge"] = Hidden(19),
-                        ["SnapshotAgeStatus"] = Hidden(20),
+                        ["TotalTimeBehind"] = Hidden(18),
+                        ["LatencyOfLast"] = Hidden(19),
+                        ["TimeSinceLast"] = Hidden(20),
+                        ["SnapshotAge"] = Hidden(21),
+                        ["SnapshotAgeStatus"] = Hidden(22),
+                        ["IsMissing"] = Hidden(23),
+                        ["PrimaryInstanceID"] = Hidden(24),
+                        ["state_desc"] = new ColumnMetadata { Visible = false, DisplayIndex = 25, Alias = "State" },
+                        ["IsExcluded"] = Hidden(26),
                     }
                 }
             },

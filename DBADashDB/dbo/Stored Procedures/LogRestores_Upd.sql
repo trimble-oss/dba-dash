@@ -68,7 +68,8 @@ BEGIN TRAN
 			CAST(AvgTimeSinceLast AS DECIMAL(28,9)) AS [Avg Time Since Last (min)],
 			CAST(CriticalCount AS DECIMAL(28,9)) AS [Critical Count],
 			CAST(WarningCount AS DECIMAL(28,9)) AS [Warning Count],
-			CAST(LogShippedDBCount AS DECIMAL(28,9)) AS [Log Shipped Database Count]
+			CAST(LogShippedDBCount AS DECIMAL(28,9)) AS [Log Shipped Database Count],
+			CAST(MissingCount AS DECIMAL(28,9)) AS [Missing Database Count]
 	FROM dbo.LogShippingStatusSummary
 	WHERE InstanceID = @InstanceID
 	) AS Summary
@@ -84,7 +85,8 @@ BEGIN TRAN
 			[Avg Time Since Last (min)],
 			[Critical Count],
 			[Warning Count],
-			[Log Shipped Database Count]
+			[Log Shipped Database Count],
+			[Missing Database Count]
 			)
 	 ) UNPVT
 	WHERE EXISTS(	SELECT 1 

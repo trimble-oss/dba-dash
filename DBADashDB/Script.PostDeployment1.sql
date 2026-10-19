@@ -2239,6 +2239,7 @@ FROM (VALUES -- AG aggregate
 			('Log Shipped Database Count',1,0,'LogShipping'),
 			('Warning Count',1,0,'LogShipping'),
 			('Critical Count',1,0,'LogShipping'),
+			('Missing Database Count',1,0,'LogShipping'),
 			-- Slow Queries
 			('Abort Count',1,0,'SlowQueries'),
 			('Error Count',1,0,'SlowQueries'),
