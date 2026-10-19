@@ -159,17 +159,33 @@ FROM (	SELECT	LatchClassID,
 JOIN #Coverage C ON C.DateGroup = B.DateGroup
 GROUP BY B.LatchClassID
 
-/* Wait time is also given per core for context, as in the Waits report */
+/* Wait time is also given per core, as in the Waits report */
 DECLARE @SchedulerCount INT
 SELECT @SchedulerCount = NULLIF(scheduler_count,0)
 FROM dbo.Instances
 WHERE InstanceID = @InstanceID
+
+/*	Highlighting thresholds, applied here and returned as IsHighWaitTime/IsHighPeakWaitTime.  Per core, as a bigger
+	server runs more requests at once, so the same number of waiting threads stalls a smaller share of the work.  50
+	ms/sec/core is on average one thread waiting for every 20 cores.  The peak is over a chart bucket (as short as a
+	minute), so it is noisier and gets a higher bar.
+	BUFFER isn't highlighted.  Its wait time is the PAGEIOLATCH_* and PAGELATCH_* waits in the Waits report, and a busy
+	server racks up a lot of it from page reads alone - average wait is the better guide there. */
+DECLARE @HighWaitTimeMsPerCorePerSec DECIMAL(38,3) = 50
+DECLARE @HighPeakWaitTimeMsPerCorePerSec DECIMAL(38,3) = 100
 
 /* 0 - Summary by latch class.  Rates first - the totals are hidden in the report but can be added back by the user. */
 SELECT	LC.LatchClass,
 		SUM(L.wait_time_ms)/@CoveredSec AS WaitTimeMsPerSec,
 		P.PeakWaitTimeMsPerSec,
 		SUM(L.wait_time_ms)/@CoveredSec/@SchedulerCount AS WaitTimeMsPerCorePerSec,
+		CASE WHEN SUM(L.wait_time_ms)/@CoveredSec/@SchedulerCount >= @HighWaitTimeMsPerCorePerSec
+				AND LC.LatchClass <> 'BUFFER'
+			THEN 1 ELSE 0 END AS IsHighWaitTime,
+		P.PeakWaitTimeMsPerSec/@SchedulerCount AS PeakWaitTimeMsPerCorePerSec,
+		CASE WHEN P.PeakWaitTimeMsPerSec/@SchedulerCount >= @HighPeakWaitTimeMsPerCorePerSec
+				AND LC.LatchClass <> 'BUFFER'
+			THEN 1 ELSE 0 END AS IsHighPeakWaitTime,
 		SUM(L.wait_time_ms)/NULLIF(@TotalWaitMs,0) AS PctOfTotal,
 		SUM(L.waiting_requests_count)/@CoveredSec AS WaitingRequestsPerSec,
 		SUM(L.wait_time_ms)*1.0/NULLIF(SUM(L.waiting_requests_count),0) AS AvgWaitMs,
