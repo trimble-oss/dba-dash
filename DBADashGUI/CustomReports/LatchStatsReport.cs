@@ -61,51 +61,60 @@ namespace DBADashGUI.CustomReports
                         {
                             Alias = "Wait Time (ms/sec)",
                             FormatString = "N3",
-                            Description = "Wait time per second - this is also the average number of threads waiting x 1000.  Highlighted at 1,000 ms/sec or more, where on average at least one thread was waiting on this latch class the whole time.",
-                            // ms/sec of waiting is the average number of waiting threads, so 1000 is a threshold with a
-                            // meaning rather than a guess.  Summary only - a short burst in the over time grid is less telling.
-                            Highlighting = new CellHighlightingRuleSet("WaitTimeMsPerSec")
-                            {
-                                Rules = new List<CellHighlightingRule>
-                                {
-                                    new()
-                                    {
-                                        ConditionType = CellHighlightingRule.ConditionTypes.GreaterThanOrEqual,
-                                        Value1 = "1000",
-                                        Status = DBADashStatus.DBADashStatusEnum.Warning
-                                    }
-                                }
-                            }
+                            Description = "Wait time per second - this is also the average number of threads waiting x 1000."
                         },
                         // The average over a long range can hide a burst of contention, so the busiest chart bucket is
-                        // shown too.  Same threshold - a bucket is at least a minute, so at 1000 a thread was waiting on
-                        // average for the whole of it.
+                        // shown too.
                         ["PeakWaitTimeMsPerSec"] = new ColumnMetadata
                         {
                             Alias = "Peak Wait Time (ms/sec)",
                             FormatString = "N3",
-                            Description = "The highest wait time per second in any one interval of the chart.  The interval depends on the length of the date range (from a minute up to a day), so the peak is closer to the average on longer ranges.  Highlighted at 1,000 ms/sec or more, where on average at least one thread was waiting on this latch class for the whole interval.",
-                            Highlighting = new CellHighlightingRuleSet("PeakWaitTimeMsPerSec")
+                            Description = "The highest wait time per second in any one interval of the chart.  The interval depends on the length of the date range (from a minute up to a day), so the peak is closer to the average on longer ranges."
+                        },
+                        // Highlighting is per core - a bigger server runs more requests at once, so the same number of
+                        // waiting threads stalls a smaller share of the work.  The proc applies the thresholds (and leaves
+                        // out BUFFER, which the Waits report covers as PAGEIOLATCH_*/PAGELATCH_*) and returns the result
+                        // as IsHighWaitTime/IsHighPeakWaitTime.  Summary only - a short burst in the over time grid is
+                        // less telling.
+                        ["WaitTimeMsPerCorePerSec"] = new ColumnMetadata
+                        {
+                            Alias = "Wait Time (ms/sec/core)",
+                            FormatString = "N3",
+                            Description = "Wait time per second divided by the number of schedulers (cores), as in the Waits report.  Highlighted at 50 or more - on average one thread waiting on this latch class for every 20 cores.  BUFFER isn't highlighted: its wait time is the PAGEIOLATCH_* and PAGELATCH_* waits in the Waits report, and Avg Wait is the better guide to it.",
+                            Highlighting = new CellHighlightingRuleSet("IsHighWaitTime", true)
                             {
                                 Rules = new List<CellHighlightingRule>
                                 {
                                     new()
                                     {
-                                        ConditionType = CellHighlightingRule.ConditionTypes.GreaterThanOrEqual,
-                                        Value1 = "1000",
+                                        ConditionType = CellHighlightingRule.ConditionTypes.Equals,
+                                        Value1 = "1",
                                         Status = DBADashStatus.DBADashStatusEnum.Warning
                                     }
                                 }
                             }
                         },
-                        // For context only - not highlighted.  Waiting threads don't use CPU, so the cost of the wait
-                        // (stalled requests) doesn't shrink with more cores and the highlight stays on ms/sec.
-                        ["WaitTimeMsPerCorePerSec"] = new ColumnMetadata
+                        ["IsHighWaitTime"] = new ColumnMetadata { Visible = false },
+                        // A higher bar than the average, as a bucket can be as short as a minute so the peak is noisier.
+                        ["PeakWaitTimeMsPerCorePerSec"] = new ColumnMetadata
                         {
-                            Alias = "Wait Time (ms/sec/core)",
+                            Alias = "Peak Wait Time (ms/sec/core)",
                             FormatString = "N3",
-                            Description = "Wait time per second divided by the number of schedulers (cores), for comparison with the Waits report."
+                            Description = "Peak wait time per second divided by the number of schedulers (cores).  Highlighted at 100 or more - on average one thread waiting on this latch class for every 10 cores for the whole interval.  BUFFER isn't highlighted, as for Wait Time (ms/sec/core).",
+                            Highlighting = new CellHighlightingRuleSet("IsHighPeakWaitTime", true)
+                            {
+                                Rules = new List<CellHighlightingRule>
+                                {
+                                    new()
+                                    {
+                                        ConditionType = CellHighlightingRule.ConditionTypes.Equals,
+                                        Value1 = "1",
+                                        Status = DBADashStatus.DBADashStatusEnum.Warning
+                                    }
+                                }
+                            }
                         },
+                        ["IsHighPeakWaitTime"] = new ColumnMetadata { Visible = false },
                         ["PctOfTotal"] = new ColumnMetadata { Alias = "% of Total", FormatString = "P1" },
                         ["WaitingRequestsPerSec"] = new ColumnMetadata { Alias = "Waiting Requests/sec", FormatString = "N2" },
                         ["AvgWaitMs"] = new ColumnMetadata { Alias = "Avg Wait (ms)", FormatString = "N3" },
