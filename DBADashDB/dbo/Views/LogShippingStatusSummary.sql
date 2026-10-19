@@ -5,7 +5,7 @@ WITH Summary AS (
 		   LSS.InstanceDisplayName,
 		   MIN(LSS.Status) AS Status,
 		   CASE MIN(LSS.Status) WHEN 1 THEN 'Critical' WHEN 2 THEN 'Warning' WHEN 3 THEN 'N/A' WHEN 4 THEN 'OK' ELSE 'N/A' END AS StatusDescription,
-		   COUNT(*) AS LogShippedDBCount,
+		   SUM(CASE WHEN LSS.IsMissing=0 THEN 1 ELSE 0 END) AS LogShippedDBCount,
 		   SUM(CASE WHEN LSS.Status=2 THEN 1 ELSE 0 END) AS WarningCount,
 		   SUM(CASE WHEN LSS.Status=1 THEN 1 ELSE 0 END) AS CriticalCount,
 		   MAX(LSS.TotalTimeBehind) MaxTotalTimeBehind,
@@ -25,7 +25,8 @@ WITH Summary AS (
 		   MAX(LSS.restore_date_utc) MaxLastRestoreCompleted,
 		   CASE WHEN T.InstanceID IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS InstanceLevelThreshold,
 		   SUM(CASE WHEN LSS.ThresholdConfiguredLevel='Database' THEN 1 ELSE 0 END) AS DatabaseLevelThresholds,
-		   LSS.ShowInSummary
+		   LSS.ShowInSummary,
+		   SUM(CASE WHEN LSS.IsMissing=1 THEN 1 ELSE 0 END) AS MissingCount
 	FROM dbo.LogShippingStatus LSS
 	LEFT JOIN dbo.LogRestoreThresholds T ON LSS.InstanceID = T.InstanceID AND T.DatabaseID=-1
 	WHERE LSS.Status<> 3
@@ -68,7 +69,8 @@ SELECT	InstanceID,
 		MaxLastRestoreCompleted,
 		InstanceLevelThreshold,
 		DatabaseLevelThresholds,
-		ShowInSummary
+		ShowInSummary,
+		MissingCount
 FROM Summary
 OUTER APPLY dbo.SecondsToHumanDuration(MaxTimeSinceLast*60.0) AS MaxTimeSinceLastHD
 OUTER APPLY dbo.SecondsToHumanDuration(MinTimeSinceLast*60.0) AS MinTimeSinceLastHD

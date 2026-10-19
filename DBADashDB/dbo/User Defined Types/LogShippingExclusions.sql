@@ -1,0 +1,3 @@
+CREATE TYPE dbo.LogShippingExclusions AS TABLE(
+	DatabaseName NVARCHAR(128) NOT NULL PRIMARY KEY
+)

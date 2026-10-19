@@ -72,7 +72,8 @@ SELECT LS.InstanceID,
        LS.MaxLastRestoreCompleted,
        LS.InstanceLevelThreshold,
        LS.DatabaseLevelThresholds,
-       CAST('Configure' AS NVARCHAR(20)) AS Configure
+       CAST('Configure' AS NVARCHAR(20)) AS Configure,
+       LS.MissingCount
 FROM dbo.LogShippingStatusSummary LS
 WHERE EXISTS(SELECT 1 FROM @Instances I WHERE I.InstanceID = LS.InstanceID)
 AND (LS.ShowInSummary=1 OR @ShowHidden=1)
@@ -112,7 +113,14 @@ SELECT LSS.InstanceID,
        f.FileName AS last_file,
        LSS.ThresholdConfiguredLevel,
        CASE WHEN LSS.SnapshotAge>1440 THEN 1 WHEN LSS.SnapshotAge>120 THEN 2 WHEN LSS.SnapshotAge<60 THEN 4 ELSE 3 END AS SnapshotAgeStatus,
-       CAST('Configure' AS NVARCHAR(20)) AS Configure
+       /* No database level thresholds for databases missing from the secondary */
+       CAST(CASE WHEN LSS.DatabaseID IS NULL THEN NULL ELSE 'Configure' END AS NVARCHAR(20)) AS Configure,
+       LSS.IsMissing,
+       LSS.PrimaryInstanceID,
+       LSS.PrimaryInstanceDisplayName,
+       LSS.state_desc,
+       LSS.IsExcluded,
+       LSS.ExcludedBy
 FROM dbo.LogShippingStatus LSS
 CROSS APPLY dbo.ParseFileName(LSS.last_file) f
 WHERE EXISTS(SELECT 1 FROM @Instances I WHERE I.InstanceID = LSS.InstanceID)
