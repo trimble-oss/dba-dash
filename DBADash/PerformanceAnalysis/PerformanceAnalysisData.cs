@@ -31,7 +31,7 @@ namespace DBADash.PerformanceAnalysis
         /// <summary>dbo.Configuration_Get for the instance: name, value, default_value, IsDefault, configuration_id.</summary>
         public DataTable? Configuration { get; set; }
 
-        /// <summary>dbo.CPU_Get in buckets: EventTime, SQLProcessCPU, OtherCPU, MaxCPU.</summary>
+        /// <summary>dbo.CPU_Get in buckets: EventTime, SQLProcessCPU, OtherCPU, MaxCPU, SampleCount.</summary>
         public DataTable? Cpu { get; set; }
 
         public DataTable? CpuBaseline { get; set; }

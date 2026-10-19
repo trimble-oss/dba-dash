@@ -35,7 +35,8 @@ SET @SQL = N'
 SELECT ' + @DateGroupingSQL + ' AS EventTime,
        SUM(SumSQLProcessCPU*1.0)/SUM(SampleCount*1.0) as SQLProcessCPU,
 	   SUM(SumOtherCPU*1.0)/SUM(SampleCount*1.0) as OtherCPU,
-	   MAX(MaxTotalCPU*1.0) as MaxCPU
+	   MAX(MaxTotalCPU*1.0) as MaxCPU,
+	   SUM(SampleCount) AS SampleCount
 FROM '+ CASE WHEN @DateGroupingMin >=60 THEN 'dbo.CPU_60MIN' ELSE 'dbo.CPU' END + '
 ' + CASE WHEN @DateGroupingMin IS NULL OR @DateGroupingMin= 0 THEN '' ELSE 'CROSS APPLY dbo.DateGroupingMins(EventTime,@DateGroupingMin)' END + '
 WHERE InstanceID = @InstanceID

@@ -86,6 +86,12 @@ namespace DBADashAI.Models
                 return "Window is required, and it and the baseline are a line each.";
             }
 
+            // An explicit null in the JSON replaces the empty list the request starts with - a bad request, not a 500.
+            if (Notes is null || Sections is null || Sections.Any(s => s is null))
+            {
+                return "Notes and sections are lists, and every section is a title and its content.";
+            }
+
             if (Notes.Count > MaxNotes || Notes.Any(n => (n?.Length ?? 0) > MaxHeaderLength))
             {
                 return $"At most {MaxNotes} notes of a line each.";

@@ -132,5 +132,23 @@ namespace DBADash.Test
             Assert.AreEqual("Latches", request.Sections.Single().Title);
             CollectionAssert.AreEqual(new List<string> { "n" }, request.Notes);
         }
+
+        [TestMethod]
+        public void NullCollections_AreABadRequestNotACrash()
+        {
+            // An explicit null replaces the list the request starts with; validation runs before the endpoint's try/catch.
+            foreach (var json in new[]
+                     {
+                         """{ "instance": "SQL01", "window": "w", "notes": null, "sections": [ { "title": "CPU", "content": "c" } ] }""",
+                         """{ "instance": "SQL01", "window": "w", "sections": null }""",
+                         """{ "instance": "SQL01", "window": "w", "sections": [ null ] }""",
+                         """{ "instance": "SQL01", "window": "w", "sections": [ { "title": "CPU", "content": "c" } ], "history": null }""",
+                         """{ "instance": "SQL01", "window": "w", "sections": [ { "title": "CPU", "content": "c" } ], "history": [ null ], "question": "q" }"""
+                     })
+            {
+                var request = JsonSerializer.Deserialize<AiPerformanceAnalysisRequest>(json, new JsonSerializerOptions(JsonSerializerDefaults.Web))!;
+                Assert.IsNotNull(request.Validate(), json);
+            }
+        }
     }
 }
