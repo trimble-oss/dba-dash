@@ -165,6 +165,21 @@ namespace DBADash.PerformanceAnalysis
         public static bool IsInternalCounter(DataRow row) =>
             PerformanceAnalysisTable.Text(row, "object_name").Trim().Equals(InternalCounterObject, StringComparison.OrdinalIgnoreCase);
 
+        /// <summary>
+        /// DBA Dash's own objects whose duration is time spent waiting rather than working.  The messaging
+        /// receive sits in WAITFOR (RECEIVE) with a 30 second timeout, so on a quiet instance it can top the
+        /// object execution list while costing nothing.  Its other monitoring objects stay in: if they are
+        /// expensive, that is worth knowing.
+        /// </summary>
+        internal static readonly (string Schema, string Name)[] IdleWaitObjects = [("Messaging", "ReceiveMessageToService")];
+
+        public static bool IsIdleWait(DataRow row)
+        {
+            var schema = PerformanceAnalysisTable.Text(row, "SchemaName").Trim();
+            var name = PerformanceAnalysisTable.Text(row, "ObjectName").Trim();
+            return IdleWaitObjects.Any(o => o.Schema.Equals(schema, StringComparison.OrdinalIgnoreCase) && o.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+        }
+
         private static string FormatFull(DateTime value) => value.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
 
         /// <summary>The per-section work, holding what every section needs.</summary>
@@ -641,10 +656,14 @@ namespace DBADash.PerformanceAnalysis
 
             private void ObjectExecution(StringBuilder text, PerformanceSectionOptions section)
             {
-                var rows = Rows(_data.ObjectExecution)
+                var all = Rows(_data.ObjectExecution)
                     .Where(r => PerformanceAnalysisTable.Double(r, "duration_ms_per_sec") is > 0)
+                    .ToList();
+                var rows = all
+                    .Where(r => !IsIdleWait(r))
                     .OrderByDescending(r => PerformanceAnalysisTable.Double(r, "duration_ms_per_sec"))
                     .ToList();
+                var leftOut = all.Count - rows.Count;
 
                 if (rows.Count == 0)
                 {
@@ -654,6 +673,11 @@ namespace DBADash.PerformanceAnalysis
 
                 var top = Top(section, 10);
                 text.AppendLine("Stored procedures, functions and triggers.  duration_ms_per_sec is the time spent in the object per second of elapsed time - its share of the workload.");
+                if (leftOut > 0)
+                {
+                    text.AppendLine($"Left out: {string.Join(", ", IdleWaitObjects.Select(o => $"{o.Schema}.{o.Name}"))} - DBA Dash's own messaging, which waits on WAITFOR (RECEIVE) and so shows as duration without doing any work.");
+                }
+
                 text.AppendLine($"Top {Math.Min(top, rows.Count)} of {rows.Count} objects by duration:");
 
                 var table = Baseline

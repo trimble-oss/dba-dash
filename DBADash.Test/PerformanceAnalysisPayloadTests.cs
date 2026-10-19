@@ -237,6 +237,45 @@ namespace DBADash.Test
             StringAssert.Contains(Section(Build(data), PerformanceSection.Metrics), "No performance counters");
         }
 
+        private static DataTable Objects(params (string Schema, string Name, double MsPerSec)[] objects)
+        {
+            var table = new DataTable();
+            table.Columns.Add("DB", typeof(string));
+            table.Columns.Add("SchemaName", typeof(string));
+            table.Columns.Add("ObjectName", typeof(string));
+            table.Columns.Add("duration_ms_per_sec", typeof(double));
+            foreach (var (schema, name, msPerSec) in objects)
+            {
+                table.Rows.Add("DBADashDB", schema, name, msPerSec);
+            }
+
+            return table;
+        }
+
+        [TestMethod]
+        public void ObjectExecution_LeavesOutTheMessagingReceiveAndSaysSo()
+        {
+            // It sits in WAITFOR (RECEIVE), so on a quiet instance it tops the list while costing nothing.
+            var data = Data();
+            data.ObjectExecution = Objects(("Messaging", "ReceiveMessageToService", 900), ("dbo", "Collect_Upd", 12));
+
+            var objects = Section(Build(data), PerformanceSection.ObjectExecution);
+
+            StringAssert.Contains(objects, "DBADashDB.dbo.Collect_Upd");
+            Assert.IsFalse(objects.Contains("DBADashDB.Messaging.ReceiveMessageToService"));
+            StringAssert.Contains(objects, "Left out: Messaging.ReceiveMessageToService");
+            StringAssert.Contains(objects, "Top 1 of 1 objects");
+        }
+
+        [TestMethod]
+        public void ObjectExecution_NothingLeftOut_SaysNothingAboutIt()
+        {
+            var data = Data();
+            data.ObjectExecution = Objects(("dbo", "Collect_Upd", 12));
+
+            Assert.IsFalse(Section(Build(data), PerformanceSection.ObjectExecution).Contains("Left out"));
+        }
+
         [TestMethod]
         public void Numbers_KeepTheDigitsWorthReading()
         {
