@@ -40,8 +40,18 @@ namespace DBADashGUI.CustomReports
 
         protected List<CustomSqlParameter> customParams = new();
 
-        /// <summary>The key a report's informational messages are kept under in its data set's extended properties - see <see cref="CustomReport.ShowInfoMessages"/>.</summary>
-        private const string InfoMessagesProperty = "InfoMessages";
+        /// <summary>
+        /// A report's results with the informational messages the procedure raised alongside them - see
+        /// <see cref="CustomReport.ShowInfoMessages"/>.  Carried with the results rather than in a field, so the
+        /// messages stay with the run that raised them when a newer one supersedes it.  A property rather than one of
+        /// the data set's ExtendedProperties, which GetXmlSchema writes into the schema <see cref="ShowTable"/>
+        /// compares: a note that changed between refreshes would rebuild the grids and lose their filters and sorting.
+        /// </summary>
+        private sealed class ReportDataSet : DataSet
+        {
+            [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+            public string InfoMessages { get; set; }
+        }
 
         /// <summary>
         /// The parameter values this report is currently showing, including whatever the pickers and the
@@ -1089,7 +1099,7 @@ namespace DBADashGUI.CustomReports
                 if (ReferenceEquals(cts, cancellationTokenSource))
                 {
                     // A note from the procedure about these results says more than "Completed" does - see CustomReport.ShowInfoMessages
-                    if (reportDS?.ExtendedProperties[InfoMessagesProperty] is string infoMessages)
+                    if (reportDS is ReportDataSet { InfoMessages: { } infoMessages })
                         SetStatus(infoMessages, infoMessages, DashColors.Warning);
                     else
                         SetStatus("Completed", "Success", DashColors.Success);
@@ -1461,9 +1471,13 @@ namespace DBADashGUI.CustomReports
         private bool IsChartShown(CustomReportChart chart)
         {
             if (string.IsNullOrEmpty(chart.HideWhenParameterSet)) return true;
-            var value = customParams?.FirstOrDefault(p =>
-                p.Param.ParameterName.Equals(chart.HideWhenParameterSet, StringComparison.OrdinalIgnoreCase))?.Param.Value;
-            return value == null || value == DBNull.Value;
+            var param = customParams?.FirstOrDefault(p =>
+                p.Param.ParameterName.Equals(chart.HideWhenParameterSet, StringComparison.OrdinalIgnoreCase));
+            if (param == null) return true;
+            // The rule GetReportDataAsync sends parameters by: a user parameter on its default isn't sent, so the
+            // procedure runs with its own default whatever placeholder the parameter holds.
+            var isSent = !param.UseDefaultValue || CustomReport.SystemParamNames.Contains(param.Param.ParameterName, StringComparer.OrdinalIgnoreCase);
+            return !isSent || param.Param.Value == null || param.Param.Value == DBNull.Value;
         }
 
         private void GetChartPanels()
@@ -2634,7 +2648,7 @@ namespace DBADashGUI.CustomReports
                 // ReSharper disable once AccessToDisposedClosure
                 cmd.Cancel();
             });
-            var ds = new DataSet();
+            var ds = new ReportDataSet();
             try
             {
                 da.Fill(ds);
@@ -2644,11 +2658,9 @@ namespace DBADashGUI.CustomReports
             {
                 registration.Unregister();
             }
-            // Carried on the data set rather than in a field, so the messages stay with the results they were
-            // raised with when a newer run supersedes this one.
             if (infoMessages.Count > 0)
             {
-                ds.ExtendedProperties[InfoMessagesProperty] = string.Join(Environment.NewLine, infoMessages);
+                ds.InfoMessages = string.Join(Environment.NewLine, infoMessages);
             }
             return ds;
         }

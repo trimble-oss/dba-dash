@@ -348,7 +348,8 @@ BEGIN
     DECLARE @Note NVARCHAR(500)
 
     SELECT @Note = dbo.QueryStatsDatabaseNote(
-                       MAX(CASE WHEN S.DatabaseID = @DatabaseID THEN 1 ELSE 0 END),
+                       /* 0 rather than NULL for a window with no rows at all, which is the empty case the note is for */
+                       ISNULL(MAX(CASE WHEN S.DatabaseID = @DatabaseID THEN 1 ELSE 0 END), 0),
                        SUM(CASE WHEN S.StatementType = 4 THEN F.WorkerTime END),
                        SUM(F.WorkerTime))
     FROM #Facts F
