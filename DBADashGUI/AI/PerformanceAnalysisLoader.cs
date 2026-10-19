@@ -149,7 +149,7 @@ namespace DBADashGUI.AI
             if (data.Cpu is not { Rows.Count: > 0 }) yield return PerformanceSection.CPU;
             if (data.Waits is not { Rows.Count: > 0 }) yield return PerformanceSection.Waits;
             if (data.IODrives is not { Rows.Count: > 0 }) yield return PerformanceSection.IO;
-            if (data.Metrics is not { Rows.Count: > 0 }) yield return PerformanceSection.Metrics;
+            if (data.Metrics is null || !data.Metrics.Rows.Cast<DataRow>().Any(r => !PerformanceAnalysisPayload.IsInternalCounter(r))) yield return PerformanceSection.Metrics;
             if (data.Memory is not { Rows.Count: > 0 }) yield return PerformanceSection.Memory;
             if (data.ObjectExecution is not { Rows.Count: > 0 }) yield return PerformanceSection.ObjectExecution;
             if (NotCollected(data.Latches)) yield return PerformanceSection.Latches;
