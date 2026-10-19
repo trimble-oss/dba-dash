@@ -159,7 +159,8 @@ GROUP BY D.InstanceID
 
 /* Get max % used for each instance */
 SELECT	InstanceID,
-		MIN(NULLIF(IdentityStatus,3)) AS IdentityStatus,
+		/* Show OK if all the identity columns for the instance are excluded - consistent with no rows collected (below) */
+		ISNULL(MIN(NULLIF(IdentityStatus,3)),CASE WHEN MIN(CAST(IsExcluded AS INT)) = 1 THEN 4 END) AS IdentityStatus,
 		MAX(CASE WHEN IsExcluded = 0 THEN pct_used END) AS MaxIdentityPctUsed,
 		MIN(CASE WHEN IsExcluded = 0 THEN estimated_days END) AS MinIdentityEstimatedDays
 INTO #IdentityStatus
