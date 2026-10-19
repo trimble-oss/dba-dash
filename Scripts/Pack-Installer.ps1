@@ -19,13 +19,15 @@
     The installed Visualizer updates to the latest release.  The installed GUI reads the feed of the release for its
     repository database's version - so each release has to have it - and installs that version, never the latest.
 
-    Velopack has to do the signing itself, part way through building the package, so this is not a step after the zips are
-    signed.  It calls the Trimble signing tool (SignFiles.exe) once for each file, about half a minute each, so it signs only
-    what identifies the app: its executable, Velopack's launcher stub and updater, and the setup program.  Not the dozens of
-    libraries.  Like SignRelease.ps1 it works only on the corporate network.
+    Velopack has to sign what goes in the package itself, part way through building it, so this is not a step after the zips
+    are signed.  It calls the Trimble signing tool (SignFiles.exe) once for each file, so it signs only what identifies the app:
+    its executable, Velopack's launcher stub and updater.  Not the dozens of libraries.  The setup program and .msi are signed
+    after vpk has built them, both at once: the tool sends the whole file to be signed, and they're the size of the package -
+    for the GUI, minutes each.  Nothing vpk writes refers to them by hash, and the .msi has the package in it, not the setup
+    program.  Like SignRelease.ps1 it works only on the corporate network.
 
     Run it after SignRelease.ps1 and before publishing the release.  It uses the signed zip if there is one - and then doesn't
-    sign the executable again - and otherwise the unsigned zip.
+    sign the executable again - and otherwise the unsigned zip.  Complete-Release.ps1 runs it for both apps at once.
 
     Nothing is uploaded unless -Upload is given.
 .PARAMETER App
@@ -36,7 +38,8 @@
     The GitHub owner and repository.
 .PARAMETER ZipPath
     A local zip to pack - DBADash_Visualizer_<version>[-unsigned].zip or DBADash_GUI_Only_<version>[-unsigned].zip - instead of
-    downloading one from the draft release.  -Version is then taken from the file name.
+    downloading one from the draft release.  -Version is then taken from the file name.  With -Upload it has to be the signed
+    zip that is in the release, as SignRelease.ps1 -OutputFolder leaves it.
 .PARAMETER OutputFolder
     Where the installer and feed are written.  Defaults to DBADashBuild\<App>Installer under the repository.  Emptied first.
 .PARAMETER SignTool
@@ -50,12 +53,15 @@
     Don't build the .msi.  It is built by default: it offers to install for the current user or for all users of the machine
     (see Docs/Visualizer.md and Docs/GUIInstaller.md), and takes about a minute more.
 .PARAMETER Upload
-    Add the files to the draft release with the GitHub CLI (gh).  Supports -WhatIf.
+    Add the files to the draft release with the GitHub CLI (gh), three at a time.  Supports -WhatIf.
+.PARAMETER SignThrottle
+    How many files to send to the sign tool at once.  1 signs them one at a time.
 .EXAMPLE
     ./Scripts/Pack-Installer.ps1 -App Visualizer -Upload
 .EXAMPLE
     ./Scripts/Pack-Installer.ps1 -App GUI -Upload
 #>
+#Requires -Version 7.2
 [CmdletBinding(SupportsShouldProcess)]
 param (
     [Parameter(Mandatory)]
@@ -69,10 +75,13 @@ param (
     [switch]$SkipSigning,
     [switch]$NoDelta,
     [switch]$NoMsi,
-    [switch]$Upload
+    [switch]$Upload,
+    [int]$SignThrottle = 4
 )
 
 $ErrorActionPreference = "Stop"
+$common = Join-Path $PSScriptRoot "ReleaseCommon.ps1"
+. $common
 
 $repoRoot = Split-Path -Parent $PSScriptRoot
 
@@ -125,9 +134,11 @@ try {
         if ((Split-Path $ZipPath -Leaf) -notmatch "^$([regex]::Escape($zipPrefix))(\d+\.\d+\.\d+)(-unsigned)?\.zip$") {
             throw "Expected a file named $($zipPrefix)<version>[-unsigned].zip."
         }
+        if ($Version -and $Version -ne $Matches[1]) { throw "$ZipPath is version $($Matches[1]), not $Version." }
         $tag = $Matches[1]
         $zip = $ZipPath
         $alreadySigned = -not $Matches[2]
+        if ($Upload -and -not $alreadySigned) { throw "-Upload with -ZipPath needs the signed zip, not the -unsigned one." }
     }
     else {
         if (-not (Get-Command gh -ErrorAction SilentlyContinue)) { throw "The GitHub CLI (gh) is needed to get the zip from the draft release." }
@@ -154,8 +165,14 @@ try {
     }
 
     $publish = Join-Path $work "publish"
-    Expand-Archive -LiteralPath $zip -DestinationPath $publish -Force
+    # ZipFile rather than Expand-Archive: many times faster on the GUI's few hundred MB
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    [IO.Compression.ZipFile]::ExtractToDirectory($zip, $publish, $true)
     if (-not (Test-Path (Join-Path $publish $exeName))) { throw "$exeName isn't at the root of $zip." }
+    # The executable isn't signed again, so a signed zip had better be
+    if ($alreadySigned -and -not $SkipSigning -and (Get-AuthenticodeSignature (Join-Path $publish $exeName)).Status -ne "Valid") {
+        throw "$exeName in $zip isn't signed."
+    }
 
     # ---- vpk, the version the app is built against -------------------------------------------------------------------------
     $props = Get-Content (Join-Path $repoRoot "Directory.Packages.props") -Raw
@@ -169,7 +186,7 @@ try {
     # ---- The feed, and the previous release for a delta -------------------------------------------------------------------
     Remove-Folder $OutputFolder
     New-Item $OutputFolder -ItemType Directory | Out-Null
-    if (-not $NoDelta -and -not $ZipPath) {
+    if (-not $NoDelta -and (-not $ZipPath -or $Upload)) {
         Write-Host "Looking for the previous release, to build a delta from" -ForegroundColor Cyan
         & $vpk download github --repoUrl "https://github.com/$Repo" --channel $channel --outputDir $OutputFolder
         if ($LASTEXITCODE -ne 0) {
@@ -202,14 +219,22 @@ try {
 
     if (-not $SkipSigning) {
         # vpk runs this for one file at a time.  A wrapper keeps the tool's arguments - the file, "$" for in place, and the
-        # name shown in the signature - out of the way of how vpk splits a command.
+        # name shown in the signature - out of the way of how vpk splits a command.  vpk signs the setup and .msi whatever
+        # --signExclude says, and one after the other: the wrapper passes over them, and they're signed together below.
         $wrapper = Join-Path $work "sign.cmd"
-        Set-Content $wrapper ("@echo off`r`n`"$SignTool`" %1 $ `"$($cfg.Title)`"`r`nexit /b %ERRORLEVEL%")
+        Set-Content $wrapper (@(
+                '@echo off'
+                'if /i "%~x1"==".msi" exit /b 0'
+                'set "name=%~n1"'
+                'if /i "%name:~-6%"=="-Setup" exit /b 0'
+                "`"$SignTool`" %1 $ `"$($cfg.Title)`""
+                'exit /b %ERRORLEVEL%'
+            ) -join "`r`n")
 
-        # Sign the app's own executable (unless the zip already had it signed), Velopack's launcher stub and updater, and the
-        # setup and .msi.  Everything else is excluded: each file is half a minute, and signing the third party libraries with
-        # our certificate is not something we do for the other packages either.
-        $exclude = '^(?!.*(Squirrel\.exe|_ExecutionStub\.exe|-Setup\.exe|\.msi' + $(if ($alreadySigned) { '' } else { '|' + [regex]::Escape($exeName) }) + ')$).*$'
+        # Sign the app's own executable (unless the zip already had it signed), and Velopack's launcher stub and updater.
+        # Everything else is excluded: each file is half a minute, and signing the third party libraries with our certificate is
+        # not something we do for the other packages either.
+        $exclude = '^(?!.*(Squirrel\.exe|_ExecutionStub\.exe' + $(if ($alreadySigned) { '' } else { '|' + [regex]::Escape($exeName) }) + ')$).*$'
 
         $packArgs += @("--signTemplate", "`"$wrapper`" {{file}}", "--signExclude", $exclude)
         Write-Host "Packing $tag and signing with $SignTool - this takes a few minutes" -ForegroundColor Cyan
@@ -236,8 +261,18 @@ try {
     }
 
     if (-not $SkipSigning) {
+        # The setup and .msi, at the same time: each is the size of the package, and the tool sends the whole file to be signed
+        $installers = @($setupName, $msiName | Where-Object { $_ })
+        Write-Host "Signing $($installers -join ' and ') - this takes a few minutes" -ForegroundColor Cyan
+        $failures = @($installers | ForEach-Object -ThrottleLimit $SignThrottle -Parallel {
+            . $using:common
+            try { Invoke-Sign -SignTool $using:SignTool -Path (Join-Path $using:OutputFolder $_) -Name $using:cfg.Title }
+            catch { "$_" }
+        })
+        if ($failures.Count -gt 0) { throw "Signing failed: $($failures -join '; ')" }
+
         $failed = @()
-        foreach ($name in @($setupName, $msiName) | Where-Object { $_ }) {
+        foreach ($name in $installers) {
             if ((Get-AuthenticodeSignature (Join-Path $OutputFolder $name)).Status -ne "Valid") { $failed += $name }
         }
 
@@ -261,17 +296,23 @@ try {
     # ---- Upload ------------------------------------------------------------------------------------------------------------
     if ($Upload) {
         if ($SkipSigning) { throw "Won't upload an unsigned installer." }
-        if ($ZipPath) { throw "-Upload takes the zip from the draft release, so -ZipPath can't be used with it." }
 
         # What is new: not the packages of earlier releases that vpk downloaded to build the delta from.
-        $files = Get-ChildItem $OutputFolder -File | Where-Object {
+        $files = @(Get-ChildItem $OutputFolder -File | Where-Object {
             $_.Name -notin $existing -or $_.Name -in $feedFiles
-        }
-        foreach ($file in $files) {
-            if ($PSCmdlet.ShouldProcess("release $tag of $Repo", "upload $($file.Name)")) {
-                Invoke-Native gh @("release", "upload", $tag, $file.FullName, "--repo", $Repo, "--clobber")
+        } | Where-Object { $PSCmdlet.ShouldProcess("release $tag of $Repo", "upload $($_.Name)") })
+
+        # Three at a time: a handful of uploads, well inside GitHub's limits.  Each is retried, with a wait, if it fails.
+        $failures = @($files | ForEach-Object -ThrottleLimit 3 -Parallel {
+            . $using:common
+            $file = $_; $tag = $using:tag; $repo = $using:Repo
+            try {
+                Invoke-WithRetry -What "Uploading $($file.Name)" -Command { gh release upload $tag $file.FullName --repo $repo --clobber }
+                Write-Host "Uploaded $($file.Name)" -ForegroundColor Green
             }
-        }
+            catch { "$_" }
+        })
+        if ($failures.Count -gt 0) { throw "Upload failed: $($failures -join '; ')" }
     }
     else {
         Write-Host "Nothing uploaded.  Use -Upload to add these to the draft release." -ForegroundColor Yellow
