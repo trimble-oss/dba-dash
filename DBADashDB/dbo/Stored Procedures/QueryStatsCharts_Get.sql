@@ -570,6 +570,9 @@ OPTION (RECOMPILE);
     3 - By database.  Capped the same way as the series, because an estate with fifty databases in context
     otherwise draws fifty slices, and a legend and tooltip nobody can read.
 
+    Still returned for a single database, where it is one slice, so the result sets keep their positions.  The
+    report leaves the chart out there.
+
     A database is identified by its id, not its name: the same name on two instances is two databases, and a
     slice that merges them is a slice of nothing in particular.  The name alone is shown where only one
     instance is on screen, since there is nothing to disambiguate it from.
@@ -649,11 +652,37 @@ OPTION (RECOMPILE);
     first collection, or an instance whose plan cache churns faster than the schedule.  It is the collector's
     estimate of the window's share of that work, so it sits on the same scale as the other two.  A large Rolled
     up slice means the top N is too small.
+
+    No Unattributed slice for a database.  The collector can't say which database work it could not place in
+    time belongs to, so the only figure there is is the instance's - set against one database's named and rolled
+    up work it would be a slice the size of the instance's problem, not this database's.
 */
 SELECT Series,
        Value
 FROM (VALUES ('Named', @NamedWorkerTime / 1000.0),
              ('Rolled up', @RolledUpWorkerTime / 1000.0),
-             ('Unattributed', (SELECT ISNULL(SUM(UnattributedWorkerTime), 0) / 1000.0 FROM #Cov))) X (Series, Value)
+             ('Unattributed', CASE WHEN @DatabaseID IS NULL
+                                   THEN (SELECT ISNULL(SUM(UnattributedWorkerTime), 0) / 1000.0 FROM #Cov) END)) X (Series, Value)
 WHERE Value > 0
 ORDER BY Value DESC;
+
+/*
+    For a database, whether the charts may be missing some of its work - see dbo.QueryStatsDatabaseNote.  Returned
+    as a message rather than a result set, so the report can say it without a chart or a grid to put it in.
+    #Agg is every statement in the window, before the database filter, so it has the instance's figures.
+*/
+IF @DatabaseID IS NOT NULL
+BEGIN
+    DECLARE @Note NVARCHAR(500)
+
+    SELECT @Note = dbo.QueryStatsDatabaseNote(
+                       CASE WHEN @NamedWorkerTime IS NOT NULL OR @RolledUpWorkerTime IS NOT NULL THEN 1 ELSE 0 END,
+                       SUM(CASE WHEN S.StatementType = 4 THEN A.WorkerTime END),
+                       SUM(A.WorkerTime))
+    FROM #Agg A
+    JOIN dbo.QueryStatements S ON S.StatementID = A.StatementID
+
+    /* As an argument rather than the message itself, which RAISERROR would read the % in as a format */
+    IF @Note IS NOT NULL
+        RAISERROR('%s', 0, 1, @Note) WITH NOWAIT;
+END

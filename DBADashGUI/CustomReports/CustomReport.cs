@@ -172,6 +172,15 @@ namespace DBADashGUI.CustomReports
         [JsonIgnore]
         public ReportSwitch SwitchTo { get; set; }
 
+        /// <summary>
+        /// Show the informational messages the procedure raises - PRINT, or an ad hoc RAISERROR at severity 10 or
+        /// below - in the status bar in place of "Completed".  For a note about the results that has no chart or grid to go
+        /// in.  Opt in, because plenty of procedures print progress nobody reading the report needs.  System
+        /// reports only, set in code like <see cref="SwitchTo"/>.
+        /// </summary>
+        [JsonIgnore]
+        public bool ShowInfoMessages { get; set; }
+
         public string CancellationMessageWarning { get; set; }
 
         public bool ChartVisible { get; set; } = true;

@@ -31,6 +31,8 @@ namespace DBADashGUI.CustomReports
             Description =
                 "Statement level resource usage aggregated from the plan cache, grouped by query shape.  Totals for the window are complete: what the collection does not keep in detail is rolled up rather than dropped.",
             SinglePageLayout = true,
+            // For a database, why it may be short or empty - the same note as the charts give
+            ShowInfoMessages = true,
             //  Puts the Trigger Collection button on the toolbar, so an instance that has just been switched
             //  on does not have to wait for the schedule to produce its first interval.
             TriggerCollectionTypes = new List<string> { DBADash.CollectionType.QueryStats.ToString() },
@@ -333,7 +335,7 @@ namespace DBADashGUI.CustomReports
                             DisplayIndex = 7,
                             Alias = "Unattributed %",
                             FormatString = "N1",
-                            Description = "Share of the window's CPU the collection could not attribute to a statement: plans seen for the first time whose compile time predates the interval, mostly in a first collection.  An estimate - their last execution, which finished inside the interval, plus their earlier work prorated over their time in cache."
+                            Description = "Share of the window's CPU the collection could not attribute to a statement: plans seen for the first time whose compile time predates the interval, mostly in a first collection.  An estimate - their last execution, which finished inside the interval, plus their earlier work prorated over their time in cache.  Blank for a database: it is only known for the instance."
                         },
                         ["UnattributedCPUms"] = new ColumnMetadata
                         {

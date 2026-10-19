@@ -81,6 +81,13 @@ namespace DBADashGUI.CustomReports
         public List<CustomReportChartOverlay> Overlays { get; init; }
 
         /// <summary>
+        /// Leave the chart out while the report runs with this parameter set - a breakdown by database, say, once
+        /// the report is filtered to one database and the breakdown is a single slice.  The other charts close up
+        /// rather than leaving a gap: see <see cref="CustomReport.ChartLayoutColumns"/>.
+        /// </summary>
+        public string HideWhenParameterSet { get; init; }
+
+        /// <summary>
         /// Persisted state for the metric control. This is the `IMetric` POCO
         /// instance. When present it will be assigned to the control's `Metric`
         /// property so the control's setter can update UI. Assigning a non-null
