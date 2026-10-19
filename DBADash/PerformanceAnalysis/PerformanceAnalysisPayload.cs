@@ -103,6 +103,19 @@ namespace DBADash.PerformanceAnalysis
             return text.ToString();
         }
 
+        /// <summary>
+        /// The whole prompt the AI service would build from this payload - its instructions, then the figures -
+        /// for a reader to paste into an assistant of their own.
+        /// </summary>
+        public string ToPrompt() =>
+            PerformanceAnalysisPrompt.Build(
+                Focus == PerformanceAnalysisFocus.LatchesAndSpinlocks,
+                Instance,
+                Window,
+                Baseline,
+                Notes,
+                Sections.Select(s => (s.Title, s.Content)));
+
         public static string DescribeFocus(PerformanceAnalysisFocus focus) => focus switch
         {
             PerformanceAnalysisFocus.LatchesAndSpinlocks => "Latch and spinlock contention",

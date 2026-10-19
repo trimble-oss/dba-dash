@@ -277,6 +277,29 @@ namespace DBADash.Test
         }
 
         [TestMethod]
+        public void CopiedPrompt_IsWhatTheServiceWouldAsk()
+        {
+            // A reader without access to the service pastes this into a tool of their own, so it has to be the same question.
+            var data = Data();
+            data.Waits = Waits(("WRITELOG", 40));
+            foreach (var focus in new[] { PerformanceAnalysisFocus.General, PerformanceAnalysisFocus.LatchesAndSpinlocks })
+            {
+                var payload = Build(data, PerformanceAnalysisOptions.Defaults(focus));
+                var request = new DBADashAI.Models.AiPerformanceAnalysisRequest
+                {
+                    Instance = payload.Instance,
+                    Focus = payload.Focus.ToString(),
+                    Window = payload.Window,
+                    Baseline = payload.Baseline,
+                    Notes = payload.Notes.ToList(),
+                    Sections = payload.Sections.Select(s => new DBADashAI.Models.AiPerformanceAnalysisSection { Title = s.Title, Content = s.Content }).ToList()
+                };
+
+                Assert.AreEqual(new DBADashAI.Services.AiPerformancePromptBuilder().Build(request), payload.ToPrompt(), focus.ToString());
+            }
+        }
+
+        [TestMethod]
         public void Numbers_KeepTheDigitsWorthReading()
         {
             Assert.AreEqual("1235", PerformanceAnalysisTable.Num(1234.5678));

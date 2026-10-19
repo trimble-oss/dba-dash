@@ -67,11 +67,27 @@ namespace DBADashGUI.AI
 
         private readonly ToolStripButton _submit;
         private readonly AIModelMenu _model = new();
+
+        /// <summary>
+        /// The whole prompt - the service's instructions and the figures - to paste into an AI tool of the
+        /// reader's own.  Always available: it spends nothing, and a reader without access to the service, or
+        /// with none configured, still gets the analysis question in full.
+        /// </summary>
+        private readonly ToolStripButton _copyPrompt = new("Copy prompt", Properties.Resources.ASX_Copy_blue_16x)
+        {
+            DisplayStyle = ToolStripItemDisplayStyle.ImageAndText,
+            Enabled = false,
+            ToolTipText = "Copy the full prompt - the instructions the AI service would use and the figures below - to paste into an AI tool of your own."
+        };
+
         private readonly AiConversationView _conversation = new() { Dock = DockStyle.Fill };
         private readonly TabControl _tabs = new() { Dock = DockStyle.Fill };
         private readonly TabPage _analysisTab = new("Analysis") { ToolTipText = "The answer, and follow-up questions about it.  Kept until this window is closed." };
 
         private AIServiceDiscovery.ServiceInfo _service;
+
+        /// <summary>Why there is no service to submit to - none configured, or no access to it.</summary>
+        private string _noServiceReason = "No AI service is configured, so nothing can be submitted.";
         private CancellationTokenSource _inFlight;
 
         /// <summary>The exchange on screen, which a follow-up continues.  Null until something is asked.</summary>
@@ -148,6 +164,7 @@ namespace DBADashGUI.AI
             _sections.CellValueChanged += SectionsCellValueChanged;
 
             _conversation.QuestionAsked += async (_, question) => await SubmitAsync(question);
+            _copyPrompt.Click += (_, _) => CopyPrompt();
 
             Shown += async (_, _) =>
             {
@@ -221,6 +238,7 @@ namespace DBADashGUI.AI
 
             var toolbar = new ToolStrip { GripStyle = ToolStripGripStyle.Hidden };
             toolbar.Items.Add(_submit);
+            toolbar.Items.Add(_copyPrompt);
             toolbar.Items.Add(new ToolStripSeparator());
             toolbar.Items.Add(options);
 
@@ -438,9 +456,20 @@ namespace DBADashGUI.AI
             }
 
             _loadNote = null;
+            _copyPrompt.Enabled = _payload.Sections.Count > 0;
             _sizeNote = $"Request size: {PerformanceAnalysisPayload.DescribeSize(preview.Length)}." +
                         (_payload.IsLarge ? "  This is large - consider leaving out a section or a time series." : string.Empty);
             _submit.Enabled = CanSubmit;
+            UpdateStatus();
+        }
+
+        private void CopyPrompt()
+        {
+            if (_payload is null) return;
+
+            Clipboard.SetText(_payload.ToPrompt());
+            _analysisNote = "Prompt copied.  It carries the instance name and the figures shown - paste it only where you are happy for those to go.";
+            _statusColour = DashColors.Information;
             UpdateStatus();
         }
 
@@ -467,11 +496,28 @@ namespace DBADashGUI.AI
 
         private async Task FindServiceAsync()
         {
-            _service = await QueryPlans.PlanAnalysisClient.FindServiceAsync();
+            var service = await QueryPlans.PlanAnalysisClient.FindServiceAsync();
             if (IsDisposed) return;
 
+            // What spends the tokens is submitting, and that is what access controls: the AIUser role is what
+            // unmasks the service's API key, and without it a request is turned away.  Everything else here -
+            // reading the figures, previewing, copying the prompt to use elsewhere - is open to anyone who can
+            // see the charts.
+            if (service is { Source: AIServiceDiscovery.ServiceSource.Repository, HasApiKeyAccess: false })
+            {
+                _service = null;
+                _noServiceReason = "You don't have access to the AI service (the AIUser role), so nothing can be submitted.  " +
+                                   "Copy prompt gives you the request to use with an AI tool of your own.";
+            }
+            else
+            {
+                _service = service;
+                _noServiceReason = "No AI service is configured, so nothing can be submitted.  " +
+                                   "Copy prompt gives you the request to use with an AI tool of your own.";
+            }
+
             _serviceNote = _service is null
-                ? "No AI service is configured, so nothing can be submitted."
+                ? _noServiceReason
                 : $"Ready to submit to {_service.ServiceUrl}.  Nothing is sent until you do.";
             _submit.Enabled = CanSubmit;
             UpdateStatus();
@@ -558,7 +604,7 @@ namespace DBADashGUI.AI
         {
             if (_service is null)
             {
-                _conversation.SetCanAsk(false, "No AI service is configured, so follow-up questions cannot be asked.");
+                _conversation.SetCanAsk(false, _noServiceReason);
             }
             else if (_inFlight is not null)
             {
