@@ -116,7 +116,13 @@ namespace DBADashGUI.AI
         /// <summary>Set while the grid is being filled, so filling it is not taken for the reader changing it.</summary>
         private bool _populating;
 
-        private PerformanceAnalysisForm(int instanceId, string instance, PerformanceAnalysisFocus focus)
+        /// <summary>
+        /// Whether the window came from the global date range, whose time of day and day of week filters the
+        /// analysis does not apply.  A report with dates of its own has no such filters to leave out.
+        /// </summary>
+        private readonly bool _fromGlobalRange;
+
+        private PerformanceAnalysisForm(int instanceId, string instance, PerformanceAnalysisFocus focus, (DateTime FromUtc, DateTime ToUtc)? windowUtc)
         {
             _instanceId = instanceId;
             _instance = instance;
@@ -140,7 +146,9 @@ namespace DBADashGUI.AI
             _focus.SelectedIndex = focus == PerformanceAnalysisFocus.LatchesAndSpinlocks ? 1 : 0;
 
             BuildLayout();
-            SetWindow(DateRange.FromUTC, DateRange.ToUTC);
+            _fromGlobalRange = windowUtc is null;
+            var (fromUtc, toUtc) = windowUtc ?? (DateRange.FromUTC, DateRange.ToUTC);
+            SetWindow(fromUtc, toUtc);
             PopulateSections();
 
             _reload.Click += async (_, _) => await LoadAsync();
@@ -181,10 +189,14 @@ namespace DBADashGUI.AI
             this.ApplyTheme();
         }
 
-        /// <summary>Opens the analysis for an instance, over the range the reader is looking at.</summary>
-        internal static void Open(IWin32Window owner, int instanceId, string instance, PerformanceAnalysisFocus focus = PerformanceAnalysisFocus.General)
+        /// <summary>
+        /// Opens the analysis for an instance, over the range the reader is looking at: <paramref name="windowUtc"/>
+        /// where the report has dates of its own, the global date range otherwise.
+        /// </summary>
+        internal static void Open(IWin32Window owner, int instanceId, string instance, PerformanceAnalysisFocus focus = PerformanceAnalysisFocus.General,
+            (DateTime FromUtc, DateTime ToUtc)? windowUtc = null)
         {
-            var form = new PerformanceAnalysisForm(instanceId, instance, focus);
+            var form = new PerformanceAnalysisForm(instanceId, instance, focus, windowUtc);
             form.Show(owner);
         }
 
@@ -270,7 +282,7 @@ namespace DBADashGUI.AI
                 ? $"The range selected is longer than {PerformanceAnalysisWindow.Describe(PerformanceAnalysisWindow.MaxLength)}, so the analysis covers its last {PerformanceAnalysisWindow.Describe(PerformanceAnalysisWindow.MaxLength)}.  "
                 : string.Empty;
 
-            if (DateRange.HasTimeOfDayFilter || DateRange.HasDayOfWeekFilter)
+            if (_fromGlobalRange && (DateRange.HasTimeOfDayFilter || DateRange.HasDayOfWeekFilter))
             {
                 note += "Time of day and day of week filters are not applied to the analysis.";
             }
@@ -361,7 +373,15 @@ namespace DBADashGUI.AI
         /// <summary>Reads everything for the window in the pickers, then shows the payload it makes.</summary>
         private async Task LoadAsync()
         {
-            if (_to.Value <= _from.Value)
+            // A time in the hour the clocks skip in spring has no UTC equivalent.
+            if (!_from.Value.TryAppTimeZoneToUtc(out var fromUtc) || !_to.Value.TryAppTimeZoneToUtc(out var toUtc))
+            {
+                _loadNote = "The window starts or ends in an hour the clocks skip for daylight saving.  Move it out of that hour.";
+                UpdateStatus();
+                return;
+            }
+
+            if (toUtc <= fromUtc)
             {
                 _loadNote = "The window must end after it starts.";
                 UpdateStatus();
@@ -372,12 +392,18 @@ namespace DBADashGUI.AI
             _loading = new CancellationTokenSource();
             var token = _loading.Token;
 
-            SetWindow(_from.Value.AppTimeZoneToUtc(), _to.Value.AppTimeZoneToUtc());
-            var window = PerformanceAnalysisWindow.Create(_from.Value.AppTimeZoneToUtc(), _to.Value.AppTimeZoneToUtc());
+            SetWindow(fromUtc, toUtc);
+            var window = PerformanceAnalysisWindow.Create(fromUtc, toUtc);
 
+            // The figures shown are for the window being replaced, so nothing can be built, copied or submitted
+            // from them while the new one loads.  The conversation on screen keeps its own - _conversationPayload.
+            _data = null;
+            _payload = null;
+            _sizeNote = null;
+            _copyPrompt.Enabled = false;
+            _submit.Enabled = false;
             _reload.Enabled = false;
             _loadNote = "Loading performance data...";
-            _submit.Enabled = false;
             UpdateStatus();
             _preview.Text = string.Empty;
 
@@ -503,7 +529,8 @@ namespace DBADashGUI.AI
             // unmasks the service's API key, and without it a request is turned away.  Everything else here -
             // reading the figures, previewing, copying the prompt to use elsewhere - is open to anyone who can
             // see the charts.
-            if (service is { Source: AIServiceDiscovery.ServiceSource.Repository, HasApiKeyAccess: false })
+            // Whatever the source: a local service can carry the repository's key, and with it its access flag.
+            if (service is { HasApiKeyAccess: false })
             {
                 _service = null;
                 _noServiceReason = "You don't have access to the AI service (the AIUser role), so nothing can be submitted.  " +
@@ -537,10 +564,12 @@ namespace DBADashGUI.AI
         /// </summary>
         private async Task SubmitAsync(string question = null)
         {
-            if (_payload is null || _service is null || _inFlight is not null) return;
+            if (_service is null || _inFlight is not null) return;
 
+            // A follow-up goes with the figures its conversation started from, so it can be asked while a reload is under way.
             var continuing = question is null ? null : _current;
             if (question is not null && continuing is null) return;
+            if (question is null && _payload is null) return;
 
             var payload = continuing is null ? _payload : _conversationPayload;
 

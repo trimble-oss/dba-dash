@@ -1,4 +1,4 @@
-#nullable enable
+﻿#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -356,7 +356,17 @@ namespace DBADash.PerformanceAnalysis
                 var total = sql.Zip(other, (s, o) => s + o).ToList();
                 var max = rows.Max(r => PerformanceAnalysisTable.Double(r, "MaxCPU") ?? 0);
 
-                table.Add(period, Num(sql.Average()), Num(other.Average()), Num(total.Average()), Num(Percentile(total, 0.95)), Num(max));
+                // Weighted by samples, so a part bucket at either end of the window counts for what it holds.
+                var weights = rows.Select(r => PerformanceAnalysisTable.Double(r, "SampleCount") ?? 1).ToList();
+
+                table.Add(period, Num(WeightedAverage(sql, weights)), Num(WeightedAverage(other, weights)), Num(WeightedAverage(total, weights)),
+                    Num(Percentile(total, 0.95)), Num(max));
+            }
+
+            private static double WeightedAverage(IReadOnlyList<double> values, IReadOnlyList<double> weights)
+            {
+                var sum = weights.Sum();
+                return sum > 0 ? values.Zip(weights, (v, w) => v * w).Sum() / sum : values.Average();
             }
 
             internal static double Percentile(IReadOnlyList<double> values, double percentile)
@@ -385,11 +395,14 @@ namespace DBADash.PerformanceAnalysis
                 var total = rows.Sum(r => PerformanceAnalysisTable.Double(r, "WaitTimeMsPerSec") ?? 0);
                 var signal = rows.Sum(r => PerformanceAnalysisTable.Double(r, "SignalWaitSec") ?? 0);
                 var waited = rows.Sum(r => PerformanceAnalysisTable.Double(r, "TotalWaitSec") ?? 0);
-                var baseTotal = Baseline ? Rows(_data.WaitsBaseline).Sum(r => PerformanceAnalysisTable.Double(r, "WaitTimeMsPerSec") ?? 0) : (double?)null;
+                // No rows at all for the baseline is no history - a newly monitored instance - not a week without waits.
+                var hasBaseline = HasRows(_data.WaitsBaseline);
+                var baseTotal = Baseline && hasBaseline ? Rows(_data.WaitsBaseline).Sum(r => PerformanceAnalysisTable.Double(r, "WaitTimeMsPerSec") ?? 0) : (double?)null;
 
                 text.AppendLine("Benign waits are already excluded.  ms_per_sec is wait time per second of elapsed time; critical marks waits DBA Dash flags as critical.");
                 text.AppendLine($"All waits: {Num(total)} ms/sec, signal waits {Num(waited == 0 ? 0 : signal * 100 / waited)}% of wait time." +
-                                (baseTotal is { } bt ? $"  Baseline: {Num(bt)} ms/sec ({Change(total, bt)})." : string.Empty));
+                                (baseTotal is { } bt ? $"  Baseline: {Num(bt)} ms/sec ({Change(total, bt)})." :
+                                    Baseline ? "  Baseline: no wait stats were collected, so there is nothing to compare with." : string.Empty));
                 text.AppendLine($"Top {Math.Min(top, rows.Count)} of {rows.Count} wait types:");
 
                 var table = Baseline
@@ -415,7 +428,8 @@ namespace DBADash.PerformanceAnalysis
 
                     if (Baseline)
                     {
-                        var before = baseline.TryGetValue(type, out var b) ? PerformanceAnalysisTable.Double(b, "WaitTimeMsPerSec") ?? 0 : 0;
+                        // Within a baseline that has waits, one that is missing did not happen.
+                        double? before = !hasBaseline ? null : baseline.TryGetValue(type, out var b) ? PerformanceAnalysisTable.Double(b, "WaitTimeMsPerSec") ?? 0 : 0;
                         values.Add(Num(before));
                         values.Add(Change(msPerSec, before));
                     }
@@ -638,7 +652,8 @@ namespace DBADash.PerformanceAnalysis
             {
                 var rows = Rows(_data.Blocking).ToList();
                 var summary = BlockingSummary(rows);
-                text.AppendLine("From blocking snapshots taken with the running queries collection.  Blocked wait is the total wait of every blocked session in the snapshot.");
+                text.AppendLine("From blocking snapshots taken with the running queries collection.  Blocked wait is the total wait of every blocked session in the snapshot - " +
+                                "how long each has been waiting so far, so a block that lasts is seen again, longer, in each snapshot.  Snapshots are not additive.");
                 text.AppendLine($"Window: {summary}");
                 if (Baseline) text.AppendLine($"Baseline: {BlockingSummary(Rows(_data.BlockingBaseline).ToList())}");
 
@@ -662,9 +677,9 @@ namespace DBADash.PerformanceAnalysis
                 if (rows.Count == 0) return "no blocking snapshots.";
 
                 var count = rows.Count >= _data.BlockingSnapshotLimit ? $"at least {rows.Count:N0}" : $"{rows.Count:N0}";
-                var wait = rows.Sum(r => PerformanceAnalysisTable.Double(r, "BlockedWaitTime") ?? 0) / 1000;
+                var wait = rows.Max(r => PerformanceAnalysisTable.Double(r, "BlockedWaitTime") ?? 0) / 1000;
                 var sessions = rows.Max(r => PerformanceAnalysisTable.Double(r, "BlockedSessionCount") ?? 0);
-                return $"{count} snapshots with blocking, {Num(wait)} sec of blocked wait in total, at most {Num(sessions)} sessions blocked at once.";
+                return $"{count} snapshots with blocking, at most {Num(wait)} sec of blocked wait in one snapshot, at most {Num(sessions)} sessions blocked at once.";
             }
 
             private void ObjectExecution(StringBuilder text, PerformanceSectionOptions section)
@@ -678,18 +693,19 @@ namespace DBADash.PerformanceAnalysis
                     .ToList();
                 var leftOut = all.Count - rows.Count;
 
+                var leftOutNote = $"Left out: {string.Join(", ", IdleWaitObjects.Select(o => $"{o.Schema}.{o.Name}"))} - DBA Dash's own messaging, which waits on WAITFOR (RECEIVE) and so shows as duration without doing any work.";
                 if (rows.Count == 0)
                 {
-                    text.AppendLine("No object execution stats were collected in this window.");
+                    text.AppendLine(leftOut > 0
+                        ? "No object recorded any duration in this window, apart from what is left out."
+                        : "No object execution stats were collected in this window.");
+                    if (leftOut > 0) text.AppendLine(leftOutNote);
                     return;
                 }
 
                 var top = Top(section, 10);
                 text.AppendLine("Stored procedures, functions and triggers.  duration_ms_per_sec is the time spent in the object per second of elapsed time - its share of the workload.");
-                if (leftOut > 0)
-                {
-                    text.AppendLine($"Left out: {string.Join(", ", IdleWaitObjects.Select(o => $"{o.Schema}.{o.Name}"))} - DBA Dash's own messaging, which waits on WAITFOR (RECEIVE) and so shows as duration without doing any work.");
-                }
+                if (leftOut > 0) text.AppendLine(leftOutNote);
 
                 text.AppendLine($"Top {Math.Min(top, rows.Count)} of {rows.Count} objects by duration:");
 

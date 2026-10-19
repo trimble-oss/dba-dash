@@ -132,6 +132,20 @@ namespace DBADash.Test
         }
 
         [TestMethod]
+        public void Waits_NoBaselineHistory_IsNotAWeekWithoutWaits()
+        {
+            // A newly monitored instance has no week-earlier rows: that is no history, not a regression in every wait.
+            var data = Data();
+            data.Waits = Waits(("WRITELOG", 40), ("PAGEIOLATCH_SH", 100));
+            data.WaitsBaseline = Waits();
+
+            var waits = Section(Build(data), PerformanceSection.Waits);
+
+            Assert.IsFalse(waits.Contains("new", StringComparison.Ordinal));
+            StringAssert.Contains(waits, "Baseline: no wait stats were collected");
+        }
+
+        [TestMethod]
         public void Baseline_Off_LeavesOutEveryBaselineColumn()
         {
             var data = Data();
@@ -161,6 +175,48 @@ namespace DBADash.Test
 
             options[PerformanceSection.CPU].TimeSeries = false;
             Assert.IsFalse(Section(Build(data, options), PerformanceSection.CPU).Contains("Over time:"));
+        }
+
+        [TestMethod]
+        public void Cpu_AveragesAreWeightedBySamples()
+        {
+            // A part bucket at the edge of the window holds fewer samples and counts for less.
+            var data = Data();
+            data.Cpu = Cpu(To.AddHours(-1), (10, 0, 10), (70, 0, 70));
+            data.Cpu.Columns.Add("SampleCount", typeof(int));
+            data.Cpu.Rows[0]["SampleCount"] = 30;
+            data.Cpu.Rows[1]["SampleCount"] = 10;
+            var options = PerformanceAnalysisOptions.Defaults(PerformanceAnalysisFocus.General);
+            options.IncludeBaseline = false;
+
+            StringAssert.Contains(Section(Build(data, options), PerformanceSection.CPU), "window | 25 | 0 | 25 |");
+        }
+
+        private static DataTable Blocking(params (int Sessions, long WaitMs)[] snapshots)
+        {
+            var table = new DataTable();
+            table.Columns.Add("SnapshotDateUTC", typeof(DateTime));
+            table.Columns.Add("BlockedSessionCount", typeof(int));
+            table.Columns.Add("BlockedWaitTime", typeof(long));
+            for (var i = 0; i < snapshots.Length; i++)
+            {
+                table.Rows.Add(To.AddMinutes(-snapshots.Length + i), snapshots[i].Sessions, snapshots[i].WaitMs);
+            }
+
+            return table;
+        }
+
+        [TestMethod]
+        public void Blocking_SnapshotsAreNotAdded()
+        {
+            // One session seen 10, 20 and 30 seconds into the same block is 30 seconds of blocking, not 60.
+            var data = Data();
+            data.Blocking = Blocking((1, 10_000), (1, 20_000), (1, 30_000));
+
+            var blocking = Section(Build(data), PerformanceSection.Blocking);
+
+            StringAssert.Contains(blocking, "at most 30 sec of blocked wait in one snapshot");
+            Assert.IsFalse(blocking.Contains("60", StringComparison.Ordinal));
         }
 
         [TestMethod]
@@ -265,6 +321,18 @@ namespace DBADash.Test
             Assert.IsFalse(objects.Contains("DBADashDB.Messaging.ReceiveMessageToService"));
             StringAssert.Contains(objects, "Left out: Messaging.ReceiveMessageToService");
             StringAssert.Contains(objects, "Top 1 of 1 objects");
+        }
+
+        [TestMethod]
+        public void ObjectExecution_OnlyTheMessagingReceive_SaysItWasLeftOutRatherThanNotCollected()
+        {
+            var data = Data();
+            data.ObjectExecution = Objects(("Messaging", "ReceiveMessageToService", 900));
+
+            var objects = Section(Build(data), PerformanceSection.ObjectExecution);
+
+            Assert.IsFalse(objects.Contains("were collected", StringComparison.Ordinal));
+            StringAssert.Contains(objects, "Left out: Messaging.ReceiveMessageToService");
         }
 
         [TestMethod]

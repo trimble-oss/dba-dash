@@ -1433,7 +1433,7 @@ namespace DBADashGUI.CustomReports
         /// filtered by date at all, so bounding its charts by the global range would hide its data rather than
         /// frame it.  The last case is why this returns null rather than falling back.</para>
         /// </summary>
-        private (DateTime FromUtc, DateTime ToUtc)? GetReportDateRangeUtc()
+        internal (DateTime FromUtc, DateTime ToUtc)? GetReportDateRangeUtc()
         {
             DateTime? ParamValue(string name) =>
                 customParams?.FirstOrDefault(p =>

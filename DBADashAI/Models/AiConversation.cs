@@ -29,8 +29,14 @@ namespace DBADashAI.Models
         /// Checks the conversation is one the service can send on, returning the reason it isn't.
         /// The artifact itself is the caller's business to validate - this is only about the turns.
         /// </summary>
-        public static string? Validate(List<AiConversationTurn> history, string? question)
+        public static string? Validate(List<AiConversationTurn>? history, string? question)
         {
+            // An explicit null in the JSON replaces the empty list the request starts with.
+            if (history is null || history.Any(t => t is null))
+            {
+                return "The conversation, when supplied, is a list of turns.";
+            }
+
             if (history.Count > MaxTurns)
             {
                 return $"The conversation exceeds {MaxTurns} turns.  Start a new analysis.";

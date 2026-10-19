@@ -638,7 +638,8 @@ namespace DBADashGUI
                     return;
                 }
 
-                PerformanceAnalysisForm.Open(view.FindForm(), context.InstanceID, context.InstanceName, focus);
+                // The report's own dates, which the reader can override in its parameters, rather than the global range.
+                PerformanceAnalysisForm.Open(view.FindForm(), context.InstanceID, context.InstanceName, focus, view.GetReportDateRangeUtc());
             };
 
             view.ToolStrip.Items.Add(button);
