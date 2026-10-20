@@ -20,7 +20,7 @@ SELECT I.InstanceID,
 	SSD.SnapshotDate,
 	SSD.Status AS SnapshotAgeStatus,
 	chk.Status,
-	CASE WHEN excl.DatabaseName IS NOT NULL THEN 'N/A (Excluded)' WHEN utc.create_date_utc > DATEADD(mi,-cfg.NewDatabaseExcludePeriodMin,GETUTCDATE()) THEN 'N/A (New Database)' WHEN chk.Status = 1 THEN 'Critical' WHEN chk.Status = 2 THEN 'Warning' WHEN chk.Status = 3 THEN 'N/A' WHEN chk.Status = 4 THEN 'OK' ELSE 'N/A' END AS StatusDescription,
+	CASE WHEN excl.DatabaseName IS NOT NULL THEN 'N/A (Excluded)' WHEN nd.IsNewDatabase=1 THEN 'N/A (New Database)' WHEN chk.Status = 1 THEN 'Critical' WHEN chk.Status = 2 THEN 'Warning' WHEN chk.Status = 3 THEN 'N/A' WHEN chk.Status = 4 THEN 'OK' ELSE 'N/A' END AS StatusDescription,
 	LR.last_file,
 	D.state_desc,
 	CASE WHEN cfg.InstanceID=D.InstanceID AND cfg.DatabaseID=D.DatabaseID THEN 'Database' WHEN cfg.InstanceID = D.InstanceID THEN 'Instance' ELSE 'Root' END AS ThresholdConfiguredLevel,
@@ -29,7 +29,8 @@ SELECT I.InstanceID,
 	pri.PrimaryInstanceID,
 	pri.PrimaryInstanceDisplayName,
 	CASE WHEN excl.DatabaseName IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS IsExcluded,
-	CASE WHEN excl.DatabaseName IS NULL THEN NULL ELSE CONCAT(excl.DatabaseName,CASE WHEN excl.InstanceID = -1 THEN ' (Root)' ELSE ' (Instance)' END) END AS ExcludedBy
+	CASE WHEN excl.DatabaseName IS NULL THEN NULL ELSE CONCAT(excl.DatabaseName,CASE WHEN excl.InstanceID = -1 THEN ' (Root)' ELSE ' (Instance)' END) END AS ExcludedBy,
+	nd.IsNewDatabase
 FROM dbo.Instances I
 JOIN dbo.Databases D ON I.InstanceID = D.InstanceID
 JOIN dbo.CollectionDatesStatus SSD ON SSD.InstanceID = I.InstanceID AND SSD.Reference='LogRestores'
@@ -60,8 +61,10 @@ OUTER APPLY(SELECT TOP(1) X.InstanceID,
 			AND D.name LIKE REPLACE(REPLACE(X.DatabaseName,'[','[[]'),'_','[_]')
 			ORDER BY X.InstanceID DESC,X.DatabaseName
 			) excl
+/* Created within the new database exclude period.  Excluded databases take precedence */
+OUTER APPLY(SELECT CASE WHEN excl.DatabaseName IS NULL AND utc.create_date_utc > DATEADD(mi,-cfg.NewDatabaseExcludePeriodMin,GETUTCDATE()) THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS IsNewDatabase) nd
 OUTER APPLY(SELECT CASE WHEN excl.DatabaseName IS NOT NULL THEN 3
-	WHEN utc.create_date_utc > DATEADD(mi,-cfg.NewDatabaseExcludePeriodMin,GETUTCDATE()) THEN 3
+	WHEN nd.IsNewDatabase=1 THEN 3
 	WHEN l.TimeSinceLast >cfg.TimeSinceLastCriticalThreshold THEN 1
 	WHEN l.TimeSinceLast IS NULL AND cfg.TimeSinceLastCriticalThreshold IS NOT NULL THEN 1
 	WHEN l.LatencyOfLast IS NULL AND cfg.LatencyCriticalThreshold IS NOT NULL THEN 1
@@ -113,7 +116,7 @@ SELECT SI.InstanceID,
 	SSD.SnapshotDate,
 	SSD.Status AS SnapshotAgeStatus,
 	chk.Status,
-	CASE WHEN excl.DatabaseName IS NOT NULL THEN 'Missing (Excluded)' WHEN chk.Status = 3 THEN 'Missing (New Database)' ELSE 'Missing' END AS StatusDescription,
+	CASE WHEN excl.DatabaseName IS NOT NULL THEN 'Missing (Excluded)' WHEN nd.IsNewDatabase=1 THEN 'Missing (New Database)' ELSE 'Missing' END AS StatusDescription,
 	NULL AS last_file,
 	SD.state_desc,
 	CASE WHEN cfg.InstanceID = SI.InstanceID THEN 'Instance' ELSE 'Root' END AS ThresholdConfiguredLevel,
@@ -122,7 +125,8 @@ SELECT SI.InstanceID,
 	P.PrimaryInstanceID,
 	PI.InstanceDisplayName AS PrimaryInstanceDisplayName,
 	CASE WHEN excl.DatabaseName IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS IsExcluded,
-	CASE WHEN excl.DatabaseName IS NULL THEN NULL ELSE CONCAT(excl.DatabaseName,CASE WHEN excl.InstanceID = -1 THEN ' (Root)' ELSE ' (Instance)' END) END AS ExcludedBy
+	CASE WHEN excl.DatabaseName IS NULL THEN NULL ELSE CONCAT(excl.DatabaseName,CASE WHEN excl.InstanceID = -1 THEN ' (Root)' ELSE ' (Instance)' END) END AS ExcludedBy,
+	nd.IsNewDatabase
 FROM dbo.LogShippingPairs P
 JOIN dbo.Instances PI ON P.PrimaryInstanceID = PI.InstanceID
 JOIN dbo.Instances SI ON P.SecondaryInstanceID = SI.InstanceID
@@ -147,8 +151,10 @@ OUTER APPLY(SELECT TOP(1) X.InstanceID,
 			AND PD.name LIKE REPLACE(REPLACE(X.DatabaseName,'[','[[]'),'_','[_]')
 			ORDER BY X.InstanceID DESC,X.DatabaseName
 			) excl
+/* Created within the new database exclude period.  Excluded databases take precedence */
+OUTER APPLY(SELECT CASE WHEN excl.DatabaseName IS NULL AND utc.create_date_utc > DATEADD(mi,-cfg.NewDatabaseExcludePeriodMin,GETUTCDATE()) THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS IsNewDatabase) nd
 OUTER APPLY(SELECT CASE WHEN excl.DatabaseName IS NOT NULL THEN 3
-					WHEN utc.create_date_utc > DATEADD(mi,-cfg.NewDatabaseExcludePeriodMin,GETUTCDATE()) THEN 3
+					WHEN nd.IsNewDatabase=1 THEN 3
 					ELSE 1 END AS Status) chk
 WHERE PI.IsActive=1
 AND SI.IsActive=1

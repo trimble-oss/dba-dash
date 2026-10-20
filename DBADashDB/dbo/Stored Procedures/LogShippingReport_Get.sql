@@ -73,8 +73,17 @@ SELECT LS.InstanceID,
        LS.InstanceLevelThreshold,
        LS.DatabaseLevelThresholds,
        CAST('Configure' AS NVARCHAR(20)) AS Configure,
-       LS.MissingCount
+       LS.MissingCount,
+       LS.NewDatabaseCount,
+       pri.PrimaryInstances
 FROM dbo.LogShippingStatusSummary LS
+/* Primary instance(s) configured for the instance in dbo.LogShippingPairs.  NULL if not configured */
+OUTER APPLY(SELECT STRING_AGG(PI.InstanceDisplayName,', ') WITHIN GROUP (ORDER BY PI.InstanceDisplayName) AS PrimaryInstances
+			FROM dbo.LogShippingPairs P
+			JOIN dbo.Instances PI ON P.PrimaryInstanceID = PI.InstanceID
+			WHERE P.SecondaryInstanceID = LS.InstanceID
+			AND PI.IsActive=1
+			) pri
 WHERE EXISTS(SELECT 1 FROM @Instances I WHERE I.InstanceID = LS.InstanceID)
 AND (LS.ShowInSummary=1 OR @ShowHidden=1)
 ORDER BY LS.Status,LS.MaxTotalTimeBehind DESC
