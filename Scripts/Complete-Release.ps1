@@ -28,7 +28,7 @@
     Each step can be run again on its own if one fails.  Run again, this script skips signing when the signed zips are already
     in the release, and rebuilds and replaces the installers.
 
-    Requires PowerShell 7, the GitHub CLI (gh), authenticated, and the Trimble signing tool (SignFiles.exe), which works only on
+    Requires PowerShell 7.4, the GitHub CLI (gh), authenticated, and the Trimble signing tool (SignFiles.exe), which works only on
     the corporate network.
 .PARAMETER Version
     The draft release, e.g. 4.21.0.  Defaults to the latest draft release.
@@ -44,7 +44,7 @@
 .EXAMPLE
     ./Scripts/Complete-Release.ps1
 #>
-#Requires -Version 7.2
+#Requires -Version 7.4
 [CmdletBinding()]
 param (
     [string]$Version,
@@ -93,6 +93,8 @@ $tag = $draft.tag_name
 Write-Host "Draft release $tag" -ForegroundColor Green
 
 $build = Join-Path (Split-Path -Parent $PSScriptRoot) "DBADashBuild"
+# For the installers' logs, when signing - which would otherwise create it - is skipped
+New-Item $build -ItemType Directory -Force | Out-Null
 # The signed zips, kept from signing for the installers
 $signedZips = Join-Path $build "SignedZips"
 if (Test-Path $signedZips) { Remove-Item $signedZips -Recurse -Force }

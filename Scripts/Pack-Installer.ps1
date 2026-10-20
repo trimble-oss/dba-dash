@@ -61,7 +61,7 @@
 .EXAMPLE
     ./Scripts/Pack-Installer.ps1 -App GUI -Upload
 #>
-#Requires -Version 7.2
+#Requires -Version 7.4
 [CmdletBinding(SupportsShouldProcess)]
 param (
     [Parameter(Mandatory)]
@@ -99,6 +99,8 @@ $apps = @{
 }
 $cfg = $apps[$App]
 if (-not $OutputFolder) { $OutputFolder = Join-Path $repoRoot "DBADashBuild\$($App)Installer" }
+# Full paths: .NET, vpk, the sign tool and the parallel workers don't resolve a relative one against PowerShell's location
+$OutputFolder = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($OutputFolder)
 $icon = Join-Path $repoRoot $cfg.Icon
 # The installers' artwork, <art>_Splash.png and so on, drawn from the app's logo by Scripts/InstallerArt.cs
 $art = Join-Path $repoRoot $cfg.Art
@@ -136,7 +138,7 @@ try {
         }
         if ($Version -and $Version -ne $Matches[1]) { throw "$ZipPath is version $($Matches[1]), not $Version." }
         $tag = $Matches[1]
-        $zip = $ZipPath
+        $zip = (Resolve-Path -LiteralPath $ZipPath).ProviderPath
         $alreadySigned = -not $Matches[2]
         if ($Upload -and -not $alreadySigned) { throw "-Upload with -ZipPath needs the signed zip, not the -unsigned one." }
     }
