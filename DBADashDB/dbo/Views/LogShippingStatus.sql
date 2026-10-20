@@ -34,12 +34,30 @@ SELECT I.InstanceID,
 FROM dbo.Instances I
 JOIN dbo.Databases D ON I.InstanceID = D.InstanceID
 JOIN dbo.CollectionDatesStatus SSD ON SSD.InstanceID = I.InstanceID AND SSD.Reference='LogRestores'
-LEFT JOIN dbo.LogRestores LR ON LR.DatabaseID = D.DatabaseID AND LR.InstanceID = D.InstanceID
-OUTER APPLY(SELECT TOP(1) T.* 
-			FROM dbo.LogRestoreThresholds T 
-			WHERE (D.InstanceID = T.InstanceID OR T.InstanceID = -1)
-			AND (D.DatabaseID = T.DatabaseID  OR T.DatabaseID = -1)
-			ORDER BY InstanceID DESC,DatabaseID DESC
+/*
+	PK seek per database.  As a LEFT JOIN the optimizer can choose a many-to-many merge join on InstanceID alone
+	(DatabaseID as a residual), which is very slow for instances with thousands of log shipped databases.
+*/
+OUTER APPLY(SELECT TOP(1) R.restore_date,
+					R.backup_start_date,
+					R.last_file,
+					R.backup_time_zone
+			FROM dbo.LogRestores R
+			WHERE R.InstanceID = D.InstanceID
+			AND R.DatabaseID = D.DatabaseID
+			) LR
+/*
+	Most specific threshold: database, instance, root database, root.
+	PK seeks for each candidate in priority order (stopping at the first match) rather than a scan + sort of all thresholds for each database.
+*/
+OUTER APPLY(SELECT TOP(1) T.*
+			FROM (VALUES(1,D.InstanceID,D.DatabaseID),
+						(2,D.InstanceID,-1),
+						(3,-1,D.DatabaseID),
+						(4,-1,-1)
+				) K(Priority,InstanceID,DatabaseID)
+			JOIN dbo.LogRestoreThresholds T ON T.InstanceID = K.InstanceID AND T.DatabaseID = K.DatabaseID
+			ORDER BY K.Priority
 			) cfg
 OUTER APPLY(SELECT DATEADD(mi,ISNULL(NULLIF(-LR.backup_time_zone,127)*15,I.UTCOffset),LR.backup_start_date) AS backup_start_date_utc,
 				DATEADD(mi,I.UTCOffset,LR.restore_date) AS restore_date_utc,
@@ -53,13 +71,16 @@ OUTER APPLY dbo.SecondsToHumanDuration(l.TimeSinceLast*60.0) AS TimeSinceLastHD
 OUTER APPLY dbo.SecondsToHumanDuration(l.LatencyOfLast*60.0) AS LatencyOfLastHD
 OUTER APPLY dbo.SecondsToHumanDuration(l.TotalTimeBehind*60.0) AS TotalTimeBehindHD
 OUTER APPLY dbo.SecondsToHumanDuration(l.SnapshotAge*60.0) AS SnapshotAgeHD
-/* Database exclusions at instance or root level.  Only % is treated as a wildcard. [ and _ are escaped as they are valid in database names */
+/*
+	Database exclusions at instance or root level.  Only % is treated as a wildcard. [ and _ are escaped as they are valid in database names.
+	Instance level takes precedence.  PK seeks for each level rather than a scan + sort of all exclusions for each database.
+*/
 OUTER APPLY(SELECT TOP(1) X.InstanceID,
 					X.DatabaseName
-			FROM dbo.LogShippingExclusions X
-			WHERE (X.InstanceID = D.InstanceID OR X.InstanceID = -1)
-			AND D.name LIKE REPLACE(REPLACE(X.DatabaseName,'[','[[]'),'_','[_]')
-			ORDER BY X.InstanceID DESC,X.DatabaseName
+			FROM (VALUES(1,D.InstanceID),(2,-1)) K(Priority,InstanceID)
+			JOIN dbo.LogShippingExclusions X ON X.InstanceID = K.InstanceID
+			WHERE D.name LIKE REPLACE(REPLACE(X.DatabaseName,'[','[[]'),'_','[_]')
+			ORDER BY K.Priority,X.DatabaseName
 			) excl
 /* Created within the new database exclude period.  Excluded databases take precedence */
 OUTER APPLY(SELECT CASE WHEN excl.DatabaseName IS NULL AND utc.create_date_utc > DATEADD(mi,-cfg.NewDatabaseExcludePeriodMin,GETUTCDATE()) THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS IsNewDatabase) nd
@@ -73,7 +94,10 @@ OUTER APPLY(SELECT CASE WHEN excl.DatabaseName IS NOT NULL THEN 3
 	WHEN l.LatencyOfLast > cfg.LatencyWarningThreshold THEN 2
 	WHEN cfg.LatencyCriticalThreshold IS NULL AND cfg.TimeSinceLastCriticalThreshold IS NULL AND cfg.LatencyWarningThreshold IS NULL AND cfg.TimeSinceLastWarningThreshold IS NULL  THEN 3
 	ELSE 4 END AS Status) chk
-/* Primary instance for the database if the instance is configured as a secondary in dbo.LogShippingPairs */
+/*
+	Primary instance for the database if the instance is configured as a secondary in dbo.LogShippingPairs.
+	If more than one primary has the database, the lowest PrimaryInstanceID is used - index order, so no sort per database.
+*/
 OUTER APPLY(SELECT TOP(1) P.PrimaryInstanceID,
 					PI.InstanceDisplayName AS PrimaryInstanceDisplayName
 			FROM dbo.LogShippingPairs P
@@ -82,7 +106,7 @@ OUTER APPLY(SELECT TOP(1) P.PrimaryInstanceID,
 			WHERE P.SecondaryInstanceID = I.InstanceID
 			AND PI.IsActive=1
 			AND PD.IsActive=1
-			ORDER BY PI.InstanceDisplayName
+			ORDER BY P.PrimaryInstanceID
 			) pri
 WHERE (D.state =1 OR D.is_in_standby=1)
 AND D.IsActive=1
@@ -143,13 +167,13 @@ OUTER APPLY(SELECT TOP(1) T.*
 OUTER APPLY(SELECT DATEADD(mi,PI.UTCOffset,PD.create_date) AS create_date_utc) AS utc
 OUTER APPLY(SELECT DATEDIFF_BIG(s,SSD.SnapshotDate,GETUTCDATE())/60.0 AS SnapshotAge) l
 OUTER APPLY dbo.SecondsToHumanDuration(l.SnapshotAge*60.0) AS SnapshotAgeHD
-/* Database exclusions at instance or root level.  Only % is treated as a wildcard. [ and _ are escaped as they are valid in database names */
+/* Database exclusions at instance or root level - see above */
 OUTER APPLY(SELECT TOP(1) X.InstanceID,
 					X.DatabaseName
-			FROM dbo.LogShippingExclusions X
-			WHERE (X.InstanceID = SI.InstanceID OR X.InstanceID = -1)
-			AND PD.name LIKE REPLACE(REPLACE(X.DatabaseName,'[','[[]'),'_','[_]')
-			ORDER BY X.InstanceID DESC,X.DatabaseName
+			FROM (VALUES(1,SI.InstanceID),(2,-1)) K(Priority,InstanceID)
+			JOIN dbo.LogShippingExclusions X ON X.InstanceID = K.InstanceID
+			WHERE PD.name LIKE REPLACE(REPLACE(X.DatabaseName,'[','[[]'),'_','[_]')
+			ORDER BY K.Priority,X.DatabaseName
 			) excl
 /* Created within the new database exclude period.  Excluded databases take precedence */
 OUTER APPLY(SELECT CASE WHEN excl.DatabaseName IS NULL AND utc.create_date_utc > DATEADD(mi,-cfg.NewDatabaseExcludePeriodMin,GETUTCDATE()) THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS IsNewDatabase) nd
