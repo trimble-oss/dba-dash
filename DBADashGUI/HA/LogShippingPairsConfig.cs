@@ -2,6 +2,7 @@ using DBADashGUI.CustomReports;
 using DBADashGUI.Theme;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
@@ -34,6 +35,10 @@ namespace DBADashGUI.LogShipping
 
         /// <summary>True if any pairs were added, updated or removed.</summary>
         public bool HasChanges { get; private set; }
+
+        /// <summary>Optional secondary instance to pre-select in the editor when the dialog opens (Set Primary).</summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public int? SecondaryInstanceID { get; init; }
 
         public LogShippingPairsConfig()
         {
@@ -144,6 +149,10 @@ namespace DBADashGUI.LogShipping
                 cboPrimary.Items.AddRange(instances.Cast<object>().ToArray());
                 cboSecondary.Items.AddRange(instances.Cast<object>().ToArray());
                 RefreshPairs();
+                if (SecondaryInstanceID.HasValue)
+                {
+                    SelectSecondary(SecondaryInstanceID.Value);
+                }
             }
             catch (Exception ex)
             {
@@ -211,6 +220,23 @@ namespace DBADashGUI.LogShipping
                 isUpdatingEditor = false;
             }
             UpdateButtons();
+        }
+
+        /// <summary>Starts a new pair for the secondary instance, leaving the primary to be selected.</summary>
+        private void SelectSecondary(int secondaryInstanceID)
+        {
+            ClearEditor();
+            isUpdatingEditor = true;
+            try
+            {
+                cboSecondary.SelectedItem = instances.FirstOrDefault(i => i.InstanceID == secondaryInstanceID);
+            }
+            finally
+            {
+                isUpdatingEditor = false;
+            }
+            UpdateButtons();
+            cboPrimary.Select();
         }
 
         /// <summary>Selects the grid row for the pair (or clears the selection) without reloading the editor.</summary>
