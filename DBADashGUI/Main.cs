@@ -170,29 +170,11 @@ namespace DBADashGUI
                         // Added to the tree before anything reads its Context, which is cached on first use and
                         // takes the instance name (and so MasterInstanceID, used for the elastic pool) from the parent
                         AzureNode.Nodes.Add(azureDBNode);
-                        azureDBNode.Nodes.AddRange(new TreeNode[] {
-                            new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration),
-                            new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks)
-                        });
-                        // Extended Events is database-scoped for Azure SQL DB, so the node hangs off the individual
-                        // database rather than the (logical) Azure instance.  Same gating as regular instances.
-                        if (azureDBNode.Context.IsXESupported && azureDBNode.Context.CanMessage && (DBADashUser.AllowManageXE || DBADashUser.AllowWatchXE || DBADashUser.AllowAdhocXE))
-                        {
-                            azureDBNode.Nodes.Add(new SQLTreeItem("Extended Events", SQLTreeItem.TreeType.ExtendedEvents)
-                            { InstanceID = azureDBNode.InstanceID });
-                        }
-                        // Deadlock collection on Azure SQL Database is per database - the session is database
-                        // scoped - so the database node is where its deadlocks belong.  Added before the
-                        // database folders so it sits in the same place as on a regular instance: after the
-                        // instance's own nodes, ahead of Reports.  Not on master, which carries no user
-                        // workload and cannot hold a database scoped session, so it could only ever be empty.
-                        if (!string.Equals(db, "master", StringComparison.InvariantCultureIgnoreCase))
-                        {
-                            azureDBNode.AddDeadlocksFolder(reports?.InstanceLevelReports);
-                        }
-                        // The query stats reports are the Query Stats tab on this node, as on an instance node
-                        azureDBNode.AddDatabaseFolders(reports?.DatabaseLevelReports
-                            .Where(r => !QueryStatsReportProcedures.Contains(r.ProcedureName)));
+                        // Child nodes are added on expand (ExpandAzureDatabase), as for a regular instance.  Each
+                        // database has dozens of them and the cost of destroying the tree (closing the app, refresh,
+                        // search) grows faster than the node count, so populating them up front made the GUI slow
+                        // to close/refresh with thousands of Azure DBs.  See issue #1837.
+                        azureDBNode.AddDummyNode();
                         azureDBNode.AddInstanceActionsContextMenu();
                     }
                     else
@@ -1544,6 +1526,33 @@ namespace DBADashGUI
             instanceNode.AddCustomToolsFolder();
         }
 
+        private void ExpandAzureDatabase(SQLTreeItem azureDBNode)
+        {
+            azureDBNode.Nodes.AddRange(new TreeNode[] {
+                new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration),
+                new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks)
+            });
+            // Extended Events is database-scoped for Azure SQL DB, so the node hangs off the individual
+            // database rather than the (logical) Azure instance.  Same gating as regular instances.
+            if (azureDBNode.Context.IsXESupported && azureDBNode.Context.CanMessage && (DBADashUser.AllowManageXE || DBADashUser.AllowWatchXE || DBADashUser.AllowAdhocXE))
+            {
+                azureDBNode.Nodes.Add(new SQLTreeItem("Extended Events", SQLTreeItem.TreeType.ExtendedEvents)
+                { InstanceID = azureDBNode.InstanceID });
+            }
+            // Deadlock collection on Azure SQL Database is per database - the session is database
+            // scoped - so the database node is where its deadlocks belong.  Added before the
+            // database folders so it sits in the same place as on a regular instance: after the
+            // instance's own nodes, ahead of Reports.  Not on master, which carries no user
+            // workload and cannot hold a database scoped session, so it could only ever be empty.
+            if (!string.Equals(azureDBNode.DatabaseName, "master", StringComparison.InvariantCultureIgnoreCase))
+            {
+                azureDBNode.AddDeadlocksFolder(customReports?.InstanceLevelReports);
+            }
+            // The query stats reports are the Query Stats tab on this node, as on an instance node
+            azureDBNode.AddDatabaseFolders(customReports?.DatabaseLevelReports
+                .Where(r => !QueryStatsReportProcedures.Contains(r.ProcedureName)));
+        }
+
         private static void ExpandStorage(SQLTreeItem storage)
         {
             var drives = CommonData.GetDrives(storage.InstanceIDs, false, true, true, true, true, true, null);
@@ -2066,6 +2075,10 @@ namespace DBADashGUI
                 {
                     case SQLTreeItem.TreeType.Instance:
                         ExpandInstance(n);
+                        break;
+
+                    case SQLTreeItem.TreeType.AzureDatabase:
+                        ExpandAzureDatabase(n);
                         break;
 
                     case SQLTreeItem.TreeType.DatabasesFolder:
