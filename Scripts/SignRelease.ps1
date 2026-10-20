@@ -6,14 +6,14 @@
   The zips are downloaded, signed and uploaded in parallel.  An executable that is in more than one zip - the same file, by its
   hash - is signed once and copied to the others.
 
-  Requires PowerShell 7, GitHub CLI (gh) and Trimble signing tool (SignFiles.exe).
+  Requires PowerShell 7.4, GitHub CLI (gh) and Trimble signing tool (SignFiles.exe).
   GitHub CLI needs to be authenticated with the repository.
   Trimble signing tool requires authentication & works only on the corporate network.
 
   Usage:
     .\SignRelease.ps1 -Folder "C:\temp" -Repo "trimble-oss/dba-dash" -SignTool "C:\Sign\SignFiles.exe" -SignPattern "DBADash*.exe" -RemoveUnsigned $true
 #>
-#Requires -Version 7.2
+#Requires -Version 7.4
 param (
     # Temp folder to use for signing.  A SignTemp sub folder will be created in this folder & a separate folder used for each run.  Folders are deleted after successful signing.
     # Old folders in the SignTemp folder are deleted after 1 day.
@@ -67,8 +67,8 @@ $releaseTag = $DraftRelease.tag_name
 
 # Create temp folder
 $signTempFolder = Join-Path $folder "SignTemp"
-$tempFolder = Join-Path $signTempFolder ("SignTemp-" + [guid]::NewGuid().ToString())
-New-Item -Path $tempFolder -ItemType Directory -Force | Out-Null
+# Its full path: ZipFile, the sign tool and the parallel workers don't resolve a relative one against PowerShell's location
+$tempFolder = (New-Item -Path (Join-Path $signTempFolder ("SignTemp-" + [guid]::NewGuid().ToString())) -ItemType Directory -Force).FullName
 
 ## Clean up old folders in the sign temp folder
 Write-Host "Cleaning up old folders in $signTempFolder..." -ForegroundColor Cyan
@@ -79,9 +79,9 @@ Get-ChildItem -Path $signTempFolder -Directory |
 
 function Get-AssetList {
     # By id: a draft release can't be looked up by its tag.  --jq rather than ConvertFrom-Json, as --paginate runs the pages together.
-    $lines = @(gh api "repos/$repo/releases/$($DraftRelease.id)/assets?per_page=100" --paginate --jq '.[] | "\(.id) \(.name)"')
+    $lines = @(gh api "repos/$repo/releases/$($DraftRelease.id)/assets?per_page=100" --paginate --jq '.[] | [.id, .name] | @tsv')
     if ($LASTEXITCODE -ne 0) { throw "Unable to list the assets of release $releaseTag." }
-    $lines | ForEach-Object { $id, $name = $_ -split " ", 2; [pscustomobject]@{ id = $id; name = $name } }
+    $lines | ForEach-Object { $id, $name = $_ -split "`t", 2; [pscustomobject]@{ id = $id; name = $name } }
 }
 
 $Assets = Get-AssetList
