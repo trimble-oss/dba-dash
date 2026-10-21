@@ -101,7 +101,16 @@ namespace DBADashAI.Services
                 if (string.Equals(provider, "Bedrock", StringComparison.OrdinalIgnoreCase))
                 {
                     var bedrockModel = modelOverride ?? _configuration["Bedrock:Model"];
-                    if (!IsBedrockRegion(_configuration["Bedrock:Region"]))
+                    var bedrockUrl = _configuration["Bedrock:Url"];
+                    if (!string.IsNullOrWhiteSpace(bedrockUrl) && !IsBedrockUrl(bedrockUrl))
+                    {
+                        return AiChatResult.Failed(AiChatFailure.NotConfigured,
+                            "AI summary is disabled. Bedrock:Url must be an absolute http or https URL.");
+                    }
+                    // A gateway with its own key has no use for a region.  Without a key, the region is
+                    // still needed to sign the short-term one, wherever it is sent.
+                    if ((string.IsNullOrWhiteSpace(bedrockUrl) || string.IsNullOrWhiteSpace(_configuration["Bedrock:ApiKey"]))
+                        && !IsBedrockRegion(_configuration["Bedrock:Region"]))
                     {
                         return AiChatResult.Failed(AiChatFailure.NotConfigured,
                             "AI summary is disabled. Bedrock:Region must be an AWS region name, e.g. us-east-1.");
@@ -492,9 +501,7 @@ namespace DBADashAI.Services
                     "AI summary is disabled. Bedrock:ApiKey is not set and no AWS credentials were found"
                     + (string.IsNullOrWhiteSpace(_configuration["Bedrock:Profile"]) ? "." : $" for profile '{LogSanitizer.SanitizeForLog(_configuration["Bedrock:Profile"]!)}'."));
             }
-            // A model can be an ARN (an application inference profile, a provisioned model), whose
-            // slashes and colons have to stay inside the one path segment.
-            var requestUrl = new Uri(BedrockRuntimeUrl(_configuration) + "/model/" + Uri.EscapeDataString(model) + "/converse");
+            var requestUrl = BedrockConverseUrl(_configuration, model);
 
             var client = _httpClientFactory.CreateClient();
             var response = await SendAsync(systemField: true);
@@ -598,6 +605,26 @@ namespace DBADashAI.Services
         internal static string BedrockRuntimeUrl(IConfiguration configuration) =>
             $"https://bedrock-runtime.{BedrockRegion(configuration)}.amazonaws.com";
 
+        /// <summary>
+        /// Where a Converse call goes: Bedrock:Url when it is set - for a gateway or proxy in front of
+        /// Bedrock - with any {model} in it replaced by the model, and otherwise bedrock-runtime in the
+        /// region.  A gateway's own URL is used as it is: how it picks the model is up to it.
+        /// </summary>
+        internal static Uri BedrockConverseUrl(IConfiguration configuration, string model)
+        {
+            // A model can be an ARN (an application inference profile, a provisioned model), whose
+            // slashes and colons have to stay inside the one path segment.
+            var escapedModel = Uri.EscapeDataString(model);
+            var url = configuration["Bedrock:Url"]?.Trim();
+            return string.IsNullOrEmpty(url)
+                ? new Uri(BedrockRuntimeUrl(configuration) + "/model/" + escapedModel + "/converse")
+                : new Uri(url.Replace("{model}", escapedModel, StringComparison.OrdinalIgnoreCase));
+        }
+
+        internal static bool IsBedrockUrl(string? url) =>
+            Uri.TryCreate(url?.Trim(), UriKind.Absolute, out var uri)
+            && (uri.Scheme == Uri.UriSchemeHttps || uri.Scheme == Uri.UriSchemeHttp);
+
         private static string BedrockControlUrl(IConfiguration configuration) =>
             $"https://bedrock.{BedrockRegion(configuration)}.amazonaws.com";
 
@@ -651,6 +678,11 @@ namespace DBADashAI.Services
         /// </summary>
         public async Task<IReadOnlyList<(string Id, string Name)>> GetBedrockModelsAsync(CancellationToken cancellationToken)
         {
+            // A gateway is not expected to pass Bedrock's control plane through, and listing the region's
+            // models would say nothing about which ones it serves - the configured Model is used.
+            if (!string.IsNullOrWhiteSpace(_configuration["Bedrock:Url"]))
+                return Array.Empty<(string, string)>();
+
             var baseUrl = BedrockControlUrl(_configuration);
             var apiKey = await BedrockKeyAsync();
 
