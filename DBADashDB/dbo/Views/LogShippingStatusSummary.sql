@@ -5,33 +5,37 @@ WITH Summary AS (
 		   LSS.InstanceDisplayName,
 		   ISNULL(MIN(NULLIF(LSS.Status,3)),3) AS Status,
 		   CASE ISNULL(MIN(NULLIF(LSS.Status,3)),3) WHEN 1 THEN 'Critical' WHEN 2 THEN 'Warning' WHEN 3 THEN 'N/A' WHEN 4 THEN 'OK' ELSE 'N/A' END AS StatusDescription,
-		   SUM(CASE WHEN LSS.IsMissing=0 AND LSS.IsNewDatabase=0 THEN 1 ELSE 0 END) AS LogShippedDBCount,
+		   SUM(CASE WHEN LSS.IsMissing=0 AND LSS.Status<>3 THEN 1 ELSE 0 END) AS LogShippedDBCount,
 		   SUM(CASE WHEN LSS.Status=2 THEN 1 ELSE 0 END) AS WarningCount,
 		   SUM(CASE WHEN LSS.Status=1 THEN 1 ELSE 0 END) AS CriticalCount,
-		   MAX(CASE WHEN LSS.IsNewDatabase=0 THEN LSS.TotalTimeBehind END) MaxTotalTimeBehind,
-		   MIN(CASE WHEN LSS.IsNewDatabase=0 THEN LSS.TotalTimeBehind END) MinTotalTimeBehind,
-		   AVG(CASE WHEN LSS.IsNewDatabase=0 THEN LSS.TotalTimeBehind END) AvgTotalTimeBehind,
-		   MAX(CASE WHEN LSS.IsNewDatabase=0 THEN LSS.LatencyOfLast END) MaxLatencyOfLast,
-		   MIN(CASE WHEN LSS.IsNewDatabase=0 THEN LSS.LatencyOfLast END) MinLatencyOfLast,
-		   AVG(CASE WHEN LSS.IsNewDatabase=0 THEN LSS.LatencyOfLast END) AvgLatencyOfLast,
-		   MAX(CASE WHEN LSS.IsNewDatabase=0 THEN LSS.TimeSinceLast END) AS MaxTimeSinceLast,
-		   MIN(CASE WHEN LSS.IsNewDatabase=0 THEN LSS.TimeSinceLast END) AS MinTimeSinceLast,
-		   AVG(CASE WHEN LSS.IsNewDatabase=0 THEN LSS.TimeSinceLast END) AS AvgTimeSinceLast,
+		   MAX(CASE WHEN LSS.Status<>3 THEN LSS.TotalTimeBehind END) MaxTotalTimeBehind,
+		   MIN(CASE WHEN LSS.Status<>3 THEN LSS.TotalTimeBehind END) MinTotalTimeBehind,
+		   AVG(CASE WHEN LSS.Status<>3 THEN LSS.TotalTimeBehind END) AvgTotalTimeBehind,
+		   MAX(CASE WHEN LSS.Status<>3 THEN LSS.LatencyOfLast END) MaxLatencyOfLast,
+		   MIN(CASE WHEN LSS.Status<>3 THEN LSS.LatencyOfLast END) MinLatencyOfLast,
+		   AVG(CASE WHEN LSS.Status<>3 THEN LSS.LatencyOfLast END) AvgLatencyOfLast,
+		   MAX(CASE WHEN LSS.Status<>3 THEN LSS.TimeSinceLast END) AS MaxTimeSinceLast,
+		   MIN(CASE WHEN LSS.Status<>3 THEN LSS.TimeSinceLast END) AS MinTimeSinceLast,
+		   AVG(CASE WHEN LSS.Status<>3 THEN LSS.TimeSinceLast END) AS AvgTimeSinceLast,
 		   MAX(LSS.SnapshotAge) AS SnapshotAge,
 		   ISNULL(MIN(NULLIF(LSS.SnapshotAgeStatus,3)),3) AS SnapshotAgeStatus,
-		   MIN(CASE WHEN LSS.IsNewDatabase=0 THEN LSS.backup_start_date_utc END) MinDateOfLastBackupRestored,
-		   MAX(CASE WHEN LSS.IsNewDatabase=0 THEN LSS.backup_start_date_utc END) MaxDateOfLastBackupRestored,
-		   MIN(CASE WHEN LSS.IsNewDatabase=0 THEN LSS.restore_date_utc END) MinLastRestoreCompleted,
-		   MAX(CASE WHEN LSS.IsNewDatabase=0 THEN LSS.restore_date_utc END) MaxLastRestoreCompleted,
+		   MIN(CASE WHEN LSS.Status<>3 THEN LSS.backup_start_date_utc END) MinDateOfLastBackupRestored,
+		   MAX(CASE WHEN LSS.Status<>3 THEN LSS.backup_start_date_utc END) MaxDateOfLastBackupRestored,
+		   MIN(CASE WHEN LSS.Status<>3 THEN LSS.restore_date_utc END) MinLastRestoreCompleted,
+		   MAX(CASE WHEN LSS.Status<>3 THEN LSS.restore_date_utc END) MaxLastRestoreCompleted,
 		   CASE WHEN T.InstanceID IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS InstanceLevelThreshold,
-		   SUM(CASE WHEN LSS.ThresholdConfiguredLevel='Database' AND LSS.IsNewDatabase=0 THEN 1 ELSE 0 END) AS DatabaseLevelThresholds,
+		   SUM(CASE WHEN LSS.ThresholdConfiguredLevel='Database' AND LSS.Status<>3 THEN 1 ELSE 0 END) AS DatabaseLevelThresholds,
 		   LSS.ShowInSummary,
-		   SUM(CASE WHEN LSS.IsMissing=1 AND LSS.IsNewDatabase=0 THEN 1 ELSE 0 END) AS MissingCount,
+		   SUM(CASE WHEN LSS.IsMissing=1 AND LSS.Status<>3 THEN 1 ELSE 0 END) AS MissingCount,
 		   SUM(CASE WHEN LSS.IsNewDatabase=1 THEN 1 ELSE 0 END) AS NewDatabaseCount
 	FROM dbo.LogShippingStatus LSS
 	LEFT JOIN dbo.LogRestoreThresholds T ON LSS.InstanceID = T.InstanceID AND T.DatabaseID=-1
-	/* New databases (N/A) are included for NewDatabaseCount only.  Other N/A databases are ignored */
-	WHERE (LSS.Status<> 3 OR LSS.IsNewDatabase=1)
+	/*
+		N/A rows are included so that an instance whose log shipped databases are all N/A (e.g. excluded or misconfigured thresholds)
+		still appears in the summary with N/A status.  N/A rows are ignored by the other aggregates.
+		Missing databases that are N/A (excluded) are ignored, other than new databases which are counted in NewDatabaseCount.
+	*/
+	WHERE (LSS.Status<> 3 OR LSS.IsNewDatabase=1 OR LSS.IsMissing=0)
 	GROUP BY LSS.InstanceID,
 			 LSS.InstanceDisplayName,
 			 T.InstanceID,
