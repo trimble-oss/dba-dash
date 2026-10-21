@@ -102,8 +102,8 @@ OPTION(RECOMPILE)
 	queries.  DISTINCT because the unit being counted is the deadlock, not the process: two processes
 	from one application in one deadlock is one deadlock involving that application. */
 CREATE TABLE #DimensionValue(
-	Dimension VARCHAR(20) NOT NULL,
-	GroupValue NVARCHAR(776) NULL,
+	Dimension VARCHAR(20) COLLATE DATABASE_DEFAULT NOT NULL,
+	GroupValue NVARCHAR(776) COLLATE DATABASE_DEFAULT NULL,
 	InstanceID INT NOT NULL,
 	EventTime DATETIME2(3) NOT NULL,
 	DeadlockHash BINARY(16) NOT NULL
