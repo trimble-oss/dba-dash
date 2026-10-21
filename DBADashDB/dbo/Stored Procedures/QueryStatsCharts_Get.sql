@@ -255,7 +255,7 @@ CREATE TABLE #Stmt (
     /*  The databases past the cap on their own rollups, combined: no one database, so the database pie puts
         it in {Other} rather than in the slice for rows whose database could not be resolved. */
     IsOtherDatabases BIT NOT NULL,
-    RollupName VARCHAR(20) NULL,
+    RollupName VARCHAR(20) COLLATE DATABASE_DEFAULT NULL,
     /*  The statement as a band: its own text, which is the thing being charted and what the reader is here
         for.  The object it belongs to is the object pie's business and is left out of the label - it is the
         same prefix on every statement of a procedure, and it crowds out the text in the space a legend or a
@@ -263,23 +263,23 @@ CREATE TABLE #Stmt (
         stand in where the text has not been collected yet, so the band is identifiable rather than being one
         of several called {No text}.  The instance prefix and the disambiguating id are added in Series, once
         the duplicates are known.  Wide enough for a qualified object name and its suffix. */
-    StatementLabel NVARCHAR(300) NULL,
+    StatementLabel NVARCHAR(300) COLLATE DATABASE_DEFAULT NULL,
     /*  The object pie's label: the object where there is one, the statement text where there is not.
         Qualified with the instance only where there is more than one on screen, so the common case of a
         single instance keeps a legend of bare object names.  Wide enough for an instance name, the separator
         and a qualified object name. */
-    ObjectSeries NVARCHAR(400) NULL,
+    ObjectSeries NVARCHAR(400) COLLATE DATABASE_DEFAULT NULL,
     /*  What an object slice can be drilled into.  An object or a statement label is something the grid report
         can filter on; a rollup band is not, so it is left null and the chart excludes it from drill-down.
         Unqualified, because it is matched against the statement rather than displayed - the instance travels
         with it as its own parameter.  The short label, which is what the grid report matches it against. */
-    ObjectDrillValue NVARCHAR(300) NULL,
+    ObjectDrillValue NVARCHAR(300) COLLATE DATABASE_DEFAULT NULL,
     Value DECIMAL(38, 6) NULL,
     WorkerTime BIGINT NOT NULL,
     /*  The band this statement would have if charted on its own - see the note where it is set. */
-    Series NVARCHAR(600) NULL,
+    Series NVARCHAR(600) COLLATE DATABASE_DEFAULT NULL,
     /*  The band it is drawn in: its own, or {Other}.  See the note on the residual bands below. */
-    SeriesLabel NVARCHAR(600) NULL,
+    SeriesLabel NVARCHAR(600) COLLATE DATABASE_DEFAULT NULL,
     IsResidual BIT NULL,
     SeriesRank INT NULL
 );
@@ -417,7 +417,7 @@ LEFT JOIN #Top T ON T.Series = S.Series;
 */
 CREATE TABLE #Rank (
     SeriesRank INT NOT NULL PRIMARY KEY,
-    SeriesLabel NVARCHAR(600) NOT NULL,
+    SeriesLabel NVARCHAR(600) COLLATE DATABASE_DEFAULT NOT NULL,
     WindowValue DECIMAL(38, 6) NULL,
     IsResidual BIT NOT NULL,
     StatementID BIGINT NULL,
@@ -586,13 +586,13 @@ OPTION (RECOMPILE);
 CREATE TABLE #DB (
     DatabaseID INT NULL,
     InstanceID INT NOT NULL,
-    BaseName NVARCHAR(300) NULL,
+    BaseName NVARCHAR(300) COLLATE DATABASE_DEFAULT NULL,
     Value DECIMAL(38, 6) NULL,
     /*  A slice's label has to name exactly one database, because clicking it sends that database's id to the
         grid report.  Two databases can still share a name within one instance once a database has been dropped
         and created again - dbo.Databases keeps the old row - so where that happens the id is appended.  An ugly
         label on a rare slice is better than a slice that drills into whichever of the two sorted first. */
-    DatabaseName NVARCHAR(300) NULL
+    DatabaseName NVARCHAR(300) COLLATE DATABASE_DEFAULT NULL
 );
 
 INSERT INTO #DB (DatabaseID, InstanceID, BaseName, Value)

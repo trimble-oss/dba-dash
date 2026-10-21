@@ -26,10 +26,10 @@ SET NOCOUNT ON
 SET DATEFIRST 1 /* Start week on Monday */
 CREATE TABLE #results(
     SnapshotDate DATETIME,
-    DatabaseName NVARCHAR(128),
+    DatabaseName NVARCHAR(128) COLLATE DATABASE_DEFAULT,
     DatabaseID INT,
 	ObjectID BIGINT,
-    object_name NVARCHAR(257),
+    object_name NVARCHAR(257) COLLATE DATABASE_DEFAULT,
     TotalCPU DECIMAL(29, 9),
     AvgCPU DECIMAL(29, 9),
 	cpu_ms_per_sec DECIMAL(29, 9),

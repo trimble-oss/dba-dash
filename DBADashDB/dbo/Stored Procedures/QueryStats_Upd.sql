@@ -89,8 +89,8 @@ CREATE TABLE #QueryStats (
     StatementID BIGINT NULL,
     StatementType TINYINT NOT NULL,
     DatabaseID INT NULL,
-    SchemaName NVARCHAR(128) NULL,
-    ObjectName NVARCHAR(128) NULL,
+    SchemaName NVARCHAR(128) COLLATE DATABASE_DEFAULT NULL,
+    ObjectName NVARCHAR(128) COLLATE DATABASE_DEFAULT NULL,
     object_id INT NULL,
     sql_handle VARBINARY(64) NULL,
     statement_start_offset INT NOT NULL,
@@ -114,8 +114,8 @@ CREATE TABLE #QueryStats (
     PlanCount INT NOT NULL,
     IsCompile BIT NOT NULL,
     IsOtherPlans BIT NOT NULL,
-    StatementTemplate NVARCHAR(MAX) NULL,
-    ExampleBatchText NVARCHAR(MAX) NULL,
+    StatementTemplate NVARCHAR(MAX) COLLATE DATABASE_DEFAULT NULL,
+    ExampleBatchText NVARCHAR(MAX) COLLATE DATABASE_DEFAULT NULL,
     query_plan_compressed VARBINARY(MAX) NULL
 );
 

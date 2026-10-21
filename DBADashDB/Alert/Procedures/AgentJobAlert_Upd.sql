@@ -19,8 +19,8 @@ CREATE TABLE #RecentJobs(
 	job_id UNIQUEIDENTIFIER NOT NULL,
 	LastFailed DATETIME2 NULL,
 	LastSucceeded DATETIME2 NULL,
-	name NVARCHAR(128) NULL,
-	category NVARCHAR(128) NULL,
+	name NVARCHAR(128) COLLATE DATABASE_DEFAULT NULL,
+	category NVARCHAR(128) COLLATE DATABASE_DEFAULT NULL,
 	PRIMARY KEY(InstanceID,job_id)
 )
 /* Get a list of recently failed jobs */

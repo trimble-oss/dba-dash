@@ -17,7 +17,7 @@ BEGIN
 
 	CREATE TABLE #History(
 		DatabaseID INT NOT NULL,
-		Setting sysname NOT NULL,
+		Setting sysname COLLATE DATABASE_DEFAULT NOT NULL,
 		OldValue SQL_VARIANT NULL,
 		NewValue SQL_VARIANT NULL,
 		ChangeDate DATETIME2(2) NOT NULL

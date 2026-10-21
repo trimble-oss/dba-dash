@@ -97,7 +97,7 @@ EXEC sp_executesql @SQL;");
         /// The DACPAC built from DBADashDB - the newest in DBADashBuild (built to DBADashBuild\{Configuration}).  It must be
         /// newer than the SQL files, so the tests don't run against a stale build.
         /// </summary>
-        private static string FindDacpac()
+        internal static string FindDacpac()
         {
             var root = MessageAuthorizationTests.FindRepositoryRoot();
             var buildFolder = Path.Combine(root, "DBADashBuild");
