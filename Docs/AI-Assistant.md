@@ -158,6 +158,16 @@ The other settings:
 - Any chat model that supports the Converse API works (Anthropic Claude, Amazon Nova, Meta Llama, Mistral, ...). The GUI's model picker lists the inference profiles and on-demand text models available in the region, with the ID to use in brackets.
 - `MaxTokens` optionally caps the answer length. Leave blank for the model's default.
 - Listing models needs the `bedrock:ListInferenceProfiles` and `bedrock:ListFoundationModels` permissions; without them the picker is hidden and the configured `Model` is used.
+- `Url` is optional (appsettings.json only - not in the service config tool): the full Converse URL of a gateway or proxy in front of Bedrock. Leave blank to call bedrock-runtime in `Region`.
+
+**Calling Bedrock through a gateway.** Set `Url` to the gateway's Converse URL, e.g. `https://bedrock-gateway.example.com/converse`:
+
+- The request is unchanged: the same Converse body, with `ApiKey` (or a short-term key from AWS credentials) as an `Authorization: Bearer` header. A gateway that expects a different request or authentication scheme won't work.
+- `{model}` in the URL is replaced by the model ID, for a gateway that keeps Bedrock's path (`https://gw.example.com/model/{model}/converse`). Without it the URL is used as-is and the gateway decides which model answers.
+- `Region` can be blank when `ApiKey` is set; without an API key it's still needed to sign the short-term key.
+- The model picker is hidden - gateways don't usually pass Bedrock's model list through - and the configured `Model` is used.
+
+A forward proxy doesn't need `Url`: the service honours `HTTPS_PROXY` or the Windows proxy settings like any .NET app. Nor does a Bedrock VPC endpoint with private DNS enabled.
 
 To find model IDs outside the GUI, use the model card in the Bedrock console ("Programmatic Access" table, bedrock-runtime row) or the AWS CLI:
 

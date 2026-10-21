@@ -311,6 +311,7 @@ ApplyAuth(app.MapGet("/api/ai/diagnostics", (IConfiguration config, IHttpClientF
     var anthropicVersion = config["Anthropic:Version"] ?? "(not set)";
 
     var bedrockRegion = config["Bedrock:Region"] ?? "(not set)";
+    var bedrockUrl = string.IsNullOrWhiteSpace(config["Bedrock:Url"]) ? "(not set - bedrock-runtime in the region)" : config["Bedrock:Url"];
     var bedrockKey = string.IsNullOrWhiteSpace(config["Bedrock:ApiKey"]) ? "(not set)" : "***set***";
     var bedrockAuthentication = !string.IsNullOrWhiteSpace(config["Bedrock:ApiKey"]) ? "API key"
         : string.IsNullOrWhiteSpace(config["Bedrock:Profile"]) ? "AWS credentials (default chain)"
@@ -332,7 +333,7 @@ ApplyAuth(app.MapGet("/api/ai/diagnostics", (IConfiguration config, IHttpClientF
         repository = repoSafe,
         azureOpenAI = new { endpoint = azureEndpoint, apiKey = azureKey, deployment = azureDeployment },
         anthropic = new { baseUrl = anthropicUrl, apiKey = anthropicKey, model = anthropicModel, version = anthropicVersion },
-        bedrock = new { region = bedrockRegion, authentication = bedrockAuthentication, apiKey = bedrockKey, model = bedrockModel },
+        bedrock = new { region = bedrockRegion, url = bedrockUrl, authentication = bedrockAuthentication, apiKey = bedrockKey, model = bedrockModel },
         ollama = new { baseUrl = ollamaBaseUrl, apiKey = ollamaKey, model = ollamaModel, contextLength = ollamaContextLength },
         security = new { enabled = securityEnabledStatus },
         systemPrompt = new { source = systemPromptLoader.Source, length = systemPromptLoader.Prompt.Length },

@@ -112,9 +112,53 @@ namespace DBADash.Test
         }
 
         [TestMethod]
+        [DataRow("https://api.claude.aws.example.com/converse", "https://api.claude.aws.example.com/converse")]
+        [DataRow("https://gw.example.com/bedrock/model/{model}/converse", "https://gw.example.com/bedrock/model/eu.anthropic.claude-sonnet-4-6/converse")]
+        public async Task Url_SendsConverseThere_WithTheSameRequest(string url, string expected)
+        {
+            // A gateway with its own key: no region needed.
+            var (client, handler) = Create(Config(new() { ["Bedrock:Url"] = url, ["Bedrock:Region"] = "" }), HttpStatusCode.OK, Answer);
+
+            var result = await client.ChatAsync(Question, CancellationToken.None);
+
+            Assert.AreEqual("Lock order.", result.Text);
+            var (request, body) = handler.Requests.Single();
+            Assert.AreEqual(expected, request.RequestUri!.ToString());
+            Assert.AreEqual("Bearer bedrock-key", request.Headers.Authorization!.ToString());
+            using var json = JsonDocument.Parse(body);
+            Assert.AreEqual("Why did this deadlock?", json.RootElement.GetProperty("messages")[0].GetProperty("content")[0].GetProperty("text").GetString());
+        }
+
+        [TestMethod]
+        public async Task Url_ListsNoModels_AndSendsNothing()
+        {
+            var (client, handler) = Create(Config(new() { ["Bedrock:Url"] = "https://api.claude.aws.example.com/converse" }), HttpStatusCode.OK, "{}");
+
+            var models = await client.GetBedrockModelsAsync(CancellationToken.None);
+
+            Assert.AreEqual(0, models.Count);
+            Assert.AreEqual(0, handler.Requests.Count);
+        }
+
+        [TestMethod]
+        public async Task Url_WithoutAKey_StillNeedsTheRegionToSignOne()
+        {
+            var config = Config(new() { ["Bedrock:Url"] = "https://gw.example.com/converse", ["Bedrock:ApiKey"] = "", ["Bedrock:Region"] = "" });
+            var (client, handler) = Create(config, HttpStatusCode.OK, Answer);
+
+            var result = await client.ChatAsync(Question, CancellationToken.None);
+
+            Assert.AreEqual(AiChatFailure.NotConfigured, result.Failure);
+            StringAssert.Contains(result.Text, "Bedrock:Region");
+            Assert.AreEqual(0, handler.Requests.Count);
+        }
+
+        [TestMethod]
         [DataRow("Bedrock:Model", "")]
         [DataRow("Bedrock:Region", "")]
         [DataRow("Bedrock:Region", "evil.example.com/x")]
+        [DataRow("Bedrock:Url", "api.claude.aws.example.com/converse")]
+        [DataRow("Bedrock:Url", "ftp://gw.example.com/converse")]
         public async Task IncompleteSettings_AreNotConfigured_AndNothingIsSent(string key, string value)
         {
             var (client, handler) = Create(Config(new() { [key] = value }), HttpStatusCode.OK, Answer);
