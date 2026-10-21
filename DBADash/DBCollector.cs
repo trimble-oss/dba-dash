@@ -1017,6 +1017,10 @@ namespace DBADash
             {
                 return false;
             }
+            else if (collectionType == CollectionType.SpinlockStats && SQLVersion.Major < 10)
+            {
+                return false; // sys.dm_os_spinlock_stats was added in SQL 2008
+            }
             else if (collectionType == CollectionType.InstanceMetadata && (IsAzureDB || IsRDS || noWMI))
             {
                 return false;
