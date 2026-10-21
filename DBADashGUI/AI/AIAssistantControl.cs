@@ -264,11 +264,11 @@ namespace DBADashGUI.AI
             _serviceUrl = serviceInfo.ServiceUrl;
             _serviceSource = serviceInfo.Source;
 
-            // For repository-sourced services
-            // permission on AI.ServiceConfig — meaning they received the real API key.
+            // HasApiKeyAccess is false when the key came from the repository masked - for a
+            // repository-sourced service, or a local one that merged the repository's key.
             // Without it, the masked placeholder 'xxxx' would be sent and all requests
             // would be rejected with 401. Show the tab but disable Ask and explain why.
-            if (serviceInfo.Source == AIServiceDiscovery.ServiceSource.Repository && !serviceInfo.HasApiKeyAccess)
+            if (!serviceInfo.HasApiKeyAccess)
             {
                 ShowNoApiKeyAccessMessage();
                 IsServiceAvailable = true; // Tab is visible so the user knows to request access
