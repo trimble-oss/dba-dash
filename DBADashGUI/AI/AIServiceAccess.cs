@@ -18,7 +18,8 @@ namespace DBADashGUI.AI
 
         /// <summary>
         /// The service to submit to, or null with the reason there is none.  A local service on loopback needs no
-        /// repository permission, so only a service registered in the repository is checked.
+        /// repository permission and always has access, but one that requires a key takes it from the repository -
+        /// masked, without the role - so the check is on the key access, not on where the service was found.
         /// </summary>
         internal static AIServiceDiscovery.ServiceInfo? Usable(AIServiceDiscovery.ServiceInfo? service, out string? reason)
         {
@@ -28,7 +29,7 @@ namespace DBADashGUI.AI
                 return null;
             }
 
-            if (service is { Source: AIServiceDiscovery.ServiceSource.Repository, HasApiKeyAccess: false })
+            if (service is { HasApiKeyAccess: false })
             {
                 reason = NoAccess;
                 return null;
