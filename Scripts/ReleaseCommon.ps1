@@ -40,6 +40,8 @@ function Invoke-Sign {
         Signs a file in place with the Trimble signing tool and checks the signature.  The tool takes the file, the folder to write
         the signed file to or $ for in place, and the name shown in the signature.  It sends the whole file to the signing
         service, so a big file takes minutes - about 5 seconds a MB - and several can be signed at once.
+        Now and then the service reports "Signing completed - OK" and sends the file back unsigned, and the tool exits 0 - so an
+        invalid signature is retried too, not just a failed exit code.
     #>
     param (
         [Parameter(Mandatory)][string]$SignTool,
@@ -47,6 +49,11 @@ function Invoke-Sign {
         [Parameter(Mandatory)][string]$Name
     )
     $file = Split-Path $Path -Leaf
-    Invoke-WithRetry -What "Signing $file" -Attempts 3 -DelaySeconds 10 -Command { & $SignTool $Path '$' $Name }.GetNewClosure()
-    if ((Get-AuthenticodeSignature -LiteralPath $Path).Status -ne "Valid") { throw "$file didn't sign: its signature isn't valid." }
+    Invoke-WithRetry -What "Signing $file" -Attempts 3 -DelaySeconds 10 -Command {
+        & $SignTool $Path '$' $Name
+        if ($LASTEXITCODE -eq 0) {
+            $status = (Get-AuthenticodeSignature -LiteralPath $Path).Status
+            if ($status -ne "Valid") { throw "the sign tool succeeded, but the signature is $status" }
+        }
+    }.GetNewClosure()
 }
