@@ -26,6 +26,7 @@ namespace DBADashGUI.AgentJobs
         public int ExecutionCount { get; set; }
         public RunStatus Status { get; set; }
         public string EncodedName => HttpUtility.JavaScriptStringEncode(Name);
+        public string EncodedToolTip => HttpUtility.JavaScriptStringEncode(ToolTip);
         public int Duration { get; set; }
         public string Name { get; set; }
         public string JobName { get; set; }
@@ -44,18 +45,26 @@ namespace DBADashGUI.AgentJobs
         };
 
         /// <summary>
-        /// Get a HTML formatted tooltip for the job execution
+        /// Get a HTML formatted tooltip for the job execution.
+        /// A job that is still running has no finish time; show elapsed time instead of an end.
         /// </summary>
-        public string ToolTip => string.Format("<span class=\"{5}\"><h1>{0}</h1>Step {9}: {6}<br/>Start: {1}<br/>End: {2}<br/>{8}: {3}<br/>Executions: {7}<br/>Status: {4}</span>",
+        public string ToolTip
+        {
+            get
+            {
+                var isRunning = Status == RunStatus.InProgress;
+                return string.Format("<span class=\"{5}\"><h1>{0}</h1>Step {9}: {6}<br/>Start: {1}<br/>End: {2}<br/>{8}: {3}<br/>Executions: {7}<br/>Status: {4}</span>",
                              HttpUtility.HtmlEncode(JobName),
                              ActualStart.ToString(CultureInfo.CurrentCulture),
-                             ActualEnd.ToString(CultureInfo.CurrentCulture),
+                             isRunning ? "(still running)" : ActualEnd.ToString(CultureInfo.CurrentCulture),
                              TimeSpan.FromSeconds(Duration).Humanize(4),
-                             Status.ToString(),
+                             isRunning ? "In Progress" : Status.ToString(),
                              TooltipCSS,
-                             Step,
+                             HttpUtility.HtmlEncode(Step),
                              ExecutionCount.ToString(),
-                             ExecutionCount == 1 ? "Duration" : "Avg Duration",
+                             isRunning ? "Elapsed" : ExecutionCount == 1 ? "Duration" : "Avg Duration",
                              StepID.ToString());
+            }
+        }
     }
 }
