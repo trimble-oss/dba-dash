@@ -181,6 +181,7 @@
             chart.Size = new System.Drawing.Size(1065, 697);
             chart.TabIndex = 2;
             chart.BarActivated += Chart_BarActivated;
+            chart.JobActivated += Chart_JobActivated;
             // 
             // JobTimeline
             // 

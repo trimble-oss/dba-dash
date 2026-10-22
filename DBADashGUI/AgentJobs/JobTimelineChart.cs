@@ -99,8 +99,39 @@ namespace DBADashGUI.AgentJobs
             InitFonts();
         }
 
-        /// <summary>Raised when a bar is double clicked or "Open job" is picked from its menu.</summary>
+        /// <summary>Raised when a bar of a single execution is double clicked, Enter is pressed on it, or its menu item is picked.</summary>
         public event EventHandler<TimelineBar> BarActivated;
+
+        /// <summary>Raised when "Open job" is picked from the menu.  The item is only offered when something handles this.</summary>
+        public event EventHandler<TimelineBar> JobActivated;
+
+        /// <summary>Raised when the user selects a bar, or clears the selection (null).</summary>
+        public event EventHandler<TimelineBar> SelectedBarChanged;
+
+        /// <summary>The menu text for <see cref="BarActivated"/>.</summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public string BarActivatedText { get; set; } = "Execution details";
+
+        /// <summary>Tell the user in the tooltip that a double click does <see cref="BarActivatedText"/>.</summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool ActivateHint { get; set; } = true;
+
+        public TimelineBar SelectedBar => _selectedBar;
+
+        /// <summary>Select the first bar that matches, scrolling it into view.  Doesn't raise <see cref="SelectedBarChanged"/>.</summary>
+        public void SelectBar(Func<TimelineBar, bool> match)
+        {
+            _selectedBar = _rows.SelectMany(r => r.Bars).Where(IsVisible).FirstOrDefault(match);
+            if (_selectedBar != null) ScrollIntoView(_selectedBar.Row);
+            _canvas.Invalidate();
+        }
+
+        private void SetSelectedBar(TimelineBar bar)
+        {
+            if (bar == _selectedBar) return;
+            _selectedBar = bar;
+            SelectedBarChanged?.Invoke(this, bar);
+        }
 
         /// <summary>Shown in the top left corner, above the job names.</summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -503,7 +534,7 @@ namespace DBADashGUI.AgentJobs
                 ToggleCollapsed(row);
                 return;
             }
-            _selectedBar = BarAt(p);
+            SetSelectedBar(BarAt(p));
         }
 
         private void Canvas_MouseDoubleClick(object sender, MouseEventArgs e)
@@ -512,7 +543,7 @@ namespace DBADashGUI.AgentJobs
             var bar = BarAt(e.Location);
             if (bar != null)
             {
-                BarActivated?.Invoke(this, bar);
+                if (bar.IsSingleExecution) BarActivated?.Invoke(this, bar);
                 return;
             }
             var row = RowAt(e.Y);
@@ -595,10 +626,10 @@ namespace DBADashGUI.AgentJobs
                     break;
 
                 case Keys.Escape:
-                    _selectedBar = null;
+                    SetSelectedBar(null);
                     break;
 
-                case Keys.Enter when _selectedBar != null:
+                case Keys.Enter when _selectedBar is { IsSingleExecution: true }:
                     BarActivated?.Invoke(this, _selectedBar);
                     break;
 
@@ -621,23 +652,34 @@ namespace DBADashGUI.AgentJobs
         private void ShowContextMenu(Point p)
         {
             var bar = BarAt(p);
-            if (bar != null) _selectedBar = bar;
+            if (bar != null) SetSelectedBar(bar);
             var row = RowAt(p.Y);
 
             _contextMenu?.Dispose();
             _contextMenu = new ContextMenuStrip();
             if (bar != null)
             {
-                var open = new ToolStripMenuItem("Open job", null, (_, _) => BarActivated?.Invoke(this, bar)) { Enabled = bar.JobId != Guid.Empty, Font = new Font(_contextMenu.Font, FontStyle.Bold) };
-                _contextMenu.Items.Add(open);
+                if (BarActivated != null)
+                {
+                    _contextMenu.Items.Add(new ToolStripMenuItem(BarActivatedText, null, (_, _) => BarActivated?.Invoke(this, bar))
+                    {
+                        Enabled = bar.IsSingleExecution,
+                        Font = new Font(_contextMenu.Font, FontStyle.Bold),
+                        ToolTipText = bar.IsSingleExecution ? null : "This bar groups several executions.  Set the date grouping to None to see each one."
+                    });
+                }
+                if (JobActivated != null)
+                {
+                    _contextMenu.Items.Add(new ToolStripMenuItem("Open job", null, (_, _) => JobActivated?.Invoke(this, bar)) { Enabled = bar.JobId != Guid.Empty });
+                }
                 _contextMenu.Items.Add("Zoom to execution", null, (_, _) => ZoomToBar(bar));
                 _contextMenu.Items.Add("Copy details", null, (_, _) => Clipboard.SetText(BarDetailsText(bar)));
                 _contextMenu.Items.Add(new ToolStripSeparator());
             }
-            else if (row != null && row.JobId != Guid.Empty)
+            else if (row != null && row.JobId != Guid.Empty && JobActivated != null)
             {
                 var first = row.AllBars.FirstOrDefault();
-                if (first != null) _contextMenu.Items.Add(new ToolStripMenuItem("Open job", null, (_, _) => BarActivated?.Invoke(this, first)) { Font = new Font(_contextMenu.Font, FontStyle.Bold) });
+                if (first != null) _contextMenu.Items.Add(new ToolStripMenuItem("Open job", null, (_, _) => JobActivated?.Invoke(this, first)) { Font = new Font(_contextMenu.Font, FontStyle.Bold) });
                 _contextMenu.Items.Add(new ToolStripSeparator());
             }
             if (row is { IsGroup: true }) _contextMenu.Items.Add(row.Collapsed ? "Expand" : "Collapse", null, (_, _) => ToggleCollapsed(row));

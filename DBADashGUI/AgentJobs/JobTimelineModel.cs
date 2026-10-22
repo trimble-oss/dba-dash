@@ -32,6 +32,18 @@ namespace DBADashGUI.AgentJobs
         public RunStatus Status { get; init; }
         public int Executions { get; init; }
 
+        /// <summary>
+        /// msdb instance_id of the history row, which identifies the execution.  Null while still running, and for a date
+        /// group of more than one execution.
+        /// </summary>
+        public int? HistoryId { get; init; }
+
+        /// <summary>Index of the source row in the DataTable the model was built from.</summary>
+        public int SourceIndex { get; init; }
+
+        /// <summary>A single execution (finished or running) that execution details can be shown for.</summary>
+        public bool IsSingleExecution => Executions == 1 && JobId != Guid.Empty && (HistoryId.HasValue || IsRunning);
+
         /// <summary>Which of its row's stacked lanes the bar is drawn in, so overlapping runs don't hide each other.</summary>
         public int Lane { get; set; }
 
@@ -128,6 +140,8 @@ namespace DBADashGUI.AgentJobs
         {
             var model = new JobTimelineModel();
             var hasJobId = dt.Columns.Contains("job_id");
+            var hasHistoryId = dt.Columns.Contains("instance_id");
+            var index = 0;
             var jobs = new Dictionary<string, TimelineRowModel>();
             var steps = new Dictionary<(string, int), TimelineRowModel>();
 
@@ -143,7 +157,9 @@ namespace DBADashGUI.AgentJobs
                     End = (DateTime)r["FinishDateTime"],
                     DurationSec = (int)r["RunDurationSec"],
                     Status = (RunStatus)r["run_status"],
-                    Executions = (int)r["Executions"]
+                    Executions = (int)r["Executions"],
+                    HistoryId = hasHistoryId && r["instance_id"] != DBNull.Value ? (int)r["instance_id"] : null,
+                    SourceIndex = index++
                 };
                 if (bar.End <= bar.Start) bar.End = bar.Start.AddSeconds(1);
                 model.Bars.Add(bar);

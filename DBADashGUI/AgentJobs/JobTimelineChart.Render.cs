@@ -619,8 +619,10 @@ namespace DBADashGUI.AgentJobs
             var labelWidth = lines.Max(l => _smallFont.MeasureText(l.Item1, (SKPaint)null)) + 10 * Dpi;
             var valueWidth = lines.Max(l => _font.MeasureText(l.Item2, (SKPaint)null));
             var titleWidth = Math.Min(_boldFont.MeasureText(bar.JobName, (SKPaint)null), 420 * Dpi);
-            var w = Math.Max(titleWidth, labelWidth + valueWidth) + pad * 2;
-            var h = titleHeight + lines.Count * lineHeight + pad;
+            var hint = ActivateHint && BarActivated != null && bar.IsSingleExecution ? $"Double-click for {BarActivatedText.ToLowerInvariant()}" : null;
+            var hintWidth = hint == null ? 0 : _smallFont.MeasureText(hint, (SKPaint)null);
+            var w = Math.Max(Math.Max(titleWidth, hintWidth), labelWidth + valueWidth) + pad * 2;
+            var h = titleHeight + (lines.Count + (hint == null ? 0 : 1)) * lineHeight + pad;
 
             var x = _mouse.X + 16 * Dpi;
             var y = _mouse.Y + 18 * Dpi;
@@ -654,6 +656,12 @@ namespace DBADashGUI.AgentJobs
                 _text.Color = p.TipFore;
                 canvas.DrawText(value, rect.Left + pad + labelWidth, CenterBaseline(lineRect, _font), _font, _text);
                 lineY += lineHeight;
+            }
+            if (hint != null)
+            {
+                var hintRect = new SKRect(rect.Left, lineY, rect.Right, lineY + lineHeight);
+                _text.Color = p.TipFore.WithAlpha(150);
+                canvas.DrawText(hint, rect.Left + pad, CenterBaseline(hintRect, _smallFont), _smallFont, _text);
             }
         }
 

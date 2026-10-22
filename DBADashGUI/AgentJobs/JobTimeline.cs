@@ -207,7 +207,21 @@ namespace DBADashGUI.AgentJobs
             chart.Filter = tsFilter.Text;
         }
 
+        /// <summary>Show the execution the bar belongs to.  A running bar has no history row yet, so it shows the execution running now.</summary>
         private void Chart_BarActivated(object sender, TimelineBar bar)
+        {
+            if (!bar.IsSingleExecution) return;
+            try
+            {
+                new JobExecutionForm(context.InstanceID, bar.JobId, bar.JobName, bar.IsRunning ? null : bar.HistoryId).ShowSingleInstance();
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex);
+            }
+        }
+
+        private void Chart_JobActivated(object sender, TimelineBar bar)
         {
             if (bar.JobId == Guid.Empty) return;
             try
