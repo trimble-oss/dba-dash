@@ -230,6 +230,11 @@ namespace DBADash.QueryPlan
                     new XElement(ns + "Batch",
                         new XElement(ns + "Statements", element))));
 
+            // A comment on the source plan — the live-plan mark — is not part of the statement element, so it has to
+            // be copied on or a statement saved out of a live plan would open as an ordinary one.
+            var comments = source?.Nodes().OfType<XComment>().Select(comment => new XComment(comment.Value)).ToList();
+            if (comments is { Count: > 0 }) root.AddFirst(comments);
+
             return root.ToString();
         }
 
