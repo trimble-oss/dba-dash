@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using DBADash.QueryPlan.Layout;
+using DBADash.QueryPlan.Live;
 using DBADash.QueryPlan.Model;
 
 namespace DBADash.QueryPlan.Interaction
@@ -416,6 +417,41 @@ namespace DBADash.QueryPlan.Interaction
         {
             IsViewUserAdjusted = view.IsUserAdjusted;
             return Apply(view.Zoom, view.Pan);
+        }
+
+        /// <summary>
+        /// Take over where the reader was in <paramref name="previous"/>, a view of an earlier capture of the same plan -
+        /// a running query's plan refreshed with newer counters.  The branches they collapsed, the operator they selected
+        /// and the zoom and pan are kept, matched by node id, so a refresh changes the numbers and nothing else.
+        /// </summary>
+        public void CarryOver(PlanViewController previous)
+        {
+            ArgumentNullException.ThrowIfNull(previous);
+
+            if (previous.Layout.CollapsedIds.Count > 0)
+            {
+                Layout.CollapsedIds.UnionWith(previous.Layout.CollapsedIds);
+                Layout.Relayout();
+            }
+
+            if (previous.SelectedNode is { } selected && Layout.FindNodeById(selected.Id) is { } node)
+            {
+                Select(node);
+            }
+
+            RestoreView(previous.SaveView());
+        }
+
+        /// <summary>
+        /// Where each operator of a running query has got to, for a live plan - see <see cref="PlanLiveSnapshot"/>.  Null
+        /// for a plan that isn't being followed live.
+        /// </summary>
+        public PlanLiveSnapshot? Live { get; private set; }
+
+        public void SetLive(PlanLiveSnapshot? live)
+        {
+            Live = live;
+            Notify();
         }
 
         /// <summary>

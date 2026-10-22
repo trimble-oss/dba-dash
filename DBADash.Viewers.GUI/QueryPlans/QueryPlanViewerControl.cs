@@ -30,10 +30,11 @@ namespace DBADashGUI.QueryPlans
     /// index lists are first class tabs rather than an afterthought, and each of them points back at
     /// the operator it is about.
     /// </summary>
-    public sealed class QueryPlanViewerControl : UserControl
+    public sealed partial class QueryPlanViewerControl : UserControl
     {
-        private readonly ExecutionPlan _plan;
-        private readonly string _sourceXml;
+        // Replaced as a live plan is refreshed - see QueryPlanViewerControl.Live.
+        private ExecutionPlan _plan;
+        private string _sourceXml;
         private readonly string _fileName;
 
         /// <summary>
@@ -207,7 +208,8 @@ namespace DBADashGUI.QueryPlans
         // one table differ only by node id - and the grids are sortable, so a row index is no use.
         private const string NodeIdColumn = "NodeId";
 
-        public QueryPlanViewerControl(ExecutionPlan plan, string sourceXml, string fileName = null, IViewerHost host = null)
+        public QueryPlanViewerControl(ExecutionPlan plan, string sourceXml, string fileName = null, IViewerHost host = null,
+            ILivePlanSource live = null)
         {
             _plan = plan ?? throw new ArgumentNullException(nameof(plan));
             if (plan.Statements.Count == 0) throw new ArgumentException("No statements to show.", nameof(plan));
@@ -215,6 +217,7 @@ namespace DBADashGUI.QueryPlans
             _sourceXml = sourceXml;
             _fileName = fileName;
             _host = host;
+            _live = live;
             _ai = host?.CreatePlanAiPanel();
             if (_ai != null) _ai.Control.Dock = DockStyle.Fill;
 
@@ -284,6 +287,7 @@ namespace DBADashGUI.QueryPlans
             Controls.Add(_tabs);
             Controls.Add(BuildToolbar());
             Controls.Add(BuildStatusBar());
+            if (_live != null) Controls.Add(BuildLiveBar());
 
             foreach (var grid in ListGrids) grid.VisibleChanged += ListGrid_VisibleChanged;
             _graphControl.SelectionChanged += (_, node) => ShowSelection(node);
@@ -1829,7 +1833,9 @@ namespace DBADashGUI.QueryPlans
         /// </summary>
         private void ShowSelection(PlanNode node)
         {
-            _properties.Show(node, _current);
+            // A live refresh re-selects the same operator on the new capture: newer figures, same place in the list.
+            if (_refreshingLive) _properties.ShowKeepingPlace(node, _current);
+            else _properties.Show(node, _current);
 
             // The operator list follows the graph, so switching to it finds the same operator.
             if (node?.Operator is { } op) _operators.Select(op);
@@ -2687,6 +2693,12 @@ namespace DBADashGUI.QueryPlans
             if (keyData == Keys.F1)
             {
                 ShowLegend();
+                return true;
+            }
+
+            if (keyData == Keys.F5 && _live != null)
+            {
+                _ = RefreshLiveAsync();
                 return true;
             }
 

@@ -229,6 +229,10 @@ namespace DBADashGUI.QueryPlans
 
             _node = node;
             _statement = node?.Statement ?? statement;
+
+            // The cards are reused rather than rebuilt (see ShowCards), so they start from the top here as the grid does
+            // below.  ShowKeepingPlace puts the scroll back after.
+            _cardPanel.AutoScrollPosition = Point.Empty;
             ShowCards();
 
             var properties = node?.Operator?.Properties ?? _statement?.Properties;
@@ -273,6 +277,59 @@ namespace DBADashGUI.QueryPlans
                     // take all the height.  With no rows on screen there is no scroll position to
                     // put right, and the grid starts at the top when it is given room again.
                 }
+            }
+        }
+
+        /// <summary>
+        /// Show newer figures for what is already shown - a live plan refreshed - keeping the reader's place: the scroll
+        /// position, the selected rows and how far the cards are scrolled.  The rows are matched by position, which holds
+        /// while the operator is the same; the odd row coming or going on a refresh, such as a warning, moves it a little.
+        /// </summary>
+        public void ShowKeepingPlace(PlanNode node, PlanStatement statement)
+        {
+            var firstRow = _grid.Visible && _grid.Rows.Count > 0 ? _grid.FirstDisplayedScrollingRowIndex : -1;
+            var selected = _grid.SelectedRows.Cast<DataGridViewRow>().Select(r => r.Index).ToList();
+            (int RowIndex, int ColumnIndex) current = _grid.CurrentCell is { } cell ? (cell.RowIndex, cell.ColumnIndex) : (-1, -1);
+            var cardScroll = _cardPanel.AutoScrollPosition;
+
+            Show(node, statement);
+
+            if (_grid.Visible && _grid.Rows.Count > 0)
+            {
+                // Each put back on its own: the grid refuses some of them in some states - a current cell it can't
+                // show, no room to display rows (see Show) - and one refused mustn't stop the others, the scroll
+                // position above all.  The scroll position goes last, as setting the current cell scrolls to it.
+                TryRestore(() =>
+                {
+                    if (current.RowIndex >= 0 && current.RowIndex < _grid.Rows.Count)
+                    {
+                        _grid.CurrentCell = _grid.Rows[current.RowIndex].Cells[current.ColumnIndex];
+                    }
+                });
+                TryRestore(() =>
+                {
+                    _grid.ClearSelection();
+                    foreach (var index in selected.Where(i => i < _grid.Rows.Count)) _grid.Rows[index].Selected = true;
+                });
+                TryRestore(() =>
+                {
+                    if (firstRow >= 0) _grid.FirstDisplayedScrollingRowIndex = Math.Min(firstRow, _grid.Rows.Count - 1);
+                });
+            }
+
+            // AutoScrollPosition reads back negative and is set positive.
+            _cardPanel.AutoScrollPosition = new Point(-cardScroll.X, -cardScroll.Y);
+        }
+
+        private static void TryRestore(Action restore)
+        {
+            try
+            {
+                restore();
+            }
+            catch (InvalidOperationException)
+            {
+                // Refused in the grid's current state - the reader loses that part of their place, nothing more.
             }
         }
 
@@ -746,36 +803,109 @@ namespace DBADashGUI.QueryPlans
         /// knowing about the statement - see <see cref="PlanInsights.ForStatement"/> - each with a
         /// link to the operator it is about.
         /// </summary>
+        /// <summary>
+        /// What each card in <see cref="_cards"/> was built from: its text, and the actions and tooltips its links look
+        /// up when used - held here, and filled in place, so a card can be given new ones without being rebuilt.
+        /// </summary>
+        private readonly List<(string Text, Dictionary<string, Action> Actions, Dictionary<string, string> Tooltips)> _cardContent = new();
+
+        /// <summary>
+        /// Show the cards for what is selected, reusing the cards already showing.  A live plan refreshes every few
+        /// seconds, and its cards mostly say the same thing each time: disposing and recreating them flickered on every
+        /// refresh.  So a card is changed only as much as it needs - its links pointed at the new capture's operators
+        /// always, its text and colours only where they differ - and cards are only added or removed at the end.
+        /// </summary>
         private void ShowCards()
         {
-            foreach (var (card, _) in _cards) card.Dispose();
-            _cards.Clear();
-            _cardPanel.Controls.Clear();
+            var wanted = CardsFor().ToList();
 
-            foreach (var (severity, text, actions, tooltips) in CardsFor())
+            _cardPanel.SuspendLayout();
+            try
             {
-                var card = new InsightCard
+                for (var i = 0; i < wanted.Count; i++)
                 {
-                    Padding = new Padding(InsightCard.AccentWidth + InsightCard.IconGutter, 12, 12, 12),
-                    FillColor = InsightCard.FillFor(severity),
-                    AccentColor = InsightCard.AccentFor(severity),
-                    Icon = severity
-                };
+                    if (i < _cards.Count) UpdateCard(i, wanted[i].Severity, wanted[i].Text, wanted[i].Actions, wanted[i].Tooltips);
+                    else AddCard(wanted[i].Severity, wanted[i].Text, wanted[i].Actions, wanted[i].Tooltips);
+                }
 
-                var label = InsightCard.CreateContentLabel(text, actions, tooltips);
-                label.AutoSize = false;
-                label.Dock = DockStyle.Fill;
-                label.BackColor = card.FillColor;
-                label.ForeColor = InsightCard.TextFor(severity);
-                label.Font = severity == InsightCard.CardIcon.Critical ? (_boldFont ??= new Font(Font, FontStyle.Bold)) : Font;
-
-                card.Controls.Add(label);
-                _cardPanel.Controls.Add(card);
-                _cards.Add((card, label));
+                while (_cards.Count > wanted.Count) RemoveCard(_cards.Count - 1);
+            }
+            finally
+            {
+                _cardPanel.ResumeLayout();
             }
 
             LayoutCards();
             _cardPanel.Visible = _cards.Count > 0;
+        }
+
+        private void AddCard(InsightCard.CardIcon severity, string text, Dictionary<string, Action> actions, Dictionary<string, string> tooltips)
+        {
+            // The label keeps these dictionaries and reads them when a link is used, so they are copies this control
+            // owns and can refill - see UpdateCard.
+            var ownActions = new Dictionary<string, Action>(actions ?? new Dictionary<string, Action>());
+            var ownTooltips = new Dictionary<string, string>(tooltips ?? new Dictionary<string, string>());
+
+            var card = new InsightCard { Padding = new Padding(InsightCard.AccentWidth + InsightCard.IconGutter, 12, 12, 12) };
+
+            var label = InsightCard.CreateContentLabel(text, ownActions, ownTooltips);
+            label.AutoSize = false;
+            label.Dock = DockStyle.Fill;
+
+            card.Controls.Add(label);
+            _cardPanel.Controls.Add(card);
+            _cards.Add((card, label));
+            _cardContent.Add((text, ownActions, ownTooltips));
+            StyleCard(card, label, severity);
+        }
+
+        private void UpdateCard(int index, InsightCard.CardIcon severity, string text, Dictionary<string, Action> actions, Dictionary<string, string> tooltips)
+        {
+            var (card, label) = _cards[index];
+            var content = _cardContent[index];
+
+            // Always: the links of a refreshed plan's card go to the operators of the new capture, not the old one.
+            content.Actions.Clear();
+            foreach (var (key, action) in actions ?? new Dictionary<string, Action>()) content.Actions[key] = action;
+            content.Tooltips.Clear();
+            foreach (var (key, tip) in tooltips ?? new Dictionary<string, string>()) content.Tooltips[key] = tip;
+
+            if (!string.Equals(content.Text, text, StringComparison.Ordinal) && label is LinkLabel link)
+            {
+                // The new text and where its links fall, taken from a label built the usual way.
+                using var parsed = InsightCard.CreateContentLabel(text);
+                link.Text = parsed.Text;
+                link.Links.Clear();
+                foreach (LinkLabel.Link span in parsed.Links) link.Links.Add(span.Start, span.Length, span.LinkData);
+
+                _cardContent[index] = (text, content.Actions, content.Tooltips);
+            }
+
+            if (card.Icon != severity) StyleCard(card, label, severity);
+        }
+
+        private void StyleCard(InsightCard card, Label label, InsightCard.CardIcon severity)
+        {
+            card.Icon = severity;
+            card.FillColor = InsightCard.FillFor(severity);
+            card.AccentColor = InsightCard.AccentFor(severity);
+            label.BackColor = card.FillColor;
+            label.ForeColor = InsightCard.TextFor(severity);
+            label.Font = severity == InsightCard.CardIcon.Critical ? (_boldFont ??= new Font(Font, FontStyle.Bold)) : Font;
+            card.Invalidate();
+        }
+
+        private void RemoveCard(int index)
+        {
+            _cards[index].Card.Dispose();
+            _cards.RemoveAt(index);
+            _cardContent.RemoveAt(index);
+        }
+
+        /// <summary>Throw the cards away, so the next <see cref="ShowCards"/> builds them afresh - for a new font.</summary>
+        private void ClearCards()
+        {
+            while (_cards.Count > 0) RemoveCard(_cards.Count - 1);
         }
 
         /// <summary>
@@ -950,6 +1080,7 @@ namespace DBADashGUI.QueryPlans
             // The rows are rebuilt as well as the cards: the headings are drawn in the bold font being
             // thrown away here.
             _grid.Rows.Clear();
+            ClearCards();
             _boldFont?.Dispose();
             _boldFont = null;
 

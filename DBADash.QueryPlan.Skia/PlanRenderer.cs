@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using DBADash.QueryPlan.Interaction;
 using DBADash.QueryPlan.Layout;
+using DBADash.QueryPlan.Live;
 using DBADash.QueryPlan.Model;
 using SkiaSharp;
 
@@ -171,6 +172,8 @@ namespace DBADash.QueryPlan.Skia
             _stroke.Color = Faded(borderColour, fade);
             _stroke.StrokeWidth = borderWidth;
             canvas.DrawRoundRect(bounds, radius, radius, _stroke);
+
+            DrawLiveProgress(canvas, node, controller, fade, radius, detail && content);
 
             if (!content) return;
 
@@ -668,6 +671,12 @@ namespace DBADash.QueryPlan.Skia
                 return (Palette.SearchMatch, _style.EmphasisBorderWidth);
             }
 
+            // On a live plan, the operators moving rows right now - see PlanRenderer.Live.
+            if (LiveState(node, controller) == PlanLiveState.Active)
+            {
+                return (Palette.Info, _style.EmphasisBorderWidth);
+            }
+
             return (Palette.NodeBorder, _style.NodeBorderWidth);
         }
 
@@ -699,6 +708,7 @@ namespace DBADash.QueryPlan.Skia
                     : null;
 
             DrawArrow(canvas, edge.Points, (float)edge.Thickness, colour, fade, estimate, controller.Zoom);
+            DrawFlow(canvas, edge, controller, (float)edge.Thickness);
         }
 
         /// <summary>
@@ -1244,9 +1254,11 @@ namespace DBADash.QueryPlan.Skia
         /// </summary>
         private float FadeFactor(PlanNode node, PlanViewController controller)
         {
-            if (!_style.FadeOffPath || controller.PathToRoot.Count == 0) return 0;
+            // An operator of a live plan that hasn't started yet is dimmed, so the part of the plan that has run stands out.
+            var live = LiveFade(node, controller);
+            if (!_style.FadeOffPath || controller.PathToRoot.Count == 0) return live;
 
-            return controller.PathToRoot.Contains(node) ? 0 : _style.UnrelatedFade;
+            return Math.Max(live, controller.PathToRoot.Contains(node) ? 0 : _style.UnrelatedFade);
         }
 
         /// <summary>

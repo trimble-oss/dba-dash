@@ -131,6 +131,7 @@ namespace DBADashGUI.Performance
             InstanceName = Convert.ToString(Row["InstanceDisplayName"]);
 
             SetupPlanButton();
+            SetupLivePlanButton();
             SetupFlushPlanButton();
             SetupJobInfoButton();
             SetupKillButton();
@@ -170,6 +171,14 @@ namespace DBADashGUI.Performance
                 QueryPlanActions.PlanAction.FindScript => "Show a script to find the query plan in the plan cache / query store on the source instance.",
                 _ => "No plan information is available for this query."
             };
+        }
+
+        /// <summary>Live plan is available for running requests (not sleeping sessions) when messaging is enabled.</summary>
+        private void SetupLivePlanButton()
+        {
+            tsLivePlan.Visible = QueryPlanActions.CanGetLivePlan(Row);
+            tsLivePlan.Enabled = true;
+            tsLivePlan.ToolTipText = QueryPlanActions.LivePlanToolTip;
         }
 
         /// <summary>True if this session is running a SQL Agent job.</summary>
@@ -2246,6 +2255,23 @@ DBCC FREEPROCCACHE({planHandle});";
         #endregion
 
         #region Plan buttons
+
+        private async void TsLivePlan_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                tsLivePlan.Enabled = false;
+                await QueryPlanActions.GetLivePlan(Row, tsStatus);
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex);
+            }
+            finally
+            {
+                tsLivePlan.Enabled = true; // Can be clicked again for an updated view of the running query
+            }
+        }
 
         private async void TsPlan_Click(object sender, EventArgs e)
         {

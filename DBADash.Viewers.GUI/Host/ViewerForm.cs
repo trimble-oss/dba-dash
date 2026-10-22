@@ -101,19 +101,20 @@ namespace DBADashGUI.Viewers
         /// Show a plan on a tab of the window, opening it if there is none.  A plan that is already open is
         /// brought to the front rather than opened a second time.
         /// </summary>
-        public static void OpenQueryPlan(ExecutionPlan plan, string sourceXml, string fileName = null, IViewerHost host = null)
+        public static void OpenQueryPlan(ExecutionPlan plan, string sourceXml, string fileName = null, IViewerHost host = null,
+            ILivePlanSource live = null)
         {
             var window = _current is { IsDisposed: false } ? _current : null;
 
             if (window is null)
             {
                 window = _current = new ViewerForm();
-                window.AddQueryPlanTab(plan, sourceXml, fileName, host);
+                window.AddQueryPlanTab(plan, sourceXml, fileName, host, live);
                 window.Show();
                 return;
             }
 
-            window.AddQueryPlanTab(plan, sourceXml, fileName, host);
+            window.AddQueryPlanTab(plan, sourceXml, fileName, host, live);
 
             if (window.WindowState == FormWindowState.Minimized) window.WindowState = FormWindowState.Normal;
             window.Activate();
@@ -415,7 +416,7 @@ namespace DBADashGUI.Viewers
             }
         }
 
-        private void AddQueryPlanTab(ExecutionPlan plan, string sourceXml, string fileName, IViewerHost host)
+        private void AddQueryPlanTab(ExecutionPlan plan, string sourceXml, string fileName, IViewerHost host, ILivePlanSource live = null)
         {
             var open = _documents.TabPages.Cast<TabPage>()
                 .FirstOrDefault(p => p.Controls.Count > 0 && p.Controls[0] is QueryPlanViewerControl viewer &&
@@ -427,7 +428,7 @@ namespace DBADashGUI.Viewers
                 return;
             }
 
-            var control = new QueryPlanViewerControl(plan, sourceXml, fileName, host) { Dock = DockStyle.Fill };
+            var control = new QueryPlanViewerControl(plan, sourceXml, fileName, host, live) { Dock = DockStyle.Fill };
             AddTab(control, control.Title, control.TabToolTip);
         }
 
