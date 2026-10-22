@@ -164,10 +164,10 @@ END
 IF @QueryPlan IS NULL
 BEGIN
     SET @msg = CONCAT(N'A live plan is not available for session ', @SessionID, N'.  Some statements have no plan to show - WAITFOR, BACKUP, DBCC and the like.  Otherwise lightweight query profiling is required - it''s on by default from SQL 2019 (LIGHTWEIGHT_QUERY_PROFILING database scoped configuration) and needs trace flag 7412 on SQL 2016 SP1 and 2017.  The query might also have completed.');
-    THROW 50000, @msg, 1;
 END
 
-/* The statement the plan is for, as read either side of taking it, so a live refresh can tell when the request has moved on to another one */
+/* The statement the plan is for, as read either side of taking it, so a live refresh can tell when the request has moved on to another one.
+   A statement with no plan is still this request: query_plan is null and unavailable_reason says why, so a refresh can skip it and keep polling. */
 SELECT @SessionID AS session_id,
     @startUtc AS start_time_utc,
     SYSUTCDATETIME() AS captured_utc,
@@ -177,6 +177,7 @@ SELECT @SessionID AS session_id,
     @SqlHandle AS sql_handle,
     @CpuTime AS cpu_time,
     @ElapsedTime AS total_elapsed_time,
-    @QueryPlan AS query_plan;";
+    @QueryPlan AS query_plan,
+    @msg AS unavailable_reason;";
     }
 }

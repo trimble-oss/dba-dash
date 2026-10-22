@@ -418,14 +418,33 @@ namespace DBADashGUI.Viewers
 
         private void AddQueryPlanTab(ExecutionPlan plan, string sourceXml, string fileName, IViewerHost host, ILivePlanSource live = null)
         {
-            var open = _documents.TabPages.Cast<TabPage>()
-                .FirstOrDefault(p => p.Controls.Count > 0 && p.Controls[0] is QueryPlanViewerControl viewer &&
-                                     string.Equals(viewer.SourceXml, sourceXml, StringComparison.Ordinal));
-
-            if (open is not null)
+            // A live plan is the request, not the XML. The same XML can be a static capture or another session, and a
+            // refresh changes the XML, so neither is a reason to reuse a tab that is not following this request.
+            if (live != null)
             {
-                _documents.SelectedTab = open;
-                return;
+                if (!string.IsNullOrEmpty(live.RequestKey))
+                {
+                    var following = _documents.TabPages.Cast<TabPage>()
+                        .FirstOrDefault(p => p.Controls.Count > 0 && p.Controls[0] is QueryPlanViewerControl viewer &&
+                                             string.Equals(viewer.LiveRequestKey, live.RequestKey, StringComparison.Ordinal));
+                    if (following is not null)
+                    {
+                        _documents.SelectedTab = following;
+                        return;
+                    }
+                }
+            }
+            else
+            {
+                var open = _documents.TabPages.Cast<TabPage>()
+                    .FirstOrDefault(p => p.Controls.Count > 0 && p.Controls[0] is QueryPlanViewerControl viewer &&
+                                         string.Equals(viewer.SourceXml, sourceXml, StringComparison.Ordinal));
+
+                if (open is not null)
+                {
+                    _documents.SelectedTab = open;
+                    return;
+                }
             }
 
             var control = new QueryPlanViewerControl(plan, sourceXml, fileName, host, live) { Dock = DockStyle.Fill };

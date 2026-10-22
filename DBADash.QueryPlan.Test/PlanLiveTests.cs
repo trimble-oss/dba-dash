@@ -114,13 +114,13 @@ namespace DBADash.QueryPlan.Test
         }
 
         [TestMethod]
-        public void Apply_UpdatesTheStatementTimes()
+        public void Apply_LeavesTheStatementTimesFromThePlan()
         {
-            var xml = PlanLivePatcher.Apply(LivePlan, [], cpuMs: 5000, elapsedMs: 6000);
+            var xml = PlanLivePatcher.Apply(LivePlan, [C(0, 500)]);
 
             var stats = PlanParser.Parse(xml).Statements[0].QueryTimeStats!;
-            Assert.AreEqual(5000, stats.CpuMs);
-            Assert.AreEqual(6000, stats.ElapsedMs);
+            Assert.AreEqual(90, stats.CpuMs, "Request CPU is not this statement's time.");
+            Assert.AreEqual(100, stats.ElapsedMs, "Request elapsed time is not this statement's time.");
         }
 
         [TestMethod]
@@ -163,6 +163,19 @@ namespace DBADash.QueryPlan.Test
             Assert.AreEqual(PlanLiveState.Waiting, snapshot.StateOf(0));
             Assert.AreEqual(PlanLiveState.Finished, snapshot.StateOf(2), "Closed is finished, whatever the counters say.");
             Assert.AreEqual(PlanLiveState.Finished, snapshot.StateOf(3), "Without timestamps the counters decide.");
+        }
+
+        [TestMethod]
+        public void Snapshot_UnusedThreadDoesNotKeepAClosedOperatorWaiting()
+        {
+            var snapshot = PlanLiveSnapshot.From(
+                [
+                    C(0, 10, thread: 0) with { OpenTimeMs = 0, CloseTimeMs = 0 },
+                    C(0, 10, thread: 1) with { OpenTimeMs = 100, CloseTimeMs = 200 }
+                ],
+                null, DateTime.UtcNow);
+
+            Assert.AreEqual(PlanLiveState.Finished, snapshot.StateOf(0), "A thread that never opened is not still running.");
         }
 
         [TestMethod]

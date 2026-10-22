@@ -60,6 +60,8 @@ namespace DBADash.Viewers.GUI.Test
 
             public string Description => "Session 1 on test";
 
+            public string RequestKey => "test";
+
             public Task<LivePlanCapture> CaptureAsync(CancellationToken cancellationToken)
             {
                 _rows += 10;
@@ -81,6 +83,8 @@ namespace DBADash.Viewers.GUI.Test
         private sealed class FailingSource(string message) : ILivePlanSource
         {
             public string Description => "Session 1 on test";
+
+            public string RequestKey => "test";
 
             public Task<LivePlanCapture> CaptureAsync(CancellationToken cancellationToken) =>
                 Task.FromException<LivePlanCapture>(new InvalidOperationException(message));
