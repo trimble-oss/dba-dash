@@ -430,6 +430,9 @@ BEGIN
 	DELETE dbo.ResourceGovernorConfigurationHistory
 	WHERE InstanceID = @InstanceID
 
+	DELETE dbo.RunningQueryLiveProfiles
+	WHERE InstanceID = @InstanceID
+
 	EXEC dbo.RunningQueries_Del @InstanceID=@InstanceID,@DaysToKeep=0
 
 	EXEC dbo.RunningQueriesSummary_Del @InstanceID=@InstanceID,@DaysToKeep=0

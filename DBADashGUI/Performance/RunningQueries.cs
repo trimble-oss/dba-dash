@@ -1296,6 +1296,11 @@ namespace DBADashGUI.Performance
 
         private void ShowPlan(DataRowView row)
         {
+            if ((bool)row["has_plan"] && QueryPlanActions.HasLiveCapture(row))
+            {
+                QueryPlanActions.ViewLiveCapture(row, tsStatus);
+                return;
+            }
             if (!(bool)row["has_plan"])
             {
                 var context = QueryPlanActions.PlanContext(row);
@@ -1906,7 +1911,9 @@ namespace DBADashGUI.Performance
         {
             if (dgv.Columns[e.ColumnIndex].Name == "colQueryPlan")
             {
-                e.Value = Convert.ToBoolean(e.Value) ? "View Plan" : dgv.Rows[e.RowIndex].Cells["colPlanHandle"].Value == DBNull.Value || dgv.Rows[e.RowIndex].Cells["colQueryPlanHash"].Value == DBNull.Value ? "" : "Find Plan";
+                var hasLiveCapture = dgv.Rows[e.RowIndex].DataBoundItem is DataRowView planRow && QueryPlanActions.HasLiveCapture(planRow);
+                e.Value = Convert.ToBoolean(e.Value) ? hasLiveCapture ? "View Live Capture" : "View Plan" : dgv.Rows[e.RowIndex].Cells["colPlanHandle"].Value == DBNull.Value || dgv.Rows[e.RowIndex].Cells["colQueryPlanHash"].Value == DBNull.Value ? "" : "Find Plan";
+                if (hasLiveCapture) dgv.Rows[e.RowIndex].Cells[e.ColumnIndex].ToolTipText = QueryPlanActions.LiveCaptureToolTip;
             }
             else if (Convert.ToString(e.Value)?.Length > 1000)
             {

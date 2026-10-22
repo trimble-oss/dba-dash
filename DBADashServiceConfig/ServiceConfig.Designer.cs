@@ -177,6 +177,14 @@ namespace DBADashServiceConfig
             chkCollectTempDB = new System.Windows.Forms.CheckBox();
             chkCollectPlans = new System.Windows.Forms.CheckBox();
             grpRunningQueryThreshold = new System.Windows.Forms.GroupBox();
+            grpLivePlanThreshold = new System.Windows.Forms.GroupBox();
+            chkCaptureLivePlans = new System.Windows.Forms.CheckBox();
+            lblLivePlanCPUThreshold = new System.Windows.Forms.Label();
+            txtLivePlanCPUThreshold = new System.Windows.Forms.TextBox();
+            lblLivePlanDurationThreshold = new System.Windows.Forms.Label();
+            txtLivePlanDurationThreshold = new System.Windows.Forms.TextBox();
+            lblLivePlanMaxPerCollection = new System.Windows.Forms.Label();
+            txtLivePlanMaxPerCollection = new System.Windows.Forms.TextBox();
             label15 = new System.Windows.Forms.Label();
             txtDurationThreshold = new System.Windows.Forms.TextBox();
             txtCountThreshold = new System.Windows.Forms.TextBox();
@@ -263,6 +271,7 @@ namespace DBADashServiceConfig
             ((System.ComponentModel.ISupportInitialize)numSlowQueryThreshold).BeginInit();
             tabRunningQueries.SuspendLayout();
             grpRunningQueryThreshold.SuspendLayout();
+            grpLivePlanThreshold.SuspendLayout();
             tabAddConnectionOther.SuspendLayout();
             tabDeadlocks.SuspendLayout();
             tabQueryStats.SuspendLayout();
@@ -1886,6 +1895,7 @@ namespace DBADashServiceConfig
             tabRunningQueries.Controls.Add(chkCollectTempDB);
             tabRunningQueries.Controls.Add(chkCollectPlans);
             tabRunningQueries.Controls.Add(grpRunningQueryThreshold);
+            tabRunningQueries.Controls.Add(grpLivePlanThreshold);
             tabRunningQueries.Controls.Add(chkCollectSessionWaits);
             tabRunningQueries.Location = new System.Drawing.Point(4, 39);
             tabRunningQueries.Name = "tabRunningQueries";
@@ -1937,9 +1947,93 @@ namespace DBADashServiceConfig
             grpRunningQueryThreshold.TabIndex = 22;
             grpRunningQueryThreshold.TabStop = false;
             grpRunningQueryThreshold.Text = "Running Queries Plan Collection Thresholds";
-            // 
+            //
+            // grpLivePlanThreshold
+            //
+            grpLivePlanThreshold.Controls.Add(chkCaptureLivePlans);
+            grpLivePlanThreshold.Controls.Add(lblLivePlanCPUThreshold);
+            grpLivePlanThreshold.Controls.Add(txtLivePlanCPUThreshold);
+            grpLivePlanThreshold.Controls.Add(lblLivePlanDurationThreshold);
+            grpLivePlanThreshold.Controls.Add(txtLivePlanDurationThreshold);
+            grpLivePlanThreshold.Controls.Add(lblLivePlanMaxPerCollection);
+            grpLivePlanThreshold.Controls.Add(txtLivePlanMaxPerCollection);
+            grpLivePlanThreshold.Enabled = false;
+            grpLivePlanThreshold.Location = new System.Drawing.Point(270, 8);
+            grpLivePlanThreshold.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            grpLivePlanThreshold.Name = "grpLivePlanThreshold";
+            grpLivePlanThreshold.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            grpLivePlanThreshold.Size = new System.Drawing.Size(265, 160);
+            grpLivePlanThreshold.TabIndex = 29;
+            grpLivePlanThreshold.TabStop = false;
+            grpLivePlanThreshold.Text = "Live Plan Capture";
+            //
+            // chkCaptureLivePlans
+            //
+            chkCaptureLivePlans.AutoSize = true;
+            chkCaptureLivePlans.Location = new System.Drawing.Point(9, 24);
+            chkCaptureLivePlans.Name = "chkCaptureLivePlans";
+            chkCaptureLivePlans.Size = new System.Drawing.Size(220, 24);
+            chkCaptureLivePlans.TabIndex = 0;
+            chkCaptureLivePlans.Text = "Capture long running queries";
+            chkCaptureLivePlans.UseVisualStyleBackColor = true;
+            chkCaptureLivePlans.CheckedChanged += ChkCaptureLivePlans_CheckedChanged;
+            //
+            // lblLivePlanCPUThreshold
+            //
+            lblLivePlanCPUThreshold.AutoSize = true;
+            lblLivePlanCPUThreshold.Location = new System.Drawing.Point(6, 58);
+            lblLivePlanCPUThreshold.Name = "lblLivePlanCPUThreshold";
+            lblLivePlanCPUThreshold.Size = new System.Drawing.Size(108, 20);
+            lblLivePlanCPUThreshold.TabIndex = 1;
+            lblLivePlanCPUThreshold.Text = "CPU (ms):";
+            //
+            // txtLivePlanCPUThreshold
+            //
+            txtLivePlanCPUThreshold.Location = new System.Drawing.Point(150, 55);
+            txtLivePlanCPUThreshold.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            txtLivePlanCPUThreshold.Enabled = false;
+            txtLivePlanCPUThreshold.Name = "txtLivePlanCPUThreshold";
+            txtLivePlanCPUThreshold.Size = new System.Drawing.Size(100, 27);
+            txtLivePlanCPUThreshold.TabIndex = 2;
+            //
+            // lblLivePlanDurationThreshold
+            //
+            lblLivePlanDurationThreshold.AutoSize = true;
+            lblLivePlanDurationThreshold.Location = new System.Drawing.Point(6, 92);
+            lblLivePlanDurationThreshold.Name = "lblLivePlanDurationThreshold";
+            lblLivePlanDurationThreshold.Size = new System.Drawing.Size(108, 20);
+            lblLivePlanDurationThreshold.TabIndex = 3;
+            lblLivePlanDurationThreshold.Text = "Duration (ms):";
+            //
+            // txtLivePlanDurationThreshold
+            //
+            txtLivePlanDurationThreshold.Location = new System.Drawing.Point(150, 89);
+            txtLivePlanDurationThreshold.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            txtLivePlanDurationThreshold.Enabled = false;
+            txtLivePlanDurationThreshold.Name = "txtLivePlanDurationThreshold";
+            txtLivePlanDurationThreshold.Size = new System.Drawing.Size(100, 27);
+            txtLivePlanDurationThreshold.TabIndex = 4;
+            //
+            // lblLivePlanMaxPerCollection
+            //
+            lblLivePlanMaxPerCollection.AutoSize = true;
+            lblLivePlanMaxPerCollection.Location = new System.Drawing.Point(6, 126);
+            lblLivePlanMaxPerCollection.Name = "lblLivePlanMaxPerCollection";
+            lblLivePlanMaxPerCollection.Size = new System.Drawing.Size(140, 20);
+            lblLivePlanMaxPerCollection.TabIndex = 5;
+            lblLivePlanMaxPerCollection.Text = "Max per collection:";
+            //
+            // txtLivePlanMaxPerCollection
+            //
+            txtLivePlanMaxPerCollection.Location = new System.Drawing.Point(150, 123);
+            txtLivePlanMaxPerCollection.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            txtLivePlanMaxPerCollection.Enabled = false;
+            txtLivePlanMaxPerCollection.Name = "txtLivePlanMaxPerCollection";
+            txtLivePlanMaxPerCollection.Size = new System.Drawing.Size(100, 27);
+            txtLivePlanMaxPerCollection.TabIndex = 6;
+            //
             // label15
-            // 
+            //
             label15.AutoSize = true;
             label15.Location = new System.Drawing.Point(6, 40);
             label15.Name = "label15";
@@ -2682,6 +2776,8 @@ namespace DBADashServiceConfig
             tabRunningQueries.PerformLayout();
             grpRunningQueryThreshold.ResumeLayout(false);
             grpRunningQueryThreshold.PerformLayout();
+            grpLivePlanThreshold.ResumeLayout(false);
+            grpLivePlanThreshold.PerformLayout();
             tabAddConnectionOther.ResumeLayout(false);
             tabAddConnectionOther.PerformLayout();
             tabDeadlocks.ResumeLayout(false);
@@ -2758,6 +2854,14 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.TabPage tabRunningQueries;
         private System.Windows.Forms.CheckBox chkCollectPlans;
         private System.Windows.Forms.GroupBox grpRunningQueryThreshold;
+        private System.Windows.Forms.GroupBox grpLivePlanThreshold;
+        private System.Windows.Forms.CheckBox chkCaptureLivePlans;
+        private System.Windows.Forms.Label lblLivePlanCPUThreshold;
+        private System.Windows.Forms.TextBox txtLivePlanCPUThreshold;
+        private System.Windows.Forms.Label lblLivePlanDurationThreshold;
+        private System.Windows.Forms.TextBox txtLivePlanDurationThreshold;
+        private System.Windows.Forms.Label lblLivePlanMaxPerCollection;
+        private System.Windows.Forms.TextBox txtLivePlanMaxPerCollection;
         private System.Windows.Forms.Label label15;
         private System.Windows.Forms.TextBox txtDurationThreshold;
         private System.Windows.Forms.TextBox txtCountThreshold;

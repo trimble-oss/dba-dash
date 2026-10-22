@@ -69,6 +69,18 @@ SetSchedule - Set how often a collection runs.  Sets the service level schedule,
         [Option("PlanCollectionMemoryGrantThreshold", Default = 6400, Required = false, HelpText = "Collect plan if memory grant is higher than the specified threshold (in pages)")]
         public int PlanCollectionMemoryGrantThreshold { get; set; }
 
+        [Option("LivePlanCaptureEnabled", Default = false, Required = false, HelpText = "Set this switch to keep the operator counters of long running queries, so their plans can be viewed with how far each operator had got.  Needs PlanCollectionEnabled - only queries whose plans are collected are captured.")]
+        public bool LivePlanCaptureEnabled { get; set; }
+
+        [Option("LivePlanCaptureCPUThreshold", Default = 60000, Required = false, HelpText = "Capture the live plan of a query if its CPU time is higher than the specified threshold (ms)")]
+        public int LivePlanCaptureCPUThreshold { get; set; }
+
+        [Option("LivePlanCaptureDurationThreshold", Default = 300000, Required = false, HelpText = "Capture the live plan of a query that isn't blocked if it has been running longer than the specified threshold (ms)")]
+        public int LivePlanCaptureDurationThreshold { get; set; }
+
+        [Option("LivePlanCaptureMaxPerCollection", Default = LiveProfileThreshold.DefaultMaxPerCollection, Required = false, HelpText = "The most live plans captured in one running queries collection, highest CPU first")]
+        public int LivePlanCaptureMaxPerCollection { get; set; }
+
         [Option("SchemaSnapshotDBs", Default = "", Required = false, HelpText = "Comma-separated list of databases to include in a schema snapshot.  Use \" * \" to snapshot all databases.")]
         public string? SchemaSnapshotDBs { get; set; }
 

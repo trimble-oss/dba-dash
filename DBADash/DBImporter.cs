@@ -393,7 +393,7 @@ namespace DBADash
             "DatabasePermissions", "CustomChecks", "PerformanceCounters", "PerfmonCounters", "VLF", "DatabaseMirroring",
             "Jobs", "JobHistory", "AvailabilityReplicas", "AvailabilityGroups", "JobSteps",
             "DatabaseQueryStoreOptions", "ResourceGovernorConfiguration", "AzureDBResourceGovernance",
-            "RunningQueries", "QueryText", "QueryPlans", "InternalPerformanceCounters", "MemoryUsage",
+            "RunningQueries", "QueryText", "QueryPlans", "RunningQueryLiveProfiles", "InternalPerformanceCounters", "MemoryUsage",
             "SessionWaits", "IdentityColumns", "RunningJobs", "TableSize", "ServerServices","ObjectExecutionStatsLegacy",
             "AvailableProcs", "FailedLogins", "RunningQueriesCursors","ResourceGovernorWorkloadGroups", "ResourceGovernorResourcePools",
             "DatabaseExtendedProperties", "AGHealthEvents", "LatchStats", "SpinlockStats"

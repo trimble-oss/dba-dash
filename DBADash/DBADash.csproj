@@ -42,6 +42,9 @@
     <EmbeddedResource Include="SQL\SQLFailedLogins.sql" />
     <EmbeddedResource Include="SQL\SQLLatchStats.sql" />
     <EmbeddedResource Include="SQL\SQLSpinlockStats.sql" />
+    <EmbeddedResource Include="SQL\SQLLivePlan.sql" />
+    <EmbeddedResource Include="SQL\SQLLiveQueryProfile.sql" />
+    <EmbeddedResource Include="SQL\SQLLiveProfiles.sql" />
     <EmbeddedResource Include="SQL\SQLAvailableCounters.sql" />
     <EmbeddedResource Include="SQL\SQLAvailableProcs.sql" />
     <EmbeddedResource Include="SQL\SQLDeadlockSession.sql" />

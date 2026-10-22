@@ -24,6 +24,7 @@ namespace DBADash
         private int slowQueryThresholdMs = -1;
         private CollectionSchedules collectionSchedules;
         private PlanCollectionThreshold runningQueryPlanThreshold;
+        private LiveProfileThreshold runningQueryLiveProfileThreshold;
         private string schemaSnapshotDBs;
         private bool noWMI;
         private int slowQuerySessionMaxMemoryKB = 4096;
@@ -56,6 +57,13 @@ namespace DBADash
             set => runningQueryPlanThreshold = value;
         }
 
+        /// <summary>Which running queries have their operator counters kept - see <see cref="LiveProfileThreshold"/>.  Null = off.</summary>
+        public LiveProfileThreshold RunningQueryLiveProfileThreshold
+        {
+            get => SourceConnection is { Type: ConnectionType.SQL } ? runningQueryLiveProfileThreshold : null;
+            set => runningQueryLiveProfileThreshold = value;
+        }
+
         public string SchemaSnapshotDBs
         {
             get => SourceConnection is { Type: ConnectionType.SQL } ? schemaSnapshotDBs : string.Empty;
@@ -76,51 +84,110 @@ namespace DBADash
             set => RunningQueryPlanThreshold = value ? PlanCollectionThreshold.DefaultThreshold : null;
         }
 
+        // A threshold that isn't used is int.MaxValue, which the grid shows as blank.  Clearing a cell sets it back to that,
+        // and doesn't add a threshold to a source without one.  Null also for a source that isn't SQL.
+
         [JsonIgnore]
-        public int PlanCollectionCPUThreshold
+        public int? PlanCollectionCPUThreshold
         {
-            get => RunningQueryPlanThreshold == null || SourceConnection.Type != ConnectionType.SQL
-                    ? int.MaxValue
-                    : RunningQueryPlanThreshold.CPUThreshold;
+            get => NullIfNotUsed(RunningQueryPlanThreshold?.CPUThreshold);
             set
             {
+                if (value == null && RunningQueryPlanThreshold == null) return;
                 RunningQueryPlanThreshold ??= PlanCollectionThreshold.PlanCollectionDisabledThreshold;
-                RunningQueryPlanThreshold.CPUThreshold = value;
+                RunningQueryPlanThreshold.CPUThreshold = value ?? int.MaxValue;
             }
         }
 
         [JsonIgnore]
-        public int PlanCollectionMemoryGrantThreshold
+        public int? PlanCollectionMemoryGrantThreshold
         {
-            get => RunningQueryPlanThreshold == null || SourceConnection.Type != ConnectionType.SQL ? int.MaxValue : RunningQueryPlanThreshold.MemoryGrantThreshold;
+            get => NullIfNotUsed(RunningQueryPlanThreshold?.MemoryGrantThreshold);
             set
             {
+                if (value == null && RunningQueryPlanThreshold == null) return;
                 RunningQueryPlanThreshold ??= PlanCollectionThreshold.PlanCollectionDisabledThreshold;
-                RunningQueryPlanThreshold.MemoryGrantThreshold = value;
+                RunningQueryPlanThreshold.MemoryGrantThreshold = value ?? int.MaxValue;
             }
         }
 
         [JsonIgnore]
-        public int PlanCollectionDurationThreshold
+        public int? PlanCollectionDurationThreshold
         {
-            get => RunningQueryPlanThreshold == null || SourceConnection.Type != ConnectionType.SQL ? int.MaxValue : RunningQueryPlanThreshold.DurationThreshold;
+            get => NullIfNotUsed(RunningQueryPlanThreshold?.DurationThreshold);
             set
             {
+                if (value == null && RunningQueryPlanThreshold == null) return;
                 RunningQueryPlanThreshold ??= PlanCollectionThreshold.PlanCollectionDisabledThreshold;
-                RunningQueryPlanThreshold.DurationThreshold = value;
+                RunningQueryPlanThreshold.DurationThreshold = value ?? int.MaxValue;
             }
         }
 
         [JsonIgnore]
-        public int PlanCollectionCountThreshold
+        public int? PlanCollectionCountThreshold
         {
-            get => RunningQueryPlanThreshold == null || SourceConnection.Type != ConnectionType.SQL ? int.MaxValue : RunningQueryPlanThreshold.CountThreshold;
+            get => NullIfNotUsed(RunningQueryPlanThreshold?.CountThreshold);
             set
             {
+                if (value == null && RunningQueryPlanThreshold == null) return;
                 RunningQueryPlanThreshold ??= PlanCollectionThreshold.PlanCollectionDisabledThreshold;
-                RunningQueryPlanThreshold.CountThreshold = value;
+                RunningQueryPlanThreshold.CountThreshold = value ?? int.MaxValue;
             }
         }
+
+        /// <summary>Live capture is on and will run: it only applies to queries whose plans are collected.</summary>
+        [JsonIgnore]
+        public bool LiveProfileCollectionEnabled => PlanCollectionEnabled && RunningQueryLiveProfileThreshold is { Enabled: true };
+
+        // Live capture properties to allow them to be visible/editable in the grid.  As set - LiveProfileCollectionEnabled
+        // says whether it runs, which also needs plan collection.
+
+        [JsonIgnore]
+        public bool LivePlanCaptureEnabled
+        {
+            get => RunningQueryLiveProfileThreshold is { Enabled: true };
+            set => RunningQueryLiveProfileThreshold = value ? LiveProfileThreshold.DefaultThreshold : null;
+        }
+
+        [JsonIgnore]
+        public int? LivePlanCaptureCPUThreshold
+        {
+            get => NullIfNotUsed(RunningQueryLiveProfileThreshold?.CPUThreshold);
+            set
+            {
+                if (value == null && RunningQueryLiveProfileThreshold == null) return;
+                RunningQueryLiveProfileThreshold ??= new LiveProfileThreshold();
+                RunningQueryLiveProfileThreshold.CPUThreshold = value ?? int.MaxValue;
+            }
+        }
+
+        [JsonIgnore]
+        public int? LivePlanCaptureDurationThreshold
+        {
+            get => NullIfNotUsed(RunningQueryLiveProfileThreshold?.DurationThreshold);
+            set
+            {
+                if (value == null && RunningQueryLiveProfileThreshold == null) return;
+                RunningQueryLiveProfileThreshold ??= new LiveProfileThreshold();
+                RunningQueryLiveProfileThreshold.DurationThreshold = value ?? int.MaxValue;
+            }
+        }
+
+        /// <summary>Cleared in the grid, it goes back to the default.</summary>
+        [JsonIgnore]
+        public int? LivePlanCaptureMaxPerCollection
+        {
+            get => RunningQueryLiveProfileThreshold?.MaxPerCollection;
+            set
+            {
+                if (value == null && RunningQueryLiveProfileThreshold == null) return;
+                RunningQueryLiveProfileThreshold ??= new LiveProfileThreshold();
+                RunningQueryLiveProfileThreshold.MaxPerCollection = value ?? LiveProfileThreshold.DefaultMaxPerCollection;
+            }
+        }
+
+        // See the plan collection threshold properties
+        private static int? NullIfNotUsed(int? threshold) => threshold == int.MaxValue ? null : threshold;
 
         #endregion "Plan Collection Threshold Properties"
 

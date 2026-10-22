@@ -22,6 +22,7 @@ namespace DBADashGUI.Performance
         {
             None,
             View,
+            ViewLiveCapture,
             Collect,
             FindScript
         }
@@ -31,6 +32,7 @@ namespace DBADashGUI.Performance
         {
             context = null;
             var hasPlan = row["has_plan"] != DBNull.Value && Convert.ToBoolean(row["has_plan"]);
+            if (hasPlan && HasLiveCapture(row)) return PlanAction.ViewLiveCapture;
             if (hasPlan) return PlanAction.View;
 
             var canFindPlan = row["plan_handle"] != DBNull.Value && row["query_plan_hash"] != DBNull.Value;
@@ -58,6 +60,7 @@ namespace DBADashGUI.Performance
         internal static string ActionText(PlanAction action) => action switch
         {
             PlanAction.View => "View Plan",
+            PlanAction.ViewLiveCapture => "View Live Capture",
             PlanAction.Collect => "Collect Plan",
             PlanAction.FindScript => "Find Plan",
             _ => "Plan"
@@ -72,6 +75,10 @@ namespace DBADashGUI.Performance
                     ViewPlan(row, PlanContext(row));
                     break;
 
+                case PlanAction.ViewLiveCapture:
+                    ViewLiveCapture(row, lblStatus);
+                    break;
+
                 case PlanAction.Collect:
                     await CollectPlan(row, context, lblStatus);
                     break;
@@ -80,6 +87,44 @@ namespace DBADashGUI.Performance
                     RunningQueries.FindPlanScript(row);
                     break;
             }
+        }
+
+        /// <summary>
+        /// True if the running queries collection kept operator counters for the row's request and statement - see
+        /// <see cref="CapturedLivePlanSource"/>.
+        /// </summary>
+        internal static bool HasLiveCapture(DataRowView row) =>
+            row.Row.Table.Columns.Contains("has_live_profile")
+            && row["has_live_profile"] != DBNull.Value && Convert.ToBoolean(row["has_live_profile"])
+            && row["start_time"] != DBNull.Value
+            && row["statement_start_offset"] != DBNull.Value && row["statement_end_offset"] != DBNull.Value
+            && row["sql_handle"] != DBNull.Value && row["query_plan_hash"] != DBNull.Value;
+
+        internal const string LiveCaptureToolTip = "View the plan with the operator counters the running queries collection kept for this query - how far it had got when last collected.";
+
+        /// <summary>
+        /// The plan with the counters kept for the row's request, shown as a live plan that can be refreshed if the query
+        /// is still running.  The plan on its own where the capture has gone since the grid was loaded.
+        /// </summary>
+        internal static void ViewLiveCapture(DataRowView row, ToolStripStatusLabel lblStatus)
+        {
+            var context = PlanContext(row);
+            var sessionId = Convert.ToInt32(row["session_id"]);
+            var source = CapturedLivePlanSource.Load(context, sessionId,
+                Convert.ToDateTime(row["start_time"]).AppTimeZoneToUtc(),
+                row.GetHexStringColumnAsByteArray("sql_handle"),
+                Convert.ToInt32(row["statement_start_offset"]),
+                Convert.ToInt32(row["statement_end_offset"]),
+                row.GetHexStringColumnAsByteArray("query_plan_hash"));
+            if (source == null)
+            {
+                lblStatus.InvokeSetStatus("The live capture for this query is no longer available.  Showing the plan.", string.Empty, DashColors.Warning);
+                ViewPlan(row, context);
+                return;
+            }
+
+            var fileName = $"Live Plan SPID {sessionId} {source.Initial.CapturedAt:yyyy-MM-dd HHmmss}.sqlplan";
+            Common.ShowQueryPlan(source.PlanXml, fileName, context, source);
         }
 
         private static void ViewPlan(DataRowView row, DBADashContext context)

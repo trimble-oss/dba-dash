@@ -233,6 +233,19 @@ namespace DBADashConfig
                 source.PlanCollectionCPUThreshold = o.PlanCollectionCPUThreshold;
                 source.PlanCollectionDurationThreshold = o.PlanCollectionDurationThreshold;
                 source.PlanCollectionMemoryGrantThreshold = o.PlanCollectionMemoryGrantThreshold;
+                if (o.LivePlanCaptureEnabled)
+                {
+                    source.RunningQueryLiveProfileThreshold = new LiveProfileThreshold
+                    {
+                        CPUThreshold = o.LivePlanCaptureCPUThreshold,
+                        DurationThreshold = o.LivePlanCaptureDurationThreshold,
+                        MaxPerCollection = o.LivePlanCaptureMaxPerCollection
+                    };
+                }
+            }
+            else if (o.LivePlanCaptureEnabled)
+            {
+                Log.Warning("--LivePlanCaptureEnabled is ignored without --PlanCollectionEnabled: only queries whose plans are collected are captured.");
             }
             if (source.SlowQueryCaptureMode == DBADashSource.SlowQueryCaptureModes.ExistingSession &&
                 string.IsNullOrWhiteSpace(source.SlowQueryXESessionName))

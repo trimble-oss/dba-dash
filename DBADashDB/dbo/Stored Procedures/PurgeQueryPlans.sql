@@ -14,6 +14,23 @@ SELECT @RetentionDays = RetentionDays
 FROM dbo.DataRetention
 WHERE TableName = 'RunningQueries'
 
+/* Live profiles are kept as long as the running queries they were captured from.  Their plans need no protecting here: each
+   capture was taken from a running query in the same collection, whose row references the plan and is kept at least as long. */
+/* A retention of 0 or less keeps running queries indefinitely (PurgeData skips them), so the captures are kept too */
+IF @RetentionDays > 0
+BEGIN
+	DECLARE @LiveProfilesCutoff DATETIME2(3) = DATEADD(d,-@RetentionDays,GETUTCDATE())
+	WHILE 1=1
+	BEGIN
+		/* In batches: each row carries a few KB of counters, and one large delete could escalate to a table lock that blocks imports */
+		DELETE TOP(@BatchSize) dbo.RunningQueryLiveProfiles
+		WHERE LastCapturedUTC < @LiveProfilesCutoff
+
+		IF @@ROWCOUNT < @BatchSize
+			BREAK
+	END
+END
+
 INSERT INTO #oldPlans
 SELECT plan_handle,statement_start_offset,statement_end_offset,query_plan_hash 
 FROM dbo.QueryPlans QP
