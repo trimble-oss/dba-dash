@@ -1651,27 +1651,49 @@ namespace DBADashGUI.QueryPlans
         private void PopulateMetricSelector()
         {
             var selected = _graphControl.HeatMetric;
+            var metrics = Enum.GetValues<PlanHeatMetric>().Where(_graphControl.Supports).ToArray();
 
-            _metricSelector.SelectedIndexChanged -= MetricSelector_SelectedIndexChanged;
-            _metricSelector.Items.Clear();
-
-            foreach (var metric in Enum.GetValues<PlanHeatMetric>())
+            // A live refresh calls this every couple of seconds. Clearing the combo to put the same
+            // choices back blanks "Estimated Cost" and makes the toolbar repaint around it, so an
+            // unchanged list is left exactly as it is.
+            var current = _metricSelector.Items.Cast<MetricChoice>().Select(c => c.Metric).ToArray();
+            if (current.SequenceEqual(metrics))
             {
-                if (!_graphControl.Supports(metric)) continue;
-                _metricSelector.Items.Add(new MetricChoice(metric));
+                var index = Array.IndexOf(metrics, selected);
+                if (index < 0 && metrics.Length > 0) index = 0;
+                if (index >= 0 && _metricSelector.SelectedIndex != index)
+                {
+                    _metricSelector.SelectedIndexChanged -= MetricSelector_SelectedIndexChanged;
+                    _metricSelector.SelectedIndex = index;
+                    _metricSelector.SelectedIndexChanged += MetricSelector_SelectedIndexChanged;
+                }
+
+                var enabled = metrics.Length > 0;
+                if (_metricSelector.Enabled != enabled) _metricSelector.Enabled = enabled;
+                return;
             }
 
-            var index = _metricSelector.Items
-                .Cast<MetricChoice>()
-                .ToList()
-                .FindIndex(c => c.Metric == selected);
+            _metricSelector.SelectedIndexChanged -= MetricSelector_SelectedIndexChanged;
+            // Hold the redraw across the clear, or the empty list paints before the choices come back.
+            _metricSelector.ComboBox?.BeginUpdate();
+            try
+            {
+                _metricSelector.Items.Clear();
 
-            // A statement with no plan supports no metric at all, and selecting into an empty list
-            // throws - so the picker is left empty and disabled rather than taking the viewer down.
-            _metricSelector.Enabled = _metricSelector.Items.Count > 0;
-            if (_metricSelector.Items.Count > 0) _metricSelector.SelectedIndex = index >= 0 ? index : 0;
+                foreach (var metric in metrics) _metricSelector.Items.Add(new MetricChoice(metric));
 
-            _metricSelector.SelectedIndexChanged += MetricSelector_SelectedIndexChanged;
+                var index = Array.IndexOf(metrics, selected);
+
+                // A statement with no plan supports no metric at all, and selecting into an empty list
+                // throws - so the picker is left empty and disabled rather than taking the viewer down.
+                _metricSelector.Enabled = metrics.Length > 0;
+                if (metrics.Length > 0) _metricSelector.SelectedIndex = index >= 0 ? index : 0;
+            }
+            finally
+            {
+                _metricSelector.ComboBox?.EndUpdate();
+                _metricSelector.SelectedIndexChanged += MetricSelector_SelectedIndexChanged;
+            }
         }
 
         private void MetricSelector_SelectedIndexChanged(object sender, EventArgs e)
