@@ -41,14 +41,16 @@
             bothToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             tsDateGroup = new System.Windows.Forms.ToolStripDropDownButton();
             dateRangeToolStripMenuItem1 = new DateRangeToolStripMenuItem();
-            WebView2Wrapper1 = new WebView2Wrapper();
+            tsSort = new System.Windows.Forms.ToolStripDropDownButton();
+            tsFilter = new System.Windows.Forms.ToolStripTextBox();
+            chart = new JobTimelineChart();
             toolStrip1.SuspendLayout();
             SuspendLayout();
             // 
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopyDropDown, tsCategories, tsIncludeSteps, tsDateGroup, dateRangeToolStripMenuItem1 });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopyDropDown, tsCategories, tsIncludeSteps, tsDateGroup, tsSort, tsFilter, dateRangeToolStripMenuItem1 });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new System.Drawing.Size(1065, 27);
@@ -155,25 +157,40 @@
             dateRangeToolStripMenuItem1.Visible = false;
             dateRangeToolStripMenuItem1.DateRangeChanged += DateRangeChanged;
             // 
-            // WebView2Wrapper1
-            // 
-            WebView2Wrapper1.Dock = System.Windows.Forms.DockStyle.Fill;
-            WebView2Wrapper1.Location = new System.Drawing.Point(0, 27);
-            WebView2Wrapper1.Name = "WebView2Wrapper1";
-            WebView2Wrapper1.Size = new System.Drawing.Size(1065, 697);
-            WebView2Wrapper1.TabIndex = 2;
-            WebView2Wrapper1.SetupCompleted += WebView2_SetupCompleted;
+            // tsSort
+            //
+            tsSort.Image = Properties.Resources.SortByColumn_16x;
+            tsSort.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsSort.Name = "tsSort";
+            tsSort.Size = new System.Drawing.Size(90, 24);
+            tsSort.Text = "Name";
+            tsSort.ToolTipText = "Order jobs by";
+            //
+            // tsFilter
+            //
+            tsFilter.Name = "tsFilter";
+            tsFilter.Size = new System.Drawing.Size(160, 27);
+            tsFilter.ToolTipText = "Filter jobs by name";
+            tsFilter.TextChanged += Filter_TextChanged;
+            //
+            // chart
+            //
+            chart.Dock = System.Windows.Forms.DockStyle.Fill;
+            chart.Location = new System.Drawing.Point(0, 27);
+            chart.Name = "chart";
+            chart.Size = new System.Drawing.Size(1065, 697);
+            chart.TabIndex = 2;
+            chart.BarActivated += Chart_BarActivated;
             // 
             // JobTimeline
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            Controls.Add(WebView2Wrapper1);
+            Controls.Add(chart);
             Controls.Add(toolStrip1);
             Name = "JobTimeline";
             Size = new System.Drawing.Size(1065, 724);
             Load += JobTimeline_Load;
-            Resize += JobTimeLine_Resize;
             toolStrip1.ResumeLayout(false);
             toolStrip1.PerformLayout();
             ResumeLayout(false);
@@ -193,7 +210,9 @@
         private System.Windows.Forms.ToolStripMenuItem hTMLToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem imageToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem bothToolStripMenuItem;
-        private WebView2Wrapper WebView2Wrapper1;
+        private JobTimelineChart chart;
+        private System.Windows.Forms.ToolStripTextBox tsFilter;
+        private System.Windows.Forms.ToolStripDropDownButton tsSort;
         private DateRangeToolStripMenuItem dateRangeToolStripMenuItem1;
     }
 }
