@@ -49,6 +49,7 @@ BEGIN
 UNION ALL
 SELECT	J.name,
 		RJ.job_id,
+		CAST(NULL AS INT) AS instance_id,
 		''Outcome'' AS step_name,
 		0 AS step_id,
 		CAST(RJ.start_execution_date_utc AS DATETIME2(2)) AS RunDateTime,
@@ -85,6 +86,7 @@ BEGIN
 UNION ALL
 SELECT	J.name,
 		RJ.job_id,
+		CAST(NULL AS INT) AS instance_id,
 		ISNULL(JS.step_name, ISNULL(RJ.current_execution_step_name, ''Step:'' + CAST(RJ.current_execution_step_id AS NVARCHAR(128)))) AS step_name,
 		RJ.current_execution_step_id AS step_id,
 		SS.StepStart AS RunDateTime,
@@ -137,6 +139,7 @@ END
 SET @SQL = N'
 SELECT	name,
 		job_id,
+		instance_id,
 		step_name,
 		step_id,
 		RunDateTime,
@@ -147,6 +150,7 @@ SELECT	name,
 FROM (
 SELECT J.name,
 	J.job_id,
+	' + CASE WHEN @DateGroupingMin= 0 THEN 'JH.instance_id,' ELSE 'CASE WHEN COUNT(*) = 1 THEN MAX(JH.instance_id) END AS instance_id,' END + '
 	' + CASE WHEN @IncludeSteps=1 THEN 'CASE WHEN JH.step_id = 0 THEN ''Outcome'' ELSE ISNULL(JS.step_name,''Step:'' + CAST(JH.step_id AS NVARCHAR(128))) END AS step_name,' ELSE '''Outcome'' AS step_name,' END + '
 	JH.step_id,
 	' + CASE WHEN @DateGroupingMin= 0 THEN 'JH.RunDateTime,' ELSE 'MIN(JH.RunDateTime) as RunDateTime,' END + '
