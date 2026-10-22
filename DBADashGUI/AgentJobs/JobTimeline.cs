@@ -361,14 +361,21 @@ namespace DBADashGUI.AgentJobs
                 }
 
                 Color statusColor = GetStatusColor(tlr.Status, tlr.IsTruncated);
+                // Dates are serialized with the "s" format, which drops fractional seconds. Compare the values the chart will see.
+                var barStart = TruncateToSecond(tlr.Start);
+                var barEnd = TruncateToSecond(tlr.End);
+                if (barEnd <= barStart)
+                {
+                    barEnd = barStart.AddSeconds(1);
+                }
 
                 sb.AppendFormat("[ '{0}', '{1}', '{2}', '{3}', new Date('{4}'), new Date('{5}') ],\n",
                     tlr.EncodedName,
-                    "",
+                    tlr.Status == RunStatus.InProgress ? "Running" : "",
                     statusColor.ToHexString(),
-                    tlr.ToolTip,
-                    tlr.Start.ToString("s", System.Globalization.CultureInfo.InvariantCulture),
-                    tlr.End.ToString("s", System.Globalization.CultureInfo.InvariantCulture));
+                    tlr.EncodedToolTip,
+                    barStart.ToString("s", System.Globalization.CultureInfo.InvariantCulture),
+                    barEnd.ToString("s", System.Globalization.CultureInfo.InvariantCulture));
                 previousTlr = tlr;
             }
             html = ReplaceColors(Template.Replace("##DATEFORMAT##", DateFormat).Replace("##SERVERNAME##", context.InstanceName).Replace("##HEIGHT##", ChartHeight(rowCount).ToString()));
@@ -398,6 +405,11 @@ namespace DBADashGUI.AgentJobs
         private static int ChartHeight(int rows)
         {
             return (42 * rows) + 100;
+        }
+
+        private static DateTime TruncateToSecond(DateTime value)
+        {
+            return new DateTime(value.Ticks - (value.Ticks % TimeSpan.TicksPerSecond), value.Kind);
         }
 
         /// <summary>
