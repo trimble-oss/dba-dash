@@ -352,21 +352,30 @@ namespace DBADashGUI.Controls
         private sealed class TooltipLinkLabel : LinkLabel
         {
             private readonly IReadOnlyDictionary<string, string> tooltips;
-            private readonly ToolTip toolTip;
+            private ToolTip toolTip;
             private string shownForUrl;
 
             public TooltipLinkLabel(IReadOnlyDictionary<string, string> tooltips)
             {
                 this.tooltips = tooltips;
-                if (tooltips != null && tooltips.Count > 0)
-                {
-                    toolTip = new ToolTip { AutoPopDelay = 30000, InitialDelay = 300, ReshowDelay = 100 };
-                }
+                EnsureTooltip();
+            }
+
+            /// <summary>
+            /// The tooltip is created the first time there is something to show. A card is reused for later selections,
+            /// and the dictionary it was given is filled in afterwards - one that started empty would otherwise never
+            /// show a tip.
+            /// </summary>
+            private void EnsureTooltip()
+            {
+                if (toolTip != null || tooltips == null || tooltips.Count == 0) return;
+                toolTip = new ToolTip { AutoPopDelay = 30000, InitialDelay = 300, ReshowDelay = 100 };
             }
 
             protected override void OnMouseMove(MouseEventArgs e)
             {
                 base.OnMouseMove(e);
+                EnsureTooltip();
                 if (toolTip == null) return;
 
                 var url = PointInLink(e.X, e.Y)?.LinkData as string;

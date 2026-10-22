@@ -149,13 +149,18 @@ WHERE r.session_id = @SessionID
 AND r.request_id = @RequestID;
 
 /* Still running and on a different statement or batch: the plan could be for either. Offsets are relative to the
-   current batch and the plan hash is the shape, so the batch (sql_handle) is part of which statement this is. */
-IF @startUtc2 IS NOT NULL
-    AND NOT (@startUtc2 = @startUtc
-        AND @StartOffset2 = @StartOffset
-        AND @EndOffset2 = @EndOffset
+   current batch and the plan hash is the shape, so the batch (sql_handle) is part of which statement this is.
+   A comparison with NULL is unknown rather than false, and NOT unknown does not enter an IF, so the match has to
+   be positively true. Anything else - a hash or handle going to or from NULL included - is a different statement. */
+DECLARE @SameStatement BIT = CASE
+    WHEN @startUtc2 = @startUtc
+        AND (@StartOffset2 = @StartOffset OR (@StartOffset2 IS NULL AND @StartOffset IS NULL))
+        AND (@EndOffset2 = @EndOffset OR (@EndOffset2 IS NULL AND @EndOffset IS NULL))
         AND (@PlanHash2 = @PlanHash OR (@PlanHash2 IS NULL AND @PlanHash IS NULL))
-        AND (@SqlHandle2 = @SqlHandle OR (@SqlHandle2 IS NULL AND @SqlHandle IS NULL)))
+        AND (@SqlHandle2 = @SqlHandle OR (@SqlHandle2 IS NULL AND @SqlHandle IS NULL))
+    THEN 1 ELSE 0 END;
+
+IF @startUtc2 IS NOT NULL AND @SameStatement = 0
 BEGIN
     SET @msg = CONCAT(N'Session ', @SessionID, N' moved on to another statement while its live plan was being captured.  Try again.');
     THROW 50000, @msg, 1;
@@ -165,6 +170,13 @@ IF @QueryPlan IS NULL
 BEGIN
     SET @msg = CONCAT(N'A live plan is not available for session ', @SessionID, N'.  Some statements have no plan to show - WAITFOR, BACKUP, DBCC and the like.  Otherwise lightweight query profiling is required - it''s on by default from SQL 2019 (LIGHTWEIGHT_QUERY_PROFILING database scoped configuration) and needs trace flag 7412 on SQL 2016 SP1 and 2017.  The query might also have completed.');
 END
+
+/* The statistics XML often leaves StatementText blank. The statement is cut out of the batch the same way the running queries view does, so the plan viewer has a query to show. */
+DECLARE @StatementText NVARCHAR(MAX);
+SELECT @StatementText = SUBSTRING(t.text,
+        ISNULL((NULLIF(@StartOffset, -1) / 2) + 1, 0),
+        ISNULL((NULLIF(NULLIF(@EndOffset, -1), 0) - NULLIF(@StartOffset, -1)) / 2 + 1, 2147483647))
+FROM sys.dm_exec_sql_text(@SqlHandle) t;
 
 /* The statement the plan is for, as read either side of taking it, so a live refresh can tell when the request has moved on to another one.
    A statement with no plan is still this request: query_plan is null and unavailable_reason says why, so a refresh can skip it and keep polling. */
@@ -178,6 +190,7 @@ SELECT @SessionID AS session_id,
     @CpuTime AS cpu_time,
     @ElapsedTime AS total_elapsed_time,
     @QueryPlan AS query_plan,
+    @StatementText AS statement_text,
     @msg AS unavailable_reason;";
     }
 }

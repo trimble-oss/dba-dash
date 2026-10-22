@@ -179,6 +179,28 @@ namespace DBADash.QueryPlan.Test
         }
 
         [TestMethod]
+        public void StatementText_FillsABlankLivePlan()
+        {
+            const string xml = """
+                <ShowPlanXML xmlns="http://schemas.microsoft.com/sqlserver/2004/07/showplan">
+                  <BatchSequence><Batch><Statements>
+                    <StmtSimple StatementId="1" StatementText="" StatementType="SELECT"><QueryPlan /></StmtSimple>
+                  </Statements></Batch></BatchSequence>
+                </ShowPlanXML>
+                """;
+
+            var filled = PlanLiveStatementText.Apply(xml, "SELECT 1 FROM t");
+
+            Assert.AreEqual("SELECT 1 FROM t", PlanParser.Parse(filled).Statements[0].StatementText);
+        }
+
+        [TestMethod]
+        public void StatementText_LeavesAPlanThatAlreadyHasIt()
+        {
+            Assert.AreSame(LivePlan, PlanLiveStatementText.Apply(LivePlan, "SELECT 2"));
+        }
+
+        [TestMethod]
         public void Snapshot_SumsThreads()
         {
             var before = new[] { C(0, 10, thread: 1), C(0, 10, thread: 2) };
