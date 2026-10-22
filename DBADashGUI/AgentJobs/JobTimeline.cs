@@ -144,6 +144,9 @@ namespace DBADashGUI.AgentJobs
         private string selectedCategory;
         private int mins = -1;
 
+        /// <summary>Start the chart afresh on the next draw (new context or date range) rather than keeping the user's place.</summary>
+        private bool resetView;
+
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public bool IsActive { get; set; }
 
@@ -207,13 +210,19 @@ namespace DBADashGUI.AgentJobs
             chart.Filter = tsFilter.Text;
         }
 
-        /// <summary>Show the execution the bar belongs to.  A running bar has no history row yet, so it shows the execution running now.</summary>
+        /// <summary>
+        /// Show the execution the bar belongs to.  A running bar has no history row yet, so it's found by its start time -
+        /// which also finds it if the job has finished since the timeline was loaded.
+        /// </summary>
         private void Chart_BarActivated(object sender, TimelineBar bar)
         {
             if (!bar.IsSingleExecution) return;
             try
             {
-                new JobExecutionForm(context.InstanceID, bar.JobId, bar.JobName, bar.IsRunning ? null : bar.HistoryId).ShowSingleInstance();
+                var form = bar.IsRunning
+                    ? new JobExecutionForm(context.InstanceID, bar.JobId, bar.JobName, null, bar.Start.AppTimeZoneToUtc())
+                    : new JobExecutionForm(context.InstanceID, bar.JobId, bar.JobName, bar.HistoryId, null);
+                form.ShowSingleInstance();
             }
             catch (Exception ex)
             {
@@ -364,7 +373,8 @@ namespace DBADashGUI.AgentJobs
         {
             var singleJob = context.JobID != Guid.Empty;
             chart.Title = context.InstanceName;
-            chart.SetData(JobTimelineModel.Build(dt, singleJob, IncludeSteps), from.ToAppTimeZone(), to.ToAppTimeZone());
+            chart.SetData(JobTimelineModel.Build(dt, singleJob, IncludeSteps), from.ToAppTimeZone(), to.ToAppTimeZone(), resetView);
+            resetView = false;
         }
 
         /// <summary>
@@ -481,6 +491,10 @@ namespace DBADashGUI.AgentJobs
             this.context = _context;
             IsActive = true;
             tsIncludeSteps.Visible = _context.JobID == Guid.Empty;
+            // Opening the job from the job's own window would only close and reopen it
+            chart.JobActivated -= Chart_JobActivated;
+            if (FindForm() is not JobInfoForm) chart.JobActivated += Chart_JobActivated;
+            resetView = true;
             RefreshData();
         }
 
@@ -513,6 +527,7 @@ namespace DBADashGUI.AgentJobs
 
         private void DateRangeChanged(object sender, EventArgs e)
         {
+            resetView = true;
             RefreshData();
         }
 

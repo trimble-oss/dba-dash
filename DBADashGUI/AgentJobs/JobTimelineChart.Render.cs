@@ -309,13 +309,13 @@ namespace DBADashGUI.AgentJobs
         private void DrawLegend(SKCanvas canvas, Palette p)
         {
             _legendRects.Clear();
-            var counts = _model.Bars.GroupBy(b => b.Status).ToDictionary(g => g.Key, g => g.Sum(b => b.Executions));
             var x = 8 * Dpi;
             var y = 36 * Dpi;
-            foreach (var status in LegendOrder.Where(counts.ContainsKey))
+            // A hidden status stays in the legend even when nothing of it matches, so it can be shown again
+            foreach (var status in LegendOrder.Where(s => _legendCounts.ContainsKey(s) || _hiddenStatuses.Contains(s)))
             {
                 var hidden = _hiddenStatuses.Contains(status);
-                var text = counts[status].ToString("N0");
+                var text = _legendCounts.GetValueOrDefault(status).ToString("N0");
                 var textWidth = _smallFont.MeasureText(text, (SKPaint)null);
                 var rect = new SKRect(x - 2 * Dpi, y - 10 * Dpi, x + 14 * Dpi + textWidth + 4 * Dpi, y + 4 * Dpi);
                 var color = TimelineBar.StatusColor(status).ToSKColor();

@@ -213,17 +213,21 @@ namespace DBADashGUI.AgentJobs
             return row;
         }
 
+        /// <summary>Top level rows whose job name or label contains <paramref name="filter"/>.</summary>
+        public IEnumerable<TimelineRowModel> MatchingRoots(string filter)
+        {
+            if (string.IsNullOrWhiteSpace(filter)) return Roots;
+            var text = filter.Trim();
+            return Roots.Where(r => r.JobName.Contains(text, StringComparison.OrdinalIgnoreCase) || r.Label.Contains(text, StringComparison.OrdinalIgnoreCase));
+        }
+
         /// <summary>
         /// The rows to draw, top to bottom: filtered by job name and visible status, sorted, and with collapsed
         /// groups' children left out.  Each row's lanes are packed for the bars that are shown.
         /// </summary>
         public List<TimelineRowModel> VisibleRows(string filter, Func<TimelineBar, bool> visible, TimelineSort sort, bool hideEmpty)
         {
-            IEnumerable<TimelineRowModel> roots = Roots;
-            if (!string.IsNullOrWhiteSpace(filter))
-            {
-                roots = roots.Where(r => r.JobName.Contains(filter.Trim(), StringComparison.OrdinalIgnoreCase) || r.Label.Contains(filter.Trim(), StringComparison.OrdinalIgnoreCase));
-            }
+            var roots = MatchingRoots(filter);
             if (hideEmpty)
             {
                 roots = roots.Where(r => r.AllBars.Any(visible));

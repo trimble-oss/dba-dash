@@ -18,7 +18,8 @@ namespace DBADashGUI.AgentJobs
     /// around the pointer (Ctrl+wheel) and pans by dragging; dragging across the time axis zooms to
     /// the range dragged.  An overview strip along the bottom shows the whole period with the part
     /// in view, and can be dragged.  Hovering a bar shows its details, clicking selects it (and
-    /// highlights the rest of that job), double clicking opens the job.  With steps included each
+    /// highlights the rest of that job), double clicking raises <see cref="BarActivated"/> - the
+    /// execution details on the job timeline.  With steps included each
     /// job is a group that can be collapsed.  The legend counts executions by status, and clicking a
     /// status hides or shows it.
     ///
@@ -42,6 +43,7 @@ namespace DBADashGUI.AgentJobs
         private string _filter = string.Empty;
         private TimelineSort _sort = TimelineSort.Name;
         private readonly HashSet<RunStatus> _hiddenStatuses = new();
+        private Dictionary<RunStatus, int> _legendCounts = new();
 
         private TimelineBar _hoverBar;
         private TimelineRowModel _hoverRow;
@@ -71,6 +73,9 @@ namespace DBADashGUI.AgentJobs
 
         private static readonly TimeSpan MinimumSpan = TimeSpan.FromSeconds(10);
 
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern IntPtr GetFocus();
+
         public JobTimelineChart()
         {
             _canvas = new SKControl { Dock = DockStyle.Fill, TabStop = true };
@@ -90,10 +95,11 @@ namespace DBADashGUI.AgentJobs
             };
             // Focus on enter so the wheel and keyboard work without clicking first - but only while this window is the
             // active one, so a window opened from here isn't pulled behind it when the pointer crosses the chart.
+            // Not while the user is typing somewhere else in the window, such as the job filter.
             _canvas.MouseEnter += (_, _) =>
             {
                 _mouseInside = true;
-                if (ReferenceEquals(Form.ActiveForm, FindForm())) _canvas.Focus();
+                if (ReferenceEquals(Form.ActiveForm, FindForm()) && FromHandle(GetFocus()) is not (TextBoxBase or ComboBox)) _canvas.Focus();
             };
             Controls.Add(_canvas);
             InitFonts();
@@ -166,28 +172,44 @@ namespace DBADashGUI.AgentJobs
         private float Dpi => DeviceDpi / 96f;
 
         /// <summary>
-        /// Show a new set of data.  The view keeps its zoom when the period is unchanged (a refresh), and is reset
-        /// to the whole period otherwise.  Collapsed groups stay collapsed.
+        /// Show a new set of data.  A refresh keeps the user's place: the scroll position, collapsed groups, the
+        /// selection, and a zoomed in window (the same times, so it holds still while a rolling period moves on).
+        /// Not zoomed in, the view follows the new period.  The view is reset when <paramref name="resetView"/> is set
+        /// (different instance or job), the length of the period changes, or the zoomed window falls outside it.
         /// </summary>
-        public void SetData(JobTimelineModel model, DateTime periodFrom, DateTime periodTo)
+        public void SetData(JobTimelineModel model, DateTime periodFrom, DateTime periodTo, bool resetView = false)
         {
             var collapsed = _model.Roots.Where(r => r.Collapsed).Select(r => r.JobName).ToHashSet();
             var selected = _selectedBar;
-            var samePeriod = periodFrom == _periodFrom && periodTo == _periodTo && _viewTo > _viewFrom;
+            if (periodTo <= periodFrom) periodTo = periodFrom.Add(MinimumSpan);
+            var hadView = _viewTo > _viewFrom;
+            var zoomed = hadView && (_viewFrom != _periodFrom || _viewTo != _periodTo);
+            var spanChanged = periodTo - periodFrom != _periodTo - _periodFrom;
+            var overlaps = _viewFrom < periodTo && _viewTo > periodFrom;
+            var reset = resetView || !hadView || spanChanged || (zoomed && !overlaps);
+            var (viewFrom, viewTo) = (_viewFrom, _viewTo);
 
             _model = model ?? JobTimelineModel.Empty;
-            foreach (var root in _model.Roots.Where(r => r.IsGroup && collapsed.Contains(r.JobName)))
+            if (!resetView)
             {
-                root.Collapsed = true;
+                foreach (var root in _model.Roots.Where(r => r.IsGroup && collapsed.Contains(r.JobName)))
+                {
+                    root.Collapsed = true;
+                }
             }
             _periodFrom = periodFrom;
-            _periodTo = periodTo > periodFrom ? periodTo : periodFrom.Add(MinimumSpan);
-            if (!samePeriod)
+            _periodTo = periodTo;
+            if (reset || !zoomed)
             {
                 _viewFrom = _periodFrom;
                 _viewTo = _periodTo;
-                _scrollY = 0;
+                if (reset) _scrollY = 0;
             }
+            else
+            {
+                SetView(viewFrom, viewTo);
+            }
+            if (resetView) selected = null;
             _selectedBar = selected == null ? null : _model.Bars.FirstOrDefault(b => b.JobName == selected.JobName && b.StepId == selected.StepId && b.Start == selected.Start);
             _hoverBar = null;
             _hoverRow = null;
@@ -198,6 +220,12 @@ namespace DBADashGUI.AgentJobs
         private void Relayout()
         {
             _rows = _model.VisibleRows(_filter, IsVisible, _sort, _hiddenStatuses.Count > 0);
+            // Executions by status for the legend, of the jobs that match the filter.  A job row's own bars are its
+            // outcomes, so steps aren't counted on top - unless outcomes aren't included and the job row is empty.
+            _legendCounts = _model.MatchingRoots(_filter)
+                .SelectMany(r => r.Bars.Count > 0 ? r.Bars : r.AllBars)
+                .GroupBy(b => b.Status)
+                .ToDictionary(g => g.Key, g => g.Sum(b => b.Executions));
             float y = 0;
             foreach (var row in _rows)
             {
