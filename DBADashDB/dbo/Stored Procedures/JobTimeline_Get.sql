@@ -48,6 +48,7 @@ BEGIN
 	SET @RunningSQL = @RunningSQL + N'
 UNION ALL
 SELECT	J.name,
+		RJ.job_id,
 		''Outcome'' AS step_name,
 		0 AS step_id,
 		CAST(RJ.start_execution_date_utc AS DATETIME2(2)) AS RunDateTime,
@@ -83,6 +84,7 @@ BEGIN
 	SET @RunningSQL = @RunningSQL + N'
 UNION ALL
 SELECT	J.name,
+		RJ.job_id,
 		ISNULL(JS.step_name, ISNULL(RJ.current_execution_step_name, ''Step:'' + CAST(RJ.current_execution_step_id AS NVARCHAR(128)))) AS step_name,
 		RJ.current_execution_step_id AS step_id,
 		SS.StepStart AS RunDateTime,
@@ -134,6 +136,7 @@ END
 
 SET @SQL = N'
 SELECT	name,
+		job_id,
 		step_name,
 		step_id,
 		RunDateTime,
@@ -143,6 +146,7 @@ SELECT	name,
 		Executions
 FROM (
 SELECT J.name,
+	J.job_id,
 	' + CASE WHEN @IncludeSteps=1 THEN 'CASE WHEN JH.step_id = 0 THEN ''Outcome'' ELSE ISNULL(JS.step_name,''Step:'' + CAST(JH.step_id AS NVARCHAR(128))) END AS step_name,' ELSE '''Outcome'' AS step_name,' END + '
 	JH.step_id,
 	' + CASE WHEN @DateGroupingMin= 0 THEN 'JH.RunDateTime,' ELSE 'MIN(JH.RunDateTime) as RunDateTime,' END + '
@@ -164,7 +168,7 @@ AND JH.RunDateTime > DATEADD(d,-1,@FromDate) -- started after 1 day before start
 ' + CASE WHEN @job_id IS NULL THEN '' ELSE 'AND JH.job_id = @job_id' END + '
 ' + CASE WHEN @DateGroupingMin= 0
 			THEN ''
-			ELSE 'GROUP BY J.name, DG.DateGroup,JH.run_status,JH.step_id' +
+			ELSE 'GROUP BY J.name, J.job_id, DG.DateGroup,JH.run_status,JH.step_id' +
 					CASE WHEN @IncludeSteps=1 THEN ',JS.step_name' ELSE '' END
 			END + '
 ' + @RunningSQL + N'

@@ -177,6 +177,52 @@ namespace DBADashGUI.AgentJobs
         {
             InitializeComponent();
             DateHelper.AddDateGroups(tsDateGroup, TsDateGroup_Click);
+            AddSortOptions();
+        }
+
+        private void AddSortOptions()
+        {
+            (TimelineSort Sort, string Text)[] options =
+            {
+                (TimelineSort.Name, "Name"),
+                (TimelineSort.FirstStart, "First start"),
+                (TimelineSort.TotalDuration, "Total duration"),
+                (TimelineSort.Failures, "Failures")
+            };
+            foreach (var (sort, text) in options)
+            {
+                var item = new ToolStripMenuItem(text) { Tag = sort, Checked = sort == chart.Sort };
+                item.Click += (_, _) =>
+                {
+                    tsSort.CheckSingleItem(item);
+                    tsSort.Text = text;
+                    chart.Sort = sort;
+                };
+                tsSort.DropDownItems.Add(item);
+            }
+        }
+
+        private void Filter_TextChanged(object sender, EventArgs e)
+        {
+            chart.Filter = tsFilter.Text;
+        }
+
+        private void Chart_BarActivated(object sender, TimelineBar bar)
+        {
+            if (bar.JobId == Guid.Empty) return;
+            try
+            {
+                var jobContext = CommonData.GetDBADashContext(context.InstanceID);
+                jobContext.Type = SQLTreeItem.TreeType.AgentJob;
+                jobContext.JobID = bar.JobId;
+                jobContext.ObjectName = bar.JobName;
+                var frm = new JobInfoForm { DBADashContext = jobContext };
+                frm.ShowSingleInstance();
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex);
+            }
         }
 
         private void TsDateGroup_Click(object sender, EventArgs e)
@@ -257,7 +303,7 @@ namespace DBADashGUI.AgentJobs
             RefreshData();
         }
 
-        public async void RefreshData()
+        public void RefreshData()
         {
             if (mins != DateRange.DurationMins)
             {
@@ -269,7 +315,8 @@ namespace DBADashGUI.AgentJobs
             to = ToDateUtc;
 
             dt = GetJobTimelineData(context.InstanceID, from, to, selectedCategory, context.JobID, IncludeSteps, IncludeOutcome, DateGrouping);
-            await DrawTimeline();
+            html = null;
+            DrawTimeline();
         }
 
         /// <summary>
@@ -299,17 +346,15 @@ namespace DBADashGUI.AgentJobs
             }
         }
 
-        // <summary>
-        // Generate and load timeline HTML
-        // </summary>
-        private async Task DrawTimeline()
+        private void DrawTimeline()
         {
-            GenerateHTML();
-            await WebView2Wrapper1.NavigateToLargeString(html);
+            var singleJob = context.JobID != Guid.Empty;
+            chart.Title = context.InstanceName;
+            chart.SetData(JobTimelineModel.Build(dt, singleJob, IncludeSteps), from.ToAppTimeZone(), to.ToAppTimeZone());
         }
 
         /// <summary>
-        /// Get HTML for Job timeline
+        /// Get HTML for Job timeline.  Only used for Copy HTML - the timeline itself is drawn by <see cref="JobTimelineChart"/>.
         /// </summary>
         private void GenerateHTML()
         {
@@ -425,14 +470,6 @@ namespace DBADashGUI.AgentJobs
             RefreshData();
         }
 
-        private async void JobTimeLine_Resize(object sender, EventArgs e)
-        {
-            if (IsActive)
-            {
-                await DrawTimeline();
-            }
-        }
-
         private void TsRefresh_Click(object sender, EventArgs e)
         {
             RefreshData();
@@ -450,17 +487,14 @@ namespace DBADashGUI.AgentJobs
 
         private void Copy_HTML(object sender, EventArgs e)
         {
+            if (dt == null) return;
+            if (html == null) GenerateHTML();
             Common.CopyHtmlToClipBoard(html);
         }
 
         private void Copy_Image(object sender, EventArgs e)
         {
-            WebView2Wrapper1.CopyImageToClipboard();
-        }
-
-        private void WebView2_SetupCompleted()
-        {
-            Invoke(RefreshData);
+            chart.CopyImage();
         }
 
         private void DateRangeChanged(object sender, EventArgs e)
