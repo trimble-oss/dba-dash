@@ -15,6 +15,12 @@ namespace DBADashGUI.Viewers
         string Description { get; }
 
         /// <summary>
+        /// Identifies the request being followed, so opening it again selects the tab that is already following it.
+        /// Plan XML is not an identity: it changes on every refresh, and the same XML can be a static plan or another session.
+        /// </summary>
+        string RequestKey { get; }
+
+        /// <summary>
         /// The latest capture of the running query.  Called repeatedly, one call at a time: the source keeps what it needs
         /// from the last capture to say which operators have moved since.
         /// </summary>

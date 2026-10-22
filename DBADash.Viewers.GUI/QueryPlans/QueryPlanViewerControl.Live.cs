@@ -23,6 +23,9 @@ namespace DBADashGUI.QueryPlans
         /// <summary>Where a live plan's refreshes come from.  Null for any other plan.</summary>
         private readonly ILivePlanSource _live;
 
+        /// <summary>The request this tab is following, when it is a live plan. Null for a static plan.</summary>
+        public string LiveRequestKey => _live?.RequestKey;
+
         // The choices for refreshing by itself, in seconds - 0 is off.  Each refresh is a message through the repository
         // and the service, so nothing faster than every couple of seconds is offered.
         private static readonly int[] AutoRefreshIntervals = [0, 2, 5, 10, 30];

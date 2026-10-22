@@ -86,8 +86,10 @@ namespace DBADash.QueryPlan.Live
             // starts again for the next outer row, so between executions it looks finished while it is very much at work.
             if (changed) return PlanLiveState.Active;
 
+            // A parallel operator can include a coordinator or worker row that was never opened. Its zero close time
+            // is not unfinished work, so only threads that actually opened have to have closed.
             var finished = timed
-                ? threads.All(t => t.CloseTimeMs > 0)
+                ? threads.Where(t => t.OpenTimeMs > 0).All(t => t.CloseTimeMs > 0)
                 : executions > 0 && threads.Sum(t => t.EndOfScans) >= executions;
 
             return finished ? PlanLiveState.Finished : PlanLiveState.Waiting;

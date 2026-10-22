@@ -202,7 +202,10 @@ namespace DBADashGUI.Performance
                 var dt = reply.Data?.Tables["LivePlan"];
                 if (dt == null || dt.Rows.Count == 0 || dt.Rows[0]["query_plan"] == DBNull.Value)
                 {
-                    setStatus("Live query plan was not found.  The query may have completed.", string.Empty, DashColors.Fail);
+                    var reason = dt is { Rows.Count: > 0 } && dt.Columns.Contains("unavailable_reason") && dt.Rows[0]["unavailable_reason"] != DBNull.Value
+                        ? Convert.ToString(dt.Rows[0]["unavailable_reason"])
+                        : "Live query plan was not found.  The query may have completed.";
+                    setStatus(reason, string.Empty, DashColors.Fail);
                     return Task.CompletedTask;
                 }
 

@@ -6,6 +6,7 @@ using DBADashGUI.Viewers;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -45,6 +46,8 @@ namespace DBADashGUI.Performance
         }
 
         public string Description => $"Session {_sessionId} on {_context.InstanceName}";
+
+        public string RequestKey => string.Join('|', _context.ConnectionID, _sessionId.ToString(CultureInfo.InvariantCulture), _startTimeUtc.Ticks.ToString(CultureInfo.InvariantCulture));
 
         public async Task<LivePlanCapture> CaptureAsync(CancellationToken cancellationToken)
         {
@@ -92,7 +95,18 @@ namespace DBADashGUI.Performance
             var changed = !string.Equals(statement, _statement, StringComparison.Ordinal);
             if (changed)
             {
-                await FetchPlanAsync(cancellationToken);
+                // A statement such as WAITFOR has no plan. That is the request carrying on, not a failed refresh:
+                // counting it as a failure would stop auto refresh before a later statement could be followed.
+                if (!await FetchPlanAsync(cancellationToken))
+                {
+                    return new LivePlanCapture
+                    {
+                        Live = _lastSnapshot,
+                        CapturedAt = captured.ToAppTimeZone(),
+                        Message = "Skipped - this statement has no plan"
+                    };
+                }
+
                 _previous = null;
                 _lastSnapshot = null;
 
@@ -111,7 +125,7 @@ namespace DBADashGUI.Performance
             }
 
             var counters = data.Tables["Profiles"]?.Rows.Cast<DataRow>().Select(CountersOf).ToList() ?? [];
-            _planXml = PlanLivePatcher.Apply(_planXml, counters, LongOrNull(request["cpu_time"]), LongOrNull(request["total_elapsed_time"]));
+            _planXml = PlanLivePatcher.Apply(_planXml, counters);
 
             var snapshot = PlanLiveSnapshot.From(counters, _previous, captured);
             _previous = counters;
@@ -128,8 +142,11 @@ namespace DBADashGUI.Performance
             };
         }
 
-        /// <summary>The whole plan, for when the request has moved on to another statement.</summary>
-        private async Task FetchPlanAsync(CancellationToken cancellationToken)
+        /// <summary>
+        /// The whole plan, for when the request has moved on to another statement.
+        /// False when that statement has no plan: the request is still the one being followed.
+        /// </summary>
+        private async Task<bool> FetchPlanAsync(CancellationToken cancellationToken)
         {
             var data = await SendAsync(new LivePlanMessage
             {
@@ -142,11 +159,13 @@ namespace DBADashGUI.Performance
                 Lifetime = 60
             }, cancellationToken);
 
-            var row = data.Tables["LivePlan"]?.Rows.Cast<DataRow>().FirstOrDefault(r => r["query_plan"] != DBNull.Value)
+            var row = data.Tables["LivePlan"]?.Rows.Cast<DataRow>().FirstOrDefault()
                       ?? throw new InvalidOperationException("The plan for the new statement was not found.  The query may have completed.");
+            if (row["query_plan"] == DBNull.Value) return false;
 
             _planXml = (string)row["query_plan"];
             _statement = StatementOf(row);
+            return true;
         }
 
         private async Task<DataSet> SendAsync(MessageBase message, CancellationToken cancellationToken)

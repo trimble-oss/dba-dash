@@ -20,11 +20,12 @@ namespace DBADash.QueryPlan.Live
     public static class PlanLivePatcher
     {
         /// <summary>
-        /// <paramref name="planXml"/> with each operator's runtime counters replaced by <paramref name="counters"/>, and the
-        /// statement's CPU and elapsed time set where they are given.  Operators with no counters are left as they are:
-        /// a Compute Scalar SQL Server doesn't measure has none either way.
+        /// <paramref name="planXml"/> with each operator's runtime counters replaced by <paramref name="counters"/>.
+        /// Operators with no counters are left as they are: a Compute Scalar SQL Server doesn't measure has none either way.
+        /// The statement's QueryTimeStats are left as the plan captured them. The request's CPU and elapsed time cover the
+        /// whole batch, so writing them here would give a later statement the time of the statements before it.
         /// </summary>
-        public static string Apply(string planXml, IEnumerable<PlanLiveCounters> counters, long? cpuMs = null, long? elapsedMs = null)
+        public static string Apply(string planXml, IEnumerable<PlanLiveCounters> counters)
         {
             ArgumentNullException.ThrowIfNull(planXml);
             ArgumentNullException.ThrowIfNull(counters);
@@ -44,12 +45,6 @@ namespace DBADash.QueryPlan.Live
                 if (!byNode.TryGetValue(nodeId, out var threads)) continue;
 
                 ApplyThreads(RunTimeInformation(relOp, ns), threads, ns);
-            }
-
-            if (queryPlan.Element(ns + "QueryTimeStats") is { } timeStats)
-            {
-                if (cpuMs is { } cpu) timeStats.SetAttributeValue("CpuTime", Text(cpu));
-                if (elapsedMs is { } elapsed) timeStats.SetAttributeValue("ElapsedTime", Text(elapsed));
             }
 
             return document.ToString(SaveOptions.DisableFormatting);
