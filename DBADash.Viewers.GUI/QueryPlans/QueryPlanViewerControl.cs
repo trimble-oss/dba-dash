@@ -1559,7 +1559,7 @@ namespace DBADashGUI.QueryPlans
 
         // ---------------------------------------------------------------- showing a statement
 
-        private void Show(PlanStatement statement)
+        private void Show(PlanStatement statement, bool retargetAi = true)
         {
             // Choosing the row that is already showing - a click on the selected row - re-lays the
             // plan out for nothing and throws away the reader's zoom and selection.
@@ -1599,8 +1599,9 @@ namespace DBADashGUI.QueryPlans
             _xmlText.Text = _sourceXml ?? string.Empty;
 
             // The AI tab is about one statement, so it follows the selector.  It contacts nothing until
-            // the reader presses its own button - moving between statements costs nothing.
-            _ai?.Show(_plan, statement, _fileName);
+            // the reader presses its own button - moving between statements costs nothing.  A live refresh
+            // does not: showing the tab a new capture clears the conversation the reader has open.
+            if (retargetAi) _ai?.Show(_plan, statement, _fileName);
 
             SetSummary(Summarise(statement, _graphControl.PlanLayout));
 

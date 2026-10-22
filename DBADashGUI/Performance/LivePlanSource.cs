@@ -41,7 +41,7 @@ namespace DBADashGUI.Performance
             _sessionId = sessionId;
             _startTimeUtc = startTimeUtc;
             _snapshotUtcOffset = snapshotUtcOffset;
-            _planXml = (string)initial["query_plan"];
+            _planXml = PlanOf(initial);
             _statement = StatementOf(initial);
         }
 
@@ -163,7 +163,7 @@ namespace DBADashGUI.Performance
                       ?? throw new InvalidOperationException("The plan for the new statement was not found.  The query may have completed.");
             if (row["query_plan"] == DBNull.Value) return false;
 
-            _planXml = (string)row["query_plan"];
+            _planXml = PlanOf(row);
             _statement = StatementOf(row);
             return true;
         }
@@ -187,6 +187,15 @@ namespace DBADashGUI.Performance
 
             if (!outcome.Succeeded) throw new InvalidOperationException(failure ?? outcome.Error);
             return outcome.Data ?? throw new InvalidOperationException("The service returned no data.");
+        }
+
+        /// <summary>The plan XML, with the statement text filled in when the statistics XML left it blank.</summary>
+        private static string PlanOf(DataRow row)
+        {
+            var text = row.Table.Columns.Contains("statement_text") && row["statement_text"] != DBNull.Value
+                ? Convert.ToString(row["statement_text"])
+                : null;
+            return PlanLiveStatementText.Apply((string)row["query_plan"], text);
         }
 
         /// <summary>Which statement of which batch is running: its offsets, plan hash and sql_handle.</summary>

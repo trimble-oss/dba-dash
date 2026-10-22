@@ -177,11 +177,13 @@ BEGIN
     WHERE r.session_id = @SessionID
     AND r.request_id = @RequestID;
 
-    /* On a different statement or batch by the second read, the counters could be for either */
+    /* On a different statement or batch by the second read, the counters could be for either. Same positive match
+       as LivePlanMessage: NULL = NULL is unknown, so each field matches when equal or both NULL, and anything else
+       is Moving rather than a match that failed open. */
     SET @Status = CASE WHEN @startUtc2 IS NULL THEN 'Completed'
                     WHEN @startUtc2 = @startUtc
-                        AND @StartOffset2 = @StartOffset
-                        AND @EndOffset2 = @EndOffset
+                        AND (@StartOffset2 = @StartOffset OR (@StartOffset2 IS NULL AND @StartOffset IS NULL))
+                        AND (@EndOffset2 = @EndOffset OR (@EndOffset2 IS NULL AND @EndOffset IS NULL))
                         AND (@PlanHash2 = @PlanHash OR (@PlanHash2 IS NULL AND @PlanHash IS NULL))
                         AND (@SqlHandle2 = @SqlHandle OR (@SqlHandle2 IS NULL AND @SqlHandle IS NULL)) THEN 'Running'
                     ELSE 'Moving' END;

@@ -265,7 +265,9 @@ namespace DBADashGUI.QueryPlans
             if (!sameShape)
             {
                 _current = null;
-                Show(plan.PrimaryStatement ?? plan.Statements[0]);
+                // The new statement is shown as though just opened, except the AI tab, which keeps the capture the
+                // reader opened it with. Picking a statement themselves still starts a new conversation.
+                Show(plan.PrimaryStatement ?? plan.Statements[0], retargetAi: false);
                 return;
             }
 
@@ -296,6 +298,8 @@ namespace DBADashGUI.QueryPlans
             ShowExpressions(statement);
             ShowParameters(statement);
             ShowWaits(statement);
+
+            if (!string.IsNullOrWhiteSpace(statement.StatementText)) _queryText.Text = statement.StatementText;
 
             _xmlStale = true;
             ShowXmlIfStale();

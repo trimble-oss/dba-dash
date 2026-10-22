@@ -219,5 +219,41 @@ namespace DBADash.Viewers.GUI.Test
                 Assert.AreEqual(5, grid.CurrentCell?.RowIndex, $"The current row moved on refresh {i}.");
             }
         }
+
+        /// <summary>
+        /// The properties grid is on the Plan tab. A refresh while Query is showing used to rebuild it and, because the
+        /// grid reported itself not visible, skip putting the reader's place back.
+        /// </summary>
+        [STATestMethod]
+        public void Refresh_KeepsThePropertiesPlaceWhileAnotherTabIsShowing()
+        {
+            using var form = new Form { Width = 1000, Height = 300, ShowInTaskbar = false, StartPosition = FormStartPosition.Manual, Left = -3000 };
+            var viewer = new QueryPlanViewerControl(PlanParser.Parse(LivePlan), LivePlan, "live.sqlplan", null, new FakeSource()) { Dock = DockStyle.Fill };
+            form.Controls.Add(viewer);
+            form.Show();
+            Pump();
+
+            var properties = Field<QueryPlanPropertiesControl>(viewer, "_properties");
+            var grid = Field<DataGridView>(properties, "_grid");
+            grid.Focus();
+            grid.CurrentCell = grid.Rows[5].Cells[1];
+            grid.FirstDisplayedScrollingRowIndex = 3;
+            Pump();
+
+            var tabs = Field<TabControl>(viewer, "_tabs");
+            tabs.SelectedTab = tabs.TabPages.Cast<TabPage>().First(p => p.Text == "Query");
+            Pump();
+
+            SynchronizationContext.SetSynchronizationContext(new WindowsFormsSynchronizationContext());
+            var refresh = (Task)viewer.GetType().GetMethod("RefreshLiveAsync", BindingFlags.NonPublic | BindingFlags.Instance)!.Invoke(viewer, null)!;
+            while (!refresh.IsCompleted) Pump();
+            Pump();
+
+            tabs.SelectedTab = tabs.TabPages.Cast<TabPage>().First(p => p.Text == "Plan");
+            Pump();
+
+            Assert.AreEqual(3, grid.FirstDisplayedScrollingRowIndex, "The properties scrolled after refreshing on another tab.");
+            Assert.AreEqual(5, grid.CurrentCell?.RowIndex, "The current row moved after refreshing on another tab.");
+        }
     }
 }

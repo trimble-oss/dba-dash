@@ -1,5 +1,6 @@
 using DBADash;
 using DBADash.Messaging;
+using DBADash.QueryPlan.Live;
 using DBADashGUI.Messaging;
 using DBADashGUI.Theme;
 using System;
@@ -210,7 +211,10 @@ namespace DBADashGUI.Performance
                 }
 
                 var row = dt.Rows[0];
-                var plan = (string)row["query_plan"];
+                var plan = PlanLiveStatementText.Apply((string)row["query_plan"],
+                    row.Table.Columns.Contains("statement_text") && row["statement_text"] != DBNull.Value
+                        ? Convert.ToString(row["statement_text"])
+                        : null);
                 var captured = Convert.ToDateTime(row["captured_utc"]).ToAppTimeZone();
                 var fileName = $"Live Plan SPID {sessionId} {captured:yyyy-MM-dd HHmmss}.sqlplan";
 

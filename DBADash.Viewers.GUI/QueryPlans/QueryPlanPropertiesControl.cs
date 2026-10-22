@@ -180,6 +180,10 @@ namespace DBADashGUI.QueryPlans
             _grid.ColumnWidthChanged += (_, _) => SizeRowsLater();
             _grid.SizeChanged += (_, _) => SizeRowsLater();
             _grid.FontChanged += (_, _) => SizeRowsLater();
+            // Remembered as the reader moves, so a refresh while this panel is on a hidden tab still has a place to
+            // put back: the grid reports itself not visible then, and will not say where it was scrolled to.
+            _grid.Scroll += (_, _) => KeepPlace();
+            _grid.SelectionChanged += (_, _) => KeepPlace();
             AddGridMenuItems();
 
             Controls.Add(_grid);
@@ -224,6 +228,20 @@ namespace DBADashGUI.QueryPlans
         /// knowing, above the statement's own properties.
         /// </summary>
         public void Show(PlanNode node, PlanStatement statement)
+        {
+            // Rebuilding the rows raises selection changes. Those must not replace the place a refresh is about to restore.
+            _suppressKeep = true;
+            try
+            {
+                ShowCore(node, statement);
+            }
+            finally
+            {
+                _suppressKeep = false;
+            }
+        }
+
+        private void ShowCore(PlanNode node, PlanStatement statement)
         {
             _grid.Rows.Clear();
 
@@ -287,49 +305,108 @@ namespace DBADashGUI.QueryPlans
         /// </summary>
         public void ShowKeepingPlace(PlanNode node, PlanStatement statement)
         {
-            var firstRow = _grid.Visible && _grid.Rows.Count > 0 ? _grid.FirstDisplayedScrollingRowIndex : -1;
-            var selected = _grid.SelectedRows.Cast<DataGridViewRow>().Select(r => r.Index).ToList();
-            (int RowIndex, int ColumnIndex) current = _grid.CurrentCell is { } cell ? (cell.RowIndex, cell.ColumnIndex) : (-1, -1);
+            KeepPlace();
             var cardScroll = _cardPanel.AutoScrollPosition;
 
             Show(node, statement);
-
-            if (_grid.Visible && _grid.Rows.Count > 0)
-            {
-                // Each put back on its own: the grid refuses some of them in some states - a current cell it can't
-                // show, no room to display rows (see Show) - and one refused mustn't stop the others, the scroll
-                // position above all.  The scroll position goes last, as setting the current cell scrolls to it.
-                TryRestore(() =>
-                {
-                    if (current.RowIndex >= 0 && current.RowIndex < _grid.Rows.Count)
-                    {
-                        _grid.CurrentCell = _grid.Rows[current.RowIndex].Cells[current.ColumnIndex];
-                    }
-                });
-                TryRestore(() =>
-                {
-                    _grid.ClearSelection();
-                    foreach (var index in selected.Where(i => i < _grid.Rows.Count)) _grid.Rows[index].Selected = true;
-                });
-                TryRestore(() =>
-                {
-                    if (firstRow >= 0) _grid.FirstDisplayedScrollingRowIndex = Math.Min(firstRow, _grid.Rows.Count - 1);
-                });
-            }
+            RestorePlace();
 
             // AutoScrollPosition reads back negative and is set positive.
             _cardPanel.AutoScrollPosition = new Point(-cardScroll.X, -cardScroll.Y);
         }
 
-        private static void TryRestore(Action restore)
+        /// <summary>The place to put back after a refresh. -1 until the reader has a row on screen.</summary>
+        private int _keptFirstRow = -1;
+
+        private List<int> _keptSelected = [];
+        private (int RowIndex, int ColumnIndex) _keptCurrent = (-1, -1);
+
+        /// <summary>True while the rows are being rebuilt or the place put back, so that does not record itself as the reader's place.</summary>
+        private bool _suppressKeep;
+
+        /// <summary>The grid could not show the place because its tab was hidden. Put back when the tab is shown.</summary>
+        private bool _placePending;
+
+        protected override void OnVisibleChanged(EventArgs e)
+        {
+            base.OnVisibleChanged(e);
+            if (!Visible) KeepPlace();
+            else if (_placePending) RestorePlace();
+        }
+
+        /// <summary>
+        /// Where the reader is in the grid. The scroll index is only read while the grid is actually on screen: a hidden
+        /// tab makes <see cref="Control.Visible"/> false, and asking for the index then throws rather than answering.
+        /// Selection is read either way, and a hidden call leaves the scroll index saved from the last time it was shown.
+        /// </summary>
+        private void KeepPlace()
+        {
+            if (_suppressKeep || _grid.Rows.Count == 0) return;
+
+            _keptSelected = _grid.SelectedRows.Cast<DataGridViewRow>().Select(r => r.Index).ToList();
+            _keptCurrent = _grid.CurrentCell is { } cell ? (cell.RowIndex, cell.ColumnIndex) : (-1, -1);
+            if (!_grid.Visible) return;
+
+            try
+            {
+                _keptFirstRow = _grid.FirstDisplayedScrollingRowIndex;
+            }
+            catch (InvalidOperationException)
+            {
+                // No row is on screen. The index saved last time this was shown still stands.
+            }
+        }
+
+        /// <summary>
+        /// Puts <see cref="KeepPlace"/> back. Each part on its own: the grid refuses some of them when its tab is hidden -
+        /// a current cell it can't show, no room to display rows - and one refused must not stop the others. The scroll
+        /// position goes last, because setting the current cell scrolls to it. A refusal is tried again when the tab is shown.
+        /// </summary>
+        private void RestorePlace()
+        {
+            if (_suppressKeep || _grid.Rows.Count == 0) return;
+
+            _suppressKeep = true;
+            var failed = false;
+            try
+            {
+                failed |= !TryRestore(() =>
+                {
+                    if (_keptCurrent.RowIndex >= 0 && _keptCurrent.RowIndex < _grid.Rows.Count &&
+                        _keptCurrent.ColumnIndex >= 0 && _keptCurrent.ColumnIndex < _grid.Columns.Count)
+                    {
+                        _grid.CurrentCell = _grid.Rows[_keptCurrent.RowIndex].Cells[_keptCurrent.ColumnIndex];
+                    }
+                });
+                failed |= !TryRestore(() =>
+                {
+                    _grid.ClearSelection();
+                    foreach (var index in _keptSelected.Where(i => i < _grid.Rows.Count)) _grid.Rows[index].Selected = true;
+                });
+                failed |= !TryRestore(() =>
+                {
+                    if (_keptFirstRow >= 0) _grid.FirstDisplayedScrollingRowIndex = Math.Min(_keptFirstRow, _grid.Rows.Count - 1);
+                });
+            }
+            finally
+            {
+                _suppressKeep = false;
+            }
+
+            _placePending = failed;
+        }
+
+        private static bool TryRestore(Action restore)
         {
             try
             {
                 restore();
+                return true;
             }
             catch (InvalidOperationException)
             {
-                // Refused in the grid's current state - the reader loses that part of their place, nothing more.
+                // Refused in the grid's current state. The caller tries again when the grid is on screen.
+                return false;
             }
         }
 
