@@ -82,6 +82,17 @@ SELECT Q.InstanceID,
 	waitF.filegroup_name + ' | ' + waitF.name AS wait_file,
     Q.login_time_utc,
     CASE WHEN QP.query_plan_compresed IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS has_plan,
+    /* Operator counters kept for this request, statement and plan - the latest capture, which can be later than this snapshot */
+    CASE WHEN EXISTS(SELECT 1
+                    FROM dbo.RunningQueryLiveProfiles LP
+                    WHERE LP.InstanceID = Q.InstanceID
+                    AND LP.session_id = Q.session_id
+                    AND LP.start_time_utc = Q.start_time_utc
+                    AND LP.sql_handle = Q.sql_handle
+                    AND LP.statement_start_offset = Q.statement_start_offset
+                    AND LP.statement_end_offset = Q.statement_end_offset
+                    AND LP.query_plan_hash = Q.query_plan_hash
+                    ) THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS has_live_profile,
     Q.statement_start_offset,
     Q.statement_end_offset,
     Q.context_info,

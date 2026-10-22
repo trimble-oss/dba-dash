@@ -382,6 +382,14 @@ namespace DBADashServiceConfig
                         MemoryGrantThreshold = int.Parse(txtGrantThreshold.Text)
                     }
                     : null,
+                RunningQueryLiveProfileThreshold = chkCollectPlans.Checked && chkCaptureLivePlans.Checked
+                    ? new LiveProfileThreshold()
+                    {
+                        CPUThreshold = int.Parse(txtLivePlanCPUThreshold.Text),
+                        DurationThreshold = int.Parse(txtLivePlanDurationThreshold.Text),
+                        MaxPerCollection = int.Parse(txtLivePlanMaxPerCollection.Text)
+                    }
+                    : null,
                 SchemaSnapshotDBs = schemaSnapshotDBs,
                 CollectSessionWaits = chkCollectSessionWaits.Checked,
                 CollectTaskWaits = chkCollectTaskWaits.Checked,
@@ -1051,19 +1059,58 @@ namespace DBADashServiceConfig
             });
             dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn()
             { DataPropertyName = "PlanCollectionEnabled", HeaderText = "Running Query Plan Collection" });
+            // A cleared threshold cell is null rather than DBNull, which the nullable properties take as "not used"
             dgvConnections.Columns.Add(new DataGridViewTextBoxColumn()
-            { DataPropertyName = "PlanCollectionCPUThreshold", HeaderText = "Plan Collection CPU Threshold" });
+            {
+                DataPropertyName = "PlanCollectionCPUThreshold",
+                HeaderText = "Plan Collection CPU Threshold",
+                DefaultCellStyle = new DataGridViewCellStyle { DataSourceNullValue = null }
+            });
             dgvConnections.Columns.Add(new DataGridViewTextBoxColumn()
             {
                 DataPropertyName = "PlanCollectionDurationThreshold",
-                HeaderText = "Plan Collection Duration Threshold"
+                HeaderText = "Plan Collection Duration Threshold",
+                DefaultCellStyle = new DataGridViewCellStyle { DataSourceNullValue = null }
             });
             dgvConnections.Columns.Add(new DataGridViewTextBoxColumn()
-            { DataPropertyName = "PlanCollectionCountThreshold", HeaderText = "Plan Collection Count Threshold" });
+            {
+                DataPropertyName = "PlanCollectionCountThreshold",
+                HeaderText = "Plan Collection Count Threshold",
+                DefaultCellStyle = new DataGridViewCellStyle { DataSourceNullValue = null }
+            });
             dgvConnections.Columns.Add(new DataGridViewTextBoxColumn()
             {
                 DataPropertyName = "PlanCollectionMemoryGrantThreshold",
-                HeaderText = "Plan Collection Memory Grant Threshold"
+                HeaderText = "Plan Collection Memory Grant Threshold",
+                DefaultCellStyle = new DataGridViewCellStyle { DataSourceNullValue = null }
+            });
+            const string livePlanNote = "  Only applies when running query plan collection is on, to queries whose plans meet its threshold too.";
+            dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn()
+            {
+                DataPropertyName = "LivePlanCaptureEnabled",
+                HeaderText = "Live Plan Capture",
+                ToolTipText = "Keep the operator counters of long running queries, so their plans can be viewed with how far each operator had got." + livePlanNote
+            });
+            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn()
+            {
+                DataPropertyName = "LivePlanCaptureCPUThreshold",
+                DefaultCellStyle = new DataGridViewCellStyle { DataSourceNullValue = null },
+                HeaderText = "Live Plan Capture CPU Threshold",
+                ToolTipText = "Capture a query whose CPU time is at least this many ms.  Blank to not use it." + livePlanNote
+            });
+            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn()
+            {
+                DataPropertyName = "LivePlanCaptureDurationThreshold",
+                DefaultCellStyle = new DataGridViewCellStyle { DataSourceNullValue = null },
+                HeaderText = "Live Plan Capture Duration Threshold",
+                ToolTipText = "Capture a query that isn't blocked and has been running for at least this many ms.  Blank to not use it." + livePlanNote
+            });
+            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn()
+            {
+                DataPropertyName = "LivePlanCaptureMaxPerCollection",
+                DefaultCellStyle = new DataGridViewCellStyle { DataSourceNullValue = null },
+                HeaderText = "Live Plan Capture Max Per Collection",
+                ToolTipText = $"The most queries captured in one running queries collection, highest CPU first.  Blank for the default ({LiveProfileThreshold.DefaultMaxPerCollection})."
             });
             dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn()
             { DataPropertyName = "ScriptAgentJobs", HeaderText = "Script Agent Jobs" });
@@ -1900,6 +1947,18 @@ namespace DBADashServiceConfig
                 {
                     chkCollectPlans.Checked = false;
                 }
+                // After the plan collection check box, which clears this one when it changes
+                if (src.RunningQueryLiveProfileThreshold != null)
+                {
+                    chkCaptureLivePlans.Checked = src.RunningQueryLiveProfileThreshold.Enabled;
+                    txtLivePlanCPUThreshold.Text = src.RunningQueryLiveProfileThreshold.CPUThreshold.ToString();
+                    txtLivePlanDurationThreshold.Text = src.RunningQueryLiveProfileThreshold.DurationThreshold.ToString();
+                    txtLivePlanMaxPerCollection.Text = src.RunningQueryLiveProfileThreshold.MaxPerCollection.ToString();
+                }
+                else
+                {
+                    chkCaptureLivePlans.Checked = false;
+                }
                 chkCollectTaskWaits.Checked = src.CollectTaskWaits;
                 chkCollectCursors.Checked = src.CollectCursors;
                 chkCollectSessionWaits.Checked = src.CollectSessionWaits;
@@ -1909,6 +1968,7 @@ namespace DBADashServiceConfig
             else
             {
                 src.RunningQueryPlanThreshold = null;
+                src.RunningQueryLiveProfileThreshold = null;
             }
 
             CustomCollectionsNew = src.CustomCollections;
@@ -2214,6 +2274,7 @@ namespace DBADashServiceConfig
             tabDeadlocks.Enabled = isSql; // Reading an XE session needs a SQL connection
             chkCollectPlans.Enabled = isSql;
             grpRunningQueryThreshold.Enabled = isSql && chkCollectPlans.Checked;
+            grpLivePlanThreshold.Enabled = isSql && chkCollectPlans.Checked;
             chkNoWMI.Enabled = isSql;
             chkScriptJobs.Enabled = isSql;
             cboIOLevel.Enabled = isSql;
@@ -2510,6 +2571,9 @@ namespace DBADashServiceConfig
         private void ChkCollectPlans_CheckedChanged(object sender, EventArgs e)
         {
             grpRunningQueryThreshold.Enabled = chkCollectPlans.Checked;
+            // Live plans are only captured for queries whose plans are collected
+            grpLivePlanThreshold.Enabled = chkCollectPlans.Checked;
+            if (!chkCollectPlans.Checked) chkCaptureLivePlans.Checked = false;
             if (chkCollectPlans.Checked)
             {
                 var defaultThreshold = PlanCollectionThreshold.DefaultThreshold;
@@ -2517,6 +2581,20 @@ namespace DBADashServiceConfig
                 txtCountThreshold.Text = defaultThreshold.CountThreshold.ToString();
                 txtDurationThreshold.Text = defaultThreshold.DurationThreshold.ToString();
                 txtGrantThreshold.Text = defaultThreshold.MemoryGrantThreshold.ToString();
+            }
+        }
+
+        private void ChkCaptureLivePlans_CheckedChanged(object sender, EventArgs e)
+        {
+            txtLivePlanCPUThreshold.Enabled = chkCaptureLivePlans.Checked;
+            txtLivePlanDurationThreshold.Enabled = chkCaptureLivePlans.Checked;
+            txtLivePlanMaxPerCollection.Enabled = chkCaptureLivePlans.Checked;
+            if (chkCaptureLivePlans.Checked)
+            {
+                var defaultThreshold = LiveProfileThreshold.DefaultThreshold;
+                txtLivePlanCPUThreshold.Text = defaultThreshold.CPUThreshold.ToString();
+                txtLivePlanDurationThreshold.Text = defaultThreshold.DurationThreshold.ToString();
+                txtLivePlanMaxPerCollection.Text = defaultThreshold.MaxPerCollection.ToString();
             }
         }
 

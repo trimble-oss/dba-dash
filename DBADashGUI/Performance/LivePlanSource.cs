@@ -211,7 +211,7 @@ namespace DBADashGUI.Performance
             return $"{row["statement_start_offset"]}:{row["statement_end_offset"]}:{hash}:{handle}";
         }
 
-        private static PlanLiveCounters CountersOf(DataRow row) => new()
+        internal static PlanLiveCounters CountersOf(DataRow row) => new()
         {
             NodeId = Convert.ToInt32(row["node_id"]),
             Thread = Convert.ToInt32(row["thread_id"]),

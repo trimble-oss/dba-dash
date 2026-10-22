@@ -173,6 +173,7 @@ SELECT ' + CASE WHEN @Top IS NULL THEN '' ELSE 'TOP(@Top)' END + '
        wait_file,
        login_time_utc,
        has_plan,
+       has_live_profile,
        statement_start_offset,
        statement_end_offset,
        context_info,

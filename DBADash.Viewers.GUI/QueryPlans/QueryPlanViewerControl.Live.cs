@@ -111,8 +111,20 @@ namespace DBADashGUI.QueryPlans
             };
 
             // After the plan has been shown on Load - the first refresh gives the counters later ones are compared with,
-            // so operators show as active from the second.
-            Load += (_, _) => BeginInvoke(() => SetAutoRefresh(DefaultAutoRefresh));
+            // so operators show as active from the second.  A capture from earlier is shown as it was, and refreshed
+            // only when asked: the query has most likely finished, and a refresh that found it had would end the view.
+            Load += (_, _) => BeginInvoke(() =>
+            {
+                if (_live.Initial is { } initial)
+                {
+                    SetAutoRefresh(0);
+                    ApplyLiveCapture(initial);
+                }
+                else
+                {
+                    SetAutoRefresh(DefaultAutoRefresh);
+                }
+            });
 
             return bar;
         }
@@ -233,7 +245,8 @@ namespace DBADashGUI.QueryPlans
 
             _graphControl.SetLive(capture.Live);
 
-            var status = "Captured " + capture.CapturedAt.ToString("T", CultureInfo.CurrentCulture);
+            // A capture from earlier can be from another day
+            var status = "Captured " + capture.CapturedAt.ToString(ReferenceEquals(capture, _live.Initial) ? "G" : "T", CultureInfo.CurrentCulture);
             if (capture.Elapsed is { } elapsed)
             {
                 status += "  -  running for " + (elapsed.TotalDays >= 1 ? elapsed.ToString(@"d\.hh\:mm\:ss") : elapsed.ToString(@"hh\:mm\:ss"));

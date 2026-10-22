@@ -17,6 +17,7 @@ namespace DBADashGUI.Viewers
         /// <summary>
         /// Identifies the request being followed, so opening it again selects the tab that is already following it.
         /// Plan XML is not an identity: it changes on every refresh, and the same XML can be a static plan or another session.
+        /// Null to open in a tab of its own every time.
         /// </summary>
         string RequestKey { get; }
 
@@ -25,6 +26,13 @@ namespace DBADashGUI.Viewers
         /// from the last capture to say which operators have moved since.
         /// </summary>
         Task<LivePlanCapture> CaptureAsync(CancellationToken cancellationToken);
+
+        /// <summary>
+        /// A capture taken earlier that the plan was opened with - one kept by the running queries collection, say.
+        /// The viewer shows it and leaves refreshing to the reader, as the query has most likely finished since.  Null
+        /// when the plan was captured just now, which the viewer starts refreshing straight away.
+        /// </summary>
+        LivePlanCapture Initial => null;
     }
 
     /// <summary>One capture of a running query - see <see cref="ILivePlanSource"/>.</summary>

@@ -1089,6 +1089,11 @@ namespace DBADash
             if (collectionType == CollectionType.RunningQueries)
             {
                 await CollectStepAsync(collectionType, "Plans", "Error collecting plans for Running Queries", CollectPlansAsync);
+                // Opt in, so a source that hasn't turned it on doesn't log a duration for a step it never runs
+                if (Source.LiveProfileCollectionEnabled)
+                {
+                    await CollectStepAsync(collectionType, "LiveProfiles", "Error collecting live query profiles for Running Queries", CollectLiveProfilesAsync);
+                }
             }
         }
 
@@ -1131,6 +1136,48 @@ namespace DBADash
         }
 
         ///<summary>
+        ///The statements in RunningQueries whose plans meet the plan collection threshold - collected or not, as a plan collected before is cached rather than collected again.
+        ///</summary>
+        private List<Plan> GetPlansMeetingThreshold()
+        {
+            if (!Data.Tables.Contains("RunningQueries") || Source.RunningQueryPlanThreshold is not { } threshold) return [];
+            var dt = Data.Tables["RunningQueries"];
+            return (from r in dt!.AsEnumerable()
+                    where r["plan_handle"] != DBNull.Value
+                    && r["query_plan_hash"] != DBNull.Value
+                    && r["statement_start_offset"] != DBNull.Value
+                    && r["statement_end_offset"] != DBNull.Value
+                    && ((byte[])r["query_plan_hash"]).Any(b => b != 0) // Not 0x00000000
+                    group r by new Plan((byte[])r["plan_handle"], (byte[])r["query_plan_hash"], (int)r["statement_start_offset"], (int)r["statement_end_offset"]) into g
+                    where g.Sum(r => Convert.ToInt64(r["cpu_time"])) >= threshold.CPUThreshold || g.Sum(r => Convert.ToInt64(r["granted_query_memory"])) >= threshold.MemoryGrantThreshold || g.Count() >= threshold.CountThreshold || g.Max(r => ((DateTime)r["SnapshotDateUTC"]).Subtract((DateTime)r["last_request_start_time_utc"])).TotalMilliseconds >= threshold.DurationThreshold
+                    select g.Key).Distinct().ToList();
+        }
+
+        /// <summary>
+        /// Keep the operator counters of the long running queries in this snapshot - see <see cref="LiveProfileCollector"/>.
+        /// Only for statements whose plan meets the plan collection threshold as well as the live profile one: the
+        /// counters are shown on the plan, so without it they are no use.  The highest CPU requests first, up to the
+        /// limit per collection.
+        /// </summary>
+        private async Task CollectLiveProfilesAsync()
+        {
+            if (!Data.Tables.Contains("RunningQueries") || !Source.LiveProfileCollectionEnabled) return;
+            var threshold = Source.RunningQueryLiveProfileThreshold;
+            var planKeys = GetPlansMeetingThreshold().Select(p => p.Key).ToHashSet();
+            if (planKeys.Count == 0) return;
+
+            var requests = LiveProfileCollector.SelectRequests(Data.Tables["RunningQueries"], planKeys, threshold);
+
+            var dt = await LiveProfileCollector.CollectAsync(requests, ConnectionString);
+            if (dt.Rows.Count > 0)
+            {
+                Data.Tables.Add(dt);
+            }
+            LogInternalPerformanceCounter("DBADash", "Count of live query profiles requested", "", requests.Count); // Requests meeting both thresholds, up to the limit per collection
+            LogInternalPerformanceCounter("DBADash", "Count of live query profiles collected", "", dt.Rows.Count); // Less where a request finished or moved on, or lightweight profiling is off
+        }
+
+        ///<summary>
         ///Get a list of plan handles from RunningQueries including statement start/end offsets as we want to capture plans at the statement level. Query plan hash is used to detect changes in the plan for caching purposes <br/>
         ///Capture a distinct list so we collect the plan for each statement once even if there are multiple instances of statements running with the same plan.<br/>
         ///Filter for plans matching the specified threshold to limit the plans captured to the ones that are likely to be of interest<br/>
@@ -1139,16 +1186,7 @@ namespace DBADash
         {
             if (Data.Tables.Contains("RunningQueries"))
             {
-                var dt = Data.Tables["RunningQueries"];
-                var plans = (from r in dt!.AsEnumerable()
-                             where r["plan_handle"] != DBNull.Value
-                             && r["query_plan_hash"] != DBNull.Value
-                             && r["statement_start_offset"] != DBNull.Value
-                             && r["statement_end_offset"] != DBNull.Value
-                             && ((byte[])r["query_plan_hash"]).Any(b => b != 0) // Not 0x00000000
-                             group r by new Plan((byte[])r["plan_handle"], (byte[])r["query_plan_hash"], (int)r["statement_start_offset"], (int)r["statement_end_offset"]) into g
-                             where g.Sum(r => Convert.ToInt64(r["cpu_time"])) >= Source.PlanCollectionCPUThreshold || g.Sum(r => Convert.ToInt64(r["granted_query_memory"])) >= Source.PlanCollectionMemoryGrantThreshold || g.Count() >= Source.PlanCollectionCountThreshold || g.Max(r => ((DateTime)r["SnapshotDateUTC"]).Subtract((DateTime)r["last_request_start_time_utc"])).TotalMilliseconds >= Source.PlanCollectionDurationThreshold
-                             select g.Key).Distinct().ToList();
+                var plans = GetPlansMeetingThreshold();
 
                 // Already have a distinct list by plan handle, hash and offsets.
                 // Filter this list by plans not already collected and get a distinct list by handle and offsets (excluding the hash as this can cause duplicates in rare cases)

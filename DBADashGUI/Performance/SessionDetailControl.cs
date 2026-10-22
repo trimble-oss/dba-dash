@@ -167,6 +167,7 @@ namespace DBADashGUI.Performance
             tsPlan.ToolTipText = action switch
             {
                 QueryPlanActions.PlanAction.View => "View the query plan captured for this query.",
+                QueryPlanActions.PlanAction.ViewLiveCapture => QueryPlanActions.LiveCaptureToolTip,
                 QueryPlanActions.PlanAction.Collect => "Collect the query plan from the source instance (via messaging) and open it.",
                 QueryPlanActions.PlanAction.FindScript => "Show a script to find the query plan in the plan cache / query store on the source instance.",
                 _ => "No plan information is available for this query."
@@ -2027,7 +2028,7 @@ DBCC FREEPROCCACHE({planHandle});";
 
         private static readonly HashSet<string> OverviewExcludedColumns = new(StringComparer.OrdinalIgnoreCase)
         {
-            "query_plan_text", "InstanceID", "job_id","BlockWaitTimeMs", "BlockWaitTimeRecursiveMs" , "context_info_bin","DBADashObjectID", "has_plan", "wait_is_compile", "database_id"
+            "query_plan_text", "InstanceID", "job_id","BlockWaitTimeMs", "BlockWaitTimeRecursiveMs" , "context_info_bin","DBADashObjectID", "has_plan", "has_live_profile", "wait_is_compile", "database_id"
         };
 
         private const string OverviewSectionColumn = "__IsSection";
