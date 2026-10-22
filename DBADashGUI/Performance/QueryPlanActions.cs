@@ -154,11 +154,12 @@ namespace DBADashGUI.Performance
                 ImportAgent = context.ImportAgent,
                 SessionID = sessionId,
                 StartTimeUtc = Convert.ToDateTime(row["start_time"]).AppTimeZoneToUtc(),
+                SnapshotUtcOffset = context.UTCOffset,
                 Lifetime = 60
             };
 
             Task ProcessReply(ResponseMessage reply, Guid group, MessagingHelper.SetStatusDelegate setStatus)
-                => ProcessLivePlanReply(reply, sessionId, message.StartTimeUtc, context, setStatus);
+                => ProcessLivePlanReply(reply, sessionId, message.StartTimeUtc, message.SnapshotUtcOffset, context, setStatus);
 
             lblStatus.InvokeSetStatus("Getting live query plan...", string.Empty, DashColors.Information);
             await MessagingHelper.SendMessageAndProcessReply(message, context, FittedStatus(lblStatus), ProcessReply, Guid.NewGuid());
@@ -187,7 +188,7 @@ namespace DBADashGUI.Performance
             label.InvokeSetStatus(shortText + "  (click for details)", fullText, colour);
         };
 
-        private static Task ProcessLivePlanReply(ResponseMessage reply, int sessionId, DateTime startTimeUtc, DBADashContext context,
+        private static Task ProcessLivePlanReply(ResponseMessage reply, int sessionId, DateTime startTimeUtc, int snapshotUtcOffset, DBADashContext context,
             MessagingHelper.SetStatusDelegate setStatus)
         {
             try
@@ -211,7 +212,7 @@ namespace DBADashGUI.Performance
                 var fileName = $"Live Plan SPID {sessionId} {captured:yyyy-MM-dd HHmmss}.sqlplan";
 
                 // The viewer refreshes it from here - see LivePlanSource.
-                var live = new LivePlanSource(context, sessionId, startTimeUtc, row);
+                var live = new LivePlanSource(context, sessionId, startTimeUtc, snapshotUtcOffset, row);
                 Common.ShowQueryPlan(plan, fileName, context, live);
                 setStatus($"Live plan for session {sessionId} captured at {captured:T}", string.Empty, DashColors.Green);
             }

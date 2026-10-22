@@ -27,6 +27,11 @@ namespace DBADash.Messaging
         /// <summary>The request start time (UTC) from the snapshot.  Compared with the live value to confirm it's the same request.</summary>
         public DateTime StartTimeUtc { get; set; }
 
+        /// <summary>
+        /// The instance UTC offset, in minutes, collected for the snapshot.  See <see cref="LivePlanMessage.SnapshotUtcOffset"/>.
+        /// </summary>
+        public int SnapshotUtcOffset { get; set; }
+
         public override async Task<DataSet> Process(CollectionConfig cfg, Guid handle, CancellationToken cancellationToken)
         {
             ThrowIfExpired();
@@ -40,6 +45,7 @@ namespace DBADash.Messaging
                 await using var cmd = new SqlCommand(ProfileSql, cn) { CommandType = CommandType.Text, CommandTimeout = Lifetime };
                 cmd.Parameters.Add("@SessionID", SqlDbType.Int).Value = SessionID;
                 cmd.Parameters.Add("@ExpectedStartUtc", SqlDbType.DateTime).Value = StartTimeUtc;
+                cmd.Parameters.Add("@SnapshotUtcOffset", SqlDbType.Int).Value = SnapshotUtcOffset;
 
                 await cn.OpenAsync(cancellationToken);
                 var ds = new DataSet();
@@ -68,12 +74,17 @@ namespace DBADash.Messaging
         }
 
         /// <summary>
-        /// The counters are read between two reads of the request - start time, statement offsets and plan hash - and only
-        /// returned when both agree.  The DMVs can't be read together atomically, and counters taken as the request moved
-        /// on to its next statement would be put down to the statement read before them: written into the operators of
-        /// the wrong plan.  A request that moved is reported as Moving with no counters, so the GUI skips that refresh
-        /// rather than failing - the next one sees the new statement and fetches its plan.  One that has finished by the
-        /// second read is Completed.
+        /// The counters are read between two reads of the request - start time, statement offsets, plan hash and batch
+        /// (sql_handle) - and only returned when both agree.  The DMVs can't be read together atomically, and counters
+        /// taken as the request moved on to its next statement would be put down to the statement read before them:
+        /// written into the operators of the wrong plan.  A request that moved is reported as Moving with no counters,
+        /// so the GUI skips that refresh rather than failing - the next one sees the new statement and fetches its plan.
+        /// One that has finished by the second read is Completed.
+        ///
+        /// The request is the one whose start time matches the snapshot, not the lowest request_id: a MARS session can
+        /// have several, and the running-queries snapshot keeps the highest-CPU one.  That request_id is what the
+        /// counters and the second read use.  The start time matches exactly, unless the instance offset has changed by
+        /// at most an hour since the snapshot, in which case it matches shifted by that change.
         ///
         /// actual_read_row_count isn't in every version that has sys.dm_exec_query_profiles, so the counters are selected
         /// with dynamic SQL that includes it where the column exists.  The live start time is converted to UTC using the
@@ -82,9 +93,13 @@ namespace DBADash.Messaging
         private const string ProfileSql = @"
 SET NOCOUNT ON;
 DECLARE @UTCOffset INT = CAST(ROUND(DATEDIFF(s,GETDATE(),GETUTCDATE())/60.0,0) AS INT);
+/* Same start-time match as LivePlanMessage: exact, or shifted by a daylight saving change of at most an hour */
+DECLARE @OffsetDelta INT = @UTCOffset - @SnapshotUtcOffset;
+IF ABS(@OffsetDelta) > 60 SET @OffsetDelta = 0;
+DECLARE @Expected DATETIME = DATEADD(mi, @OffsetDelta, @ExpectedStartUtc);
 DECLARE @Status VARCHAR(20);
-DECLARE @startUtc DATETIME, @RequestID INT, @StartOffset INT, @EndOffset INT, @PlanHash BINARY(8), @CpuTime INT, @ElapsedTime INT;
-DECLARE @startUtc2 DATETIME, @StartOffset2 INT, @EndOffset2 INT, @PlanHash2 BINARY(8);
+DECLARE @startUtc DATETIME, @RequestID INT, @StartOffset INT, @EndOffset INT, @PlanHash BINARY(8), @SqlHandle VARBINARY(64), @CpuTime INT, @ElapsedTime INT;
+DECLARE @startUtc2 DATETIME, @StartOffset2 INT, @EndOffset2 INT, @PlanHash2 BINARY(8), @SqlHandle2 VARBINARY(64);
 
 CREATE TABLE #Profiles(
     node_id INT,
@@ -135,16 +150,17 @@ SELECT  TOP(1) @startUtc = DATEADD(mi,@UTCOffset,r.start_time),
         @StartOffset = r.statement_start_offset,
         @EndOffset = r.statement_end_offset,
         @PlanHash = r.query_plan_hash,
+        @SqlHandle = r.sql_handle,
         @CpuTime = r.cpu_time,
         @ElapsedTime = r.total_elapsed_time
 FROM sys.dm_exec_requests r
 WHERE r.session_id = @SessionID
-ORDER BY r.request_id;
+ORDER BY CASE WHEN DATEADD(mi,@UTCOffset,r.start_time) = @Expected THEN 0 ELSE 1 END,
+         r.cpu_time DESC,
+         r.request_id;
 
-/* Exact, apart from a clock change - see LivePlanMessage */
-IF @startUtc IS NULL
-    OR DATEDIFF(ms, @ExpectedStartUtc, @startUtc) % 60000 <> 0
-    OR ABS(DATEDIFF(ms, @ExpectedStartUtc, @startUtc)) > 3600000
+/* Exact, apart from a daylight saving change - see LivePlanMessage */
+IF @startUtc IS NULL OR @startUtc <> @Expected
 BEGIN
     SET @Status = 'Completed';
 END
@@ -155,17 +171,19 @@ BEGIN
     SELECT  @startUtc2 = DATEADD(mi,@UTCOffset,r.start_time),
             @StartOffset2 = r.statement_start_offset,
             @EndOffset2 = r.statement_end_offset,
-            @PlanHash2 = r.query_plan_hash
+            @PlanHash2 = r.query_plan_hash,
+            @SqlHandle2 = r.sql_handle
     FROM sys.dm_exec_requests r
     WHERE r.session_id = @SessionID
     AND r.request_id = @RequestID;
 
-    /* On a different statement by the second read, the counters could be for either */
+    /* On a different statement or batch by the second read, the counters could be for either */
     SET @Status = CASE WHEN @startUtc2 IS NULL THEN 'Completed'
                     WHEN @startUtc2 = @startUtc
                         AND @StartOffset2 = @StartOffset
                         AND @EndOffset2 = @EndOffset
-                        AND (@PlanHash2 = @PlanHash OR (@PlanHash2 IS NULL AND @PlanHash IS NULL)) THEN 'Running'
+                        AND (@PlanHash2 = @PlanHash OR (@PlanHash2 IS NULL AND @PlanHash IS NULL))
+                        AND (@SqlHandle2 = @SqlHandle OR (@SqlHandle2 IS NULL AND @SqlHandle IS NULL)) THEN 'Running'
                     ELSE 'Moving' END;
 END
 
@@ -180,6 +198,7 @@ SELECT  @Status AS Status,
         @StartOffset AS statement_start_offset,
         @EndOffset AS statement_end_offset,
         @PlanHash AS query_plan_hash,
+        @SqlHandle AS sql_handle,
         @CpuTime AS cpu_time,
         @ElapsedTime AS total_elapsed_time;
 

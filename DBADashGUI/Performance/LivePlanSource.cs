@@ -23,6 +23,7 @@ namespace DBADashGUI.Performance
         private readonly DBADashContext _context;
         private readonly int _sessionId;
         private readonly DateTime _startTimeUtc;
+        private readonly int _snapshotUtcOffset;
 
         private string _planXml;
         private string _statement;
@@ -32,11 +33,13 @@ namespace DBADashGUI.Performance
         private PlanLiveSnapshot _lastSnapshot;
 
         /// <param name="initial">The LivePlan row the plan was first opened from, which says which statement it is for.</param>
-        public LivePlanSource(DBADashContext context, int sessionId, DateTime startTimeUtc, DataRow initial)
+        /// <param name="snapshotUtcOffset">The instance UTC offset, in minutes, captured with the snapshot. Sent on every poll so a daylight saving change is the only start-time shift that still matches.</param>
+        public LivePlanSource(DBADashContext context, int sessionId, DateTime startTimeUtc, int snapshotUtcOffset, DataRow initial)
         {
             _context = context;
             _sessionId = sessionId;
             _startTimeUtc = startTimeUtc;
+            _snapshotUtcOffset = snapshotUtcOffset;
             _planXml = (string)initial["query_plan"];
             _statement = StatementOf(initial);
         }
@@ -52,6 +55,7 @@ namespace DBADashGUI.Performance
                 ImportAgent = _context.ImportAgent,
                 SessionID = _sessionId,
                 StartTimeUtc = _startTimeUtc,
+                SnapshotUtcOffset = _snapshotUtcOffset,
                 Lifetime = 30
             }, cancellationToken);
 
@@ -134,6 +138,7 @@ namespace DBADashGUI.Performance
                 ImportAgent = _context.ImportAgent,
                 SessionID = _sessionId,
                 StartTimeUtc = _startTimeUtc,
+                SnapshotUtcOffset = _snapshotUtcOffset,
                 Lifetime = 60
             }, cancellationToken);
 
@@ -165,14 +170,17 @@ namespace DBADashGUI.Performance
             return outcome.Data ?? throw new InvalidOperationException("The service returned no data.");
         }
 
-        /// <summary>Which statement of the batch is running: its offsets and plan hash.</summary>
+        /// <summary>Which statement of which batch is running: its offsets, plan hash and sql_handle.</summary>
         private static string StatementOf(DataRow row)
         {
             var columns = row.Table.Columns;
             if (!columns.Contains("statement_start_offset")) return string.Empty;
 
             var hash = row["query_plan_hash"] is byte[] bytes ? Convert.ToHexString(bytes) : string.Empty;
-            return $"{row["statement_start_offset"]}:{row["statement_end_offset"]}:{hash}";
+            var handle = columns.Contains("sql_handle") && row["sql_handle"] is byte[] handleBytes
+                ? Convert.ToHexString(handleBytes)
+                : string.Empty;
+            return $"{row["statement_start_offset"]}:{row["statement_end_offset"]}:{hash}:{handle}";
         }
 
         private static PlanLiveCounters CountersOf(DataRow row) => new()

@@ -11,8 +11,8 @@ namespace DBADash.Messaging
     /// <summary>
     /// Gets the live query plan (actual row counts etc. so far) for a request that is still running, from
     /// sys.dm_exec_query_statistics_xml.  The plan is only returned if the same request is still running on the session -
-    /// the request start time must match the snapshot the user is looking at, so a reused SPID doesn't return a plan for a
-    /// different query.<br/>
+    /// the request whose start time matches the snapshot, so a reused SPID or another request on a MARS session doesn't
+    /// return a plan for a different query.<br/>
     /// Needs lightweight query profiling: on by default from SQL 2019, trace flag 7412 on SQL 2016 SP1 and 2017.  Without it
     /// a plan is only available if the query was started with SET STATISTICS XML/PROFILE ON or an XE session capturing
     /// query_post_execution_showplan was running.<br/>
@@ -26,6 +26,13 @@ namespace DBADash.Messaging
 
         /// <summary>The request start time (UTC) from the snapshot.  Compared with the live value to confirm it's the same request.</summary>
         public DateTime StartTimeUtc { get; set; }
+
+        /// <summary>
+        /// The instance UTC offset, in minutes, collected for the snapshot (<c>DATEDIFF</c> style, added to local time to
+        /// get UTC).  A live start time may differ by exactly the change in this offset since the snapshot - a daylight
+        /// saving change - and by nothing else.
+        /// </summary>
+        public int SnapshotUtcOffset { get; set; }
 
         public override async Task<DataSet> Process(CollectionConfig cfg, Guid handle, CancellationToken cancellationToken)
         {
@@ -45,6 +52,7 @@ namespace DBADash.Messaging
                 await using var cmd = new SqlCommand(LivePlanSql, cn) { CommandType = CommandType.Text, CommandTimeout = Lifetime };
                 cmd.Parameters.Add("@SessionID", SqlDbType.Int).Value = SessionID;
                 cmd.Parameters.Add("@ExpectedStartUtc", SqlDbType.DateTime).Value = StartTimeUtc;
+                cmd.Parameters.Add("@SnapshotUtcOffset", SqlDbType.Int).Value = SnapshotUtcOffset;
 
                 await cn.OpenAsync(cancellationToken);
                 var ds = new DataSet();
@@ -72,67 +80,82 @@ namespace DBADash.Messaging
         /// The DMVs can't be read together atomically: the request could finish (and another start on the session)
         /// between checking it and taking the plan, or move on to its next statement between taking the plan and reading
         /// which statement is running.  A plan put down to the wrong statement would have the next statement's counters
-        /// written into it on refresh.  So the request - start time, statement offsets and plan hash - is read before and
-        /// after the plan is taken.  If the statement changed in between, the plan can't be put down to either, and the
-        /// user is asked to try again.  One that has finished by the second read keeps the plan: it was taken from the
-        /// request checked, and there are no more statements to confuse it with.
+        /// written into it on refresh.  So the request - start time, statement offsets, plan hash and batch (sql_handle) -
+        /// is read before and after the plan is taken.  If the statement changed in between, the plan can't be put down to
+        /// either, and the user is asked to try again.  One that has finished by the second read keeps the plan: it was
+        /// taken from the request checked, and there are no more statements to confuse it with.
         ///
         /// The DMV doesn't exist before SQL 2016 SP1 so it's queried with sp_executesql to allow the batch to compile on
         /// older versions.  The live start time is converted to UTC using the same whole-minute offset the collector uses.
+        /// It matches the snapshot exactly, unless the instance offset has changed by at most an hour since the snapshot,
+        /// in which case it matches shifted by that change.
         /// </summary>
         private const string LivePlanSql = @"
 SET NOCOUNT ON;
 DECLARE @UTCOffset INT = CAST(ROUND(DATEDIFF(s,GETDATE(),GETUTCDATE())/60.0,0) AS INT);
+/* The snapshot start was made UTC with @SnapshotUtcOffset. The same local start converted now differs by exactly
+   the change in that offset, and only when the change is a daylight saving shift of at most an hour. */
+DECLARE @OffsetDelta INT = @UTCOffset - @SnapshotUtcOffset;
+IF ABS(@OffsetDelta) > 60 SET @OffsetDelta = 0;
+DECLARE @Expected DATETIME = DATEADD(mi, @OffsetDelta, @ExpectedStartUtc);
 DECLARE @msg NVARCHAR(400), @QueryPlan NVARCHAR(MAX);
-DECLARE @startUtc DATETIME, @StartOffset INT, @EndOffset INT, @PlanHash BINARY(8), @CpuTime INT, @ElapsedTime INT;
-DECLARE @startUtc2 DATETIME, @StartOffset2 INT, @EndOffset2 INT, @PlanHash2 BINARY(8);
+DECLARE @RequestID INT, @startUtc DATETIME, @StartOffset INT, @EndOffset INT, @PlanHash BINARY(8), @SqlHandle VARBINARY(64), @CpuTime INT, @ElapsedTime INT;
+DECLARE @startUtc2 DATETIME, @StartOffset2 INT, @EndOffset2 INT, @PlanHash2 BINARY(8), @SqlHandle2 VARBINARY(64);
 
 IF OBJECT_ID('sys.dm_exec_query_statistics_xml') IS NULL
 BEGIN
     THROW 50000, N'Live query plans require SQL Server 2016 SP1 or later.', 1;
 END
 
-SELECT TOP(1) @startUtc = DATEADD(mi,@UTCOffset,r.start_time),
+/* A session can have several requests (MARS). The running-queries snapshot keeps the highest-CPU one, so the request
+   whose start time is the snapshot's is taken and its request_id is what the plan and the second read use. Highest
+   CPU, then request_id, breaks a tie where two requests share a start time. */
+SELECT TOP(1) @RequestID = r.request_id,
+        @startUtc = DATEADD(mi,@UTCOffset,r.start_time),
         @StartOffset = r.statement_start_offset,
         @EndOffset = r.statement_end_offset,
         @PlanHash = r.query_plan_hash,
+        @SqlHandle = r.sql_handle,
         @CpuTime = r.cpu_time,
         @ElapsedTime = r.total_elapsed_time
 FROM sys.dm_exec_requests r
 WHERE r.session_id = @SessionID
-ORDER BY r.request_id;
+ORDER BY CASE WHEN DATEADD(mi,@UTCOffset,r.start_time) = @Expected THEN 0 ELSE 1 END,
+         r.cpu_time DESC,
+         r.request_id;
 
 IF @startUtc IS NULL
 BEGIN
     SET @msg = CONCAT(N'Session ', @SessionID, N' is no longer running a request.  The query may have completed.');
     THROW 50000, @msg, 1;
 END
-/* Exact, apart from a clock change: the snapshot's start time and this one are both made UTC with the whole-minute
-   offset at the time, so a daylight saving change since the snapshot moves this one by exactly that many minutes */
-IF DATEDIFF(ms, @ExpectedStartUtc, @startUtc) % 60000 <> 0 OR ABS(DATEDIFF(ms, @ExpectedStartUtc, @startUtc)) > 3600000
+IF @startUtc <> @Expected
 BEGIN
     SET @msg = CONCAT(N'Session ', @SessionID, N' is no longer running the same request (the request start time has changed).  The query may have completed.');
     THROW 50000, @msg, 1;
 END
 
-EXEC sp_executesql N'SELECT TOP(1) @QueryPlan = CAST(query_plan AS NVARCHAR(MAX)) FROM sys.dm_exec_query_statistics_xml(@SessionID)',
-    N'@SessionID INT, @QueryPlan NVARCHAR(MAX) OUTPUT',
-    @SessionID = @SessionID, @QueryPlan = @QueryPlan OUTPUT;
+EXEC sp_executesql N'SELECT @QueryPlan = CAST(query_plan AS NVARCHAR(MAX)) FROM sys.dm_exec_query_statistics_xml(@SessionID) WHERE request_id = @RequestID',
+    N'@SessionID INT, @RequestID INT, @QueryPlan NVARCHAR(MAX) OUTPUT',
+    @SessionID = @SessionID, @RequestID = @RequestID, @QueryPlan = @QueryPlan OUTPUT;
 
-SELECT TOP(1) @startUtc2 = DATEADD(mi,@UTCOffset,r.start_time),
+SELECT @startUtc2 = DATEADD(mi,@UTCOffset,r.start_time),
         @StartOffset2 = r.statement_start_offset,
         @EndOffset2 = r.statement_end_offset,
-        @PlanHash2 = r.query_plan_hash
+        @PlanHash2 = r.query_plan_hash,
+        @SqlHandle2 = r.sql_handle
 FROM sys.dm_exec_requests r
 WHERE r.session_id = @SessionID
-ORDER BY r.request_id;
+AND r.request_id = @RequestID;
 
-/* Still running and on a different statement: the plan could be for either */
+/* Still running and on a different statement or batch: the plan could be for either. Offsets are relative to the
+   current batch and the plan hash is the shape, so the batch (sql_handle) is part of which statement this is. */
 IF @startUtc2 IS NOT NULL
     AND NOT (@startUtc2 = @startUtc
         AND @StartOffset2 = @StartOffset
         AND @EndOffset2 = @EndOffset
-        AND (@PlanHash2 = @PlanHash OR (@PlanHash2 IS NULL AND @PlanHash IS NULL)))
+        AND (@PlanHash2 = @PlanHash OR (@PlanHash2 IS NULL AND @PlanHash IS NULL))
+        AND (@SqlHandle2 = @SqlHandle OR (@SqlHandle2 IS NULL AND @SqlHandle IS NULL)))
 BEGIN
     SET @msg = CONCAT(N'Session ', @SessionID, N' moved on to another statement while its live plan was being captured.  Try again.');
     THROW 50000, @msg, 1;
@@ -151,6 +174,7 @@ SELECT @SessionID AS session_id,
     @StartOffset AS statement_start_offset,
     @EndOffset AS statement_end_offset,
     @PlanHash AS query_plan_hash,
+    @SqlHandle AS sql_handle,
     @CpuTime AS cpu_time,
     @ElapsedTime AS total_elapsed_time,
     @QueryPlan AS query_plan;";
