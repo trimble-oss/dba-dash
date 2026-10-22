@@ -1,5 +1,6 @@
 using DBADashGUI.Viewers;
 using DBADash.QueryPlan;
+using DBADash.QueryPlan.Live;
 using DBADash.QueryPlan.Layout;
 using DBADash.QueryPlan.Model;
 using DBADashGUI.CustomReports;
@@ -268,7 +269,7 @@ namespace DBADashGUI.QueryPlans
             _missingIndexTab = NewPage("Missing Indexes", GridAndScript(_missingIndexGrid, _missingIndexScript, _missingIndexScriptSplit));
             _expressionsTab = NewPage("Expressions", _expressionsGrid);
             _parametersTab = NewPage("Parameters", GridAndScript(_parametersGrid, _parameterScript, _parameterScriptSplit));
-            _waitsTab = NewPage("Waits", _waitsGrid);
+            _waitsTab = NewPage("Waits", WaitsPage());
 
             _tabs.TabPages.Add(NewPage("Plan", _statementSplit));
             _tabs.TabPages.Add(_operatorsTab);
@@ -502,6 +503,39 @@ namespace DBADashGUI.QueryPlans
             BeginInvoke(() => FitGrid(grid));
         }
 
+        /// <summary>
+        /// Added to the tooltips of anything that hands the plan XML to a file or another program. The file carries
+        /// the same fact as a comment, which is what a later open reads — see <see cref="PlanLiveMark"/>.
+        /// </summary>
+        private string LivePlanFileNote => _live == null
+            ? string.Empty
+            : " Operator counters are as last refreshed. Waits are from when the plan was first captured.";
+
+        /// <summary>This viewer is following a running query, or the file was saved from one.</summary>
+        private bool CapturedLive => _live != null || PlanLiveMark.IsMarked(_sourceXml);
+
+        /// <summary>
+        /// The waits grid, with a note on a live plan. Wait totals live in the statistics XML and are not in
+        /// sys.dm_exec_query_profiles, so a refresh updates operator counters and leaves these as first captured.
+        /// </summary>
+        private Control WaitsPage()
+        {
+            if (!CapturedLive) return _waitsGrid;
+
+            var page = new Panel { Dock = DockStyle.Fill };
+            var note = new Label
+            {
+                Dock = DockStyle.Top,
+                AutoSize = true,
+                Padding = new Padding(6, 4, 6, 4),
+                Text = "These waits are from the first capture of this live plan. Operator counters may have been refreshed after that."
+            };
+            // Docked last so it takes the top and the grid fills what is left.
+            page.Controls.Add(_waitsGrid);
+            page.Controls.Add(note);
+            return page;
+        }
+
         private static TabPage NewPage(string text, Control content)
         {
             var page = new TabPage(text);
@@ -660,7 +694,7 @@ namespace DBADashGUI.QueryPlans
             // plan leaves for another application, but not which one.
             _openWith = new ToolStripDropDownButton("Open With", Resources.Open_16x)
             {
-                ToolTipText = "Open the plan in another application registered for .sqlplan files (e.g. SSMS)",
+                ToolTipText = "Open the plan in another application registered for .sqlplan files (e.g. SSMS)" + LivePlanFileNote,
                 Alignment = ToolStripItemAlignment.Right
             };
 
@@ -1169,7 +1203,10 @@ namespace DBADashGUI.QueryPlans
             });
             menu.DropDownItems.Add(new ToolStripMenuItem("Copy Current View as Image", null, (_, _) => CopyImage(whole: false)));
             menu.DropDownItems.Add(new ToolStripSeparator());
-            menu.DropDownItems.Add(new ToolStripMenuItem("Copy Plan XML", null, (_, _) => CopyText(_sourceXml)));
+            menu.DropDownItems.Add(new ToolStripMenuItem("Copy Plan XML", null, (_, _) => CopyText(_sourceXml))
+            {
+                ToolTipText = "The plan XML." + LivePlanFileNote
+            });
             menu.DropDownItems.Add(new ToolStripMenuItem("Copy Query Text", null, (_, _) => CopyText(_current?.StatementText)));
             menu.DropDownItems.Add(new ToolStripMenuItem("Copy Properties", null, (_, _) => CopyText(_properties.ToText())));
             menu.DropDownItems.Add(new ToolStripSeparator());
@@ -2366,11 +2403,18 @@ namespace DBADashGUI.QueryPlans
             _waitsTab.Text = statement.WaitStats.Count == 0
                 ? "Waits"
                 : "Waits (" + statement.WaitStats.Count.ToString(CultureInfo.InvariantCulture) + ")";
-            SetTabVisible(_waitsTab, statement.WaitStats.Count > 0);
+            SetTabVisible(_waitsTab, statement.WaitStats.Count > 0 || CapturedLive);
 
-            _waitsTab.ToolTipText = total == 0
+            var tip = total == 0
                 ? string.Empty
                 : total.ToString("N0", CultureInfo.InvariantCulture) + " ms waiting in total.";
+            if (CapturedLive)
+            {
+                const string captured = "From the first capture of this live plan. Operator counters may have been refreshed after that.";
+                tip = string.IsNullOrEmpty(tip) ? captured : tip + "  " + captured;
+            }
+
+            _waitsTab.ToolTipText = tip;
         }
 
         private void WaitsGrid_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -2495,12 +2539,12 @@ namespace DBADashGUI.QueryPlans
 
             menu.DropDownItems.Add(new ToolStripMenuItem("Plan XML...", null, (_, _) => SavePlanXml(statementOnly: false))
             {
-                ToolTipText = "The whole plan, every statement, as a .sqlplan file."
+                ToolTipText = "The whole plan, every statement, as a .sqlplan file." + LivePlanFileNote
             });
 
             var statement = new ToolStripMenuItem("Statement Plan XML...", null, (_, _) => SavePlanXml(statementOnly: true))
             {
-                ToolTipText = "Only the statement selected in the plan, as a .sqlplan file of its own."
+                ToolTipText = "Only the statement selected in the plan, as a .sqlplan file of its own." + LivePlanFileNote
             };
             menu.DropDownItems.Add(statement);
 
@@ -2594,7 +2638,7 @@ namespace DBADashGUI.QueryPlans
                 }
 
                 File.WriteAllText(dialog.FileName, xml, Encoding.Unicode);
-                SetSummary("Saved " + dialog.FileName);
+                SetSummary("Saved " + dialog.FileName + (_live == null ? string.Empty : ". Waits in the file are from when the plan was first captured."));
             }
             catch (Exception ex)
             {

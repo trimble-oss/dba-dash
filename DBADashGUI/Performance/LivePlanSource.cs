@@ -195,7 +195,7 @@ namespace DBADashGUI.Performance
             var text = row.Table.Columns.Contains("statement_text") && row["statement_text"] != DBNull.Value
                 ? Convert.ToString(row["statement_text"])
                 : null;
-            return PlanLiveStatementText.Apply((string)row["query_plan"], text);
+            return PlanLiveStatementText.Apply(PlanLiveMark.Apply((string)row["query_plan"]), text);
         }
 
         /// <summary>Which statement of which batch is running: its offsets, plan hash and sql_handle.</summary>

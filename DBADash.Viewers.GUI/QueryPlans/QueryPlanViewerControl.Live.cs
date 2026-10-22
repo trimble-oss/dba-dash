@@ -68,7 +68,8 @@ namespace DBADashGUI.QueryPlans
             {
                 Font = new Font(bar.Font, FontStyle.Bold),
                 ToolTipText = "A query that is still running.  Refresh to see how far it has got - operators moving rows are highlighted, " +
-                              "with their rows moving along the arrows, and operators that haven't started are dimmed."
+                              "with their rows moving along the arrows, and operators that haven't started are dimmed.  " +
+                              "Waits stay as they were when the plan was first captured."
             });
             bar.Items.Add(new ToolStripLabel(_live.Description));
             bar.Items.Add(new ToolStripSeparator());

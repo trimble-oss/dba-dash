@@ -201,6 +201,22 @@ namespace DBADash.QueryPlan.Test
         }
 
         [TestMethod]
+        public void Mark_IsReadBackAfterARefreshAndAStatementSave()
+        {
+            var marked = PlanLiveMark.Apply(LivePlan);
+
+            Assert.IsTrue(PlanLiveMark.IsMarked(marked));
+            Assert.AreSame(marked, PlanLiveMark.Apply(marked), "Marking a plan that already says so does not rewrite it.");
+            Assert.IsFalse(PlanLiveMark.IsMarked(LivePlan.Replace("SELECT 1", "SELECT DBADashLivePlan")), "The token in the query does not make it a live plan.");
+
+            var refreshed = PlanLivePatcher.Apply(marked, [C(0, 4)]);
+            Assert.IsTrue(PlanLiveMark.IsMarked(refreshed), "Refreshing the counters keeps the mark.");
+
+            var statementXml = PlanParser.ExtractStatementXml(refreshed, PlanParser.Parse(refreshed).Statements[0]);
+            Assert.IsTrue(PlanLiveMark.IsMarked(statementXml), "Saving one statement keeps the mark.");
+        }
+
+        [TestMethod]
         public void Snapshot_SumsThreads()
         {
             var before = new[] { C(0, 10, thread: 1), C(0, 10, thread: 2) };

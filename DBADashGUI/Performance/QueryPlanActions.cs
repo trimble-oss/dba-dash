@@ -211,7 +211,7 @@ namespace DBADashGUI.Performance
                 }
 
                 var row = dt.Rows[0];
-                var plan = PlanLiveStatementText.Apply((string)row["query_plan"],
+                var plan = PlanLiveStatementText.Apply(PlanLiveMark.Apply((string)row["query_plan"]),
                     row.Table.Columns.Contains("statement_text") && row["statement_text"] != DBNull.Value
                         ? Convert.ToString(row["statement_text"])
                         : null);
