@@ -114,6 +114,114 @@ namespace DBADashGUI.Performance
                 messageGroup);
         }
 
+        /// <summary>
+        /// True if a live plan can be requested for the row: a running request (not a sleeping session) on an instance the
+        /// user can message.  Whether the request is still running is checked by the service.
+        /// </summary>
+        internal static bool CanGetLivePlan(DataRowView row)
+        {
+            var columns = row.Row.Table.Columns;
+            if (!columns.Contains("session_id") || !columns.Contains("start_time") || !columns.Contains("InstanceID"))
+            {
+                return false;
+            }
+            if (row["start_time"] == DBNull.Value || row["session_id"] == DBNull.Value || row["InstanceID"] == DBNull.Value)
+            {
+                return false;
+            }
+            return CommonData.GetDBADashContext(Convert.ToInt32(row["InstanceID"])).CanMessage;
+        }
+
+        internal const string LivePlanToolTip =
+            "Get the live query plan for this request from the source instance (via messaging).  Shows actual rows, time etc. so far for a query that is still running.  Requires lightweight query profiling (on by default from SQL 2019).";
+
+        /// <summary>Get the live plan for a running request via messaging and open it in the plan viewer.  It isn't saved to the repository.</summary>
+        internal static async Task GetLivePlan(DataRowView row, ToolStripStatusLabel lblStatus)
+        {
+            var context = PlanContext(row);
+            if (!context.CanMessage)
+            {
+                MessageBox.Show("Messaging is not available for this instance.", "Live Plan", MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                return;
+            }
+
+            var sessionId = Convert.ToInt32(row["session_id"]);
+            var message = new LivePlanMessage
+            {
+                ConnectionID = context.ConnectionID,
+                CollectAgent = context.CollectAgent,
+                ImportAgent = context.ImportAgent,
+                SessionID = sessionId,
+                StartTimeUtc = Convert.ToDateTime(row["start_time"]).AppTimeZoneToUtc(),
+                Lifetime = 60
+            };
+
+            Task ProcessReply(ResponseMessage reply, Guid group, MessagingHelper.SetStatusDelegate setStatus)
+                => ProcessLivePlanReply(reply, sessionId, message.StartTimeUtc, context, setStatus);
+
+            lblStatus.InvokeSetStatus("Getting live query plan...", string.Empty, DashColors.Information);
+            await MessagingHelper.SendMessageAndProcessReply(message, context, FittedStatus(lblStatus), ProcessReply, Guid.NewGuid());
+        }
+
+        // About as much as a status bar shows beside its other items.
+        private const int MaxStatusLength = 80;
+
+        /// <summary>
+        /// Sets <paramref name="label"/>, cutting a long message down to its first sentence.  A status strip hides an item
+        /// that doesn't fit rather than cutting it short, so the explanation of why a query has no live plan - a few
+        /// sentences - showed nothing at all.  The whole message goes in the tooltip, which a click shows.
+        /// </summary>
+        private static MessagingHelper.SetStatusDelegate FittedStatus(ToolStripStatusLabel label) => (text, details, colour) =>
+        {
+            text ??= string.Empty;
+            if (text.Length <= MaxStatusLength)
+            {
+                label.InvokeSetStatus(text, details, colour);
+                return;
+            }
+
+            var end = text.IndexOf(".  ", StringComparison.Ordinal);
+            var shortText = end > 0 && end < MaxStatusLength ? text[..(end + 1)] : text[..MaxStatusLength].TrimEnd() + "...";
+            var fullText = string.IsNullOrEmpty(details) ? text : text + Environment.NewLine + Environment.NewLine + details;
+            label.InvokeSetStatus(shortText + "  (click for details)", fullText, colour);
+        };
+
+        private static Task ProcessLivePlanReply(ResponseMessage reply, int sessionId, DateTime startTimeUtc, DBADashContext context,
+            MessagingHelper.SetStatusDelegate setStatus)
+        {
+            try
+            {
+                if (reply.Type != ResponseMessage.ResponseTypes.Success)
+                {
+                    setStatus(reply.Message, reply.Exception?.ToString(), DashColors.Fail);
+                    return Task.CompletedTask;
+                }
+
+                var dt = reply.Data?.Tables["LivePlan"];
+                if (dt == null || dt.Rows.Count == 0 || dt.Rows[0]["query_plan"] == DBNull.Value)
+                {
+                    setStatus("Live query plan was not found.  The query may have completed.", string.Empty, DashColors.Fail);
+                    return Task.CompletedTask;
+                }
+
+                var row = dt.Rows[0];
+                var plan = (string)row["query_plan"];
+                var captured = Convert.ToDateTime(row["captured_utc"]).ToAppTimeZone();
+                var fileName = $"Live Plan SPID {sessionId} {captured:yyyy-MM-dd HHmmss}.sqlplan";
+
+                // The viewer refreshes it from here - see LivePlanSource.
+                var live = new LivePlanSource(context, sessionId, startTimeUtc, row);
+                Common.ShowQueryPlan(plan, fileName, context, live);
+                setStatus($"Live plan for session {sessionId} captured at {captured:T}", string.Empty, DashColors.Green);
+            }
+            catch (Exception ex)
+            {
+                setStatus(ex.Message, ex.ToString(), DashColors.Red);
+            }
+            return Task.CompletedTask;
+        }
+
         private static async Task ProcessPlanReply(ResponseMessage reply, DataRowView row, DBADashContext context,
             MessagingHelper.SetStatusDelegate setStatus)
         {

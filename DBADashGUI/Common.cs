@@ -186,8 +186,9 @@ namespace DBADashGUI
         /// caller knows - it names the instance on an AI analysis and records one against it.  Optional
         /// because a plan can arrive from a file or from a grid with no instance behind it.
         /// </summary>
-        public static void ShowQueryPlan(string plan, string fileName = null, DBADashContext context = null) =>
-            ViewerLauncher.ShowQueryPlan(plan, fileName, DBADashViewerHost.Create(context));
+        /// <param name="live">For a query that is still running, where the viewer gets refreshes of the plan from.</param>
+        public static void ShowQueryPlan(string plan, string fileName = null, DBADashContext context = null, ILivePlanSource live = null) =>
+            ViewerLauncher.ShowQueryPlan(plan, fileName, DBADashViewerHost.Create(context), live);
 
         /// <summary>
         /// Open a deadlock graph in the built-in viewer.

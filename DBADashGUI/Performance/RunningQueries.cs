@@ -42,7 +42,13 @@ namespace DBADashGUI.Performance
                 OpenSelectedInNewWindow);
             openInNewWindow.DropDownItems.AddRange(new ToolStripItem[] { contextRowInNewWindow, selectedInNewWindow });
             dgv.CellContextMenu.Items.Insert(0, openInNewWindow);
-            dgv.CellContextMenu.Items.Insert(1, new ToolStripSeparator());
+            dgv.CellContextMenu.Items.Insert(1, livePlanMenuItem);
+            dgv.CellContextMenu.Items.Insert(2, new ToolStripSeparator());
+            livePlanMenuItem.Click += LivePlan_Click;
+            dgv.CellContextMenu.Opening += (_, _) =>
+                livePlanMenuItem.Visible = dgv.ClickedRowIndex >= 0 &&
+                                           dgv.Rows[dgv.ClickedRowIndex].DataBoundItem is DataRowView row &&
+                                           QueryPlanActions.CanGetLivePlan(row);
 
             // Insights for the snapshot, shown above the grid. Added last so it docks above the grid (which fills the rest).
             insightsPanel = new InsightsPanel { Visible = false, AutoScroll = true };
@@ -112,6 +118,24 @@ namespace DBADashGUI.Performance
             var snapshotDate = ((DateTime)row["SnapshotDate"]).AppTimeZoneToUtc();
             var instanceId = (int)row["InstanceID"];
             OpenInNewWindow(snapshotDate, instanceId);
+        }
+
+        private readonly ToolStripMenuItem livePlanMenuItem = new("Live Query Plan", Properties.Resources.query_plan)
+        {
+            ToolTipText = QueryPlanActions.LivePlanToolTip
+        };
+
+        private async void LivePlan_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var row = (DataRowView)dgv.Rows[dgv.ClickedRowIndex].DataBoundItem;
+                await QueryPlanActions.GetLivePlan(row, tsStatus);
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex);
+            }
         }
 
         private DBADashContext CurrentContext;

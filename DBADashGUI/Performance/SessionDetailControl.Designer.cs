@@ -30,6 +30,7 @@ namespace DBADashGUI.Performance
         {
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             tsPlan = new System.Windows.Forms.ToolStripButton();
+            tsLivePlan = new System.Windows.Forms.ToolStripButton();
             tsFlushPlan = new System.Windows.Forms.ToolStripButton();
             tsJobInfo = new System.Windows.Forms.ToolStripButton();
             tsKill = new System.Windows.Forms.ToolStripButton();
@@ -46,7 +47,7 @@ namespace DBADashGUI.Performance
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsBack, tsLatest, tsCollectNow, tsPlan, tsFlushPlan, tsJobInfo, tsKill });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsBack, tsLatest, tsCollectNow, tsPlan, tsLivePlan, tsFlushPlan, tsJobInfo, tsKill });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new System.Drawing.Size(1000, 27);
@@ -59,6 +60,15 @@ namespace DBADashGUI.Performance
             tsPlan.Size = new System.Drawing.Size(61, 24);
             tsPlan.Text = "Plan";
             tsPlan.Click += TsPlan_Click;
+            //
+            // tsLivePlan
+            //
+            tsLivePlan.Image = Properties.Resources.query_plan;
+            tsLivePlan.Name = "tsLivePlan";
+            tsLivePlan.Size = new System.Drawing.Size(90, 24);
+            tsLivePlan.Text = "Live Plan";
+            tsLivePlan.Visible = false;
+            tsLivePlan.Click += TsLivePlan_Click;
             //
             // tsFlushPlan
             //
@@ -123,11 +133,15 @@ namespace DBADashGUI.Performance
             // 
             tsStatus.Name = "tsStatus";
             tsStatus.Size = new System.Drawing.Size(0, 16);
+            tsStatus.Spring = true;
+            tsStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // statusStrip1
             // 
             statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsStatus });
+            statusStrip1.ShowItemToolTips = true;
+            statusStrip1.SizingGrip = false;
             statusStrip1.Location = new System.Drawing.Point(0, 942);
             statusStrip1.Name = "statusStrip1";
             statusStrip1.Size = new System.Drawing.Size(1000, 22);
@@ -168,6 +182,7 @@ namespace DBADashGUI.Performance
 
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripButton tsPlan;
+        private System.Windows.Forms.ToolStripButton tsLivePlan;
         private System.Windows.Forms.ToolStripButton tsFlushPlan;
         private System.Windows.Forms.ToolStripButton tsJobInfo;
         private System.Windows.Forms.ToolStripButton tsKill;

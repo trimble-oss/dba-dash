@@ -1,11 +1,13 @@
 using DBADash.QueryPlan.Interaction;
 using DBADash.QueryPlan.Layout;
+using DBADash.QueryPlan.Live;
 using DBADash.QueryPlan.Model;
 using DBADash.QueryPlan.Skia;
 using DBADashGUI.Theme;
 using SkiaSharp;
 using SkiaSharp.Views.Desktop;
 using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -78,6 +80,7 @@ namespace DBADashGUI.QueryPlans
             };
 
             Controls.Add(_canvas);
+            _flowTimer.Tick += FlowTimer_Tick;
         }
 
         /// <summary>Raised when the selected node changes, so the host can follow it elsewhere.</summary>
@@ -379,6 +382,48 @@ namespace DBADashGUI.QueryPlans
             // notifies the host to uncheck the toolbar) rather than re-rooted onto the new plan.
             FollowDataPath = false;
 
+            _canvas.Invalidate();
+        }
+
+        /// <summary>
+        /// Lay out a newer capture of the statement being shown - a running query refreshed - keeping the reader's place:
+        /// the zoom and pan, the selected operator, collapsed branches and Follow Data Path.  The live state carries over
+        /// until <see cref="SetLive"/> replaces it.
+        /// </summary>
+        public void ReloadStatement(PlanStatement statement)
+        {
+            var previous = _controller;
+            var follow = FollowDataPath;
+            var live = previous?.Live;
+
+            LoadStatement(statement);
+            if (previous is null) return;
+
+            _controller.CarryOver(previous);
+            _controller.SetLive(live);
+            if (follow && _controller.SelectedNode is not null) FollowDataPath = true;
+        }
+
+        /// <summary>
+        /// Where each operator of a running query has got to, drawn over the plan - see <see cref="PlanLiveSnapshot"/>.
+        /// While anything is moving rows the arrows out of it are animated.  Null for a plan that isn't live.
+        /// </summary>
+        public void SetLive(PlanLiveSnapshot live)
+        {
+            _controller?.SetLive(live);
+            if (live?.HasActive == true) _flowTimer.Start();
+            else _flowTimer.Stop();
+        }
+
+        // Moves the dashes along the arrows out of active operators.  Only runs while there are any.
+        private readonly System.Windows.Forms.Timer _flowTimer = new() { Interval = 50 };
+        private readonly Stopwatch _flowClock = Stopwatch.StartNew();
+
+        private void FlowTimer_Tick(object sender, EventArgs e)
+        {
+            if (!Visible || _controller?.Live?.HasActive != true) return;
+
+            _renderer.FlowPhase = _flowClock.Elapsed.TotalSeconds;
             _canvas.Invalidate();
         }
 
@@ -905,6 +950,7 @@ namespace DBADashGUI.QueryPlans
             if (disposing)
             {
                 _contextMenu?.Dispose();
+                _flowTimer.Dispose();
                 _renderer.Dispose();
 
                 // The renderer does not own the fonts - the measurer shares them - so they are

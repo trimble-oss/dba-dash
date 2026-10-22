@@ -23,6 +23,31 @@ namespace DBADash.QueryPlan.Test
         }
 
         [TestMethod]
+        public void CarryOver_KeepsTheReadersPlaceOnANewerCaptureOfThePlan()
+        {
+            var previous = Controller();
+            var collapsible = previous.Layout.Nodes.First(n => n.Operator?.Parent is not null && n.Operator.Children.Count > 0);
+            previous.ToggleCollapse(collapsible);
+            var selected = previous.Layout.Nodes.Last(n => n.Operator is not null);
+            previous.Select(selected);
+            previous.SetZoom(1.7, new LayoutPoint(100, 100));
+            previous.PanBy(-40, 25);
+
+            // A newer capture of the same plan is a new parse, so new operators and nodes - matched by node id.
+            var next = Controller();
+            next.CarryOver(previous);
+
+            Assert.IsTrue(next.Layout.HasCollapsedNodes);
+            Assert.AreEqual(collapsible.Id, next.Layout.Nodes.Single(n => n.IsCollapsed).Id);
+            Assert.AreEqual(selected.Id, next.SelectedNode?.Id);
+            Assert.AreNotSame(selected, next.SelectedNode);
+            Assert.AreEqual(previous.Zoom, next.Zoom, 0.0001);
+            Assert.AreEqual(previous.Pan.X, next.Pan.X, 0.0001);
+            Assert.AreEqual(previous.Pan.Y, next.Pan.Y, 0.0001);
+            Assert.IsTrue(next.IsViewUserAdjusted);
+        }
+
+        [TestMethod]
         public void SetViewport_FitsThePlanWhileTheViewIsStillOurs()
         {
             var layout = new PlanLayoutEngine(new FakeTextMeasurer()).Layout(TestPlans.Statement(TestPlans.ParallelSpill));

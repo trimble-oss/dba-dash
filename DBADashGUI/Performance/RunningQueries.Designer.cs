@@ -612,6 +612,8 @@ namespace DBADashGUI.Performance
             statusStrip1.Size = new System.Drawing.Size(1271, 26);
             statusStrip1.TabIndex = 1;
             statusStrip1.Text = "statusStrip1";
+            statusStrip1.ShowItemToolTips = true;
+            statusStrip1.SizingGrip = false;
             // 
             // lblRowLimit
             // 
@@ -633,6 +635,8 @@ namespace DBADashGUI.Performance
             // 
             tsStatus.Name = "tsStatus";
             tsStatus.Size = new System.Drawing.Size(0, 20);
+            tsStatus.Spring = true;
+            tsStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // dgvSessionWaits
             // 

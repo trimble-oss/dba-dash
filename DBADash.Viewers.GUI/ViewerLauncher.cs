@@ -46,7 +46,7 @@ namespace DBADashGUI.Viewers
 
         /// </summary>
 
-        public static void ShowQueryPlan(string plan, string fileName = null, IViewerHost host = null)
+        public static void ShowQueryPlan(string plan, string fileName = null, IViewerHost host = null, ILivePlanSource live = null)
 
         {
 
@@ -73,7 +73,7 @@ namespace DBADashGUI.Viewers
             // On a tab of the plan window already open, if there is one, so plans can be compared.
 
             host ??= DefaultHost;
-            OnUIThread(() => ViewerForm.OpenQueryPlan(parsed, plan, fileName, host));
+            OnUIThread(() => ViewerForm.OpenQueryPlan(parsed, plan, fileName, host, live));
 
         }
 
