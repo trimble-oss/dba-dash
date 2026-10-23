@@ -49,6 +49,7 @@ namespace DBADashGUI.AgentJobs
 
         private void DisposeFonts()
         {
+            _overviewImage?.Dispose();
             _font?.Dispose();
             _boldFont?.Dispose();
             _smallFont?.Dispose();
@@ -114,10 +115,10 @@ namespace DBADashGUI.AgentJobs
             canvas.Clear(p.Back);
 
             var (step, ticks) = ComputeTicks();
-            var firstVisible = _rows.FindIndex(r => r.Top + r.Height >= _scrollY);
-            var visibleRows = firstVisible < 0
-                ? new List<TimelineRowModel>()
-                : _rows.Skip(firstVisible).TakeWhile(r => r.Top <= _scrollY + RowsHeight).ToList();
+            // Only the rows scrolled into view, found by binary search - there can be thousands on the multi-instance timeline
+            var firstVisible = FirstRowEndingAfter(_scrollY);
+            var visibleRows = new List<TimelineRowModel>();
+            for (var i = firstVisible; i < _rows.Count && _rows[i].Top <= _scrollY + RowsHeight; i++) visibleRows.Add(_rows[i]);
 
             // Rows: background bands across label and chart
             canvas.Save();
@@ -148,11 +149,12 @@ namespace DBADashGUI.AgentJobs
 
             canvas.Save();
             canvas.ClipRect(new SKRect(ChartLeft, RowsTop, ChartRight, RowsBottom));
+            // And of those, only the bars in the time in view
             foreach (var row in visibleRows)
             {
-                foreach (var bar in row.Bars.Where(IsVisible))
+                foreach (var bar in row.BarsBetween(_viewFrom, _viewTo))
                 {
-                    DrawBar(canvas, p, bar);
+                    if (IsVisible(bar)) DrawBar(canvas, p, bar);
                 }
             }
             canvas.Restore();
@@ -433,8 +435,11 @@ namespace DBADashGUI.AgentJobs
 
                 if (row.IsGroup) DrawChevron(canvas, p, 12 * Dpi, lane.MidY, row.Collapsed);
 
-                // Failures badge: for a collapsed group, include its steps
-                var failures = (row.Collapsed ? row.AllBars : row.Bars).Where(IsVisible).Count(b => b.Status == RunStatus.Failed);
+                // Failures badge: for a collapsed group, include its steps.  An instance's own bars are summary spans, so
+                // it counts its executions when collapsed and leaves the count to its jobs when expanded.
+                var failures = _hiddenStatuses.Contains(RunStatus.Failed) ? 0
+                    : row.Kind == TimelineRowKind.Instance ? (row.Collapsed || row.CanLoadChildren ? row.StatusCounts.GetValueOrDefault(RunStatus.Failed) : 0)
+                    : (row.Collapsed ? row.AllBars : row.Bars).Where(IsVisible).Count(b => b.Status == RunStatus.Failed);
                 var right = LabelWidth - 8 * Dpi;
                 if (failures > 0)
                 {
@@ -446,6 +451,16 @@ namespace DBADashGUI.AgentJobs
                     _text.Color = SKColors.White;
                     canvas.DrawText(badge, pill.MidX, CenterBaseline(pill, _smallFont), SKTextAlign.Center, _smallFont, _text);
                     right = pill.Left - 6 * Dpi;
+                }
+
+                // Loading or failed to load the jobs of an expanded instance
+                var status = row.Loading ? "loading…" : row.LoadError != null ? "failed to load" : null;
+                if (status != null)
+                {
+                    var w = _smallFont.MeasureText(status, (SKPaint)null);
+                    _text.Color = row.LoadError != null ? TimelineBar.StatusColor(RunStatus.Failed).ToSKColor() : p.Dim;
+                    canvas.DrawText(status, right - w, CenterBaseline(lane, _smallFont), _smallFont, _text);
+                    right -= w + 6 * Dpi;
                 }
 
                 var font = row.IsGroup || (row.Parent == null && hasGroups) ? _boldFont : _font;
@@ -546,6 +561,46 @@ namespace DBADashGUI.AgentJobs
             canvas.DrawText(text, rect.MidX, CenterBaseline(rect, _smallFont), SKTextAlign.Center, _smallFont, _text);
         }
 
+        private SKImage _overviewImage;
+        private (int Version, int Width, int Height, SKColor Back) _overviewKey;
+
+        /// <summary>
+        /// Every bar of every row, drawn small - kept as an image and drawn again only when the rows, the strip's size or
+        /// the theme change.  Drawn every frame it cost time in proportion to all the bars, on every mouse move.
+        /// </summary>
+        private SKImage OverviewImage(SKRect strip, Palette p)
+        {
+            var key = (_layoutVersion, (int)strip.Width, (int)strip.Height, p.Back);
+            if (_overviewImage != null && key == _overviewKey) return _overviewImage;
+            _overviewImage?.Dispose();
+            _overviewImage = null;
+            _overviewKey = key;
+            if (key.Item2 <= 0 || key.Item3 <= 0) return null;
+
+            using var surface = SKSurface.Create(new SKImageInfo(key.Item2, key.Item3));
+            var canvas = surface.Canvas;
+            canvas.Clear(SKColors.Transparent);
+            var local = new SKRect(0, 0, key.Item2, key.Item3);
+            if (_rows.Count > 0)
+            {
+                var rowHeight = Math.Max(1f, local.Height / _rows.Count);
+                for (var i = 0; i < _rows.Count; i++)
+                {
+                    var y = local.Height * i / _rows.Count;
+                    foreach (var bar in _rows[i].Bars)
+                    {
+                        if (!IsVisible(bar)) continue;
+                        var x1 = PeriodTimeToX(bar.Start < _periodFrom ? _periodFrom : bar.Start, local);
+                        var x2 = Math.Max(x1 + 1, PeriodTimeToX(bar.End > _periodTo ? _periodTo : bar.End, local));
+                        _fill.Color = TimelineBar.StatusColor(bar.Status).ToSKColor().WithAlpha(200);
+                        canvas.DrawRect(new SKRect(x1, y, x2, y + rowHeight), _fill);
+                    }
+                }
+            }
+            _overviewImage = surface.Snapshot();
+            return _overviewImage;
+        }
+
         private void DrawOverview(SKCanvas canvas, Palette p)
         {
             _fill.Color = p.Header;
@@ -561,21 +616,8 @@ namespace DBADashGUI.AgentJobs
             _text.Color = p.Dim;
             canvas.DrawText(_periodFrom.ToString("g"), 8 * Dpi, CenterBaseline(strip, _smallFont), _smallFont, _text);
 
-            if (_rows.Count > 0)
-            {
-                var rowHeight = Math.Max(1f, strip.Height / _rows.Count);
-                for (var i = 0; i < _rows.Count; i++)
-                {
-                    var y = strip.Top + strip.Height * i / _rows.Count;
-                    foreach (var bar in _rows[i].Bars.Where(IsVisible))
-                    {
-                        var x1 = PeriodTimeToX(bar.Start < _periodFrom ? _periodFrom : bar.Start, strip);
-                        var x2 = Math.Max(x1 + 1, PeriodTimeToX(bar.End > _periodTo ? _periodTo : bar.End, strip));
-                        _fill.Color = TimelineBar.StatusColor(bar.Status).ToSKColor().WithAlpha(200);
-                        canvas.DrawRect(new SKRect(x1, y, x2, y + rowHeight), _fill);
-                    }
-                }
-            }
+            var image = OverviewImage(strip, p);
+            if (image != null) canvas.DrawImage(image, strip.Left, strip.Top);
 
             // Dim what's out of view, and outline what's in it
             var vx1 = PeriodTimeToX(_viewFrom, strip);
@@ -619,7 +661,8 @@ namespace DBADashGUI.AgentJobs
             var labelWidth = lines.Max(l => _smallFont.MeasureText(l.Item1, (SKPaint)null)) + 10 * Dpi;
             var valueWidth = lines.Max(l => _font.MeasureText(l.Item2, (SKPaint)null));
             var titleWidth = Math.Min(_boldFont.MeasureText(bar.JobName, (SKPaint)null), 420 * Dpi);
-            var hint = ActivateHint && BarActivated != null && bar.IsSingleExecution ? $"Double-click for {BarActivatedText.ToLowerInvariant()}" : null;
+            var hint = bar.IsSummary ? (bar.Row.Collapsed ? "Double-click to show the instance's jobs" : null)
+                : ActivateHint && BarActivated != null && bar.IsSingleExecution ? $"Double-click for {BarActivatedText.ToLowerInvariant()}" : null;
             var hintWidth = hint == null ? 0 : _smallFont.MeasureText(hint, (SKPaint)null);
             var w = Math.Max(Math.Max(titleWidth, hintWidth), labelWidth + valueWidth) + pad * 2;
             var h = titleHeight + (lines.Count + (hint == null ? 0 : 1)) * lineHeight + pad;
