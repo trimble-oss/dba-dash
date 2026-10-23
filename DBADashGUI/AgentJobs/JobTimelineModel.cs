@@ -53,7 +53,24 @@ namespace DBADashGUI.AgentJobs
 
         public string StepLabel => StepId == 0 ? "Job outcome" : $"Step {StepId}: {StepName}";
 
-        public static Color StatusColor(RunStatus status) => status switch
+        /// <summary>
+        /// The colour for a status, for the current theme.  The dark theme's chart background (Gray8) is close in
+        /// lightness to the dark success and fail colours (about 1.2:1), so a bar a few pixels wide all but vanished.
+        /// The dark theme uses lighter shades instead - 2.7:1 or better against the background, with white text still
+        /// readable on them.
+        /// </summary>
+        public static Color StatusColor(RunStatus status) => DBADashUser.IsDarkTheme ? DarkStatusColor(status) : LightStatusColor(status);
+
+        private static Color DarkStatusColor(RunStatus status) => status switch
+        {
+            RunStatus.Succeeded => DashColors.GreenLight,
+            RunStatus.Retry => DashColors.Warning,
+            RunStatus.InProgress => DashColors.ProgressBarTo,
+            RunStatus.Cancelled => DashColors.Gray3,
+            _ => DashColors.RedLight
+        };
+
+        private static Color LightStatusColor(RunStatus status) => status switch
         {
             RunStatus.Succeeded => DashColors.Success,
             RunStatus.Retry => DashColors.Warning,

@@ -441,7 +441,7 @@ namespace DBADashGUI.AgentJobs
                     var badge = failures.ToString("N0");
                     var w = _smallFont.MeasureText(badge, (SKPaint)null) + 10 * Dpi;
                     var pill = new SKRect(right - w, lane.MidY - 8 * Dpi, right, lane.MidY + 8 * Dpi);
-                    _fill.Color = DashColors.Fail.ToSKColor();
+                    _fill.Color = TimelineBar.StatusColor(RunStatus.Failed).ToSKColor();
                     canvas.DrawRoundRect(pill, pill.Height / 2, pill.Height / 2, _fill);
                     _text.Color = SKColors.White;
                     canvas.DrawText(badge, pill.MidX, CenterBaseline(pill, _smallFont), SKTextAlign.Center, _smallFont, _text);
