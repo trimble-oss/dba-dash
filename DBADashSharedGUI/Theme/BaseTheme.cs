@@ -119,6 +119,12 @@ namespace DBADashGUI.Theme
 
         public Color InputForeColor { get; set; } = DashColors.TrimbleBlueDark;
 
+        /// <summary>
+        /// A text box on a toolbar or in a toolbar's menu.  Separate from <see cref="InputBackColor"/> because the dark
+        /// theme's input colour is the same as its toolbars, which left a text box there with nothing to show where it was.
+        /// </summary>
+        public Color ToolStripInputBackColor { get; set; } = DashColors.White;
+
         public Color InputDisabledBackColor { get; set; } = DashColors.GrayLight;
     }
 }
