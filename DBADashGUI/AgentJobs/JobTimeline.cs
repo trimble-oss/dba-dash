@@ -241,6 +241,7 @@ namespace DBADashGUI.AgentJobs
             DateGrouping = AutoDateGrouping;
             AddSortOptions();
             AddRunFilterItems();
+            tsFilter.TextBox.PlaceholderText = "Filter jobs";
             chart.ChildrenRequested += Chart_ChildrenRequested;
             chart.ViewChanged += (_, _) =>
             {

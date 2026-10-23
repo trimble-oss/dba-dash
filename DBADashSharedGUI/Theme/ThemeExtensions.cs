@@ -126,6 +126,30 @@ namespace DBADashGUI.Theme
             {
                 lbl.LinkColor = theme.LinkColor;
             }
+            ApplyTheme(menu.Items, theme);
+        }
+
+        /// <summary>
+        /// Text boxes on a toolbar, and in its drop-down menus.  They aren't in the toolbar's Controls (they're parented
+        /// to its overflow or a drop-down), so the recursion through child controls doesn't reach them.
+        /// </summary>
+        private static void ApplyTheme(ToolStripItemCollection items, BaseTheme theme)
+        {
+            foreach (ToolStripItem item in items)
+            {
+                switch (item)
+                {
+                    case ToolStripTextBox txt:
+                        txt.BackColor = theme.ToolStripInputBackColor;
+                        txt.ForeColor = theme.InputForeColor;
+                        txt.BorderStyle = BorderStyle.FixedSingle;
+                        break;
+
+                    case ToolStripDropDownItem dropDown when dropDown.HasDropDownItems:
+                        ApplyTheme(dropDown.DropDownItems, theme);
+                        break;
+                }
+            }
         }
 
         public static void ApplyTheme(this MenuStrip menu, BaseTheme theme)
@@ -138,6 +162,7 @@ namespace DBADashGUI.Theme
             {
                 menu.Renderer = theme is DarkTheme ? new DarkModeMenuRenderer() : new LightModeMenuRenderer();
             }
+            ApplyTheme(menu.Items, theme);
         }
 
         public static void ApplyTheme(this CheckedListBox chkL, BaseTheme theme)
@@ -148,7 +173,8 @@ namespace DBADashGUI.Theme
 
         public static void ApplyTheme(this TextBox txt, BaseTheme theme)
         {
-            txt.BackColor = theme.InputBackColor;
+            // Hosted on a toolbar (if the recursion does reach it) - see ToolStripInputBackColor
+            txt.BackColor = txt.Parent is ToolStrip ? theme.ToolStripInputBackColor : theme.InputBackColor;
             txt.ForeColor = theme.InputForeColor;
             txt.BorderStyle = BorderStyle.FixedSingle;
         }

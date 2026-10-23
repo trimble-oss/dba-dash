@@ -51,6 +51,7 @@ namespace DBADashGUI.Theme
             TabBorderColor = DashColors.BluePale;
             InputBackColor = DashColors.Gray7;
             InputForeColor = DashColors.White;
+            ToolStripInputBackColor = DashColors.TrimbleGray; // the toolbars are Gray7, the same as InputBackColor
         }
     }
 }
