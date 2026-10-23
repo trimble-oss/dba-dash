@@ -356,7 +356,7 @@ namespace DBADashGUI.AgentJobs
             var rect = BarRect(bar);
             if (rect.Right < ChartLeft || rect.Left > ChartRight) return;
 
-            var color = TimelineBar.StatusColor(bar.Status).ToSKColor();
+            var color = TimelineBar.StatusColor(ShownStatus(bar)).ToSKColor();
             var selectionActive = _selectedBar != null;
             var sameJob = selectionActive && bar.JobName == _selectedBar.JobName;
             if (selectionActive && !sameJob) color = color.WithAlpha(90);
@@ -668,7 +668,7 @@ namespace DBADashGUI.AgentJobs
                         if (!IsVisible(bar)) continue;
                         var x1 = PeriodTimeToX(bar.Start < _periodFrom ? _periodFrom : bar.Start, local);
                         var x2 = Math.Max(x1 + 1, PeriodTimeToX(bar.End > _periodTo ? _periodTo : bar.End, local));
-                        _fill.Color = TimelineBar.StatusColor(bar.Status).ToSKColor().WithAlpha(200);
+                        _fill.Color = TimelineBar.StatusColor(ShownStatus(bar)).ToSKColor().WithAlpha(200);
                         canvas.DrawRect(new SKRect(x1, y, x2, y + rowHeight), _fill);
                     }
                 }
@@ -760,7 +760,7 @@ namespace DBADashGUI.AgentJobs
             var title = new SKRect(rect.Left, rect.Top, rect.Right, rect.Top + titleHeight);
             canvas.Save();
             canvas.ClipRoundRect(new SKRoundRect(rect, radius), antialias: true);
-            _fill.Color = TimelineBar.StatusColor(bar.Status).ToSKColor();
+            _fill.Color = TimelineBar.StatusColor(ShownStatus(bar)).ToSKColor();
             canvas.DrawRect(title, _fill);
             canvas.Restore();
             _text.Color = SKColors.White;

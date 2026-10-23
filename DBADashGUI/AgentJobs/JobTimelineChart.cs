@@ -310,7 +310,27 @@ namespace DBADashGUI.AgentJobs
             _canvas.Invalidate();
         }
 
-        private bool IsVisible(TimelineBar bar) => !_hiddenStatuses.Contains(bar.Status);
+        /// <summary>
+        /// Whether a bar shows with the statuses hidden in the legend.  A bar merging several runs shows if any of them has
+        /// a status that isn't hidden - judging it by its worst status alone hid an instance's span holding a running job
+        /// when only running was shown, because a failure overlapped it.
+        /// </summary>
+        private bool IsVisible(TimelineBar bar) =>
+            bar.StatusRuns == null ? !_hiddenStatuses.Contains(bar.Status) : StatusSeverity.Any(s => bar.RunsWith(s) > 0 && !_hiddenStatuses.Contains(s));
+
+        /// <summary>Statuses from worst to best, as a merged bar takes the worst of its runs.</summary>
+        private static readonly RunStatus[] StatusSeverity = { RunStatus.Failed, RunStatus.Retry, RunStatus.Cancelled, RunStatus.InProgress, RunStatus.Succeeded };
+
+        /// <summary>The status to colour a bar by: the worst of its runs that isn't hidden in the legend.</summary>
+        private RunStatus ShownStatus(TimelineBar bar)
+        {
+            if (bar.StatusRuns == null || _hiddenStatuses.Count == 0) return bar.Status;
+            foreach (var status in StatusSeverity)
+            {
+                if (bar.RunsWith(status) > 0 && !_hiddenStatuses.Contains(status)) return status;
+            }
+            return bar.Status;
+        }
 
         #region Geometry
 
