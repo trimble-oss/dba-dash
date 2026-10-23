@@ -358,6 +358,7 @@ namespace DBADashGUI.AgentJobs
                     DurationSec = (int)r["RunDurationSec"],
                     Status = (RunStatus)r["run_status"],
                     Executions = (int)r["Executions"],
+                    StatusRuns = ds.Tables[1].Columns.Contains("FailedRuns") && (int)r["Executions"] > 1 ? StatusRunsOf(r) : null,
                     Row = row
                 };
                 if (bar.End <= bar.Start) bar.End = bar.Start.AddSeconds(1);

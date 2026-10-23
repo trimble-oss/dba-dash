@@ -20,7 +20,9 @@ AS
 	2. Spans - executions merged per instance.  Executions are merged when they overlap or the gap between them is no
 	   more than @MergeGapSec.  The caller passes the time the narrowest bar covers (a few pixels), which caps the spans per instance at
 	   roughly the chart's width however many jobs there are.  run_status is the worst status in the span
-	   (Failed, Retry, Cancelled, In Progress, then Succeeded) and Executions the number merged.
+	   (Failed, Retry, Cancelled, In Progress, then Succeeded), Executions the number merged, and FailedRuns, SucceededRuns,
+	   RetryRuns, CancelledRuns and RunningRuns the runs by status - so filtering by status can keep a span for the runs
+	   it does want even when its worst status is one that's hidden.
 	3. Status counts - executions per instance and run_status, for the legend.
 
 	@MinDurationSec and @ProblemsOnly filter the executions as in JobTimeline_Get.  Problems only also leaves out the
@@ -131,7 +133,12 @@ Spans AS (
 			MIN(RunDateTime) AS RunDateTime,
 			MAX(FinishDateTime) AS FinishDateTime,
 			MAX(CASE run_status WHEN 0 THEN 5 WHEN 2 THEN 4 WHEN 3 THEN 3 WHEN 4 THEN 2 ELSE 1 END) AS Severity,
-			COUNT(*) AS Executions
+			COUNT(*) AS Executions,
+			SUM(CASE WHEN run_status = 0 THEN 1 ELSE 0 END) AS FailedRuns,
+			SUM(CASE WHEN run_status = 1 THEN 1 ELSE 0 END) AS SucceededRuns,
+			SUM(CASE WHEN run_status = 2 THEN 1 ELSE 0 END) AS RetryRuns,
+			SUM(CASE WHEN run_status = 3 THEN 1 ELSE 0 END) AS CancelledRuns,
+			SUM(CASE WHEN run_status = 4 THEN 1 ELSE 0 END) AS RunningRuns
 	FROM Islands
 	GROUP BY InstanceID, Island
 )
@@ -140,7 +147,12 @@ SELECT	InstanceID,
 		FinishDateTime,
 		DATEDIFF(s, RunDateTime, FinishDateTime) AS RunDurationSec,
 		CASE Severity WHEN 5 THEN 0 WHEN 4 THEN 2 WHEN 3 THEN 3 WHEN 2 THEN 4 ELSE 1 END AS run_status,
-		Executions
+		Executions,
+		FailedRuns,
+		SucceededRuns,
+		RetryRuns,
+		CancelledRuns,
+		RunningRuns
 FROM Spans
 ORDER BY InstanceID, RunDateTime
 

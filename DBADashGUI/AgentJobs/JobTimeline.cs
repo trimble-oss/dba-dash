@@ -1082,20 +1082,30 @@ namespace DBADashGUI.AgentJobs
 
         public void SetContext(DBADashContext _context)
         {
+            // Coming back to the tab sets the same context again - keep the user's place (zoom, scroll, expanded
+            // instances) rather than starting afresh, which collapsed the instances and lost their jobs
+            var sameContext = context != null && SameContext(context, _context);
             this.context = _context;
             IsActive = true;
             tsIncludeSteps.Visible = _context.JobID == Guid.Empty && !MultiInstance; // outcome only across instances
             // How many of one job were running at once isn't worth a band
             tsConcurrency.Visible = _context.JobID == Guid.Empty;
             chart.ShowConcurrency = tsConcurrency.Checked && _context.JobID == Guid.Empty;
-            bandFromUtc = null;
-            chart.SetConcurrency(default, TimeSpan.FromSeconds(1), null);
+            if (!sameContext)
+            {
+                bandFromUtc = null;
+                chart.SetConcurrency(default, TimeSpan.FromSeconds(1), null);
+            }
             // Opening the job from the job's own window would only close and reopen it
             chart.JobActivated -= Chart_JobActivated;
             if (FindForm() is not JobInfoForm) chart.JobActivated += Chart_JobActivated;
-            resetView = true;
+            resetView = !sameContext;
             RefreshData();
         }
+
+        /// <summary>The same instance(s) and job - the node the timeline was showing, set again.</summary>
+        private static bool SameContext(DBADashContext a, DBADashContext b) =>
+            a.InstanceID == b.InstanceID && a.JobID == b.JobID && a.InstanceIDs.SetEquals(b.InstanceIDs);
 
         private void TsRefresh_Click(object sender, EventArgs e)
         {
