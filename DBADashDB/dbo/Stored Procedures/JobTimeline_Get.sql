@@ -7,7 +7,8 @@
 	@IncludeOutcome BIT=1,
 	@job_id UNIQUEIDENTIFIER=NULL,
 	@Debug BIT=0,
-	@DateGroupingMin INT =0
+	@DateGroupingMin INT =0,
+	@MergeGapSec INT=0
 )
 AS
 /*
@@ -34,6 +35,14 @@ AS
 	RunningJobs has at most one row per job.
 */
 SET @DateGroupingMin = ISNULL(@DateGroupingMin,0)
+/*
+	@MergeGapSec: runs of the same job/step that overlap or are within this many seconds of each other are returned as one
+	row - first start, last finish, average duration, the worst status, the number of runs, and the runs by status
+	(FailedRuns, SucceededRuns, RetryRuns, CancelledRuns, RunningRuns).  The GUI passes the time its narrowest bar covers
+	(a few pixels), so a row has at most a bar every few pixels, and fetches again with a smaller gap as it zooms in.
+	A row of one run keeps its instance_id.  Ignored with @DateGroupingMin, which groups by fixed periods instead.
+*/
+SET @MergeGapSec = CASE WHEN @DateGroupingMin = 0 THEN ISNULL(@MergeGapSec,0) ELSE 0 END
 DECLARE @AsOf DATETIME2(2) = CAST(GETUTCDATE() AS DATETIME2(2))
 DECLARE @SQL NVARCHAR(MAX)
 DECLARE @RunningSQL NVARCHAR(MAX) = N''
@@ -176,7 +185,46 @@ AND JH.RunDateTime > DATEADD(d,-1,@FromDate) -- started after 1 day before start
 					CASE WHEN @IncludeSteps=1 THEN ',JS.step_name' ELSE '' END
 			END + '
 ' + @RunningSQL + N'
-) Timeline
+) Timeline'
+
+IF @MergeGapSec > 0
+BEGIN
+	/* Merge runs of the same job and step that overlap or are within @MergeGapSec of each other (gaps and islands) */
+	SET @SQL = N'
+WITH Timeline AS (' + @SQL + N'
+),
+Ordered AS (
+	SELECT	*,
+			MAX(FinishDateTime) OVER (PARTITION BY name, step_id ORDER BY RunDateTime, FinishDateTime ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING) AS PrevFinish
+	FROM Timeline
+),
+Islands AS (
+	SELECT	*,
+			SUM(CASE WHEN PrevFinish IS NOT NULL AND DATEADD(s, @MergeGapSec, PrevFinish) >= RunDateTime THEN 0 ELSE 1 END)
+				OVER (PARTITION BY name, step_id ORDER BY RunDateTime, FinishDateTime ROWS UNBOUNDED PRECEDING) AS Island
+	FROM Ordered
+)
+SELECT	name,
+		job_id,
+		CASE WHEN COUNT(*) = 1 THEN MAX(instance_id) END AS instance_id,
+		MAX(step_name) AS step_name,
+		step_id,
+		MIN(RunDateTime) AS RunDateTime,
+		AVG(RunDurationSec) AS RunDurationSec,
+		MAX(FinishDateTime) AS FinishDateTime,
+		CASE MAX(CASE run_status WHEN 0 THEN 5 WHEN 2 THEN 4 WHEN 3 THEN 3 WHEN 4 THEN 2 ELSE 1 END) WHEN 5 THEN 0 WHEN 4 THEN 2 WHEN 3 THEN 3 WHEN 2 THEN 4 ELSE 1 END AS run_status,
+		SUM(Executions) AS Executions,
+		/* Runs by status, so the merged row''s worst status isn''t taken as the status of every run in it */
+		SUM(CASE WHEN run_status = 0 THEN Executions ELSE 0 END) AS FailedRuns,
+		SUM(CASE WHEN run_status = 1 THEN Executions ELSE 0 END) AS SucceededRuns,
+		SUM(CASE WHEN run_status = 2 THEN Executions ELSE 0 END) AS RetryRuns,
+		SUM(CASE WHEN run_status = 3 THEN Executions ELSE 0 END) AS CancelledRuns,
+		SUM(CASE WHEN run_status = 4 THEN Executions ELSE 0 END) AS RunningRuns
+FROM Islands
+GROUP BY name, job_id, step_id, Island'
+END
+
+SET @SQL = @SQL + N'
 ORDER BY name,
 		step_id,
 		RunDateTime'
@@ -184,5 +232,5 @@ ORDER BY name,
 IF @Debug=1
 	PRINT @SQL
 
-EXEC sp_executesql @SQL,N'@InstanceID INT,@FromDate DATETIME2(2),@ToDate DATETIME2(2),@category NVARCHAR(128),@job_id UNIQUEIDENTIFIER,@DateGroupingMin INT,@AsOf DATETIME2(2)',
-						@InstanceID,@FromDate,@ToDate,@category,@job_id,@DateGroupingMin,@AsOf
+EXEC sp_executesql @SQL,N'@InstanceID INT,@FromDate DATETIME2(2),@ToDate DATETIME2(2),@category NVARCHAR(128),@job_id UNIQUEIDENTIFIER,@DateGroupingMin INT,@AsOf DATETIME2(2),@MergeGapSec INT',
+						@InstanceID,@FromDate,@ToDate,@category,@job_id,@DateGroupingMin,@AsOf,@MergeGapSec

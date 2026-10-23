@@ -184,7 +184,9 @@ namespace DBADashGUI.AgentJobs
             if (periodTo <= periodFrom) periodTo = periodFrom.Add(MinimumSpan);
             var hadView = _viewTo > _viewFrom;
             var zoomed = hadView && (_viewFrom != _periodFrom || _viewTo != _periodTo);
-            var spanChanged = periodTo - periodFrom != _periodTo - _periodFrom;
+            // A rolling period's ends are worked out moments apart, so its length can differ by a few milliseconds from one
+            // refresh to the next - that's the same period, not a different one
+            var spanChanged = Math.Abs((periodTo - periodFrom - (_periodTo - _periodFrom)).Ticks) > Math.Max((_periodTo - _periodFrom).Ticks / 100, TimeSpan.TicksPerSecond);
             var overlaps = _viewFrom < periodTo && _viewTo > periodFrom;
             var reset = resetView || !hadView || spanChanged || (zoomed && !overlaps);
             var (viewFrom, viewTo) = (_viewFrom, _viewTo);
@@ -216,6 +218,8 @@ namespace DBADashGUI.AgentJobs
             Relayout();
             // Instances that were expanded before the refresh need their jobs again
             foreach (var root in _model.Roots.Where(r => !r.Collapsed && r.CanLoadChildren)) RequestChildren(root);
+            // The view may not have moved, but the detail the host fetched for it might not suit the new data
+            ViewChanged?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>Identifies a group row across refreshes, to keep it expanded or collapsed.</summary>
@@ -420,11 +424,47 @@ namespace DBADashGUI.AgentJobs
             if (span > periodSpan) span = periodSpan;
             if (from < _periodFrom) from = _periodFrom;
             if (from + span > _periodTo) from = _periodTo - span;
+            var changed = from != _viewFrom || from + span != _viewTo;
             _viewFrom = from;
             _viewTo = from + span;
             RefreshHover();
             _canvas.Invalidate();
+            if (changed) ViewChanged?.Invoke(this, EventArgs.Empty);
         }
+
+        /// <summary>
+        /// Raised when the time in view changes - zoom, pan, reset, or new data.  Raised often while dragging, so a host
+        /// that fetches more detail for the view should wait for it to settle.
+        /// </summary>
+        public event EventHandler ViewChanged;
+
+        /// <summary>The time in view, in the app time zone.</summary>
+        public DateTime ViewFrom => _viewFrom;
+
+        public DateTime ViewTo => _viewTo;
+
+        /// <summary>The whole period the data is for, in the app time zone.</summary>
+        public DateTime PeriodFrom => _periodFrom;
+
+        public DateTime PeriodTo => _periodTo;
+
+        /// <summary>The width of the time axis in pixels, for working out how much time a pixel covers.</summary>
+        public float TimeAxisWidth => ChartWidth;
+
+        /// <summary>A note shown across the top of the rows, e.g. that runs are merged at this zoom.  Null for none.</summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public string Banner
+        {
+            get => _banner;
+            set
+            {
+                if (_banner == value) return;
+                _banner = value;
+                _canvas.Invalidate();
+            }
+        }
+
+        private string _banner;
 
         /// <summary>Zoom by <paramref name="factor"/> (below 1 zooms in) keeping the time under <paramref name="x"/> still.</summary>
         private void ZoomAt(float x, double factor)
@@ -781,7 +821,7 @@ namespace DBADashGUI.AgentJobs
                     {
                         Enabled = bar.IsSingleExecution,
                         Font = new Font(_contextMenu.Font, FontStyle.Bold),
-                        ToolTipText = bar.IsSingleExecution ? null : "This bar groups several executions.  Set the date grouping to None to see each one."
+                        ToolTipText = bar.IsSingleExecution ? null : "This bar combines several executions.  Zoom in to see each one (or set the date grouping to None)."
                     });
                 }
                 if (JobActivated != null)
@@ -842,6 +882,13 @@ namespace DBADashGUI.AgentJobs
             yield return ("End", bar.IsRunning ? "(still running)" : bar.End.ToString("G"));
             yield return (bar.IsRunning ? "Elapsed" : bar.Executions > 1 ? "Avg duration" : "Duration", FormatDuration(TimeSpan.FromSeconds(bar.DurationSec), true));
             if (bar.Executions > 1) yield return ("Executions", bar.Executions.ToString("N0"));
+            // A merged bar is coloured by its worst run - say what the rest were
+            if (bar.StatusRuns != null && bar.StatusRuns.Count(n => n > 0) > 1)
+            {
+                yield return ("By status", string.Join(", ", JobTimelineModel.StatusRunColumns
+                    .Where(c => bar.RunsWith(c.Status) > 0)
+                    .Select(c => $"{bar.RunsWith(c.Status):N0} {TimelineBar.StatusText(c.Status).ToLowerInvariant()}")));
+            }
         }
 
         /// <summary>A compact duration: 45s, 3m 12s, 1h 05m, 2d 3h.  <paramref name="precise"/> keeps seconds under an hour.</summary>

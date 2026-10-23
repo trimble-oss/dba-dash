@@ -33,6 +33,15 @@ namespace DBADashGUI.AgentJobs
         public int Executions { get; init; }
 
         /// <summary>
+        /// Runs by status, indexed by <see cref="RunStatus"/>, for a bar that merges runs of different statuses - its
+        /// <see cref="Status"/> is the worst of them.  Null when every run has the bar's status.
+        /// </summary>
+        public int[] StatusRuns { get; init; }
+
+        /// <summary>How many of the bar's runs had <paramref name="status"/>.</summary>
+        public int RunsWith(RunStatus status) => StatusRuns != null ? StatusRuns[(int)status] : status == Status ? Executions : 0;
+
+        /// <summary>
         /// msdb instance_id of the history row, which identifies the execution.  Null while still running, and for a date
         /// group of more than one execution.
         /// </summary>
@@ -239,6 +248,7 @@ namespace DBADashGUI.AgentJobs
             var model = new JobTimelineModel();
             var hasJobId = dt.Columns.Contains("job_id");
             var hasHistoryId = dt.Columns.Contains("instance_id");
+            var hasStatusRuns = dt.Columns.Contains("FailedRuns");
             var index = 0;
             var jobs = new Dictionary<string, TimelineRowModel>();
             var steps = new Dictionary<(string, int), TimelineRowModel>();
@@ -258,6 +268,7 @@ namespace DBADashGUI.AgentJobs
                     Status = (RunStatus)r["run_status"],
                     Executions = (int)r["Executions"],
                     HistoryId = hasHistoryId && r["instance_id"] != DBNull.Value ? (int)r["instance_id"] : null,
+                    StatusRuns = hasStatusRuns && (int)r["Executions"] > 1 ? StatusRunsOf(r) : null,
                     SourceIndex = index++
                 };
                 if (bar.End <= bar.Start) bar.End = bar.Start.AddSeconds(1);
@@ -378,6 +389,32 @@ namespace DBADashGUI.AgentJobs
             parent.LoadError = null;
         }
 
+        /// <summary>The run counts by status of a merged row, indexed by <see cref="RunStatus"/>.</summary>
+        internal static readonly (RunStatus Status, string Column)[] StatusRunColumns =
+        {
+            (RunStatus.Failed, "FailedRuns"),
+            (RunStatus.Succeeded, "SucceededRuns"),
+            (RunStatus.Retry, "RetryRuns"),
+            (RunStatus.Cancelled, "CancelledRuns"),
+            (RunStatus.InProgress, "RunningRuns")
+        };
+
+        private static int[] StatusRunsOf(DataRow r)
+        {
+            var runs = new int[5];
+            foreach (var (status, column) in StatusRunColumns)
+            {
+                if (r[column] != DBNull.Value) runs[(int)status] = Convert.ToInt32(r[column]);
+            }
+            return runs;
+        }
+
+        /// <summary>
+        /// The model to count the legend from, when this one was put together from data at different levels of detail
+        /// (the full period with a zoomed in window in place) - the full period load alone counts every run once.
+        /// </summary>
+        public JobTimelineModel CountsFrom { get; set; }
+
         private static TimelineRowModel GetOrAdd<TKey>(Dictionary<TKey, TimelineRowModel> lookup, TKey key, Func<TimelineRowModel> create, List<TimelineRowModel> addTo)
         {
             if (lookup.TryGetValue(key, out var row)) return row;
@@ -416,6 +453,7 @@ namespace DBADashGUI.AgentJobs
         /// <summary>Executions by status for the legend, of the top level rows matching <paramref name="filter"/>.</summary>
         public Dictionary<RunStatus, int> LegendCounts(string filter)
         {
+            if (CountsFrom != null) return CountsFrom.LegendCounts(filter);
             var counts = new Dictionary<RunStatus, int>();
             foreach (var root in MatchingRoots(filter))
             {
@@ -429,7 +467,11 @@ namespace DBADashGUI.AgentJobs
                 var rows = root.Kind == TimelineRowKind.Instance ? root.Children.Where(c => Matches(c, filter.Trim())) : new[] { root };
                 foreach (var bar in rows.SelectMany(OwnBars))
                 {
-                    counts[bar.Status] = counts.GetValueOrDefault(bar.Status) + bar.Executions;
+                    foreach (var (status, _) in StatusRunColumns)
+                    {
+                        var runs = bar.RunsWith(status);
+                        if (runs > 0) counts[status] = counts.GetValueOrDefault(status) + runs;
+                    }
                 }
             }
             return counts;
@@ -487,6 +529,6 @@ namespace DBADashGUI.AgentJobs
 
         private static int Failures(TimelineRowModel row) => row.StatusCounts != null
             ? row.StatusCounts.Where(kv => kv.Key is RunStatus.Failed or RunStatus.Retry).Sum(kv => kv.Value)
-            : OwnBars(row).Count(b => b.Status is RunStatus.Failed or RunStatus.Retry);
+            : OwnBars(row).Sum(b => b.RunsWith(RunStatus.Failed) + b.RunsWith(RunStatus.Retry));
     }
 }

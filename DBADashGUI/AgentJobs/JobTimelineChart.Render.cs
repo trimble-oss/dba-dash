@@ -163,6 +163,7 @@ namespace DBADashGUI.AgentJobs
             canvas.Restore();
 
             DrawHeader(canvas, p, width, step, ticks);
+            if (!string.IsNullOrEmpty(Banner)) DrawBanner(canvas, p, Banner);
             if (interactive) DrawCursor(canvas, p);
             DrawOverview(canvas, p);
             DrawScrollBar(canvas, p);
@@ -439,7 +440,7 @@ namespace DBADashGUI.AgentJobs
                 // it counts its executions when collapsed and leaves the count to its jobs when expanded.
                 var failures = _hiddenStatuses.Contains(RunStatus.Failed) ? 0
                     : row.Kind == TimelineRowKind.Instance ? (row.Collapsed || row.CanLoadChildren ? row.StatusCounts.GetValueOrDefault(RunStatus.Failed) : 0)
-                    : (row.Collapsed ? row.AllBars : row.Bars).Where(IsVisible).Count(b => b.Status == RunStatus.Failed);
+                    : (row.Collapsed ? row.AllBars : row.Bars).Where(IsVisible).Sum(b => b.RunsWith(RunStatus.Failed));
                 var right = LabelWidth - 8 * Dpi;
                 if (failures > 0)
                 {
@@ -547,6 +548,21 @@ namespace DBADashGUI.AgentJobs
             var t = XToTime(_mouse.X);
             var format = ViewTicks < TimeSpan.FromHours(6).Ticks ? "HH:mm:ss" : "dd MMM HH:mm";
             DrawPill(canvas, t.ToString(format), _mouse.X, HeaderHeight - 14 * Dpi, p.Fore, p.Back);
+        }
+
+        /// <summary>A note centred along the bottom of the rows - over the bars, but where the rows usually run out first.</summary>
+        private void DrawBanner(SKCanvas canvas, Palette p, string text)
+        {
+            var pad = 8 * Dpi;
+            var label = Ellipsize(text, _smallFont, ChartWidth - pad * 4);
+            var w = _smallFont.MeasureText(label, (SKPaint)null) + pad * 2;
+            var h = 20 * Dpi;
+            var left = ChartLeft + (ChartWidth - w) / 2;
+            var rect = new SKRect(left, RowsBottom - 6 * Dpi - h, left + w, RowsBottom - 6 * Dpi);
+            _fill.Color = p.TipBack.WithAlpha(230);
+            canvas.DrawRoundRect(rect, h / 2, h / 2, _fill);
+            _text.Color = p.TipFore;
+            canvas.DrawText(label, rect.MidX, CenterBaseline(rect, _smallFont), SKTextAlign.Center, _smallFont, _text);
         }
 
         private void DrawPill(SKCanvas canvas, string text, float cx, float cy, SKColor back, SKColor fore)
