@@ -8,7 +8,9 @@
 	@job_id UNIQUEIDENTIFIER=NULL,
 	@Debug BIT=0,
 	@DateGroupingMin INT =0,
-	@MergeGapSec INT=0
+	@MergeGapSec INT=0,
+	@MinDurationSec INT=0,
+	@ProblemsOnly BIT=0
 )
 AS
 /*
@@ -41,6 +43,10 @@ SET @DateGroupingMin = ISNULL(@DateGroupingMin,0)
 	(FailedRuns, SucceededRuns, RetryRuns, CancelledRuns, RunningRuns).  The GUI passes the time its narrowest bar covers
 	(a few pixels), so a row has at most a bar every few pixels, and fetches again with a smaller gap as it zooms in.
 	A row of one run keeps its instance_id.  Ignored with @DateGroupingMin, which groups by fixed periods instead.
+
+	@MinDurationSec: leave out runs shorter than this (for a running job, its elapsed time so far) - the frequent short
+	jobs that crowd out the ones worth looking at.
+	@ProblemsOnly: just the failed, retried and cancelled runs.  Jobs still running are left out.
 */
 SET @MergeGapSec = CASE WHEN @DateGroupingMin = 0 THEN ISNULL(@MergeGapSec,0) ELSE 0 END
 DECLARE @AsOf DATETIME2(2) = CAST(GETUTCDATE() AS DATETIME2(2))
@@ -52,7 +58,7 @@ DECLARE @JobFilter NVARCHAR(MAX) = CASE WHEN @job_id IS NULL THEN N'' ELSE N'
 AND RJ.job_id = @job_id' END
 
 /* Outcome row for a job that is still executing. run_status 4 = In Progress. */
-IF @IncludeOutcome = 1
+IF @IncludeOutcome = 1 AND @ProblemsOnly = 0 /* running isn't a problem */
 BEGIN
 	SET @RunningSQL = @RunningSQL + N'
 UNION ALL
@@ -76,6 +82,7 @@ AND RJ.start_execution_date_utc IS NOT NULL
 AND RJ.start_execution_date_utc < CAST(@ToDate AS DATETIME) /* started before the end of the selected period */
 AND RJ.SnapshotDate >= CAST(@FromDate AS DATETIME) /* still observed running at or after the start of the selected period */
 AND (RJ.current_execution_status IS NULL OR RJ.current_execution_status <> 4) /* not idle */
+AND DATEDIFF(s, RJ.start_execution_date_utc, OE.ObservedEnd) >= @MinDurationSec /* elapsed so far */
 ' + @CategoryFilter + @JobFilter + N'
 AND NOT EXISTS ( /* outcome already captured in history for this execution */
 		SELECT 1
@@ -89,7 +96,7 @@ AND NOT EXISTS ( /* outcome already captured in history for this execution */
 END
 
 /* The step that is executing now is not in JobHistory until it completes. */
-IF @IncludeSteps = 1
+IF @IncludeSteps = 1 AND @ProblemsOnly = 0
 BEGIN
 	SET @RunningSQL = @RunningSQL + N'
 UNION ALL
@@ -132,6 +139,7 @@ AND SS.StepStart IS NOT NULL
 AND SS.StepStart < @ToDate
 AND RJ.SnapshotDate >= CAST(@FromDate AS DATETIME)
 AND (RJ.current_execution_status IS NULL OR RJ.current_execution_status <> 4) /* not idle */
+AND DATEDIFF(s, SS.StepStart, OE.ObservedEnd) >= @MinDurationSec /* elapsed so far */
 ' + @CategoryFilter + @JobFilter + N'
 AND NOT EXISTS ( /* a later history row is this attempt, not the previous zero-duration execution of the same step */
 		SELECT 1
@@ -175,6 +183,8 @@ WHERE JH.InstanceID = @InstanceID
 AND JH.FinishDateTime >= @FromDate -- Finished after start of selected time period
 AND JH.RunDateTime < @ToDate -- Sarted before end of selected time period
 AND JH.RunDateTime > DATEADD(d,-1,@FromDate) -- started after 1 day before start of selected time period. (For performance - will exclude very long running jobs)
+' + CASE WHEN @MinDurationSec > 0 THEN 'AND JH.RunDurationSec >= @MinDurationSec' ELSE '' END + '
+' + CASE WHEN @ProblemsOnly = 1 THEN 'AND JH.run_status IN (0,2,3) /* failed, retry, cancelled */' ELSE '' END + '
 ' + CASE WHEN @IncludeSteps = 0 THEN 'AND JH.step_id=0 /* Job outcome step */' ELSE '' END + '
 ' + CASE WHEN @IncludeOutcome = 0 THEN 'AND JH.step_id > 0 /* Exclude outcome */' ELSE '' END + '
 ' + CASE WHEN @category IS NULL THEN '' ELSE 'AND J.category = @category' END + '
@@ -232,5 +242,5 @@ ORDER BY name,
 IF @Debug=1
 	PRINT @SQL
 
-EXEC sp_executesql @SQL,N'@InstanceID INT,@FromDate DATETIME2(2),@ToDate DATETIME2(2),@category NVARCHAR(128),@job_id UNIQUEIDENTIFIER,@DateGroupingMin INT,@AsOf DATETIME2(2),@MergeGapSec INT',
-						@InstanceID,@FromDate,@ToDate,@category,@job_id,@DateGroupingMin,@AsOf,@MergeGapSec
+EXEC sp_executesql @SQL,N'@InstanceID INT,@FromDate DATETIME2(2),@ToDate DATETIME2(2),@category NVARCHAR(128),@job_id UNIQUEIDENTIFIER,@DateGroupingMin INT,@AsOf DATETIME2(2),@MergeGapSec INT,@MinDurationSec INT',
+						@InstanceID,@FromDate,@ToDate,@category,@job_id,@DateGroupingMin,@AsOf,@MergeGapSec,@MinDurationSec

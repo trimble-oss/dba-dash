@@ -240,6 +240,7 @@ namespace DBADashGUI.AgentJobs
             tsDateGroup.DropDownItems.Insert(1, new ToolStripSeparator());
             DateGrouping = AutoDateGrouping;
             AddSortOptions();
+            AddRunFilterItems();
             chart.ChildrenRequested += Chart_ChildrenRequested;
             chart.ViewChanged += (_, _) =>
             {
@@ -250,12 +251,15 @@ namespace DBADashGUI.AgentJobs
             {
                 viewTimer.Stop();
                 FetchDetailForView();
+                FetchConcurrencyForView(false);
             };
             Disposed += (_, _) => viewTimer.Dispose();
             filterTimer.Tick += (_, _) =>
             {
                 filterTimer.Stop();
-                RefreshData();
+                // Across instances the summary is filtered on the server; for one instance only the band is
+                if (MultiInstance) RefreshData();
+                else FetchConcurrencyForView(true);
             };
             Disposed += (_, _) => filterTimer.Dispose();
         }
@@ -289,7 +293,7 @@ namespace DBADashGUI.AgentJobs
         private void Filter_TextChanged(object sender, EventArgs e)
         {
             chart.Filter = tsFilter.Text;
-            if (context == null || !MultiInstance) return;
+            if (context == null || (!MultiInstance && !chart.ShowConcurrency)) return;
             filterTimer.Stop();
             filterTimer.Start();
         }
@@ -342,7 +346,7 @@ namespace DBADashGUI.AgentJobs
         /// <summary>
         /// Get DataTable with Job Timeline data.  Dates converted to app timezone
         /// </summary>
-        private static DataTable GetJobTimelineData(int InstanceID, DateTime from, DateTime to, string category, Guid job_id, bool steps, bool outcome, int dateGroup, int mergeGapSec = 0)
+        private static DataTable GetJobTimelineData(int InstanceID, DateTime from, DateTime to, RunFilters filters, Guid job_id, bool steps, bool outcome, int dateGroup, int mergeGapSec = 0)
         {
             using var cn = new SqlConnection(Common.ConnectionString);
             using var cmd = new SqlCommand("dbo.JobTimeline_Get", cn) { CommandType = CommandType.StoredProcedure };
@@ -353,7 +357,9 @@ namespace DBADashGUI.AgentJobs
             cmd.Parameters.AddWithValue("@IncludeSteps", steps);
             cmd.Parameters.AddWithValue("@IncludeOutcome", outcome);
             cmd.Parameters.AddGuidIfNotEmpty("@job_id", job_id);
-            cmd.Parameters.AddStringIfNotNullOrEmpty("category", category);
+            cmd.Parameters.AddStringIfNotNullOrEmpty("category", filters.Category);
+            cmd.Parameters.AddWithValue("@MinDurationSec", filters.MinDurationSec);
+            cmd.Parameters.AddWithValue("@ProblemsOnly", filters.ProblemsOnly);
             cmd.Parameters.AddWithValue("@DateGroupingMin", dateGroup);
             cmd.Parameters.AddWithValue("@MergeGapSec", mergeGapSec);
 
@@ -367,7 +373,7 @@ namespace DBADashGUI.AgentJobs
         /// The multi-instance timeline: a summary row per instance (dbo.JobTimelineSummary_Get), dates converted to the
         /// app time zone.  Executions closer together than <paramref name="mergeGapSec"/> are merged into one span.
         /// </summary>
-        private static DataSet GetSummaryData(IEnumerable<int> instanceIds, DateTime from, DateTime to, string category, string jobName, int mergeGapSec)
+        private static DataSet GetSummaryData(IEnumerable<int> instanceIds, DateTime from, DateTime to, RunFilters filters, int mergeGapSec)
         {
             using var cn = new SqlConnection(Common.ConnectionString);
             using var cmd = new SqlCommand("dbo.JobTimelineSummary_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Config.DefaultCommandTimeout };
@@ -375,8 +381,10 @@ namespace DBADashGUI.AgentJobs
             cmd.Parameters.AddWithValue("@InstanceIDs", instanceIds.AsDataTable());
             cmd.Parameters.AddWithValue("@FromDate", from);
             cmd.Parameters.AddWithValue("@ToDate", to);
-            cmd.Parameters.AddStringIfNotNullOrEmpty("@category", category);
-            cmd.Parameters.AddStringIfNotNullOrEmpty("@JobName", jobName);
+            cmd.Parameters.AddStringIfNotNullOrEmpty("@category", filters.Category);
+            cmd.Parameters.AddStringIfNotNullOrEmpty("@JobName", filters.JobName);
+            cmd.Parameters.AddWithValue("@MinDurationSec", filters.MinDurationSec);
+            cmd.Parameters.AddWithValue("@ProblemsOnly", filters.ProblemsOnly);
             cmd.Parameters.AddWithValue("@MergeGapSec", mergeGapSec);
             var ds = new DataSet();
             da.Fill(ds);
@@ -386,6 +394,157 @@ namespace DBADashGUI.AgentJobs
                 DateHelper.ConvertUTCToAppTimeZone(ref t);
             }
             return ds;
+        }
+
+        /// <summary>
+        /// The most jobs running at once in each <paramref name="sliceSec"/> slice of the period, for the concurrency band -
+        /// filled in from dbo.JobTimelineConcurrency_Get, which only returns slices where a job starts or finishes.
+        /// </summary>
+        private static int[] GetConcurrencyData(IEnumerable<int> instanceIds, DateTime from, DateTime to, RunFilters filters, int sliceSec)
+        {
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.JobTimelineConcurrency_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cmd.Parameters.AddWithValue("@InstanceIDs", instanceIds.AsDataTable());
+            cmd.Parameters.AddWithValue("@FromDate", from);
+            cmd.Parameters.AddWithValue("@ToDate", to);
+            cmd.Parameters.AddWithValue("@BucketSec", sliceSec);
+            cmd.Parameters.AddStringIfNotNullOrEmpty("@category", filters.Category);
+            cmd.Parameters.AddStringIfNotNullOrEmpty("@JobName", filters.JobName);
+            cmd.Parameters.AddWithValue("@MinDurationSec", filters.MinDurationSec);
+            cmd.Parameters.AddWithValue("@ProblemsOnly", filters.ProblemsOnly);
+            var dt = new DataTable();
+            da.Fill(dt);
+
+            var peaks = new int[(int)Math.Ceiling((to - from).TotalSeconds / sliceSec)];
+            var rows = dt.AsEnumerable().ToDictionary(r => (int)r["Bucket"], r => ((int)r["MaxRunning"], (int)r["EndRunning"]));
+            var running = 0; // carried through slices where nothing starts or finishes
+            for (var i = 0; i < peaks.Length; i++)
+            {
+                if (rows.TryGetValue(i, out var slice))
+                {
+                    peaks[i] = Math.Max(running, slice.Item1);
+                    running = slice.Item2;
+                }
+                else
+                {
+                    peaks[i] = running;
+                }
+            }
+            return peaks;
+        }
+
+        /// <summary>The filters on what's fetched, taken together when a fetch starts so it can't mix old and new.</summary>
+        private sealed record RunFilters(string Category, string JobName, int MinDurationSec, bool ProblemsOnly);
+
+        /// <summary>
+        /// The job name filter only goes to the server across instances - for one instance every job is loaded and the
+        /// chart filters them - but the concurrency band always counts just the jobs that match.
+        /// </summary>
+        private RunFilters CurrentFilters => new(selectedCategory, MultiInstance ? tsFilter.Text.Trim() : null, minDurationSec, problemsOnly);
+
+        private int minDurationSec;
+        private bool problemsOnly;
+
+        // The concurrency band's data: the window and slice it was fetched for
+        private DateTime? bandFromUtc;
+        private DateTime? bandToUtc;
+        private int bandSliceSec;
+        private int bandGeneration;
+
+        /// <summary>
+        /// Fetch the concurrency band for the time in view (and as much again either side, like the detail), in slices of
+        /// about a pixel - unless what's loaded already covers it at about the right size.
+        /// </summary>
+        private async void FetchConcurrencyForView(bool force)
+        {
+            if (context == null || !chart.ShowConcurrency || chart.ViewTo <= chart.ViewFrom || to <= from) return;
+            var viewFrom = chart.ViewFrom.AppTimeZoneToUtc();
+            var viewTo = chart.ViewTo.AppTimeZoneToUtc();
+            var span = viewTo - viewFrom;
+            var slice = Math.Max(1, (int)(span.TotalSeconds / Math.Max(200, chart.TimeAxisWidth)));
+            if (!force && bandFromUtc <= viewFrom && bandToUtc >= viewTo && bandSliceSec <= slice * 2 && bandSliceSec * 2 >= slice) return;
+
+            var windowFrom = viewFrom - span < from ? from : viewFrom - span;
+            var windowTo = viewTo + span > to ? to : viewTo + span;
+            var generation = loadGeneration;
+            var band = ++bandGeneration;
+            var instanceIds = MultiInstance ? context.RegularInstanceIDs.ToList() : new List<int> { InstanceId };
+            var filters = CurrentFilters with { JobName = tsFilter.Text.Trim() };
+            try
+            {
+                var peaks = await Task.Run(() => GetConcurrencyData(instanceIds, windowFrom, windowTo, filters, slice));
+                if (generation != loadGeneration || band != bandGeneration) return;
+                (bandFromUtc, bandToUtc, bandSliceSec) = (windowFrom, windowTo, slice);
+                chart.SetConcurrency(windowFrom.ToAppTimeZone(), TimeSpan.FromSeconds(slice), peaks);
+            }
+            catch (Exception ex)
+            {
+                if (generation == loadGeneration && band == bandGeneration) chart.Banner = "Couldn't load how many jobs were running at once: " + ex.Message;
+            }
+        }
+
+        private ToolStripDropDownButton tsRuns;
+        private ToolStripMenuItem tsProblemsOnly;
+        private ToolStripButton tsConcurrency;
+
+        /// <summary>
+        /// The run filters (minimum duration, problems only) and the concurrency band toggle.  The filters apply on the
+        /// server, so they cut what's fetched as well as what's shown.
+        /// </summary>
+        private void AddRunFilterItems()
+        {
+            tsRuns = new ToolStripDropDownButton("All runs", Properties.Resources.Filter_16x) { ToolTipText = "Leave out short runs, or show only the runs with a problem" };
+            (int Seconds, string Text)[] durations =
+            {
+                (0, "Any duration"), (10, "10 seconds or longer"), (60, "1 minute or longer"), (300, "5 minutes or longer"),
+                (900, "15 minutes or longer"), (3600, "1 hour or longer")
+            };
+            foreach (var (seconds, text) in durations)
+            {
+                var item = new ToolStripMenuItem(text) { Tag = seconds, Checked = seconds == 0 };
+                item.Click += (_, _) =>
+                {
+                    foreach (var other in tsRuns.DropDownItems.OfType<ToolStripMenuItem>().Where(i => i.Tag is int)) other.Checked = other == item;
+                    minDurationSec = seconds;
+                    RunFiltersChanged();
+                };
+                tsRuns.DropDownItems.Add(item);
+            }
+            tsRuns.DropDownItems.Add(new ToolStripSeparator());
+            tsProblemsOnly = new ToolStripMenuItem("Problems only (failed, retry, cancelled)") { CheckOnClick = true };
+            tsProblemsOnly.CheckedChanged += (_, _) =>
+            {
+                problemsOnly = tsProblemsOnly.Checked;
+                RunFiltersChanged();
+            };
+            tsRuns.DropDownItems.Add(tsProblemsOnly);
+
+            tsConcurrency = new ToolStripButton("Running at once", Properties.Resources.StackedAreaChart)
+            {
+                CheckOnClick = true,
+                Checked = true,
+                ToolTipText = "Show how many jobs were running at once, across every instance in view"
+            };
+            tsConcurrency.CheckedChanged += (_, _) =>
+            {
+                chart.ShowConcurrency = tsConcurrency.Checked && context?.JobID == Guid.Empty;
+                FetchConcurrencyForView(true);
+            };
+
+            var at = toolStrip1.Items.IndexOf(tsSort) + 1;
+            toolStrip1.Items.Insert(at, tsRuns);
+            toolStrip1.Items.Insert(at + 1, tsConcurrency);
+        }
+
+        private void RunFiltersChanged()
+        {
+            var parts = new List<string>();
+            if (minDurationSec > 0) parts.Add("≥ " + JobTimelineChart.FormatDuration(TimeSpan.FromSeconds(minDurationSec)));
+            if (problemsOnly) parts.Add("problems");
+            tsRuns.Text = parts.Count == 0 ? "All runs" : string.Join(", ", parts);
+            tsRuns.Font = new Font(tsRuns.Font, parts.Count == 0 ? FontStyle.Regular : FontStyle.Bold);
+            RefreshData();
         }
 
         private static DataTable GetJobCategories(int instanceId, IEnumerable<int> instanceIds)
@@ -462,7 +621,7 @@ namespace DBADashGUI.AgentJobs
                 RefreshCategories();
                 var queryFrom = FromDateUtc;
                 var queryTo = ToDateUtc;
-                var category = selectedCategory;
+                var filters = CurrentFilters;
                 var dateGroup = AutoDetail ? 0 : DateGrouping;
                 var gap = AutoDetail ? GapFor(queryTo - queryFrom) : 0;
                 tsRefresh.Enabled = false;
@@ -470,8 +629,7 @@ namespace DBADashGUI.AgentJobs
                 if (MultiInstance)
                 {
                     var instanceIds = context.RegularInstanceIDs.ToList();
-                    var jobName = tsFilter.Text.Trim();
-                    var (ds, usedGap, capped) = await Task.Run(() => FetchCapped(g => GetSummaryData(instanceIds, queryFrom, queryTo, category, jobName, g), d => d.Tables[1].Rows.Count, gap));
+                    var (ds, usedGap, capped) = await Task.Run(() => FetchCapped(g => GetSummaryData(instanceIds, queryFrom, queryTo, filters, g), d => d.Tables[1].Rows.Count, gap));
                     if (generation != loadGeneration) return;
                     SetBase(queryFrom, queryTo, usedGap, capped);
                     baseSummary = ds;
@@ -483,13 +641,14 @@ namespace DBADashGUI.AgentJobs
                     var jobId = context.JobID;
                     var steps = IncludeSteps;
                     var outcome = IncludeOutcome;
-                    var (data, usedGap, capped) = await Task.Run(() => FetchCapped(g => GetJobTimelineData(instanceId, queryFrom, queryTo, category, jobId, steps, outcome, dateGroup, g), d => d.Rows.Count, gap));
+                    var (data, usedGap, capped) = await Task.Run(() => FetchCapped(g => GetJobTimelineData(instanceId, queryFrom, queryTo, filters, jobId, steps, outcome, dateGroup, g), d => d.Rows.Count, gap));
                     if (generation != loadGeneration) return;
                     SetBase(queryFrom, queryTo, usedGap, capped);
                     baseData = data;
                     hTMLToolStripMenuItem.Enabled = true;
                 }
                 Display();
+                FetchConcurrencyForView(true);
                 resetView = false;
             }
             catch (Exception ex)
@@ -579,14 +738,13 @@ namespace DBADashGUI.AgentJobs
             var windowTo = viewTo + span > to ? to : viewTo + span;
             var generation = loadGeneration;
             var detail = ++detailGeneration;
-            var category = selectedCategory;
+            var filters = CurrentFilters;
             try
             {
                 if (MultiInstance)
                 {
                     var instanceIds = context.RegularInstanceIDs.ToList();
-                    var jobName = tsFilter.Text.Trim();
-                    var (ds, usedGap, capped) = await Task.Run(() => FetchCapped(g => GetSummaryData(instanceIds, windowFrom, windowTo, category, jobName, g), d => d.Tables[1].Rows.Count, need));
+                    var (ds, usedGap, capped) = await Task.Run(() => FetchCapped(g => GetSummaryData(instanceIds, windowFrom, windowTo, filters, g), d => d.Tables[1].Rows.Count, need));
                     if (generation != loadGeneration || detail != detailGeneration) return;
                     detailSummary = ds;
                     (detailGap, detailCapped) = (usedGap, capped);
@@ -597,7 +755,7 @@ namespace DBADashGUI.AgentJobs
                     var jobId = context.JobID;
                     var steps = IncludeSteps;
                     var outcome = IncludeOutcome;
-                    var (data, usedGap, capped) = await Task.Run(() => FetchCapped(g => GetJobTimelineData(instanceId, windowFrom, windowTo, category, jobId, steps, outcome, 0, g), d => d.Rows.Count, need));
+                    var (data, usedGap, capped) = await Task.Run(() => FetchCapped(g => GetJobTimelineData(instanceId, windowFrom, windowTo, filters, jobId, steps, outcome, 0, g), d => d.Rows.Count, need));
                     if (generation != loadGeneration || detail != detailGeneration) return;
                     detailData = data;
                     (detailGap, detailCapped) = (usedGap, capped);
@@ -721,7 +879,7 @@ namespace DBADashGUI.AgentJobs
             var generation = loadGeneration;
             var queryFrom = from;
             var queryTo = to;
-            var category = selectedCategory;
+            var filters = CurrentFilters;
             var dateGroup = AutoDetail ? 0 : DateGrouping;
             var gap = baseGap;
             var (windowFrom, windowTo, windowGap) = (detailFromUtc, detailToUtc, detailGap);
@@ -735,14 +893,14 @@ namespace DBADashGUI.AgentJobs
                     if (generation != loadGeneration) return;
                     if (!childBase.TryGetValue(row.InstanceId, out var full))
                     {
-                        full = await Task.Run(() => GetJobTimelineData(row.InstanceId, queryFrom, queryTo, category, Guid.Empty, false, true, dateGroup, gap));
+                        full = await Task.Run(() => GetJobTimelineData(row.InstanceId, queryFrom, queryTo, filters, Guid.Empty, false, true, dateGroup, gap));
                         if (generation != loadGeneration) return;
                         childBase[row.InstanceId] = full;
                     }
                     data = full;
                     if (windowFrom.HasValue)
                     {
-                        var detail = await Task.Run(() => GetJobTimelineData(row.InstanceId, windowFrom.Value, windowTo.Value, category, Guid.Empty, false, true, 0, windowGap));
+                        var detail = await Task.Run(() => GetJobTimelineData(row.InstanceId, windowFrom.Value, windowTo.Value, filters, Guid.Empty, false, true, 0, windowGap));
                         data = Combine(full, detail, windowFrom.Value.ToAppTimeZone(), windowTo.Value.ToAppTimeZone());
                     }
                 }
@@ -916,6 +1074,11 @@ namespace DBADashGUI.AgentJobs
             this.context = _context;
             IsActive = true;
             tsIncludeSteps.Visible = _context.JobID == Guid.Empty && !MultiInstance; // outcome only across instances
+            // How many of one job were running at once isn't worth a band
+            tsConcurrency.Visible = _context.JobID == Guid.Empty;
+            chart.ShowConcurrency = tsConcurrency.Checked && _context.JobID == Guid.Empty;
+            bandFromUtc = null;
+            chart.SetConcurrency(default, TimeSpan.FromSeconds(1), null);
             // Opening the job from the job's own window would only close and reopen it
             chart.JobActivated -= Chart_JobActivated;
             if (FindForm() is not JobInfoForm) chart.JobActivated += Chart_JobActivated;

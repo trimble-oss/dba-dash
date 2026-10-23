@@ -4,7 +4,9 @@ CREATE PROC dbo.JobTimelineSummary_Get(
 	@ToDate DATETIME2(2),
 	@category NVARCHAR(128)=NULL,
 	@JobName NVARCHAR(128)=NULL,
-	@MergeGapSec INT=0
+	@MergeGapSec INT=0,
+	@MinDurationSec INT=0,
+	@ProblemsOnly BIT=0
 )
 AS
 /*
@@ -20,6 +22,9 @@ AS
 	   roughly the chart's width however many jobs there are.  run_status is the worst status in the span
 	   (Failed, Retry, Cancelled, In Progress, then Succeeded) and Executions the number merged.
 	3. Status counts - executions per instance and run_status, for the legend.
+
+	@MinDurationSec and @ProblemsOnly filter the executions as in JobTimeline_Get.  Problems only also leaves out the
+	instances with none.
 
 	Job outcomes only (step_id 0), selected as in JobTimeline_Get: executions that started before @ToDate and finished
 	after @FromDate, with a 1 day lookback, plus executions still running from dbo.RunningJobs.
@@ -53,6 +58,8 @@ WHERE JH.step_id = 0
 AND JH.FinishDateTime >= @FromDate
 AND JH.RunDateTime < @ToDate
 AND JH.RunDateTime > DATEADD(d, -1, @FromDate)
+AND JH.RunDurationSec >= ISNULL(@MinDurationSec, 0)
+AND (@ProblemsOnly = 0 OR JH.run_status IN (0,2,3)) /* failed, retry, cancelled */
 AND (@category IS NULL OR J.category = @category)
 AND (@JobName IS NULL OR CHARINDEX(@JobName, J.name) > 0)
 UNION ALL
@@ -71,6 +78,8 @@ WHERE RJ.start_execution_date_utc IS NOT NULL
 AND RJ.start_execution_date_utc < CAST(@ToDate AS DATETIME)
 AND RJ.SnapshotDate >= CAST(@FromDate AS DATETIME)
 AND (RJ.current_execution_status IS NULL OR RJ.current_execution_status <> 4) /* not idle */
+AND @ProblemsOnly = 0 /* running isn't a problem */
+AND DATEDIFF(s, RJ.start_execution_date_utc, OE.ObservedEnd) >= ISNULL(@MinDurationSec, 0) /* elapsed so far */
 AND (@category IS NULL OR J.category = @category)
 AND (@JobName IS NULL OR CHARINDEX(@JobName, J.name) > 0)
 AND NOT EXISTS (
@@ -95,6 +104,8 @@ WHERE EXISTS (
 		AND (@category IS NULL OR J.category = @category)
 		AND (@JobName IS NULL OR CHARINDEX(@JobName, J.name) > 0)
 	)
+/* Problems only lists just the instances that had some */
+AND (@ProblemsOnly = 0 OR EXISTS (SELECT 1 FROM #Runs R WHERE R.InstanceID = I.InstanceID))
 ORDER BY Inst.InstanceDisplayName
 
 /*
