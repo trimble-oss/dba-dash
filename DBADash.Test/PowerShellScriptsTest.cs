@@ -46,10 +46,10 @@ namespace DBADashConfig.Test
         }
 
         [TestMethod]
-        [DataRow(-1, false, int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue, "", DBADashSource.IOCollectionLevels.Database)]
+        [DataRow(-1, false, null, null, null, null, "", DBADashSource.IOCollectionLevels.Database)]
         [DataRow(999, true, 2, 1000, 1001, 8000, "*", DBADashSource.IOCollectionLevels.Drive)]
         [DataRow(2000, true, 1, 2000, 2001, 6400, "DB1,DB2,DB3", DBADashSource.IOCollectionLevels.Full)]
-        public void AddDBADashSourceTest(int slowQueryThreshold, bool planCollectionEnabled, int planCollectionCountThreshold, int planCollectionCPUThreshold, int planCollectionDurationThreshold, int PlanCollectionMemoryGrantThreshold, string schemaSnapshotDBs, DBADashSource.IOCollectionLevels IOCollectionLevel)
+        public void AddDBADashSourceTest(int slowQueryThreshold, bool planCollectionEnabled, int? planCollectionCountThreshold, int? planCollectionCPUThreshold, int? planCollectionDurationThreshold, int? PlanCollectionMemoryGrantThreshold, string schemaSnapshotDBs, DBADashSource.IOCollectionLevels IOCollectionLevel)
         {
             // Add connection
             var cnt = GetConnectionCount();
@@ -107,7 +107,8 @@ namespace DBADashConfig.Test
             Assert.IsTrue(src.NoWMI, "NoWMI Test");
             Assert.IsTrue(src.PlanCollectionEnabled == planCollectionEnabled, "PlanCollectionEnabled Test");
             Assert.IsTrue(src.PlanCollectionCountThreshold == planCollectionCountThreshold, "PlanCollectionCountThreshold Test");
-            Assert.IsTrue(src.PlanCollectionCPUThreshold == planCollectionCPUThreshold, "PlanCollectionCountThreshold Test");
+            Assert.IsTrue(src.PlanCollectionCPUThreshold == planCollectionCPUThreshold, "PlanCollectionCPUThreshold Test");
+            Assert.IsTrue(src.PlanCollectionDurationThreshold == planCollectionDurationThreshold, "PlanCollectionDurationThreshold Test");
             Assert.IsTrue(src.PlanCollectionMemoryGrantThreshold == PlanCollectionMemoryGrantThreshold, "PlanCollectionMemoryGrantThreshold Test");
             Assert.IsTrue(src.IOCollectionLevel == IOCollectionLevel, "IOCollectionLevel Test");
             if (string.IsNullOrEmpty(schemaSnapshotDBs))
