@@ -45,6 +45,8 @@ SELECT I.InstanceID,
 	I.BufferPoolMB,
 	I.MemoryNotAllocatedToBufferPoolGB,
 	I.PctMemoryAllocatedToBufferPool,
+	mem.PhysicalMemoryLimitStatus,
+	mem.PhysicalMemoryLimitMessage,
 	I.sql_memory_model_desc,
 	I.OfflineSchedulers,
 	I.ActivePowerPlan,
@@ -59,6 +61,7 @@ SELECT I.InstanceID,
 FROM dbo.InstanceInfo I
 LEFT JOIN dbo.InstanceMetadata IMD ON I.InstanceID = IMD.InstanceID
 OUTER APPLY dbo.ParseInstanceMetadata(IMD.Metadata) M
+CROSS APPLY dbo.EditionMemoryLimit(I.EditionID, I.Edition, I.EngineEdition, I.ProductMajorVersion, I.ProductVersion, I.ProductLevel, I.physical_memory_kb, I.BufferPoolMB) mem
 WHERE EXISTS(
 			SELECT 1 
 			FROM @Instances t 

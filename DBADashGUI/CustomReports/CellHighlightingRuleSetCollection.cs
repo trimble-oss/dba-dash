@@ -32,7 +32,7 @@ namespace DBADashGUI.CustomReports
                     {
                         var row = dgv.Rows[idx].DataBoundItem as DataRowView;
 
-                        if (row?.DataView.Table == null || !row.DataView.Table.Columns.Contains(rules.Value.TargetColumn)) return;
+                        if (row?.DataView?.Table == null || !row.DataView.Table.Columns.Contains(rules.Value.TargetColumn)) continue;
 
                         value = row[rules.Value.TargetColumn];
                     }

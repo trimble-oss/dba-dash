@@ -687,7 +687,7 @@ namespace DBADashGUI
             dataGridViewTextBoxColumn15.DataPropertyName = "BufferPoolMB";
             dataGridViewCellStyle12.Format = "N0";
             dataGridViewTextBoxColumn15.DefaultCellStyle = dataGridViewCellStyle12;
-            dataGridViewTextBoxColumn15.HeaderText = "Buffer Pool (MB)";
+            dataGridViewTextBoxColumn15.HeaderText = "Max Server Memory (MB)";
             dataGridViewTextBoxColumn15.MinimumWidth = 6;
             dataGridViewTextBoxColumn15.Name = "dataGridViewTextBoxColumn15";
             dataGridViewTextBoxColumn15.ReadOnly = true;
@@ -698,7 +698,7 @@ namespace DBADashGUI
             dataGridViewTextBoxColumn16.DataPropertyName = "PctMemoryAllocatedToBufferPool";
             dataGridViewCellStyle13.Format = "P1";
             dataGridViewTextBoxColumn16.DefaultCellStyle = dataGridViewCellStyle13;
-            dataGridViewTextBoxColumn16.HeaderText = "% Memory allocated to buffer pool";
+            dataGridViewTextBoxColumn16.HeaderText = "Max Server Memory (% of Physical)";
             dataGridViewTextBoxColumn16.MinimumWidth = 6;
             dataGridViewTextBoxColumn16.Name = "dataGridViewTextBoxColumn16";
             dataGridViewTextBoxColumn16.ReadOnly = true;
@@ -709,7 +709,7 @@ namespace DBADashGUI
             dataGridViewTextBoxColumn17.DataPropertyName = "MemoryNotAllocatedToBufferPoolGB";
             dataGridViewCellStyle14.Format = "N1";
             dataGridViewTextBoxColumn17.DefaultCellStyle = dataGridViewCellStyle14;
-            dataGridViewTextBoxColumn17.HeaderText = "Memory not allocated to buffer pool (GB)";
+            dataGridViewTextBoxColumn17.HeaderText = "Memory Outside Max Server Memory (GB)";
             dataGridViewTextBoxColumn17.MinimumWidth = 6;
             dataGridViewTextBoxColumn17.Name = "dataGridViewTextBoxColumn17";
             dataGridViewTextBoxColumn17.ReadOnly = true;
@@ -1071,6 +1071,7 @@ namespace DBADashGUI
             dataGridViewCellStyle6.Format = "N1";
             colPhysicalMemory.DefaultCellStyle = dataGridViewCellStyle6;
             colPhysicalMemory.HeaderText = "Physical Memory (GB)";
+            colPhysicalMemory.ToolTipText = "Physical memory reported by the operating system. Highlighted when it is above the Database Engine buffer pool limit for this edition and version. Hover a cell for details.";
             colPhysicalMemory.MinimumWidth = 6;
             colPhysicalMemory.Name = "colPhysicalMemory";
             colPhysicalMemory.ReadOnly = true;
@@ -1081,7 +1082,8 @@ namespace DBADashGUI
             colBufferPool.DataPropertyName = "BufferPoolMB";
             dataGridViewCellStyle7.Format = "N0";
             colBufferPool.DefaultCellStyle = dataGridViewCellStyle7;
-            colBufferPool.HeaderText = "Buffer Pool (MB)";
+            colBufferPool.HeaderText = "Max Server Memory (MB)";
+            colBufferPool.ToolTipText = "Configured max server memory (MB). This is not the current size of the buffer pool. From SQL Server 2012, max server memory includes the buffer pool and other Database Engine memory clerks. Highlighted when it has not been set, is above physical memory, or is half of physical memory or less.";
             colBufferPool.MinimumWidth = 6;
             colBufferPool.Name = "colBufferPool";
             colBufferPool.ReadOnly = true;
@@ -1092,7 +1094,8 @@ namespace DBADashGUI
             colPctMemoryBufferPool.DataPropertyName = "PctMemoryAllocatedToBufferPool";
             dataGridViewCellStyle8.Format = "P1";
             colPctMemoryBufferPool.DefaultCellStyle = dataGridViewCellStyle8;
-            colPctMemoryBufferPool.HeaderText = "% Memory allocated to buffer pool";
+            colPctMemoryBufferPool.HeaderText = "Max Server Memory (% of Physical)";
+            colPctMemoryBufferPool.ToolTipText = "Max server memory as a percentage of physical memory. Shown as 100% when max server memory is greater than physical memory. Uses the same highlight as Max Server Memory.";
             colPctMemoryBufferPool.MinimumWidth = 6;
             colPctMemoryBufferPool.Name = "colPctMemoryBufferPool";
             colPctMemoryBufferPool.ReadOnly = true;
@@ -1103,7 +1106,8 @@ namespace DBADashGUI
             colMemNotAllocated.DataPropertyName = "MemoryNotAllocatedToBufferPoolGB";
             dataGridViewCellStyle9.Format = "N1";
             colMemNotAllocated.DefaultCellStyle = dataGridViewCellStyle9;
-            colMemNotAllocated.HeaderText = "Memory not allocated to buffer pool (GB)";
+            colMemNotAllocated.HeaderText = "Memory Outside Max Server Memory (GB)";
+            colMemNotAllocated.ToolTipText = "Physical memory minus max server memory, in GB. Zero when max server memory is greater than physical memory. This is memory left for the operating system and other processes.";
             colMemNotAllocated.MinimumWidth = 6;
             colMemNotAllocated.Name = "colMemNotAllocated";
             colMemNotAllocated.ReadOnly = true;

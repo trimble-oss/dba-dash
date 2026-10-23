@@ -19,6 +19,7 @@ namespace DBADashGUI
             dgvHistory.RegisterClearFilter(tsClearFilterHistory);
             dgvHardware.ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing();
             dgvHistory.ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing();
+            dgvHardware.CellFormatting += DgvHardware_CellFormatting;
         }
 
         private List<int> InstanceIDs;
@@ -190,6 +191,12 @@ namespace DBADashGUI
                 }
             },
             {
+                "colPhysicalMemory", new CellHighlightingRuleSet("PhysicalMemoryLimitStatus", true)
+                {
+                    IsStatusColumn = true
+                }
+            },
+            {
                 "colAffinity", new CellHighlightingRuleSet("colAffinity")
                 {
                     Rules = new List<CellHighlightingRule>
@@ -218,6 +225,41 @@ namespace DBADashGUI
         private void DgvHardware_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
             HighlightingRules.FormatRowsAdded(dgvHardware, e);
+        }
+
+        private void DgvHardware_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.ColumnIndex < 0) return;
+            if (dgvHardware.Rows[e.RowIndex].DataBoundItem is not DataRowView row) return;
+            var columnName = dgvHardware.Columns[e.ColumnIndex].Name;
+            if (columnName == colBufferPool.Name || columnName == colPctMemoryBufferPool.Name)
+            {
+                var maxMemory = EditionMemoryLimit.EvaluateMaxServerMemoryRow(row);
+                if (maxMemory == null) return;
+                ApplyStatus(e, maxMemory.Value.Status);
+                if (!string.IsNullOrEmpty(maxMemory.Value.Message))
+                {
+                    dgvHardware.Rows[e.RowIndex].Cells[e.ColumnIndex].ToolTipText = maxMemory.Value.Message;
+                }
+
+                return;
+            }
+
+            if (columnName != colPhysicalMemory.Name) return;
+            var result = EditionMemoryLimit.EvaluateRow(row);
+            if (result == null) return;
+            ApplyStatus(e, result.Value.Status);
+            if (!string.IsNullOrEmpty(result.Value.Message))
+            {
+                dgvHardware.Rows[e.RowIndex].Cells[e.ColumnIndex].ToolTipText = result.Value.Message;
+            }
+        }
+
+        private static void ApplyStatus(DataGridViewCellFormattingEventArgs e, DBADashStatus.DBADashStatusEnum status)
+        {
+            e.CellStyle.SetStatusColor(status);
+            e.CellStyle.SelectionBackColor = status.GetBackColor().AdjustBasedOnLuminance();
+            e.CellStyle.SelectionForeColor = status.GetForeColor();
         }
 
         private void TsExcelHistory_Click(object sender, EventArgs e)
