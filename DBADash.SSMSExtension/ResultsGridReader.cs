@@ -178,6 +178,24 @@ namespace DBADash.SSMSExtension
                 }
             }
 
+            /// <summary>The data column with any of <paramref name="names"/>, ignoring case, or -1.</summary>
+            internal int ColumnIndex(params string[] names)
+            {
+                for (var col = 0; col < ColumnCount; col++)
+                {
+                    if (names.Any(n => string.Equals(ColumnNames[col], n, StringComparison.OrdinalIgnoreCase))) return col;
+                }
+
+                return -1;
+            }
+
+            /// <summary>One cell's value as its CLR type - an int, a DateTime - or null for NULL.</summary>
+            internal object GetValue(long row, int col)
+            {
+                var value = _getCellData(row, col + _columnOffset);
+                return IsNull(value) ? null : Unwrap(value);
+            }
+
             private object ReadText(long row, int col) =>
                 // Null checked on the typed value: the display text of a NULL is the string "NULL".
                 IsNull(_getCellData(row, col + _columnOffset))
@@ -278,6 +296,88 @@ namespace DBADash.SSMSExtension
             }
         }
 
+        /// <summary>
+        /// The focused grid's result set and the row the user means - the one clicked last, when the context menu was
+        /// opened with the mouse (<see cref="LastClickTracker"/>), otherwise the one highlighted - or null if focus isn't
+        /// in a results grid or the grid can't be read.
+        /// </summary>
+        public static ResultSet TryGetFocusedRow(out long row)
+        {
+            row = -1;
+            var grid = FocusedGrid();
+            var resultSet = TryGet(grid);
+            if (resultSet == null) return null;
+
+            try
+            {
+                row = ClickedRow(grid) ?? SelectedRow(grid) ?? CurrentRow(grid) ?? -1;
+                return row >= 0 && row < resultSet.RowCount ? resultSet : null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// The row of the grid that was last clicked - right-clicked, for a context menu - or null if the last click wasn't
+        /// in this grid, a key has been pressed since, or it wasn't on a row.  GridControl.HitTest(int x, int y), in client
+        /// coordinates, returns a HitTestInfo with the RowIndex hit.
+        /// </summary>
+        private static long? ClickedRow(Control grid)
+        {
+            if (!LastClickTracker.TryGetLastClick(grid, out var point)) return null;
+
+            var method = grid.GetType().GetMethod("HitTest", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+                null, new[] { typeof(int), typeof(int) }, null);
+            var hit = method?.Invoke(grid, new object[] { point.X, point.Y });
+            return hit != null && GetProperty(hit, "RowIndex") is long row && row >= 0 ? row : null;
+        }
+
+        /// <summary>
+        /// The row of the grid's latest selection block (GridControl.SelectedCells, a collection of BlockOfCells), or
+        /// null with nothing selected.  Read in preference to the current cell: SSMS doesn't always move the current
+        /// cell when the selection moves - selecting another row could leave it on the row a live plan was opened from
+        /// before.  Within a block of several rows, the row the selection was last extended to.
+        /// </summary>
+        private static long? SelectedRow(Control grid)
+        {
+            if (GetProperty(grid, "SelectedCells") is not System.Collections.IList { Count: > 0 } blocks) return null;
+
+            var block = blocks[blocks.Count - 1];
+            if (GetProperty(block, "IsEmpty") is true) return null;
+            if (GetProperty(block, "Y") is not long top || GetProperty(block, "Bottom") is not long bottom) return null;
+            if (top < 0) return null; // A whole column selected from its header
+
+            return GetProperty(block, "LastUpdatedRow") is long last && last >= top && last <= bottom ? last : top;
+        }
+
+        /// <summary>The row of the grid's current cell - GridControl.GetCurrentCell(out long rowIndex, out int columnIndex) - or null.</summary>
+        private static long? CurrentRow(Control grid)
+        {
+            var method = grid.GetType().GetMethod("GetCurrentCell", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+                null, new[] { typeof(long).MakeByRefType(), typeof(int).MakeByRefType() }, null);
+            if (method == null) return null;
+
+            var args = new object[] { -1L, -1 };
+            method.Invoke(grid, args);
+            return (long)args[0] >= 0 ? (long)args[0] : null;
+        }
+
+        /// <summary>
+        /// The query window focus is in - script and results together - which knows the connection its results came
+        /// from. Null if focus isn't in one.
+        /// </summary>
+        public static Control FocusedQueryWindow()
+        {
+            for (var control = Control.FromHandle(GetFocus()); control != null; control = control.Parent)
+            {
+                if (IsOfType(control, QueryWindowTypeName)) return control;
+            }
+
+            return null;
+        }
+
         /// <summary>True if focus is in a results grid. Cheap enough for BeforeQueryStatus.</summary>
         public static bool IsFocused() => FocusedGrid() != null;
 
@@ -297,6 +397,16 @@ namespace DBADash.SSMSExtension
         }
 
         /// <summary>True if the control is of the named type, or derives from it.</summary>
+        /// <summary>True if <paramref name="window"/> is a results grid's window.  For <see cref="LastClickTracker"/>.</summary>
+        internal static bool IsGridWindow(IntPtr window)
+        {
+            var control = window == IntPtr.Zero ? null : Control.FromHandle(window);
+            return control != null && IsOfType(control, GridControlTypeName);
+        }
+
+        /// <summary>True if focus is in a results grid - keys typed go to it.  For <see cref="LastClickTracker"/>.</summary>
+        internal static bool IsGridFocused() => FocusedGrid() != null;
+
         private static bool IsOfType(Control control, string fullTypeName)
         {
             for (var type = control.GetType(); type != null; type = type.BaseType)

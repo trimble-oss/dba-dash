@@ -23,7 +23,15 @@ namespace DBADash.SSMSExtension
             await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
             await OpenCommand.InitializeAsync(this);
             await OpenAllResultsCommand.InitializeAsync(this);
+            await LivePlanCommand.InitializeAsync(this);
+            LastClickTracker.Install();
             await DeadlockContextMenuHook.InitializeAsync(this);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing) LastClickTracker.Uninstall();
+            base.Dispose(disposing);
         }
     }
 }

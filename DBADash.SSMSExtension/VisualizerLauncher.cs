@@ -1,12 +1,15 @@
 using System;
 using System.Data;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.IO.Compression;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using System.Xml;
+using System.Xml.Linq;
 using Microsoft.Win32;
 
 namespace DBADash.SSMSExtension
@@ -86,6 +89,63 @@ namespace DBADash.SSMSExtension
         {
             Open(xml, ".xml", Encoding.UTF8);
         }
+
+        // Shared with the app's LivePlanRequestFile. Scope the protected password, and the protected file, to this use.
+        private static readonly byte[] LivePlanEntropy = Encoding.UTF8.GetBytes("DBADash.LivePlanRequest");
+        private static readonly byte[] LivePlanFileEntropy = Encoding.UTF8.GetBytes("DBADash.LivePlanRequest.File");
+
+        /// <summary>
+        /// Asks the app to follow a running request's live plan over its own connection to the instance - the app's
+        /// LivePlanRequestFile reads this.  The whole file is protected with DPAPI for the current Windows user, so nothing
+        /// in it - the connection string included, whatever it holds - is written as plain text, and the app only accepts
+        /// a file this user protected on this machine.  A SQL login's password is protected again inside it, so the app
+        /// can read the rest without the password ever being a string.  The app deletes the file as soon as it has read it.
+        /// An app older than this extension doesn't know the file and says it can't be opened; the sweep deletes it.
+        /// </summary>
+        public static void OpenLivePlan(QueryWindowConnection connection, int sessionId, DateTime? startTime, string title)
+        {
+            var root = new XElement("DBADashLivePlan",
+                new XAttribute("Version", 2),
+                new XElement("ConnectionString", connection.ConnectionString),
+                new XElement("SessionId", sessionId));
+            if (connection.Password != null)
+            {
+                var plain = Encoding.UTF8.GetBytes(connection.Password);
+                try
+                {
+                    var protectedPassword = ProtectedData.Protect(plain, LivePlanEntropy, DataProtectionScope.CurrentUser);
+                    root.Add(new XElement("Password", Convert.ToBase64String(protectedPassword)));
+                }
+                finally
+                {
+                    Array.Clear(plain, 0, plain.Length);
+                }
+            }
+            // The instance's local time, as the grid showed it - no offset, and read back without one.
+            if (startTime is { } started) root.Add(new XElement("StartTime", started.ToString("yyyy-MM-ddTHH:mm:ss.fffffff", CultureInfo.InvariantCulture)));
+            if (!string.IsNullOrEmpty(title)) root.Add(new XElement("Title", title));
+
+            byte[] plainFile;
+            using (var buffer = new MemoryStream())
+            {
+                new XDocument(root).Save(buffer);
+                plainFile = buffer.ToArray();
+            }
+
+            byte[] protectedFile;
+            try
+            {
+                protectedFile = ProtectedData.Protect(plainFile, LivePlanFileEntropy, DataProtectionScope.CurrentUser);
+            }
+            finally
+            {
+                Array.Clear(plainFile, 0, plainFile.Length);
+            }
+
+            OpenFile(SaveToTemp(LivePlanExtension, stream => stream.Write(protectedFile, 0, protectedFile.Length)));
+        }
+
+        private const string LivePlanExtension = ".dbadashlive";
 
         /// <summary>
         /// Writes a result set read from SSMS's results grid (ResultsGridReader) to a temp file for
@@ -279,14 +339,18 @@ namespace DBADash.SSMSExtension
         {
             try
             {
+                // A live plan request holds a protected password, and the app refuses one more than 10 minutes old anyway -
+                // so one it never read (an app too old to know it, say) isn't left lying around for the hour.
                 var cutoff = DateTime.UtcNow.AddHours(-1);
-                foreach (var pattern in new[] { "ssms_*.sqlplan", "ssms_*.xdl", "ssms_*.xml", "ssms_*.xml.gz" })
+                var liveCutoff = DateTime.UtcNow.AddMinutes(-10);
+                foreach (var pattern in new[] { "ssms_*.sqlplan", "ssms_*.xdl", "ssms_*.xml", "ssms_*.xml.gz", "ssms_*" + LivePlanExtension })
                 {
+                    var patternCutoff = pattern.EndsWith(LivePlanExtension, StringComparison.Ordinal) ? liveCutoff : cutoff;
                     foreach (var path in Directory.GetFiles(Path.GetTempPath(), pattern))
                     {
                         try
                         {
-                            if (File.GetLastWriteTimeUtc(path) < cutoff) File.Delete(path);
+                            if (File.GetLastWriteTimeUtc(path) < patternCutoff) File.Delete(path);
                         }
                         catch
                         {

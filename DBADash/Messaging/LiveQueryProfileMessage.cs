@@ -42,7 +42,7 @@ namespace DBADash.Messaging
                 var src = await cfg.GetSourceConnectionAsync(ConnectionID);
 
                 await using var cn = new SqlConnection(src.SourceConnection.ConnectionString);
-                await using var cmd = new SqlCommand(SqlStrings.GetSqlString("LiveQueryProfile"), cn) { CommandType = CommandType.Text, CommandTimeout = Lifetime };
+                await using var cmd = new SqlCommand(LiveQuerySql.LiveQueryProfile, cn) { CommandType = CommandType.Text, CommandTimeout = Lifetime };
                 cmd.Parameters.Add("@SessionID", SqlDbType.Int).Value = SessionID;
                 cmd.Parameters.Add("@ExpectedStartUtc", SqlDbType.DateTime).Value = StartTimeUtc;
                 cmd.Parameters.Add("@SnapshotUtcOffset", SqlDbType.Int).Value = SnapshotUtcOffset;

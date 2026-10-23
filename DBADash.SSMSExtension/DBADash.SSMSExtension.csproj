@@ -40,6 +40,7 @@
 
   <ItemGroup>
     <Reference Include="System.Design" />
+    <Reference Include="System.Security" />
   </ItemGroup>
 
   <ItemGroup>

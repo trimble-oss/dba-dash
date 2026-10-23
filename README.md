@@ -29,6 +29,7 @@ An extension for SSMS 21 and 22 that adds **Open in DBA Dash Visualizer** to SSM
 - **Execution plans** - from the execution plan right-click menu.
 - **Deadlock graphs** - from deadlock graph tabs, or XML holding a plan or deadlock graph (e.g. `sp_BlitzLock` output).
 - **Results grids** - one grid, or all the results from a query window in one go.
+- **Live plans** - right-click a row with a `session_id` (e.g. from `sp_BlitzWho` or `sp_WhoIsActive`) and choose **Open Live Plan in DBA Dash Visualizer** to follow the running query's plan as it progresses.  The Visualizer connects to the instance with the query window's connection (Windows or SQL Server authentication) and needs `VIEW SERVER STATE` and lightweight query profiling.
 
 The option is also on the **Tools** menu (**Ctrl+Alt+Shift+D**).  Results opened in the Visualizer can be sorted, filtered, grouped and exported - or scripted as `INSERT` statements to re-create the results in a temp table.
 
