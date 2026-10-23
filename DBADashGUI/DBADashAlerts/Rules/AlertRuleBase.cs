@@ -39,7 +39,9 @@ namespace DBADashGUI.DBADashAlerts.Rules
             AgentNotRunning,
             CustomSql,
             FailedLogins,
-            DatabaseMail
+            DatabaseMail,
+            AzureDBSpace,
+            ElasticPoolSpace
         }
 
         public static AlertRuleBase CreateRule(RuleTypes type)
@@ -62,6 +64,8 @@ namespace DBADashGUI.DBADashAlerts.Rules
                 RuleTypes.CustomSql => new CustomSqlRule(),
                 RuleTypes.FailedLogins => new FailedLoginsRule(),
                 RuleTypes.DatabaseMail => new DatabaseMailRule(),
+                RuleTypes.AzureDBSpace => new AzureDBSpaceRule(),
+                RuleTypes.ElasticPoolSpace => new ElasticPoolSpaceRule(),
                 _ => throw new ArgumentOutOfRangeException()
             };
         }
@@ -258,6 +262,8 @@ namespace DBADashGUI.DBADashAlerts.Rules
                 RuleTypes.CustomSql => string.IsNullOrEmpty(details) ? new CustomSqlRule() : JsonConvert.DeserializeObject<CustomSqlRule>(details),
                 RuleTypes.FailedLogins => new FailedLoginsRule(),
                 RuleTypes.DatabaseMail => string.IsNullOrEmpty(details) ? new DatabaseMailRule() : JsonConvert.DeserializeObject<DatabaseMailRule>(details),
+                RuleTypes.AzureDBSpace => string.IsNullOrEmpty(details) ? new AzureDBSpaceRule() : JsonConvert.DeserializeObject<AzureDBSpaceRule>(details),
+                RuleTypes.ElasticPoolSpace => string.IsNullOrEmpty(details) ? new ElasticPoolSpaceRule() : JsonConvert.DeserializeObject<ElasticPoolSpaceRule>(details),
                 _ => throw new NotImplementedException()
             };
             rule.RuleID = ruleID;
