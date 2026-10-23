@@ -484,28 +484,38 @@ namespace DBADashGUI.AgentJobs
         /// something beneath it matches shows only the matching children.  Each row's lanes are packed for the bars
         /// that are shown.
         /// </summary>
-        public List<TimelineRowModel> VisibleRows(string filter, Func<TimelineBar, bool> visible, int visibleKey, TimelineSort sort, bool hideEmpty)
+        public List<TimelineRowModel> VisibleRows(string filter, Func<TimelineBar, bool> visible, int visibleKey, TimelineSort sort, Func<RunStatus, bool> statusShown)
         {
             var text = string.IsNullOrWhiteSpace(filter) ? null : filter.Trim();
             var rows = new List<TimelineRowModel>();
-            AddRows(rows, Roots, text, visible, visibleKey, sort, hideEmpty);
+            AddRows(rows, Roots, text, visible, visibleKey, sort, statusShown);
             return rows;
         }
 
-        private void AddRows(List<TimelineRowModel> rows, IEnumerable<TimelineRowModel> siblings, string text, Func<TimelineBar, bool> visible, int visibleKey, TimelineSort sort, bool hideEmpty)
+        private void AddRows(List<TimelineRowModel> rows, IEnumerable<TimelineRowModel> siblings, string text, Func<TimelineBar, bool> visible, int visibleKey, TimelineSort sort, Func<RunStatus, bool> statusShown)
         {
             var level = siblings;
             if (text != null) level = level.Where(r => MatchesOrHasMatch(r, text));
             // An unloaded instance stays: what's hidden is decided by its summary spans
-            if (hideEmpty) level = level.Where(r => r.AllBars.Any(visible));
+            if (statusShown != null) level = level.Where(r => HasShownRuns(r, visible, statusShown));
             foreach (var row in Sort(level.ToList(), sort))
             {
                 row.PackLanes(visible, visibleKey);
                 rows.Add(row);
                 if (row.Collapsed || row.Children.Count == 0) continue;
-                AddRows(rows, row.Children, text == null || Matches(row, text) ? null : text, visible, visibleKey, sort, hideEmpty);
+                AddRows(rows, row.Children, text == null || Matches(row, text) ? null : text, visible, visibleKey, sort, statusShown);
             }
         }
+
+        /// <summary>
+        /// Whether a row has runs with a status that's shown, so it stays when other statuses are hidden.  An instance
+        /// also goes by its own counts - the ones the legend shows - so it isn't hidden while the legend says it has
+        /// matching runs, even if none of its spans can show them (a server without the per-status span counts, where a
+        /// span is judged by its worst status).  Otherwise there'd be no row to expand to reach the jobs.
+        /// </summary>
+        private static bool HasShownRuns(TimelineRowModel row, Func<TimelineBar, bool> visible, Func<RunStatus, bool> statusShown) =>
+            row.AllBars.Any(visible)
+            || (row.Kind == TimelineRowKind.Instance && row.StatusCounts != null && row.StatusCounts.Any(kv => kv.Value > 0 && statusShown(kv.Key)));
 
         private IEnumerable<TimelineRowModel> Sort(List<TimelineRowModel> rows, TimelineSort sort)
         {

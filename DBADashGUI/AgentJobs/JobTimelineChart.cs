@@ -293,7 +293,7 @@ namespace DBADashGUI.AgentJobs
         /// <summary>Rebuild the visible row list and their positions after anything that changes which rows show.</summary>
         private void Relayout()
         {
-            _rows = _model.VisibleRows(_filter, IsVisible, HiddenStatusKey, _sort, _hiddenStatuses.Count > 0);
+            _rows = _model.VisibleRows(_filter, IsVisible, HiddenStatusKey, _sort, _hiddenStatuses.Count > 0 ? s => !_hiddenStatuses.Contains(s) : null);
             _legendCounts = _model.LegendCounts(_filter);
             _exactFailures = _model.CountsFrom == null ? null : FailuresByRow(_model.CountsFrom.Roots);
             _layoutVersion++;
