@@ -1784,7 +1784,7 @@ namespace DBADashGUI
             else if (n.Type == SQLTreeItem.TreeType.AgentJobs)
             {
                 allowedTabs.AddRange(parent.Type is SQLTreeItem.TreeType.DBADashRoot or SQLTreeItem.TreeType.InstanceFolder
-                    ? new[] { tabJobs, tabRunningJobs }
+                    ? new[] { tabJobs, tabJobTimeline, tabRunningJobs }
                     : new[] { tabJobs, tabJobStats, tabJobTimeline, tabRunningJobs });
             }
             else if (n.Type == SQLTreeItem.TreeType.AgentJob)

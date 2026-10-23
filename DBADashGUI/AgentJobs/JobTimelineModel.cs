@@ -41,6 +41,15 @@ namespace DBADashGUI.AgentJobs
         /// <summary>Index of the source row in the DataTable the model was built from.</summary>
         public int SourceIndex { get; init; }
 
+        /// <summary>The instance the job is on.</summary>
+        public int InstanceId { get; init; }
+
+        /// <summary>
+        /// A span of an instance row on the multi-instance timeline: <see cref="Executions"/> overlapping (or nearly)
+        /// executions of any of its jobs, with the worst of their statuses.  <see cref="JobName"/> is the instance name.
+        /// </summary>
+        public bool IsSummary { get; init; }
+
         /// <summary>A single execution (finished or running) that execution details can be shown for.</summary>
         public bool IsSingleExecution => Executions == 1 && JobId != Guid.Empty && (HistoryId.HasValue || IsRunning);
 
@@ -86,19 +95,45 @@ namespace DBADashGUI.AgentJobs
         };
     }
 
+
+    internal enum TimelineRowKind
+    {
+        Job,
+        Step,
+
+        /// <summary>An instance on the multi-instance timeline.  Its bars are summary spans; its jobs load when expanded.</summary>
+        Instance
+    }
+
     /// <summary>
-    /// A row of the timeline: a job, or with steps included, a job (its outcome) with a child row per step.
+    /// A row of the timeline: a job, or with steps included, a job (its outcome) with a child row per step.  On the
+    /// multi-instance timeline the top level rows are instances, with their jobs beneath.
     /// </summary>
     internal sealed class TimelineRowModel
     {
+        public TimelineRowKind Kind { get; init; } = TimelineRowKind.Job;
         public string Label { get; init; }
         public Guid JobId { get; init; }
         public string JobName { get; init; }
-        public bool IsGroup => Children.Count > 0;
+        public int InstanceId { get; init; }
+
+        public bool IsGroup => Children.Count > 0 || CanLoadChildren;
         public List<TimelineRowModel> Children { get; } = new();
         public TimelineRowModel Parent { get; set; }
         public List<TimelineBar> Bars { get; } = new();
         public bool Collapsed { get; set; }
+
+        /// <summary>The children haven't been fetched yet - they're loaded the first time the row is expanded.</summary>
+        public bool CanLoadChildren { get; set; }
+
+        /// <summary>The children are being fetched.</summary>
+        public bool Loading { get; set; }
+
+        /// <summary>Why loading the children failed, shown on the row.</summary>
+        public string LoadError { get; set; }
+
+        /// <summary>Executions by status, for an instance row whose own bars are summary spans.</summary>
+        public Dictionary<RunStatus, int> StatusCounts { get; set; }
 
         /// <summary>Lanes needed for the bars currently shown.  Set by <see cref="PackLanes"/>.</summary>
         public int LaneCount { get; private set; } = 1;
@@ -107,20 +142,60 @@ namespace DBADashGUI.AgentJobs
         public float Top { get; set; }
 
         public float Height { get; set; }
-        public int Depth => Parent == null ? 0 : 1;
+        public int Depth => Parent == null ? 0 : Parent.Depth + 1;
+
+        /// <summary>The longest bar in the row, which bounds how far before a time a bar overlapping it can start.</summary>
+        private long _maxBarTicks;
+
+        /// <summary>The status filter the lanes were last packed for, so they are only packed again when it changes.</summary>
+        private int? _packedFor;
 
         /// <summary>The row and every row beneath it.</summary>
         public IEnumerable<TimelineBar> AllBars => Bars.Concat(Children.SelectMany(c => c.AllBars));
 
         /// <summary>
+        /// Order the bars by start, which <see cref="BarsBetween"/> relies on.  Call after adding bars.
+        /// </summary>
+        public void BarsChanged()
+        {
+            Bars.Sort((a, b) => a.Start != b.Start ? a.Start.CompareTo(b.Start) : a.End.CompareTo(b.End));
+            _maxBarTicks = Bars.Count == 0 ? 0 : Bars.Max(b => (b.End - b.Start).Ticks);
+            _packedFor = null;
+        }
+
+        /// <summary>
+        /// The bars that overlap <paramref name="from"/> to <paramref name="to"/>, found by binary search rather than by
+        /// looking at every bar - a busy row on a long period can have thousands.
+        /// </summary>
+        public IEnumerable<TimelineBar> BarsBetween(DateTime from, DateTime to)
+        {
+            // A bar that overlaps "from" starts no earlier than the longest bar's length before it
+            var earliest = from.Ticks - _maxBarTicks < DateTime.MinValue.Ticks ? DateTime.MinValue : from.AddTicks(-_maxBarTicks);
+            int lo = 0, hi = Bars.Count;
+            while (lo < hi)
+            {
+                var mid = (lo + hi) / 2;
+                if (Bars[mid].Start < earliest) lo = mid + 1;
+                else hi = mid;
+            }
+            for (var i = lo; i < Bars.Count && Bars[i].Start <= to; i++)
+            {
+                if (Bars[i].End >= from) yield return Bars[i];
+            }
+        }
+
+        /// <summary>
         /// Stack overlapping bars into lanes: each bar goes in the first lane that is free by the time it starts.
         /// Only bars that pass <paramref name="visible"/> are placed, so hiding a status closes the gaps it leaves.
+        /// <paramref name="filterKey"/> identifies the filter, so the work is skipped when nothing has changed.
         /// </summary>
-        public void PackLanes(Func<TimelineBar, bool> visible)
+        public void PackLanes(Func<TimelineBar, bool> visible, int filterKey)
         {
+            if (_packedFor == filterKey) return;
             var laneEnds = new List<DateTime>();
-            foreach (var bar in Bars.Where(visible).OrderBy(b => b.Start).ThenBy(b => b.End))
+            foreach (var bar in Bars)
             {
+                if (!visible(bar)) continue;
                 var lane = laneEnds.FindIndex(end => end <= bar.Start);
                 if (lane < 0)
                 {
@@ -134,11 +209,13 @@ namespace DBADashGUI.AgentJobs
                 bar.Lane = lane;
             }
             LaneCount = Math.Max(1, laneEnds.Count);
+            _packedFor = filterKey;
         }
     }
 
     /// <summary>
-    /// The rows and bars of the job timeline, built from dbo.JobTimeline_Get.
+    /// The rows and bars of the job timeline, built from dbo.JobTimeline_Get - or, across instances, from
+    /// dbo.JobTimelineSummary_Get with each instance's jobs added when it's expanded.
     /// </summary>
     internal sealed class JobTimelineModel
     {
@@ -150,10 +227,14 @@ namespace DBADashGUI.AgentJobs
         /// <summary>Each row is a step of one job, so name order means step order.</summary>
         public bool StepRows { get; private set; }
 
+        /// <summary>The top level rows are instances.</summary>
+        public bool MultiInstance { get; private set; }
+
         /// <param name="dt">Timeline data with dates already converted to the app time zone</param>
         /// <param name="singleJob">One job is shown, so each step is a row of its own rather than a child of the job</param>
         /// <param name="includeSteps">Steps are included, so each job gets a child row per step</param>
-        public static JobTimelineModel Build(DataTable dt, bool singleJob, bool includeSteps)
+        /// <param name="instanceId">The instance the data is for</param>
+        public static JobTimelineModel Build(DataTable dt, bool singleJob, bool includeSteps, int instanceId = 0)
         {
             var model = new JobTimelineModel();
             var hasJobId = dt.Columns.Contains("job_id");
@@ -166,6 +247,7 @@ namespace DBADashGUI.AgentJobs
             {
                 var bar = new TimelineBar
                 {
+                    InstanceId = instanceId,
                     JobId = hasJobId && r["job_id"] != DBNull.Value ? (Guid)r["job_id"] : Guid.Empty,
                     JobName = (string)r["name"],
                     StepId = (int)r["step_id"],
@@ -186,21 +268,25 @@ namespace DBADashGUI.AgentJobs
                 {
                     row = GetOrAdd(steps, (bar.JobName, bar.StepId), () => new TimelineRowModel
                     {
+                        Kind = TimelineRowKind.Step,
                         Label = bar.StepId == 0 ? "Outcome" : $"{bar.StepId} : {bar.StepName}",
                         JobId = bar.JobId,
-                        JobName = bar.JobName
+                        JobName = bar.JobName,
+                        InstanceId = instanceId
                     }, model.Roots);
                 }
                 else
                 {
-                    var job = GetOrAdd(jobs, bar.JobName, () => new TimelineRowModel { Label = bar.JobName, JobId = bar.JobId, JobName = bar.JobName }, model.Roots);
+                    var job = GetOrAdd(jobs, bar.JobName, () => new TimelineRowModel { Label = bar.JobName, JobId = bar.JobId, JobName = bar.JobName, InstanceId = instanceId }, model.Roots);
                     if (includeSteps && bar.StepId != 0)
                     {
                         row = GetOrAdd(steps, (bar.JobName, bar.StepId), () => new TimelineRowModel
                         {
+                            Kind = TimelineRowKind.Step,
                             Label = $"{bar.StepId} : {bar.StepName}",
                             JobId = bar.JobId,
                             JobName = bar.JobName,
+                            InstanceId = instanceId,
                             Parent = job
                         }, job.Children);
                     }
@@ -215,10 +301,81 @@ namespace DBADashGUI.AgentJobs
 
             foreach (var root in model.Roots)
             {
-                root.Children.Sort((a, b) => a.Bars[0].StepId.CompareTo(b.Bars[0].StepId));
+                root.BarsChanged();
+                foreach (var child in root.Children) child.BarsChanged();
             }
             model.StepRows = singleJob;
             return model;
+        }
+
+        /// <summary>
+        /// The multi-instance timeline from dbo.JobTimelineSummary_Get: a collapsed row per instance, showing its
+        /// executions merged into spans.  Its jobs are added with <see cref="SetChildren"/> when it's expanded.
+        /// </summary>
+        /// <param name="ds">Instances, spans and status counts, with dates already converted to the app time zone</param>
+        public static JobTimelineModel BuildSummary(DataSet ds)
+        {
+            var model = new JobTimelineModel { MultiInstance = true };
+            var instances = new Dictionary<int, TimelineRowModel>();
+            foreach (DataRow r in ds.Tables[0].Rows)
+            {
+                var id = (int)r["InstanceID"];
+                var row = new TimelineRowModel
+                {
+                    Kind = TimelineRowKind.Instance,
+                    Label = (string)r["InstanceDisplayName"],
+                    JobName = string.Empty,
+                    InstanceId = id,
+                    CanLoadChildren = true,
+                    Collapsed = true,
+                    StatusCounts = new Dictionary<RunStatus, int>()
+                };
+                instances.Add(id, row);
+                model.Roots.Add(row);
+            }
+            foreach (DataRow r in ds.Tables[1].Rows)
+            {
+                if (!instances.TryGetValue((int)r["InstanceID"], out var row)) continue;
+                var bar = new TimelineBar
+                {
+                    IsSummary = true,
+                    InstanceId = row.InstanceId,
+                    JobName = row.Label,
+                    StepName = string.Empty,
+                    Start = (DateTime)r["RunDateTime"],
+                    End = (DateTime)r["FinishDateTime"],
+                    DurationSec = (int)r["RunDurationSec"],
+                    Status = (RunStatus)r["run_status"],
+                    Executions = (int)r["Executions"],
+                    Row = row
+                };
+                if (bar.End <= bar.Start) bar.End = bar.Start.AddSeconds(1);
+                row.Bars.Add(bar);
+                model.Bars.Add(bar);
+            }
+            foreach (DataRow r in ds.Tables[2].Rows)
+            {
+                if (!instances.TryGetValue((int)r["InstanceID"], out var row)) continue;
+                row.StatusCounts[(RunStatus)(int)r["run_status"]] = (int)r["Executions"];
+            }
+            foreach (var root in model.Roots) root.BarsChanged();
+            return model;
+        }
+
+        /// <summary>Put the jobs of an expanded instance beneath it.</summary>
+        public void SetChildren(TimelineRowModel parent, JobTimelineModel children)
+        {
+            Bars.RemoveAll(b => b.Row?.Parent == parent);
+            parent.Children.Clear();
+            foreach (var child in children.Roots)
+            {
+                child.Parent = parent;
+                parent.Children.Add(child);
+            }
+            Bars.AddRange(children.Bars);
+            parent.CanLoadChildren = false;
+            parent.Loading = false;
+            parent.LoadError = null;
         }
 
         private static TimelineRowModel GetOrAdd<TKey>(Dictionary<TKey, TimelineRowModel> lookup, TKey key, Func<TimelineRowModel> create, List<TimelineRowModel> addTo)
@@ -230,47 +387,106 @@ namespace DBADashGUI.AgentJobs
             return row;
         }
 
-        /// <summary>Top level rows whose job name or label contains <paramref name="filter"/>.</summary>
+        private static bool Matches(TimelineRowModel row, string text) =>
+            row.Label.Contains(text, StringComparison.OrdinalIgnoreCase) || row.JobName.Contains(text, StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// An instance whose jobs haven't been loaded counts as a match: the multi-instance summary is already filtered
+        /// by job name on the server, so an instance is only there if some of its jobs match.
+        /// </summary>
+        private static bool MatchesOrHasMatch(TimelineRowModel row, string text) =>
+            row.CanLoadChildren || Matches(row, text) || row.Children.Any(c => MatchesOrHasMatch(c, text));
+
+        /// <summary>Top level rows that match <paramref name="filter"/> themselves, or have a row beneath them that does.</summary>
         public IEnumerable<TimelineRowModel> MatchingRoots(string filter)
         {
             if (string.IsNullOrWhiteSpace(filter)) return Roots;
             var text = filter.Trim();
-            return Roots.Where(r => r.JobName.Contains(text, StringComparison.OrdinalIgnoreCase) || r.Label.Contains(text, StringComparison.OrdinalIgnoreCase));
+            return Roots.Where(r => MatchesOrHasMatch(r, text));
         }
 
         /// <summary>
-        /// The rows to draw, top to bottom: filtered by job name and visible status, sorted, and with collapsed
-        /// groups' children left out.  Each row's lanes are packed for the bars that are shown.
+        /// The bars a top level row contributes to the status legend, given the filter: a job's own bars (its outcomes,
+        /// or its steps when outcomes aren't included).  For an instance, see <see cref="TimelineRowModel.StatusCounts"/>
+        /// unless the filter matched only some of its jobs, in which case it's those jobs' bars.
         /// </summary>
-        public List<TimelineRowModel> VisibleRows(string filter, Func<TimelineBar, bool> visible, TimelineSort sort, bool hideEmpty)
-        {
-            var roots = MatchingRoots(filter);
-            if (hideEmpty)
-            {
-                roots = roots.Where(r => r.AllBars.Any(visible));
-            }
-            roots = sort switch
-            {
-                TimelineSort.FirstStart => roots.OrderBy(r => r.AllBars.Min(b => b.Start)).ThenBy(r => r.Label, StringComparer.OrdinalIgnoreCase),
-                TimelineSort.TotalDuration => roots.OrderByDescending(r => r.AllBars.Where(b => b.StepId == 0 || !r.IsGroup).Sum(b => (long)b.DurationSec * b.Executions)).ThenBy(r => r.Label, StringComparer.OrdinalIgnoreCase),
-                TimelineSort.Failures => roots.OrderByDescending(r => r.AllBars.Count(b => b.Status is RunStatus.Failed or RunStatus.Retry)).ThenBy(r => r.Label, StringComparer.OrdinalIgnoreCase),
-                _ when StepRows => roots.OrderBy(r => r.Bars[0].StepId),
-                _ => roots.OrderBy(r => r.Label, StringComparer.OrdinalIgnoreCase)
-            };
+        public static bool CountsWholeInstance(TimelineRowModel root, string filter) =>
+            root.Kind == TimelineRowKind.Instance && (root.CanLoadChildren || string.IsNullOrWhiteSpace(filter) || Matches(root, filter.Trim()));
 
-            var rows = new List<TimelineRowModel>();
-            foreach (var root in roots)
+        /// <summary>Executions by status for the legend, of the top level rows matching <paramref name="filter"/>.</summary>
+        public Dictionary<RunStatus, int> LegendCounts(string filter)
+        {
+            var counts = new Dictionary<RunStatus, int>();
+            foreach (var root in MatchingRoots(filter))
             {
-                root.PackLanes(visible);
-                rows.Add(root);
-                if (root.Collapsed) continue;
-                foreach (var child in root.Children.Where(c => !hideEmpty || c.Bars.Any(visible)))
+                if (CountsWholeInstance(root, filter))
                 {
-                    child.PackLanes(visible);
-                    rows.Add(child);
+                    foreach (var (status, count) in root.StatusCounts) counts[status] = counts.GetValueOrDefault(status) + count;
+                    continue;
+                }
+                // A job's own bars are its outcomes, so steps aren't counted on top - unless outcomes aren't included.
+                // An instance matched through some of its jobs counts just those.
+                var rows = root.Kind == TimelineRowKind.Instance ? root.Children.Where(c => Matches(c, filter.Trim())) : new[] { root };
+                foreach (var bar in rows.SelectMany(OwnBars))
+                {
+                    counts[bar.Status] = counts.GetValueOrDefault(bar.Status) + bar.Executions;
                 }
             }
+            return counts;
+        }
+
+        /// <summary>
+        /// The rows to draw, top to bottom: filtered by name and visible status, sorted, and with collapsed groups'
+        /// children left out.  A row that matches the filter shows all of its children; a row shown only because
+        /// something beneath it matches shows only the matching children.  Each row's lanes are packed for the bars
+        /// that are shown.
+        /// </summary>
+        public List<TimelineRowModel> VisibleRows(string filter, Func<TimelineBar, bool> visible, int visibleKey, TimelineSort sort, bool hideEmpty)
+        {
+            var text = string.IsNullOrWhiteSpace(filter) ? null : filter.Trim();
+            var rows = new List<TimelineRowModel>();
+            AddRows(rows, Roots, text, visible, visibleKey, sort, hideEmpty);
             return rows;
         }
+
+        private void AddRows(List<TimelineRowModel> rows, IEnumerable<TimelineRowModel> siblings, string text, Func<TimelineBar, bool> visible, int visibleKey, TimelineSort sort, bool hideEmpty)
+        {
+            var level = siblings;
+            if (text != null) level = level.Where(r => MatchesOrHasMatch(r, text));
+            // An unloaded instance stays: what's hidden is decided by its summary spans
+            if (hideEmpty) level = level.Where(r => r.AllBars.Any(visible));
+            foreach (var row in Sort(level.ToList(), sort))
+            {
+                row.PackLanes(visible, visibleKey);
+                rows.Add(row);
+                if (row.Collapsed || row.Children.Count == 0) continue;
+                AddRows(rows, row.Children, text == null || Matches(row, text) ? null : text, visible, visibleKey, sort, hideEmpty);
+            }
+        }
+
+        private IEnumerable<TimelineRowModel> Sort(List<TimelineRowModel> rows, TimelineSort sort)
+        {
+            if (rows.Count == 0) return rows;
+            if (rows[0].Kind == TimelineRowKind.Step)
+            {
+                // Steps are always in step order - except a single job's rows, which follow the chosen sort below
+                if (!StepRows || sort == TimelineSort.Name) return rows.OrderBy(r => r.Bars.Count == 0 ? 0 : r.Bars[0].StepId);
+            }
+            var byName = StringComparer.OrdinalIgnoreCase;
+            return sort switch
+            {
+                TimelineSort.FirstStart => rows.OrderBy(r => OwnBars(r).Select(b => b.Start).DefaultIfEmpty(DateTime.MaxValue).Min()).ThenBy(r => r.Label, byName),
+                TimelineSort.TotalDuration => rows.OrderByDescending(r => OwnBars(r).Sum(b => b.IsSummary ? b.DurationSec : (long)b.DurationSec * b.Executions)).ThenBy(r => r.Label, byName),
+                TimelineSort.Failures => rows.OrderByDescending(Failures).ThenBy(r => r.Label, byName),
+                _ => rows.OrderBy(r => r.Label, byName)
+            };
+        }
+
+        /// <summary>A row's own bars, or with none (a job whose outcomes aren't included), the bars beneath it.</summary>
+        private static IEnumerable<TimelineBar> OwnBars(TimelineRowModel row) => row.Bars.Count > 0 ? row.Bars : row.AllBars;
+
+        private static int Failures(TimelineRowModel row) => row.StatusCounts != null
+            ? row.StatusCounts.Where(kv => kv.Key is RunStatus.Failed or RunStatus.Retry).Sum(kv => kv.Value)
+            : OwnBars(row).Count(b => b.Status is RunStatus.Failed or RunStatus.Retry);
     }
 }

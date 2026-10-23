@@ -6,6 +6,8 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Text;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static DBADashGUI.AgentJobs.TimelineRow;
@@ -140,9 +142,26 @@ namespace DBADashGUI.AgentJobs
         private DateTime from;
         private DateTime to;
         private DBADashContext context;
-        private int categoryInstanceID;
+        private string categoryKey;
         private string selectedCategory;
         private int mins = -1;
+
+        /// <summary>Incremented by each load, so a slower earlier one can tell it has been overtaken.</summary>
+        private int loadGeneration;
+
+        /// <summary>Limits how many instances' jobs are fetched at once on the multi-instance timeline.</summary>
+        private readonly SemaphoreSlim childLoads = new(4);
+
+        /// <summary>Waits for typing to pause before filtering on the server (multi-instance timeline).</summary>
+        private readonly System.Windows.Forms.Timer filterTimer = new() { Interval = 600 };
+
+        /// <summary>
+        /// No single instance in context (the Agent Jobs node at the root or a folder): a summary row per instance, with
+        /// each instance's jobs loaded when it's expanded.
+        /// </summary>
+        private bool MultiInstance => context.JobID == Guid.Empty && context.InstanceID <= 0 && context.InstanceIDs.Count != 1;
+
+        private int InstanceId => context.InstanceID > 0 ? context.InstanceID : context.InstanceIDs.FirstOrDefault();
 
         /// <summary>Start the chart afresh on the next draw (new context or date range) rather than keeping the user's place.</summary>
         private bool resetView;
@@ -181,6 +200,13 @@ namespace DBADashGUI.AgentJobs
             InitializeComponent();
             DateHelper.AddDateGroups(tsDateGroup, TsDateGroup_Click);
             AddSortOptions();
+            chart.ChildrenRequested += Chart_ChildrenRequested;
+            filterTimer.Tick += (_, _) =>
+            {
+                filterTimer.Stop();
+                RefreshData();
+            };
+            Disposed += (_, _) => filterTimer.Dispose();
         }
 
         private void AddSortOptions()
@@ -205,9 +231,16 @@ namespace DBADashGUI.AgentJobs
             }
         }
 
+        /// <summary>
+        /// Filter by job name.  Across instances the jobs aren't loaded until an instance is expanded, so the summary is
+        /// also fetched again filtered on the server - once typing pauses.
+        /// </summary>
         private void Filter_TextChanged(object sender, EventArgs e)
         {
             chart.Filter = tsFilter.Text;
+            if (context == null || !MultiInstance) return;
+            filterTimer.Stop();
+            filterTimer.Start();
         }
 
         /// <summary>
@@ -220,8 +253,8 @@ namespace DBADashGUI.AgentJobs
             try
             {
                 var form = bar.IsRunning
-                    ? new JobExecutionForm(context.InstanceID, bar.JobId, bar.JobName, null, bar.Start.AppTimeZoneToUtc())
-                    : new JobExecutionForm(context.InstanceID, bar.JobId, bar.JobName, bar.HistoryId, null);
+                    ? new JobExecutionForm(bar.InstanceId, bar.JobId, bar.JobName, null, bar.Start.AppTimeZoneToUtc())
+                    : new JobExecutionForm(bar.InstanceId, bar.JobId, bar.JobName, bar.HistoryId, null);
                 form.ShowSingleInstance();
             }
             catch (Exception ex)
@@ -235,7 +268,7 @@ namespace DBADashGUI.AgentJobs
             if (bar.JobId == Guid.Empty) return;
             try
             {
-                var jobContext = CommonData.GetDBADashContext(context.InstanceID);
+                var jobContext = CommonData.GetDBADashContext(bar.InstanceId);
                 jobContext.Type = SQLTreeItem.TreeType.AgentJob;
                 jobContext.JobID = bar.JobId;
                 jobContext.ObjectName = bar.JobName;
@@ -278,12 +311,44 @@ namespace DBADashGUI.AgentJobs
             return dt;
         }
 
-        private static DataTable GetJobCategories(int InstanceID)
+        /// <summary>
+        /// The multi-instance timeline: a summary row per instance (dbo.JobTimelineSummary_Get), dates converted to the
+        /// app time zone.  Executions closer together than <paramref name="mergeGapSec"/> are merged into one span.
+        /// </summary>
+        private static DataSet GetSummaryData(IEnumerable<int> instanceIds, DateTime from, DateTime to, string category, string jobName, int mergeGapSec)
+        {
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.JobTimelineSummary_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Config.DefaultCommandTimeout };
+            using var da = new SqlDataAdapter(cmd);
+            cmd.Parameters.AddWithValue("@InstanceIDs", instanceIds.AsDataTable());
+            cmd.Parameters.AddWithValue("@FromDate", from);
+            cmd.Parameters.AddWithValue("@ToDate", to);
+            cmd.Parameters.AddStringIfNotNullOrEmpty("@category", category);
+            cmd.Parameters.AddStringIfNotNullOrEmpty("@JobName", jobName);
+            cmd.Parameters.AddWithValue("@MergeGapSec", mergeGapSec);
+            var ds = new DataSet();
+            da.Fill(ds);
+            foreach (DataTable table in ds.Tables)
+            {
+                var t = table;
+                DateHelper.ConvertUTCToAppTimeZone(ref t);
+            }
+            return ds;
+        }
+
+        private static DataTable GetJobCategories(int instanceId, IEnumerable<int> instanceIds)
         {
             using var cn = new SqlConnection(Common.ConnectionString);
             using var cmd = new SqlCommand("dbo.JobCategories_Get", cn) { CommandType = CommandType.StoredProcedure };
             using var da = new SqlDataAdapter(cmd);
-            cmd.Parameters.AddWithValue("@InstanceID", InstanceID);
+            if (instanceIds == null)
+            {
+                cmd.Parameters.AddWithValue("@InstanceID", instanceId);
+            }
+            else
+            {
+                cmd.Parameters.AddWithValue("@InstanceIDs", instanceIds.AsDataTable());
+            }
             DataTable dt = new();
             da.Fill(dt);
             return dt;
@@ -294,7 +359,8 @@ namespace DBADashGUI.AgentJobs
         /// </summary>
         private void RefreshCategories()
         {
-            if (context.InstanceID != categoryInstanceID)
+            var key = MultiInstance ? string.Join(",", context.RegularInstanceIDs.OrderBy(id => id)) : InstanceId.ToString();
+            if (key != categoryKey)
             {
                 string allCategoriesText = "ALL Categories";
                 selectedCategory = string.Empty;
@@ -304,7 +370,7 @@ namespace DBADashGUI.AgentJobs
                 tsALL.Click += Category_Selected;
                 tsCategories.DropDownItems.Add(tsALL);
                 tsCategories.DropDownItems.Add(new ToolStripSeparator());
-                DataTable dtCategories = GetJobCategories(context.InstanceID);
+                DataTable dtCategories = GetJobCategories(InstanceId, MultiInstance ? context.RegularInstanceIDs : null);
                 foreach (DataRow row in dtCategories.Rows)
                 {
                     string category = (string)row["category"];
@@ -312,7 +378,7 @@ namespace DBADashGUI.AgentJobs
                     tsCat.Click += Category_Selected;
                     tsCategories.DropDownItems.Add(tsCat);
                 }
-                categoryInstanceID = context.InstanceID;
+                categoryKey = key;
             }
         }
 
@@ -326,20 +392,99 @@ namespace DBADashGUI.AgentJobs
             RefreshData();
         }
 
-        public void RefreshData()
+        /// <summary>
+        /// Load and draw the timeline.  The query runs off the UI thread - across many instances it can take a while - and
+        /// a load that has been overtaken by a newer one (a refresh, a filter change, another node) is discarded.
+        /// </summary>
+        public async void RefreshData()
         {
-            if (mins != DateRange.DurationMins)
+            var generation = ++loadGeneration;
+            try
             {
-                DateGrouping = DateHelper.DateGrouping(Convert.ToInt32(SelectedTimeSpan.TotalMinutes), 1440);
-                mins = DateRange.DurationMins;
-            }
-            RefreshCategories();
-            from = FromDateUtc;
-            to = ToDateUtc;
+                if (mins != DateRange.DurationMins)
+                {
+                    DateGrouping = DateHelper.DateGrouping(Convert.ToInt32(SelectedTimeSpan.TotalMinutes), 1440);
+                    mins = DateRange.DurationMins;
+                }
+                RefreshCategories();
+                var queryFrom = FromDateUtc;
+                var queryTo = ToDateUtc;
+                var category = selectedCategory;
+                var dateGroup = DateGrouping;
+                tsRefresh.Enabled = false;
 
-            dt = GetJobTimelineData(context.InstanceID, from, to, selectedCategory, context.JobID, IncludeSteps, IncludeOutcome, DateGrouping);
-            html = null;
-            DrawTimeline();
+                if (MultiInstance)
+                {
+                    var instanceIds = context.RegularInstanceIDs.ToList();
+                    var jobName = tsFilter.Text.Trim();
+                    // About a pixel's worth of time: closer executions merge, so an instance has at most a span per pixel
+                    var mergeGapSec = (int)((queryTo - queryFrom).TotalSeconds / Math.Max(200, chart.Width));
+                    var ds = await Task.Run(() => GetSummaryData(instanceIds, queryFrom, queryTo, category, jobName, mergeGapSec));
+                    if (generation != loadGeneration) return;
+                    from = queryFrom;
+                    to = queryTo;
+                    dt = null;
+                    html = null;
+                    hTMLToolStripMenuItem.Enabled = false;
+                    chart.Title = $"{ds.Tables[0].Rows.Count:N0} instances";
+                    chart.SetData(JobTimelineModel.BuildSummary(ds), from.ToAppTimeZone(), to.ToAppTimeZone(), resetView);
+                }
+                else
+                {
+                    var instanceId = InstanceId;
+                    var jobId = context.JobID;
+                    var steps = IncludeSteps;
+                    var outcome = IncludeOutcome;
+                    var data = await Task.Run(() => GetJobTimelineData(instanceId, queryFrom, queryTo, category, jobId, steps, outcome, dateGroup));
+                    if (generation != loadGeneration) return;
+                    from = queryFrom;
+                    to = queryTo;
+                    dt = data;
+                    html = null;
+                    hTMLToolStripMenuItem.Enabled = true;
+                    DrawTimeline();
+                }
+                resetView = false;
+            }
+            catch (Exception ex)
+            {
+                if (generation == loadGeneration) CommonShared.ShowExceptionDialog(ex, "Error loading job timeline");
+            }
+            finally
+            {
+                if (generation == loadGeneration) tsRefresh.Enabled = true;
+            }
+        }
+
+        /// <summary>Fetch the jobs of an instance expanded on the multi-instance timeline.</summary>
+        private async void Chart_ChildrenRequested(object sender, TimelineRowModel row)
+        {
+            var generation = loadGeneration;
+            var queryFrom = from;
+            var queryTo = to;
+            var category = selectedCategory;
+            var dateGroup = DateGrouping;
+            try
+            {
+                // Expand all can ask for hundreds - a few at a time is kinder to the repository
+                await childLoads.WaitAsync();
+                DataTable data;
+                try
+                {
+                    if (generation != loadGeneration) return;
+                    data = await Task.Run(() => GetJobTimelineData(row.InstanceId, queryFrom, queryTo, category, Guid.Empty, false, true, dateGroup));
+                }
+                finally
+                {
+                    childLoads.Release();
+                }
+                if (generation != loadGeneration) return;
+                chart.SetChildren(row, JobTimelineModel.Build(data, singleJob: false, includeSteps: false, row.InstanceId));
+            }
+            catch (Exception ex)
+            {
+                if (generation == loadGeneration) chart.SetChildrenError(row, ex.Message);
+            }
         }
 
         /// <summary>
@@ -373,7 +518,7 @@ namespace DBADashGUI.AgentJobs
         {
             var singleJob = context.JobID != Guid.Empty;
             chart.Title = context.InstanceName;
-            chart.SetData(JobTimelineModel.Build(dt, singleJob, IncludeSteps), from.ToAppTimeZone(), to.ToAppTimeZone(), resetView);
+            chart.SetData(JobTimelineModel.Build(dt, singleJob, IncludeSteps, InstanceId), from.ToAppTimeZone(), to.ToAppTimeZone(), resetView);
             resetView = false;
         }
 
@@ -490,7 +635,7 @@ namespace DBADashGUI.AgentJobs
         {
             this.context = _context;
             IsActive = true;
-            tsIncludeSteps.Visible = _context.JobID == Guid.Empty;
+            tsIncludeSteps.Visible = _context.JobID == Guid.Empty && !MultiInstance; // outcome only across instances
             // Opening the job from the job's own window would only close and reopen it
             chart.JobActivated -= Chart_JobActivated;
             if (FindForm() is not JobInfoForm) chart.JobActivated += Chart_JobActivated;

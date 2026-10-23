@@ -179,7 +179,7 @@ namespace DBADashGUI.AgentJobs
         /// </summary>
         public void SetData(JobTimelineModel model, DateTime periodFrom, DateTime periodTo, bool resetView = false)
         {
-            var collapsed = _model.Roots.Where(r => r.Collapsed).Select(r => r.JobName).ToHashSet();
+            var collapsed = _model.Roots.Where(r => r.IsGroup).ToDictionary(RowKey, r => r.Collapsed);
             var selected = _selectedBar;
             if (periodTo <= periodFrom) periodTo = periodFrom.Add(MinimumSpan);
             var hadView = _viewTo > _viewFrom;
@@ -192,9 +192,9 @@ namespace DBADashGUI.AgentJobs
             _model = model ?? JobTimelineModel.Empty;
             if (!resetView)
             {
-                foreach (var root in _model.Roots.Where(r => r.IsGroup && collapsed.Contains(r.JobName)))
+                foreach (var root in _model.Roots.Where(r => r.IsGroup))
                 {
-                    root.Collapsed = true;
+                    if (collapsed.TryGetValue(RowKey(root), out var wasCollapsed)) root.Collapsed = wasCollapsed;
                 }
             }
             _periodFrom = periodFrom;
@@ -214,18 +214,55 @@ namespace DBADashGUI.AgentJobs
             _hoverBar = null;
             _hoverRow = null;
             Relayout();
+            // Instances that were expanded before the refresh need their jobs again
+            foreach (var root in _model.Roots.Where(r => !r.Collapsed && r.CanLoadChildren)) RequestChildren(root);
         }
+
+        /// <summary>Identifies a group row across refreshes, to keep it expanded or collapsed.</summary>
+        private static string RowKey(TimelineRowModel row) => row.Kind == TimelineRowKind.Instance ? "instance:" + row.InstanceId : "job:" + row.JobName;
+
+        /// <summary>
+        /// Raised when a row whose children haven't been loaded is expanded - an instance on the multi-instance
+        /// timeline.  The host fetches them and passes them to <see cref="SetChildren"/>, or <see cref="SetChildrenError"/>.
+        /// </summary>
+        public event EventHandler<TimelineRowModel> ChildrenRequested;
+
+        private void RequestChildren(TimelineRowModel row)
+        {
+            if (!row.CanLoadChildren || row.Loading) return;
+            row.Loading = true;
+            row.LoadError = null;
+            ChildrenRequested?.Invoke(this, row);
+            _canvas.Invalidate();
+        }
+
+        /// <summary>Show the children fetched for <paramref name="row"/>.  Ignored if the data has been replaced since.</summary>
+        public void SetChildren(TimelineRowModel row, JobTimelineModel children)
+        {
+            if (!_model.Roots.Contains(row)) return;
+            _model.SetChildren(row, children);
+            Relayout();
+        }
+
+        public void SetChildrenError(TimelineRowModel row, string message)
+        {
+            if (!_model.Roots.Contains(row)) return;
+            row.Loading = false;
+            row.LoadError = message;
+            _canvas.Invalidate();
+        }
+
+        /// <summary>Changes whenever the rows are laid out again, so caches drawn from them know to redraw.</summary>
+        private int _layoutVersion;
+
+        private int HiddenStatusKey => _hiddenStatuses.Aggregate(0, (key, status) => key | 1 << (int)status);
 
         /// <summary>Rebuild the visible row list and their positions after anything that changes which rows show.</summary>
         private void Relayout()
         {
-            _rows = _model.VisibleRows(_filter, IsVisible, _sort, _hiddenStatuses.Count > 0);
-            // Executions by status for the legend, of the jobs that match the filter.  A job row's own bars are its
-            // outcomes, so steps aren't counted on top - unless outcomes aren't included and the job row is empty.
-            _legendCounts = _model.MatchingRoots(_filter)
-                .SelectMany(r => r.Bars.Count > 0 ? r.Bars : r.AllBars)
-                .GroupBy(b => b.Status)
-                .ToDictionary(g => g.Key, g => g.Sum(b => b.Executions));
+            _rows = _model.VisibleRows(_filter, IsVisible, HiddenStatusKey, _sort, _hiddenStatuses.Count > 0);
+            _legendCounts = _model.LegendCounts(_filter);
+            _layoutVersion++;
             float y = 0;
             foreach (var row in _rows)
             {
@@ -317,12 +354,36 @@ namespace DBADashGUI.AgentJobs
         private TimelineRowModel RowAt(float y)
         {
             if (y < RowsTop || y >= RowsBottom) return null;
-            var contentY = y - RowsTop + _scrollY;
-            foreach (var row in _rows)
+            var index = RowIndexAt(y - RowsTop + _scrollY);
+            return index < 0 ? null : _rows[index];
+        }
+
+        /// <summary>The index of the row at a content position, by binary search on the rows' tops, or -1.</summary>
+        private int RowIndexAt(float contentY)
+        {
+            int lo = 0, hi = _rows.Count - 1;
+            while (lo <= hi)
             {
-                if (contentY >= row.Top && contentY < row.Top + row.Height) return row;
+                var mid = (lo + hi) / 2;
+                var row = _rows[mid];
+                if (contentY < row.Top) hi = mid - 1;
+                else if (contentY >= row.Top + row.Height) lo = mid + 1;
+                else return mid;
             }
-            return null;
+            return -1;
+        }
+
+        /// <summary>The first row that is at least partly below <paramref name="contentY"/>.</summary>
+        private int FirstRowEndingAfter(float contentY)
+        {
+            int lo = 0, hi = _rows.Count;
+            while (lo < hi)
+            {
+                var mid = (lo + hi) / 2;
+                if (_rows[mid].Top + _rows[mid].Height < contentY) lo = mid + 1;
+                else hi = mid;
+            }
+            return lo;
         }
 
         private TimelineBar BarAt(Point p)
@@ -330,9 +391,12 @@ namespace DBADashGUI.AgentJobs
             if (p.X < ChartLeft || p.X > ChartRight) return null;
             var row = RowAt(p.Y);
             if (row == null) return null;
-            // Topmost first, and allow a little slack either side so very short runs can still be picked.
+            // Topmost first, and allow a little slack either side so very short runs can still be picked.  A short bar
+            // is drawn wider than its time, so look a few pixels either side of the pointer's time.
             var slack = 2 * Dpi;
-            return row.Bars.Where(IsVisible).LastOrDefault(b =>
+            var reach = TimeSpan.FromTicks((long)((slack + 3 * Dpi) / ChartWidth * ViewTicks));
+            var t = _viewFrom.AddTicks((long)((p.X - ChartLeft) / ChartWidth * ViewTicks));
+            return row.BarsBetween(t - reach, t + reach).Where(IsVisible).LastOrDefault(b =>
             {
                 var r = BarRect(b);
                 return p.Y >= r.Top && p.Y <= r.Bottom && p.X >= r.Left - slack && p.X <= r.Right + slack;
@@ -398,13 +462,20 @@ namespace DBADashGUI.AgentJobs
             row.Collapsed = !row.Collapsed;
             if (_selectedBar != null && _selectedBar.Row.Parent == row && row.Collapsed) _selectedBar = null;
             Relayout();
+            if (!row.Collapsed) RequestChildren(row);
         }
 
+        /// <summary>
+        /// Expand or collapse every group shown.  Only the rows left by the filter are expanded, so on the multi-instance
+        /// timeline a filter limits how many instances' jobs are fetched.
+        /// </summary>
         private void SetAllCollapsed(bool collapsed)
         {
-            foreach (var root in _model.Roots.Where(r => r.IsGroup)) root.Collapsed = collapsed;
+            var groups = collapsed ? _model.Roots.Where(r => r.IsGroup).ToList() : _rows.Where(r => r.Depth == 0 && r.IsGroup).ToList();
+            foreach (var root in groups) root.Collapsed = collapsed;
             if (collapsed && _selectedBar?.Row.Parent != null) _selectedBar = null;
             Relayout();
+            if (!collapsed) groups.ForEach(RequestChildren);
         }
 
         private void ToggleStatus(RunStatus status)
@@ -571,7 +642,14 @@ namespace DBADashGUI.AgentJobs
             var bar = BarAt(e.Location);
             if (bar != null)
             {
-                if (bar.IsSingleExecution) BarActivated?.Invoke(this, bar);
+                if (bar.IsSummary)
+                {
+                    if (bar.Row.Collapsed) ToggleCollapsed(bar.Row);
+                }
+                else if (bar.IsSingleExecution)
+                {
+                    BarActivated?.Invoke(this, bar);
+                }
                 return;
             }
             var row = RowAt(e.Y);
@@ -685,7 +763,17 @@ namespace DBADashGUI.AgentJobs
 
             _contextMenu?.Dispose();
             _contextMenu = new ContextMenuStrip();
-            if (bar != null)
+            if (bar is { IsSummary: true })
+            {
+                if (bar.Row.Collapsed)
+                {
+                    _contextMenu.Items.Add(new ToolStripMenuItem("Show jobs", null, (_, _) => ToggleCollapsed(bar.Row)) { Font = new Font(_contextMenu.Font, FontStyle.Bold) });
+                }
+                _contextMenu.Items.Add("Zoom to span", null, (_, _) => ZoomToBar(bar));
+                _contextMenu.Items.Add("Copy details", null, (_, _) => Clipboard.SetText(BarDetailsText(bar)));
+                _contextMenu.Items.Add(new ToolStripSeparator());
+            }
+            else if (bar != null)
             {
                 if (BarActivated != null)
                 {
@@ -739,6 +827,15 @@ namespace DBADashGUI.AgentJobs
         /// <summary>Label/value lines describing an execution, for the tooltip and for copying.</summary>
         private static IEnumerable<(string, string)> BarDetails(TimelineBar bar)
         {
+            if (bar.IsSummary)
+            {
+                yield return ("Executions", bar.Executions.ToString("N0") + (bar.Executions == 1 ? " job run" : " job runs"));
+                yield return ("Worst status", TimelineBar.StatusText(bar.Status));
+                yield return ("Start", bar.Start.ToString("G"));
+                yield return ("End", bar.End.ToString("G"));
+                yield return ("Busy for", FormatDuration(TimeSpan.FromSeconds(bar.DurationSec), true));
+                yield break;
+            }
             yield return ("Step", bar.StepLabel);
             yield return ("Status", TimelineBar.StatusText(bar.Status));
             yield return ("Start", bar.Start.ToString("G"));
