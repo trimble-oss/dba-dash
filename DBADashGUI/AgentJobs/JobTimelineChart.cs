@@ -256,6 +256,35 @@ namespace DBADashGUI.AgentJobs
             _canvas.Invalidate();
         }
 
+        /// <summary>
+        /// Failed runs per row (own, and with the rows beneath it) from the full period load, when what's drawn was put
+        /// together from more than one level of detail - see <see cref="JobTimelineModel.CountsFrom"/>.  Counting the
+        /// drawn bars would count a failure twice: once in the zoomed in detail, and again in the share of it given to a
+        /// merged bar trimmed back to the edges of the detail.
+        /// </summary>
+        private Dictionary<string, (int Own, int All)> _exactFailures;
+
+        private static string FailureKey(TimelineRowModel row) => $"{row.InstanceId}|{row.Kind}|{row.JobName}|{row.Label}";
+
+        private static Dictionary<string, (int Own, int All)> FailuresByRow(IEnumerable<TimelineRowModel> rows)
+        {
+            var failures = new Dictionary<string, (int Own, int All)>();
+            void Add(TimelineRowModel row)
+            {
+                failures[FailureKey(row)] = (row.Bars.Sum(b => b.RunsWith(RunStatus.Failed)), row.AllBars.Sum(b => b.RunsWith(RunStatus.Failed)));
+                foreach (var child in row.Children) Add(child);
+            }
+            foreach (var row in rows) Add(row);
+            return failures;
+        }
+
+        /// <summary>The failed runs to show on a row's badge: with the rows beneath it when it's collapsed.</summary>
+        private int RowFailures(TimelineRowModel row)
+        {
+            if (_exactFailures != null && _exactFailures.TryGetValue(FailureKey(row), out var exact)) return row.Collapsed ? exact.All : exact.Own;
+            return (row.Collapsed ? row.AllBars : row.Bars).Where(IsVisible).Sum(b => b.RunsWith(RunStatus.Failed));
+        }
+
         /// <summary>Changes whenever the rows are laid out again, so caches drawn from them know to redraw.</summary>
         private int _layoutVersion;
 
@@ -266,6 +295,7 @@ namespace DBADashGUI.AgentJobs
         {
             _rows = _model.VisibleRows(_filter, IsVisible, HiddenStatusKey, _sort, _hiddenStatuses.Count > 0);
             _legendCounts = _model.LegendCounts(_filter);
+            _exactFailures = _model.CountsFrom == null ? null : FailuresByRow(_model.CountsFrom.Roots);
             _layoutVersion++;
             float y = 0;
             foreach (var row in _rows)
@@ -294,7 +324,10 @@ namespace DBADashGUI.AgentJobs
         private float ChartLeft => LabelWidth;
         private float ChartRight => _canvas.Width - ScrollBarWidth;
         private float ChartWidth => Math.Max(1, ChartRight - ChartLeft);
-        private float RowsTop => HeaderHeight;
+        private float RowsTop => HeaderHeight + BandHeight;
+
+        /// <summary>The concurrency band, between the axis and the rows, when shown.</summary>
+        private float BandHeight => ShowConcurrency ? 36 * Dpi : 0;
         private float RowsBottom => CanvasHeight - OverviewHeight;
         private float RowsHeight => Math.Max(0, RowsBottom - RowsTop);
 
@@ -450,6 +483,48 @@ namespace DBADashGUI.AgentJobs
 
         /// <summary>The width of the time axis in pixels, for working out how much time a pixel covers.</summary>
         public float TimeAxisWidth => ChartWidth;
+
+        private bool _showConcurrency;
+
+        /// <summary>Show the band of how many jobs were running at once, between the axis and the rows.</summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool ShowConcurrency
+        {
+            get => _showConcurrency;
+            set
+            {
+                if (_showConcurrency == value) return;
+                _showConcurrency = value;
+                ClampScroll();
+                _layoutVersion++;
+                _canvas.Invalidate();
+            }
+        }
+
+        // The band's data: the most jobs running at once in each slice, from _bandFrom
+        private DateTime _bandFrom;
+        private TimeSpan _bandSlice;
+        private int[] _bandPeaks = Array.Empty<int>();
+
+        /// <summary>
+        /// The concurrency band's data: the most jobs running at once in each <paramref name="slice"/> from
+        /// <paramref name="from"/> (app time zone).  It needn't cover the whole period - the host fetches it for the view.
+        /// </summary>
+        public void SetConcurrency(DateTime from, TimeSpan slice, int[] peaks)
+        {
+            _bandFrom = from;
+            _bandSlice = slice > TimeSpan.Zero ? slice : TimeSpan.FromSeconds(1);
+            _bandPeaks = peaks ?? Array.Empty<int>();
+            _canvas.Invalidate();
+        }
+
+        /// <summary>The most jobs running at once at <paramref name="t"/>, or null where the band has no data.</summary>
+        private int? ConcurrencyAt(DateTime t)
+        {
+            if (_bandPeaks.Length == 0 || t < _bandFrom) return null;
+            var index = (long)((t - _bandFrom).Ticks / _bandSlice.Ticks);
+            return index < _bandPeaks.Length ? _bandPeaks[index] : null;
+        }
 
         /// <summary>A note shown across the top of the rows, e.g. that runs are merged at this zoom.  Null for none.</summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]

@@ -163,6 +163,7 @@ namespace DBADashGUI.AgentJobs
             canvas.Restore();
 
             DrawHeader(canvas, p, width, step, ticks);
+            if (ShowConcurrency) DrawConcurrencyBand(canvas, p, ticks);
             if (!string.IsNullOrEmpty(Banner)) DrawBanner(canvas, p, Banner);
             if (interactive) DrawCursor(canvas, p);
             DrawOverview(canvas, p);
@@ -440,7 +441,7 @@ namespace DBADashGUI.AgentJobs
                 // it counts its executions when collapsed and leaves the count to its jobs when expanded.
                 var failures = _hiddenStatuses.Contains(RunStatus.Failed) ? 0
                     : row.Kind == TimelineRowKind.Instance ? (row.Collapsed || row.CanLoadChildren ? row.StatusCounts.GetValueOrDefault(RunStatus.Failed) : 0)
-                    : (row.Collapsed ? row.AllBars : row.Bars).Where(IsVisible).Sum(b => b.RunsWith(RunStatus.Failed));
+                    : RowFailures(row);
                 var right = LabelWidth - 8 * Dpi;
                 if (failures > 0)
                 {
@@ -542,12 +543,71 @@ namespace DBADashGUI.AgentJobs
             _stroke.Color = p.Fore.WithAlpha(110);
             _stroke.StrokeWidth = 1;
             _stroke.PathEffect = dash;
-            canvas.DrawLine(_mouse.X, RowsTop, _mouse.X, RowsBottom, _stroke);
+            canvas.DrawLine(_mouse.X, HeaderHeight, _mouse.X, RowsBottom, _stroke);
             _stroke.PathEffect = null;
 
             var t = XToTime(_mouse.X);
             var format = ViewTicks < TimeSpan.FromHours(6).Ticks ? "HH:mm:ss" : "dd MMM HH:mm";
             DrawPill(canvas, t.ToString(format), _mouse.X, HeaderHeight - 14 * Dpi, p.Fore, p.Back);
+
+            // How many were running then, on the band
+            if (ShowConcurrency && ConcurrencyAt(t) is int running)
+            {
+                DrawPill(canvas, running == 1 ? "1 job running" : $"{running:N0} jobs running", _mouse.X, HeaderHeight + BandHeight / 2, p.Accent, SKColors.White);
+            }
+        }
+
+        /// <summary>
+        /// How many jobs were running at once: a column per slice, as tall as the most running at any moment in it, scaled
+        /// to the highest in view so the shape stays readable when zoomed in.
+        /// </summary>
+        private void DrawConcurrencyBand(SKCanvas canvas, Palette p, List<DateTime> ticks)
+        {
+            var top = HeaderHeight;
+            var bottom = RowsTop;
+            _fill.Color = p.Panel;
+            canvas.DrawRect(new SKRect(0, top, _canvas.Width, bottom), _fill);
+            _stroke.Color = p.GridStrong;
+            _stroke.StrokeWidth = 1;
+            canvas.DrawLine(0, bottom, _canvas.Width, bottom, _stroke);
+
+            // The slices in view, and the highest of them for the scale
+            var first = Math.Max(0, (long)((_viewFrom - _bandFrom).Ticks / Math.Max(1, _bandSlice.Ticks)));
+            var last = Math.Min(_bandPeaks.Length - 1, (long)((_viewTo - _bandFrom).Ticks / Math.Max(1, _bandSlice.Ticks)));
+            var max = 0;
+            for (var i = first; i <= last; i++) max = Math.Max(max, _bandPeaks[i]);
+
+            _text.Color = p.Dim;
+            canvas.DrawText("Running at once", 8 * Dpi, top + 15 * Dpi, _smallFont, _text);
+            if (_bandPeaks.Length > 0)
+            {
+                _text.Color = p.Fore;
+                canvas.DrawText($"peak {max:N0}", 8 * Dpi, top + 29 * Dpi, _smallFont, _text);
+            }
+
+            canvas.Save();
+            canvas.ClipRect(new SKRect(ChartLeft, top, ChartRight, bottom));
+            _stroke.Color = p.Grid;
+            foreach (var t in ticks)
+            {
+                var x = TimeToX(t);
+                canvas.DrawLine(x, top, x, bottom, _stroke);
+            }
+            if (max > 0)
+            {
+                var height = bottom - top - 6 * Dpi;
+                _fill.Color = p.Accent.WithAlpha(170);
+                for (var i = first; i <= last; i++)
+                {
+                    if (_bandPeaks[i] == 0) continue;
+                    var start = _bandFrom.AddTicks(_bandSlice.Ticks * i);
+                    var x1 = TimeToX(start);
+                    var x2 = Math.Max(x1 + 1, TimeToX(start + _bandSlice));
+                    var h = Math.Max(1.5f * Dpi, height * _bandPeaks[i] / max);
+                    canvas.DrawRect(new SKRect(x1, bottom - h, x2, bottom), _fill);
+                }
+            }
+            canvas.Restore();
         }
 
         /// <summary>A note centred along the bottom of the rows - over the bars, but where the rows usually run out first.</summary>
