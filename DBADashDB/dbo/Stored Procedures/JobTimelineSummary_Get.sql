@@ -16,7 +16,7 @@ AS
 	1. Instances - every instance in @InstanceIDs that has agent jobs (in @category, with @JobName in their name), including those with no executions
 	   in the period, so a missing run shows as a gap rather than a missing row.
 	2. Spans - executions merged per instance.  Executions are merged when they overlap or the gap between them is no
-	   more than @MergeGapSec.  The caller passes about one pixel's worth of time, which caps the spans per instance at
+	   more than @MergeGapSec.  The caller passes the time the narrowest bar covers (a few pixels), which caps the spans per instance at
 	   roughly the chart's width however many jobs there are.  run_status is the worst status in the span
 	   (Failed, Retry, Cancelled, In Progress, then Succeeded) and Executions the number merged.
 	3. Status counts - executions per instance and run_status, for the legend.

@@ -149,6 +149,37 @@ namespace DBADashGUI.AgentJobs
         /// <summary>Incremented by each load, so a slower earlier one can tell it has been overtaken.</summary>
         private int loadGeneration;
 
+        /// <summary>
+        /// The Auto date grouping: the level of detail follows the zoom.  Runs closer than about a pixel are merged, and
+        /// zooming in fetches the time in view again with a smaller gap, down to each individual run.
+        /// </summary>
+        private const int AutoDateGrouping = -1;
+
+        /// <summary>More bars than this and the fetch is repeated with a wider merge gap.</summary>
+        private const int MaxBars = 50_000;
+
+        private bool AutoDetail => DateGrouping == AutoDateGrouping;
+
+        // The full period, at the level of detail that suits it
+        private DataTable baseData;
+        private DataSet baseSummary;
+        private int baseGap;
+        private bool baseCapped;
+        private readonly Dictionary<int, DataTable> childBase = new();
+
+        // Zoomed in: the time in view (and as much again either side) at a finer level of detail
+        private DateTime? detailFromUtc;
+        private DateTime? detailToUtc;
+        private DataTable detailData;
+        private DataSet detailSummary;
+        private int detailGap;
+        private int detailRequestedGap;
+        private bool detailCapped;
+        private int detailGeneration;
+
+        /// <summary>Waits for zooming and panning to settle before fetching detail for the view.</summary>
+        private readonly System.Windows.Forms.Timer viewTimer = new() { Interval = 350 };
+
         /// <summary>Limits how many instances' jobs are fetched at once on the multi-instance timeline.</summary>
         private readonly SemaphoreSlim childLoads = new(4);
 
@@ -191,7 +222,7 @@ namespace DBADashGUI.AgentJobs
             set
             {
                 tsDateGroup.Tag = value;
-                tsDateGroup.Text = DateHelper.DateGroupString(value);
+                tsDateGroup.Text = value == AutoDateGrouping ? "Auto" : DateHelper.DateGroupString(value);
             }
         }
 
@@ -199,8 +230,28 @@ namespace DBADashGUI.AgentJobs
         {
             InitializeComponent();
             DateHelper.AddDateGroups(tsDateGroup, TsDateGroup_Click);
+            var auto = new ToolStripMenuItem("Auto")
+            {
+                Tag = AutoDateGrouping,
+                ToolTipText = "Combine runs too close together to tell apart at the current zoom, and show more detail as you zoom in"
+            };
+            auto.Click += TsDateGroup_Click;
+            tsDateGroup.DropDownItems.Insert(0, auto);
+            tsDateGroup.DropDownItems.Insert(1, new ToolStripSeparator());
+            DateGrouping = AutoDateGrouping;
             AddSortOptions();
             chart.ChildrenRequested += Chart_ChildrenRequested;
+            chart.ViewChanged += (_, _) =>
+            {
+                viewTimer.Stop();
+                viewTimer.Start();
+            };
+            viewTimer.Tick += (_, _) =>
+            {
+                viewTimer.Stop();
+                FetchDetailForView();
+            };
+            Disposed += (_, _) => viewTimer.Dispose();
             filterTimer.Tick += (_, _) =>
             {
                 filterTimer.Stop();
@@ -291,7 +342,7 @@ namespace DBADashGUI.AgentJobs
         /// <summary>
         /// Get DataTable with Job Timeline data.  Dates converted to app timezone
         /// </summary>
-        private static DataTable GetJobTimelineData(int InstanceID, DateTime from, DateTime to, string category, Guid job_id, bool steps, bool outcome, int dateGroup)
+        private static DataTable GetJobTimelineData(int InstanceID, DateTime from, DateTime to, string category, Guid job_id, bool steps, bool outcome, int dateGroup, int mergeGapSec = 0)
         {
             using var cn = new SqlConnection(Common.ConnectionString);
             using var cmd = new SqlCommand("dbo.JobTimeline_Get", cn) { CommandType = CommandType.StoredProcedure };
@@ -304,6 +355,7 @@ namespace DBADashGUI.AgentJobs
             cmd.Parameters.AddGuidIfNotEmpty("@job_id", job_id);
             cmd.Parameters.AddStringIfNotNullOrEmpty("category", category);
             cmd.Parameters.AddWithValue("@DateGroupingMin", dateGroup);
+            cmd.Parameters.AddWithValue("@MergeGapSec", mergeGapSec);
 
             DataTable dt = new();
             da.Fill(dt);
@@ -403,31 +455,27 @@ namespace DBADashGUI.AgentJobs
             {
                 if (mins != DateRange.DurationMins)
                 {
-                    DateGrouping = DateHelper.DateGrouping(Convert.ToInt32(SelectedTimeSpan.TotalMinutes), 1440);
+                    // A fixed grouping is re-picked to suit a new period.  Auto adjusts to the zoom by itself.
+                    if (!AutoDetail) DateGrouping = DateHelper.DateGrouping(Convert.ToInt32(SelectedTimeSpan.TotalMinutes), 1440);
                     mins = DateRange.DurationMins;
                 }
                 RefreshCategories();
                 var queryFrom = FromDateUtc;
                 var queryTo = ToDateUtc;
                 var category = selectedCategory;
-                var dateGroup = DateGrouping;
+                var dateGroup = AutoDetail ? 0 : DateGrouping;
+                var gap = AutoDetail ? GapFor(queryTo - queryFrom) : 0;
                 tsRefresh.Enabled = false;
 
                 if (MultiInstance)
                 {
                     var instanceIds = context.RegularInstanceIDs.ToList();
                     var jobName = tsFilter.Text.Trim();
-                    // About a pixel's worth of time: closer executions merge, so an instance has at most a span per pixel
-                    var mergeGapSec = (int)((queryTo - queryFrom).TotalSeconds / Math.Max(200, chart.Width));
-                    var ds = await Task.Run(() => GetSummaryData(instanceIds, queryFrom, queryTo, category, jobName, mergeGapSec));
+                    var (ds, usedGap, capped) = await Task.Run(() => FetchCapped(g => GetSummaryData(instanceIds, queryFrom, queryTo, category, jobName, g), d => d.Tables[1].Rows.Count, gap));
                     if (generation != loadGeneration) return;
-                    from = queryFrom;
-                    to = queryTo;
-                    dt = null;
-                    html = null;
+                    SetBase(queryFrom, queryTo, usedGap, capped);
+                    baseSummary = ds;
                     hTMLToolStripMenuItem.Enabled = false;
-                    chart.Title = $"{ds.Tables[0].Rows.Count:N0} instances";
-                    chart.SetData(JobTimelineModel.BuildSummary(ds), from.ToAppTimeZone(), to.ToAppTimeZone(), resetView);
                 }
                 else
                 {
@@ -435,15 +483,13 @@ namespace DBADashGUI.AgentJobs
                     var jobId = context.JobID;
                     var steps = IncludeSteps;
                     var outcome = IncludeOutcome;
-                    var data = await Task.Run(() => GetJobTimelineData(instanceId, queryFrom, queryTo, category, jobId, steps, outcome, dateGroup));
+                    var (data, usedGap, capped) = await Task.Run(() => FetchCapped(g => GetJobTimelineData(instanceId, queryFrom, queryTo, category, jobId, steps, outcome, dateGroup, g), d => d.Rows.Count, gap));
                     if (generation != loadGeneration) return;
-                    from = queryFrom;
-                    to = queryTo;
-                    dt = data;
-                    html = null;
+                    SetBase(queryFrom, queryTo, usedGap, capped);
+                    baseData = data;
                     hTMLToolStripMenuItem.Enabled = true;
-                    DrawTimeline();
                 }
+                Display();
                 resetView = false;
             }
             catch (Exception ex)
@@ -456,14 +502,229 @@ namespace DBADashGUI.AgentJobs
             }
         }
 
-        /// <summary>Fetch the jobs of an instance expanded on the multi-instance timeline.</summary>
+        /// <summary>Start again from a full period load: the zoomed in detail and each instance's jobs are dropped.</summary>
+        private void SetBase(DateTime queryFrom, DateTime queryTo, int gap, bool capped)
+        {
+            from = queryFrom;
+            to = queryTo;
+            baseGap = gap;
+            baseCapped = capped;
+            baseData = null;
+            baseSummary = null;
+            ClearDetail();
+            childBase.Clear();
+        }
+
+        private void ClearDetail()
+        {
+            // A detail fetch still running is for a view that's gone - don't let it land after this
+            detailGeneration++;
+            detailFromUtc = null;
+            detailToUtc = null;
+            detailData = null;
+            detailSummary = null;
+            detailCapped = false;
+            detailGap = 0;
+            detailRequestedGap = 0;
+        }
+
+        private bool DetailActive => detailFromUtc.HasValue;
+
+        /// <summary>
+        /// How close runs can be and still be merged: the time covered by the narrowest bar the chart draws (3 pixels), so
+        /// runs are only merged where their bars would have run into each other anyway.  Less than a second means nothing
+        /// is merged.
+        /// </summary>
+        private int GapFor(TimeSpan span) => (int)(span.TotalSeconds * MinBarPixels / Math.Max(200, chart.TimeAxisWidth));
+
+        private const int MinBarPixels = 3;
+
+        /// <summary>
+        /// Fetch, and if that returns more than <see cref="MaxBars"/>, fetch once more with a gap wide enough to bring it
+        /// under - a busy estate over a long period could otherwise be hundreds of thousands of bars.
+        /// </summary>
+        private static (T Data, int Gap, bool Capped) FetchCapped<T>(Func<int, T> fetch, Func<T, int> count, int gap)
+        {
+            var data = fetch(gap);
+            var bars = count(data);
+            if (bars <= MaxBars) return (data, gap, false);
+            var wider = (int)Math.Max(Math.Max(gap, 1) * 2L, Math.Ceiling(Math.Max(gap, 1) * (double)bars / MaxBars * 1.5));
+            return (fetch(wider), wider, true);
+        }
+
+        /// <summary>
+        /// When the view settles after a zoom or pan, fetch more detail for it if what's loaded is too coarse - or doesn't
+        /// cover it.  The detail is fetched for the view and as much again either side, so a small pan doesn't fetch again.
+        /// Zoomed back out to where the full period load is fine enough, the detail is dropped.
+        /// </summary>
+        private async void FetchDetailForView()
+        {
+            if (context == null || !AutoDetail || chart.ViewTo <= chart.ViewFrom) return;
+            var viewFrom = chart.ViewFrom.AppTimeZoneToUtc();
+            var viewTo = chart.ViewTo.AppTimeZoneToUtc();
+            var need = GapFor(viewTo - viewFrom);
+            var zoomed = chart.ViewFrom > chart.PeriodFrom || chart.ViewTo < chart.PeriodTo;
+            if (!zoomed || (need * 2 >= baseGap && !baseCapped))
+            {
+                if (!DetailActive) return;
+                ClearDetail();
+                Display();
+                return;
+            }
+            // Compared with the gap asked for rather than the one used: a capped fetch is coarser than asked, and asking again would only be capped again
+            if (DetailActive && detailFromUtc <= viewFrom && detailToUtc >= viewTo && detailRequestedGap <= need * 2) return;
+
+            var span = viewTo - viewFrom;
+            var windowFrom = viewFrom - span < from ? from : viewFrom - span;
+            var windowTo = viewTo + span > to ? to : viewTo + span;
+            var generation = loadGeneration;
+            var detail = ++detailGeneration;
+            var category = selectedCategory;
+            try
+            {
+                if (MultiInstance)
+                {
+                    var instanceIds = context.RegularInstanceIDs.ToList();
+                    var jobName = tsFilter.Text.Trim();
+                    var (ds, usedGap, capped) = await Task.Run(() => FetchCapped(g => GetSummaryData(instanceIds, windowFrom, windowTo, category, jobName, g), d => d.Tables[1].Rows.Count, need));
+                    if (generation != loadGeneration || detail != detailGeneration) return;
+                    detailSummary = ds;
+                    (detailGap, detailCapped) = (usedGap, capped);
+                }
+                else
+                {
+                    var instanceId = InstanceId;
+                    var jobId = context.JobID;
+                    var steps = IncludeSteps;
+                    var outcome = IncludeOutcome;
+                    var (data, usedGap, capped) = await Task.Run(() => FetchCapped(g => GetJobTimelineData(instanceId, windowFrom, windowTo, category, jobId, steps, outcome, 0, g), d => d.Rows.Count, need));
+                    if (generation != loadGeneration || detail != detailGeneration) return;
+                    detailData = data;
+                    (detailGap, detailCapped) = (usedGap, capped);
+                }
+                (detailFromUtc, detailToUtc, detailRequestedGap) = (windowFrom, windowTo, need);
+                Display();
+            }
+            catch (Exception ex)
+            {
+                // The full period load is still shown, so just say why the detail is missing
+                if (generation == loadGeneration && detail == detailGeneration) chart.Banner = "Couldn't load more detail: " + ex.Message;
+            }
+        }
+
+        /// <summary>
+        /// Draw what's loaded: the full period load, with the detail fetched for the zoomed in window in place of it there.
+        /// Expanded instances are asked for their jobs again by the chart, for the same window.
+        /// </summary>
+        private void Display()
+        {
+            var windowFrom = detailFromUtc?.ToAppTimeZone();
+            var windowTo = detailToUtc?.ToAppTimeZone();
+            if (MultiInstance)
+            {
+                if (baseSummary == null) return;
+                var ds = baseSummary;
+                if (detailSummary != null)
+                {
+                    ds = baseSummary.Clone();
+                    ds.Tables[0].Merge(detailSummary.Tables[0].Rows.Count >= baseSummary.Tables[0].Rows.Count ? detailSummary.Tables[0] : baseSummary.Tables[0]);
+                    ds.Tables[1].Merge(Combine(baseSummary.Tables[1], detailSummary.Tables[1], windowFrom.Value, windowTo.Value));
+                    ds.Tables[2].Merge(baseSummary.Tables[2]); // the legend counts the whole period
+                }
+                dt = null;
+                html = null;
+                chart.Title = $"{ds.Tables[0].Rows.Count:N0} instances";
+                chart.SetData(JobTimelineModel.BuildSummary(ds), from.ToAppTimeZone(), to.ToAppTimeZone(), resetView);
+            }
+            else
+            {
+                if (baseData == null) return;
+                dt = detailData == null ? baseData : Combine(baseData, detailData, windowFrom.Value, windowTo.Value);
+                html = null;
+                DrawTimeline();
+            }
+            chart.Banner = BannerText();
+        }
+
+        /// <summary>
+        /// The full period rows outside the detail window, and the detail rows.  Inside the window the detail has the runs
+        /// themselves.  A merged full period row that reaches into the window is trimmed back to the window's edges, so a
+        /// job merged into one long bar still shows either side of it; a single run reaching in is left to the detail,
+        /// which has it whole.
+        /// </summary>
+        private static DataTable Combine(DataTable full, DataTable detail, DateTime windowFrom, DateTime windowTo)
+        {
+            // The wider schema: a fetch with nothing to merge has no runs-by-status columns
+            var combined = full.Columns.Count >= detail.Columns.Count ? full.Clone() : detail.Clone();
+            foreach (DataRow r in full.Rows)
+            {
+                var start = (DateTime)r["RunDateTime"];
+                var finish = (DateTime)r["FinishDateTime"];
+                if (finish < windowFrom || start > windowTo)
+                {
+                    combined.ImportRow(r);
+                    continue;
+                }
+                if (!r.Table.Columns.Contains("Executions") || (int)r["Executions"] <= 1) continue;
+                if (start < windowFrom) AddTrimmed(combined, r, start, windowFrom);
+                if (finish > windowTo) AddTrimmed(combined, r, windowTo, finish);
+            }
+            foreach (DataRow r in detail.Rows) combined.ImportRow(r);
+            return combined;
+        }
+
+        private static void AddTrimmed(DataTable table, DataRow source, DateTime start, DateTime finish)
+        {
+            table.ImportRow(source);
+            var row = table.Rows[^1];
+            // The piece's share of the runs, by time - which runs fell where isn't known
+            var whole = ((DateTime)source["FinishDateTime"] - (DateTime)source["RunDateTime"]).TotalSeconds;
+            var share = whole <= 0 ? 1 : (finish - start).TotalSeconds / whole;
+            var executions = 0;
+            foreach (var (_, column) in JobTimelineModel.StatusRunColumns)
+            {
+                if (!table.Columns.Contains(column) || row[column] == DBNull.Value) continue;
+                var runs = (int)Math.Round(Convert.ToInt32(row[column]) * share);
+                row[column] = runs;
+                executions += runs;
+            }
+            row["Executions"] = Math.Max(1, executions > 0 ? executions : (int)Math.Round((int)source["Executions"] * share));
+            row["RunDateTime"] = start;
+            row["FinishDateTime"] = finish;
+            row["RunDurationSec"] = (int)Math.Max(1, (finish - start).TotalSeconds);
+            if (table.Columns.Contains("instance_id")) row["instance_id"] = DBNull.Value;
+        }
+
+        /// <summary>Say when runs are being merged, so a merged bar isn't mistaken for one long run.</summary>
+        private string BannerText()
+        {
+            if (!AutoDetail) return null;
+            var gap = DetailActive ? detailGap : baseGap;
+            var within = JobTimelineChart.FormatDuration(TimeSpan.FromSeconds(gap));
+            if (DetailActive ? detailCapped : baseCapped)
+            {
+                return $"Too many runs to show individually - runs within {within} of each other are combined.  Zoom in or filter for detail.";
+            }
+            // The instance spans are merged by design, so only job rows count
+            // Zoomed in, only the detail for the window is at this zoom's level - the rest is off screen
+            var shown = DetailActive ? detailData : baseData;
+            var merged = MultiInstance ? childBase.Count > 0 && gap > 0 : gap > 0 && shown != null && shown.AsEnumerable().Any(r => (int)r["Executions"] > 1);
+            return merged ? $"Runs within {within} of each other are combined at this zoom.  Zoom in to see each run." : null;
+        }
+
+        /// <summary>
+        /// Fetch the jobs of an instance expanded on the multi-instance timeline: for the full period (kept, so collapsing
+        /// and expanding again doesn't fetch it again) and, when zoomed in, the detail for the window.
+        /// </summary>
         private async void Chart_ChildrenRequested(object sender, TimelineRowModel row)
         {
             var generation = loadGeneration;
             var queryFrom = from;
             var queryTo = to;
             var category = selectedCategory;
-            var dateGroup = DateGrouping;
+            var dateGroup = AutoDetail ? 0 : DateGrouping;
+            var gap = baseGap;
+            var (windowFrom, windowTo, windowGap) = (detailFromUtc, detailToUtc, detailGap);
             try
             {
                 // Expand all can ask for hundreds - a few at a time is kinder to the repository
@@ -472,7 +733,18 @@ namespace DBADashGUI.AgentJobs
                 try
                 {
                     if (generation != loadGeneration) return;
-                    data = await Task.Run(() => GetJobTimelineData(row.InstanceId, queryFrom, queryTo, category, Guid.Empty, false, true, dateGroup));
+                    if (!childBase.TryGetValue(row.InstanceId, out var full))
+                    {
+                        full = await Task.Run(() => GetJobTimelineData(row.InstanceId, queryFrom, queryTo, category, Guid.Empty, false, true, dateGroup, gap));
+                        if (generation != loadGeneration) return;
+                        childBase[row.InstanceId] = full;
+                    }
+                    data = full;
+                    if (windowFrom.HasValue)
+                    {
+                        var detail = await Task.Run(() => GetJobTimelineData(row.InstanceId, windowFrom.Value, windowTo.Value, category, Guid.Empty, false, true, 0, windowGap));
+                        data = Combine(full, detail, windowFrom.Value.ToAppTimeZone(), windowTo.Value.ToAppTimeZone());
+                    }
                 }
                 finally
                 {
@@ -480,6 +752,7 @@ namespace DBADashGUI.AgentJobs
                 }
                 if (generation != loadGeneration) return;
                 chart.SetChildren(row, JobTimelineModel.Build(data, singleJob: false, includeSteps: false, row.InstanceId));
+                chart.Banner = BannerText();
             }
             catch (Exception ex)
             {
@@ -518,7 +791,14 @@ namespace DBADashGUI.AgentJobs
         {
             var singleJob = context.JobID != Guid.Empty;
             chart.Title = context.InstanceName;
-            chart.SetData(JobTimelineModel.Build(dt, singleJob, IncludeSteps, InstanceId), from.ToAppTimeZone(), to.ToAppTimeZone(), resetView);
+            var model = JobTimelineModel.Build(dt, singleJob, IncludeSteps, InstanceId);
+            // Zoomed in, part of what's drawn is shared out from merged bars by time - count the legend from the full
+            // period load, where every run is counted once
+            if (detailData != null && baseData != null && !ReferenceEquals(dt, baseData))
+            {
+                model.CountsFrom = JobTimelineModel.Build(baseData, singleJob, IncludeSteps, InstanceId);
+            }
+            chart.SetData(model, from.ToAppTimeZone(), to.ToAppTimeZone(), resetView);
             resetView = false;
         }
 
