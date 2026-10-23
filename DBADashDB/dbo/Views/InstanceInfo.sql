@@ -14,7 +14,7 @@ SELECT I.InstanceID,
     I.SystemProductName,
 	I.physical_memory_kb,
 	I.physical_memory_kb/POWER(1024.0,2) PhysicalMemoryGB,
-	CAST(maxmem.value AS BIGINT) BufferPoolMB, 
+	CAST(maxmem.value AS BIGINT) BufferPoolMB, /* max server memory (MB), not the current buffer pool size */
 	CASE WHEN CAST(maxmem.value AS BIGINT)*1024 > I.physical_memory_kb THEN 1.0 ELSE CAST(maxmem.value AS BIGINT) / (I.physical_memory_kb/1024.0) END AS  PctMemoryAllocatedToBufferPool,
 	CASE WHEN CAST(maxmem.value AS BIGINT)*1024 > I.physical_memory_kb THEN 0.0 ELSE ((I.physical_memory_kb/1024)-CAST(maxmem.value AS BIGINT)) / 1024.0 END AS MemoryNotAllocatedToBufferPoolGB,
     I.sql_memory_model,	  

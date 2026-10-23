@@ -12,7 +12,7 @@ WITH T AS (
 				+ ISNULL(', HT Ratio: ' + FORMAT(I.hyperthread_ratio,'N0'),'') + ISNULL(', NUMA nodes: ' + FORMAT(I.numa_node_count,'N0'),'') 
 				+ ISNULL(', Soft NUMA: ' + I.softnuma_configuration_desc,'') + ISNULL(', Affinity: ' + I.affinity_type_desc,'') AS NVARCHAR(MAX)) AS [Processor Info],
 		CAST(I.OfflineSchedulers AS NVARCHAR(MAX)) AS [Offline Schedulers],
-		CAST(FORMAT(I.physical_memory_kb/POWER(1024,2),'N1') + 'GB, Allocated to buffer pool: ' + FORMAT(I.BufferPoolMB,'N0') + 'MB (' + FORMAT(I.PctMemoryAllocatedToBufferPool,'P1') + ') ' +
+		CAST(FORMAT(I.physical_memory_kb/POWER(1024,2),'N1') + 'GB. Max server memory: ' + FORMAT(I.BufferPoolMB,'N0') + 'MB (' + FORMAT(I.PctMemoryAllocatedToBufferPool,'P1') + ') ' +
 				ISNULL(', Memory Model: ' + I.sql_memory_model_desc,'')  AS NVARCHAR(MAX)) AS Memory,
 		CAST(I.SystemManufacturer AS NVARCHAR(MAX)) Manufacturer,
 		CAST(I.SystemProductName AS NVARCHAR(MAX)) Model,
