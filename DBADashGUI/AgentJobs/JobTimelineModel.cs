@@ -429,11 +429,12 @@ namespace DBADashGUI.AgentJobs
             row.Label.Contains(text, StringComparison.OrdinalIgnoreCase) || row.JobName.Contains(text, StringComparison.OrdinalIgnoreCase);
 
         /// <summary>
-        /// An instance whose jobs haven't been loaded counts as a match: the multi-instance summary is already filtered
-        /// by job name on the server, so an instance is only there if some of its jobs match.
+        /// An instance always counts as a match: the multi-instance summary is already filtered by job name on the server,
+        /// so an instance is only there if it has jobs that match - even ones with no runs in the period, which leave a
+        /// gap rather than a missing instance once its jobs are loaded.
         /// </summary>
         private static bool MatchesOrHasMatch(TimelineRowModel row, string text) =>
-            row.CanLoadChildren || Matches(row, text) || row.Children.Any(c => MatchesOrHasMatch(c, text));
+            row.Kind == TimelineRowKind.Instance || Matches(row, text) || row.Children.Any(c => MatchesOrHasMatch(c, text));
 
         /// <summary>Top level rows that match <paramref name="filter"/> themselves, or have a row beneath them that does.</summary>
         public IEnumerable<TimelineRowModel> MatchingRoots(string filter)
@@ -444,12 +445,11 @@ namespace DBADashGUI.AgentJobs
         }
 
         /// <summary>
-        /// The bars a top level row contributes to the status legend, given the filter: a job's own bars (its outcomes,
-        /// or its steps when outcomes aren't included).  For an instance, see <see cref="TimelineRowModel.StatusCounts"/>
-        /// unless the filter matched only some of its jobs, in which case it's those jobs' bars.
+        /// An instance counts its <see cref="TimelineRowModel.StatusCounts"/>: exact, and already filtered by job name on
+        /// the server.  Counting its jobs' bars instead would change the totals just by expanding it - and when zoomed in,
+        /// some of those bars carry a share of a merged bar's runs, estimated by time.
         /// </summary>
-        public static bool CountsWholeInstance(TimelineRowModel root, string filter) =>
-            root.Kind == TimelineRowKind.Instance && (root.CanLoadChildren || string.IsNullOrWhiteSpace(filter) || Matches(root, filter.Trim()));
+        public static bool CountsWholeInstance(TimelineRowModel root) => root.Kind == TimelineRowKind.Instance && root.StatusCounts != null;
 
         /// <summary>Executions by status for the legend, of the top level rows matching <paramref name="filter"/>.</summary>
         public Dictionary<RunStatus, int> LegendCounts(string filter)
@@ -458,15 +458,13 @@ namespace DBADashGUI.AgentJobs
             var counts = new Dictionary<RunStatus, int>();
             foreach (var root in MatchingRoots(filter))
             {
-                if (CountsWholeInstance(root, filter))
+                if (CountsWholeInstance(root))
                 {
                     foreach (var (status, count) in root.StatusCounts) counts[status] = counts.GetValueOrDefault(status) + count;
                     continue;
                 }
-                // A job's own bars are its outcomes, so steps aren't counted on top - unless outcomes aren't included.
-                // An instance matched through some of its jobs counts just those.
-                var rows = root.Kind == TimelineRowKind.Instance ? root.Children.Where(c => Matches(c, filter.Trim())) : new[] { root };
-                foreach (var bar in rows.SelectMany(OwnBars))
+                // A job's own bars are its outcomes, so steps aren't counted on top - unless outcomes aren't included
+                foreach (var bar in OwnBars(root))
                 {
                     foreach (var (status, _) in StatusRunColumns)
                     {
@@ -503,7 +501,9 @@ namespace DBADashGUI.AgentJobs
                 row.PackLanes(visible, visibleKey);
                 rows.Add(row);
                 if (row.Collapsed || row.Children.Count == 0) continue;
-                AddRows(rows, row.Children, text == null || Matches(row, text) ? null : text, visible, visibleKey, sort, statusShown);
+                // A matching job shows all its steps, but an instance whose name matches doesn't show all its jobs - the filter is
+                // on job names, and the instance is there because of the jobs that match
+                AddRows(rows, row.Children, text == null || (row.Kind != TimelineRowKind.Instance && Matches(row, text)) ? null : text, visible, visibleKey, sort, statusShown);
             }
         }
 

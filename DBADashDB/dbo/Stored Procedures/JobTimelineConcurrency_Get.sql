@@ -19,8 +19,8 @@ AS
 	as another ends isn't counted as overlapping it.
 
 	The period is cut into @BucketSec slices - the GUI passes about a pixel's worth - and for each slice with any events
-	this returns the most running at once (MaxRunning) and the number still running at its end (EndRunning).  A slice
-	with no events has the previous slice's EndRunning throughout, which the caller fills in, so at most one row per
+	this returns the most running at any moment in it (PeakRunning) and the number still running at its end (EndRunning).  A
+	slice with no events has the previous slice's EndRunning throughout, which the caller fills in, so at most one row per
 	slice comes back however many executions there are.
 */
 SET NOCOUNT ON
@@ -81,24 +81,50 @@ AND NOT EXISTS (
 	SELECT CASE WHEN FinishDateTime > @ToDate THEN @ToDate ELSE FinishDateTime END, -1
 	FROM #Runs
 ),
+/*
+	One change per instant: everything starting and finishing at the same time netted together.  The states part way
+	through an instant last no time - a job starting as another finishes doesn't overlap it - and leaving them as separate
+	rows with the same sort key made "the count at the end of a slice" depend on which of them happened to sort last.
+*/
+Changes AS (
+	SELECT	EventTime,
+			SUM(Delta) AS Delta
+	FROM Events
+	GROUP BY EventTime
+),
 Running AS (
 	SELECT	EventTime,
-			Delta,
-			SUM(Delta) OVER (ORDER BY EventTime, Delta ROWS UNBOUNDED PRECEDING) AS Running
-	FROM Events
+			SUM(Delta) OVER (ORDER BY EventTime ROWS UNBOUNDED PRECEDING) AS Running
+	FROM Changes
 ),
 Buckets AS (
 	/* Elapsed milliseconds rather than DATEDIFF(s), which counts second boundaries crossed - off by up to a second when
 	   the period starts part way through one, putting an event near a slice boundary in the wrong slice */
 	SELECT	DATEDIFF_BIG(ms, @FromDate, EventTime) / (CAST(@BucketSec AS BIGINT) * 1000) AS Bucket,
+			EventTime,
 			Running,
-			ROW_NUMBER() OVER (PARTITION BY DATEDIFF_BIG(ms, @FromDate, EventTime) / (CAST(@BucketSec AS BIGINT) * 1000) ORDER BY EventTime DESC, Delta DESC) AS FromEnd
+			LAG(Running, 1, 0) OVER (ORDER BY EventTime) AS Entering
 	FROM Running
+),
+Ordered AS (
+	SELECT	Bucket,
+			EventTime,
+			Running,
+			Entering,
+			DATEADD(s, CAST(Bucket AS INT) * @BucketSec, @FromDate) AS BucketStart,
+			ROW_NUMBER() OVER (PARTITION BY Bucket ORDER BY EventTime DESC) AS FromEnd,
+			ROW_NUMBER() OVER (PARTITION BY Bucket ORDER BY EventTime) AS FromStart
+	FROM Buckets
 )
 SELECT	CAST(Bucket AS INT) AS Bucket,
-		DATEADD(s, CAST(Bucket AS INT) * @BucketSec, @FromDate) AS BucketStart,
-		MAX(Running) AS MaxRunning,
+		MIN(BucketStart) AS BucketStart,
+		/* The most running at any moment in the slice: after each change in it, and the number running as it began - but
+		   only if that lasted some time, i.e. the slice's first change isn't right at its start */
+		CASE WHEN MAX(CASE WHEN FromStart = 1 AND EventTime > BucketStart THEN Entering END) > MAX(Running)
+			THEN MAX(CASE WHEN FromStart = 1 AND EventTime > BucketStart THEN Entering END)
+			ELSE MAX(Running)
+		END AS PeakRunning,
 		MAX(CASE WHEN FromEnd = 1 THEN Running END) AS EndRunning
-FROM Buckets
+FROM Ordered
 GROUP BY Bucket
 ORDER BY Bucket
