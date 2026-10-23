@@ -253,7 +253,11 @@ namespace DBADashGUI.AgentJobs
                 FetchDetailForView();
                 FetchConcurrencyForView(false);
             };
-            Disposed += (_, _) => viewTimer.Dispose();
+            Disposed += (_, _) =>
+            {
+                viewTimer.Dispose();
+                runsBoldFont?.Dispose();
+            };
             filterTimer.Tick += (_, _) =>
             {
                 filterTimer.Stop();
@@ -485,6 +489,9 @@ namespace DBADashGUI.AgentJobs
         }
 
         private ToolStripDropDownButton tsRuns;
+
+        /// <summary>The Runs button is bold while a filter is on.  Made once, rather than a new font each change.</summary>
+        private Font runsBoldFont;
         private ToolStripMenuItem tsProblemsOnly;
         private ToolStripButton tsConcurrency;
 
@@ -543,7 +550,10 @@ namespace DBADashGUI.AgentJobs
             if (minDurationSec > 0) parts.Add("≥ " + JobTimelineChart.FormatDuration(TimeSpan.FromSeconds(minDurationSec)));
             if (problemsOnly) parts.Add("problems");
             tsRuns.Text = parts.Count == 0 ? "All runs" : string.Join(", ", parts);
-            tsRuns.Font = new Font(tsRuns.Font, parts.Count == 0 ? FontStyle.Regular : FontStyle.Bold);
+            runsBoldFont ??= new Font(toolStrip1.Font, FontStyle.Bold);
+            tsRuns.Font = parts.Count == 0 ? toolStrip1.Font : runsBoldFont;
+            // A drop-down takes its font from the button that owns it - keep the menu regular
+            tsRuns.DropDown.Font = toolStrip1.Font;
             RefreshData();
         }
 
