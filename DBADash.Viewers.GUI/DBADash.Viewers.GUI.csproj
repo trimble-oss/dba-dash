@@ -76,6 +76,16 @@
     for the extension, and -o redirects its output entirely - either way the guessed path didn't exist
     and the resource was silently left out of the release build.
   -->
+  <!--
+    Visual Studio's fast up-to-date check only knows the inputs it can see up front, and the .vsix above is added by a
+    target, so a change to just the extension left this project "up to date" and the app installing the old extension.
+    Named here for that check alone, at the path a Debug or Release build in Visual Studio writes it to; MSBuild itself
+    already sees the resource as an input of the compile.
+  -->
+  <ItemGroup>
+    <UpToDateCheckInput Include="..\DBADash.SSMSExtension\bin\$(Configuration)\net472\DBADash.SSMSExtension.vsix" />
+  </ItemGroup>
+
   <Target Name="AddSsmsExtensionVsixResource" BeforeTargets="AssignTargetPaths" AfterTargets="ResolveProjectReferences">
     <MSBuild Projects="@(_MSBuildProjectReferenceExistent)"
              Targets="VSIXContainerProjectOutputGroup"

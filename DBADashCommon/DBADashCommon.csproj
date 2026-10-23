@@ -27,4 +27,10 @@
     <PackageReference Include="Newtonsoft.Json" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Here rather than in DBADash so the viewers can follow a live plan over a direct connection too - see LiveQuerySql. -->
+    <EmbeddedResource Include="SQL\SQLLivePlan.sql" />
+    <EmbeddedResource Include="SQL\SQLLiveQueryProfile.sql" />
+  </ItemGroup>
+
 </Project>

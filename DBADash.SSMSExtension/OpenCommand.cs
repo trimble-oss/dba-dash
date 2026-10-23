@@ -168,17 +168,24 @@ namespace DBADash.SSMSExtension
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
-            string document = null;
+            var document = DocumentName();
+            return string.IsNullOrEmpty(document) ? title : document + " - " + title;
+        }
+
+        /// <summary>The query window's document name - "SQLQuery1.sql" - or null if it can't be had.</summary>
+        internal static string DocumentName()
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
             try
             {
-                document = (ServiceProvider.GlobalProvider.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE)?.ActiveDocument?.Name;
+                return (ServiceProvider.GlobalProvider.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE)?.ActiveDocument?.Name;
             }
             catch
             {
                 // Just a caption - go without the document's name.
+                return null;
             }
-
-            return string.IsNullOrEmpty(document) ? title : document + " - " + title;
         }
     }
 }

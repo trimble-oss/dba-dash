@@ -49,6 +49,20 @@
           <ButtonText>Open All Results in DBA Dash Visualizer</ButtonText>
         </Strings>
       </Button>
+
+      <!--
+        Follow the running query on the selected row (LivePlanCommand) - e.g. a row of sp_BlitzWho or sp_WhoIsActive.
+        Only appears for a grid with a session_id/spid column.
+      -->
+      <Button guid="guidDBADashCmdSet" id="LivePlanCommandId" priority="0x0102" type="Button">
+        <Parent guid="guidDBADashCmdSet" id="ResultsGridContextMenuGroupId"/>
+        <Icon guid="guidDBADashImages" id="bmpDBADash"/>
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <CommandFlag>DefaultInvisible</CommandFlag>
+        <Strings>
+          <ButtonText>Open Live Plan in DBA Dash Visualizer</ButtonText>
+        </Strings>
+      </Button>
     </Buttons>
 
     <Bitmaps>
@@ -100,6 +114,7 @@
       <IDSymbol name="ContextMenuGroupId" value="0x1020"/>
       <IDSymbol name="OpenCommandId" value="0x0100"/>
       <IDSymbol name="OpenAllResultsCommandId" value="0x0101"/>
+      <IDSymbol name="LivePlanCommandId" value="0x0102"/>
       <IDSymbol name="ToolsGroupId" value="0x1030"/>
       <IDSymbol name="ResultsGridContextMenuGroupId" value="0x1040"/>
     </GuidSymbol>

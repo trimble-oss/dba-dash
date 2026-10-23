@@ -127,6 +127,6 @@ namespace DBADashGUI.Performance
         }
 
         private static List<PlanLiveCounters> CountersOf(byte[] counters) =>
-            LiveProfileCounters.Decode(counters).Rows.Cast<DataRow>().Select(LivePlanSource.CountersOf).ToList();
+            LiveProfileCounters.Decode(counters).Rows.Cast<DataRow>().Select(LivePlanFollower.CountersOf).ToList();
     }
 }

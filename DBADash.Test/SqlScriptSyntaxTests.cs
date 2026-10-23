@@ -27,17 +27,20 @@ namespace DBADash.Test
         [TestMethod]
         public void EveryEmbeddedSqlScriptParses()
         {
-            var assembly = typeof(SqlStrings).Assembly;
-            var scripts = assembly.GetManifestResourceNames()
-                .Where(n => n.StartsWith("DBADash.SQL.", StringComparison.Ordinal)
-                            && n.EndsWith(".sql", StringComparison.OrdinalIgnoreCase))
-                .OrderBy(n => n, StringComparer.Ordinal)
+            // DBADashCommon has the live plan scripts, shared with the viewers (LiveQuerySql).
+            var scripts = new[] { (typeof(SqlStrings).Assembly, "DBADash.SQL."), (typeof(LiveQuerySql).Assembly, "DBADashCommon.SQL.") }
+                .SelectMany(source => source.Item1.GetManifestResourceNames()
+                    .Where(n => n.StartsWith(source.Item2, StringComparison.Ordinal)
+                                && n.EndsWith(".sql", StringComparison.OrdinalIgnoreCase))
+                    .Select(n => (Assembly: source.Item1, Name: n)))
+                .OrderBy(s => s.Name, StringComparer.Ordinal)
                 .ToList();
 
             Assert.IsTrue(scripts.Count > 0, "No embedded SQL scripts were found to parse.");
+            Assert.IsTrue(scripts.Any(s => s.Name == "DBADashCommon.SQL.SQLLivePlan.sql"), "The live plan scripts were not found.");
 
             var failures = new List<string>();
-            foreach (var name in scripts)
+            foreach (var (assembly, name) in scripts)
             {
                 using var stream = assembly.GetManifestResourceStream(name);
                 using var reader = new StreamReader(stream!);

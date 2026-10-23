@@ -220,7 +220,11 @@ namespace DBADashGUI.Viewers
             {
                 // .sqlplan and .xdl are unambiguous, as are the grid files; anything else - a bare .xml, or
                 // no extension at all - is all three's other extension, so ShowXmlFile decides from the content.
-                if (IsGridFile(file))
+                if (LivePlanRequestFile.IsRequestFile(file))
+                {
+                    OpenLivePlanRequest(file);
+                }
+                else if (IsGridFile(file))
                 {
                     ViewerLauncher.ShowGridFile(file);
                 }
@@ -243,6 +247,27 @@ namespace DBADashGUI.Viewers
             // Only when the SSMS extension just handed over a file: that's when it's in use, and when the version it
             // recorded is the one that did.
             if (list.Any(SsmsExtensionInstaller.IsFromExtension)) ViewerForm.OfferSsmsExtensionUpdate();
+        }
+
+        /// <summary>
+        /// Opens the live plan the SSMS extension asked for (<see cref="LivePlanRequestFile"/>), following it over a direct
+        /// connection.  Connecting can take a while, so it is done off the UI thread and the plan opens when it arrives -
+        /// on a tab of the window already open, if there is one.
+        /// </summary>
+        private static async void OpenLivePlanRequest(string file)
+        {
+            try
+            {
+                var request = LivePlanRequestFile.ReadAndDelete(file);
+                var (plan, source, captured) = await Task.Run(() => DirectLivePlanSource.OpenAsync(request, CancellationToken.None));
+                var title = string.IsNullOrEmpty(request.Title) ? string.Empty : request.Title + " - ";
+                ViewerLauncher.ShowQueryPlan(plan, $"{title}Live Plan SPID {request.SessionId} {captured:yyyy-MM-dd HHmmss}.sqlplan", live: source);
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Unable to open the live plan requested by the SSMS extension");
+                CommonShared.ShowExceptionDialog(ex, "Error opening live plan", text: ex.Message);
+            }
         }
 
         /// <summary>Prompts for plans and deadlock graphs and returns the ones chosen; empty if cancelled.</summary>
