@@ -37,7 +37,25 @@ DECLARE @NextID INT
 DECLARE @NextIsRunning BIT = 0
 DECLARE @AsOf DATETIME2(2) = CAST(GETUTCDATE() AS DATETIME2(2))
 
+/*
+	The history row asked for may have been purged since the caller saw it (a timeline bar, or an execution window left
+	open).  Looking for the first outcome after it would then pick up a different execution and show it as this one -
+	return nothing instead.
+*/
+DECLARE @Missing BIT = 0
 IF @instance_id IS NOT NULL
+AND NOT EXISTS (
+		SELECT 1
+		FROM dbo.JobHistory
+		WHERE InstanceID = @InstanceID
+		AND instance_id = @instance_id
+		AND job_id = @job_id
+	)
+BEGIN
+	SET @Missing = 1
+END
+
+IF @instance_id IS NOT NULL AND @Missing = 0
 BEGIN
 	SELECT TOP(1) @OutcomeID = instance_id,
 			@OutcomeStart = RunDateTime,
@@ -49,7 +67,7 @@ BEGIN
 	AND instance_id >= @instance_id
 	ORDER BY instance_id
 END
-ELSE IF @RunDateTime IS NOT NULL
+ELSE IF @RunDateTime IS NOT NULL AND @instance_id IS NULL
 BEGIN
 	/* The latest execution to start at or before @RunDateTime, if it has finished and covers it */
 	SELECT TOP(1) @OutcomeID = instance_id,
@@ -113,12 +131,13 @@ WHERE JH.InstanceID = @InstanceID
 AND JH.job_id = @job_id
 AND JH.instance_id > @FromID
 AND (@OutcomeID IS NULL OR JH.instance_id <= @OutcomeID)
+AND @Missing = 0
 /* Steps start within the job's run.  The previous outcome bounds a running execution. */
 AND JH.RunDateTime >= COALESCE(@OutcomeStart, @FromStart, CAST('19000101' AS DATETIME2(2)))
 AND (@OutcomeEnd IS NULL OR JH.RunDateTime <= DATEADD(s, 1, @OutcomeEnd))
 
 /* No outcome yet - add the running outcome and current step if this is the execution that is running now */
-IF @OutcomeID IS NULL
+IF @OutcomeID IS NULL AND @Missing = 0
 BEGIN
 	DECLARE @LastStepFinish DATETIME2(2) = (SELECT MAX(FinishDateTime) FROM @Execution)
 
@@ -168,7 +187,7 @@ BEGIN
 			WHERE E.RunDateTime < CAST(RJ.start_execution_date_utc AS DATETIME2(2))
 		)
 END
-ELSE
+ELSE IF @OutcomeID IS NOT NULL
 BEGIN
 	SELECT TOP(1) @NextID = instance_id
 	FROM dbo.JobHistory

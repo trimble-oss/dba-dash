@@ -358,7 +358,7 @@ namespace DBADashGUI.AgentJobs
 
             var color = TimelineBar.StatusColor(ShownStatus(bar)).ToSKColor();
             var selectionActive = _selectedBar != null;
-            var sameJob = selectionActive && bar.JobName == _selectedBar.JobName;
+            var sameJob = selectionActive && SameJob(bar, _selectedBar);
             if (selectionActive && !sameJob) color = color.WithAlpha(90);
             if (bar == _hoverBar) color = Blend(color, SKColors.White, 0.2f);
 
@@ -374,7 +374,11 @@ namespace DBADashGUI.AgentJobs
                 _stroke.Color = SKColors.White.WithAlpha(60);
                 _stroke.StrokeWidth = 3 * Dpi;
                 var gap = 8 * Dpi;
-                for (var x = rect.Left - rect.Height; x < rect.Right; x += gap)
+                // Only across the part in view: a long running job zoomed in can be millions of stripes wide, every frame
+                var from = Math.Max(rect.Left, ChartLeft - rect.Height);
+                var stripesFrom = rect.Left - rect.Height + (float)Math.Floor((from - rect.Left) / gap) * gap;
+                var stripesTo = Math.Min(rect.Right, ChartRight);
+                for (var x = stripesFrom; x < stripesTo; x += gap)
                 {
                     canvas.DrawLine(x, rect.Bottom, x + rect.Height, rect.Top, _stroke);
                 }
@@ -423,6 +427,7 @@ namespace DBADashGUI.AgentJobs
             _fill.Color = p.Panel;
             canvas.DrawRect(new SKRect(0, RowsTop, LabelWidth, RowsBottom), _fill);
             var hasGroups = _model.Roots.Any(r => r.IsGroup);
+            var focusRow = _canvas.Focused && _exportHeight == null ? FocusRow : null;
 
             foreach (var row in rows)
             {
@@ -432,6 +437,13 @@ namespace DBADashGUI.AgentJobs
                 {
                     _fill.Color = p.HoverRow;
                     canvas.DrawRect(new SKRect(0, top, LabelWidth, top + row.Height), _fill);
+                }
+                // The keyboard's row, while the chart has focus (not in a copied image)
+                if (row == focusRow)
+                {
+                    _stroke.Color = p.Accent;
+                    _stroke.StrokeWidth = 1.5f * Dpi;
+                    canvas.DrawRect(new SKRect(1.5f * Dpi, top + 1.5f * Dpi, LabelWidth - 1.5f * Dpi, top + row.Height - 1.5f * Dpi), _stroke);
                 }
                 var x = 8 * Dpi + (hasGroups ? 18 * Dpi : 0) + row.Depth * 14 * Dpi;
 
@@ -572,8 +584,8 @@ namespace DBADashGUI.AgentJobs
             canvas.DrawLine(0, bottom, _canvas.Width, bottom, _stroke);
 
             // The slices in view, and the highest of them for the scale
-            var first = Math.Max(0, (long)((_viewFrom - _bandFrom).Ticks / Math.Max(1, _bandSlice.Ticks)));
-            var last = Math.Min(_bandPeaks.Length - 1, (long)((_viewTo - _bandFrom).Ticks / Math.Max(1, _bandSlice.Ticks)));
+            var first = _bandPeaks.Length == 0 ? 0 : Math.Max(0, BandSliceAt(_viewFrom < _bandEdges[0] ? _bandEdges[0] : _viewFrom));
+            var last = _bandPeaks.Length == 0 ? -1 : _viewTo >= _bandEdges[^1] ? _bandPeaks.Length - 1 : BandSliceAt(_viewTo);
             var max = 0;
             for (var i = first; i <= last; i++) max = Math.Max(max, _bandPeaks[i]);
 
@@ -600,9 +612,8 @@ namespace DBADashGUI.AgentJobs
                 for (var i = first; i <= last; i++)
                 {
                     if (_bandPeaks[i] == 0) continue;
-                    var start = _bandFrom.AddTicks(_bandSlice.Ticks * i);
-                    var x1 = TimeToX(start);
-                    var x2 = Math.Max(x1 + 1, TimeToX(start + _bandSlice));
+                    var x1 = TimeToX(_bandEdges[i]);
+                    var x2 = Math.Max(x1 + 1, TimeToX(_bandEdges[i + 1]));
                     var h = Math.Max(1.5f * Dpi, height * _bandPeaks[i] / max);
                     canvas.DrawRect(new SKRect(x1, bottom - h, x2, bottom), _fill);
                 }

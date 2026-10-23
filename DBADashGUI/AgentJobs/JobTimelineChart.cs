@@ -87,7 +87,7 @@ namespace DBADashGUI.AgentJobs
             _canvas.MouseWheel += Canvas_MouseWheel;
             _canvas.MouseDoubleClick += Canvas_MouseDoubleClick;
             _canvas.KeyDown += Canvas_KeyDown;
-            _canvas.PreviewKeyDown += (_, e) => e.IsInputKey = e.KeyCode is Keys.Left or Keys.Right or Keys.Up or Keys.Down;
+            _canvas.PreviewKeyDown += (_, e) => e.IsInputKey = e.KeyCode is Keys.Left or Keys.Right or Keys.Up or Keys.Down or Keys.Enter or Keys.Space or Keys.Apps;
             _canvas.Resize += (_, _) =>
             {
                 ClampScroll();
@@ -180,6 +180,7 @@ namespace DBADashGUI.AgentJobs
         public void SetData(JobTimelineModel model, DateTime periodFrom, DateTime periodTo, bool resetView = false)
         {
             var collapsed = _model.Roots.Where(r => r.IsGroup).ToDictionary(RowKey, r => r.Collapsed);
+            var loadedChildren = _model.Roots.Where(r => r.Kind == TimelineRowKind.Instance && r.Children.Count > 0).ToDictionary(RowKey, r => r.Children.ToList());
             var selected = _selectedBar;
             if (periodTo <= periodFrom) periodTo = periodFrom.Add(MinimumSpan);
             var hadView = _viewTo > _viewFrom;
@@ -197,6 +198,18 @@ namespace DBADashGUI.AgentJobs
                 foreach (var root in _model.Roots.Where(r => r.IsGroup))
                 {
                     if (collapsed.TryGetValue(RowKey(root), out var wasCollapsed)) root.Collapsed = wasCollapsed;
+                    // An expanded instance's jobs are fetched again below.  Until they arrive, keep showing the ones it had -
+                    // without them the rows would shrink to the instances, losing the scroll position and the selection, on
+                    // every refresh and every zoom that fetches more detail.
+                    if (!root.Collapsed && root.CanLoadChildren && loadedChildren.TryGetValue(RowKey(root), out var children))
+                    {
+                        foreach (var child in children)
+                        {
+                            child.Parent = root;
+                            root.Children.Add(child);
+                            _model.Bars.AddRange(child.AllBars);
+                        }
+                    }
                 }
             }
             _periodFrom = periodFrom;
@@ -212,7 +225,7 @@ namespace DBADashGUI.AgentJobs
                 SetView(viewFrom, viewTo);
             }
             if (resetView) selected = null;
-            _selectedBar = selected == null ? null : _model.Bars.FirstOrDefault(b => b.JobName == selected.JobName && b.StepId == selected.StepId && b.Start == selected.Start);
+            _selectedBar = selected == null ? null : _model.Bars.FirstOrDefault(b => SameExecution(b, selected));
             _hoverBar = null;
             _hoverRow = null;
             Relayout();
@@ -221,6 +234,17 @@ namespace DBADashGUI.AgentJobs
             // The view may not have moved, but the detail the host fetched for it might not suit the new data
             ViewChanged?.Invoke(this, EventArgs.Empty);
         }
+
+        /// <summary>
+        /// Bars of the same job.  Job names are only unique within an instance, so on the multi-instance timeline a backup
+        /// job of the same name on another server isn't the same job.  An instance's spans count as one "job".
+        /// </summary>
+        private static bool SameJob(TimelineBar a, TimelineBar b) =>
+            a.InstanceId == b.InstanceId && (a.JobId != Guid.Empty && b.JobId != Guid.Empty ? a.JobId == b.JobId : a.JobName == b.JobName);
+
+        /// <summary>The same execution (or merged bar) in data loaded again.</summary>
+        private static bool SameExecution(TimelineBar a, TimelineBar b) =>
+            SameJob(a, b) && a.StepId == b.StepId && a.Start == b.Start && a.IsSummary == b.IsSummary;
 
         /// <summary>Identifies a group row across refreshes, to keep it expanded or collapsed.</summary>
         private static string RowKey(TimelineRowModel row) => row.Kind == TimelineRowKind.Instance ? "instance:" + row.InstanceId : "job:" + row.JobName;
@@ -244,7 +268,15 @@ namespace DBADashGUI.AgentJobs
         public void SetChildren(TimelineRowModel row, JobTimelineModel children)
         {
             if (!_model.Roots.Contains(row)) return;
+            var selected = _selectedBar;
             _model.SetChildren(row, children);
+            // A selected run among the jobs being replaced: select it again in the new ones - or, if it's been merged
+            // differently at this zoom, the bar of the same job that now holds it
+            if (selected?.Row?.Parent == row)
+            {
+                _selectedBar = children.Bars.FirstOrDefault(b => SameExecution(b, selected))
+                               ?? children.Bars.FirstOrDefault(b => SameJob(b, selected) && b.StepId == selected.StepId && b.Start <= selected.Start && b.End >= selected.Start);
+            }
             Relayout();
         }
 
@@ -521,29 +553,41 @@ namespace DBADashGUI.AgentJobs
             }
         }
 
-        // The band's data: the most jobs running at once in each slice, from _bandFrom
-        private DateTime _bandFrom;
-        private TimeSpan _bandSlice;
+        // The band's data: the most jobs running at once in each slice, which runs from _bandEdges[i] to _bandEdges[i + 1]
+        private DateTime[] _bandEdges = Array.Empty<DateTime>();
         private int[] _bandPeaks = Array.Empty<int>();
 
         /// <summary>
-        /// The concurrency band's data: the most jobs running at once in each <paramref name="slice"/> from
-        /// <paramref name="from"/> (app time zone).  It needn't cover the whole period - the host fetches it for the view.
+        /// The concurrency band's data: the most jobs running at once in each slice.  <paramref name="edges"/> are the
+        /// slices' boundaries in the app time zone, one more than <paramref name="peaks"/>.  The slices are even in UTC, and
+        /// each boundary is converted on its own, so across a change of the clocks they stay level with the job bars.  It
+        /// needn't cover the whole period - the host fetches it for the view.
         /// </summary>
-        public void SetConcurrency(DateTime from, TimeSpan slice, int[] peaks)
+        public void SetConcurrency(DateTime[] edges, int[] peaks)
         {
-            _bandFrom = from;
-            _bandSlice = slice > TimeSpan.Zero ? slice : TimeSpan.FromSeconds(1);
-            _bandPeaks = peaks ?? Array.Empty<int>();
+            if (edges == null || peaks == null || edges.Length != peaks.Length + 1)
+            {
+                (edges, peaks) = (Array.Empty<DateTime>(), Array.Empty<int>());
+            }
+            _bandEdges = edges;
+            _bandPeaks = peaks;
             _canvas.Invalidate();
+        }
+
+        /// <summary>The slice <paramref name="t"/> falls in, or -1 outside the band's data.</summary>
+        private int BandSliceAt(DateTime t)
+        {
+            if (_bandPeaks.Length == 0 || t < _bandEdges[0] || t >= _bandEdges[^1]) return -1;
+            var index = Array.BinarySearch(_bandEdges, t);
+            // An exact edge starts its slice; otherwise BinarySearch gives the complement of the next edge
+            return index >= 0 ? Math.Min(index, _bandPeaks.Length - 1) : ~index - 1;
         }
 
         /// <summary>The most jobs running at once at <paramref name="t"/>, or null where the band has no data.</summary>
         private int? ConcurrencyAt(DateTime t)
         {
-            if (_bandPeaks.Length == 0 || t < _bandFrom) return null;
-            var index = (long)((t - _bandFrom).Ticks / _bandSlice.Ticks);
-            return index < _bandPeaks.Length ? _bandPeaks[index] : null;
+            var index = BandSliceAt(t);
+            return index < 0 ? null : _bandPeaks[index];
         }
 
         /// <summary>A note shown across the top of the rows, e.g. that runs are merged at this zoom.  Null for none.</summary>
@@ -842,6 +886,14 @@ namespace DBADashGUI.AgentJobs
                     ResetZoom();
                     break;
 
+                case Keys.Left when e.Control:
+                    MoveToBar(-1);
+                    break;
+
+                case Keys.Right when e.Control:
+                    MoveToBar(1);
+                    break;
+
                 case Keys.Left:
                     PanBy(TimeSpan.FromTicks((long)(-ViewTicks / 10)));
                     break;
@@ -851,11 +903,24 @@ namespace DBADashGUI.AgentJobs
                     break;
 
                 case Keys.Up:
-                    _scrollY -= LaneHeight * 2;
+                    MoveToRow(-1);
                     break;
 
                 case Keys.Down:
-                    _scrollY += LaneHeight * 2;
+                    MoveToRow(1);
+                    break;
+
+                case Keys.Space when FocusRow is { IsGroup: true }:
+                    ToggleCollapsed(FocusRow);
+                    break;
+
+                case Keys.Enter when _selectedBar is { IsSummary: true } || (_selectedBar == null && FocusRow is { IsGroup: true }):
+                    ToggleCollapsed(_selectedBar?.Row ?? FocusRow);
+                    break;
+
+                case Keys.Apps:
+                case Keys.F10 when e.Shift:
+                    ShowContextMenuForKeyboard();
                     break;
 
                 case Keys.PageUp:
@@ -888,13 +953,88 @@ namespace DBADashGUI.AgentJobs
             _canvas.Invalidate();
         }
 
+        /// <summary>
+        /// The row the keyboard is on: the selected bar's, or one moved to with no bar to select (a group with no runs of
+        /// its own).  Up/Down move it, Ctrl+Left/Right move along its bars, Space and Enter expand or collapse it.
+        /// </summary>
+        private TimelineRowModel _focusRow;
+
+        private TimelineRowModel FocusRow => _selectedBar?.Row ?? (_rows.Contains(_focusRow) ? _focusRow : null);
+
+        /// <summary>
+        /// Move to the row above or below, selecting its bar nearest the time of the bar selected now (or the middle of the
+        /// view) - so keyboard users can reach a run to open, and a row to expand, without the mouse.
+        /// </summary>
+        private void MoveToRow(int direction)
+        {
+            if (_rows.Count == 0) return;
+            var current = FocusRow;
+            var index = current == null ? (direction > 0 ? 0 : _rows.Count - 1) : Math.Clamp(_rows.IndexOf(current) + direction, 0, _rows.Count - 1);
+            var row = _rows[index];
+            var around = _selectedBar?.Start ?? _viewFrom.AddTicks((long)(ViewTicks / 2));
+            var bar = row.Bars.Where(IsVisible)
+                .OrderBy(b => b.Start <= around && b.End >= around ? 0 : 1)
+                .ThenBy(b => Math.Abs((b.Start - around).Ticks))
+                .FirstOrDefault();
+            _focusRow = row;
+            SetSelectedBar(bar);
+            ScrollIntoView(row);
+            if (bar != null) BringIntoView(bar);
+        }
+
+        /// <summary>Move to the previous or next bar in the row.</summary>
+        private void MoveToBar(int direction)
+        {
+            var row = FocusRow;
+            if (row == null)
+            {
+                MoveToRow(1);
+                return;
+            }
+            var bars = row.Bars.Where(IsVisible).ToList();
+            if (bars.Count == 0) return;
+            var index = _selectedBar == null ? (direction > 0 ? 0 : bars.Count - 1) : Math.Clamp(bars.IndexOf(_selectedBar) + direction, 0, bars.Count - 1);
+            SetSelectedBar(bars[index]);
+            BringIntoView(bars[index]);
+        }
+
+        /// <summary>Pan just enough to show a bar's start, keeping the zoom.</summary>
+        private void BringIntoView(TimelineBar bar)
+        {
+            if (bar.Start >= _viewFrom && bar.Start <= _viewTo) return;
+            var span = _viewTo - _viewFrom;
+            var from = bar.Start - TimeSpan.FromTicks(span.Ticks / 10);
+            SetView(from, from + span);
+        }
+
+        /// <summary>The right click menu for the selected bar or row, opened from the keyboard (Shift+F10 or the menu key).</summary>
+        private void ShowContextMenuForKeyboard()
+        {
+            var row = FocusRow;
+            Point p;
+            if (_selectedBar != null)
+            {
+                var r = BarRect(_selectedBar);
+                p = new Point((int)Math.Clamp(r.MidX, ChartLeft, ChartRight), (int)r.MidY);
+            }
+            else if (row != null)
+            {
+                p = new Point((int)(LabelWidth / 2), (int)(RowScreenTop(row) + RowPadding + LaneHeight / 2));
+            }
+            else
+            {
+                p = new Point((int)(ChartLeft + ChartWidth / 2), (int)RowsTop);
+            }
+            ShowContextMenu(p, _selectedBar, row);
+        }
+
         private ContextMenuStrip _contextMenu;
 
-        private void ShowContextMenu(Point p)
+        private void ShowContextMenu(Point p) => ShowContextMenu(p, BarAt(p), RowAt(p.Y));
+
+        private void ShowContextMenu(Point p, TimelineBar bar, TimelineRowModel row)
         {
-            var bar = BarAt(p);
             if (bar != null) SetSelectedBar(bar);
-            var row = RowAt(p.Y);
 
             _contextMenu?.Dispose();
             _contextMenu = new ContextMenuStrip();
@@ -941,14 +1081,22 @@ namespace DBADashGUI.AgentJobs
                 _contextMenu.Items.Add(new ToolStripSeparator());
             }
             _contextMenu.Items.Add("Reset zoom", null, (_, _) => ResetZoom()).Enabled = _viewFrom != _periodFrom || _viewTo != _periodTo;
+            // The legend's status filter, for keyboard users - the legend itself is only clickable
+            var statuses = new ToolStripMenuItem("Show statuses");
+            foreach (var status in LegendOrder.Where(s => _legendCounts.ContainsKey(s) || _hiddenStatuses.Contains(s)))
+            {
+                statuses.DropDownItems.Add(new ToolStripMenuItem(TimelineBar.StatusText(status), null, (_, _) => ToggleStatus(status)) { Checked = !_hiddenStatuses.Contains(status) });
+            }
             if (_hiddenStatuses.Count > 0)
             {
-                _contextMenu.Items.Add("Show all statuses", null, (_, _) =>
+                statuses.DropDownItems.Add(new ToolStripSeparator());
+                statuses.DropDownItems.Add("Show all", null, (_, _) =>
                 {
                     _hiddenStatuses.Clear();
                     Relayout();
                 });
             }
+            if (statuses.HasDropDownItems) _contextMenu.Items.Add(statuses);
             _contextMenu.Items.Add("Copy image", null, (_, _) => CopyImage());
             _canvas.Invalidate();
             _contextMenu.Show(_canvas, p);
@@ -1000,7 +1148,7 @@ namespace DBADashGUI.AgentJobs
         public void CopyImage()
         {
             var width = Math.Max(1, _canvas.Width);
-            var height = (int)Math.Ceiling(HeaderHeight + _contentHeight + OverviewHeight);
+            var height = (int)Math.Ceiling(HeaderHeight + BandHeight + _contentHeight + OverviewHeight);
             height = Math.Clamp(height, 1, 30000);
             var scroll = _scrollY;
             using (var surface = SKSurface.Create(new SKImageInfo(width, height)))

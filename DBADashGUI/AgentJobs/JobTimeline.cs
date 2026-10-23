@@ -167,6 +167,9 @@ namespace DBADashGUI.AgentJobs
         private bool baseCapped;
         private readonly Dictionary<int, DataTable> childBase = new();
 
+        /// <summary>Instances whose jobs were fetched with a wider gap than asked, to keep under <see cref="MaxBars"/>.</summary>
+        private readonly HashSet<int> cappedChildren = new();
+
         // Zoomed in: the time in view (and as much again either side) at a finer level of detail
         private DateTime? detailFromUtc;
         private DateTime? detailToUtc;
@@ -422,13 +425,13 @@ namespace DBADashGUI.AgentJobs
             da.Fill(dt);
 
             var peaks = new int[(int)Math.Ceiling((to - from).TotalSeconds / sliceSec)];
-            var rows = dt.AsEnumerable().ToDictionary(r => (int)r["Bucket"], r => ((int)r["MaxRunning"], (int)r["EndRunning"]));
+            var rows = dt.AsEnumerable().ToDictionary(r => (int)r["Bucket"], r => ((int)r["PeakRunning"], (int)r["EndRunning"]));
             var running = 0; // carried through slices where nothing starts or finishes
             for (var i = 0; i < peaks.Length; i++)
             {
                 if (rows.TryGetValue(i, out var slice))
                 {
-                    peaks[i] = Math.Max(running, slice.Item1);
+                    peaks[i] = slice.Item1; // the proc counts those running as the slice began only if they were still running in it
                     running = slice.Item2;
                 }
                 else
@@ -458,14 +461,37 @@ namespace DBADashGUI.AgentJobs
         private int bandGeneration;
 
         /// <summary>
+        /// The time in view in UTC.  The chart works in the app time zone, so zooming or panning across the clocks going
+        /// forward can leave an edge in the time that doesn't exist, which AppTimeZoneToUtc throws on - from a timer
+        /// callback, taking the app down.  An edge there is taken as the moment the clocks change: the first time after the
+        /// gap.  (Moving it a whole hour on could take it past the other edge.)
+        /// </summary>
+        private bool ViewToUtc(out DateTime fromUtc, out DateTime toUtc)
+        {
+            toUtc = default;
+            return EdgeToUtc(chart.ViewFrom, out fromUtc) && EdgeToUtc(chart.ViewTo, out toUtc) && toUtc > fromUtc;
+
+            static bool EdgeToUtc(DateTime t, out DateTime utc)
+            {
+                // A gap is an hour, or a couple at most - look a minute at a time for the end of it
+                var edge = new DateTime(t.Ticks - t.Ticks % TimeSpan.TicksPerMinute);
+                for (var i = 0; i <= 180; i++, edge = edge.AddMinutes(1))
+                {
+                    if ((i == 0 ? t : edge).TryAppTimeZoneToUtc(out utc)) return true;
+                }
+                utc = default;
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Fetch the concurrency band for the time in view (and as much again either side, like the detail), in slices of
         /// about a pixel - unless what's loaded already covers it at about the right size.
         /// </summary>
         private async void FetchConcurrencyForView(bool force)
         {
             if (context == null || !chart.ShowConcurrency || chart.ViewTo <= chart.ViewFrom || to <= from) return;
-            var viewFrom = chart.ViewFrom.AppTimeZoneToUtc();
-            var viewTo = chart.ViewTo.AppTimeZoneToUtc();
+            if (!ViewToUtc(out var viewFrom, out var viewTo)) return;
             var span = viewTo - viewFrom;
             var slice = Math.Max(1, (int)(span.TotalSeconds / Math.Max(200, chart.TimeAxisWidth)));
             if (!force && bandFromUtc <= viewFrom && bandToUtc >= viewTo && bandSliceSec <= slice * 2 && bandSliceSec * 2 >= slice) return;
@@ -481,7 +507,14 @@ namespace DBADashGUI.AgentJobs
                 var peaks = await Task.Run(() => GetConcurrencyData(instanceIds, windowFrom, windowTo, filters, slice));
                 if (generation != loadGeneration || band != bandGeneration) return;
                 (bandFromUtc, bandToUtc, bandSliceSec) = (windowFrom, windowTo, slice);
-                chart.SetConcurrency(windowFrom.ToAppTimeZone(), TimeSpan.FromSeconds(slice), peaks);
+                // Each slice edge converted on its own, so the band stays level with the job bars across a change of the clocks
+                var edges = new DateTime[peaks.Length + 1];
+                for (var i = 0; i < edges.Length; i++)
+                {
+                    var edge = windowFrom.AddSeconds((double)i * slice);
+                    edges[i] = (edge > windowTo ? windowTo : edge).ToAppTimeZone();
+                }
+                chart.SetConcurrency(edges, peaks);
             }
             catch (Exception ex)
             {
@@ -683,6 +716,7 @@ namespace DBADashGUI.AgentJobs
             baseSummary = null;
             ClearDetail();
             childBase.Clear();
+            cappedChildren.Clear();
         }
 
         private void ClearDetail()
@@ -730,8 +764,7 @@ namespace DBADashGUI.AgentJobs
         private async void FetchDetailForView()
         {
             if (context == null || !AutoDetail || chart.ViewTo <= chart.ViewFrom) return;
-            var viewFrom = chart.ViewFrom.AppTimeZoneToUtc();
-            var viewTo = chart.ViewTo.AppTimeZoneToUtc();
+            if (!ViewToUtc(out var viewFrom, out var viewTo)) return;
             var need = GapFor(viewTo - viewFrom);
             var zoomed = chart.ViewFrom > chart.PeriodFrom || chart.ViewTo < chart.PeriodTo;
             if (!zoomed || (need * 2 >= baseGap && !baseCapped))
@@ -818,13 +851,17 @@ namespace DBADashGUI.AgentJobs
         /// <summary>
         /// The full period rows outside the detail window, and the detail rows.  Inside the window the detail has the runs
         /// themselves.  A merged full period row that reaches into the window is trimmed back to the window's edges, so a
-        /// job merged into one long bar still shows either side of it; a single run reaching in is left to the detail,
-        /// which has it whole.
+        /// job merged into one long bar still shows either side of it.  A single run reaching in is left to the detail,
+        /// which has it whole - unless it doesn't: the procs only look back a day before the window for runs that have
+        /// finished, so a run that started longer ago than that is kept from the full period load.
         /// </summary>
         private static DataTable Combine(DataTable full, DataTable detail, DateTime windowFrom, DateTime windowTo)
         {
             // The wider schema: a fetch with nothing to merge has no runs-by-status columns
             var combined = full.Columns.Count >= detail.Columns.Count ? full.Clone() : detail.Clone();
+            var detailBars = detail.AsEnumerable()
+                .GroupBy(BarGroup)
+                .ToDictionary(g => g.Key, g => g.Select(d => (Start: (DateTime)d["RunDateTime"], Finish: (DateTime)d["FinishDateTime"])).ToList());
             foreach (DataRow r in full.Rows)
             {
                 var start = (DateTime)r["RunDateTime"];
@@ -834,13 +871,23 @@ namespace DBADashGUI.AgentJobs
                     combined.ImportRow(r);
                     continue;
                 }
-                if (!r.Table.Columns.Contains("Executions") || (int)r["Executions"] <= 1) continue;
+                if (!r.Table.Columns.Contains("Executions") || (int)r["Executions"] <= 1)
+                {
+                    var covered = detailBars.TryGetValue(BarGroup(r), out var bars) && bars.Any(b => b.Start <= start && b.Finish >= finish);
+                    if (!covered) combined.ImportRow(r);
+                    continue;
+                }
                 if (start < windowFrom) AddTrimmed(combined, r, start, windowFrom);
                 if (finish > windowTo) AddTrimmed(combined, r, windowTo, finish);
             }
             foreach (DataRow r in detail.Rows) combined.ImportRow(r);
             return combined;
         }
+
+        /// <summary>The row a bar is drawn on: a job (and step) on the job timeline, an instance for the summary spans.</summary>
+        private static string BarGroup(DataRow r) => r.Table.Columns.Contains("name")
+            ? $"{r["name"]}|{r["step_id"]}"
+            : Convert.ToString(r["InstanceID"]);
 
         private static void AddTrimmed(DataTable table, DataRow source, DateTime start, DateTime finish)
         {
@@ -860,7 +907,9 @@ namespace DBADashGUI.AgentJobs
             row["Executions"] = Math.Max(1, executions > 0 ? executions : (int)Math.Round((int)source["Executions"] * share));
             row["RunDateTime"] = start;
             row["FinishDateTime"] = finish;
-            row["RunDurationSec"] = (int)Math.Max(1, (finish - start).TotalSeconds);
+            // A merged job bar's duration is the average of its runs, which trimming doesn't change - only an instance span's
+            // is its length
+            if (!table.Columns.Contains("step_id")) row["RunDurationSec"] = (int)Math.Max(1, (finish - start).TotalSeconds);
             if (table.Columns.Contains("instance_id")) row["instance_id"] = DBNull.Value;
         }
 
@@ -870,7 +919,7 @@ namespace DBADashGUI.AgentJobs
             if (!AutoDetail) return null;
             var gap = DetailActive ? detailGap : baseGap;
             var within = JobTimelineChart.FormatDuration(TimeSpan.FromSeconds(gap));
-            if (DetailActive ? detailCapped : baseCapped)
+            if ((DetailActive ? detailCapped : baseCapped) || cappedChildren.Count > 0)
             {
                 return $"Too many runs to show individually - runs within {within} of each other are combined.  Zoom in or filter for detail.";
             }
@@ -898,29 +947,36 @@ namespace DBADashGUI.AgentJobs
             {
                 // Expand all can ask for hundreds - a few at a time is kinder to the repository
                 await childLoads.WaitAsync();
-                DataTable data;
+                JobTimelineModel jobs;
                 try
                 {
                     if (generation != loadGeneration) return;
+                    // The gaps come from the instance spans, which can be few for an instance running a great many jobs, so
+                    // each fetch has its own cap too
                     if (!childBase.TryGetValue(row.InstanceId, out var full))
                     {
-                        full = await Task.Run(() => GetJobTimelineData(row.InstanceId, queryFrom, queryTo, filters, Guid.Empty, false, true, dateGroup, gap));
+                        var (fullData, _, fullCapped) = await Task.Run(() => FetchCapped(g => GetJobTimelineData(row.InstanceId, queryFrom, queryTo, filters, Guid.Empty, false, true, dateGroup, g), d => d.Rows.Count, gap));
                         if (generation != loadGeneration) return;
+                        full = fullData;
                         childBase[row.InstanceId] = full;
+                        if (fullCapped) cappedChildren.Add(row.InstanceId);
                     }
-                    data = full;
+                    var data = full;
                     if (windowFrom.HasValue)
                     {
-                        var detail = await Task.Run(() => GetJobTimelineData(row.InstanceId, windowFrom.Value, windowTo.Value, filters, Guid.Empty, false, true, 0, windowGap));
+                        var (detail, _, detailWasCapped) = await Task.Run(() => FetchCapped(g => GetJobTimelineData(row.InstanceId, windowFrom.Value, windowTo.Value, filters, Guid.Empty, false, true, 0, g), d => d.Rows.Count, windowGap));
+                        if (detailWasCapped) cappedChildren.Add(row.InstanceId);
                         data = Combine(full, detail, windowFrom.Value.ToAppTimeZone(), windowTo.Value.ToAppTimeZone());
                     }
+                    // Building the model can take a moment for a busy instance - not on the UI thread
+                    jobs = await Task.Run(() => JobTimelineModel.Build(data, singleJob: false, includeSteps: false, row.InstanceId));
                 }
                 finally
                 {
                     childLoads.Release();
                 }
                 if (generation != loadGeneration) return;
-                chart.SetChildren(row, JobTimelineModel.Build(data, singleJob: false, includeSteps: false, row.InstanceId));
+                chart.SetChildren(row, jobs);
                 chart.Banner = BannerText();
             }
             catch (Exception ex)
@@ -1094,7 +1150,7 @@ namespace DBADashGUI.AgentJobs
             if (!sameContext)
             {
                 bandFromUtc = null;
-                chart.SetConcurrency(default, TimeSpan.FromSeconds(1), null);
+                chart.SetConcurrency(null, null);
             }
             // Opening the job from the job's own window would only close and reopen it
             chart.JobActivated -= Chart_JobActivated;
