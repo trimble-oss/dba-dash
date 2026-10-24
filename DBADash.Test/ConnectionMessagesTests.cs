@@ -90,7 +90,9 @@ namespace DBADash.Test
             {
                 new ConnectionTestMessage { ConnectionStrings = new List<string> { "x" } },
                 new ConnectionAddMessage { Connections = new List<ConnectionAddMessage.ConnectionRequest> { new() } },
-                new ConnectionRemoveMessage { ConnectionIDs = new List<string> { "SQL1" } }
+                new ConnectionRemoveMessage { ConnectionIDs = new List<string> { "SQL1" } },
+                new ConnectionOptionsGetMessage { ConnectionID = "SQL1" },
+                new ConnectionOptionsUpdateMessage { ConnectionIDs = new List<string> { "SQL1" } }
             };
             foreach (var message in messages)
             {
@@ -125,6 +127,70 @@ namespace DBADash.Test
             Assert.AreSame(withID, ConnectionRemoveMessage.FindInFileConfig(fileConfig, running, "sql1"));
             Assert.AreSame(withoutID, ConnectionRemoveMessage.FindInFileConfig(fileConfig, running, "SQL2\\GENERATED"));
             Assert.IsNull(ConnectionRemoveMessage.FindInFileConfig(fileConfig, running, "SQL3"));
+        }
+
+        private static SourceConnectionOptions SlowQueries(DBADashSource.SlowQueryCaptureModes mode, int threshold = 1000, string deadlocks = "") =>
+            new() { SlowQueryThresholdMs = threshold, SlowQueryCaptureMode = mode, SlowQueryXESessionName = mode == DBADashSource.SlowQueryCaptureModes.ExistingSession ? "Mine" : null, DeadlockXESessionName = deadlocks };
+
+        [TestMethod]
+        public void SessionsToDrop_RingBuffer()
+        {
+            var ring = SlowQueries(DBADashSource.SlowQueryCaptureModes.RingBuffer);
+            CollectionAssert.AreEqual(Array.Empty<string>(), ConnectionOptionsUpdateMessage.GetSessionsToDrop(ring, SlowQueries(DBADashSource.SlowQueryCaptureModes.RingBuffer)));
+            CollectionAssert.AreEqual(new[] { "DBADash_1", "DBADash_2" }, ConnectionOptionsUpdateMessage.GetSessionsToDrop(ring, SlowQueries(DBADashSource.SlowQueryCaptureModes.RingBuffer, 2000)));
+            CollectionAssert.AreEqual(new[] { "DBADash_1", "DBADash_2" }, ConnectionOptionsUpdateMessage.GetSessionsToDrop(ring, SlowQueries(DBADashSource.SlowQueryCaptureModes.RingBuffer, -1)));
+            CollectionAssert.AreEqual(new[] { "DBADash_1", "DBADash_2" }, ConnectionOptionsUpdateMessage.GetSessionsToDrop(ring, SlowQueries(DBADashSource.SlowQueryCaptureModes.EventFile)));
+        }
+
+        [TestMethod]
+        public void SessionsToDrop_EventFileKeptUnlessNoLongerUsed()
+        {
+            var file = SlowQueries(DBADashSource.SlowQueryCaptureModes.EventFile);
+            // A changed definition is rebuilt by the collection, keeping its unread events
+            CollectionAssert.AreEqual(Array.Empty<string>(), ConnectionOptionsUpdateMessage.GetSessionsToDrop(file, SlowQueries(DBADashSource.SlowQueryCaptureModes.EventFile, 5000)));
+            CollectionAssert.AreEqual(new[] { DBADashSource.ManagedSlowQueryXESessionName }, ConnectionOptionsUpdateMessage.GetSessionsToDrop(file, SlowQueries(DBADashSource.SlowQueryCaptureModes.EventFile, -1)));
+            CollectionAssert.AreEqual(new[] { DBADashSource.ManagedSlowQueryXESessionName }, ConnectionOptionsUpdateMessage.GetSessionsToDrop(file, SlowQueries(DBADashSource.SlowQueryCaptureModes.ExistingSession)));
+        }
+
+        [TestMethod]
+        public void SessionsToDrop_NeverTheUsersOwn()
+        {
+            var existing = SlowQueries(DBADashSource.SlowQueryCaptureModes.ExistingSession, deadlocks: "MyDeadlocks");
+            CollectionAssert.AreEqual(Array.Empty<string>(), ConnectionOptionsUpdateMessage.GetSessionsToDrop(existing, SlowQueries(DBADashSource.SlowQueryCaptureModes.RingBuffer, -1)));
+        }
+
+        [TestMethod]
+        public void SessionsToDrop_ManagedDeadlockSession()
+        {
+            var managed = SlowQueries(DBADashSource.SlowQueryCaptureModes.RingBuffer, -1, DBADashSource.ManagedDeadlockXESessionName);
+            CollectionAssert.AreEqual(Array.Empty<string>(), ConnectionOptionsUpdateMessage.GetSessionsToDrop(managed, managed));
+            CollectionAssert.AreEqual(new[] { DBADashSource.ManagedDeadlockXESessionName },
+                ConnectionOptionsUpdateMessage.GetSessionsToDrop(managed, SlowQueries(DBADashSource.SlowQueryCaptureModes.RingBuffer, -1, DBADashSource.SystemHealthXESessionName)));
+            CollectionAssert.AreEqual(new[] { DBADashSource.ManagedDeadlockXESessionName },
+                ConnectionOptionsUpdateMessage.GetSessionsToDrop(managed, SlowQueries(DBADashSource.SlowQueryCaptureModes.RingBuffer, -1, string.Empty)));
+        }
+
+        [TestMethod]
+        public void ApplyTo_KeepsWhatIsntAnOption()
+        {
+            var src = new DBADashSource("Data Source=SQL1;Integrated Security=True")
+            {
+                ConnectionID = "CustomID",
+                SlowQueryEventFileMaxSizeMB = 77,
+                FlushDeadlockXERingBuffer = true,
+                CustomCollections = new() { { "Test", new CustomCollection { ProcedureName = "dbo.Test" } } },
+                CollectionSchedules = new DBADashService.CollectionSchedules { { CollectionType.Jobs, new DBADashService.CollectionSchedule { Schedule = "600" } } }
+            };
+            new SourceConnectionOptions { SlowQueryThresholdMs = 500, RunningQueryLiveProfileThreshold = LiveProfileThreshold.DefaultThreshold, RunningQueryPlanThreshold = PlanCollectionThreshold.DefaultThreshold }
+                .ApplyTo(src, includeCustomCollections: false);
+
+            Assert.AreEqual(500, src.SlowQueryThresholdMs);
+            Assert.IsNotNull(src.RunningQueryLiveProfileThreshold);
+            Assert.AreEqual("CustomID", src.ConnectionID);
+            Assert.AreEqual(77, src.SlowQueryEventFileMaxSizeMB);
+            Assert.IsTrue(src.FlushDeadlockXERingBuffer);
+            Assert.AreEqual(1, src.CustomCollections.Count);
+            Assert.AreEqual("600", src.CollectionSchedules[CollectionType.Jobs].Schedule);
         }
 
         [TestMethod]

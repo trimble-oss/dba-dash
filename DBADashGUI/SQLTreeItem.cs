@@ -1057,9 +1057,21 @@ namespace DBADashGUI
             }
             if (DBADashUser.ManageConnections)
             {
+                var mnuEditConnection = new ToolStripMenuItem("Connection Options...") { Image = Resources.DatabaseSettings_16x };
+                mnuEditConnection.Click += (_, _) =>
+                {
+                    try
+                    {
+                        Connections.EditConnectionOptionsDialog.Show(TreeView, Context);
+                    }
+                    catch (Exception ex)
+                    {
+                        CommonShared.ShowExceptionDialog(ex);
+                    }
+                };
                 var mnuRemoveConnection = new ToolStripMenuItem("Remove Connection...") { Image = Resources.DeleteDatabase_16x };
                 mnuRemoveConnection.Click += MnuRemoveConnection_Click;
-                scheduleMenus.Add(mnuRemoveConnection);
+                scheduleMenus.AddRange(new ToolStripItem[] { mnuEditConnection, mnuRemoveConnection });
             }
             if (!DBADashUser.IsAdmin)
             {

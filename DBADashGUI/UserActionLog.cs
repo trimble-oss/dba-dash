@@ -23,6 +23,7 @@ namespace DBADashGUI
         public const string ActionResume = "Resume Collections";
         public const string ActionAddConnections = "Add Connections";
         public const string ActionRemoveConnections = "Remove Connections";
+        public const string ActionEditConnection = "Edit Connection Options";
 
         public const string StatusSucceeded = "Succeeded";
 

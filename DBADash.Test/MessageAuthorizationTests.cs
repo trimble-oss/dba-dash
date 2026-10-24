@@ -62,6 +62,8 @@ namespace DBADash.Test
             AssertRoles(nameof(ConnectionTestMessage), "ManageConnections");
             AssertRoles(nameof(ConnectionAddMessage), "ManageConnections");
             AssertRoles(nameof(ConnectionRemoveMessage), "ManageConnections");
+            AssertRoles(nameof(ConnectionOptionsGetMessage), "ManageConnections");
+            AssertRoles(nameof(ConnectionOptionsUpdateMessage), "ManageConnections");
             AssertRoles(nameof(XESessionControlMessage), "ManageXE");
             AssertRoles(nameof(XESessionListMessage), "ManageXE", "WatchXE");
             AssertRoles(nameof(XESessionScriptMessage), "ManageXE", "WatchXE");
