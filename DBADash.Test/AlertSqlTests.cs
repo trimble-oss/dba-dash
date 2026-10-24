@@ -16,7 +16,7 @@ namespace DBADash.Test
     /// </summary>
     [TestClass]
     [TestCategory("SqlServer")]
-    public class AlertSqlTests
+    public partial class AlertSqlTests
     {
         private static readonly string? ServerConnectionString = Environment.GetEnvironmentVariable(MessageAuthorizationSqlTests.ServerEnvironmentVariable) is { Length: > 0 } cs ? cs : null;
         private static readonly string Database = "DBADashAlertTest_" + Guid.NewGuid().ToString("N");
