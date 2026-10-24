@@ -25,7 +25,7 @@ namespace DBADash
         public bool KeepSlowQueryXESessionRunning { get; set; }
 
         /// <summary>See <see cref="DBADashSource.DeadlockXESessionName"/> - blank disables deadlock collection.</summary>
-        public string DeadlockXESessionName { get; set; } = DBADashSource.ManagedDeadlockXESessionName;
+        public string DeadlockXESessionName { get; set; } = string.Empty;
 
         public bool BackfillDeadlocksFromSystemHealth { get; set; } = true;
 

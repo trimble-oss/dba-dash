@@ -46,10 +46,6 @@ namespace DBADashServiceConfig
             bttnScanNow = new System.Windows.Forms.Button();
             chkScanAzureDB = new System.Windows.Forms.CheckBox();
             chkMonitorReadReplicas = new System.Windows.Forms.CheckBox();
-            pictureBox3 = new System.Windows.Forms.PictureBox();
-            chkScriptJobs = new System.Windows.Forms.CheckBox();
-            chkCollectSessionWaits = new System.Windows.Forms.CheckBox();
-            chkDualSession = new System.Windows.Forms.CheckBox();
             bttnConnectSource = new System.Windows.Forms.Button();
             bttnSrcFolder = new System.Windows.Forms.Button();
             bttnS3Src = new System.Windows.Forms.Button();
@@ -67,8 +63,6 @@ namespace DBADashServiceConfig
             chkLogInternalPerfCounters = new System.Windows.Forms.CheckBox();
             bttnCheckConnections = new System.Windows.Forms.Button();
             label21 = new System.Windows.Forms.Label();
-            chkCollectTaskWaits = new System.Windows.Forms.CheckBox();
-            chkCollectCursors = new System.Windows.Forms.CheckBox();
             label23 = new System.Windows.Forms.Label();
             lblSchedulerThreads = new System.Windows.Forms.Label();
             chkQueueBasedScheduling = new System.Windows.Forms.CheckBox();
@@ -88,10 +82,6 @@ namespace DBADashServiceConfig
             txtAllowedJobs = new System.Windows.Forms.TextBox();
             txtAllowScripts = new System.Windows.Forms.TextBox();
             xeMaxDuration = new DBADashGUI.Pickers.DurationDropDown();
-            optSystemManagedDeadlock = new System.Windows.Forms.RadioButton();
-            optSystemHealthDeadlock = new System.Windows.Forms.RadioButton();
-            optCustomDeadlockSession = new System.Windows.Forms.RadioButton();
-            chkBackfillDeadlocks = new System.Windows.Forms.CheckBox();
             labelManageXE = new System.Windows.Forms.Label();
             lnkManageXEAll = new System.Windows.Forms.LinkLabel();
             lnkManageXENone = new System.Windows.Forms.LinkLabel();
@@ -156,66 +146,11 @@ namespace DBADashServiceConfig
             label4 = new System.Windows.Forms.Label();
             tabSource = new System.Windows.Forms.TabPage();
             groupBox2 = new System.Windows.Forms.GroupBox();
-            tabSrcOptions = new ThemedTabControl();
+            tabSrcOptions = new DBADashGUI.SourceConnectionOptionsTabs();
             tabGeneral = new System.Windows.Forms.TabPage();
             lnkGrant = new System.Windows.Forms.LinkLabel();
             txtSource = new System.Windows.Forms.TextBox();
             label1 = new System.Windows.Forms.Label();
-            tabExtendedEvents = new System.Windows.Forms.TabPage();
-            pnlExtendedEvents = new System.Windows.Forms.Panel();
-            chkSlowQueryThreshold = new System.Windows.Forms.CheckBox();
-            numSlowQueryThreshold = new System.Windows.Forms.NumericUpDown();
-            label9 = new System.Windows.Forms.Label();
-            lblSlow = new System.Windows.Forms.Label();
-            chkPersistXESession = new System.Windows.Forms.CheckBox();
-            lblSlowQueryCaptureMode = new System.Windows.Forms.Label();
-            cboSlowQueryCaptureMode = new System.Windows.Forms.ComboBox();
-            lblSlowQueryXESessionName = new System.Windows.Forms.Label();
-            txtSlowQueryXESessionName = new System.Windows.Forms.TextBox();
-            chkKeepSlowQuerySessionRunning = new System.Windows.Forms.CheckBox();
-            tabRunningQueries = new System.Windows.Forms.TabPage();
-            chkCollectTempDB = new System.Windows.Forms.CheckBox();
-            chkCollectPlans = new System.Windows.Forms.CheckBox();
-            grpRunningQueryThreshold = new System.Windows.Forms.GroupBox();
-            grpLivePlanThreshold = new System.Windows.Forms.GroupBox();
-            chkCaptureLivePlans = new System.Windows.Forms.CheckBox();
-            lblLivePlanCPUThreshold = new System.Windows.Forms.Label();
-            txtLivePlanCPUThreshold = new System.Windows.Forms.TextBox();
-            lblLivePlanDurationThreshold = new System.Windows.Forms.Label();
-            txtLivePlanDurationThreshold = new System.Windows.Forms.TextBox();
-            lblLivePlanMaxPerCollection = new System.Windows.Forms.Label();
-            txtLivePlanMaxPerCollection = new System.Windows.Forms.TextBox();
-            label15 = new System.Windows.Forms.Label();
-            txtDurationThreshold = new System.Windows.Forms.TextBox();
-            txtCountThreshold = new System.Windows.Forms.TextBox();
-            label17 = new System.Windows.Forms.Label();
-            label14 = new System.Windows.Forms.Label();
-            txtCPUThreshold = new System.Windows.Forms.TextBox();
-            txtGrantThreshold = new System.Windows.Forms.TextBox();
-            label16 = new System.Windows.Forms.Label();
-            tabAddConnectionOther = new System.Windows.Forms.TabPage();
-            bttnCustomCollectionsNew = new System.Windows.Forms.Button();
-            chkWriteToSecondaryDestinations = new System.Windows.Forms.CheckBox();
-            lblIOCollectionLevel = new System.Windows.Forms.Label();
-            cboIOLevel = new System.Windows.Forms.ComboBox();
-            lnkExample = new System.Windows.Forms.LinkLabel();
-            lnkNone = new System.Windows.Forms.LinkLabel();
-            lnkALL = new System.Windows.Forms.LinkLabel();
-            lblSchemaSnapshotDBs = new System.Windows.Forms.Label();
-            txtSnapshotDBs = new System.Windows.Forms.TextBox();
-            chkNoWMI = new System.Windows.Forms.CheckBox();
-            tabDeadlocks = new System.Windows.Forms.TabPage();
-            lnkApplyDeadlockConfigurationToAll = new System.Windows.Forms.LinkLabel();
-            txtDeadlockSessionName = new System.Windows.Forms.TextBox();
-            optDisableDeadlock = new System.Windows.Forms.RadioButton();
-            tabQueryStats = new System.Windows.Forms.TabPage();
-            lnkApplyQueryStatsConfigurationToAll = new System.Windows.Forms.LinkLabel();
-            lblQueryStatsNote = new System.Windows.Forms.Label();
-            numQueryStatsPlans = new System.Windows.Forms.NumericUpDown();
-            lblQueryStatsPlans = new System.Windows.Forms.Label();
-            numQueryStatsTopN = new System.Windows.Forms.NumericUpDown();
-            lblQueryStatsTopN = new System.Windows.Forms.Label();
-            chkCollectQueryStats = new System.Windows.Forms.CheckBox();
             bttnAdd = new System.Windows.Forms.Button();
             groupBox1 = new System.Windows.Forms.GroupBox();
             bttnPermissionsHelper = new System.Windows.Forms.Button();
@@ -242,7 +177,6 @@ namespace DBADashServiceConfig
             tabMessaging = new System.Windows.Forms.TabPage();
             grpXE = new System.Windows.Forms.GroupBox();
             ((System.ComponentModel.ISupportInitialize)errorProvider1).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)pictureBox3).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
             ((System.ComponentModel.ISupportInitialize)picConfigFileAccess).BeginInit();
             pnlBottom.SuspendLayout();
@@ -266,17 +200,6 @@ namespace DBADashServiceConfig
             groupBox2.SuspendLayout();
             tabSrcOptions.SuspendLayout();
             tabGeneral.SuspendLayout();
-            tabExtendedEvents.SuspendLayout();
-            pnlExtendedEvents.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)numSlowQueryThreshold).BeginInit();
-            tabRunningQueries.SuspendLayout();
-            grpRunningQueryThreshold.SuspendLayout();
-            grpLivePlanThreshold.SuspendLayout();
-            tabAddConnectionOther.SuspendLayout();
-            tabDeadlocks.SuspendLayout();
-            tabQueryStats.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)numQueryStatsPlans).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)numQueryStatsTopN).BeginInit();
             groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvConnections).BeginInit();
             tabDest.SuspendLayout();
@@ -393,58 +316,6 @@ namespace DBADashServiceConfig
             toolTip1.SetToolTip(chkMonitorReadReplicas, resources.GetString("chkMonitorReadReplicas.ToolTip"));
             chkMonitorReadReplicas.UseVisualStyleBackColor = true;
             chkMonitorReadReplicas.CheckedChanged += ChkMonitorReadReplicas_CheckedChanged;
-            // 
-            // pictureBox3
-            // 
-            pictureBox3.Image = Properties.Resources.Warning_yellow_7231_16x16;
-            pictureBox3.Location = new System.Drawing.Point(679, 91);
-            pictureBox3.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            pictureBox3.Name = "pictureBox3";
-            pictureBox3.Size = new System.Drawing.Size(16, 16);
-            pictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
-            pictureBox3.TabIndex = 26;
-            pictureBox3.TabStop = false;
-            toolTip1.SetToolTip(pictureBox3, "Warning: Avoid using this feature on databases with very large numbers of objects or selecting all databases on servers with very large numbers of databases.");
-            // 
-            // chkScriptJobs
-            // 
-            chkScriptJobs.AutoSize = true;
-            chkScriptJobs.Checked = true;
-            chkScriptJobs.CheckState = System.Windows.Forms.CheckState.Checked;
-            chkScriptJobs.Location = new System.Drawing.Point(146, 8);
-            chkScriptJobs.Name = "chkScriptJobs";
-            chkScriptJobs.Size = new System.Drawing.Size(102, 24);
-            chkScriptJobs.TabIndex = 28;
-            chkScriptJobs.Text = "Script Jobs";
-            toolTip1.SetToolTip(chkScriptJobs, "If Jobs collection is enabled, the job definition will be scripted via SMO");
-            chkScriptJobs.UseVisualStyleBackColor = true;
-            // 
-            // chkCollectSessionWaits
-            // 
-            chkCollectSessionWaits.AutoSize = true;
-            chkCollectSessionWaits.Checked = true;
-            chkCollectSessionWaits.CheckState = System.Windows.Forms.CheckState.Checked;
-            chkCollectSessionWaits.Location = new System.Drawing.Point(9, 8);
-            chkCollectSessionWaits.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            chkCollectSessionWaits.Name = "chkCollectSessionWaits";
-            chkCollectSessionWaits.Size = new System.Drawing.Size(170, 24);
-            chkCollectSessionWaits.TabIndex = 27;
-            chkCollectSessionWaits.Text = "Collect Session Waits";
-            toolTip1.SetToolTip(chkCollectSessionWaits, "Collect Session Waits for Running Queries (sys.dm_exec_session_wait_stats)");
-            chkCollectSessionWaits.UseVisualStyleBackColor = true;
-            // 
-            // chkDualSession
-            // 
-            chkDualSession.AutoSize = true;
-            chkDualSession.Enabled = false;
-            chkDualSession.Location = new System.Drawing.Point(6, 71);
-            chkDualSession.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            chkDualSession.Name = "chkDualSession";
-            chkDualSession.Size = new System.Drawing.Size(139, 24);
-            chkDualSession.TabIndex = 17;
-            chkDualSession.Text = "Use dual session";
-            toolTip1.SetToolTip(chkDualSession, "Uses overlapping event sessions to try to capture events that occur during the brief period where the session is stopped to flush the ring buffer.");
-            chkDualSession.UseVisualStyleBackColor = true;
             // 
             // bttnConnectSource
             // 
@@ -659,31 +530,6 @@ namespace DBADashServiceConfig
             label21.Text = "Allowed Job Execution";
             toolTip1.SetToolTip(label21, "Comma separated list of allowed jobs, categories or job IDs.  Prefix with - to deny.  Use * or % as wildcard characters. ");
             // 
-            // chkCollectTaskWaits
-            // 
-            chkCollectTaskWaits.AutoSize = true;
-            chkCollectTaskWaits.Location = new System.Drawing.Point(9, 40);
-            chkCollectTaskWaits.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            chkCollectTaskWaits.Name = "chkCollectTaskWaits";
-            chkCollectTaskWaits.Size = new System.Drawing.Size(148, 24);
-            chkCollectTaskWaits.TabIndex = 29;
-            chkCollectTaskWaits.Text = "Collect Task Waits";
-            toolTip1.SetToolTip(chkCollectTaskWaits, "Collect Task Waits for Running Queries (sys.dm_os_waiting_tasks)\r\nUseful for parallel queries that can have several tasks waiting on different things");
-            chkCollectTaskWaits.UseVisualStyleBackColor = true;
-            // 
-            // chkCollectCursors
-            // 
-            chkCollectCursors.AutoSize = true;
-            chkCollectCursors.Location = new System.Drawing.Point(9, 134);
-            chkCollectCursors.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            chkCollectCursors.Name = "chkCollectCursors";
-            chkCollectCursors.Size = new System.Drawing.Size(129, 24);
-            chkCollectCursors.TabIndex = 30;
-            chkCollectCursors.Text = "Collect Cursors";
-            chkCollectCursors.ThreeState = true;
-            toolTip1.SetToolTip(chkCollectCursors, "sys.dm_exec_cursors capture for Running Queries.  Enable if your application uses cursors and you need to identify the SQL query associated with the cursor.");
-            chkCollectCursors.UseVisualStyleBackColor = true;
-            // 
             // label23
             // 
             label23.AutoSize = true;
@@ -896,52 +742,6 @@ namespace DBADashServiceConfig
             xeMaxDuration.Size = new System.Drawing.Size(387, 34);
             xeMaxDuration.TabIndex = 22;
             toolTip1.SetToolTip(xeMaxDuration, "Maximum duration allowed for an ad-hoc XE trace, preventing long running extended events.");
-            // 
-            // optSystemManagedDeadlock
-            // 
-            optSystemManagedDeadlock.AutoSize = true;
-            optSystemManagedDeadlock.Location = new System.Drawing.Point(23, 46);
-            optSystemManagedDeadlock.Name = "optSystemManagedDeadlock";
-            optSystemManagedDeadlock.Size = new System.Drawing.Size(381, 24);
-            optSystemManagedDeadlock.TabIndex = 1;
-            optSystemManagedDeadlock.Text = "Dedicated System Managed Session (recommended)";
-            toolTip1.SetToolTip(optSystemManagedDeadlock, "Uses a system managed \"DBADash_Deadlocks\" session.");
-            optSystemManagedDeadlock.UseVisualStyleBackColor = true;
-            // 
-            // optSystemHealthDeadlock
-            // 
-            optSystemHealthDeadlock.AutoSize = true;
-            optSystemHealthDeadlock.Location = new System.Drawing.Point(23, 76);
-            optSystemHealthDeadlock.Name = "optSystemHealthDeadlock";
-            optSystemHealthDeadlock.Size = new System.Drawing.Size(148, 24);
-            optSystemHealthDeadlock.TabIndex = 2;
-            optSystemHealthDeadlock.Text = "Use system health";
-            toolTip1.SetToolTip(optSystemHealthDeadlock, "Uses existing system_health session.  This option has additional overhead compared to using a dedicated session.");
-            optSystemHealthDeadlock.UseVisualStyleBackColor = true;
-            // 
-            // optCustomDeadlockSession
-            // 
-            optCustomDeadlockSession.AutoSize = true;
-            optCustomDeadlockSession.Location = new System.Drawing.Point(23, 106);
-            optCustomDeadlockSession.Name = "optCustomDeadlockSession";
-            optCustomDeadlockSession.Size = new System.Drawing.Size(163, 24);
-            optCustomDeadlockSession.TabIndex = 3;
-            optCustomDeadlockSession.Text = "Use existing session:";
-            toolTip1.SetToolTip(optCustomDeadlockSession, resources.GetString("optCustomDeadlockSession.ToolTip"));
-            optCustomDeadlockSession.UseVisualStyleBackColor = true;
-            // 
-            // chkBackfillDeadlocks
-            // 
-            chkBackfillDeadlocks.AutoSize = true;
-            chkBackfillDeadlocks.Checked = true;
-            chkBackfillDeadlocks.CheckState = System.Windows.Forms.CheckState.Checked;
-            chkBackfillDeadlocks.Location = new System.Drawing.Point(23, 142);
-            chkBackfillDeadlocks.Name = "chkBackfillDeadlocks";
-            chkBackfillDeadlocks.Size = new System.Drawing.Size(257, 24);
-            chkBackfillDeadlocks.TabIndex = 5;
-            chkBackfillDeadlocks.Text = "Backfill history from system health";
-            toolTip1.SetToolTip(chkBackfillDeadlocks, "After the first collection, read the system_health session once in the background for the deadlocks from before the dedicated session started.  Later collections use the dedicated session only.");
-            chkBackfillDeadlocks.UseVisualStyleBackColor = true;
             // 
             // labelManageXE
             // 
@@ -1689,11 +1489,6 @@ namespace DBADashServiceConfig
             // 
             tabSrcOptions.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             tabSrcOptions.Controls.Add(tabGeneral);
-            tabSrcOptions.Controls.Add(tabExtendedEvents);
-            tabSrcOptions.Controls.Add(tabRunningQueries);
-            tabSrcOptions.Controls.Add(tabAddConnectionOther);
-            tabSrcOptions.Controls.Add(tabDeadlocks);
-            tabSrcOptions.Controls.Add(tabQueryStats);
             tabSrcOptions.DrawMode = System.Windows.Forms.TabDrawMode.OwnerDrawFixed;
             tabSrcOptions.Location = new System.Drawing.Point(16, 27);
             tabSrcOptions.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
@@ -1751,615 +1546,6 @@ namespace DBADashServiceConfig
             label1.Size = new System.Drawing.Size(61, 20);
             label1.TabIndex = 2;
             label1.Text = "Source: ";
-            // 
-            // tabExtendedEvents
-            // 
-            tabExtendedEvents.Controls.Add(pnlExtendedEvents);
-            tabExtendedEvents.Location = new System.Drawing.Point(4, 39);
-            tabExtendedEvents.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            tabExtendedEvents.Name = "tabExtendedEvents";
-            tabExtendedEvents.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            tabExtendedEvents.Size = new System.Drawing.Size(1059, 178);
-            tabExtendedEvents.TabIndex = 1;
-            tabExtendedEvents.Text = "Slow Queries";
-            tabExtendedEvents.UseVisualStyleBackColor = true;
-            // 
-            // pnlExtendedEvents
-            // 
-            pnlExtendedEvents.Controls.Add(chkSlowQueryThreshold);
-            pnlExtendedEvents.Controls.Add(chkDualSession);
-            pnlExtendedEvents.Controls.Add(numSlowQueryThreshold);
-            pnlExtendedEvents.Controls.Add(label9);
-            pnlExtendedEvents.Controls.Add(lblSlow);
-            pnlExtendedEvents.Controls.Add(chkPersistXESession);
-            pnlExtendedEvents.Controls.Add(lblSlowQueryCaptureMode);
-            pnlExtendedEvents.Controls.Add(cboSlowQueryCaptureMode);
-            pnlExtendedEvents.Controls.Add(lblSlowQueryXESessionName);
-            pnlExtendedEvents.Controls.Add(txtSlowQueryXESessionName);
-            pnlExtendedEvents.Controls.Add(chkKeepSlowQuerySessionRunning);
-            pnlExtendedEvents.Dock = System.Windows.Forms.DockStyle.Fill;
-            pnlExtendedEvents.Location = new System.Drawing.Point(3, 4);
-            pnlExtendedEvents.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            pnlExtendedEvents.Name = "pnlExtendedEvents";
-            pnlExtendedEvents.Size = new System.Drawing.Size(1053, 170);
-            pnlExtendedEvents.TabIndex = 18;
-            // 
-            // chkSlowQueryThreshold
-            // 
-            chkSlowQueryThreshold.AutoSize = true;
-            chkSlowQueryThreshold.Location = new System.Drawing.Point(6, 4);
-            chkSlowQueryThreshold.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            chkSlowQueryThreshold.Name = "chkSlowQueryThreshold";
-            chkSlowQueryThreshold.Size = new System.Drawing.Size(289, 24);
-            chkSlowQueryThreshold.TabIndex = 13;
-            chkSlowQueryThreshold.Text = "Capture Slow Queries (Extended Event)";
-            chkSlowQueryThreshold.UseVisualStyleBackColor = true;
-            chkSlowQueryThreshold.CheckedChanged += ChkSlowQueryThreshold_CheckedChanged;
-            // 
-            // numSlowQueryThreshold
-            // 
-            numSlowQueryThreshold.Enabled = false;
-            numSlowQueryThreshold.Increment = new decimal(new int[] { 1000, 0, 0, 0 });
-            numSlowQueryThreshold.Location = new System.Drawing.Point(117, 108);
-            numSlowQueryThreshold.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            numSlowQueryThreshold.Maximum = new decimal(new int[] { 604800000, 0, 0, 0 });
-            numSlowQueryThreshold.Minimum = new decimal(new int[] { 1, 0, 0, int.MinValue });
-            numSlowQueryThreshold.Name = "numSlowQueryThreshold";
-            numSlowQueryThreshold.Size = new System.Drawing.Size(173, 27);
-            numSlowQueryThreshold.TabIndex = 12;
-            numSlowQueryThreshold.Value = new decimal(new int[] { 1, 0, 0, int.MinValue });
-            // 
-            // label9
-            // 
-            label9.AutoSize = true;
-            label9.Location = new System.Drawing.Point(6, 109);
-            label9.Name = "label9";
-            label9.Size = new System.Drawing.Size(110, 20);
-            label9.TabIndex = 16;
-            label9.Text = "Threshold (ms):";
-            // 
-            // lblSlow
-            // 
-            lblSlow.AutoSize = true;
-            lblSlow.Location = new System.Drawing.Point(6, 145);
-            lblSlow.Name = "lblSlow";
-            lblSlow.Size = new System.Drawing.Size(582, 20);
-            lblSlow.TabIndex = 14;
-            lblSlow.Text = "Extended events trace to capture slow rpc and batch completed events is NOT enabled";
-            // 
-            // chkPersistXESession
-            // 
-            chkPersistXESession.AutoSize = true;
-            chkPersistXESession.Enabled = false;
-            chkPersistXESession.Location = new System.Drawing.Point(6, 37);
-            chkPersistXESession.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            chkPersistXESession.Name = "chkPersistXESession";
-            chkPersistXESession.Size = new System.Drawing.Size(387, 24);
-            chkPersistXESession.TabIndex = 15;
-            chkPersistXESession.Text = "Persist XE sessions (to allow for manual configuration)";
-            chkPersistXESession.UseVisualStyleBackColor = true;
-            // 
-            // lblSlowQueryCaptureMode
-            // 
-            lblSlowQueryCaptureMode.AutoSize = true;
-            lblSlowQueryCaptureMode.Location = new System.Drawing.Point(620, 8);
-            lblSlowQueryCaptureMode.Name = "lblSlowQueryCaptureMode";
-            lblSlowQueryCaptureMode.Size = new System.Drawing.Size(107, 20);
-            lblSlowQueryCaptureMode.TabIndex = 19;
-            lblSlowQueryCaptureMode.Text = "Capture mode:";
-            // 
-            // cboSlowQueryCaptureMode
-            // 
-            cboSlowQueryCaptureMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            cboSlowQueryCaptureMode.Enabled = false;
-            cboSlowQueryCaptureMode.FormattingEnabled = true;
-            cboSlowQueryCaptureMode.Location = new System.Drawing.Point(760, 4);
-            cboSlowQueryCaptureMode.Name = "cboSlowQueryCaptureMode";
-            cboSlowQueryCaptureMode.Size = new System.Drawing.Size(250, 28);
-            cboSlowQueryCaptureMode.TabIndex = 20;
-            cboSlowQueryCaptureMode.SelectedIndexChanged += CboSlowQueryCaptureMode_SelectedIndexChanged;
-            // 
-            // lblSlowQueryXESessionName
-            // 
-            lblSlowQueryXESessionName.AutoSize = true;
-            lblSlowQueryXESessionName.Location = new System.Drawing.Point(620, 41);
-            lblSlowQueryXESessionName.Name = "lblSlowQueryXESessionName";
-            lblSlowQueryXESessionName.Size = new System.Drawing.Size(102, 20);
-            lblSlowQueryXESessionName.TabIndex = 21;
-            lblSlowQueryXESessionName.Text = "Session name:";
-            // 
-            // txtSlowQueryXESessionName
-            // 
-            txtSlowQueryXESessionName.Enabled = false;
-            txtSlowQueryXESessionName.Location = new System.Drawing.Point(760, 38);
-            txtSlowQueryXESessionName.Name = "txtSlowQueryXESessionName";
-            txtSlowQueryXESessionName.Size = new System.Drawing.Size(250, 27);
-            txtSlowQueryXESessionName.TabIndex = 22;
-            // 
-            // chkKeepSlowQuerySessionRunning
-            // 
-            chkKeepSlowQuerySessionRunning.AutoSize = true;
-            chkKeepSlowQuerySessionRunning.Enabled = false;
-            chkKeepSlowQuerySessionRunning.Location = new System.Drawing.Point(620, 71);
-            chkKeepSlowQuerySessionRunning.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            chkKeepSlowQuerySessionRunning.Name = "chkKeepSlowQuerySessionRunning";
-            chkKeepSlowQuerySessionRunning.Size = new System.Drawing.Size(297, 24);
-            chkKeepSlowQuerySessionRunning.TabIndex = 23;
-            chkKeepSlowQuerySessionRunning.Text = "Keep session running when service stops";
-            chkKeepSlowQuerySessionRunning.UseVisualStyleBackColor = true;
-            // 
-            // tabRunningQueries
-            // 
-            tabRunningQueries.Controls.Add(chkCollectCursors);
-            tabRunningQueries.Controls.Add(chkCollectTaskWaits);
-            tabRunningQueries.Controls.Add(chkCollectTempDB);
-            tabRunningQueries.Controls.Add(chkCollectPlans);
-            tabRunningQueries.Controls.Add(grpRunningQueryThreshold);
-            tabRunningQueries.Controls.Add(grpLivePlanThreshold);
-            tabRunningQueries.Controls.Add(chkCollectSessionWaits);
-            tabRunningQueries.Location = new System.Drawing.Point(4, 39);
-            tabRunningQueries.Name = "tabRunningQueries";
-            tabRunningQueries.Padding = new System.Windows.Forms.Padding(3);
-            tabRunningQueries.Size = new System.Drawing.Size(1059, 178);
-            tabRunningQueries.TabIndex = 4;
-            tabRunningQueries.Text = "Running Queries";
-            tabRunningQueries.UseVisualStyleBackColor = true;
-            // 
-            // chkCollectTempDB
-            // 
-            chkCollectTempDB.AutoSize = true;
-            chkCollectTempDB.Location = new System.Drawing.Point(9, 103);
-            chkCollectTempDB.Name = "chkCollectTempDB";
-            chkCollectTempDB.Size = new System.Drawing.Size(214, 24);
-            chkCollectTempDB.TabIndex = 28;
-            chkCollectTempDB.Text = "Collect TempDB allocations";
-            chkCollectTempDB.UseVisualStyleBackColor = true;
-            // 
-            // chkCollectPlans
-            // 
-            chkCollectPlans.AutoSize = true;
-            chkCollectPlans.Location = new System.Drawing.Point(9, 72);
-            chkCollectPlans.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            chkCollectPlans.Name = "chkCollectPlans";
-            chkCollectPlans.Size = new System.Drawing.Size(250, 24);
-            chkCollectPlans.TabIndex = 13;
-            chkCollectPlans.Text = "Collect Plans for Running Queries";
-            chkCollectPlans.UseVisualStyleBackColor = true;
-            chkCollectPlans.CheckedChanged += ChkCollectPlans_CheckedChanged;
-            // 
-            // grpRunningQueryThreshold
-            // 
-            grpRunningQueryThreshold.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
-            grpRunningQueryThreshold.Controls.Add(label15);
-            grpRunningQueryThreshold.Controls.Add(txtDurationThreshold);
-            grpRunningQueryThreshold.Controls.Add(txtCountThreshold);
-            grpRunningQueryThreshold.Controls.Add(label17);
-            grpRunningQueryThreshold.Controls.Add(label14);
-            grpRunningQueryThreshold.Controls.Add(txtCPUThreshold);
-            grpRunningQueryThreshold.Controls.Add(txtGrantThreshold);
-            grpRunningQueryThreshold.Controls.Add(label16);
-            grpRunningQueryThreshold.Enabled = false;
-            grpRunningQueryThreshold.Location = new System.Drawing.Point(545, 16);
-            grpRunningQueryThreshold.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            grpRunningQueryThreshold.Name = "grpRunningQueryThreshold";
-            grpRunningQueryThreshold.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            grpRunningQueryThreshold.Size = new System.Drawing.Size(509, 132);
-            grpRunningQueryThreshold.TabIndex = 22;
-            grpRunningQueryThreshold.TabStop = false;
-            grpRunningQueryThreshold.Text = "Running Queries Plan Collection Thresholds";
-            //
-            // grpLivePlanThreshold
-            //
-            grpLivePlanThreshold.Controls.Add(chkCaptureLivePlans);
-            grpLivePlanThreshold.Controls.Add(lblLivePlanCPUThreshold);
-            grpLivePlanThreshold.Controls.Add(txtLivePlanCPUThreshold);
-            grpLivePlanThreshold.Controls.Add(lblLivePlanDurationThreshold);
-            grpLivePlanThreshold.Controls.Add(txtLivePlanDurationThreshold);
-            grpLivePlanThreshold.Controls.Add(lblLivePlanMaxPerCollection);
-            grpLivePlanThreshold.Controls.Add(txtLivePlanMaxPerCollection);
-            grpLivePlanThreshold.Enabled = false;
-            grpLivePlanThreshold.Location = new System.Drawing.Point(270, 8);
-            grpLivePlanThreshold.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            grpLivePlanThreshold.Name = "grpLivePlanThreshold";
-            grpLivePlanThreshold.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            grpLivePlanThreshold.Size = new System.Drawing.Size(265, 160);
-            grpLivePlanThreshold.TabIndex = 29;
-            grpLivePlanThreshold.TabStop = false;
-            grpLivePlanThreshold.Text = "Live Plan Capture";
-            //
-            // chkCaptureLivePlans
-            //
-            chkCaptureLivePlans.AutoSize = true;
-            chkCaptureLivePlans.Location = new System.Drawing.Point(9, 24);
-            chkCaptureLivePlans.Name = "chkCaptureLivePlans";
-            chkCaptureLivePlans.Size = new System.Drawing.Size(220, 24);
-            chkCaptureLivePlans.TabIndex = 0;
-            chkCaptureLivePlans.Text = "Capture long running queries";
-            chkCaptureLivePlans.UseVisualStyleBackColor = true;
-            chkCaptureLivePlans.CheckedChanged += ChkCaptureLivePlans_CheckedChanged;
-            //
-            // lblLivePlanCPUThreshold
-            //
-            lblLivePlanCPUThreshold.AutoSize = true;
-            lblLivePlanCPUThreshold.Location = new System.Drawing.Point(6, 58);
-            lblLivePlanCPUThreshold.Name = "lblLivePlanCPUThreshold";
-            lblLivePlanCPUThreshold.Size = new System.Drawing.Size(108, 20);
-            lblLivePlanCPUThreshold.TabIndex = 1;
-            lblLivePlanCPUThreshold.Text = "CPU (ms):";
-            //
-            // txtLivePlanCPUThreshold
-            //
-            txtLivePlanCPUThreshold.Location = new System.Drawing.Point(150, 55);
-            txtLivePlanCPUThreshold.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            txtLivePlanCPUThreshold.Enabled = false;
-            txtLivePlanCPUThreshold.Name = "txtLivePlanCPUThreshold";
-            txtLivePlanCPUThreshold.Size = new System.Drawing.Size(100, 27);
-            txtLivePlanCPUThreshold.TabIndex = 2;
-            //
-            // lblLivePlanDurationThreshold
-            //
-            lblLivePlanDurationThreshold.AutoSize = true;
-            lblLivePlanDurationThreshold.Location = new System.Drawing.Point(6, 92);
-            lblLivePlanDurationThreshold.Name = "lblLivePlanDurationThreshold";
-            lblLivePlanDurationThreshold.Size = new System.Drawing.Size(108, 20);
-            lblLivePlanDurationThreshold.TabIndex = 3;
-            lblLivePlanDurationThreshold.Text = "Duration (ms):";
-            //
-            // txtLivePlanDurationThreshold
-            //
-            txtLivePlanDurationThreshold.Location = new System.Drawing.Point(150, 89);
-            txtLivePlanDurationThreshold.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            txtLivePlanDurationThreshold.Enabled = false;
-            txtLivePlanDurationThreshold.Name = "txtLivePlanDurationThreshold";
-            txtLivePlanDurationThreshold.Size = new System.Drawing.Size(100, 27);
-            txtLivePlanDurationThreshold.TabIndex = 4;
-            //
-            // lblLivePlanMaxPerCollection
-            //
-            lblLivePlanMaxPerCollection.AutoSize = true;
-            lblLivePlanMaxPerCollection.Location = new System.Drawing.Point(6, 126);
-            lblLivePlanMaxPerCollection.Name = "lblLivePlanMaxPerCollection";
-            lblLivePlanMaxPerCollection.Size = new System.Drawing.Size(140, 20);
-            lblLivePlanMaxPerCollection.TabIndex = 5;
-            lblLivePlanMaxPerCollection.Text = "Max per collection:";
-            //
-            // txtLivePlanMaxPerCollection
-            //
-            txtLivePlanMaxPerCollection.Location = new System.Drawing.Point(150, 123);
-            txtLivePlanMaxPerCollection.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            txtLivePlanMaxPerCollection.Enabled = false;
-            txtLivePlanMaxPerCollection.Name = "txtLivePlanMaxPerCollection";
-            txtLivePlanMaxPerCollection.Size = new System.Drawing.Size(100, 27);
-            txtLivePlanMaxPerCollection.TabIndex = 6;
-            //
-            // label15
-            //
-            label15.AutoSize = true;
-            label15.Location = new System.Drawing.Point(6, 40);
-            label15.Name = "label15";
-            label15.Size = new System.Drawing.Size(139, 20);
-            label15.TabIndex = 17;
-            label15.Text = "Duration Threshold:";
-            // 
-            // txtDurationThreshold
-            // 
-            txtDurationThreshold.Location = new System.Drawing.Point(146, 37);
-            txtDurationThreshold.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            txtDurationThreshold.Name = "txtDurationThreshold";
-            txtDurationThreshold.Size = new System.Drawing.Size(100, 27);
-            txtDurationThreshold.TabIndex = 16;
-            // 
-            // txtCountThreshold
-            // 
-            txtCountThreshold.Location = new System.Drawing.Point(385, 79);
-            txtCountThreshold.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            txtCountThreshold.Name = "txtCountThreshold";
-            txtCountThreshold.Size = new System.Drawing.Size(100, 27);
-            txtCountThreshold.TabIndex = 20;
-            // 
-            // label17
-            // 
-            label17.AutoSize = true;
-            label17.Location = new System.Drawing.Point(263, 83);
-            label17.Name = "label17";
-            label17.Size = new System.Drawing.Size(120, 20);
-            label17.TabIndex = 21;
-            label17.Text = "Count Threshold:";
-            // 
-            // label14
-            // 
-            label14.AutoSize = true;
-            label14.Location = new System.Drawing.Point(6, 83);
-            label14.Name = "label14";
-            label14.Size = new System.Drawing.Size(108, 20);
-            label14.TabIndex = 15;
-            label14.Text = "CPU Threshold:";
-            // 
-            // txtCPUThreshold
-            // 
-            txtCPUThreshold.Location = new System.Drawing.Point(146, 79);
-            txtCPUThreshold.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            txtCPUThreshold.Name = "txtCPUThreshold";
-            txtCPUThreshold.Size = new System.Drawing.Size(100, 27);
-            txtCPUThreshold.TabIndex = 14;
-            // 
-            // txtGrantThreshold
-            // 
-            txtGrantThreshold.Location = new System.Drawing.Point(385, 37);
-            txtGrantThreshold.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            txtGrantThreshold.Name = "txtGrantThreshold";
-            txtGrantThreshold.Size = new System.Drawing.Size(100, 27);
-            txtGrantThreshold.TabIndex = 18;
-            // 
-            // label16
-            // 
-            label16.AutoSize = true;
-            label16.Location = new System.Drawing.Point(263, 40);
-            label16.Name = "label16";
-            label16.Size = new System.Drawing.Size(117, 20);
-            label16.TabIndex = 19;
-            label16.Text = "Grant Threshold:";
-            // 
-            // tabAddConnectionOther
-            // 
-            tabAddConnectionOther.Controls.Add(bttnCustomCollectionsNew);
-            tabAddConnectionOther.Controls.Add(chkWriteToSecondaryDestinations);
-            tabAddConnectionOther.Controls.Add(lblIOCollectionLevel);
-            tabAddConnectionOther.Controls.Add(cboIOLevel);
-            tabAddConnectionOther.Controls.Add(chkScriptJobs);
-            tabAddConnectionOther.Controls.Add(pictureBox3);
-            tabAddConnectionOther.Controls.Add(lnkExample);
-            tabAddConnectionOther.Controls.Add(lnkNone);
-            tabAddConnectionOther.Controls.Add(lnkALL);
-            tabAddConnectionOther.Controls.Add(lblSchemaSnapshotDBs);
-            tabAddConnectionOther.Controls.Add(txtSnapshotDBs);
-            tabAddConnectionOther.Controls.Add(chkNoWMI);
-            tabAddConnectionOther.Location = new System.Drawing.Point(4, 39);
-            tabAddConnectionOther.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            tabAddConnectionOther.Name = "tabAddConnectionOther";
-            tabAddConnectionOther.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            tabAddConnectionOther.Size = new System.Drawing.Size(1059, 178);
-            tabAddConnectionOther.TabIndex = 3;
-            tabAddConnectionOther.Text = "Other";
-            tabAddConnectionOther.UseVisualStyleBackColor = true;
-            // 
-            // bttnCustomCollectionsNew
-            // 
-            bttnCustomCollectionsNew.Location = new System.Drawing.Point(859, 8);
-            bttnCustomCollectionsNew.Name = "bttnCustomCollectionsNew";
-            bttnCustomCollectionsNew.Size = new System.Drawing.Size(193, 37);
-            bttnCustomCollectionsNew.TabIndex = 32;
-            bttnCustomCollectionsNew.Text = "Custom Collections";
-            bttnCustomCollectionsNew.UseVisualStyleBackColor = true;
-            bttnCustomCollectionsNew.Click += BttnCustomCollectionsNew_Click;
-            // 
-            // chkWriteToSecondaryDestinations
-            // 
-            chkWriteToSecondaryDestinations.AutoSize = true;
-            chkWriteToSecondaryDestinations.Checked = true;
-            chkWriteToSecondaryDestinations.CheckState = System.Windows.Forms.CheckState.Checked;
-            chkWriteToSecondaryDestinations.Location = new System.Drawing.Point(264, 8);
-            chkWriteToSecondaryDestinations.Name = "chkWriteToSecondaryDestinations";
-            chkWriteToSecondaryDestinations.Size = new System.Drawing.Size(240, 24);
-            chkWriteToSecondaryDestinations.TabIndex = 31;
-            chkWriteToSecondaryDestinations.Text = "Write to secondary destinations";
-            chkWriteToSecondaryDestinations.UseVisualStyleBackColor = true;
-            // 
-            // lblIOCollectionLevel
-            // 
-            lblIOCollectionLevel.AutoSize = true;
-            lblIOCollectionLevel.Location = new System.Drawing.Point(9, 49);
-            lblIOCollectionLevel.Name = "lblIOCollectionLevel";
-            lblIOCollectionLevel.Size = new System.Drawing.Size(136, 20);
-            lblIOCollectionLevel.TabIndex = 30;
-            lblIOCollectionLevel.Text = "IO Collection Level:";
-            // 
-            // cboIOLevel
-            // 
-            cboIOLevel.FormattingEnabled = true;
-            cboIOLevel.Location = new System.Drawing.Point(224, 45);
-            cboIOLevel.Name = "cboIOLevel";
-            cboIOLevel.Size = new System.Drawing.Size(135, 28);
-            cboIOLevel.TabIndex = 29;
-            // 
-            // lnkExample
-            // 
-            lnkExample.AutoSize = true;
-            lnkExample.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            lnkExample.Location = new System.Drawing.Point(613, 115);
-            lnkExample.Name = "lnkExample";
-            lnkExample.Size = new System.Drawing.Size(66, 20);
-            lnkExample.TabIndex = 25;
-            lnkExample.TabStop = true;
-            lnkExample.Text = "Example";
-            lnkExample.LinkClicked += LnkExample_LinkClicked;
-            // 
-            // lnkNone
-            // 
-            lnkNone.AutoSize = true;
-            lnkNone.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            lnkNone.Location = new System.Drawing.Point(565, 115);
-            lnkNone.Name = "lnkNone";
-            lnkNone.Size = new System.Drawing.Size(45, 20);
-            lnkNone.TabIndex = 24;
-            lnkNone.TabStop = true;
-            lnkNone.Text = "None";
-            lnkNone.LinkClicked += LnkNone_LinkClicked;
-            // 
-            // lnkALL
-            // 
-            lnkALL.AutoSize = true;
-            lnkALL.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
-            lnkALL.Location = new System.Drawing.Point(535, 115);
-            lnkALL.Name = "lnkALL";
-            lnkALL.Size = new System.Drawing.Size(27, 20);
-            lnkALL.TabIndex = 23;
-            lnkALL.TabStop = true;
-            lnkALL.Text = "All";
-            lnkALL.LinkClicked += LnkALL_LinkClicked;
-            // 
-            // lblSchemaSnapshotDBs
-            // 
-            lblSchemaSnapshotDBs.AutoSize = true;
-            lblSchemaSnapshotDBs.Location = new System.Drawing.Point(9, 91);
-            lblSchemaSnapshotDBs.Name = "lblSchemaSnapshotDBs";
-            lblSchemaSnapshotDBs.Size = new System.Drawing.Size(202, 20);
-            lblSchemaSnapshotDBs.TabIndex = 20;
-            lblSchemaSnapshotDBs.Text = "Schema Snapshot Databases:";
-            // 
-            // txtSnapshotDBs
-            // 
-            txtSnapshotDBs.Location = new System.Drawing.Point(224, 88);
-            txtSnapshotDBs.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            txtSnapshotDBs.Name = "txtSnapshotDBs";
-            txtSnapshotDBs.Size = new System.Drawing.Size(449, 27);
-            txtSnapshotDBs.TabIndex = 17;
-            // 
-            // chkNoWMI
-            // 
-            chkNoWMI.AutoSize = true;
-            chkNoWMI.Location = new System.Drawing.Point(9, 8);
-            chkNoWMI.Name = "chkNoWMI";
-            chkNoWMI.Size = new System.Drawing.Size(128, 24);
-            chkNoWMI.TabIndex = 6;
-            chkNoWMI.Text = "Don't use WMI";
-            chkNoWMI.UseVisualStyleBackColor = true;
-            // 
-            // tabDeadlocks
-            // 
-            tabDeadlocks.Controls.Add(lnkApplyDeadlockConfigurationToAll);
-            tabDeadlocks.Controls.Add(chkBackfillDeadlocks);
-            tabDeadlocks.Controls.Add(txtDeadlockSessionName);
-            tabDeadlocks.Controls.Add(optCustomDeadlockSession);
-            tabDeadlocks.Controls.Add(optSystemHealthDeadlock);
-            tabDeadlocks.Controls.Add(optSystemManagedDeadlock);
-            tabDeadlocks.Controls.Add(optDisableDeadlock);
-            tabDeadlocks.Location = new System.Drawing.Point(4, 39);
-            tabDeadlocks.Name = "tabDeadlocks";
-            tabDeadlocks.Padding = new System.Windows.Forms.Padding(3);
-            tabDeadlocks.Size = new System.Drawing.Size(1059, 178);
-            tabDeadlocks.TabIndex = 5;
-            tabDeadlocks.Text = "Deadlocks";
-            tabDeadlocks.UseVisualStyleBackColor = true;
-            // 
-            // lnkApplyDeadlockConfigurationToAll
-            // 
-            lnkApplyDeadlockConfigurationToAll.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            lnkApplyDeadlockConfigurationToAll.AutoSize = true;
-            lnkApplyDeadlockConfigurationToAll.Location = new System.Drawing.Point(650, 17);
-            lnkApplyDeadlockConfigurationToAll.Name = "lnkApplyDeadlockConfigurationToAll";
-            lnkApplyDeadlockConfigurationToAll.Size = new System.Drawing.Size(382, 20);
-            lnkApplyDeadlockConfigurationToAll.TabIndex = 6;
-            lnkApplyDeadlockConfigurationToAll.TabStop = true;
-            lnkApplyDeadlockConfigurationToAll.Text = "Apply deadlock configuration to all existing connections";
-            lnkApplyDeadlockConfigurationToAll.LinkClicked += ApplyDeadlockConfigToAll;
-            // 
-            // txtDeadlockSessionName
-            // 
-            txtDeadlockSessionName.Location = new System.Drawing.Point(321, 106);
-            txtDeadlockSessionName.Name = "txtDeadlockSessionName";
-            txtDeadlockSessionName.Size = new System.Drawing.Size(207, 27);
-            txtDeadlockSessionName.TabIndex = 4;
-            // 
-            // optDisableDeadlock
-            // 
-            optDisableDeadlock.AutoSize = true;
-            optDisableDeadlock.Checked = true;
-            optDisableDeadlock.Location = new System.Drawing.Point(23, 16);
-            optDisableDeadlock.Name = "optDisableDeadlock";
-            optDisableDeadlock.Size = new System.Drawing.Size(136, 24);
-            optDisableDeadlock.TabIndex = 0;
-            optDisableDeadlock.TabStop = true;
-            optDisableDeadlock.Text = "Disable Capture";
-            optDisableDeadlock.UseVisualStyleBackColor = true;
-            // 
-            // tabQueryStats
-            // 
-            tabQueryStats.Controls.Add(lnkApplyQueryStatsConfigurationToAll);
-            tabQueryStats.Controls.Add(lblQueryStatsNote);
-            tabQueryStats.Controls.Add(numQueryStatsPlans);
-            tabQueryStats.Controls.Add(lblQueryStatsPlans);
-            tabQueryStats.Controls.Add(numQueryStatsTopN);
-            tabQueryStats.Controls.Add(lblQueryStatsTopN);
-            tabQueryStats.Controls.Add(chkCollectQueryStats);
-            tabQueryStats.Location = new System.Drawing.Point(4, 39);
-            tabQueryStats.Name = "tabQueryStats";
-            tabQueryStats.Padding = new System.Windows.Forms.Padding(3);
-            tabQueryStats.Size = new System.Drawing.Size(1059, 178);
-            tabQueryStats.TabIndex = 6;
-            tabQueryStats.Text = "Query Stats";
-            tabQueryStats.UseVisualStyleBackColor = true;
-            // 
-            // lnkApplyQueryStatsConfigurationToAll
-            // 
-            lnkApplyQueryStatsConfigurationToAll.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            lnkApplyQueryStatsConfigurationToAll.AutoSize = true;
-            lnkApplyQueryStatsConfigurationToAll.Location = new System.Drawing.Point(650, 17);
-            lnkApplyQueryStatsConfigurationToAll.Name = "lnkApplyQueryStatsConfigurationToAll";
-            lnkApplyQueryStatsConfigurationToAll.Size = new System.Drawing.Size(392, 20);
-            lnkApplyQueryStatsConfigurationToAll.TabIndex = 6;
-            lnkApplyQueryStatsConfigurationToAll.TabStop = true;
-            lnkApplyQueryStatsConfigurationToAll.Text = "Apply query stats configuration to all existing connections";
-            lnkApplyQueryStatsConfigurationToAll.LinkClicked += ApplyQueryStatsConfigToAll;
-            // 
-            // lblQueryStatsNote
-            // 
-            lblQueryStatsNote.AutoSize = true;
-            lblQueryStatsNote.Location = new System.Drawing.Point(23, 132);
-            lblQueryStatsNote.Name = "lblQueryStatsNote";
-            lblQueryStatsNote.Size = new System.Drawing.Size(692, 20);
-            lblQueryStatsNote.TabIndex = 5;
-            lblQueryStatsNote.Text = "Totals are correct at any Top N - queries below the cut are rolled up.  Raising it adds detail and storage.";
-            // 
-            // numQueryStatsPlans
-            // 
-            numQueryStatsPlans.Enabled = false;
-            numQueryStatsPlans.Location = new System.Drawing.Point(230, 90);
-            numQueryStatsPlans.Maximum = new decimal(new int[] { 10000, 0, 0, 0 });
-            numQueryStatsPlans.Name = "numQueryStatsPlans";
-            numQueryStatsPlans.Size = new System.Drawing.Size(100, 27);
-            numQueryStatsPlans.TabIndex = 4;
-            numQueryStatsPlans.Value = new decimal(new int[] { 50, 0, 0, 0 });
-            // 
-            // lblQueryStatsPlans
-            // 
-            lblQueryStatsPlans.AutoSize = true;
-            lblQueryStatsPlans.Location = new System.Drawing.Point(43, 92);
-            lblQueryStatsPlans.Name = "lblQueryStatsPlans";
-            lblQueryStatsPlans.Size = new System.Drawing.Size(141, 20);
-            lblQueryStatsPlans.TabIndex = 3;
-            lblQueryStatsPlans.Text = "Plans per collection:";
-            // 
-            // numQueryStatsTopN
-            // 
-            numQueryStatsTopN.Enabled = false;
-            numQueryStatsTopN.Location = new System.Drawing.Point(230, 54);
-            numQueryStatsTopN.Maximum = new decimal(new int[] { 10000, 0, 0, 0 });
-            numQueryStatsTopN.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
-            numQueryStatsTopN.Name = "numQueryStatsTopN";
-            numQueryStatsTopN.Size = new System.Drawing.Size(100, 27);
-            numQueryStatsTopN.TabIndex = 2;
-            numQueryStatsTopN.Value = new decimal(new int[] { 50, 0, 0, 0 });
-            // 
-            // lblQueryStatsTopN
-            // 
-            lblQueryStatsTopN.AutoSize = true;
-            lblQueryStatsTopN.Location = new System.Drawing.Point(43, 56);
-            lblQueryStatsTopN.Name = "lblQueryStatsTopN";
-            lblQueryStatsTopN.Size = new System.Drawing.Size(52, 20);
-            lblQueryStatsTopN.TabIndex = 1;
-            lblQueryStatsTopN.Text = "Top N:";
-            // 
-            // chkCollectQueryStats
-            // 
-            chkCollectQueryStats.AutoSize = true;
-            chkCollectQueryStats.Location = new System.Drawing.Point(23, 16);
-            chkCollectQueryStats.Name = "chkCollectQueryStats";
-            chkCollectQueryStats.Size = new System.Drawing.Size(406, 24);
-            chkCollectQueryStats.TabIndex = 0;
-            chkCollectQueryStats.Text = "Collect query stats (statement level, from the plan cache)";
-            chkCollectQueryStats.UseVisualStyleBackColor = true;
-            chkCollectQueryStats.CheckedChanged += ChkCollectQueryStats_CheckedChanged;
             // 
             // bttnAdd
             // 
@@ -2735,7 +1921,6 @@ namespace DBADashServiceConfig
             FormClosing += ServiceConfig_FromClosing;
             Load += ServiceConfig_Load;
             ((System.ComponentModel.ISupportInitialize)errorProvider1).EndInit();
-            ((System.ComponentModel.ISupportInitialize)pictureBox3).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox2).EndInit();
             ((System.ComponentModel.ISupportInitialize)picConfigFileAccess).EndInit();
             pnlBottom.ResumeLayout(false);
@@ -2768,24 +1953,6 @@ namespace DBADashServiceConfig
             tabSrcOptions.ResumeLayout(false);
             tabGeneral.ResumeLayout(false);
             tabGeneral.PerformLayout();
-            tabExtendedEvents.ResumeLayout(false);
-            pnlExtendedEvents.ResumeLayout(false);
-            pnlExtendedEvents.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)numSlowQueryThreshold).EndInit();
-            tabRunningQueries.ResumeLayout(false);
-            tabRunningQueries.PerformLayout();
-            grpRunningQueryThreshold.ResumeLayout(false);
-            grpRunningQueryThreshold.PerformLayout();
-            grpLivePlanThreshold.ResumeLayout(false);
-            grpLivePlanThreshold.PerformLayout();
-            tabAddConnectionOther.ResumeLayout(false);
-            tabAddConnectionOther.PerformLayout();
-            tabDeadlocks.ResumeLayout(false);
-            tabDeadlocks.PerformLayout();
-            tabQueryStats.ResumeLayout(false);
-            tabQueryStats.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)numQueryStatsPlans).EndInit();
-            ((System.ComponentModel.ISupportInitialize)numQueryStatsTopN).EndInit();
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)dgvConnections).EndInit();
@@ -2830,7 +1997,7 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.TextBox txtDestination;
         private System.Windows.Forms.TabPage tabSource;
         private System.Windows.Forms.GroupBox groupBox2;
-        private ThemedTabControl tabSrcOptions;
+        private DBADashGUI.SourceConnectionOptionsTabs tabSrcOptions;
         private System.Windows.Forms.TabPage tabGeneral;
         private System.Windows.Forms.PictureBox pictureBox2;
         private System.Windows.Forms.TextBox txtSource;
@@ -2838,50 +2005,6 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.Button bttnSrcFolder;
         private System.Windows.Forms.Button bttnConnectSource;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TabPage tabExtendedEvents;
-        private System.Windows.Forms.Panel pnlExtendedEvents;
-        private System.Windows.Forms.CheckBox chkSlowQueryThreshold;
-        private System.Windows.Forms.CheckBox chkDualSession;
-        private System.Windows.Forms.NumericUpDown numSlowQueryThreshold;
-        private System.Windows.Forms.Label label9;
-        private System.Windows.Forms.Label lblSlow;
-        private System.Windows.Forms.CheckBox chkPersistXESession;
-        private System.Windows.Forms.Label lblSlowQueryCaptureMode;
-        private System.Windows.Forms.ComboBox cboSlowQueryCaptureMode;
-        private System.Windows.Forms.Label lblSlowQueryXESessionName;
-        private System.Windows.Forms.TextBox txtSlowQueryXESessionName;
-        private System.Windows.Forms.CheckBox chkKeepSlowQuerySessionRunning;
-        private System.Windows.Forms.TabPage tabRunningQueries;
-        private System.Windows.Forms.CheckBox chkCollectPlans;
-        private System.Windows.Forms.GroupBox grpRunningQueryThreshold;
-        private System.Windows.Forms.GroupBox grpLivePlanThreshold;
-        private System.Windows.Forms.CheckBox chkCaptureLivePlans;
-        private System.Windows.Forms.Label lblLivePlanCPUThreshold;
-        private System.Windows.Forms.TextBox txtLivePlanCPUThreshold;
-        private System.Windows.Forms.Label lblLivePlanDurationThreshold;
-        private System.Windows.Forms.TextBox txtLivePlanDurationThreshold;
-        private System.Windows.Forms.Label lblLivePlanMaxPerCollection;
-        private System.Windows.Forms.TextBox txtLivePlanMaxPerCollection;
-        private System.Windows.Forms.Label label15;
-        private System.Windows.Forms.TextBox txtDurationThreshold;
-        private System.Windows.Forms.TextBox txtCountThreshold;
-        private System.Windows.Forms.Label label17;
-        private System.Windows.Forms.Label label14;
-        private System.Windows.Forms.TextBox txtCPUThreshold;
-        private System.Windows.Forms.TextBox txtGrantThreshold;
-        private System.Windows.Forms.Label label16;
-        private System.Windows.Forms.CheckBox chkCollectSessionWaits;
-        private System.Windows.Forms.TabPage tabAddConnectionOther;
-        private System.Windows.Forms.Label lblIOCollectionLevel;
-        private System.Windows.Forms.ComboBox cboIOLevel;
-        private System.Windows.Forms.CheckBox chkScriptJobs;
-        private System.Windows.Forms.PictureBox pictureBox3;
-        private System.Windows.Forms.LinkLabel lnkExample;
-        private System.Windows.Forms.LinkLabel lnkNone;
-        private System.Windows.Forms.LinkLabel lnkALL;
-        private System.Windows.Forms.Label lblSchemaSnapshotDBs;
-        private System.Windows.Forms.TextBox txtSnapshotDBs;
-        private System.Windows.Forms.CheckBox chkNoWMI;
         private System.Windows.Forms.Button bttnAdd;
         private System.Windows.Forms.GroupBox groupBox1;
         private DBADashGUI.CustomReports.DBADashDataGridView dgvConnections;
@@ -2907,11 +2030,9 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.Label lblEncryptionStatus;
         private System.Windows.Forms.NumericUpDown numBackupRetention;
         private System.Windows.Forms.LinkLabel lnkDeleteConfigBackups;
-        private System.Windows.Forms.CheckBox chkWriteToSecondaryDestinations;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label lblConfigFileRetention;
         private System.Windows.Forms.Button bttnCustomCollections;
-        private System.Windows.Forms.Button bttnCustomCollectionsNew;
         private System.Windows.Forms.GroupBox grpMessaging;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.CheckBox chkEnableMessaging;
@@ -2957,7 +2078,6 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.Label lblConfigFileAccess;
         private System.Windows.Forms.PictureBox picConfigFileAccess;
         private System.Windows.Forms.Panel pnlConfigFileAccessWarning;
-        private System.Windows.Forms.CheckBox chkCollectTempDB;
         private System.Windows.Forms.NumericUpDown numThreads;
         private System.Windows.Forms.Label label23;
         private System.Windows.Forms.CheckBox chkThreads;
@@ -2965,8 +2085,6 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.CheckBox chkGeneric;
         private System.Windows.Forms.CheckBox chkAWS;
         private System.Windows.Forms.CheckBox chkAzure;
-        private System.Windows.Forms.CheckBox chkCollectTaskWaits;
-        private System.Windows.Forms.CheckBox chkCollectCursors;
         private System.Windows.Forms.CheckBox chkQueueBasedScheduling;
         private System.Windows.Forms.CheckBox chkSchedulerThreads;
         private System.Windows.Forms.Label lblSchedulerThreads;
@@ -2993,22 +2111,6 @@ namespace DBADashServiceConfig
         private DBADashGUI.Pickers.DurationDropDown xeMaxDuration;
         private System.Windows.Forms.GroupBox grpXE;
         private DBADashGUI.Pickers.DurationDropDown durationAzureDBScan;
-        private System.Windows.Forms.TabPage tabDeadlocks;
-        private System.Windows.Forms.RadioButton optSystemManagedDeadlock;
-        private System.Windows.Forms.RadioButton optDisableDeadlock;
-        private System.Windows.Forms.TextBox txtDeadlockSessionName;
-        private System.Windows.Forms.CheckBox chkBackfillDeadlocks;
-        private System.Windows.Forms.RadioButton optCustomDeadlockSession;
-        private System.Windows.Forms.RadioButton optSystemHealthDeadlock;
-        private System.Windows.Forms.LinkLabel lnkApplyDeadlockConfigurationToAll;
-        private System.Windows.Forms.TabPage tabQueryStats;
-        private System.Windows.Forms.CheckBox chkCollectQueryStats;
-        private System.Windows.Forms.Label lblQueryStatsTopN;
-        private System.Windows.Forms.NumericUpDown numQueryStatsTopN;
-        private System.Windows.Forms.Label lblQueryStatsPlans;
-        private System.Windows.Forms.NumericUpDown numQueryStatsPlans;
-        private System.Windows.Forms.Label lblQueryStatsNote;
-        private System.Windows.Forms.LinkLabel lnkApplyQueryStatsConfigurationToAll;
     }
 }
 

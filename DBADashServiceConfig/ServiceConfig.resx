@@ -151,10 +151,6 @@ Or:
 
 Source can also be a folder or a S3 bucket to import data from remote DBA Dash agents</value>
   </data>
-  <data name="optCustomDeadlockSession.ToolTip" xml:space="preserve">
-    <value>Option to use your own custom session.  e.g. You already have a suitable session created &amp; running for other purposes. 
-Ideally it captures only sqlserver.xml_deadlock_report to avoid unnecessary overhead.</value>
-  </data>
   <data name="chkMonitorReadReplicas.ToolTip" xml:space="preserve">
     <value>Probe each Azure SQL Database for a read-only replica (ApplicationIntent=ReadOnly) and monitor it as a separate instance.  Only Business Critical / Premium / Hyperscale databases with a readable secondary are added.</value>
   </data>
