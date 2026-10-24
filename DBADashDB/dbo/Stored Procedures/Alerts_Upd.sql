@@ -59,13 +59,15 @@ BEGIN
 					Priority,
 					AlertKey,
 					Message,
-					RuleID
+					RuleID,
+					GroupID
 			)
 			SELECT @InstanceID,
 					R.Priority,
 					REPLACE(R.AlertKey,'{AlertName}',name) AS AlertKey,
 					ISNULL(T.notification_message,name + ' alert triggered'),
-					R.RuleID
+					R.RuleID,
+					R.GroupID
 			FROM Alert.Rules R
 			CROSS APPLY Alert.ApplicableInstances_Get(R.ApplyToTagID,R.ApplyToInstanceID,R.AlertKey,R.ApplyToHidden) I
 			OUTER APPLY(SELECT 	TRY_CAST(JSON_VALUE(R.Details,'$.SeverityFrom') AS INT) AS SeverityFrom,
