@@ -89,171 +89,26 @@ namespace DBADashServiceConfig
                 // Defensive: if control does not exist on older builds, ignore
             }
 
-            foreach (var opt in new[]
-                     { optDisableDeadlock, optSystemManagedDeadlock, optSystemHealthDeadlock, optCustomDeadlockSession })
-            {
-                opt.CheckedChanged += (_, _) => UpdateDeadlockOptionsEnabled();
-            }
-            UpdateDeadlockOptionsEnabled();
-
-            toolTip1.SetToolTip(chkCollectQueryStats,
-                "Statement level resource usage, read from sys.dm_exec_query_stats every collection and diffed against the previous read.\r\n" +
-                "Off by default: reading the plan cache costs in proportion to the size of the cache, so it's a decision to make per connection.");
-            toolTip1.SetToolTip(numQueryStatsTopN, QueryStatsTopNToolTip);
-            toolTip1.SetToolTip(numQueryStatsPlans, QueryStatsPlansToolTip);
-            UpdateQueryStatsOptionsEnabled();
+            // The connection strings tab first - the shared options tabs are added when the control is created
+            tabSrcOptions.TabPages.Remove(tabGeneral);
+            tabSrcOptions.TabPages.Insert(0, tabGeneral);
+            tabSrcOptions.SelectedTab = tabGeneral;
+            tabSrcOptions.ShowCustomCollections = true;
+            tabSrcOptions.ShowApplyToAll = true;
+            tabSrcOptions.CustomCollectionsClick += BttnCustomCollectionsNew_Click;
+            tabSrcOptions.ApplyDeadlockConfigurationToAll += ApplyDeadlockConfigToAll;
+            tabSrcOptions.ApplyQueryStatsConfigurationToAll += ApplyQueryStatsConfigToAll;
         }
 
-        private const string QueryStatsTopNToolTip =
-            "The number of query families kept per ranking measure each collection.  Seven measures are ranked and the results combined, so the number of queries stored is usually close to this but can reach seven times it, plus any query kept for one slow execution.\r\n" +
-            "Everything below the cut is rolled up rather than discarded, so the totals for an interval stay correct whatever this is set to.  Raising it buys detail, not accuracy.  50 suits most instances.";
-
-        private const string QueryStatsPlansToolTip =
-            "0 - query stats collects no plans.  Plans can still be fetched from the plan cache from the grid, with messaging enabled.\r\n" +
-            "Any other value - the most plans one collection fetches, for the plan shapes of the queries it stored.  50 by default.\r\n" +
-            "Each plan shape's plan is sent once a day rather than every collection, so once the plans in use have been sent a collection only fetches the ones that are new.  The cap bites after a restart, and the heaviest plans are fetched first.";
-
-        /// <summary>The top N on the Query Stats tab - zero, the off switch, when collection isn't ticked.  See
-        /// <see cref="DBADashSource.QueryStatsTopN"/>.</summary>
-        private int SelectedQueryStatsTopN => chkCollectQueryStats.Checked ? (int)numQueryStatsTopN.Value : 0;
-
-        private void ChkCollectQueryStats_CheckedChanged(object sender, EventArgs e) => UpdateQueryStatsOptionsEnabled();
-
-        private void UpdateQueryStatsOptionsEnabled()
+        /// <summary>Checks the options on the Add New Connection tabs, showing the first problem.</summary>
+        private bool ValidateNewConnectionOptions()
         {
-            numQueryStatsTopN.Enabled = chkCollectQueryStats.Checked;
-            numQueryStatsPlans.Enabled = chkCollectQueryStats.Checked;
-        }
-
-        /// <summary>
-        /// The session name described by the Deadlocks tab.  The name is the only mode switch - see
-        /// <see cref="DBADashSource.DeadlockXESessionName"/> - so a blank name is what disables the collection.
-        /// </summary>
-        private string SelectedDeadlockXESessionName
-        {
-            get
-            {
-                if (optSystemManagedDeadlock.Checked) return DBADashSource.ManagedDeadlockXESessionName;
-                if (optSystemHealthDeadlock.Checked) return DBADashSource.SystemHealthXESessionName;
-                if (optCustomDeadlockSession.Checked) return txtDeadlockSessionName.Text.Trim();
-                return string.Empty;
-            }
-            set
-            {
-                if (string.IsNullOrWhiteSpace(value))
-                {
-                    optDisableDeadlock.Checked = true;
-                    txtDeadlockSessionName.Text = string.Empty;
-                }
-                else if (string.Equals(value, DBADashSource.ManagedDeadlockXESessionName,
-                             StringComparison.OrdinalIgnoreCase))
-                {
-                    optSystemManagedDeadlock.Checked = true;
-                    txtDeadlockSessionName.Text = string.Empty;
-                }
-                else if (string.Equals(value, DBADashSource.SystemHealthXESessionName,
-                             StringComparison.OrdinalIgnoreCase))
-                {
-                    optSystemHealthDeadlock.Checked = true;
-                    txtDeadlockSessionName.Text = string.Empty;
-                }
-                else
-                {
-                    optCustomDeadlockSession.Checked = true;
-                    txtDeadlockSessionName.Text = value;
-                }
-
-                UpdateDeadlockOptionsEnabled();
-            }
-        }
-
-        private void UpdateDeadlockOptionsEnabled()
-        {
-            txtDeadlockSessionName.Enabled = optCustomDeadlockSession.Checked;
-            // Only a dedicated session has anything to backfill - system_health is the backfill source itself
-            chkBackfillDeadlocks.Enabled = optSystemManagedDeadlock.Checked || optCustomDeadlockSession.Checked;
-            if (!optCustomDeadlockSession.Checked)
-            {
-                errorProvider1.SetError(txtDeadlockSessionName, null);
-            }
-        }
-
-        /// <summary>The custom option is the only one that needs a name typed - the others carry their own.</summary>
-        private bool ValidateDeadlockOptions()
-        {
-            errorProvider1.SetError(txtDeadlockSessionName, null);
-            if (!optCustomDeadlockSession.Checked || !string.IsNullOrWhiteSpace(txtDeadlockSessionName.Text))
+            if (tabSrcOptions.ValidateOptions())
             {
                 return true;
             }
 
-            errorProvider1.SetError(txtDeadlockSessionName,
-                "Enter the name of the extended events session to read deadlocks from");
             tab1.SelectedTab = tabSource;
-            tabSrcOptions.SelectedTab = tabDeadlocks;
-            return false;
-        }
-
-        private const string SlowQueryCaptureModeToolTip =
-            "RingBuffer (default) - DBADash_1/DBADash_2 sessions with a ring buffer, read and then emptied by stopping and starting the session.\r\n" +
-            $"EventFile - a {DBADashSource.ManagedSlowQueryXESessionName} session with an event file, read from a saved position.  Never stopped to be emptied, so nothing is lost while it is.  Not available on Azure SQL Database or Managed Instance, which use RingBuffer.\r\n" +
-            "ExistingSession - a session you create and manage.  DBA Dash reads it and never alters it.";
-
-        private const string KeepSlowQuerySessionToolTip =
-            $"Leave the {DBADashSource.ManagedSlowQueryXESessionName} session running when the service stops, and start it with the instance, so slow queries are captured while the service is down and collected when it starts.\r\n" +
-            "EventFile mode only.  Without it, the session is stopped or removed on service stop like the other DBA Dash sessions.";
-
-        private DBADashSource.SlowQueryCaptureModes SelectedSlowQueryCaptureMode =>
-            cboSlowQueryCaptureMode.SelectedItem is DBADashSource.SlowQueryCaptureModes mode
-                ? mode
-                : DBADashSource.SlowQueryCaptureModes.RingBuffer;
-
-        private void CboSlowQueryCaptureMode_SelectedIndexChanged(object sender, EventArgs e) =>
-            UpdateSlowQueryOptionsEnabled();
-
-        /// <summary>Each option on the Slow Queries tab only applies to some modes.</summary>
-        private void UpdateSlowQueryOptionsEnabled()
-        {
-            var enabled = chkSlowQueryThreshold.Checked;
-            var mode = SelectedSlowQueryCaptureMode;
-            cboSlowQueryCaptureMode.Enabled = enabled;
-            chkDualSession.Enabled = enabled && mode == DBADashSource.SlowQueryCaptureModes.RingBuffer;
-            chkPersistXESession.Enabled = enabled && mode != DBADashSource.SlowQueryCaptureModes.ExistingSession;
-            txtSlowQueryXESessionName.Enabled = enabled && mode == DBADashSource.SlowQueryCaptureModes.ExistingSession;
-            chkKeepSlowQuerySessionRunning.Enabled = enabled && mode == DBADashSource.SlowQueryCaptureModes.EventFile;
-            if (!txtSlowQueryXESessionName.Enabled)
-            {
-                errorProvider1.SetError(txtSlowQueryXESessionName, null);
-            }
-        }
-
-        /// <summary>The existing session mode is the only one that needs a name typed - and not the name of a session
-        /// DBA Dash manages itself.</summary>
-        private bool ValidateSlowQueryOptions()
-        {
-            errorProvider1.SetError(txtSlowQueryXESessionName, null);
-            if (!txtSlowQueryXESessionName.Enabled)
-            {
-                return true;
-            }
-
-            string error = null;
-            if (string.IsNullOrWhiteSpace(txtSlowQueryXESessionName.Text))
-            {
-                error = "Enter the name of the extended events session to read slow queries from";
-            }
-            else if (DBADashSource.IsReservedSlowQueryXESessionName(txtSlowQueryXESessionName.Text))
-            {
-                error = "This is a session DBA Dash creates and removes itself.  Use the EventFile or RingBuffer capture mode, or a session of your own with a different name.";
-            }
-            if (error == null)
-            {
-                return true;
-            }
-
-            errorProvider1.SetError(txtSlowQueryXESessionName, error);
-            tab1.SelectedTab = tabSource;
-            tabSrcOptions.SelectedTab = tabExtendedEvents;
             return false;
         }
 
@@ -279,7 +134,6 @@ namespace DBADashServiceConfig
         private string originalJson = "";
         private CollectionConfig collectionConfig = new();
         private bool isInstalled;
-        private Dictionary<string, CustomCollection> _customCollectionsNew;
         private DateTime lastUserActivity = DateTime.Now;
         private DateTime lastServiceActivity = DateTime.Now;
         private DateTime lastFatalErrorPrompt = DateTime.MinValue;
@@ -289,15 +143,8 @@ namespace DBADashServiceConfig
 
         private Dictionary<string, CustomCollection> CustomCollectionsNew
         {
-            get => _customCollectionsNew;
-            set
-            {
-                _customCollectionsNew = value;
-                bttnCustomCollectionsNew.Text = $"Custom Collections ({_customCollectionsNew?.Count ?? 0})";
-                bttnCustomCollectionsNew.Font = _customCollectionsNew?.Count > 0
-                    ? new Font(bttnCustomCollectionsNew.Font, FontStyle.Bold)
-                    : new Font(bttnCustomCollectionsNew.Font, FontStyle.Regular);
-            }
+            get => tabSrcOptions.CustomCollections;
+            set => tabSrcOptions.CustomCollections = value;
         }
 
         private async void BttnAdd_Click(object sender, EventArgs e)
@@ -310,7 +157,7 @@ namespace DBADashServiceConfig
                 return;
             }
 
-            if (!ValidateDeadlockOptions() || !ValidateSlowQueryOptions())
+            if (!ValidateNewConnectionOptions())
             {
                 return;
             }
@@ -325,228 +172,113 @@ namespace DBADashServiceConfig
             }
         }
 
-        /// <summary>The options chosen on the Add New Connection tabs</summary>
-        private SourceConnectionOptions GetNewConnectionOptions() => new()
-        {
-            NoWMI = chkNoWMI.Checked,
-            UseDualEventSession = chkDualSession.Checked,
-            PersistXESessions = chkPersistXESession.Checked,
-            SlowQueryThresholdMs = chkSlowQueryThreshold.Checked ? (int)numSlowQueryThreshold.Value : -1,
-            SlowQueryCaptureMode = SelectedSlowQueryCaptureMode,
-            SlowQueryXESessionName = txtSlowQueryXESessionName.Text.Trim(),
-            KeepSlowQueryXESessionRunning = chkKeepSlowQuerySessionRunning.Checked,
-            DeadlockXESessionName = SelectedDeadlockXESessionName,
-            BackfillDeadlocksFromSystemHealth = chkBackfillDeadlocks.Checked,
-            QueryStatsTopN = SelectedQueryStatsTopN,
-            QueryStatsPlansPerCollection = (int)numQueryStatsPlans.Value,
-            RunningQueryPlanThreshold = chkCollectPlans.Checked
-                ? new PlanCollectionThreshold()
-                {
-                    CountThreshold = int.Parse(txtCountThreshold.Text),
-                    CPUThreshold = int.Parse(txtCPUThreshold.Text),
-                    DurationThreshold = int.Parse(txtDurationThreshold.Text),
-                    MemoryGrantThreshold = int.Parse(txtGrantThreshold.Text)
-                }
-                : null,
-            RunningQueryLiveProfileThreshold = chkCollectPlans.Checked && chkCaptureLivePlans.Checked
-                ? new LiveProfileThreshold()
-                {
-                    CPUThreshold = int.Parse(txtLivePlanCPUThreshold.Text),
-                    DurationThreshold = int.Parse(txtLivePlanDurationThreshold.Text),
-                    MaxPerCollection = int.Parse(txtLivePlanMaxPerCollection.Text)
-                }
-                : null,
-            SchemaSnapshotDBs = txtSnapshotDBs.Text.Trim(),
-            CollectSessionWaits = chkCollectSessionWaits.Checked,
-            CollectTaskWaits = chkCollectTaskWaits.Checked,
-            CollectCursors = chkCollectCursors.Checked,
-            ScriptAgentJobs = chkScriptJobs.Checked,
-            IOCollectionLevel = (DBADashSource.IOCollectionLevels)cboIOLevel.SelectedItem!,
-            WriteToSecondaryDestinations = chkWriteToSecondaryDestinations.Checked,
-            CollectTempDB = chkCollectTempDB.Checked,
-            CustomCollections = CustomCollectionsNew
-        };
-
         private List<DBADashSource> GetNewSourceConnections()
         {
-            var options = GetNewConnectionOptions();
+            var options = tabSrcOptions.Options;
             return NewSourceConnections.Select(src => src.Trim()).Where(src => !string.IsNullOrEmpty(src))
                 .Select(options.CreateSource).ToList();
         }
 
+        /// <summary>
+        /// Checks each new connection (connects to it), shows what was found so the user can decide what to do with each
+        /// one, then adds them.
+        /// </summary>
         private async Task AddInstance()
         {
-            var schemaSnapshotDBs = txtSnapshotDBs.Text.Trim();
+            var sources = GetNewSourceConnections();
+            if (sources.Count == 0) return;
+
+            var checks = new List<SourceConnectionCheck>();
+            UseWaitCursor = true;
+            bttnAdd.Enabled = false;
+            try
+            {
+                var checkRepository = RepoDbVersionStatus?.VersionStatus == DBValidations.DBVersionStatusEnum.OK;
+                // Connections are checked a few at a time - an unreachable instance takes the connect timeout to fail
+                using var throttle = new SemaphoreSlim(8);
+                checks.AddRange(await Task.WhenAll(sources.Select(async src =>
+                {
+                    await throttle.WaitAsync();
+                    try
+                    {
+                        var check = await SourceConnectionAdder.CheckAsync(collectionConfig, src);
+                        if (checkRepository && !check.IsInvalid)
+                        {
+                            check.IsDeletedInRepository = await IsInstanceDeletedAsync(src.ConnectionID);
+                        }
+                        return check;
+                    }
+                    finally
+                    {
+                        throttle.Release();
+                    }
+                })));
+            }
+            finally
+            {
+                UseWaitCursor = false;
+                bttnAdd.Enabled = true;
+            }
+
+            using var review = new AddConnectionsReviewDialog(checks, $"this computer as {Environment.UserDomainName}\\{Environment.UserName}");
+            if (review.ShowDialog(this) != DialogResult.OK) return;
+
+            var schemaSnapshotDBs = tabSrcOptions.Options.SchemaSnapshotDBs;
             if (!string.IsNullOrEmpty(schemaSnapshotDBs) && collectionConfig.SchemaSnapshotOptions == null)
             {
                 collectionConfig.SchemaSnapshotOptions = new SchemaSnapshotDBOptions();
             }
 
-            var decisions = new SourceConnectionDecisions();
-            var hasUpdateApproval = false;
-            var warnXENotSupported = false;
-            var addUnvalidated = false;
-            var doNotAddUnvalidated = false;
-            var doesNotHaveUpdateApproval = false;
-            var hasScannedApproval = false;
-            var doesNotHaveScannedApproval = false;
-            var isDeleted = false;
-            bool? deadlockScheduleApproval = null;
-            foreach (var src in GetNewSourceConnections())
+            var decisions = review.Decisions;
+            for (var i = 0; i < sources.Count; i++)
             {
-                if (!ValidateSource(src.SourceConnection.ConnectionString))
+                if (decisions[i] == null) continue;
+                var result = SourceConnectionAdder.Apply(collectionConfig, sources[i], checks[i], decisions[i]);
+                if (result.Outcome != SourceConnectionAddOutcomes.Skipped && review.RestoreDeleted && checks[i].IsDeletedInRepository)
                 {
-                    continue;
+                    RestoreInstance(sources[i].ConnectionID);
                 }
-
-                Cursor.Current = Cursors.WaitCursor;
-                var check = await SourceConnectionAdder.CheckAsync(collectionConfig, src, validate: !addUnvalidated);
-                Cursor.Current = Cursors.Default;
-
-                if (check.IsInvalid)
-                {
-                    MessageBox.Show("Error: " + check.ValidationError, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-
-                if (check.ServerNameIsNull)
-                {
-                    MessageBox.Show(
-                        "Warning @@SERVERNAME returned NULL.  Consider fixing this using sp_addserver",
-                        "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                }
-
-                if (!addUnvalidated && !check.Validated)
-                {
-                    if (doNotAddUnvalidated)
-                    {
-                        continue;
-                    }
-                    else if (MessageBox.Show(
-                                 "Error connecting to data source.  Do you wish to add anyway?" +
-                                 Environment.NewLine + Environment.NewLine + check.ValidationError, "Error",
-                                 MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) == DialogResult.No)
-                    {
-                        doNotAddUnvalidated = true;
-                        continue;
-                    }
-                    else
-                    {
-                        addUnvalidated = true;
-                        decisions.AddUnvalidated = true;
-                    }
-                }
-
-                warnXENotSupported |= check.SlowQueryWillBeDisabled;
-
-                if (check.Existing == ExistingConnectionStates.Configured)
-                {
-                    if (doesNotHaveUpdateApproval)
-                    {
-                        continue;
-                    }
-                    else if (hasUpdateApproval || MessageBox.Show("Update existing connection(s)?", "Update",
-                                 MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-                    {
-                        hasUpdateApproval = true;
-                        decisions.UpdateExisting = true;
-                    }
-                    else
-                    {
-                        doesNotHaveUpdateApproval = true;
-                        continue;
-                    }
-                }
-                else if (check.Existing == ExistingConnectionStates.Discovered)
-                {
-                    if (doesNotHaveScannedApproval)
-                    {
-                        continue;
-                    }
-                    else if (hasScannedApproval || MessageBox.Show(
-                                 $"{src.ConnectionID} is already monitored automatically via the \"{check.DiscoveredVia}\" option and doesn't need to be added." +
-                                 Environment.NewLine + Environment.NewLine +
-                                 "Adding it here won't create a duplicate instance - it lets you configure this database explicitly instead of it inheriting the settings it's monitored with now." +
-                                 Environment.NewLine + Environment.NewLine +
-                                 "Add this connection?",
-                                 "Database is already monitored", MessageBoxButtons.YesNo,
-                                 MessageBoxIcon.Question) == DialogResult.Yes)
-                    {
-                        hasScannedApproval = true;
-                        decisions.AddDiscovered = true;
-                    }
-                    else
-                    {
-                        doesNotHaveScannedApproval = true;
-                        continue;
-                    }
-                }
-
-                if (RepoDbVersionStatus?.VersionStatus == DBValidations.DBVersionStatusEnum.OK)
-                {
-                    try // Check if instance is marked deleted so we can warn the user that the instance needs to be restored
-                    {
-                        foreach (var dest in collectionConfig.SQLDestinations.Where(dest => !isDeleted))
-                        {
-                            isDeleted = await SourceConnectionAdder.IsInstanceDeletedAsync(src.ConnectionID, dest.ConnectionString);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        CommonShared.ShowExceptionDialog(ex, "Error checking connection status in repository database:");
-                    }
-                }
-
-                if (check.DeadlockScheduleMissing)
-                {
-                    deadlockScheduleApproval ??= MessageBox.Show(
-                        "Deadlock collection doesn't have a schedule, so no deadlocks will be collected." +
-                        Environment.NewLine + Environment.NewLine +
-                        "Use the default deadlock collection schedule (every 5 minutes) for this instance?" +
-                        Environment.NewLine + Environment.NewLine +
-                        "Choose No to leave the schedule alone - you can set it for all instances with the Schedule button, or per instance from the connections grid.",
-                        "Deadlock Schedule", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes;
-                    decisions.UseDefaultDeadlockSchedule = deadlockScheduleApproval == true;
-                }
-
-                SourceConnectionAdder.Apply(collectionConfig, src, check, decisions);
             }
 
             SetJson();
             SetConnectionCount();
             SetDgv();
             RefreshEncryption();
-            if (isDeleted)
-            {
-                MessageBox.Show(
-                    "Warning. The instance you have added is marked deleted in the repository database.  Use the recycle bin folder in the GUI to restore the instance.",
-                    "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-            if (warnXENotSupported)
-            {
-                MessageBox.Show(
-                    "Warning: Slow query capture requires an extended event session which is not supported for one or more connections.\nRequirements:\nSQL 2012 or later.\nStandard or Enterprise Edition on Amazon RDS",
-                    "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
         }
 
-        private bool ValidateSource(string sourceString)
+        /// <summary>True if the instance is marked deleted in any of the SQL destinations.</summary>
+        private async Task<bool> IsInstanceDeletedAsync(string connectionID)
         {
-            errorProvider1.SetError(txtSource, null);
-            DBADashConnection source = new(sourceString);
-            if (string.IsNullOrEmpty(sourceString))
+            try
             {
-                return false;
+                foreach (var dest in collectionConfig.SQLDestinations)
+                {
+                    if (await SourceConnectionAdder.IsInstanceDeletedAsync(connectionID, dest.ConnectionString))
+                    {
+                        return true;
+                    }
+                }
             }
+            catch (Exception ex)
+            {
+                // Only a warning - adding the connection doesn't depend on it
+                Serilog.Log.Warning(ex, "Error checking whether {connectionID} is deleted in the repository", connectionID);
+            }
+            return false;
+        }
 
-            if (source.Type == ConnectionType.Invalid)
+        private void RestoreInstance(string connectionID)
+        {
+            foreach (var dest in collectionConfig.SQLDestinations)
             {
-                errorProvider1.SetError(txtSource, "Invalid connection string, directory or S3 path");
-                return false;
-            }
-            else
-            {
-                return true;
+                try
+                {
+                    SharedData.RestoreInstance(connectionID, dest.ConnectionString);
+                }
+                catch (Exception ex)
+                {
+                    CommonShared.ShowExceptionDialog(ex, $"Error restoring {connectionID} in the repository database");
+                }
             }
         }
 
@@ -807,12 +539,6 @@ namespace DBADashServiceConfig
             await AboutHelper.CheckForIncompleteUpgrade();
             if (Upgrade.IsUpgradeIncomplete) return;
 
-            cboIOLevel.DataSource = Enum.GetValues(typeof(DBADashSource.IOCollectionLevels));
-            cboSlowQueryCaptureMode.DataSource = Enum.GetValues(typeof(DBADashSource.SlowQueryCaptureModes));
-            toolTip1.SetToolTip(cboSlowQueryCaptureMode, SlowQueryCaptureModeToolTip);
-            toolTip1.SetToolTip(chkKeepSlowQuerySessionRunning, KeepSlowQuerySessionToolTip);
-            UpdateSlowQueryOptionsEnabled();
-
             dgvConnections.AutoGenerateColumns = false;
             dgvConnections.Columns.Add(new DataGridViewTextBoxColumn()
             {
@@ -910,7 +636,7 @@ namespace DBADashServiceConfig
                 HeaderText = "Slow Query Capture Mode",
                 DataSource = Enum.GetValues(typeof(DBADashSource.SlowQueryCaptureModes)),
                 ValueType = typeof(DBADashSource.SlowQueryCaptureModes),
-                ToolTipText = SlowQueryCaptureModeToolTip
+                ToolTipText = SourceConnectionOptionsTabs.SlowQueryCaptureModeToolTip
             });
             dgvConnections.Columns.Add(new DataGridViewTextBoxColumn()
             {
@@ -934,7 +660,7 @@ namespace DBADashServiceConfig
             {
                 DataPropertyName = "KeepSlowQueryXESessionRunning",
                 HeaderText = "Keep Slow Query XE Session Running",
-                ToolTipText = KeepSlowQuerySessionToolTip
+                ToolTipText = SourceConnectionOptionsTabs.KeepSlowQuerySessionToolTip
             });
             dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn()
             {
@@ -1797,84 +1523,11 @@ namespace DBADashServiceConfig
             }
         }
 
-        private void ChkSlowQueryThreshold_CheckedChanged(object sender, EventArgs e)
-        {
-            numSlowQueryThreshold.Enabled = chkSlowQueryThreshold.Checked;
-            if (chkSlowQueryThreshold.Checked)
-            {
-                numSlowQueryThreshold.Value = 1000;
-                lblSlow.Text = "Extended events trace to capture slow rpc and batch completed events IS enabled";
-            }
-            else
-            {
-                numSlowQueryThreshold.Value = -1;
-                lblSlow.Text = "Extended events trace to capture slow rpc and batch completed events is NOT enabled";
-            }
-
-            UpdateSlowQueryOptionsEnabled();
-        }
-
         private void LoadConnectionForEdit(DBADashSource src)
         {
-            if (src != null)
-            {
-                txtSource.Text = src.ConnectionString;
-                chkNoWMI.Checked = src.NoWMI;
-                chkPersistXESession.Checked = src.PersistXESessions;
-                chkSlowQueryThreshold.Checked = (src.SlowQueryThresholdMs != -1);
-                SelectedDeadlockXESessionName = src.DeadlockXESessionName;
-                chkBackfillDeadlocks.Checked = src.BackfillDeadlocksFromSystemHealth;
-                chkCollectQueryStats.Checked = src.IsQueryStatsCollectionEnabled;
-                numQueryStatsTopN.Value = src.IsQueryStatsCollectionEnabled
-                    ? Math.Clamp(src.QueryStatsTopN, (int)numQueryStatsTopN.Minimum, (int)numQueryStatsTopN.Maximum)
-                    : 50;
-                numQueryStatsPlans.Value = Math.Clamp(src.QueryStatsPlansPerCollection, (int)numQueryStatsPlans.Minimum, (int)numQueryStatsPlans.Maximum);
-                chkScriptJobs.Checked = src.ScriptAgentJobs;
-                numSlowQueryThreshold.Value = chkSlowQueryThreshold.Checked ? src.SlowQueryThresholdMs : 0;
-
-                txtSnapshotDBs.Text = src.SchemaSnapshotDBs;
-                chkDualSession.Checked = src.UseDualEventSession;
-                cboSlowQueryCaptureMode.SelectedItem = src.SlowQueryCaptureMode;
-                txtSlowQueryXESessionName.Text = src.SlowQueryXESessionName;
-                chkKeepSlowQuerySessionRunning.Checked = src.KeepSlowQueryXESessionRunning;
-                UpdateSlowQueryOptionsEnabled();
-                if (src.RunningQueryPlanThreshold != null)
-                {
-                    txtCountThreshold.Text = src.RunningQueryPlanThreshold.CountThreshold.ToString();
-                    txtDurationThreshold.Text = src.RunningQueryPlanThreshold.DurationThreshold.ToString();
-                    txtGrantThreshold.Text = src.RunningQueryPlanThreshold.MemoryGrantThreshold.ToString();
-                    txtCPUThreshold.Text = src.RunningQueryPlanThreshold.CPUThreshold.ToString();
-                    chkCollectPlans.Checked = src.RunningQueryPlanThreshold.PlanCollectionEnabled;
-                }
-                else
-                {
-                    chkCollectPlans.Checked = false;
-                }
-                // After the plan collection check box, which clears this one when it changes
-                if (src.RunningQueryLiveProfileThreshold != null)
-                {
-                    chkCaptureLivePlans.Checked = src.RunningQueryLiveProfileThreshold.Enabled;
-                    txtLivePlanCPUThreshold.Text = src.RunningQueryLiveProfileThreshold.CPUThreshold.ToString();
-                    txtLivePlanDurationThreshold.Text = src.RunningQueryLiveProfileThreshold.DurationThreshold.ToString();
-                    txtLivePlanMaxPerCollection.Text = src.RunningQueryLiveProfileThreshold.MaxPerCollection.ToString();
-                }
-                else
-                {
-                    chkCaptureLivePlans.Checked = false;
-                }
-                chkCollectTaskWaits.Checked = src.CollectTaskWaits;
-                chkCollectCursors.Checked = src.CollectCursors;
-                chkCollectSessionWaits.Checked = src.CollectSessionWaits;
-                cboIOLevel.SelectedItem = src.IOCollectionLevel;
-                chkCollectTempDB.Checked = src.CollectTempDB;
-            }
-            else
-            {
-                src.RunningQueryPlanThreshold = null;
-                src.RunningQueryLiveProfileThreshold = null;
-            }
-
-            CustomCollectionsNew = src.CustomCollections;
+            if (src == null) return;
+            txtSource.Text = src.ConnectionString;
+            tabSrcOptions.LoadFromSource(src);
             SetAvailableOptionsForSource();
         }
 
@@ -2171,26 +1824,7 @@ namespace DBADashServiceConfig
         private void SetAvailableOptionsForSource()
         {
             var src = new DBADashSource(txtSource.Text);
-            bool isSql = src.SourceConnection.Type == ConnectionType.SQL;
-
-            pnlExtendedEvents.Enabled = isSql;
-            tabDeadlocks.Enabled = isSql; // Reading an XE session needs a SQL connection
-            chkCollectPlans.Enabled = isSql;
-            grpRunningQueryThreshold.Enabled = isSql && chkCollectPlans.Checked;
-            grpLivePlanThreshold.Enabled = isSql && chkCollectPlans.Checked;
-            chkNoWMI.Enabled = isSql;
-            chkScriptJobs.Enabled = isSql;
-            cboIOLevel.Enabled = isSql;
-            txtSnapshotDBs.Enabled = isSql;
-            lblIOCollectionLevel.Enabled = isSql;
-            lblSchemaSnapshotDBs.Enabled = isSql;
-            chkCollectSessionWaits.Enabled = isSql;
-            chkCollectTaskWaits.Enabled = isSql;
-            chkCollectCursors.Enabled = isSql;
-            lnkALL.Enabled = isSql;
-            lnkExample.Enabled = isSql;
-            lnkNone.Enabled = isSql;
-            chkScriptJobs.Enabled = isSql;
+            tabSrcOptions.SetSqlOptionsEnabled(src.SourceConnection.Type == ConnectionType.SQL);
         }
 
         private void ChkLogInternalPerfCounters_CheckedChanged(object sender, EventArgs e)
@@ -2469,51 +2103,6 @@ namespace DBADashServiceConfig
             }
 
             currencyManager1.ResumeBinding();
-        }
-
-        private void ChkCollectPlans_CheckedChanged(object sender, EventArgs e)
-        {
-            grpRunningQueryThreshold.Enabled = chkCollectPlans.Checked;
-            // Live plans are only captured for queries whose plans are collected
-            grpLivePlanThreshold.Enabled = chkCollectPlans.Checked;
-            if (!chkCollectPlans.Checked) chkCaptureLivePlans.Checked = false;
-            if (chkCollectPlans.Checked)
-            {
-                var defaultThreshold = PlanCollectionThreshold.DefaultThreshold;
-                txtCPUThreshold.Text = defaultThreshold.CPUThreshold.ToString();
-                txtCountThreshold.Text = defaultThreshold.CountThreshold.ToString();
-                txtDurationThreshold.Text = defaultThreshold.DurationThreshold.ToString();
-                txtGrantThreshold.Text = defaultThreshold.MemoryGrantThreshold.ToString();
-            }
-        }
-
-        private void ChkCaptureLivePlans_CheckedChanged(object sender, EventArgs e)
-        {
-            txtLivePlanCPUThreshold.Enabled = chkCaptureLivePlans.Checked;
-            txtLivePlanDurationThreshold.Enabled = chkCaptureLivePlans.Checked;
-            txtLivePlanMaxPerCollection.Enabled = chkCaptureLivePlans.Checked;
-            if (chkCaptureLivePlans.Checked)
-            {
-                var defaultThreshold = LiveProfileThreshold.DefaultThreshold;
-                txtLivePlanCPUThreshold.Text = defaultThreshold.CPUThreshold.ToString();
-                txtLivePlanDurationThreshold.Text = defaultThreshold.DurationThreshold.ToString();
-                txtLivePlanMaxPerCollection.Text = defaultThreshold.MaxPerCollection.ToString();
-            }
-        }
-
-        private void LnkALL_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            txtSnapshotDBs.Text = "*";
-        }
-
-        private void LnkNone_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            txtSnapshotDBs.Text = string.Empty;
-        }
-
-        private void LnkExample_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            txtSnapshotDBs.Text = "Database1,Database2,Database3";
         }
 
         private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
@@ -3852,13 +3441,9 @@ namespace DBADashServiceConfig
             await DeployDatabase();
         }
 
-        private async void ApplyDeadlockConfigToAll(object sender, LinkLabelLinkClickedEventArgs e)
+        /// <summary>Raised by the options tabs once the deadlock options are valid</summary>
+        private async void ApplyDeadlockConfigToAll(object sender, EventArgs e)
         {
-            if (!ValidateDeadlockOptions())
-            {
-                return;
-            }
-
             if (collectionConfig?.SourceConnections is not { Count: > 0 })
             {
                 MessageBox.Show("There are no source connections to apply the deadlock configuration to.",
@@ -3866,8 +3451,8 @@ namespace DBADashServiceConfig
                 return;
             }
 
-            var sessionName = SelectedDeadlockXESessionName;
-            var backfill = chkBackfillDeadlocks.Checked;
+            var sessionName = tabSrcOptions.DeadlockXESessionName;
+            var backfill = tabSrcOptions.Options.BackfillDeadlocksFromSystemHealth;
             // system_health doesn't exist on Azure SQL Database, so that mode can't be applied there
             var isSystemHealth = string.Equals(sessionName, DBADashSource.SystemHealthXESessionName,
                 StringComparison.OrdinalIgnoreCase);
@@ -3977,7 +3562,7 @@ namespace DBADashServiceConfig
                 "Apply Deadlock Configuration", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        private void ApplyQueryStatsConfigToAll(object sender, LinkLabelLinkClickedEventArgs e)
+        private void ApplyQueryStatsConfigToAll(object sender, EventArgs e)
         {
             //  Not files or S3 paths: the collection reads the plan cache, so only a SQL connection has one
             var sqlSources = collectionConfig?.SourceConnections?
@@ -3990,8 +3575,9 @@ namespace DBADashServiceConfig
                 return;
             }
 
-            var topN = SelectedQueryStatsTopN;
-            var plans = (int)numQueryStatsPlans.Value;
+            var queryStatsOptions = tabSrcOptions.Options;
+            var topN = queryStatsOptions.QueryStatsTopN;
+            var plans = queryStatsOptions.QueryStatsPlansPerCollection;
             var description = topN > 0
                 ? $"Collect query stats with a top N of {topN} and up to {plans} plans per collection"
                 : "Switch query stats collection off";
