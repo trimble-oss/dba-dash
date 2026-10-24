@@ -1081,6 +1081,7 @@ namespace DBADashServiceConfig
                 chkAllowPlanForcing.Checked = collectionConfig.AllowPlanForcing;
                 chkAllowKillSession.Checked = collectionConfig.AllowKillSession;
                 chkAllowScheduleChanges.Checked = collectionConfig.AllowScheduleChanges;
+                chkAllowConnectionChanges.Checked = collectionConfig.AllowConnectionChanges;
                 chkAllowAdhocXE.Checked = collectionConfig.AllowAdhocXE;
                 txtManageXESessions.Text = collectionConfig.ManageXESessions;
                 txtWatchXESessions.Text = collectionConfig.WatchXESessions;
@@ -2562,6 +2563,12 @@ namespace DBADashServiceConfig
         private void ChkAllowScheduleChanges_CheckedChanged(object sender, EventArgs e)
         {
             collectionConfig.AllowScheduleChanges = chkAllowScheduleChanges.Checked;
+            SetJson();
+        }
+
+        private void ChkAllowConnectionChanges_CheckedChanged(object sender, EventArgs e)
+        {
+            collectionConfig.AllowConnectionChanges = chkAllowConnectionChanges.Checked;
             SetJson();
         }
 

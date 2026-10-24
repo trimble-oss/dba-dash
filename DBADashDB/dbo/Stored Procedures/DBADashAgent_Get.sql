@@ -18,6 +18,8 @@ SELECT DBADashAgentID,
        ManageXESessions,
        WatchXESessions,
        AdhocXEEnabled,
-       ScheduleChangesEnabled
+       ScheduleChangesEnabled,
+       ConnectionChangesEnabled,
+       PublicKey
 FROM dbo.DBADashAgent
 WHERE DBADashAgentID = @DBADashAgentID

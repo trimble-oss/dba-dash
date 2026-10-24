@@ -19,6 +19,8 @@
 	WatchXESessions NVARCHAR(MAX) NULL,
 	AdhocXEEnabled BIT NOT NULL CONSTRAINT DF_DBADashAgent_AdhocXEEnabled DEFAULT(0),
 	ScheduleChangesEnabled BIT NOT NULL CONSTRAINT DF_DBADashAgent_ScheduleChangesEnabled DEFAULT(0),
+	ConnectionChangesEnabled BIT NOT NULL CONSTRAINT DF_DBADashAgent_ConnectionChangesEnabled DEFAULT(0),
+	PublicKey NVARCHAR(1000) NULL,
 	CONSTRAINT PK_DBADashAgent PRIMARY KEY(DBADashAgentID),
 	INDEX IX_DBADashAgent UNIQUE NONCLUSTERED (AgentHostName,AgentServiceName),
 	INDEX IX_DBADashAgent_AgentIdentifier UNIQUE NONCLUSTERED (AgentIdentifier)

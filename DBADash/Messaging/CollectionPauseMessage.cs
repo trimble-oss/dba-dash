@@ -33,7 +33,7 @@ namespace DBADash.Messaging
         {
             ThrowIfExpired();
 
-            if (!cfg.AllowScheduleChanges)
+            if (!cfg.IsScheduleChangesAllowed)
             {
                 throw new Exception("Pausing collections is not enabled on the DBA Dash service.  Use the service configuration tool to allow schedule changes.");
             }

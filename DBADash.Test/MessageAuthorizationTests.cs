@@ -55,9 +55,13 @@ namespace DBADash.Test
             AssertRoles(nameof(QueryStorePlanForcingMessage), "AllowPlanForcing");
             AssertRoles(nameof(FlushPlanMessage), "AllowPlanForcing");
             AssertRoles(nameof(AgentJobExecutionMessage), "AllowJobExecution");
-            AssertRoles(nameof(CollectionPauseMessage), "AllowScheduleChanges");
-            AssertRoles(nameof(CollectionScheduleUpdateMessage), "AllowScheduleChanges");
-            AssertRoles(nameof(CollectionScheduleGetMessage), "AllowScheduleChanges");
+            // Connection management includes schedules - someone who can add a connection can set its schedule
+            AssertRoles(nameof(CollectionPauseMessage), "AllowScheduleChanges", "ManageConnections");
+            AssertRoles(nameof(CollectionScheduleUpdateMessage), "AllowScheduleChanges", "ManageConnections");
+            AssertRoles(nameof(CollectionScheduleGetMessage), "AllowScheduleChanges", "ManageConnections");
+            AssertRoles(nameof(ConnectionTestMessage), "ManageConnections");
+            AssertRoles(nameof(ConnectionAddMessage), "ManageConnections");
+            AssertRoles(nameof(ConnectionRemoveMessage), "ManageConnections");
             AssertRoles(nameof(XESessionControlMessage), "ManageXE");
             AssertRoles(nameof(XESessionListMessage), "ManageXE", "WatchXE");
             AssertRoles(nameof(XESessionScriptMessage), "ManageXE", "WatchXE");

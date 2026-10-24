@@ -37,6 +37,18 @@ namespace DBADash
         public bool ScheduleChangesEnabled { get; set; }
 
         /// <summary>
+        /// Whether the service accepts source connections added and removed from the GUI (<see cref="CollectionConfig.AllowConnectionChanges"/>).
+        /// </summary>
+        public bool ConnectionChangesEnabled { get; set; }
+
+        /// <summary>
+        /// The key the GUI encrypts connection strings with before sending them to this service (<see cref="Messaging.MessageEncryption"/>).
+        /// Created each time the service starts.  Null when the agent wasn't registered by a running service - the
+        /// repository then keeps the key it has.
+        /// </summary>
+        public string PublicKey { get; set; }
+
+        /// <summary>
         /// Hard cap (seconds) the service applies to ad-hoc XE trace / watch durations (<see
         /// cref="CollectionConfig.AdhocXEMaxDurationSeconds"/>).  Surfaced to the GUI (via the DBADashAgent row) so it
         /// can warn about / clamp a requested duration up-front rather than relying solely on the server-side clamp.
@@ -143,7 +155,7 @@ namespace DBADash
             int agentID;
             var cacheKey =
                 // Caching takes all properties into account + connection string (as we could be writing to multiple repositories and the agent could have different IDs for each).  Base off MD5 hash which should be sufficient for this use case.
-                Convert.ToBase64String(MD5.HashData(System.Text.Encoding.UTF8.GetBytes(string.Join('|', connectionString, AgentServiceName, AgentVersion, AgentHostName, AgentPath, ServiceSQSQueueUrl, MessagingEnabled, KillSessionEnabled, PlanForcingEnabled, AdhocXEMaxDurationSeconds, S3Path, AllowedScriptsCSV, AllowedCustomProcsCSV, ManageXESessions, WatchXESessions, AdhocXEEnabled, ScheduleChangesEnabled))));
+                Convert.ToBase64String(MD5.HashData(System.Text.Encoding.UTF8.GetBytes(string.Join('|', connectionString, AgentServiceName, AgentVersion, AgentHostName, AgentPath, ServiceSQSQueueUrl, MessagingEnabled, KillSessionEnabled, PlanForcingEnabled, AdhocXEMaxDurationSeconds, S3Path, AllowedScriptsCSV, AllowedCustomProcsCSV, ManageXESessions, WatchXESessions, AdhocXEEnabled, ScheduleChangesEnabled, ConnectionChangesEnabled, PublicKey))));
             if (cache.Contains(cacheKey))
             {
                 agentID = (int)cache[cacheKey];
@@ -206,6 +218,8 @@ namespace DBADash
         public static DBADashAgent GetCurrent()
         {
             currentAgent ??= GetCurrentAgent();
+            // In case the agent was created before the service created its key
+            currentAgent.PublicKey ??= Messaging.MessageEncryption.PublicKey;
             return currentAgent;
         }
 
@@ -229,7 +243,9 @@ namespace DBADash
                 ManageXESessions = cfg.ManageXESessions,
                 WatchXESessions = cfg.WatchXESessions,
                 AdhocXEEnabled = cfg.AllowAdhocXE,
-                ScheduleChangesEnabled = cfg.AllowScheduleChanges
+                ScheduleChangesEnabled = cfg.IsScheduleChangesAllowed,
+                ConnectionChangesEnabled = cfg.AllowConnectionChanges,
+                PublicKey = Messaging.MessageEncryption.PublicKey
             };
         }
 
@@ -263,7 +279,9 @@ namespace DBADash
                     ManageXESessions = rdr["ManageXESessions"] == DBNull.Value ? null : rdr["ManageXESessions"].ToString(),
                     WatchXESessions = rdr["WatchXESessions"] == DBNull.Value ? null : rdr["WatchXESessions"].ToString(),
                     AdhocXEEnabled = rdr["AdhocXEEnabled"] != DBNull.Value && (bool)rdr["AdhocXEEnabled"],
-                    ScheduleChangesEnabled = rdr["ScheduleChangesEnabled"] != DBNull.Value && (bool)rdr["ScheduleChangesEnabled"]
+                    ScheduleChangesEnabled = rdr["ScheduleChangesEnabled"] != DBNull.Value && (bool)rdr["ScheduleChangesEnabled"],
+                    ConnectionChangesEnabled = rdr["ConnectionChangesEnabled"] != DBNull.Value && (bool)rdr["ConnectionChangesEnabled"],
+                    PublicKey = rdr["PublicKey"] == DBNull.Value ? null : (string)rdr["PublicKey"]
                 };
             }
             else
@@ -298,6 +316,8 @@ namespace DBADash
             cmd.Parameters.AddWithValue("WatchXESessions", (object)WatchXESessions ?? DBNull.Value);
             cmd.Parameters.AddWithValue("AdhocXEEnabled", AdhocXEEnabled);
             cmd.Parameters.AddWithValue("ScheduleChangesEnabled", ScheduleChangesEnabled);
+            cmd.Parameters.AddWithValue("ConnectionChangesEnabled", ConnectionChangesEnabled);
+            cmd.Parameters.AddWithValue("PublicKey", (object)PublicKey ?? DBNull.Value);
             pAgentID.Direction = System.Data.ParameterDirection.Output;
             cmd.ExecuteNonQuery();
             return (int)pAgentID.Value;

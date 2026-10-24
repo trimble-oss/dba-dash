@@ -76,9 +76,12 @@ namespace DBADashService
 
         public ScheduleService()
         {
+            // Before the agent is registered, so it's registered with the key the GUI encrypts connection strings with
+            MessageEncryption.Initialize();
             config = SchedulerServiceConfig.Config;
             schedules = config.GetSchedules();
             config.RescheduleCollectionsAsync = RescheduleCollectionsAsync;
+            config.ScheduleNewSourcesAsync = ScheduleNewSourcesAsync;
             if (config.CollectionSchedules != null)
             {
                 Log.Information("Custom schedules set at agent level");
@@ -795,6 +798,7 @@ namespace DBADashService
             }
 
             initialSchedulingComplete = true;
+            config.AcceptsSourceChanges = true;
             await ApplyPendingRescheduleAsync(); // A schedule change received while starting up
             temporaryScheduleTimer = new System.Threading.Timer(_ => _ = ExpireTemporarySchedulesAsync(), null,
                 TemporaryScheduleCheckInterval, TemporaryScheduleCheckInterval);
@@ -828,6 +832,23 @@ namespace DBADashService
                     var task = Task.Run(() => alertProcessing.ProcessAlerts(backgroundTasksCts.Token), backgroundTasksCts.Token);
                     backgroundTasks.Add(task);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Schedules sources added while the service is running (see <see cref="CollectionConfig.ScheduleNewSourcesAsync"/>),
+        /// the same way as those discovered by the Azure DB scan: their service start collections run straight away.
+        /// </summary>
+        private async Task ScheduleNewSourcesAsync(IReadOnlyList<DBADashSource> sources)
+        {
+            Log.Information("Scheduling {count} source(s) added while running: {sources}", sources.Count, sources.Select(s => s.SourceConnection.ConnectionForPrint));
+            if (config.IsUseQueueBasedScheduling())
+            {
+                await ScheduleCollectionsWithQueueAsync(sources.ToList());
+            }
+            else
+            {
+                await ScheduleCollectionsAsync(sources.ToList());
             }
         }
 

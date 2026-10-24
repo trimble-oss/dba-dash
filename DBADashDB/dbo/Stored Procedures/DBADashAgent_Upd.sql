@@ -16,6 +16,8 @@
 	@WatchXESessions NVARCHAR(MAX)=NULL,
 	@AdhocXEEnabled BIT=0,
 	@ScheduleChangesEnabled BIT=0,
+	@ConnectionChangesEnabled BIT=0,
+	@PublicKey NVARCHAR(1000)=NULL, /* NULL keeps the key the agent has - only a running service publishes one */
 	@DBADashAgentID INT OUT
 )
 AS
@@ -35,9 +37,9 @@ DECLARE @UpdateAgent BIT = 0
 SELECT @DBADashAgentID = DBADashAgentID,
 	@UpdateAgent = CASE WHEN 
 						EXISTS(
-								SELECT @AgentPath, @AgentVersion, @ServiceSQSQueueUrl, @AgentIdentifier,@S3Path,@MessagingEnabled,@KillSessionEnabled,@PlanForcingEnabled,@AdhocXEMaxDurationSeconds,@AllowedScripts, @AllowedCustomProcs, @ManageXESessions, @WatchXESessions, @AdhocXEEnabled, @ScheduleChangesEnabled
+								SELECT @AgentPath, @AgentVersion, @ServiceSQSQueueUrl, @AgentIdentifier,@S3Path,@MessagingEnabled,@KillSessionEnabled,@PlanForcingEnabled,@AdhocXEMaxDurationSeconds,@AllowedScripts, @AllowedCustomProcs, @ManageXESessions, @WatchXESessions, @AdhocXEEnabled, @ScheduleChangesEnabled, @ConnectionChangesEnabled, ISNULL(@PublicKey,PublicKey)
 								EXCEPT
-								SELECT AgentPath, AgentVersion, ServiceSQSQueueUrl, AgentIdentifier, S3Path, MessagingEnabled, KillSessionEnabled, PlanForcingEnabled, AdhocXEMaxDurationSeconds, AllowedScripts, AllowedCustomProcs, ManageXESessions, WatchXESessions, AdhocXEEnabled, ScheduleChangesEnabled
+								SELECT AgentPath, AgentVersion, ServiceSQSQueueUrl, AgentIdentifier, S3Path, MessagingEnabled, KillSessionEnabled, PlanForcingEnabled, AdhocXEMaxDurationSeconds, AllowedScripts, AllowedCustomProcs, ManageXESessions, WatchXESessions, AdhocXEEnabled, ScheduleChangesEnabled, ConnectionChangesEnabled, PublicKey
 								)
 					THEN 1 ELSE 0 END
 FROM dbo.DBADashAgent
@@ -47,8 +49,8 @@ AND AgentServiceName = @AgentServiceName
 IF @DBADashAgentID IS NULL
 BEGIN
 
-	INSERT INTO dbo.DBADashAgent(AgentHostName,AgentServiceName,AgentVersion,AgentPath,ServiceSQSQueueUrl,AgentIdentifier,S3Path,MessagingEnabled,KillSessionEnabled,PlanForcingEnabled,AdhocXEMaxDurationSeconds,AllowedScripts, AllowedCustomProcs, ManageXESessions, WatchXESessions, AdhocXEEnabled, ScheduleChangesEnabled)
-	SELECT @AgentHostName,@AgentServiceName,@AgentVersion,@AgentPath,@ServiceSQSQueueUrl,ISNULL(@AgentIdentifier,LEFT(CONCAT('Temp.',REPLACE(NEWID(),'-','')),22)), @S3Path, @MessagingEnabled,@KillSessionEnabled,@PlanForcingEnabled,@AdhocXEMaxDurationSeconds,@AllowedScripts,@AllowedCustomProcs, @ManageXESessions, @WatchXESessions, @AdhocXEEnabled, @ScheduleChangesEnabled
+	INSERT INTO dbo.DBADashAgent(AgentHostName,AgentServiceName,AgentVersion,AgentPath,ServiceSQSQueueUrl,AgentIdentifier,S3Path,MessagingEnabled,KillSessionEnabled,PlanForcingEnabled,AdhocXEMaxDurationSeconds,AllowedScripts, AllowedCustomProcs, ManageXESessions, WatchXESessions, AdhocXEEnabled, ScheduleChangesEnabled, ConnectionChangesEnabled, PublicKey)
+	SELECT @AgentHostName,@AgentServiceName,@AgentVersion,@AgentPath,@ServiceSQSQueueUrl,ISNULL(@AgentIdentifier,LEFT(CONCAT('Temp.',REPLACE(NEWID(),'-','')),22)), @S3Path, @MessagingEnabled,@KillSessionEnabled,@PlanForcingEnabled,@AdhocXEMaxDurationSeconds,@AllowedScripts,@AllowedCustomProcs, @ManageXESessions, @WatchXESessions, @AdhocXEEnabled, @ScheduleChangesEnabled, @ConnectionChangesEnabled, @PublicKey
 	WHERE NOT EXISTS(SELECT 1 
 				FROM dbo.DBADashAgent WITH(UPDLOCK,HOLDLOCK) 
 				WHERE AgentHostName = @AgentHostName 
@@ -81,6 +83,8 @@ BEGIN
 			WatchXESessions = @WatchXESessions,
 			AdhocXEEnabled = @AdhocXEEnabled,
 			ScheduleChangesEnabled = @ScheduleChangesEnabled,
+			ConnectionChangesEnabled = @ConnectionChangesEnabled,
+			PublicKey = ISNULL(@PublicKey,PublicKey),
 			ModifiedDate = SYSUTCDATETIME()
 	WHERE DBADashAgentID = @DBADashAgentID;
 END

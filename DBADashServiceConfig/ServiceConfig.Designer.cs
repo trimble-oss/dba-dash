@@ -77,6 +77,7 @@ namespace DBADashServiceConfig
             chkAllowPlanForcing = new System.Windows.Forms.CheckBox();
             chkAllowKillSession = new System.Windows.Forms.CheckBox();
             chkAllowScheduleChanges = new System.Windows.Forms.CheckBox();
+            chkAllowConnectionChanges = new System.Windows.Forms.CheckBox();
             chkEnableMessaging = new System.Windows.Forms.CheckBox();
             txtAllowedCustomProcs = new System.Windows.Forms.TextBox();
             txtAllowedJobs = new System.Windows.Forms.TextBox();
@@ -689,6 +690,18 @@ namespace DBADashServiceConfig
             toolTip1.SetToolTip(chkAllowScheduleChanges, "Allow collection schedules to be enabled, disabled or changed, and collections to be paused for a period, from the GUI via the messaging feature.  Changes are saved to ServiceConfig.json and applied without a service restart.");
             chkAllowScheduleChanges.UseVisualStyleBackColor = true;
             chkAllowScheduleChanges.CheckedChanged += ChkAllowScheduleChanges_CheckedChanged;
+            //
+            // chkAllowConnectionChanges
+            //
+            chkAllowConnectionChanges.AutoSize = true;
+            chkAllowConnectionChanges.Location = new System.Drawing.Point(650, 25);
+            chkAllowConnectionChanges.Name = "chkAllowConnectionChanges";
+            chkAllowConnectionChanges.Size = new System.Drawing.Size(212, 24);
+            chkAllowConnectionChanges.TabIndex = 8;
+            chkAllowConnectionChanges.Text = "Allow Connection Changes";
+            toolTip1.SetToolTip(chkAllowConnectionChanges, "Allow source connections to be added and removed from the GUI via the messaging feature.  The service checks each connection as the service account, saves it to ServiceConfig.json and starts collecting it without a restart.  Also allows schedule changes.  Requires the ManageConnections role in the repository database.");
+            chkAllowConnectionChanges.UseVisualStyleBackColor = true;
+            chkAllowConnectionChanges.CheckedChanged += ChkAllowConnectionChanges_CheckedChanged;
             //
             // chkEnableMessaging
             // 
@@ -1330,6 +1343,7 @@ namespace DBADashServiceConfig
             grpMessaging.Controls.Add(chkAllowPlanForcing);
             grpMessaging.Controls.Add(chkAllowKillSession);
             grpMessaging.Controls.Add(chkAllowScheduleChanges);
+            grpMessaging.Controls.Add(chkAllowConnectionChanges);
             grpMessaging.Controls.Add(label8);
             grpMessaging.Controls.Add(label6);
             grpMessaging.Controls.Add(txtSQS);
@@ -2043,6 +2057,7 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.CheckBox chkAllowPlanForcing;
         private System.Windows.Forms.CheckBox chkAllowKillSession;
         private System.Windows.Forms.CheckBox chkAllowScheduleChanges;
+        private System.Windows.Forms.CheckBox chkAllowConnectionChanges;
         private System.Windows.Forms.Button bttnCheckConnections;
         private System.Windows.Forms.ComboBox cboDeleteAction;
         private System.Windows.Forms.Label label12;

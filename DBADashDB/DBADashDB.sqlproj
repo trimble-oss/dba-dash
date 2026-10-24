@@ -1024,6 +1024,8 @@
     <Build Include="Security\AllowJobExecution.sql" />
     <Build Include="Security\AllowKillSession.sql" />
     <Build Include="Security\AllowScheduleChanges.sql" />
+    <Build Include="Security\ManageConnections.sql" />
+    <Build Include="dbo\Stored Procedures\ConnectionManagementAgents_Get.sql" />
     <Build Include="Security\AdhocXE.sql" />
     <Build Include="Security\WatchXE.sql" />
     <Build Include="Security\ManageXE.sql" />
