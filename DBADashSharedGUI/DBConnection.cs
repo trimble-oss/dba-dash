@@ -22,6 +22,12 @@ namespace DBADash
 
         public bool InitialCatalogRequired = false;
 
+        /// <summary>
+        /// Build the connection string without connecting - for a connection made from somewhere else, e.g. a service that
+        /// can reach an instance this computer can't.
+        /// </summary>
+        public bool SkipConnectionTest = false;
+
         private SqlAuthenticationMethod SelectedAuthenticationMethod => cboAuthType.SelectedItem is KeyValuePair<SqlAuthenticationMethod, string> selectedPair ? selectedPair.Key : SqlAuthenticationMethod.ActiveDirectoryIntegrated;
         private SqlConnectionEncryptOption SelectedEncryptionOption => cboEncryption.SelectedItem is KeyValuePair<SqlConnectionEncryptOption, string> selectedPair ? selectedPair.Key : SqlConnectionEncryptOption.Mandatory;
 
@@ -179,6 +185,12 @@ namespace DBADash
             if (InitialCatalogRequired && string.IsNullOrWhiteSpace(cboDatabase.Text))
             {
                 MessageBox.Show("Please select a database", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (SkipConnectionTest)
+            {
+                DialogResult = DialogResult.OK;
                 return;
             }
 

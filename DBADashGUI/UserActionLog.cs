@@ -21,6 +21,8 @@ namespace DBADashGUI
         public const string ActionEndTemporarySchedule = "End Temporary Schedule";
         public const string ActionPause = "Pause Collections";
         public const string ActionResume = "Resume Collections";
+        public const string ActionAddConnections = "Add Connections";
+        public const string ActionRemoveConnections = "Remove Connections";
 
         public const string StatusSucceeded = "Succeeded";
 

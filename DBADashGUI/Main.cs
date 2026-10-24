@@ -1396,6 +1396,29 @@ namespace DBADashGUI
             var mnuRootRefresh = new ToolStripMenuItem("Refresh") { Image = Properties.Resources._112_RefreshArrow_Green_16x16_72 };
             rootNode.ContextMenuStrip.Items.Insert(0, mnuRootRefresh);
             mnuRootRefresh.Click += MnuRootRefresh_Click;
+            if (DBADashUser.ManageConnections)
+            {
+                var mnuAddConnections = new ToolStripMenuItem("Add Connections...") { Image = Properties.Resources.DatabaseSettings_16x };
+                mnuAddConnections.Click += MnuAddConnections_Click;
+                rootNode.ContextMenuStrip.Items.Insert(1, mnuAddConnections);
+            }
+        }
+
+        private async void MnuAddConnections_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using var frm = new Connections.AddConnectionsDialog();
+                frm.ShowDialog(this);
+                if (frm.ConnectionsChanged)
+                {
+                    await AddInstancesAsync(forceRefresh: true);
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex);
+            }
         }
 
         private async void MnuRootRefresh_Click(object sender, EventArgs e)

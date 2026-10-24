@@ -43,6 +43,9 @@ namespace DBADashGUI
         /// <summary>Member of the AllowScheduleChanges role (or admin) - can change collection schedules via the service.</summary>
         public static bool AllowScheduleChanges;
 
+        /// <summary>Member of the ManageConnections role (or admin) - can add and remove source connections via the service.  Includes schedule changes.</summary>
+        public static bool ManageConnections;
+
         public static TimeZoneInfo UserTimeZone = TimeZoneInfo.Local;
 
         public static HashSet<string> Roles;
@@ -164,7 +167,9 @@ namespace DBADashGUI
                 AllowAdhocXE = (IsInRole("AdhocXE") && AllowMessaging) || IsAdmin;
                 AllowManageXE = (IsInRole("ManageXE") && AllowMessaging) || IsAdmin;
                 AllowWatchXE = (IsInRole("WatchXE") && AllowMessaging) || IsAdmin;
-                AllowScheduleChanges = (IsInRole("AllowScheduleChanges") && AllowMessaging) || IsAdmin;
+                ManageConnections = (IsInRole("ManageConnections") && AllowMessaging) || IsAdmin;
+                // Someone who can add a connection can set its schedule
+                AllowScheduleChanges = ((IsInRole("AllowScheduleChanges") || IsInRole("ManageConnections")) && AllowMessaging) || IsAdmin;
                 if (pTZ.Value != DBNull.Value)
                 {
                     var tzID = (string)pTZ.Value;
