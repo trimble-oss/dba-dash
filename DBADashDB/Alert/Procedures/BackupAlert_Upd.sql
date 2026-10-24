@@ -195,6 +195,16 @@ WHERE (
 		)
 	);
 
+/* Highest priority rule per instance/group/backup type.  Priority & RuleID come from the same row so rule notes & closure match the alert */
+WITH TopRule AS (
+	SELECT T.InstanceID,
+		T.GroupID,
+		T.BackupType,
+		T.Priority,
+		T.RuleID,
+		ROW_NUMBER() OVER (PARTITION BY T.InstanceID, T.GroupID, T.BackupType ORDER BY T.Priority, T.RuleID) AS rnum
+	FROM #Triggered T
+)
 INSERT INTO @AlertDetails(
 	InstanceID,
 	Priority,
@@ -211,7 +221,7 @@ SELECT Msg.InstanceID,
 	Msg.GroupID
 FROM (
 	SELECT T.InstanceID,
-		MIN(T.Priority) AS Priority,
+		TR.Priority,
 		MIN(T.AlertKey) AS AlertKey,
 		CONCAT(
 			CASE T.BackupType
@@ -241,10 +251,14 @@ FROM (
 			).value('.', 'nvarchar(max)'), 1, 1, ''),
 			''
 		) AS FullMessage,
-		MIN(T.RuleID) AS RuleID,
+		TR.RuleID,
 		T.GroupID
 	FROM #Triggered T
-	GROUP BY T.InstanceID, T.GroupID, T.BackupType
+	JOIN TopRule TR ON TR.InstanceID = T.InstanceID
+		AND TR.GroupID = T.GroupID
+		AND TR.BackupType = T.BackupType
+		AND TR.rnum = 1
+	GROUP BY T.InstanceID, T.GroupID, T.BackupType, TR.Priority, TR.RuleID
 ) Msg;
 
 EXEC Alert.ActiveAlerts_Upd @AlertDetails = @AlertDetails, @AlertType = @Type;
