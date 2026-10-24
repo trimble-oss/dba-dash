@@ -1055,6 +1055,12 @@ namespace DBADashGUI
                 mnuConfigureServiceSchedule.Click += (_, _) => ConfigureScheduleAsync(serviceLevel: true);
                 scheduleMenus.AddRange(new ToolStripItem[] { mnuPauseCollections, mnuConfigureSchedule, mnuConfigureServiceSchedule });
             }
+            if (DBADashUser.ManageConnections)
+            {
+                var mnuRemoveConnection = new ToolStripMenuItem("Remove Connection...") { Image = Resources.DeleteDatabase_16x };
+                mnuRemoveConnection.Click += MnuRemoveConnection_Click;
+                scheduleMenus.Add(mnuRemoveConnection);
+            }
             if (!DBADashUser.IsAdmin)
             {
                 ContextMenuStrip.Items.AddRange(scheduleMenus.ToArray());
@@ -1186,6 +1192,21 @@ namespace DBADashGUI
                 pausedSuffix = string.Empty;
                 UpdatePausedIndicator();
                 RefreshNode();
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex);
+            }
+        }
+
+        private void MnuRemoveConnection_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (Connections.RemoveConnectionDialog.Show(TreeView, Context))
+                {
+                    Parent?.Nodes.Remove(this);
+                }
             }
             catch (Exception ex)
             {

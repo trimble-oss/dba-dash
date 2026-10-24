@@ -273,6 +273,12 @@ namespace DBADash
         /// <summary>Marked deleted in the repository.  Not set by <see cref="SourceConnectionAdder.CheckAsync"/> - checked by the caller, which knows the repository.</summary>
         public bool IsDeletedInRepository { get; set; }
 
+        /// <summary>
+        /// Another service already collects the instance, so adding it would collect it twice.  Like
+        /// <see cref="IsDeletedInRepository"/>, set by the caller from the repository.
+        /// </summary>
+        public string CollectedByOtherService { get; set; }
+
         /// <summary>The source matched by <see cref="Existing"/> - in the config that was checked</summary>
         [JsonIgnore]
         public DBADashSource ExistingSource { get; set; }

@@ -172,7 +172,9 @@ namespace DBADashGUI
                 _ => couldNotConnect ? ActionAddAnyway : ActionAdd
             };
             // Something that needs a closer look isn't done unless it's chosen
-            var defaultAction = couldNotConnect || check.Existing == ExistingConnectionStates.Discovered ? ActionSkip : add;
+            var defaultAction = couldNotConnect || check.Existing == ExistingConnectionStates.Discovered || !string.IsNullOrEmpty(check.CollectedByOtherService)
+                ? ActionSkip
+                : add;
             return (new List<string> { add, ActionSkip }, defaultAction);
         }
 
@@ -188,6 +190,11 @@ namespace DBADashGUI
                 case ExistingConnectionStates.Discovered:
                     notes.Add($"Already monitored automatically via the \"{check.DiscoveredVia}\" option.  Adding it lets you configure it explicitly - it won't create a duplicate instance.");
                     break;
+            }
+
+            if (!string.IsNullOrEmpty(check.CollectedByOtherService))
+            {
+                notes.Add($"Already collected by {check.CollectedByOtherService} - adding it here would collect it twice.");
             }
 
             if (check.IsDeletedInRepository)
