@@ -910,7 +910,9 @@ namespace DBADash
                 ManageXESessions = row.Table.Columns.Contains("ManageXESessions") && row["ManageXESessions"] != DBNull.Value ? (string)row["ManageXESessions"] : null,
                 WatchXESessions = row.Table.Columns.Contains("WatchXESessions") && row["WatchXESessions"] != DBNull.Value ? (string)row["WatchXESessions"] : null,
                 AdhocXEEnabled = row.Table.Columns.Contains("AdhocXEEnabled") && row["AdhocXEEnabled"] != DBNull.Value && (bool)row["AdhocXEEnabled"],
-                ScheduleChangesEnabled = row.Table.Columns.Contains("ScheduleChangesEnabled") && row["ScheduleChangesEnabled"] != DBNull.Value && (bool)row["ScheduleChangesEnabled"]
+                ScheduleChangesEnabled = row.Table.Columns.Contains("ScheduleChangesEnabled") && row["ScheduleChangesEnabled"] != DBNull.Value && (bool)row["ScheduleChangesEnabled"],
+                ConnectionChangesEnabled = row.Table.Columns.Contains("ConnectionChangesEnabled") && row["ConnectionChangesEnabled"] != DBNull.Value && (bool)row["ConnectionChangesEnabled"],
+                PublicKey = row.Table.Columns.Contains("PublicKey") && row["PublicKey"] != DBNull.Value ? (string)row["PublicKey"] : null
             };
         }
 

@@ -1,0 +1,143 @@
+using DBADash.Messaging;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace DBADash.Test
+{
+    /// <summary>
+    /// Adding and removing connections from the GUI: encrypting connection strings for the service, the gate on the
+    /// service, and the checks made on a message before anything is changed.  No service, instance or config file needed.
+    /// </summary>
+    [TestClass]
+    public class ConnectionMessagesTests
+    {
+        [ClassInitialize]
+        public static void ClassInitialize(TestContext _) => MessageEncryption.Initialize();
+
+        [TestMethod]
+        public void Encryption_RoundTrips()
+        {
+            const string cs = "Data Source=SQL1;User ID=dba;Password=S3cret!;Encrypt=True";
+            var encrypted = MessageEncryption.Encrypt(cs, MessageEncryption.PublicKey);
+
+            Assert.IsTrue(MessageEncryption.IsEncrypted(encrypted));
+            Assert.DoesNotContain("S3cret", encrypted);
+            Assert.AreNotEqual(encrypted, MessageEncryption.Encrypt(cs, MessageEncryption.PublicKey)); // Random key and nonce
+            Assert.AreEqual(cs, MessageEncryption.Decrypt(encrypted));
+        }
+
+        [TestMethod]
+        public void Encryption_OtherKeyCantBeDecrypted()
+        {
+            using var other = RSA.Create(3072);
+            var encrypted = MessageEncryption.Encrypt("Data Source=SQL1", Convert.ToBase64String(other.ExportSubjectPublicKeyInfo()));
+            Assert.ThrowsExactly<CryptographicException>(() => MessageEncryption.Decrypt(encrypted));
+        }
+
+        [TestMethod]
+        public void Encryption_TamperedValueRejected()
+        {
+            var encrypted = MessageEncryption.Encrypt("Data Source=SQL1", MessageEncryption.PublicKey);
+            var tampered = encrypted[..^4] + (encrypted[^4] == 'A' ? "B" : "A") + encrypted[^3..];
+            Assert.ThrowsExactly<CryptographicException>(() => MessageEncryption.Decrypt(tampered));
+            Assert.ThrowsExactly<ArgumentException>(() => MessageEncryption.Decrypt("Data Source=SQL1"));
+            Assert.ThrowsExactly<ArgumentException>(() => MessageEncryption.Encrypt("Data Source=SQL1", null));
+        }
+
+        [TestMethod]
+        public void CreateSource_OnlySqlConnections()
+        {
+            var options = new SourceConnectionOptions();
+            var src = ConnectionChanges.CreateSource(MessageEncryption.Encrypt("SQL1", MessageEncryption.PublicKey), options);
+            StringAssert.Contains(src.SourceConnection.ConnectionString, "Data Source=SQL1");
+
+            Assert.ThrowsExactly<ArgumentException>(() => ConnectionChanges.CreateSource(MessageEncryption.Encrypt("C:\\Temp\\Import", MessageEncryption.PublicKey), options));
+            Assert.ThrowsExactly<ArgumentException>(() => ConnectionChanges.CreateSource(MessageEncryption.Encrypt("s3://bucket/path", MessageEncryption.PublicKey), options));
+            Assert.ThrowsExactly<ArgumentException>(() => ConnectionChanges.CreateSource("SQL1", options)); // Must be encrypted
+        }
+
+        [TestMethod]
+        public void ValidateOptions_NoCustomCollections()
+        {
+            ConnectionChanges.ValidateOptions(new SourceConnectionOptions());
+            Assert.ThrowsExactly<ArgumentException>(() => ConnectionChanges.ValidateOptions(new SourceConnectionOptions
+            {
+                CustomCollections = new() { { "Test", new CustomCollection { ProcedureName = "dbo.Test" } } }
+            }));
+            Assert.ThrowsExactly<ArgumentException>(() => ConnectionChanges.ValidateOptions(new SourceConnectionOptions
+            {
+                SlowQueryThresholdMs = 1000,
+                SlowQueryCaptureMode = DBADashSource.SlowQueryCaptureModes.ExistingSession
+            }));
+        }
+
+        [TestMethod]
+        public void ValidateCount()
+        {
+            Assert.ThrowsExactly<ArgumentException>(() => ConnectionChanges.ValidateCount(0));
+            Assert.ThrowsExactly<ArgumentException>(() => ConnectionChanges.ValidateCount(ConnectionChanges.MaxConnectionsPerMessage + 1));
+            ConnectionChanges.ValidateCount(1);
+        }
+
+        [TestMethod]
+        public async Task Messages_RejectedUnlessEnabledAndStarted()
+        {
+            var messages = new MessageBase[]
+            {
+                new ConnectionTestMessage { ConnectionStrings = new List<string> { "x" } },
+                new ConnectionAddMessage { Connections = new List<ConnectionAddMessage.ConnectionRequest> { new() } },
+                new ConnectionRemoveMessage { ConnectionIDs = new List<string> { "SQL1" } }
+            };
+            foreach (var message in messages)
+            {
+                var disabled = await Assert.ThrowsExactlyAsync<Exception>(() => message.Process(new CollectionConfig { AcceptsSourceChanges = true }, Guid.Empty, CancellationToken.None));
+                StringAssert.Contains(disabled.Message, "not enabled", message.GetType().Name);
+
+                var starting = await Assert.ThrowsExactlyAsync<Exception>(() => message.Process(new CollectionConfig { AllowConnectionChanges = true }, Guid.Empty, CancellationToken.None));
+                StringAssert.Contains(starting.Message, "still starting", message.GetType().Name);
+            }
+        }
+
+        [TestMethod]
+        public void ConnectionChangesAllowScheduleChanges()
+        {
+            Assert.IsFalse(new CollectionConfig().IsScheduleChangesAllowed);
+            Assert.IsTrue(new CollectionConfig { AllowScheduleChanges = true }.IsScheduleChangesAllowed);
+            Assert.IsTrue(new CollectionConfig { AllowConnectionChanges = true }.IsScheduleChangesAllowed);
+        }
+
+        [TestMethod]
+        public void FindInFileConfig_MatchesConnectionIDOrRunningConnectionString()
+        {
+            var withID = new DBADashSource("Data Source=SQL1;Integrated Security=True") { ConnectionID = "SQL1" };
+            var withoutID = new DBADashSource("Data Source=SQL2;Integrated Security=True");
+            var fileConfig = new CollectionConfig();
+            fileConfig.SourceConnections.AddRange(new[] { withID, withoutID });
+
+            // The running source has its ConnectionID generated at runtime
+            var running = new CollectionConfig();
+            running.SourceConnections.Add(new DBADashSource("Data Source=SQL2;Integrated Security=True") { ConnectionID = "SQL2\\GENERATED" });
+
+            Assert.AreSame(withID, ConnectionRemoveMessage.FindInFileConfig(fileConfig, running, "sql1"));
+            Assert.AreSame(withoutID, ConnectionRemoveMessage.FindInFileConfig(fileConfig, running, "SQL2\\GENERATED"));
+            Assert.IsNull(ConnectionRemoveMessage.FindInFileConfig(fileConfig, running, "SQL3"));
+        }
+
+        [TestMethod]
+        public void ReplyPayload_RoundTrips()
+        {
+            var results = new List<ConnectionChangeResult> { new() { ConnectionID = "SQL1", Outcome = ConnectionChangeResult.Added } };
+            var ds = ConnectionChanges.ToDataSet(results, new[] { "A warning" });
+
+            var read = ConnectionChanges.FromDataSet<List<ConnectionChangeResult>>(ds);
+            Assert.AreEqual("SQL1", read[0].ConnectionID);
+            Assert.IsTrue(read[0].IsChange);
+            CollectionAssert.AreEqual(new[] { "A warning" }, MessageWarnings.Read(ds));
+            Assert.IsNull(ConnectionChanges.FromDataSet<List<ConnectionChangeResult>>(null));
+        }
+    }
+}

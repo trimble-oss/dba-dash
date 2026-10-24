@@ -712,6 +712,42 @@ namespace DBADash
         }
 
         /// <summary>
+        /// Drops every extended events session DBA Dash created on the instance, for a connection that's being removed:
+        /// the slow query sessions (ring buffer and event file - including one kept running while the service is
+        /// stopped), the deadlock session when DBA Dash manages it, and any ad-hoc trace.  A session the user created and
+        /// DBA Dash only reads is left alone.  Event files stay in the log directory - SQL Server never deletes them on a
+        /// drop.  Returns the sessions dropped.
+        /// </summary>
+        public async Task<List<string>> DropDBADashEventSessionsAsync(CancellationToken cancellationToken = default)
+        {
+            var dropped = new List<string>();
+            if (!IsXESupported) return dropped;
+            var sessions = new List<string> { "DBADash_1", "DBADash_2", DBADashSource.ManagedSlowQueryXESessionName, Messaging.XETraceMessage.SessionName };
+            if (string.Equals(Source.DeadlockXESessionName, DBADashSource.ManagedDeadlockXESessionName, StringComparison.OrdinalIgnoreCase))
+            {
+                sessions.Add(DBADashSource.ManagedDeadlockXESessionName);
+            }
+
+            var scope = IsAzureDB ? "ON DATABASE" : "ON SERVER";
+            var catalog = IsAzureDB ? "sys.database_event_sessions" : "sys.server_event_sessions";
+            await using var cn = new SqlConnection(ConnectionString);
+            await cn.OpenAsync(cancellationToken);
+            foreach (var session in sessions)
+            {
+                // Fixed names, so safe to inline
+                var sql = $"IF EXISTS(SELECT 1 FROM {catalog} WHERE name = N'{session}') " +
+                          $"BEGIN DROP EVENT SESSION [{session}] {scope}; SELECT CAST(1 AS bit); END " +
+                          "ELSE SELECT CAST(0 AS bit);";
+                await using var cmd = new SqlCommand(sql, cn);
+                if (Convert.ToBoolean(await cmd.ExecuteScalarAsync(cancellationToken)))
+                {
+                    dropped.Add(session);
+                }
+            }
+            return dropped;
+        }
+
+        /// <summary>
         /// Add Metadata relating to the DBA Dash service used for collection.
         /// </summary>
         public static void AddDBADashServiceMetadata(ref DataTable dt)
@@ -735,7 +771,9 @@ namespace DBADash
                 new DataColumn("ManageXESessions", typeof(string)),
                 new DataColumn("WatchXESessions", typeof(string)),
                 new DataColumn("AdhocXEEnabled", typeof(bool)),
-                new DataColumn("ScheduleChangesEnabled", typeof(bool))
+                new DataColumn("ScheduleChangesEnabled", typeof(bool)),
+                new DataColumn("ConnectionChangesEnabled", typeof(bool)),
+                new DataColumn("PublicKey", typeof(string))
             });
             if (dt.Rows.Count == 0)
             {
@@ -760,6 +798,8 @@ namespace DBADash
             dt.Rows[0]["WatchXESessions"] = (object)dashAgent.WatchXESessions ?? DBNull.Value;
             dt.Rows[0]["AdhocXEEnabled"] = dashAgent.AdhocXEEnabled;
             dt.Rows[0]["ScheduleChangesEnabled"] = dashAgent.ScheduleChangesEnabled;
+            dt.Rows[0]["ConnectionChangesEnabled"] = dashAgent.ConnectionChangesEnabled;
+            dt.Rows[0]["PublicKey"] = (object)dashAgent.PublicKey ?? DBNull.Value;
         }
 
         public async Task GetInstanceAsync()

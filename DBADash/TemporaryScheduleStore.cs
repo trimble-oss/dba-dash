@@ -104,6 +104,23 @@ namespace DBADash
             }
         }
 
+        /// <summary>Removes every temporary schedule for <paramref name="connectionIDs"/> - e.g. connections that are no longer collected.</summary>
+        public void Remove(IReadOnlyCollection<string> connectionIDs)
+        {
+            lock (updateLock)
+            {
+                var updated = Copy(GetAll());
+                var removed = false;
+                foreach (var id in connectionIDs)
+                {
+                    removed |= updated.Remove(id);
+                }
+                if (!removed) return;
+                Save(updated);
+                schedules = updated;
+            }
+        }
+
         /// <summary>
         /// Drops schedules that have expired, returning the ConnectionIDs they belonged to so the service can reschedule
         /// those instances and report their schedule.  Empty when nothing has expired.

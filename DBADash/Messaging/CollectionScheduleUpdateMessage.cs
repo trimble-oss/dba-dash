@@ -68,7 +68,7 @@ namespace DBADash.Messaging
         {
             ThrowIfExpired();
 
-            if (!cfg.AllowScheduleChanges)
+            if (!cfg.IsScheduleChangesAllowed)
             {
                 throw new Exception("Changing collection schedules is not enabled on the DBA Dash service.  Use the service configuration tool to enable.");
             }

@@ -43,7 +43,7 @@ namespace DBADash.Test
         }
 
         private static readonly string[] Roles =
-            { "AllowKillSession", "AllowPlanForcing", "AllowJobExecution", "AllowScheduleChanges", "ManageXE", "WatchXE", "AdhocXE", "CommunityScripts", "CustomTools" };
+            { "AllowKillSession", "AllowPlanForcing", "AllowJobExecution", "AllowScheduleChanges", "ManageConnections", "ManageXE", "WatchXE", "AdhocXE", "CommunityScripts", "CustomTools" };
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext _)
@@ -487,6 +487,53 @@ AND m.name <> N'dbo'");
             {
                 return ex.Message;
             }
+        }
+
+        /// <summary>
+        /// The key the GUI encrypts connection strings with is only published by a running service - a registration
+        /// without one (e.g. the collect agent read from an older service's data) keeps the key the agent has.
+        /// </summary>
+        [TestMethod]
+        public void AgentRegistration_KeepsPublicKeyWhenNoneSupplied()
+        {
+            var agent = new DBADashAgent
+            {
+                AgentHostName = "KeyHost",
+                AgentServiceName = "KeyService",
+                AgentPath = "C:\\DBADash",
+                AgentVersion = "1.0",
+                MessagingEnabled = true,
+                ConnectionChangesEnabled = true,
+                PublicKey = "Key1"
+            };
+            var id = agent.GetDBADashAgentID(ConnectionString);
+            Assert.AreEqual("Key1", DBADashAgent.GetDBADashAgent(ConnectionString, id).PublicKey);
+
+            agent.PublicKey = null;
+            agent.AgentVersion = "1.1"; // Not cached
+            Assert.AreEqual(id, agent.GetDBADashAgentID(ConnectionString));
+            var registered = DBADashAgent.GetDBADashAgent(ConnectionString, id);
+            Assert.AreEqual("Key1", registered.PublicKey);
+            Assert.AreEqual("1.1", registered.AgentVersion);
+            Assert.IsTrue(registered.ConnectionChangesEnabled);
+
+            agent.PublicKey = "Key2";
+            agent.GetDBADashAgentID(ConnectionString);
+            Assert.AreEqual("Key2", DBADashAgent.GetDBADashAgent(ConnectionString, id).PublicKey);
+
+            // Listed for the GUI to add connections to, routed through itself as it has no instances
+            using var cn = Open();
+            using var cmd = new SqlCommand("dbo.ConnectionManagementAgents_Get", cn) { CommandType = System.Data.CommandType.StoredProcedure };
+            using var rdr = cmd.ExecuteReader();
+            var listed = false;
+            while (rdr.Read())
+            {
+                if ((int)rdr["CollectAgentID"] != id) continue;
+                listed = true;
+                Assert.AreEqual(id, (int)rdr["ImportAgentID"]);
+                Assert.IsTrue((bool)rdr["HasPublicKey"]);
+            }
+            Assert.IsTrue(listed, "Agent with connection changes enabled wasn't listed");
         }
 
         private static int QueueCount()

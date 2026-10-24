@@ -126,11 +126,41 @@ namespace DBADash
         public bool AllowScheduleChanges { get; set; }
 
         /// <summary>
+        /// Source connections can be added and removed from the GUI when enabled
+        /// (<see cref="Messaging.ConnectionTestMessage"/>, <see cref="Messaging.ConnectionAddMessage"/> and
+        /// <see cref="Messaging.ConnectionRemoveMessage"/>).  Connections are checked by the service, as the service
+        /// account, and written to ServiceConfig.json.  Also allows schedule changes - see <see cref="IsScheduleChangesAllowed"/>.
+        /// </summary>
+        public bool AllowConnectionChanges { get; set; }
+
+        /// <summary>
+        /// Schedule changes and pauses are accepted - <see cref="AllowScheduleChanges"/>, or <see cref="AllowConnectionChanges"/>
+        /// which goes further: someone who can add a connection can set its schedule.
+        /// </summary>
+        [JsonIgnore]
+        public bool IsScheduleChangesAllowed => AllowScheduleChanges || AllowConnectionChanges;
+
+        /// <summary>
         /// Set by the service so that a schedule change made via messaging can take effect without a restart.  Rebuilds
         /// the collection jobs from the current config.  Null outside the service (e.g. the config tools).
         /// </summary>
         [JsonIgnore]
         public Func<Task> RescheduleCollectionsAsync { get; set; }
+
+        /// <summary>
+        /// Set by the service so that sources added via messaging start collecting without a restart - schedules their
+        /// collections and runs the service start collections.  The sources have already been added to
+        /// <see cref="SourceConnections"/>.  Null outside the service.
+        /// </summary>
+        [JsonIgnore]
+        public Func<IReadOnlyList<DBADashSource>, Task> ScheduleNewSourcesAsync { get; set; }
+
+        /// <summary>
+        /// Set by the service once its collections are scheduled at startup - sources added or removed before then could be
+        /// missed by, or scheduled twice with, the startup scheduling.  False outside the service.
+        /// </summary>
+        [JsonIgnore]
+        public bool AcceptsSourceChanges { get; set; }
 
         /// <summary>
         /// Ad-hoc extended-events tracing must be explicitly enabled on the service (mirrors
