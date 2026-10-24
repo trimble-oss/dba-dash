@@ -257,29 +257,11 @@ namespace DBADashServiceConfig
             return false;
         }
 
-        /// <summary>
-        /// True if the Deadlocks collection has a schedule that would actually run it, taking the connection's
-        /// own schedule overrides into account.  The collection is disabled in the default schedule, so setting
-        /// a session name alone leaves it collecting nothing.
-        /// </summary>
-        private bool IsDeadlockCollectionScheduled(DBADashSource src)
-        {
-            var schedules = src.CollectionSchedules is { Count: > 0 }
-                ? DBADashService.CollectionSchedules.Combine(collectionConfig.GetSchedules(), src.CollectionSchedules)
-                : collectionConfig.GetSchedules();
-            return schedules.TryGetValue(CollectionType.Deadlocks, out var schedule) &&
-                   !string.IsNullOrWhiteSpace(schedule?.Schedule);
-        }
+        private bool IsDeadlockCollectionScheduled(DBADashSource src) =>
+            SourceConnectionAdder.IsDeadlockCollectionScheduled(collectionConfig, src);
 
-        private static void SetDefaultDeadlockSchedule(DBADashSource src)
-        {
-            src.CollectionSchedules ??= new DBADashService.CollectionSchedules();
-            src.CollectionSchedules[CollectionType.Deadlocks] = new DBADashService.CollectionSchedule
-            {
-                Schedule = DBADashService.CollectionSchedules.DeadlocksSchedule,
-                RunOnServiceStart = false
-            };
-        }
+        private static void SetDefaultDeadlockSchedule(DBADashSource src) =>
+            SourceConnectionAdder.SetDefaultDeadlockSchedule(src);
 
         /// <summary>
         /// The XE max-duration cap applies to both ad-hoc XE traces and watching existing sessions, so the control is
@@ -343,71 +325,53 @@ namespace DBADashServiceConfig
             }
         }
 
-        private DBADashSource CreateSourceConnection(string sourceString, string schemaSnapshotDBs)
+        /// <summary>The options chosen on the Add New Connection tabs</summary>
+        private SourceConnectionOptions GetNewConnectionOptions() => new()
         {
-            if (!sourceString.Contains(';') && !sourceString.Contains(':') && !sourceString.StartsWith("\\\\") &&
-                !sourceString.StartsWith("//"))
-            {
-                // Providing the name of the SQL instances - build the connection string automatically
-                var builder = new SqlConnectionStringBuilder
+            NoWMI = chkNoWMI.Checked,
+            UseDualEventSession = chkDualSession.Checked,
+            PersistXESessions = chkPersistXESession.Checked,
+            SlowQueryThresholdMs = chkSlowQueryThreshold.Checked ? (int)numSlowQueryThreshold.Value : -1,
+            SlowQueryCaptureMode = SelectedSlowQueryCaptureMode,
+            SlowQueryXESessionName = txtSlowQueryXESessionName.Text.Trim(),
+            KeepSlowQueryXESessionRunning = chkKeepSlowQuerySessionRunning.Checked,
+            DeadlockXESessionName = SelectedDeadlockXESessionName,
+            BackfillDeadlocksFromSystemHealth = chkBackfillDeadlocks.Checked,
+            QueryStatsTopN = SelectedQueryStatsTopN,
+            QueryStatsPlansPerCollection = (int)numQueryStatsPlans.Value,
+            RunningQueryPlanThreshold = chkCollectPlans.Checked
+                ? new PlanCollectionThreshold()
                 {
-                    DataSource = sourceString,
-                    IntegratedSecurity = true,
-                    TrustServerCertificate = true,
-                    Encrypt = true,
-                    ApplicationName = "DBADash"
-                };
-                sourceString = builder.ConnectionString;
-            }
-
-            var src = new DBADashSource(sourceString)
-            {
-                NoWMI = chkNoWMI.Checked,
-                UseDualEventSession = chkDualSession.Checked,
-                PersistXESessions = chkPersistXESession.Checked,
-                SlowQueryThresholdMs = chkSlowQueryThreshold.Checked ? (int)numSlowQueryThreshold.Value : -1,
-                SlowQueryCaptureMode = SelectedSlowQueryCaptureMode,
-                SlowQueryXESessionName = txtSlowQueryXESessionName.Text.Trim(),
-                KeepSlowQueryXESessionRunning = chkKeepSlowQuerySessionRunning.Checked,
-                DeadlockXESessionName = SelectedDeadlockXESessionName,
-                BackfillDeadlocksFromSystemHealth = chkBackfillDeadlocks.Checked,
-                QueryStatsTopN = SelectedQueryStatsTopN,
-                QueryStatsPlansPerCollection = (int)numQueryStatsPlans.Value,
-                RunningQueryPlanThreshold = chkCollectPlans.Checked
-                    ? new PlanCollectionThreshold()
-                    {
-                        CountThreshold = int.Parse(txtCountThreshold.Text),
-                        CPUThreshold = int.Parse(txtCPUThreshold.Text),
-                        DurationThreshold = int.Parse(txtDurationThreshold.Text),
-                        MemoryGrantThreshold = int.Parse(txtGrantThreshold.Text)
-                    }
-                    : null,
-                RunningQueryLiveProfileThreshold = chkCollectPlans.Checked && chkCaptureLivePlans.Checked
-                    ? new LiveProfileThreshold()
-                    {
-                        CPUThreshold = int.Parse(txtLivePlanCPUThreshold.Text),
-                        DurationThreshold = int.Parse(txtLivePlanDurationThreshold.Text),
-                        MaxPerCollection = int.Parse(txtLivePlanMaxPerCollection.Text)
-                    }
-                    : null,
-                SchemaSnapshotDBs = schemaSnapshotDBs,
-                CollectSessionWaits = chkCollectSessionWaits.Checked,
-                CollectTaskWaits = chkCollectTaskWaits.Checked,
-                CollectCursors = chkCollectCursors.Checked,
-                ScriptAgentJobs = chkScriptJobs.Checked,
-                IOCollectionLevel = (DBADashSource.IOCollectionLevels)cboIOLevel.SelectedItem!,
-                WriteToSecondaryDestinations = chkWriteToSecondaryDestinations.Checked,
-                CollectTempDB = chkCollectTempDB.Checked,
-            };
-            src.CustomCollections = src.SourceConnection.Type == ConnectionType.SQL ? CustomCollectionsNew : null;
-            return src;
-        }
+                    CountThreshold = int.Parse(txtCountThreshold.Text),
+                    CPUThreshold = int.Parse(txtCPUThreshold.Text),
+                    DurationThreshold = int.Parse(txtDurationThreshold.Text),
+                    MemoryGrantThreshold = int.Parse(txtGrantThreshold.Text)
+                }
+                : null,
+            RunningQueryLiveProfileThreshold = chkCollectPlans.Checked && chkCaptureLivePlans.Checked
+                ? new LiveProfileThreshold()
+                {
+                    CPUThreshold = int.Parse(txtLivePlanCPUThreshold.Text),
+                    DurationThreshold = int.Parse(txtLivePlanDurationThreshold.Text),
+                    MaxPerCollection = int.Parse(txtLivePlanMaxPerCollection.Text)
+                }
+                : null,
+            SchemaSnapshotDBs = txtSnapshotDBs.Text.Trim(),
+            CollectSessionWaits = chkCollectSessionWaits.Checked,
+            CollectTaskWaits = chkCollectTaskWaits.Checked,
+            CollectCursors = chkCollectCursors.Checked,
+            ScriptAgentJobs = chkScriptJobs.Checked,
+            IOCollectionLevel = (DBADashSource.IOCollectionLevels)cboIOLevel.SelectedItem!,
+            WriteToSecondaryDestinations = chkWriteToSecondaryDestinations.Checked,
+            CollectTempDB = chkCollectTempDB.Checked,
+            CustomCollections = CustomCollectionsNew
+        };
 
         private List<DBADashSource> GetNewSourceConnections()
         {
-            var schemaSnapshotDBs = txtSnapshotDBs.Text.Trim();
+            var options = GetNewConnectionOptions();
             return NewSourceConnections.Select(src => src.Trim()).Where(src => !string.IsNullOrEmpty(src))
-                .Select(src => CreateSourceConnection(src, schemaSnapshotDBs)).ToList();
+                .Select(options.CreateSource).ToList();
         }
 
         private async Task AddInstance()
@@ -418,6 +382,7 @@ namespace DBADashServiceConfig
                 collectionConfig.SchemaSnapshotOptions = new SchemaSnapshotDBOptions();
             }
 
+            var decisions = new SourceConnectionDecisions();
             var hasUpdateApproval = false;
             var warnXENotSupported = false;
             var addUnvalidated = false;
@@ -429,173 +394,122 @@ namespace DBADashServiceConfig
             bool? deadlockScheduleApproval = null;
             foreach (var src in GetNewSourceConnections())
             {
-                var validated = ValidateSource(src.SourceConnection.ConnectionString);
-
-                var validationError = "";
-                if (validated)
+                if (!ValidateSource(src.SourceConnection.ConnectionString))
                 {
-                    if (!(src.SourceConnection.Type == ConnectionType.SQL ||
-                          collectionConfig.DestinationConnection.Type == ConnectionType.SQL))
-                    {
-                        MessageBox.Show(
-                            "Error: Invalid source and destination connection combination.  One of these should be a SQL connection string",
-                            "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        return;
-                    }
-
-                    collectionConfig ??= new CollectionConfig();
-                    if (!addUnvalidated)
-                    {
-                        Cursor.Current = Cursors.WaitCursor;
-                        try
-                        {
-                            src.SourceConnection.Validate();
-                            validated = true;
-                            src.ConnectionID = await src.GetGeneratedConnectionIDAsync();
-                            // The collector already applies the "|ReadOnly" suffix itself for Azure DB read-only
-                            // replicas, so only add it here if it's not already present - otherwise the ConnectionID
-                            // ends up as <server>|<db>|ReadOnly|ReadOnly
-                            if (src.SourceConnection.ApplicationIntent() == ApplicationIntent.ReadOnly &&
-                                !src.ConnectionID.EndsWith("|ReadOnly", StringComparison.InvariantCultureIgnoreCase))
-                            {
-                                src.ConnectionID += "|ReadOnly";
-                            }
-
-                            if (src.SourceConnection.Type == ConnectionType.SQL &&
-                                string.IsNullOrEmpty(src.SourceConnection.ConnectionInfo.ServerName))
-                            {
-                                MessageBox.Show(
-                                    "Warning @@SERVERNAME returned NULL.  Consider fixing this using sp_addserver",
-                                    "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            validated = false;
-                            validationError = ex.Message;
-                        }
-
-                        Cursor.Current = Cursors.Default;
-                    }
-
-                    if (!addUnvalidated && !validated)
-                    {
-                        if (doNotAddUnvalidated)
-                        {
-                            continue;
-                        }
-                        else if (MessageBox.Show(
-                                     "Error connecting to data source.  Do you wish to add anyway?" +
-                                     Environment.NewLine + Environment.NewLine + validationError, "Error",
-                                     MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) == DialogResult.No)
-                        {
-                            doNotAddUnvalidated = true;
-                            continue;
-                        }
-                        else
-                        {
-                            addUnvalidated = true;
-                        }
-                    }
-                    else if (!addUnvalidated && !src.SourceConnection.IsXESupported() && src.SlowQueryThresholdMs >= 0)
-                    {
-                        warnXENotSupported = true;
-                        src.SlowQueryThresholdMs = -1;
-                        src.PersistXESessions = false;
-                    }
-                    // Ensure we have a ConnectionID set for SQL connections
-                    src.SetConnectionIDFromBuilderIfNotSet();
-
-                    var existingConnection = await collectionConfig.FindSourceConnectionAsync(src.SourceConnection.ConnectionString, src.ConnectionID); // Check if the connection string exists in the config
-
-                    if (existingConnection != null)
-                    {
-                        src.CollectionSchedules = existingConnection.CollectionSchedules;
-                        // The match isn't necessarily a configured connection.  With "Scan for Azure DBs" enabled,
-                        // FindSourceConnectionAsync also resolves a database that is only monitored implicitly through
-                        // the master connection's scan - that source doesn't exist in the config, so there is nothing
-                        // to update or replace and the "Update existing connection(s)?" prompt is misleading.
-                        if (collectionConfig.SourceConnections.Contains(existingConnection))
-                        {
-                            if (doesNotHaveUpdateApproval)
-                            {
-                                continue;
-                            }
-                            else if (hasUpdateApproval || MessageBox.Show("Update existing connection(s)?", "Update",
-                                         MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-                            {
-                                collectionConfig.SourceConnections.Remove(existingConnection);
-                                src.ConnectionID = existingConnection.ConnectionID;
-                                // Not on the form, so carried over rather than reset to the defaults.  A change here
-                                // would also rebuild the event file session for no reason.
-                                src.SlowQueryEventFileMaxSizeMB = existingConnection.SlowQueryEventFileMaxSizeMB;
-                                src.SlowQueryEventFileMaxRolloverFiles = existingConnection.SlowQueryEventFileMaxRolloverFiles;
-                                src.CopyQueryStatsTuningFrom(existingConnection);
-                                hasUpdateApproval = true;
-                            }
-                            else
-                            {
-                                doesNotHaveUpdateApproval = true;
-                                continue;
-                            }
-                        }
-                        else if (doesNotHaveScannedApproval)
-                        {
-                            continue;
-                        }
-                        else if (hasScannedApproval || MessageBox.Show(
-                                     $"{src.ConnectionID} is already monitored automatically via the \"{(src.SourceConnection.ApplicationIntent() == ApplicationIntent.ReadOnly ? "Monitor read replicas" : "Scan for AzureDBs on service start")}\" option and doesn't need to be added." +
-                                     Environment.NewLine + Environment.NewLine +
-                                     "Adding it here won't create a duplicate instance - it lets you configure this database explicitly instead of it inheriting the settings it's monitored with now." +
-                                     Environment.NewLine + Environment.NewLine +
-                                     "Add this connection?",
-                                     "Database is already monitored", MessageBoxButtons.YesNo,
-                                     MessageBoxIcon.Question) == DialogResult.Yes)
-                        {
-                            hasScannedApproval = true;
-                        }
-                        else
-                        {
-                            doesNotHaveScannedApproval = true;
-                            continue;
-                        }
-                    }
-
-                    if (RepoDbVersionStatus?.VersionStatus == DBValidations.DBVersionStatusEnum.OK)
-                    {
-                        try // Check if instance is marked deleted so we can warn the user that the instance needs to be restored
-                        {
-                            foreach (var dest in collectionConfig.SQLDestinations.Where(dest => !isDeleted))
-                            {
-                                isDeleted = await IsInstanceDeleted(src.ConnectionID, dest.ConnectionString);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            CommonShared.ShowExceptionDialog(ex, "Error checking connection status in repository database:");
-                        }
-                    }
-
-                    //  Choosing a session says which session to read, not when to read it: the Deadlocks
-                    //  collection is disabled in the default schedule, so unless a schedule has been set the
-                    //  connection would be configured for deadlocks and still collect nothing.
-                    if (src.IsDeadlockCollectionEnabled && !IsDeadlockCollectionScheduled(src))
-                    {
-                        deadlockScheduleApproval ??= MessageBox.Show(
-                            "Deadlock collection doesn't have a schedule, so no deadlocks will be collected." +
-                            Environment.NewLine + Environment.NewLine +
-                            "Use the default deadlock collection schedule (every 5 minutes) for this instance?" +
-                            Environment.NewLine + Environment.NewLine +
-                            "Choose No to leave the schedule alone - you can set it for all instances with the Schedule button, or per instance from the connections grid.",
-                            "Deadlock Schedule", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes;
-                        if (deadlockScheduleApproval == true)
-                        {
-                            SetDefaultDeadlockSchedule(src);
-                        }
-                    }
-
-                    collectionConfig.SourceConnections.Add(src);
+                    continue;
                 }
+
+                Cursor.Current = Cursors.WaitCursor;
+                var check = await SourceConnectionAdder.CheckAsync(collectionConfig, src, validate: !addUnvalidated);
+                Cursor.Current = Cursors.Default;
+
+                if (check.IsInvalid)
+                {
+                    MessageBox.Show("Error: " + check.ValidationError, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                if (check.ServerNameIsNull)
+                {
+                    MessageBox.Show(
+                        "Warning @@SERVERNAME returned NULL.  Consider fixing this using sp_addserver",
+                        "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+
+                if (!addUnvalidated && !check.Validated)
+                {
+                    if (doNotAddUnvalidated)
+                    {
+                        continue;
+                    }
+                    else if (MessageBox.Show(
+                                 "Error connecting to data source.  Do you wish to add anyway?" +
+                                 Environment.NewLine + Environment.NewLine + check.ValidationError, "Error",
+                                 MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) == DialogResult.No)
+                    {
+                        doNotAddUnvalidated = true;
+                        continue;
+                    }
+                    else
+                    {
+                        addUnvalidated = true;
+                        decisions.AddUnvalidated = true;
+                    }
+                }
+
+                warnXENotSupported |= check.SlowQueryWillBeDisabled;
+
+                if (check.Existing == ExistingConnectionStates.Configured)
+                {
+                    if (doesNotHaveUpdateApproval)
+                    {
+                        continue;
+                    }
+                    else if (hasUpdateApproval || MessageBox.Show("Update existing connection(s)?", "Update",
+                                 MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                    {
+                        hasUpdateApproval = true;
+                        decisions.UpdateExisting = true;
+                    }
+                    else
+                    {
+                        doesNotHaveUpdateApproval = true;
+                        continue;
+                    }
+                }
+                else if (check.Existing == ExistingConnectionStates.Discovered)
+                {
+                    if (doesNotHaveScannedApproval)
+                    {
+                        continue;
+                    }
+                    else if (hasScannedApproval || MessageBox.Show(
+                                 $"{src.ConnectionID} is already monitored automatically via the \"{check.DiscoveredVia}\" option and doesn't need to be added." +
+                                 Environment.NewLine + Environment.NewLine +
+                                 "Adding it here won't create a duplicate instance - it lets you configure this database explicitly instead of it inheriting the settings it's monitored with now." +
+                                 Environment.NewLine + Environment.NewLine +
+                                 "Add this connection?",
+                                 "Database is already monitored", MessageBoxButtons.YesNo,
+                                 MessageBoxIcon.Question) == DialogResult.Yes)
+                    {
+                        hasScannedApproval = true;
+                        decisions.AddDiscovered = true;
+                    }
+                    else
+                    {
+                        doesNotHaveScannedApproval = true;
+                        continue;
+                    }
+                }
+
+                if (RepoDbVersionStatus?.VersionStatus == DBValidations.DBVersionStatusEnum.OK)
+                {
+                    try // Check if instance is marked deleted so we can warn the user that the instance needs to be restored
+                    {
+                        foreach (var dest in collectionConfig.SQLDestinations.Where(dest => !isDeleted))
+                        {
+                            isDeleted = await SourceConnectionAdder.IsInstanceDeletedAsync(src.ConnectionID, dest.ConnectionString);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        CommonShared.ShowExceptionDialog(ex, "Error checking connection status in repository database:");
+                    }
+                }
+
+                if (check.DeadlockScheduleMissing)
+                {
+                    deadlockScheduleApproval ??= MessageBox.Show(
+                        "Deadlock collection doesn't have a schedule, so no deadlocks will be collected." +
+                        Environment.NewLine + Environment.NewLine +
+                        "Use the default deadlock collection schedule (every 5 minutes) for this instance?" +
+                        Environment.NewLine + Environment.NewLine +
+                        "Choose No to leave the schedule alone - you can set it for all instances with the Schedule button, or per instance from the connections grid.",
+                        "Deadlock Schedule", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes;
+                    decisions.UseDefaultDeadlockSchedule = deadlockScheduleApproval == true;
+                }
+
+                SourceConnectionAdder.Apply(collectionConfig, src, check, decisions);
             }
 
             SetJson();
@@ -614,17 +528,6 @@ namespace DBADashServiceConfig
                     "Warning: Slow query capture requires an extended event session which is not supported for one or more connections.\nRequirements:\nSQL 2012 or later.\nStandard or Enterprise Edition on Amazon RDS",
                     "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
-        }
-
-        private async Task<bool> IsInstanceDeleted(string connectionID, string connectionString)
-        {
-            await using var cn = new SqlConnection(connectionString);
-            await using var cmd = new SqlCommand("dbo.Instances_Get", cn) { CommandType = CommandType.StoredProcedure };
-            cmd.Parameters.AddWithValue("IsActive", 0);
-            cmd.Parameters.AddWithValue("ConnectionID", connectionID);
-            await cn.OpenAsync();
-            await using var rdr = await cmd.ExecuteReaderAsync();
-            return rdr.Read(); // Instance is soft deleted (IsActive=0) if a row is returned
         }
 
         private bool ValidateSource(string sourceString)
