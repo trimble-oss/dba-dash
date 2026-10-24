@@ -104,9 +104,18 @@ SELECT InstanceID,
 	RuleID,
 	GroupID
 FROM DeDupe
-WHERE rnum = 1
+WHERE rnum = 1;
 
-/* Aggregate so we have a single row per instance */
+/* Single row per instance.  Priority & RuleID come from the same (highest priority) row so rule notes & closure match the alert */
+WITH Ranked AS (
+	SELECT ET.InstanceID,
+		ET.Priority,
+		ET.AlertKey,
+		ET.RuleID,
+		ET.GroupID,
+		ROW_NUMBER() OVER (PARTITION BY ET.InstanceID,ET.AlertKey,ET.GroupID ORDER BY ET.Priority,ET.RuleID) AS rnum
+	FROM #ExceededThreshold ET
+)
 INSERT INTO @AlertDetails(
 	InstanceID,
 	Priority,
@@ -115,19 +124,19 @@ INSERT INTO @AlertDetails(
 	RuleID,
 	GroupID
 )
-SELECT	ET.InstanceID,
-		MIN(ET.Priority) AS Priority,
+SELECT	R.InstanceID,
+		R.Priority,
 		STUFF((SELECT '
 ' + ETcsv.Message FROM #ExceededThreshold ETcsv
-		WHERE ETcsv.InstanceID = ET.InstanceID
-		AND ETcsv.AlertKey = ET.AlertKey
-		AND ETcsv.GroupID = ET.GroupID
+		WHERE ETcsv.InstanceID = R.InstanceID
+		AND ETcsv.AlertKey = R.AlertKey
+		AND ETcsv.GroupID = R.GroupID
 		ORDER BY ETcsv.Priority
 		FOR XML PATH(''),TYPE).value('.','NVARCHAR(MAX)'),1,2,''),
-		ET.AlertKey,
-		MIN(RuleID),
-		ET.GroupID
-FROM #ExceededThreshold ET
-GROUP BY ET.InstanceID,ET.AlertKey,ET.GroupID
+		R.AlertKey,
+		R.RuleID,
+		R.GroupID
+FROM Ranked R
+WHERE R.rnum = 1
 
 EXEC Alert.ActiveAlerts_Upd @AlertDetails=@AlertDetails,@AlertType=@Type
