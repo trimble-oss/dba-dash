@@ -10,6 +10,18 @@ namespace DBADash
     /// The options chosen when adding new source connections - everything on the "Add New Connection" options apart from
     /// the connection strings themselves.  Shared by the service configuration tool and the GUI (which sends them to the
     /// service in a <see cref="Messaging.ConnectionAddMessage"/>), so a connection added either way gets the same settings.
+    ///
+    /// <para>Deliberately not a base class of <see cref="DBADashSource"/>, though the properties overlap:</para>
+    /// <list type="bullet">
+    /// <item>It's the allowlist of what the GUI can set.  Json.NET serializes the runtime type, so a DBADashSource passed
+    /// as a message's options would send everything - including the connection string, whose password is only
+    /// obfuscated - unencrypted in the queue.</item>
+    /// <item>The defaults differ: these are the add form's (e.g. <see cref="UseDualEventSession"/> off), while
+    /// DBADashSource's [DefaultValue]s are part of the ServiceConfig.json format.</item>
+    /// <item>DBADashSource's getters return "off" for folder and S3 sources, which a base class has no connection to check.</item>
+    /// </list>
+    /// <para>The cost is that a new option has to be added here, in <see cref="ApplyTo"/> and <see cref="FromSource"/>,
+    /// as well as on DBADashSource and the options tabs.</para>
     /// </summary>
     public class SourceConnectionOptions
     {
@@ -83,32 +95,44 @@ namespace DBADash
         /// <summary>A new source connection for <paramref name="source"/> (see <see cref="GetConnectionString"/>) with these options.</summary>
         public DBADashSource CreateSource(string source)
         {
-            var src = new DBADashSource(GetConnectionString(source))
-            {
-                NoWMI = NoWMI,
-                UseDualEventSession = UseDualEventSession,
-                PersistXESessions = PersistXESessions,
-                SlowQueryThresholdMs = SlowQueryThresholdMs,
-                SlowQueryCaptureMode = SlowQueryCaptureMode,
-                SlowQueryXESessionName = SlowQueryXESessionName?.Trim(),
-                KeepSlowQueryXESessionRunning = KeepSlowQueryXESessionRunning,
-                DeadlockXESessionName = DeadlockXESessionName,
-                BackfillDeadlocksFromSystemHealth = BackfillDeadlocksFromSystemHealth,
-                QueryStatsTopN = QueryStatsTopN,
-                QueryStatsPlansPerCollection = QueryStatsPlansPerCollection,
-                RunningQueryPlanThreshold = RunningQueryPlanThreshold,
-                RunningQueryLiveProfileThreshold = RunningQueryLiveProfileThreshold,
-                SchemaSnapshotDBs = SchemaSnapshotDBs,
-                CollectSessionWaits = CollectSessionWaits,
-                CollectTaskWaits = CollectTaskWaits,
-                CollectCursors = CollectCursors,
-                ScriptAgentJobs = ScriptAgentJobs,
-                IOCollectionLevel = IOCollectionLevel,
-                WriteToSecondaryDestinations = WriteToSecondaryDestinations,
-                CollectTempDB = CollectTempDB,
-            };
+            var src = new DBADashSource(GetConnectionString(source));
+            ApplyTo(src, includeCustomCollections: false);
             src.CustomCollections = src.SourceConnection.Type == ConnectionType.SQL ? CustomCollections : null;
             return src;
+        }
+
+        /// <summary>
+        /// Changes an existing connection to these options.  Everything else about it - connection string, ConnectionID,
+        /// schedules, and settings that aren't among these options (event file size, query stats tuning, perfmon
+        /// counters...) - is kept.  Custom collections are only changed when <paramref name="includeCustomCollections"/>.
+        /// </summary>
+        public void ApplyTo(DBADashSource src, bool includeCustomCollections)
+        {
+            src.NoWMI = NoWMI;
+            src.UseDualEventSession = UseDualEventSession;
+            src.PersistXESessions = PersistXESessions;
+            src.SlowQueryThresholdMs = SlowQueryThresholdMs;
+            src.SlowQueryCaptureMode = SlowQueryCaptureMode;
+            src.SlowQueryXESessionName = SlowQueryXESessionName?.Trim();
+            src.KeepSlowQueryXESessionRunning = KeepSlowQueryXESessionRunning;
+            src.DeadlockXESessionName = DeadlockXESessionName;
+            src.BackfillDeadlocksFromSystemHealth = BackfillDeadlocksFromSystemHealth;
+            src.QueryStatsTopN = QueryStatsTopN;
+            src.QueryStatsPlansPerCollection = QueryStatsPlansPerCollection;
+            src.RunningQueryPlanThreshold = RunningQueryPlanThreshold;
+            src.RunningQueryLiveProfileThreshold = RunningQueryLiveProfileThreshold;
+            src.SchemaSnapshotDBs = SchemaSnapshotDBs;
+            src.CollectSessionWaits = CollectSessionWaits;
+            src.CollectTaskWaits = CollectTaskWaits;
+            src.CollectCursors = CollectCursors;
+            src.ScriptAgentJobs = ScriptAgentJobs;
+            src.IOCollectionLevel = IOCollectionLevel;
+            src.WriteToSecondaryDestinations = WriteToSecondaryDestinations;
+            src.CollectTempDB = CollectTempDB;
+            if (includeCustomCollections)
+            {
+                src.CustomCollections = CustomCollections;
+            }
         }
 
         /// <summary>The options <paramref name="src"/> was configured with - e.g. to edit an existing connection.</summary>

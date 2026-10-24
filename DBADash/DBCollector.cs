@@ -718,15 +718,24 @@ namespace DBADash
         /// DBA Dash only reads is left alone.  Event files stay in the log directory - SQL Server never deletes them on a
         /// drop.  Returns the sessions dropped.
         /// </summary>
-        public async Task<List<string>> DropDBADashEventSessionsAsync(CancellationToken cancellationToken = default)
+        public Task<List<string>> DropDBADashEventSessionsAsync(CancellationToken cancellationToken = default)
         {
-            var dropped = new List<string>();
-            if (!IsXESupported) return dropped;
             var sessions = new List<string> { "DBADash_1", "DBADash_2", DBADashSource.ManagedSlowQueryXESessionName, Messaging.XETraceMessage.SessionName };
             if (string.Equals(Source.DeadlockXESessionName, DBADashSource.ManagedDeadlockXESessionName, StringComparison.OrdinalIgnoreCase))
             {
                 sessions.Add(DBADashSource.ManagedDeadlockXESessionName);
             }
+            return DropEventSessionsAsync(sessions, cancellationToken);
+        }
+
+        /// <summary>
+        /// Drops the named extended events sessions where they exist - server or database scoped as the instance needs.
+        /// Only for DBA Dash's own fixed session names, which are inlined.  Returns the sessions dropped.
+        /// </summary>
+        internal async Task<List<string>> DropEventSessionsAsync(IEnumerable<string> sessions, CancellationToken cancellationToken = default)
+        {
+            var dropped = new List<string>();
+            if (!IsXESupported) return dropped;
 
             var scope = IsAzureDB ? "ON DATABASE" : "ON SERVER";
             var catalog = IsAzureDB ? "sys.database_event_sessions" : "sys.server_event_sessions";
