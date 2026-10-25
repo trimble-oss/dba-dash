@@ -48,6 +48,9 @@ namespace DBADash
         /// </summary>
         public string PublicKey { get; set; }
 
+        /// <summary>When <see cref="PublicKey"/> was created (UTC).  The repository keeps the newest key it's been sent.</summary>
+        public DateTime? PublicKeyCreatedUtc { get; set; }
+
         /// <summary>
         /// Hard cap (seconds) the service applies to ad-hoc XE trace / watch durations (<see
         /// cref="CollectionConfig.AdhocXEMaxDurationSeconds"/>).  Surfaced to the GUI (via the DBADashAgent row) so it
@@ -155,7 +158,7 @@ namespace DBADash
             int agentID;
             var cacheKey =
                 // Caching takes all properties into account + connection string (as we could be writing to multiple repositories and the agent could have different IDs for each).  Base off MD5 hash which should be sufficient for this use case.
-                Convert.ToBase64String(MD5.HashData(System.Text.Encoding.UTF8.GetBytes(string.Join('|', connectionString, AgentServiceName, AgentVersion, AgentHostName, AgentPath, ServiceSQSQueueUrl, MessagingEnabled, KillSessionEnabled, PlanForcingEnabled, AdhocXEMaxDurationSeconds, S3Path, AllowedScriptsCSV, AllowedCustomProcsCSV, ManageXESessions, WatchXESessions, AdhocXEEnabled, ScheduleChangesEnabled, ConnectionChangesEnabled, PublicKey))));
+                Convert.ToBase64String(MD5.HashData(System.Text.Encoding.UTF8.GetBytes(string.Join('|', connectionString, AgentServiceName, AgentVersion, AgentHostName, AgentPath, ServiceSQSQueueUrl, MessagingEnabled, KillSessionEnabled, PlanForcingEnabled, AdhocXEMaxDurationSeconds, S3Path, AllowedScriptsCSV, AllowedCustomProcsCSV, ManageXESessions, WatchXESessions, AdhocXEEnabled, ScheduleChangesEnabled, ConnectionChangesEnabled, PublicKey, PublicKeyCreatedUtc?.Ticks))));
             if (cache.Contains(cacheKey))
             {
                 agentID = (int)cache[cacheKey];
@@ -219,7 +222,11 @@ namespace DBADash
         {
             currentAgent ??= GetCurrentAgent();
             // In case the agent was created before the service created its key
-            currentAgent.PublicKey ??= Messaging.MessageEncryption.PublicKey;
+            if (currentAgent.PublicKey == null)
+            {
+                currentAgent.PublicKey = Messaging.MessageEncryption.PublicKey;
+                currentAgent.PublicKeyCreatedUtc = Messaging.MessageEncryption.PublicKeyCreatedUtc;
+            }
             return currentAgent;
         }
 
@@ -245,7 +252,8 @@ namespace DBADash
                 AdhocXEEnabled = cfg.AllowAdhocXE,
                 ScheduleChangesEnabled = cfg.IsScheduleChangesAllowed,
                 ConnectionChangesEnabled = cfg.AllowConnectionChanges,
-                PublicKey = Messaging.MessageEncryption.PublicKey
+                PublicKey = Messaging.MessageEncryption.PublicKey,
+                PublicKeyCreatedUtc = Messaging.MessageEncryption.PublicKeyCreatedUtc
             };
         }
 
@@ -281,7 +289,8 @@ namespace DBADash
                     AdhocXEEnabled = rdr["AdhocXEEnabled"] != DBNull.Value && (bool)rdr["AdhocXEEnabled"],
                     ScheduleChangesEnabled = rdr["ScheduleChangesEnabled"] != DBNull.Value && (bool)rdr["ScheduleChangesEnabled"],
                     ConnectionChangesEnabled = rdr["ConnectionChangesEnabled"] != DBNull.Value && (bool)rdr["ConnectionChangesEnabled"],
-                    PublicKey = rdr["PublicKey"] == DBNull.Value ? null : (string)rdr["PublicKey"]
+                    PublicKey = rdr["PublicKey"] == DBNull.Value ? null : (string)rdr["PublicKey"],
+                    PublicKeyCreatedUtc = rdr["PublicKeyCreated"] == DBNull.Value ? null : DateTime.SpecifyKind((DateTime)rdr["PublicKeyCreated"], DateTimeKind.Utc)
                 };
             }
             else
@@ -318,6 +327,7 @@ namespace DBADash
             cmd.Parameters.AddWithValue("ScheduleChangesEnabled", ScheduleChangesEnabled);
             cmd.Parameters.AddWithValue("ConnectionChangesEnabled", ConnectionChangesEnabled);
             cmd.Parameters.AddWithValue("PublicKey", (object)PublicKey ?? DBNull.Value);
+            cmd.Parameters.Add("PublicKeyCreated", System.Data.SqlDbType.DateTime2).Value = (object)PublicKeyCreatedUtc ?? DBNull.Value;
             pAgentID.Direction = System.Data.ParameterDirection.Output;
             cmd.ExecuteNonQuery();
             return (int)pAgentID.Value;

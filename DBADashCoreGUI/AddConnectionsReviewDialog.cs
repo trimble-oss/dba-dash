@@ -39,6 +39,7 @@ namespace DBADashGUI
         };
 
         private readonly bool isRestoreOffered;
+        private readonly IReadOnlyList<SourceConnectionCheck> checks;
 
         private readonly CheckBox chkRestoreDeleted = new()
         {
@@ -51,6 +52,7 @@ namespace DBADashGUI
         /// <param name="checkedFrom">Where the connections were checked from - e.g. "this computer" or the service's name.  With Windows authentication, that's the account that connected.</param>
         public AddConnectionsReviewDialog(IReadOnlyList<SourceConnectionCheck> checks, string checkedFrom)
         {
+            this.checks = checks;
             Text = "Review New Connections";
             Size = new Size(1300, 520);
             StartPosition = FormStartPosition.CenterParent;
@@ -229,7 +231,7 @@ namespace DBADashGUI
         public IReadOnlyList<SourceConnectionDecisions> Decisions =>
             dgv.Rows.Cast<DataGridViewRow>()
                 .OrderBy(row => (int)row.Tag)
-                .Select(row => GetDecisions(row.Cells["Action"].Value as string, chkDefaultDeadlockSchedule.Checked))
+                .Select(row => GetDecisions(row.Cells["Action"].Value as string, chkDefaultDeadlockSchedule.Checked, checks[(int)row.Tag]))
                 .ToList();
 
         /// <summary>
@@ -238,13 +240,16 @@ namespace DBADashGUI
         /// </summary>
         public bool RestoreDeleted => isRestoreOffered && chkRestoreDeleted.Checked;
 
-        public static SourceConnectionDecisions GetDecisions(string action, bool useDefaultDeadlockSchedule) => action switch
+        /// <param name="check">The check shown for the connection.  Adding without validation is only allowed when it showed
+        /// the connection failing - if the service's own check then fails, the connection isn't added without the failure
+        /// being seen.</param>
+        public static SourceConnectionDecisions GetDecisions(string action, bool useDefaultDeadlockSchedule, SourceConnectionCheck check) => action switch
         {
             null or ActionSkip => null,
             _ => new SourceConnectionDecisions
             {
                 // Chosen with the error in front of them
-                AddUnvalidated = true,
+                AddUnvalidated = !check.Validated && !string.IsNullOrEmpty(check.ValidationError),
                 UpdateExisting = action == ActionUpdate,
                 AddDiscovered = action == ActionAddExplicitly,
                 UseDefaultDeadlockSchedule = useDefaultDeadlockSchedule

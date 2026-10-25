@@ -26,6 +26,9 @@ namespace DBADash.Messaging
         /// <summary>The service's public key (SubjectPublicKeyInfo, base64) - null until <see cref="Initialize"/> is called, so other processes don't publish one.</summary>
         public static string PublicKey { get; private set; }
 
+        /// <summary>When <see cref="PublicKey"/> was created (UTC) - so the repository can ignore a key older than the one it has.</summary>
+        public static DateTime? PublicKeyCreatedUtc { get; private set; }
+
         /// <summary>Creates the service's key pair.  Called once by the service at startup.</summary>
         public static void Initialize()
         {
@@ -34,6 +37,7 @@ namespace DBADash.Messaging
                 if (serviceKey != null) return;
                 serviceKey = RSA.Create(KeySizeBits);
                 PublicKey = Convert.ToBase64String(serviceKey.ExportSubjectPublicKeyInfo());
+                PublicKeyCreatedUtc = DateTime.UtcNow;
             }
         }
 

@@ -297,6 +297,14 @@ namespace DBADash
         /// </summary>
         public string CollectedByOtherService { get; set; }
 
+        /// <summary>
+        /// The ConnectionID the instance has in the repository once added: an existing connection that's updated keeps its
+        /// own, which can be a custom one rather than the one generated.
+        /// </summary>
+        [JsonIgnore]
+        public string RepositoryConnectionID =>
+            Existing == ExistingConnectionStates.Configured && !string.IsNullOrEmpty(ExistingConnectionID) ? ExistingConnectionID : ConnectionID;
+
         /// <summary>The source matched by <see cref="Existing"/> - in the config that was checked</summary>
         [JsonIgnore]
         public DBADashSource ExistingSource { get; set; }

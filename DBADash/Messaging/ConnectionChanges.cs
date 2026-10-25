@@ -125,11 +125,28 @@ namespace DBADash.Messaging
         /// to its current options (<see cref="ConnectionOptionsUpdateMessage.GetSessionsToDrop"/>), adding what was
         /// dropped to its result and anything that failed to <paramref name="warnings"/>.
         /// </summary>
+        /// <param name="replacedSources">Sources replaced by the changed ones (e.g. with a different connection string), whose collections may still be running.</param>
         internal static async Task DropRedundantSessionsAsync(CollectionConfig cfg, IReadOnlyList<(DBADashSource Source, SourceConnectionOptions Before)> changed,
-            List<ConnectionChangeResult> results, List<string> warnings, CancellationToken cancellationToken)
+            List<ConnectionChangeResult> results, List<string> warnings, CancellationToken cancellationToken,
+            IReadOnlyCollection<DBADashSource> replacedSources = null)
         {
-            var sqlSources = changed.Where(c => c.Source.SourceConnection.Type == ConnectionType.SQL).ToList();
+            // Only those where a session might need dropping, whichever platform the instance turns out to be
+            var sqlSources = changed.Where(c => c.Source.SourceConnection.Type == ConnectionType.SQL)
+                .Where(c =>
+                {
+                    var after = SourceConnectionOptions.FromSource(c.Source);
+                    return ConnectionOptionsUpdateMessage.GetSessionsToDrop(c.Before, after, false, false).Count > 0
+                           || ConnectionOptionsUpdateMessage.GetSessionsToDrop(c.Before, after, true, false).Count > 0;
+                })
+                .ToList();
             if (sqlSources.Count == 0) return;
+
+            // A collection that started with the old configuration would recreate a session dropped under it
+            if (!await CollectionActivity.WaitForIdleAsync(sqlSources.Select(c => c.Source).Concat(replacedSources ?? Array.Empty<DBADashSource>()).ToList(),
+                    RunningCollectionWait, cancellationToken))
+            {
+                warnings.Add("A collection that started before the change was still running, so an extended events session it uses might be recreated after it was dropped.  It will be removed when the service stops.");
+            }
 
             var outcomes = await ForEachThrottledAsync(sqlSources, async c =>
             {
@@ -175,6 +192,9 @@ namespace DBADash.Messaging
                 result.Detail = string.IsNullOrEmpty(result.Detail) ? detail : result.Detail + ".  " + detail;
             }
         }
+
+        /// <summary>How long to wait for collections that started before a change before dropping the sessions they use</summary>
+        internal static readonly TimeSpan RunningCollectionWait = TimeSpan.FromMinutes(2);
 
         /// <summary>Runs <paramref name="action"/> for each item, a few at a time, keeping the order of the results.</summary>
         internal static async Task<List<TResult>> ForEachThrottledAsync<T, TResult>(IReadOnlyList<T> items, Func<T, Task<TResult>> action, CancellationToken cancellationToken)

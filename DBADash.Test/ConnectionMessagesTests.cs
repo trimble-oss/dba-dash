@@ -134,6 +134,67 @@ namespace DBADash.Test
         }
 
         [TestMethod]
+        public async Task CollectionActivity_WaitsForRunningCollections()
+        {
+            var src = new DBADashSource("Data Source=ActivityTest;Integrated Security=True");
+            var copy = Newtonsoft.Json.JsonConvert.DeserializeObject<DBADashSource>(Newtonsoft.Json.JsonConvert.SerializeObject(src))!; // As a collection job carries
+            Assert.IsTrue(await CollectionActivity.WaitForIdleAsync(new[] { src }, TimeSpan.Zero, CancellationToken.None));
+
+            var first = CollectionActivity.Begin(copy);
+            var second = CollectionActivity.Begin(src);
+            Assert.IsTrue(CollectionActivity.IsRunning(new[] { src }));
+            Assert.IsFalse(await CollectionActivity.WaitForIdleAsync(new[] { src }, TimeSpan.FromMilliseconds(300), CancellationToken.None));
+
+            first.Dispose();
+            first.Dispose(); // Only counted once
+            Assert.IsTrue(CollectionActivity.IsRunning(new[] { src }));
+            var wait = CollectionActivity.WaitForIdleAsync(new[] { src }, TimeSpan.FromSeconds(10), CancellationToken.None);
+            second.Dispose();
+            Assert.IsTrue(await wait);
+        }
+
+        [TestMethod]
+        public void IsCollected_MatchesCopiesWithTheSameConnectionString()
+        {
+            var cfg = new CollectionConfig();
+            var src = new DBADashSource("Data Source=SQL1;Integrated Security=True");
+            cfg.SourceConnections.Add(src);
+            var copy = Newtonsoft.Json.JsonConvert.DeserializeObject<DBADashSource>(Newtonsoft.Json.JsonConvert.SerializeObject(src))!;
+
+            Assert.IsTrue(cfg.IsCollected(src));
+            Assert.IsTrue(cfg.IsCollected(copy));
+            Assert.IsFalse(cfg.IsCollected(new DBADashSource("Data Source=SQL1;User ID=dba;Password=new")));
+            cfg.SourceConnections.Clear();
+            Assert.IsFalse(cfg.IsCollected(copy));
+        }
+
+        [TestMethod]
+        public void DerivedConnectionString_TakesTheParentsWithTheChildsDatabaseAndIntent()
+        {
+            var parent = new DBADashSource("Data Source=az.database.windows.net;Initial Catalog=master;User ID=dba;Password=NewPassword");
+            var db = new DBADashSource("Data Source=az.database.windows.net;Initial Catalog=DB1;User ID=dba;Password=OldPassword");
+            var replica = new DBADashSource("Data Source=az.database.windows.net;Initial Catalog=DB1;User ID=dba;Password=OldPassword;ApplicationIntent=ReadOnly");
+
+            var dbCs = new Microsoft.Data.SqlClient.SqlConnectionStringBuilder(ConnectionAddMessage.GetDerivedConnectionString(parent, db));
+            Assert.AreEqual("DB1", dbCs.InitialCatalog);
+            Assert.AreEqual("NewPassword", dbCs.Password);
+            Assert.AreEqual(Microsoft.Data.SqlClient.ApplicationIntent.ReadWrite, dbCs.ApplicationIntent);
+
+            var replicaCs = new Microsoft.Data.SqlClient.SqlConnectionStringBuilder(ConnectionAddMessage.GetDerivedConnectionString(parent, replica));
+            Assert.AreEqual(Microsoft.Data.SqlClient.ApplicationIntent.ReadOnly, replicaCs.ApplicationIntent);
+            Assert.AreEqual("NewPassword", replicaCs.Password);
+        }
+
+        [TestMethod]
+        public void RepositoryConnectionID_IsTheRetainedCustomID()
+        {
+            Assert.AreEqual("Generated", new SourceConnectionCheck { ConnectionID = "Generated" }.RepositoryConnectionID);
+            Assert.AreEqual("Custom", new SourceConnectionCheck { ConnectionID = "Generated", Existing = ExistingConnectionStates.Configured, ExistingConnectionID = "Custom" }.RepositoryConnectionID);
+            // A discovered database isn't kept - it's added with its own ID
+            Assert.AreEqual("Generated", new SourceConnectionCheck { ConnectionID = "Generated", Existing = ExistingConnectionStates.Discovered, ExistingConnectionID = "Other" }.RepositoryConnectionID);
+        }
+
+        [TestMethod]
         public void ValidateConnectionIDs_RejectsBlank()
         {
             ConnectionChanges.ValidateConnectionIDs(new List<string> { "SQL1" });

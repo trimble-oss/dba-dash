@@ -20,6 +20,7 @@ SELECT DBADashAgentID,
        AdhocXEEnabled,
        ScheduleChangesEnabled,
        ConnectionChangesEnabled,
-       PublicKey
+       PublicKey,
+       PublicKeyCreated
 FROM dbo.DBADashAgent
 WHERE DBADashAgentID = @DBADashAgentID

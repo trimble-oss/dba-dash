@@ -1,4 +1,5 @@
 using DBADashService;
+using Microsoft.Data.SqlClient;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -65,6 +66,8 @@ namespace DBADash.Messaging
             var newSources = new List<DBADashSource>();
             // Sources that replaced others in the running service, whose jobs are rebuilt
             var replacing = new List<DBADashSource>();
+            // The running sources they replaced, whose collections may still be running
+            var replacedRunning = new List<DBADashSource>();
             await CollectionScheduleUpdateMessage.ConfigFileLock.WaitAsync(cancellationToken);
             try
             {
@@ -132,6 +135,7 @@ namespace DBADash.Messaging
                             : CollectionScheduleUpdateMessage.GetDerivedSources(cfg.SourceConnections, src.ConnectionID, configured);
 
                         replaced.AddRange(running.Select(s => (Source: src, Before: SourceConnectionOptions.FromSource(s))));
+                        replacedRunning.AddRange(running);
                         cfg.SourceConnections.RemoveAll(running.Contains);
                         cfg.SourceConnections.Add(src);
                         (running.Count == 0 ? newSources : replacing).Add(src);
@@ -140,6 +144,9 @@ namespace DBADash.Messaging
                         foreach (var child in derived)
                         {
                             replaced.Add((child, SourceConnectionOptions.FromSource(child)));
+                            // The parent's connection string may have changed (e.g. a new password) - the child's is the
+                            // parent's with its own database and application intent
+                            child.ConnectionString = GetDerivedConnectionString(src, child);
                             options.ApplyTo(child, includeCustomCollections: false);
                             child.CollectionSchedules = src.CollectionSchedules == null ? null : CollectionSchedules.Combine(new CollectionSchedules(), src.CollectionSchedules);
                             replacing.Add(child);
@@ -183,13 +190,27 @@ namespace DBADash.Messaging
                 warnings.Add($"The connections were saved, but scheduling their collections failed - restart the service to collect them.  {ex.Message}");
             }
 
-            await ConnectionChanges.DropRedundantSessionsAsync(cfg, replaced, results, warnings, cancellationToken);
+            await ConnectionChanges.DropRedundantSessionsAsync(cfg, replaced, results, warnings, cancellationToken, replacedRunning);
 
             var failures = await ScheduleInfoReporter.ReportAsync(newSources.Concat(replacing).Distinct().ToList(), cfg, cancellationToken);
             var warning = MessageWarnings.ForScheduleInfoFailures(failures, "Collection Dates won't show their schedules");
             if (warning != null) warnings.Add(warning);
 
             return ConnectionChanges.ToDataSet(results, warnings);
+        }
+
+        /// <summary>
+        /// The connection string for a database or read replica discovered from <paramref name="parent"/>: the parent's,
+        /// with the child's database and application intent - as the Azure DB and read replica scans build it.
+        /// </summary>
+        internal static string GetDerivedConnectionString(DBADashSource parent, DBADashSource child)
+        {
+            var childBuilder = new SqlConnectionStringBuilder(child.SourceConnection.ConnectionString);
+            return new SqlConnectionStringBuilder(parent.SourceConnection.ConnectionString)
+            {
+                InitialCatalog = childBuilder.InitialCatalog,
+                ApplicationIntent = childBuilder.ApplicationIntent
+            }.ConnectionString;
         }
     }
 }

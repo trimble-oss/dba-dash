@@ -782,7 +782,8 @@ namespace DBADash
                 new DataColumn("AdhocXEEnabled", typeof(bool)),
                 new DataColumn("ScheduleChangesEnabled", typeof(bool)),
                 new DataColumn("ConnectionChangesEnabled", typeof(bool)),
-                new DataColumn("PublicKey", typeof(string))
+                new DataColumn("PublicKey", typeof(string)),
+                new DataColumn("PublicKeyCreated", typeof(DateTime))
             });
             if (dt.Rows.Count == 0)
             {
@@ -809,6 +810,7 @@ namespace DBADash
             dt.Rows[0]["ScheduleChangesEnabled"] = dashAgent.ScheduleChangesEnabled;
             dt.Rows[0]["ConnectionChangesEnabled"] = dashAgent.ConnectionChangesEnabled;
             dt.Rows[0]["PublicKey"] = (object)dashAgent.PublicKey ?? DBNull.Value;
+            dt.Rows[0]["PublicKeyCreated"] = (object)dashAgent.PublicKeyCreatedUtc ?? DBNull.Value;
         }
 
         public async Task GetInstanceAsync()

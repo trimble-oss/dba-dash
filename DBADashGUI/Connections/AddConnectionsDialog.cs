@@ -135,7 +135,8 @@ namespace DBADashGUI.Connections
             txtConnections.Text.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None)
                 .Select(l => l.Trim())
                 .Where(l => l.Length > 0)
-                .Distinct(StringComparer.OrdinalIgnoreCase)
+                // Exact matches only - passwords are case sensitive.  The service reconciles entries for the same instance.
+                .Distinct(StringComparer.Ordinal)
                 .ToList();
 
         private async Task CheckAndAddAsync()
@@ -274,7 +275,7 @@ namespace DBADashGUI.Connections
         /// <summary>What the repository knows about each instance: marked deleted, or collected by another service.</summary>
         private static void AddRepositoryStatus(List<SourceConnectionCheck> checks, int collectAgentID)
         {
-            var ids = checks.Where(c => !string.IsNullOrEmpty(c.ConnectionID)).Select(c => c.ConnectionID).Distinct().ToList();
+            var ids = checks.Where(c => !string.IsNullOrEmpty(c.RepositoryConnectionID)).Select(c => c.RepositoryConnectionID).Distinct().ToList();
             if (ids.Count == 0) return;
             try
             {
@@ -286,7 +287,7 @@ namespace DBADashGUI.Connections
                 while (rdr.Read())
                 {
                     var connectionID = (string)rdr["ConnectionID"];
-                    foreach (var check in checks.Where(c => string.Equals(c.ConnectionID, connectionID, StringComparison.OrdinalIgnoreCase)))
+                    foreach (var check in checks.Where(c => string.Equals(c.RepositoryConnectionID, connectionID, StringComparison.OrdinalIgnoreCase)))
                     {
                         var isActive = (bool)rdr["IsActive"];
                         check.IsDeletedInRepository = !isActive;
@@ -308,7 +309,7 @@ namespace DBADashGUI.Connections
         {
             foreach (var result in results.Where(r => r.IsChange))
             {
-                if (!checks.Any(c => c.IsDeletedInRepository && string.Equals(c.ConnectionID, result.ConnectionID, StringComparison.OrdinalIgnoreCase))) continue;
+                if (!checks.Any(c => c.IsDeletedInRepository && string.Equals(c.RepositoryConnectionID, result.ConnectionID, StringComparison.OrdinalIgnoreCase))) continue;
                 try
                 {
                     SharedData.SetInstanceActive(null, result.ConnectionID, true, Common.ConnectionString);
