@@ -8,6 +8,21 @@ namespace DBADash
         private const int SoftDeleteCommandTimeout = 30;
         private const int HardDeleteCommandTimeout = 3600;
 
+        /// <summary>
+        /// Marks an instance deleted or restores it, with dbo.Instance_SetActive - a soft delete only, which members of the
+        /// ManageConnections role can run without access to dbo.Instance_Del.
+        /// </summary>
+        public static void SetInstanceActive(int? instanceID, string connectionID, bool isActive, string connectionString)
+        {
+            using var cn = new SqlConnection(connectionString);
+            using var cmd = new SqlCommand("dbo.Instance_SetActive", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = SoftDeleteCommandTimeout };
+            cmd.Parameters.AddWithValue("InstanceID", (object)instanceID ?? System.DBNull.Value);
+            cmd.Parameters.AddWithValue("ConnectionID", (object)connectionID ?? System.DBNull.Value);
+            cmd.Parameters.AddWithValue("IsActive", isActive);
+            cn.Open();
+            cmd.ExecuteNonQuery();
+        }
+
         private static void InstanceDelete(string connectionID, string connectionString, bool isActive = false, bool hardDelete = false)
         {
             using var cn = new SqlConnection(connectionString);

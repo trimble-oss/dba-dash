@@ -669,22 +669,51 @@ namespace DBADash
 
         public List<DBADashSource> AddAzureDBs()
         {
-            var newConnections = GetNewAzureDBConnections();
+            // Snapshot - probing is slow and the list can change while it runs
+            List<DBADashSource> sources;
             lock (SourceConnections)
             {
-                SourceConnections.AddRange(newConnections);
+                sources = SourceConnections.ToList();
             }
-            return newConnections;
+
+            var added = new List<DBADashSource>();
+            foreach (var master in sources.Where(src => src.SourceConnection.Type == ConnectionType.SQL && !OfflineInstances.IsOffline(src)))
+            {
+                try
+                {
+                    if ((new[] { "master", String.Empty }).Contains(master.SourceConnection.InitialCatalog()) && master.SourceConnection.ConnectionInfo.IsAzureMasterDB)
+                    {
+                        added.AddRange(AddAzureDBs(master));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Error getting Azure DB connections from master {connection}", master.SourceConnection.ConnectionForPrint);
+                }
+            }
+            return added;
         }
 
+        /// <summary>
+        /// Adds the databases of an Azure master connection that aren't already monitored, returning them.  The databases
+        /// are found outside the lock, so they're only added if the master is still a source then - it may have been
+        /// removed (<see cref="Messaging.ConnectionRemoveMessage"/>) - and each is checked again against the live list.
+        /// </summary>
         public List<DBADashSource> AddAzureDBs(DBADashSource masterConnection)
         {
-            var newConnections = GetNewAzureDBConnections(masterConnection);
+            var candidates = GetNewAzureDBConnections(masterConnection);
+            var added = new List<DBADashSource>();
             lock (SourceConnections)
             {
-                SourceConnections.AddRange(newConnections);
+                if (!SourceConnections.Contains(masterConnection)) return added;
+                foreach (var db in candidates)
+                {
+                    if (SourceExists(db.SourceConnection.ConnectionString, SourceConnections, true)) continue;
+                    SourceConnections.Add(db);
+                    added.Add(db);
+                }
             }
-            return newConnections;
+            return added;
         }
 
         public List<DBADashSource> GetNewAzureDBConnections()
@@ -734,9 +763,13 @@ namespace DBADash
             return newConnections;
         }
 
-        public List<DBADashSource> AddReadReplicas()
+        public List<DBADashSource> AddReadReplicas() => AddReadReplicaCandidates(GetNewReadReplicaConnections());
+
+        /// <summary>Adds the read replicas of <paramref name="primaries"/> only - e.g. sources just added - returning them.</summary>
+        public List<DBADashSource> AddReadReplicas(List<DBADashSource> primaries) => AddReadReplicaCandidates(GetNewReadReplicaConnections(primaries));
+
+        private List<DBADashSource> AddReadReplicaCandidates(List<DBADashSource> candidates)
         {
-            var candidates = GetNewReadReplicaConnections();
             if (candidates.Count == 0) return candidates;
             var added = new List<DBADashSource>();
             lock (SourceConnections)
@@ -746,6 +779,9 @@ namespace DBADash
                     // Authoritative dedup under the lock: another thread (or an earlier candidate) may have added an
                     // equivalent source since we snapshotted, so re-check against the live list before adding.
                     if (SourceExists(replica.SourceConnection.ConnectionString, SourceConnections, true)) continue;
+                    // The primary was probed outside the lock and may have been removed since
+                    var primary = new SqlConnectionStringBuilder(replica.SourceConnection.ConnectionString) { ApplicationIntent = ApplicationIntent.ReadWrite }.ConnectionString;
+                    if (!SourceExists(primary, SourceConnections, true)) continue;
                     SourceConnections.Add(replica);
                     added.Add(replica);
                 }

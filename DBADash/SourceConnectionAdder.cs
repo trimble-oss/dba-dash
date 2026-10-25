@@ -80,36 +80,50 @@ namespace DBADash
             src.SetConnectionIDFromBuilderIfNotSet();
             check.ConnectionID = src.ConnectionID;
 
-            var existing = await cfg.FindSourceConnectionAsync(src.SourceConnection.ConnectionString, src.ConnectionID);
-            if (existing != null)
-            {
-                check.ExistingSource = existing;
-                check.ExistingConnectionID = existing.ConnectionID;
-                // The match isn't necessarily a configured connection.  With "Scan for Azure DBs" enabled,
-                // FindSourceConnectionAsync also resolves a database that is only monitored implicitly through the master
-                // connection's scan - that source doesn't exist in the config, so there is nothing to update or replace.
-                if (cfg.SourceConnections.Contains(existing))
-                {
-                    check.Existing = ExistingConnectionStates.Configured;
-                }
-                else
-                {
-                    check.Existing = ExistingConnectionStates.Discovered;
-                    check.DiscoveredVia = src.SourceConnection.ApplicationIntent() == ApplicationIntent.ReadOnly
-                        ? "Monitor read replicas"
-                        : "Scan for AzureDBs on service start";
-                }
-            }
-
+            await RefreshExistingAsync(cfg, src, check);
             check.DeadlockScheduleMissing = src.IsDeadlockCollectionEnabled &&
-                                            !IsDeadlockCollectionScheduled(cfg, src, existing?.CollectionSchedules ?? src.CollectionSchedules);
+                                            !IsDeadlockCollectionScheduled(cfg, src, check.ExistingSource?.CollectionSchedules ?? src.CollectionSchedules);
             return check;
         }
 
         /// <summary>
-        /// Adds <paramref name="src"/> to <paramref name="cfg"/> as decided, after <see cref="CheckAsync"/> with the same
-        /// config.  An existing connection that's updated is replaced, keeping its ConnectionID, schedules and the settings
-        /// that aren't among the <see cref="SourceConnectionOptions"/>.
+        /// Finds the source <paramref name="src"/> matches in <paramref name="cfg"/> as it is now, updating
+        /// <paramref name="check"/>.  Called again before each connection of a batch is applied: two entries for the same
+        /// instance (e.g. its name and a connection string) both look new when they're checked, so the second has to see
+        /// the first once it's been added.
+        /// </summary>
+        public static async Task RefreshExistingAsync(CollectionConfig cfg, DBADashSource src, SourceConnectionCheck check)
+        {
+            var existing = await cfg.FindSourceConnectionAsync(src.SourceConnection.ConnectionString, src.ConnectionID);
+            check.ExistingSource = existing;
+            check.ExistingConnectionID = existing?.ConnectionID;
+            check.DiscoveredVia = null;
+            if (existing == null)
+            {
+                check.Existing = ExistingConnectionStates.None;
+            }
+            // The match isn't necessarily a configured connection.  With "Scan for Azure DBs" enabled,
+            // FindSourceConnectionAsync also resolves a database that is only monitored implicitly through the master
+            // connection's scan - that source doesn't exist in the config, so there is nothing to update or replace.
+            else if (cfg.SourceConnections.Contains(existing))
+            {
+                check.Existing = ExistingConnectionStates.Configured;
+            }
+            else
+            {
+                check.Existing = ExistingConnectionStates.Discovered;
+                check.DiscoveredVia = src.SourceConnection.ApplicationIntent() == ApplicationIntent.ReadOnly
+                    ? "Monitor read replicas"
+                    : "Scan for AzureDBs on service start";
+            }
+        }
+
+        /// <summary>
+        /// Adds <paramref name="src"/> to <paramref name="cfg"/> as decided, after <see cref="CheckAsync"/> (or
+        /// <see cref="RefreshExistingAsync"/>) with the same config.  An existing connection that's updated is replaced by
+        /// a copy of it with the new connection string and options (<see cref="SourceConnectionOptions"/>), so its
+        /// ConnectionID, schedules and every setting that isn't an option are kept - and its custom collections too, when
+        /// <paramref name="src"/> doesn't specify any (null).  The result's Source is the source added.
         /// </summary>
         public static SourceConnectionAddResult Apply(CollectionConfig cfg, DBADashSource src, SourceConnectionCheck check,
             SourceConnectionDecisions decisions)
@@ -131,10 +145,10 @@ namespace DBADash
             }
 
             var outcome = SourceConnectionAddOutcomes.Added;
+            var added = src;
             var existing = check.ExistingSource;
             if (existing != null)
             {
-                src.CollectionSchedules = existing.CollectionSchedules;
                 if (check.Existing == ExistingConnectionStates.Configured)
                 {
                     if (!decisions.UpdateExisting)
@@ -143,30 +157,34 @@ namespace DBADash
                     }
 
                     cfg.SourceConnections.Remove(existing);
-                    src.ConnectionID = existing.ConnectionID;
-                    // Not among the options, so carried over rather than reset to the defaults.  A change here would also
-                    // rebuild the event file session for no reason.
-                    src.SlowQueryEventFileMaxSizeMB = existing.SlowQueryEventFileMaxSizeMB;
-                    src.SlowQueryEventFileMaxRolloverFiles = existing.SlowQueryEventFileMaxRolloverFiles;
-                    src.CopyQueryStatsTuningFrom(existing);
+                    added = existing.DeepCopy();
+                    added.ConnectionString = src.ConnectionString;
+                    // Saved without one, it's generated at runtime - as the check just did
+                    if (string.IsNullOrEmpty(added.ConnectionID)) added.ConnectionID = src.ConnectionID;
+                    SourceConnectionOptions.FromSource(src).ApplyTo(added, includeCustomCollections: src.CustomCollections != null);
                     outcome = SourceConnectionAddOutcomes.Updated;
                 }
                 else if (!decisions.AddDiscovered)
                 {
                     return SourceConnectionAddResult.Skip($"Already monitored via \"{check.DiscoveredVia}\"");
                 }
+                else
+                {
+                    // Configured explicitly with the schedule it's collected on now
+                    src.CollectionSchedules = existing.CollectionSchedules;
+                }
             }
 
             //  Choosing a session says which session to read, not when to read it: the Deadlocks collection is disabled in
             //  the default schedule, so unless a schedule has been set the connection would be configured for deadlocks
             //  and still collect nothing.
-            if (decisions.UseDefaultDeadlockSchedule && src.IsDeadlockCollectionEnabled && !IsDeadlockCollectionScheduled(cfg, src, src.CollectionSchedules))
+            if (decisions.UseDefaultDeadlockSchedule && added.IsDeadlockCollectionEnabled && !IsDeadlockCollectionScheduled(cfg, added, added.CollectionSchedules))
             {
-                SetDefaultDeadlockSchedule(src);
+                SetDefaultDeadlockSchedule(added);
             }
 
-            cfg.SourceConnections.Add(src);
-            return new SourceConnectionAddResult(outcome, null);
+            cfg.SourceConnections.Add(added);
+            return new SourceConnectionAddResult(outcome, null, added);
         }
 
         /// <summary>
@@ -307,7 +325,8 @@ namespace DBADash
         Skipped
     }
 
-    public record SourceConnectionAddResult(SourceConnectionAddOutcomes Outcome, string Reason)
+    /// <param name="Source">The source added to the config - for an update, the copy of the existing source that replaced it.  Null when skipped.</param>
+    public record SourceConnectionAddResult(SourceConnectionAddOutcomes Outcome, string Reason, DBADashSource Source = null)
     {
         public static SourceConnectionAddResult Skip(string reason) => new(SourceConnectionAddOutcomes.Skipped, reason);
     }

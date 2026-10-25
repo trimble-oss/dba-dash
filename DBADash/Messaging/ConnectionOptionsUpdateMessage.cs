@@ -86,14 +86,11 @@ namespace DBADash.Messaging
                 }
                 fileConfig.Save();
 
-                var configured = fileConfig.SourceConnections
-                    .Where(s => !string.IsNullOrEmpty(s.ConnectionID))
-                    .Select(s => s.ConnectionID)
-                    .ToHashSet(StringComparer.InvariantCultureIgnoreCase);
                 // The running service's sources are added to by the Azure DB and read replica scans, so they're only
                 // changed under the lock those take
                 lock (cfg.SourceConnections)
                 {
+                    var configured = ConnectionChanges.GetConfiguredConnectionIDs(fileConfig, cfg.SourceConnections);
                     foreach (var (connectionID, fileSource) in updated)
                     {
                         var running = cfg.SourceConnections
@@ -147,7 +144,7 @@ namespace DBADash.Messaging
                 warnings.Add($"The options were saved, but rescheduling failed - restart the service to apply them.  {ex.Message}");
             }
 
-            await DropRedundantSessionsAsync(cfg, changed, results, warnings, cancellationToken);
+            await ConnectionChanges.DropRedundantSessionsAsync(cfg, changed, results, warnings, cancellationToken);
 
             var failures = await ScheduleInfoReporter.ReportAsync(changed.Select(c => c.Source).ToList(), cfg, cancellationToken);
             var warning = MessageWarnings.ForScheduleInfoFailures(failures, "Collection Dates won't reflect the change");
@@ -166,17 +163,23 @@ namespace DBADash.Messaging
         /// by the collection itself, which keeps its unread events;</item>
         /// <item>the managed deadlock session when deadlocks are read from another session or not at all.</item>
         /// </list>
-        /// A session the user created (existing session modes) is never dropped.
+        /// A session the user created (existing session modes) is never dropped.  Modes are compared as they apply to the
+        /// instance: event file mode uses the ring buffer on Azure SQL Database and Managed Instance.
         /// </summary>
-        public static List<string> GetSessionsToDrop(SourceConnectionOptions before, SourceConnectionOptions after)
+        public static List<string> GetSessionsToDrop(SourceConnectionOptions before, SourceConnectionOptions after, bool isAzureDB = false, bool isManagedInstance = false)
         {
+            DBADashSource.SlowQueryCaptureModes Effective(DBADashSource.SlowQueryCaptureModes mode) =>
+                mode == DBADashSource.SlowQueryCaptureModes.EventFile && (isAzureDB || isManagedInstance) ? DBADashSource.SlowQueryCaptureModes.RingBuffer : mode;
+
             var sessions = new List<string>();
             var wasCapturing = before.SlowQueryThresholdMs >= 0;
             var isCapturing = after.SlowQueryThresholdMs >= 0;
-            if (wasCapturing && before.SlowQueryCaptureMode == DBADashSource.SlowQueryCaptureModes.RingBuffer)
+            var beforeMode = Effective(before.SlowQueryCaptureMode);
+            var afterMode = Effective(after.SlowQueryCaptureMode);
+            if (wasCapturing && beforeMode == DBADashSource.SlowQueryCaptureModes.RingBuffer)
             {
                 var unchanged = isCapturing
-                                && after.SlowQueryCaptureMode == DBADashSource.SlowQueryCaptureModes.RingBuffer
+                                && afterMode == DBADashSource.SlowQueryCaptureModes.RingBuffer
                                 && after.SlowQueryThresholdMs == before.SlowQueryThresholdMs
                                 && after.UseDualEventSession == before.UseDualEventSession
                                 && after.PersistXESessions == before.PersistXESessions;
@@ -186,8 +189,8 @@ namespace DBADash.Messaging
                 }
             }
 
-            if (wasCapturing && before.SlowQueryCaptureMode == DBADashSource.SlowQueryCaptureModes.EventFile
-                             && !(isCapturing && after.SlowQueryCaptureMode == DBADashSource.SlowQueryCaptureModes.EventFile))
+            if (wasCapturing && beforeMode == DBADashSource.SlowQueryCaptureModes.EventFile
+                             && !(isCapturing && afterMode == DBADashSource.SlowQueryCaptureModes.EventFile))
             {
                 sessions.Add(DBADashSource.ManagedSlowQueryXESessionName);
             }
@@ -199,44 +202,6 @@ namespace DBADash.Messaging
             }
 
             return sessions;
-        }
-
-        private async Task DropRedundantSessionsAsync(CollectionConfig cfg, IReadOnlyList<(DBADashSource Source, SourceConnectionOptions Before)> changed,
-            List<ConnectionChangeResult> results, List<string> warnings, CancellationToken cancellationToken)
-        {
-            var toDrop = changed
-                .Select(c => (c.Source, Sessions: GetSessionsToDrop(c.Before, Options)))
-                .Where(c => c.Sessions.Count > 0)
-                .ToList();
-            if (toDrop.Count == 0) return;
-
-            var outcomes = await ConnectionChanges.ForEachThrottledAsync(toDrop, async c =>
-            {
-                try
-                {
-                    var collector = await DBCollector.CreateAsync(c.Source, cfg.ServiceName);
-                    return (c.Source, Dropped: await collector.DropEventSessionsAsync(c.Sessions, cancellationToken), Error: (string)null);
-                }
-                catch (Exception ex)
-                {
-                    Log.Warning(ex, "Error dropping extended events sessions no longer used by {connection}", c.Source.SourceConnection.ConnectionForPrint);
-                    return (c.Source, Dropped: new List<string>(), Error: ex.Message);
-                }
-            }, cancellationToken);
-
-            foreach (var (src, dropped, error) in outcomes)
-            {
-                if (error != null)
-                {
-                    warnings.Add($"Extended events sessions no longer used by {src.ConnectionID} couldn't be removed - they'll be removed when the service stops.  {error}");
-                    continue;
-                }
-                if (dropped.Count == 0) continue;
-                var result = results.FirstOrDefault(r => string.Equals(r.ConnectionID, src.ConnectionID, StringComparison.InvariantCultureIgnoreCase));
-                if (result == null) continue;
-                var detail = $"Dropped extended events sessions: {string.Join(", ", dropped)}";
-                result.Detail = string.IsNullOrEmpty(result.Detail) ? detail : result.Detail + ".  " + detail;
-            }
         }
     }
 }

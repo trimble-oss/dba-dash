@@ -311,7 +311,7 @@ namespace DBADashGUI.Connections
                 if (!checks.Any(c => c.IsDeletedInRepository && string.Equals(c.ConnectionID, result.ConnectionID, StringComparison.OrdinalIgnoreCase))) continue;
                 try
                 {
-                    SharedData.RestoreInstance(result.ConnectionID, Common.ConnectionString);
+                    SharedData.SetInstanceActive(null, result.ConnectionID, true, Common.ConnectionString);
                 }
                 catch (Exception ex)
                 {

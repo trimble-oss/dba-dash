@@ -108,7 +108,7 @@ namespace DBADashGUI.Connections
                 var removed = results.Any(r => r.Outcome == ConnectionChangeResult.Removed);
                 if (removed && chkMarkDeleted.Checked)
                 {
-                    SharedData.MarkInstanceDeleted(context.InstanceID, Common.ConnectionString);
+                    SharedData.SetInstanceActive(context.InstanceID, null, false, Common.ConnectionString);
                     MarkedDeleted = true;
                 }
 

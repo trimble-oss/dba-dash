@@ -558,8 +558,10 @@ namespace DBADashService
             }
         }
 
-        private async Task ScanForAzureDBsAsync(DBADashSource src)
+        /// <summary>Adds and schedules the databases of an Azure master connection, returning them.</summary>
+        private async Task<List<DBADashSource>> ScanForAzureDBsAsync(DBADashSource src)
         {
+            var newSources = new List<DBADashSource>();
             if (config.ScanForAzureDBs && src.SourceConnection.Type == ConnectionType.SQL && !OfflineInstances.IsOffline(src))
             {
                 var isAzureDBMaster = false;
@@ -576,7 +578,7 @@ namespace DBADashService
                 {
                     if (isAzureDBMaster)
                     {
-                        var newSources = config.AddAzureDBs(src);
+                        newSources = config.AddAzureDBs(src);
                         if (config.IsUseQueueBasedScheduling())
                         {
                             await ScheduleCollectionsWithQueueAsync(newSources.ToList());
@@ -592,6 +594,7 @@ namespace DBADashService
                     Log.Error(ex, "ConnectionInfo Error {0}", src.SourceConnection.ConnectionForPrint);
                 }
             }
+            return newSources;
         }
 
         private async Task ScanForAzureDBsAsync()
@@ -651,6 +654,11 @@ namespace DBADashService
                 if (scheduledSources.Contains(src))
                 {
                     Log.Debug("{source} has already been scheduled", src.SourceConnection.ConnectionForPrint);
+                    return;
+                }
+                if (!IsCollected(src))
+                {
+                    Log.Information("{source} was removed before it was scheduled", src.SourceConnection.ConnectionForPrint);
                     return;
                 }
                 await ScheduleSourceCoreAsync(src, runOnStart: true);
@@ -848,7 +856,59 @@ namespace DBADashService
             }
             else
             {
-                await ScheduleCollectionsAsync(sources.ToList());
+                // As ScheduleCollectionsAsync, but the Azure DB scan is left to DiscoverFromNewSourcesAsync
+                await Parallel.ForEachAsync(sources, new ParallelOptions { MaxDegreeOfParallelism = 30 }, async (src, _) =>
+                {
+                    await RemoveEventSessionAsync(src);
+                    await ScheduleSourceAsync(src);
+                });
+            }
+
+            // As at startup, find the databases and read replicas of the new sources rather than waiting for the next scan
+            // (which may never come - scanning can be startup only).  In the background: probing can be slow, and the
+            // message that added them shouldn't wait for it.
+            backgroundTasks.Add(Task.Run(() => DiscoverFromNewSourcesAsync(sources), backgroundTasksCts.Token));
+        }
+
+        private async Task DiscoverFromNewSourcesAsync(IReadOnlyList<DBADashSource> sources)
+        {
+            try
+            {
+                var discovered = new List<DBADashSource>();
+                foreach (var src in sources)
+                {
+                    discovered.AddRange(await ScanForAzureDBsAsync(src));
+                }
+
+                if (!config.MonitorReadReplicas) return;
+                var replicas = config.AddReadReplicas(sources.Concat(discovered).ToList());
+                if (replicas.Count == 0) return;
+                if (config.IsUseQueueBasedScheduling())
+                {
+                    await ScheduleCollectionsWithQueueAsync(replicas);
+                }
+                else
+                {
+                    await ScheduleCollectionsAsync(replicas);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error scanning for Azure DBs and read replicas of sources added while running");
+            }
+        }
+
+        /// <summary>
+        /// True while <paramref name="src"/> is one of the service's sources.  A source scheduled outside the scheduling
+        /// lock - just added, or just discovered - can be removed before it's scheduled; the removal's reschedule has
+        /// already run, so scheduling it afterwards would collect it with nothing to stop it.  Checked under
+        /// <see cref="scheduleLock"/>, which the removal's reschedule also takes.
+        /// </summary>
+        private bool IsCollected(DBADashSource src)
+        {
+            lock (config.SourceConnections)
+            {
+                return config.SourceConnections.Contains(src);
             }
         }
 
@@ -1026,7 +1086,12 @@ namespace DBADashService
             await scheduleLock.WaitAsync();
             try
             {
-                await ScheduleCollectionsWithQueueCoreAsync(connections, runOnStart: true);
+                var collected = connections.Where(IsCollected).ToList();
+                if (collected.Count < connections.Count)
+                {
+                    Log.Information("{count} source(s) were removed before they were scheduled", connections.Count - collected.Count);
+                }
+                await ScheduleCollectionsWithQueueCoreAsync(collected, runOnStart: true);
             }
             finally
             {

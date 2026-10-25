@@ -1,4 +1,4 @@
-using DBADashService;
+﻿using DBADashService;
 using Quartz;
 using Serilog;
 using System;
@@ -146,10 +146,8 @@ namespace DBADash.Messaging
         {
             var parent = sources.FirstOrDefault(s => string.Equals(s.ConnectionID, ConnectionID, StringComparison.InvariantCultureIgnoreCase));
             if (parent == null) return new List<string>();
-            var configured = fileConfig.SourceConnections
-                .Where(s => !string.IsNullOrEmpty(s.ConnectionID))
-                .Select(s => s.ConnectionID)
-                .ToHashSet(StringComparer.InvariantCultureIgnoreCase);
+            // Caller holds the lock on sources
+            var configured = ConnectionChanges.GetConfiguredConnectionIDs(fileConfig, sources);
             var derived = GetDerivedSources(sources, ConnectionID, configured);
             foreach (var source in derived)
             {

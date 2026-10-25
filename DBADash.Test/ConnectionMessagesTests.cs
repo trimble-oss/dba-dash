@@ -2,6 +2,7 @@ using DBADash.Messaging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
@@ -150,6 +151,39 @@ namespace DBADash.Test
             CollectionAssert.AreEqual(Array.Empty<string>(), ConnectionOptionsUpdateMessage.GetSessionsToDrop(file, SlowQueries(DBADashSource.SlowQueryCaptureModes.EventFile, 5000)));
             CollectionAssert.AreEqual(new[] { DBADashSource.ManagedSlowQueryXESessionName }, ConnectionOptionsUpdateMessage.GetSessionsToDrop(file, SlowQueries(DBADashSource.SlowQueryCaptureModes.EventFile, -1)));
             CollectionAssert.AreEqual(new[] { DBADashSource.ManagedSlowQueryXESessionName }, ConnectionOptionsUpdateMessage.GetSessionsToDrop(file, SlowQueries(DBADashSource.SlowQueryCaptureModes.ExistingSession)));
+        }
+
+        [TestMethod]
+        public void SessionsToDrop_EventFileIsRingBufferOnAzure()
+        {
+            // Event file mode uses the ring buffer sessions on Azure SQL Database and Managed Instance
+            var file = SlowQueries(DBADashSource.SlowQueryCaptureModes.EventFile);
+            var off = SlowQueries(DBADashSource.SlowQueryCaptureModes.EventFile, -1);
+            CollectionAssert.AreEqual(new[] { "DBADash_1", "DBADash_2" }, ConnectionOptionsUpdateMessage.GetSessionsToDrop(file, off, isAzureDB: true));
+            CollectionAssert.AreEqual(new[] { "DBADash_1", "DBADash_2" }, ConnectionOptionsUpdateMessage.GetSessionsToDrop(file, off, isManagedInstance: true));
+            // Switching between the two is no change there
+            CollectionAssert.AreEqual(Array.Empty<string>(), ConnectionOptionsUpdateMessage.GetSessionsToDrop(file, SlowQueries(DBADashSource.SlowQueryCaptureModes.RingBuffer), isAzureDB: true));
+        }
+
+        [TestMethod]
+        public void ConfiguredConnectionIDs_ResolvesIDsGeneratedAtRuntime()
+        {
+            var fileConfig = new CollectionConfig();
+            fileConfig.SourceConnections.Add(new DBADashSource("Data Source=AZ1;Initial Catalog=master;Integrated Security=True") { ConnectionID = "AZ1|master" });
+            // Saved without a ConnectionID - an Azure DB configured explicitly
+            fileConfig.SourceConnections.Add(new DBADashSource("Data Source=AZ1;Initial Catalog=DB1;Integrated Security=True"));
+            var running = new List<DBADashSource>
+            {
+                new("Data Source=AZ1;Initial Catalog=master;Integrated Security=True") { ConnectionID = "AZ1|master" },
+                new("Data Source=AZ1;Initial Catalog=DB1;Integrated Security=True") { ConnectionID = "AZ1|DB1" },
+                new("Data Source=AZ1;Initial Catalog=DB2;Integrated Security=True") { ConnectionID = "AZ1|DB2" } // Discovered
+            };
+
+            var configured = ConnectionChanges.GetConfiguredConnectionIDs(fileConfig, running);
+            CollectionAssert.AreEquivalent(new[] { "AZ1|master", "AZ1|DB1" }, configured.ToList());
+            // So only the discovered database is derived from master
+            var derived = CollectionScheduleUpdateMessage.GetDerivedSources(running, "AZ1|master", configured);
+            CollectionAssert.AreEqual(new[] { "AZ1|DB2" }, derived.Select(d => d.ConnectionID).ToList());
         }
 
         [TestMethod]

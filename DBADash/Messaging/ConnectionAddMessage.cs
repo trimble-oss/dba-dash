@@ -58,8 +58,13 @@ namespace DBADash.Messaging
             });
 
             var results = new List<ConnectionChangeResult>();
-            var added = new List<DBADashSource>();
-            var updated = new List<DBADashSource>();
+            var applied = new List<DBADashSource>();
+            // Running sources replaced, with their options before the change - for the sessions it leaves unused
+            var replaced = new List<(DBADashSource Source, SourceConnectionOptions Before)>();
+            // New to the running service - their collections are scheduled and run straight away
+            var newSources = new List<DBADashSource>();
+            // Sources that replaced others in the running service, whose jobs are rebuilt
+            var replacing = new List<DBADashSource>();
             await CollectionScheduleUpdateMessage.ConfigFileLock.WaitAsync(cancellationToken);
             try
             {
@@ -77,10 +82,11 @@ namespace DBADash.Messaging
                         continue;
                     }
 
+                    await SourceConnectionAdder.RefreshExistingAsync(fileConfig, src, checks[i]);
                     var result = SourceConnectionAdder.Apply(fileConfig, src, checks[i], request.Decisions ?? new SourceConnectionDecisions());
                     results.Add(new ConnectionChangeResult
                     {
-                        ConnectionID = src.ConnectionID,
+                        ConnectionID = result.Source?.ConnectionID ?? src.ConnectionID,
                         ConnectionForPrint = src.SourceConnection.ConnectionForPrint,
                         Outcome = result.Outcome switch
                         {
@@ -90,11 +96,12 @@ namespace DBADash.Messaging
                         },
                         Detail = result.Reason
                     });
-                    if (result.Outcome == SourceConnectionAddOutcomes.Added) added.Add(src);
-                    if (result.Outcome == SourceConnectionAddOutcomes.Updated) updated.Add(src);
+                    if (result.Source != null) applied.Add(result.Source);
                 }
 
-                if (added.Count + updated.Count == 0)
+                // A source can be replaced by a later request for the same instance - only those still in the config count
+                applied = applied.Where(fileConfig.SourceConnections.Contains).ToList();
+                if (applied.Count == 0)
                 {
                     return ConnectionChanges.ToDataSet(results);
                 }
@@ -110,12 +117,34 @@ namespace DBADash.Messaging
                 // changed under the lock those take
                 lock (cfg.SourceConnections)
                 {
-                    foreach (var src in updated)
+                    var configured = ConnectionChanges.GetConfiguredConnectionIDs(fileConfig, cfg.SourceConnections);
+                    foreach (var src in applied)
                     {
-                        cfg.SourceConnections.RemoveAll(s => string.Equals(s.ConnectionID, src.ConnectionID, StringComparison.InvariantCultureIgnoreCase));
+                        // The connection it updates, or a database or replica the service discovered and monitors already
+                        var running = cfg.SourceConnections
+                            .Where(s => string.Equals(s.ConnectionID, src.ConnectionID, StringComparison.InvariantCultureIgnoreCase)
+                                        || s.ConnectionString == src.ConnectionString)
+                            .ToList();
+                        // Databases and read replicas discovered from an updated connection are copies of it - they'd get
+                        // its new options and schedules on restart
+                        var derived = running.Count == 0
+                            ? new List<DBADashSource>()
+                            : CollectionScheduleUpdateMessage.GetDerivedSources(cfg.SourceConnections, src.ConnectionID, configured);
+
+                        replaced.AddRange(running.Select(s => (Source: src, Before: SourceConnectionOptions.FromSource(s))));
+                        cfg.SourceConnections.RemoveAll(running.Contains);
+                        cfg.SourceConnections.Add(src);
+                        (running.Count == 0 ? newSources : replacing).Add(src);
+
+                        var options = SourceConnectionOptions.FromSource(src);
+                        foreach (var child in derived)
+                        {
+                            replaced.Add((child, SourceConnectionOptions.FromSource(child)));
+                            options.ApplyTo(child, includeCustomCollections: false);
+                            child.CollectionSchedules = src.CollectionSchedules == null ? null : CollectionSchedules.Combine(new CollectionSchedules(), src.CollectionSchedules);
+                            replacing.Add(child);
+                        }
                     }
-                    cfg.SourceConnections.AddRange(updated);
-                    cfg.SourceConnections.AddRange(added);
                 }
             }
             finally
@@ -123,8 +152,8 @@ namespace DBADash.Messaging
                 CollectionScheduleUpdateMessage.ConfigFileLock.Release();
             }
 
-            Log.Information("Source connections changed via message {id}: added {added}, updated {updated}", Id,
-                added.Select(s => s.ConnectionID), updated.Select(s => s.ConnectionID));
+            Log.Information("Source connections changed via message {id}: added {added}, replaced {replaced}", Id,
+                newSources.Select(s => s.ConnectionID), replacing.Select(s => s.ConnectionID));
 
             await ReportProgressAsync(new ResponseMessage
             {
@@ -137,12 +166,13 @@ namespace DBADash.Messaging
             {
                 // New sources first: scheduling them runs their service start collections, so they show in the GUI.  A
                 // reschedule would schedule them without those.
-                if (added.Count > 0 && cfg.ScheduleNewSourcesAsync != null)
+                if (newSources.Count > 0 && cfg.ScheduleNewSourcesAsync != null)
                 {
-                    await cfg.ScheduleNewSourcesAsync(added);
+                    await cfg.ScheduleNewSourcesAsync(newSources);
                 }
 
-                if (updated.Count > 0 && cfg.RescheduleCollectionsAsync != null)
+                // The jobs of a replaced source carry its old settings
+                if (replacing.Count > 0 && cfg.RescheduleCollectionsAsync != null)
                 {
                     await cfg.RescheduleCollectionsAsync();
                 }
@@ -153,7 +183,9 @@ namespace DBADash.Messaging
                 warnings.Add($"The connections were saved, but scheduling their collections failed - restart the service to collect them.  {ex.Message}");
             }
 
-            var failures = await ScheduleInfoReporter.ReportAsync(added.Concat(updated).ToList(), cfg, cancellationToken);
+            await ConnectionChanges.DropRedundantSessionsAsync(cfg, replaced, results, warnings, cancellationToken);
+
+            var failures = await ScheduleInfoReporter.ReportAsync(newSources.Concat(replacing).Distinct().ToList(), cfg, cancellationToken);
             var warning = MessageWarnings.ForScheduleInfoFailures(failures, "Collection Dates won't show their schedules");
             if (warning != null) warnings.Add(warning);
 
