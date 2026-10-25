@@ -27,7 +27,7 @@ namespace DBADash.Messaging
         {
             ThrowIfExpired();
             ConnectionChanges.ThrowIfNotAllowed(cfg);
-            ConnectionChanges.ValidateCount(ConnectionIDs?.Count ?? 0);
+            ConnectionChanges.ValidateConnectionIDs(ConnectionIDs);
 
             var results = new List<ConnectionChangeResult>();
             var removedSources = new List<DBADashSource>();
@@ -134,6 +134,8 @@ namespace DBADash.Messaging
         /// </summary>
         internal static DBADashSource FindInFileConfig(CollectionConfig fileConfig, CollectionConfig cfg, string connectionID)
         {
+            // Would match a source saved without a ConnectionID
+            if (string.IsNullOrWhiteSpace(connectionID)) return null;
             var match = fileConfig.SourceConnections.FirstOrDefault(s =>
                 string.Equals(s.ConnectionID, connectionID, StringComparison.InvariantCultureIgnoreCase));
             if (match != null) return match;
