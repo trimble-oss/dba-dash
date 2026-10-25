@@ -48,7 +48,7 @@ namespace DBADash.Messaging
                 var updated = new List<(string ConnectionID, DBADashSource FileSource)>();
                 foreach (var connectionID in ConnectionIDs.Distinct(StringComparer.InvariantCultureIgnoreCase))
                 {
-                    var fileSource = ConnectionRemoveMessage.FindInFileConfig(fileConfig, cfg, connectionID);
+                    var fileSource = ConnectionRemoveMessage.FindInFileConfig(fileConfig, connectionID);
                     if (fileSource == null)
                     {
                         results.Add(new ConnectionChangeResult
@@ -90,12 +90,11 @@ namespace DBADash.Messaging
                 // changed under the lock those take
                 lock (cfg.SourceConnections)
                 {
-                    var configured = ConnectionChanges.GetConfiguredConnectionIDs(fileConfig, cfg.SourceConnections);
+                    var configured = ConnectionChanges.GetConfiguredConnectionIDs(fileConfig);
                     foreach (var (connectionID, fileSource) in updated)
                     {
                         var running = cfg.SourceConnections
-                            .Where(s => string.Equals(s.ConnectionID, connectionID, StringComparison.InvariantCultureIgnoreCase)
-                                        || s.ConnectionString == fileSource.ConnectionString)
+                            .Where(s => string.Equals(s.ConnectionID, connectionID, StringComparison.InvariantCultureIgnoreCase))
                             .ToList();
                         // Databases and read replicas discovered from it are copies of it - they'd get the new options on restart
                         var derived = CollectionScheduleUpdateMessage.GetDerivedSources(cfg.SourceConnections, connectionID, configured);

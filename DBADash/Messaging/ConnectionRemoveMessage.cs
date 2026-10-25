@@ -38,7 +38,7 @@ namespace DBADash.Messaging
                 var removedFromFile = new List<(string ConnectionID, DBADashSource FileSource)>();
                 foreach (var connectionID in ConnectionIDs.Distinct(StringComparer.InvariantCultureIgnoreCase))
                 {
-                    var fileSource = FindInFileConfig(fileConfig, cfg, connectionID);
+                    var fileSource = FindInFileConfig(fileConfig, connectionID);
                     if (fileSource == null)
                     {
                         results.Add(new ConnectionChangeResult
@@ -64,12 +64,11 @@ namespace DBADash.Messaging
 
                 lock (cfg.SourceConnections)
                 {
-                    var configured = ConnectionChanges.GetConfiguredConnectionIDs(fileConfig, cfg.SourceConnections);
+                    var configured = ConnectionChanges.GetConfiguredConnectionIDs(fileConfig);
                     foreach (var (connectionID, fileSource) in removedFromFile)
                     {
                         var running = cfg.SourceConnections
-                            .Where(s => string.Equals(s.ConnectionID, connectionID, StringComparison.InvariantCultureIgnoreCase)
-                                        || s.ConnectionString == fileSource.ConnectionString)
+                            .Where(s => string.Equals(s.ConnectionID, connectionID, StringComparison.InvariantCultureIgnoreCase))
                             .ToList();
                         // Databases and read replicas discovered from it go with it - they'd be found again from it on restart
                         var derived = CollectionScheduleUpdateMessage.GetDerivedSources(cfg.SourceConnections, connectionID, configured);
@@ -129,26 +128,15 @@ namespace DBADash.Messaging
         }
 
         /// <summary>
-        /// The source in the saved config for <paramref name="connectionID"/>.  Matched on ConnectionID, or for a source
-        /// saved without one (it's generated at runtime), on the connection string of the running source.
+        /// The source in the saved config for <paramref name="connectionID"/>, matched on ConnectionID only
+        /// (<see cref="ConnectionChanges.ThrowIfMissingConnectionIDs"/>).
         /// </summary>
-        internal static DBADashSource FindInFileConfig(CollectionConfig fileConfig, CollectionConfig cfg, string connectionID)
+        internal static DBADashSource FindInFileConfig(CollectionConfig fileConfig, string connectionID)
         {
             // Would match a source saved without a ConnectionID
             if (string.IsNullOrWhiteSpace(connectionID)) return null;
-            var match = fileConfig.SourceConnections.FirstOrDefault(s =>
+            return fileConfig.SourceConnections.FirstOrDefault(s =>
                 string.Equals(s.ConnectionID, connectionID, StringComparison.InvariantCultureIgnoreCase));
-            if (match != null) return match;
-
-            DBADashSource running;
-            lock (cfg.SourceConnections)
-            {
-                running = cfg.SourceConnections.FirstOrDefault(s =>
-                    string.Equals(s.ConnectionID, connectionID, StringComparison.InvariantCultureIgnoreCase));
-            }
-            return running == null
-                ? null
-                : fileConfig.SourceConnections.FirstOrDefault(s => string.IsNullOrEmpty(s.ConnectionID) && s.ConnectionString == running.ConnectionString);
         }
 
         private static bool IsCollected(CollectionConfig cfg, string connectionID)

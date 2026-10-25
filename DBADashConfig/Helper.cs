@@ -157,8 +157,11 @@ namespace DBADashConfig
                 Environment.Exit(1);
                 return;
             }
+            ExitIfUnreadablePassword(o.ConnectionString);
 
-            Log.Information("Add new connection: {Connection}", o.ConnectionString);
+            // ConnectionForPrint is the whole string for a connection string that can't be parsed - it could have a password in it
+            var newConnection = new DBADashConnection(o.ConnectionString);
+            Log.Information("Add new connection: {Connection}", newConnection.Type == DBADashConnection.ConnectionType.Invalid ? "(invalid connection string)" : newConnection.ConnectionForPrint);
 
             var source = new DBADashSource()
             {
@@ -309,6 +312,18 @@ namespace DBADashConfig
             }
         }
 
+        /// <summary>
+        /// A protected password copied from another machine (e.g. the output of GetDestination or List) can't be decrypted
+        /// here.  Saving it would leave the connection without a password.
+        /// </summary>
+        private static void ExitIfUnreadablePassword(string connectionString)
+        {
+            var error = new DBADashConnection(connectionString).SecretError;
+            if (error == null) return;
+            Log.Error("The password in the connection string can't be decrypted on this machine.  {Error}  Pass the password in plain text - it's encrypted when the config is saved.", error);
+            Environment.Exit(1);
+        }
+
         public static async Task AddDestination(CollectionConfig config, Options o)
         {
             if (string.IsNullOrEmpty(o.ConnectionString))
@@ -317,6 +332,7 @@ namespace DBADashConfig
                 Environment.Exit(1);
                 return;
             }
+            ExitIfUnreadablePassword(o.ConnectionString);
             if (string.IsNullOrEmpty(config.Destination) || o.Option == Options.CommandLineActionOption.SetDestination) // Set primary destination
             {
                 Log.Information("Setting destination connection");
@@ -748,6 +764,162 @@ namespace DBADashConfig
                 config.AWSProfile = null;
                 config.AccessKey = null;
                 config.SecretKey = null;
+            }
+            SaveConfig(config, o);
+        }
+
+        public const string ExportPasswordEnvironmentVariable = "DBADASH_EXPORT_PASSWORD";
+        public const string PasswordEnvironmentVariable = "DBADASH_PASSWORD";
+
+        /// <summary>
+        /// The option if supplied, then the environment variable, then standard input if it's redirected, then a prompt.  So
+        /// it can be scripted (e.g. a scheduled backup) without the password being on the command line.
+        /// </summary>
+        /// <param name="confirm">Prompt twice, so a typo doesn't leave something nobody can decrypt</param>
+        private static string? ReadSecret(string? option, string environmentVariable, string prompt, bool confirm)
+        {
+            if (!string.IsNullOrEmpty(option)) return option;
+            var fromEnvironment = Environment.GetEnvironmentVariable(environmentVariable);
+            if (!string.IsNullOrEmpty(fromEnvironment)) return fromEnvironment;
+            if (Console.IsInputRedirected) return Console.In.ReadLine();
+
+            var value = Prompt(prompt);
+            if (confirm && value.Length > 0 && Prompt("Confirm: ") != value)
+            {
+                Log.Error("Passwords don't match");
+                Environment.Exit(1);
+            }
+            return value;
+        }
+
+        private static string Prompt(string prompt)
+        {
+            Console.Error.Write(prompt);
+            var value = new System.Text.StringBuilder();
+            while (true)
+            {
+                var key = Console.ReadKey(intercept: true);
+                if (key.Key == ConsoleKey.Enter) break;
+                if (key.Key == ConsoleKey.Backspace)
+                {
+                    if (value.Length > 0) value.Length--;
+                }
+                else if (!char.IsControl(key.KeyChar))
+                {
+                    value.Append(key.KeyChar);
+                }
+            }
+            Console.Error.WriteLine();
+            return value.ToString();
+        }
+
+        public static void ExportConfig(CollectionConfig config, Options o)
+        {
+            if (string.IsNullOrEmpty(o.ExportPath))
+            {
+                Log.Error("ExportPath parameter not supplied");
+                Environment.Exit(1);
+                return;
+            }
+            var path = Path.GetFullPath(o.ExportPath);
+            if (string.Equals(path, Path.GetFullPath(BasicConfig.JsonConfigPath), StringComparison.OrdinalIgnoreCase))
+            {
+                Log.Error("ExportPath can't be the config file itself.  Use -a Encrypt to encrypt the config.");
+                Environment.Exit(1);
+                return;
+            }
+            if (o.NoSecrets)
+            {
+                string export;
+                try
+                {
+                    export = config.ExportWithoutSecrets();
+                }
+                catch (InvalidOperationException ex)
+                {
+                    Log.Error(ex.Message);
+                    Environment.Exit(1);
+                    return;
+                }
+                File.WriteAllText(path, export);
+                Log.Information("Config exported to {Path} without passwords.  When it's used, they're listed to be entered again: -a ListUnreadableSecrets then -a SetPassword, or the service config tool.", path);
+                return;
+            }
+            var password = ReadSecret(o.ExportPassword, ExportPasswordEnvironmentVariable, "Export password: ", confirm: true);
+            if (string.IsNullOrEmpty(password))
+            {
+                Log.Error("Export password not supplied.  Use --ExportPassword, the {Variable} environment variable or standard input.", ExportPasswordEnvironmentVariable);
+                Environment.Exit(1);
+                return;
+            }
+            foreach (var unreadable in config.GetUnreadableSecrets())
+            {
+                Log.Warning("Exported, but still can't be decrypted - re-enter it after importing.  {Secret}", unreadable);
+            }
+            File.WriteAllText(path, config.ExportEncrypted(password));
+            Log.Information("Config exported to {Path}.  To use it on another machine, copy it to the DBA Dash folder as ServiceConfig.json, " +
+                            "then run -a Decrypt --DecryptionPassword <password> to protect the passwords for that machine (or -a Encrypt --EncryptionPassword <password> to keep the config encrypted).", path);
+        }
+
+        public static void ListUnreadableSecrets(CollectionConfig config)
+        {
+            var unreadable = config.GetSecrets().Where(s => !s.IsReadable).ToList();
+            foreach (var secret in unreadable)
+            {
+                Console.WriteLine($"{secret.TypeDescription}\t{secret.Name}\t{secret.UserName}");
+            }
+            if (unreadable.Count == 0)
+            {
+                Log.Information("All passwords can be decrypted");
+            }
+        }
+
+        public static void SetPassword(CollectionConfig config, Options o)
+        {
+            if (string.IsNullOrEmpty(o.ConnectionID) && string.IsNullOrEmpty(o.UserName))
+            {
+                Log.Error("Use --ConnectionID or --UserName to say which connections to set the password for");
+                Environment.Exit(1);
+                return;
+            }
+            List<ConfigSecret> targets;
+            try
+            {
+                targets = config.FindConnectionSecrets(o.ConnectionID, o.UserName);
+            }
+            catch (InvalidOperationException ex)
+            {
+                Log.Error(ex.Message);
+                Environment.Exit(1);
+                return;
+            }
+            if (targets.Count == 0)
+            {
+                Log.Error("No SQL connections with a password match.  Use -a ListUnreadableSecrets or -a List2 to see the connections.");
+                Environment.Exit(1);
+                return;
+            }
+            var password = ReadSecret(o.Password, PasswordEnvironmentVariable, "Password: ", confirm: true);
+            if (string.IsNullOrEmpty(password))
+            {
+                Log.Error("Password not supplied.  Use --Password, the {Variable} environment variable or standard input.", PasswordEnvironmentVariable);
+                Environment.Exit(1);
+                return;
+            }
+            try
+            {
+                ConfigSecret.ThrowIfProtected(password);
+            }
+            catch (ArgumentException ex)
+            {
+                Log.Error(ex.Message);
+                Environment.Exit(1);
+                return;
+            }
+            foreach (var target in targets)
+            {
+                target.SetSecret(password);
+                Log.Information("Password set for {Type} {Name}", target.TypeDescription, target.Name);
             }
             SaveConfig(config, o);
         }

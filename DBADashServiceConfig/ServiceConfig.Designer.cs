@@ -122,6 +122,7 @@ namespace DBADashServiceConfig
             numThreads = new System.Windows.Forms.NumericUpDown();
             lnkTimeouts = new System.Windows.Forms.LinkLabel();
             bttnCustomCollections = new System.Windows.Forms.Button();
+            bttnExportConfig = new System.Windows.Forms.Button();
             lnkDeleteConfigBackups = new System.Windows.Forms.LinkLabel();
             numBackupRetention = new System.Windows.Forms.NumericUpDown();
             lblEncryptionStatus = new System.Windows.Forms.Label();
@@ -488,7 +489,7 @@ namespace DBADashServiceConfig
             bttnAWS.Location = new System.Drawing.Point(14, 240);
             bttnAWS.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             bttnAWS.Name = "bttnAWS";
-            bttnAWS.Size = new System.Drawing.Size(197, 55);
+            bttnAWS.Size = new System.Drawing.Size(176, 55);
             bttnAWS.TabIndex = 35;
             bttnAWS.Text = "AWS Credentials";
             toolTip1.SetToolTip(bttnAWS, "Used when writing to a S3 bucket destination or reading from a S3 bucket.  Alternatively, use an instance profile to avoid storing credentials in the config.  Or consider using an encrypted config.");
@@ -1053,6 +1054,7 @@ namespace DBADashServiceConfig
             groupBox3.Controls.Add(label23);
             groupBox3.Controls.Add(lnkTimeouts);
             groupBox3.Controls.Add(bttnCustomCollections);
+            groupBox3.Controls.Add(bttnExportConfig);
             groupBox3.Controls.Add(label3);
             groupBox3.Controls.Add(lnkDeleteConfigBackups);
             groupBox3.Controls.Add(lblConfigFileRetention);
@@ -1204,14 +1206,24 @@ namespace DBADashServiceConfig
             // 
             // bttnCustomCollections
             // 
-            bttnCustomCollections.Location = new System.Drawing.Point(622, 240);
+            bttnCustomCollections.Location = new System.Drawing.Point(560, 240);
             bttnCustomCollections.Name = "bttnCustomCollections";
-            bttnCustomCollections.Size = new System.Drawing.Size(197, 55);
+            bttnCustomCollections.Size = new System.Drawing.Size(176, 55);
             bttnCustomCollections.TabIndex = 46;
             bttnCustomCollections.Text = "Custom Collections";
             bttnCustomCollections.UseVisualStyleBackColor = true;
             bttnCustomCollections.Click += BttnCustomCollections_Click;
-            // 
+            //
+            // bttnExportConfig
+            //
+            bttnExportConfig.Location = new System.Drawing.Point(742, 240);
+            bttnExportConfig.Name = "bttnExportConfig";
+            bttnExportConfig.Size = new System.Drawing.Size(176, 55);
+            bttnExportConfig.TabIndex = 48;
+            bttnExportConfig.Text = "Export Config";
+            bttnExportConfig.UseVisualStyleBackColor = true;
+            bttnExportConfig.Click += BttnExportConfig_Click;
+            //
             // lnkDeleteConfigBackups
             // 
             lnkDeleteConfigBackups.AutoSize = true;
@@ -1235,19 +1247,19 @@ namespace DBADashServiceConfig
             // 
             // lblEncryptionStatus
             // 
-            lblEncryptionStatus.Location = new System.Drawing.Point(419, 300);
+            lblEncryptionStatus.Location = new System.Drawing.Point(378, 300);
             lblEncryptionStatus.Name = "lblEncryptionStatus";
-            lblEncryptionStatus.Size = new System.Drawing.Size(197, 27);
+            lblEncryptionStatus.Size = new System.Drawing.Size(176, 27);
             lblEncryptionStatus.TabIndex = 38;
             lblEncryptionStatus.Text = "{Encryption Status}";
             lblEncryptionStatus.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
             // bttnEncryption
             // 
-            bttnEncryption.Location = new System.Drawing.Point(419, 240);
+            bttnEncryption.Location = new System.Drawing.Point(378, 240);
             bttnEncryption.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             bttnEncryption.Name = "bttnEncryption";
-            bttnEncryption.Size = new System.Drawing.Size(197, 55);
+            bttnEncryption.Size = new System.Drawing.Size(176, 55);
             bttnEncryption.TabIndex = 37;
             bttnEncryption.Text = "Configure Encryption";
             bttnEncryption.UseVisualStyleBackColor = true;
@@ -1264,10 +1276,10 @@ namespace DBADashServiceConfig
             // 
             // bttnSchedule
             // 
-            bttnSchedule.Location = new System.Drawing.Point(216, 240);
+            bttnSchedule.Location = new System.Drawing.Point(196, 240);
             bttnSchedule.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             bttnSchedule.Name = "bttnSchedule";
-            bttnSchedule.Size = new System.Drawing.Size(197, 55);
+            bttnSchedule.Size = new System.Drawing.Size(176, 55);
             bttnSchedule.TabIndex = 1;
             bttnSchedule.Text = "Configure Schedule";
             bttnSchedule.UseVisualStyleBackColor = true;
@@ -2047,6 +2059,7 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label lblConfigFileRetention;
         private System.Windows.Forms.Button bttnCustomCollections;
+        private System.Windows.Forms.Button bttnExportConfig;
         private System.Windows.Forms.GroupBox grpMessaging;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.CheckBox chkEnableMessaging;

@@ -46,7 +46,7 @@ namespace DBADash.Messaging
             await CollectionScheduleUpdateMessage.ConfigFileLock.WaitAsync(cancellationToken);
             try
             {
-                src = ConnectionRemoveMessage.FindInFileConfig(ConnectionChanges.LoadFileConfig(), cfg, ConnectionID);
+                src = ConnectionRemoveMessage.FindInFileConfig(ConnectionChanges.LoadFileConfig(), ConnectionID);
             }
             finally
             {
