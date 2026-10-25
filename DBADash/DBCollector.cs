@@ -1040,8 +1040,9 @@ namespace DBADash
                 // Reads the plan cache, so the cost scales with the size of that cache rather than with
                 // anything we can filter on.  Off until a top N is configured, for the same reason the slow
                 // query collection is off until a threshold is set.  The Azure master database has no user
-                // workload to account for.
-                return Source.IsQueryStatsCollectionEnabled && !isAzureMasterDB;
+                // workload to account for.  Not supported on SQL 2005 (the query uses DATETIME2 and query_hash,
+                // both added in SQL 2008).
+                return Source.IsQueryStatsCollectionEnabled && !isAzureMasterDB && SQLVersion.Major >= 10;
             }
             else if (collectionType == CollectionType.Instance)
             {
