@@ -128,6 +128,38 @@ namespace DBADash.Test
             Assert.AreSame(withID, ConnectionRemoveMessage.FindInFileConfig(fileConfig, running, "sql1"));
             Assert.AreSame(withoutID, ConnectionRemoveMessage.FindInFileConfig(fileConfig, running, "SQL2\\GENERATED"));
             Assert.IsNull(ConnectionRemoveMessage.FindInFileConfig(fileConfig, running, "SQL3"));
+            // Not the source saved without a ConnectionID
+            Assert.IsNull(ConnectionRemoveMessage.FindInFileConfig(fileConfig, running, null!));
+            Assert.IsNull(ConnectionRemoveMessage.FindInFileConfig(fileConfig, running, " "));
+        }
+
+        [TestMethod]
+        public void ValidateConnectionIDs_RejectsBlank()
+        {
+            ConnectionChanges.ValidateConnectionIDs(new List<string> { "SQL1" });
+            Assert.ThrowsExactly<ArgumentException>(() => ConnectionChanges.ValidateConnectionIDs(new List<string> { "SQL1", null! }));
+            Assert.ThrowsExactly<ArgumentException>(() => ConnectionChanges.ValidateConnectionIDs(new List<string> { "" }));
+            Assert.ThrowsExactly<ArgumentException>(() => ConnectionChanges.ValidateConnectionIDs(new List<string>()));
+            Assert.ThrowsExactly<ArgumentException>(() => ConnectionChanges.ValidateConnectionIDs(null!));
+        }
+
+        [TestMethod]
+        public async Task RemoveAndUpdate_RejectBlankConnectionIDs()
+        {
+            var cfg = new CollectionConfig { AllowConnectionChanges = true, AcceptsSourceChanges = true };
+            await Assert.ThrowsExactlyAsync<ArgumentException>(() => new ConnectionRemoveMessage { ConnectionIDs = new List<string> { null! } }.Process(cfg, Guid.Empty, CancellationToken.None));
+            await Assert.ThrowsExactlyAsync<ArgumentException>(() => new ConnectionOptionsUpdateMessage { ConnectionIDs = new List<string> { "" } }.Process(cfg, Guid.Empty, CancellationToken.None));
+        }
+
+        [TestMethod]
+        public async Task NewConnectionsGetAConnectionID()
+        {
+            // Saved with the ConnectionID even when the connection can't be validated - the data source
+            var cfg = new CollectionConfig { Destination = "Data Source=Repo;Integrated Security=True;Initial Catalog=DBADashDB" };
+            var src = new SourceConnectionOptions().CreateSource("Data Source=SQL9;Integrated Security=True");
+            var check = await SourceConnectionAdder.CheckAsync(cfg, src, validate: false);
+            SourceConnectionAdder.Apply(cfg, src, check, new SourceConnectionDecisions());
+            Assert.AreEqual("SQL9", cfg.SourceConnections.Single().ConnectionID);
         }
 
         private static SourceConnectionOptions SlowQueries(DBADashSource.SlowQueryCaptureModes mode, int threshold = 1000, string deadlocks = "") =>

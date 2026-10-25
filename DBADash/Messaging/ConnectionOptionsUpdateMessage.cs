@@ -35,7 +35,7 @@ namespace DBADash.Messaging
         {
             ThrowIfExpired();
             ConnectionChanges.ThrowIfNotAllowed(cfg);
-            ConnectionChanges.ValidateCount(ConnectionIDs?.Count ?? 0);
+            ConnectionChanges.ValidateConnectionIDs(ConnectionIDs);
             ConnectionChanges.ValidateOptions(Options);
 
             var results = new List<ConnectionChangeResult>();

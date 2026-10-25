@@ -68,6 +68,19 @@ namespace DBADash.Messaging
             }
         }
 
+        /// <summary>
+        /// Throws unless <paramref name="connectionIDs"/> are all given.  A blank ConnectionID would match a source saved
+        /// without one (they're generated at runtime in older configs), changing an unrelated connection.
+        /// </summary>
+        internal static void ValidateConnectionIDs(IReadOnlyCollection<string> connectionIDs)
+        {
+            ValidateCount(connectionIDs?.Count ?? 0);
+            if (connectionIDs!.Any(string.IsNullOrWhiteSpace))
+            {
+                throw new ArgumentException("Every connection must have a ConnectionID.");
+            }
+        }
+
         internal static void ValidateCount(int count)
         {
             if (count == 0)
