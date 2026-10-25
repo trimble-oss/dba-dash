@@ -60,6 +60,15 @@ namespace DBADashService
             if (!(Types?.Length > 0 || CustomCollections?.Count > 0))
                 return;
 
+            // Registered before the check, so a removal either sees this collection running or is seen by it - see CollectionActivity
+            using var activity = CollectionActivity.Begin(Source);
+            if (!config.IsCollected(Source))
+            {
+                // Queued or scheduled before its connection was removed, or changed to a new connection string
+                Log.Information("Skipping {types} for {instance} - it's no longer collected with this configuration", AllTypes, Source.ConnectionID ?? Source.SourceConnection.ConnectionForPrint);
+                return;
+            }
+
             var dequeueLatencyMs = EnqueueSW.ElapsedMilliseconds;
             var collectJobs = Types.Contains(CollectionType.Jobs);
             var reportSchedule = Types.Contains(CollectionType.ScheduleInfo);

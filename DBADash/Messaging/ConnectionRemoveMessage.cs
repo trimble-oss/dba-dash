@@ -182,6 +182,12 @@ namespace DBADash.Messaging
             List<string> warnings, CancellationToken cancellationToken)
         {
             var sqlSources = sources.Where(s => s.SourceConnection.Type == ConnectionType.SQL).ToList();
+            // A collection that started before the removal would recreate a session dropped under it - and with the
+            // source gone, nothing would remove it again
+            if (!await CollectionActivity.WaitForIdleAsync(sqlSources, ConnectionChanges.RunningCollectionWait, cancellationToken))
+            {
+                warnings.Add("A collection that started before the removal was still running, so an extended events session it uses might be recreated after it was dropped.  Check for DBADash sessions on the instance.");
+            }
             var outcomes = await ConnectionChanges.ForEachThrottledAsync(sqlSources, async src =>
             {
                 try

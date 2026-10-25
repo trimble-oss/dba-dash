@@ -521,6 +521,29 @@ AND m.name <> N'dbo'");
             agent.GetDBADashAgentID(ConnectionString);
             Assert.AreEqual("Key2", DBADashAgent.GetDBADashAgent(ConnectionString, id).PublicKey);
 
+            // Only a newer key replaces one with a creation time - a dataset collected before a restart can be imported after one collected since
+            var created = new DateTime(2026, 10, 25, 12, 0, 0, DateTimeKind.Utc);
+            agent.PublicKey = "Key3";
+            agent.PublicKeyCreatedUtc = created;
+            agent.GetDBADashAgentID(ConnectionString);
+            Assert.AreEqual("Key3", DBADashAgent.GetDBADashAgent(ConnectionString, id).PublicKey);
+            Assert.AreEqual(created, DBADashAgent.GetDBADashAgent(ConnectionString, id).PublicKeyCreatedUtc);
+
+            agent.PublicKey = "OlderKey";
+            agent.PublicKeyCreatedUtc = created.AddMinutes(-5);
+            agent.GetDBADashAgentID(ConnectionString);
+            Assert.AreEqual("Key3", DBADashAgent.GetDBADashAgent(ConnectionString, id).PublicKey);
+
+            agent.PublicKey = "NoTimeKey";
+            agent.PublicKeyCreatedUtc = null;
+            agent.GetDBADashAgentID(ConnectionString);
+            Assert.AreEqual("Key3", DBADashAgent.GetDBADashAgent(ConnectionString, id).PublicKey);
+
+            agent.PublicKey = "Key4";
+            agent.PublicKeyCreatedUtc = created.AddMinutes(5);
+            agent.GetDBADashAgentID(ConnectionString);
+            Assert.AreEqual("Key4", DBADashAgent.GetDBADashAgent(ConnectionString, id).PublicKey);
+
             // Listed for the GUI to add connections to, routed through itself as it has no instances
             using var cn = Open();
             using var cmd = new SqlCommand("dbo.ConnectionManagementAgents_Get", cn) { CommandType = System.Data.CommandType.StoredProcedure };
@@ -534,6 +557,41 @@ AND m.name <> N'dbo'");
                 Assert.IsTrue((bool)rdr["HasPublicKey"]);
             }
             Assert.IsTrue(listed, "Agent with connection changes enabled wasn't listed");
+        }
+
+        /// <summary>
+        /// A remote service that writes to S3 is reached through the service that imports its data.  Once its instances
+        /// have all been removed (and marked deleted) the route still comes from them, preferring active instances.
+        /// </summary>
+        [TestMethod]
+        public void ConnectionManagementAgents_RouteFromInactiveInstances()
+        {
+            using var cn = Open();
+            int Agent(string host, bool connectionChanges)
+            {
+                using var cmd = new SqlCommand("INSERT INTO dbo.DBADashAgent(AgentHostName,AgentServiceName,AgentVersion,AgentPath,MessagingEnabled,ConnectionChangesEnabled) VALUES(@Host,'RouteService','1','Path',1,@CC); SELECT CAST(SCOPE_IDENTITY() AS INT)", cn);
+                cmd.Parameters.AddWithValue("@Host", host);
+                cmd.Parameters.AddWithValue("@CC", connectionChanges);
+                return (int)cmd.ExecuteScalar();
+            }
+            var remote = Agent("Remote" + Guid.NewGuid().ToString("N")[..8], true);
+            var importer = Agent("Import" + Guid.NewGuid().ToString("N")[..8], false);
+            using (var cmd = new SqlCommand("INSERT INTO dbo.Instances(ConnectionID,Instance,IsActive,CollectAgentID,ImportAgentID) VALUES(@ID,@ID,0,@Remote,@Importer)", cn))
+            {
+                cmd.Parameters.AddWithValue("@ID", "RouteTest" + Guid.NewGuid().ToString("N")[..8]);
+                cmd.Parameters.AddWithValue("@Remote", remote);
+                cmd.Parameters.AddWithValue("@Importer", importer);
+                cmd.ExecuteNonQuery();
+            }
+
+            using var get = new SqlCommand("dbo.ConnectionManagementAgents_Get", cn) { CommandType = System.Data.CommandType.StoredProcedure };
+            using var rdr = get.ExecuteReader();
+            int? route = null;
+            while (rdr.Read())
+            {
+                if ((int)rdr["CollectAgentID"] == remote) route = (int)rdr["ImportAgentID"];
+            }
+            Assert.AreEqual(importer, route);
         }
 
         /// <summary>

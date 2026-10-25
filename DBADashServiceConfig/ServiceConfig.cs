@@ -204,7 +204,7 @@ namespace DBADashServiceConfig
                         var check = await SourceConnectionAdder.CheckAsync(collectionConfig, src);
                         if (checkRepository && !check.IsInvalid)
                         {
-                            check.IsDeletedInRepository = await IsInstanceDeletedAsync(src.ConnectionID);
+                            check.IsDeletedInRepository = await IsInstanceDeletedAsync(check.RepositoryConnectionID);
                         }
                         return check;
                     }

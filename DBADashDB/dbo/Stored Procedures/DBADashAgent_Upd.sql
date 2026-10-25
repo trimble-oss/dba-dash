@@ -18,6 +18,7 @@
 	@ScheduleChangesEnabled BIT=0,
 	@ConnectionChangesEnabled BIT=0,
 	@PublicKey NVARCHAR(1000)=NULL, /* NULL keeps the key the agent has - only a running service publishes one */
+	@PublicKeyCreated DATETIME2=NULL, /* When the service created @PublicKey (UTC) */
 	@DBADashAgentID INT OUT
 )
 AS
@@ -34,12 +35,29 @@ END
 
 DECLARE @UpdateAgent BIT = 0
 
+/*	A key is only taken if it's newer than the one registered.  S3 imports can register a dataset collected before the
+	service restarted after one collected since - its key would replace the running service's key with one the service
+	no longer holds, and the GUI couldn't encrypt connection strings for it. */
+IF @PublicKey IS NOT NULL
+	AND EXISTS(
+			SELECT 1
+			FROM dbo.DBADashAgent
+			WHERE AgentHostName = @AgentHostName
+			AND AgentServiceName = @AgentServiceName
+			AND PublicKeyCreated IS NOT NULL
+			AND (@PublicKeyCreated IS NULL OR @PublicKeyCreated < PublicKeyCreated)
+			)
+BEGIN
+	SELECT @PublicKey = NULL,
+		@PublicKeyCreated = NULL
+END
+
 SELECT @DBADashAgentID = DBADashAgentID,
 	@UpdateAgent = CASE WHEN 
 						EXISTS(
-								SELECT @AgentPath, @AgentVersion, @ServiceSQSQueueUrl, @AgentIdentifier,@S3Path,@MessagingEnabled,@KillSessionEnabled,@PlanForcingEnabled,@AdhocXEMaxDurationSeconds,@AllowedScripts, @AllowedCustomProcs, @ManageXESessions, @WatchXESessions, @AdhocXEEnabled, @ScheduleChangesEnabled, @ConnectionChangesEnabled, ISNULL(@PublicKey,PublicKey)
+								SELECT @AgentPath, @AgentVersion, @ServiceSQSQueueUrl, @AgentIdentifier,@S3Path,@MessagingEnabled,@KillSessionEnabled,@PlanForcingEnabled,@AdhocXEMaxDurationSeconds,@AllowedScripts, @AllowedCustomProcs, @ManageXESessions, @WatchXESessions, @AdhocXEEnabled, @ScheduleChangesEnabled, @ConnectionChangesEnabled, ISNULL(@PublicKey,PublicKey), CASE WHEN @PublicKey IS NULL THEN PublicKeyCreated ELSE @PublicKeyCreated END
 								EXCEPT
-								SELECT AgentPath, AgentVersion, ServiceSQSQueueUrl, AgentIdentifier, S3Path, MessagingEnabled, KillSessionEnabled, PlanForcingEnabled, AdhocXEMaxDurationSeconds, AllowedScripts, AllowedCustomProcs, ManageXESessions, WatchXESessions, AdhocXEEnabled, ScheduleChangesEnabled, ConnectionChangesEnabled, PublicKey
+								SELECT AgentPath, AgentVersion, ServiceSQSQueueUrl, AgentIdentifier, S3Path, MessagingEnabled, KillSessionEnabled, PlanForcingEnabled, AdhocXEMaxDurationSeconds, AllowedScripts, AllowedCustomProcs, ManageXESessions, WatchXESessions, AdhocXEEnabled, ScheduleChangesEnabled, ConnectionChangesEnabled, PublicKey, PublicKeyCreated
 								)
 					THEN 1 ELSE 0 END
 FROM dbo.DBADashAgent
@@ -49,8 +67,8 @@ AND AgentServiceName = @AgentServiceName
 IF @DBADashAgentID IS NULL
 BEGIN
 
-	INSERT INTO dbo.DBADashAgent(AgentHostName,AgentServiceName,AgentVersion,AgentPath,ServiceSQSQueueUrl,AgentIdentifier,S3Path,MessagingEnabled,KillSessionEnabled,PlanForcingEnabled,AdhocXEMaxDurationSeconds,AllowedScripts, AllowedCustomProcs, ManageXESessions, WatchXESessions, AdhocXEEnabled, ScheduleChangesEnabled, ConnectionChangesEnabled, PublicKey)
-	SELECT @AgentHostName,@AgentServiceName,@AgentVersion,@AgentPath,@ServiceSQSQueueUrl,ISNULL(@AgentIdentifier,LEFT(CONCAT('Temp.',REPLACE(NEWID(),'-','')),22)), @S3Path, @MessagingEnabled,@KillSessionEnabled,@PlanForcingEnabled,@AdhocXEMaxDurationSeconds,@AllowedScripts,@AllowedCustomProcs, @ManageXESessions, @WatchXESessions, @AdhocXEEnabled, @ScheduleChangesEnabled, @ConnectionChangesEnabled, @PublicKey
+	INSERT INTO dbo.DBADashAgent(AgentHostName,AgentServiceName,AgentVersion,AgentPath,ServiceSQSQueueUrl,AgentIdentifier,S3Path,MessagingEnabled,KillSessionEnabled,PlanForcingEnabled,AdhocXEMaxDurationSeconds,AllowedScripts, AllowedCustomProcs, ManageXESessions, WatchXESessions, AdhocXEEnabled, ScheduleChangesEnabled, ConnectionChangesEnabled, PublicKey, PublicKeyCreated)
+	SELECT @AgentHostName,@AgentServiceName,@AgentVersion,@AgentPath,@ServiceSQSQueueUrl,ISNULL(@AgentIdentifier,LEFT(CONCAT('Temp.',REPLACE(NEWID(),'-','')),22)), @S3Path, @MessagingEnabled,@KillSessionEnabled,@PlanForcingEnabled,@AdhocXEMaxDurationSeconds,@AllowedScripts,@AllowedCustomProcs, @ManageXESessions, @WatchXESessions, @AdhocXEEnabled, @ScheduleChangesEnabled, @ConnectionChangesEnabled, @PublicKey, @PublicKeyCreated
 	WHERE NOT EXISTS(SELECT 1 
 				FROM dbo.DBADashAgent WITH(UPDLOCK,HOLDLOCK) 
 				WHERE AgentHostName = @AgentHostName 
@@ -84,6 +102,7 @@ BEGIN
 			AdhocXEEnabled = @AdhocXEEnabled,
 			ScheduleChangesEnabled = @ScheduleChangesEnabled,
 			ConnectionChangesEnabled = @ConnectionChangesEnabled,
+			PublicKeyCreated = CASE WHEN @PublicKey IS NULL THEN PublicKeyCreated ELSE @PublicKeyCreated END,
 			PublicKey = ISNULL(@PublicKey,PublicKey),
 			ModifiedDate = SYSUTCDATETIME()
 	WHERE DBADashAgentID = @DBADashAgentID;

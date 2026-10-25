@@ -912,7 +912,8 @@ namespace DBADash
                 AdhocXEEnabled = row.Table.Columns.Contains("AdhocXEEnabled") && row["AdhocXEEnabled"] != DBNull.Value && (bool)row["AdhocXEEnabled"],
                 ScheduleChangesEnabled = row.Table.Columns.Contains("ScheduleChangesEnabled") && row["ScheduleChangesEnabled"] != DBNull.Value && (bool)row["ScheduleChangesEnabled"],
                 ConnectionChangesEnabled = row.Table.Columns.Contains("ConnectionChangesEnabled") && row["ConnectionChangesEnabled"] != DBNull.Value && (bool)row["ConnectionChangesEnabled"],
-                PublicKey = row.Table.Columns.Contains("PublicKey") && row["PublicKey"] != DBNull.Value ? (string)row["PublicKey"] : null
+                PublicKey = row.Table.Columns.Contains("PublicKey") && row["PublicKey"] != DBNull.Value ? (string)row["PublicKey"] : null,
+                PublicKeyCreatedUtc = row.Table.Columns.Contains("PublicKeyCreated") && row["PublicKeyCreated"] != DBNull.Value ? DateTime.SpecifyKind((DateTime)row["PublicKeyCreated"], DateTimeKind.Utc) : null
             };
         }
 

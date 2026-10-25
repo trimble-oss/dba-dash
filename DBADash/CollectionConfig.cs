@@ -659,6 +659,18 @@ namespace DBADash
             return GetSourceFromConnectionString(connectionString, sources, isAzure) != null;
         }
 
+        /// <summary>
+        /// True if <paramref name="source"/> - or a copy of it, as a collection job carries - is one of the sources, with
+        /// the same connection string.
+        /// </summary>
+        public bool IsCollected(DBADashSource source)
+        {
+            lock (SourceConnections)
+            {
+                return SourceConnections.Exists(s => ReferenceEquals(s, source) || s.ConnectionString == source.ConnectionString);
+            }
+        }
+
         public void AddConnections(List<DBADashSource> connections)
         {
             lock (SourceConnections)

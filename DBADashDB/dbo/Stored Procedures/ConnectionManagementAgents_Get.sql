@@ -21,14 +21,15 @@ OUTER APPLY(
 	WHERE I.CollectAgentID = A.DBADashAgentID
 	AND I.IsActive = 1
 	) Instances
+/*	Routes from active instances are preferred, but deleted instances still show the route - a remote service whose
+	instances have all been removed from the GUI (and marked deleted) is still only reachable through its importer */
 OUTER APPLY(
 	SELECT TOP(1) I.ImportAgentID
 	FROM dbo.Instances I
 	WHERE I.CollectAgentID = A.DBADashAgentID
-	AND I.IsActive = 1
 	AND I.ImportAgentID IS NOT NULL
 	GROUP BY I.ImportAgentID
-	ORDER BY COUNT(*) DESC
+	ORDER BY MAX(CASE WHEN I.IsActive = 1 THEN 1 ELSE 0 END) DESC, COUNT(*) DESC
 	) Import
 WHERE A.MessagingEnabled = 1
 AND A.ConnectionChangesEnabled = 1
