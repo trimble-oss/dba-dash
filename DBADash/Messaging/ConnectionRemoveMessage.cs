@@ -62,12 +62,9 @@ namespace DBADash.Messaging
 
                 fileConfig.Save();
 
-                var configured = fileConfig.SourceConnections
-                    .Where(s => !string.IsNullOrEmpty(s.ConnectionID))
-                    .Select(s => s.ConnectionID)
-                    .ToHashSet(StringComparer.InvariantCultureIgnoreCase);
                 lock (cfg.SourceConnections)
                 {
+                    var configured = ConnectionChanges.GetConfiguredConnectionIDs(fileConfig, cfg.SourceConnections);
                     foreach (var (connectionID, fileSource) in removedFromFile)
                     {
                         var running = cfg.SourceConnections

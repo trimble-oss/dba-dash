@@ -38,6 +38,8 @@ namespace DBADashGUI
             Checked = true
         };
 
+        private readonly bool isRestoreOffered;
+
         private readonly CheckBox chkRestoreDeleted = new()
         {
             Text = "Restore instances marked deleted in the repository",
@@ -87,7 +89,8 @@ namespace DBADashGUI
                 WrapContents = false
             };
             chkDefaultDeadlockSchedule.Visible = checks.Any(c => c.DeadlockScheduleMissing);
-            chkRestoreDeleted.Visible = checks.Any(c => c.IsDeletedInRepository);
+            isRestoreOffered = checks.Any(c => c.IsDeletedInRepository);
+            chkRestoreDeleted.Visible = isRestoreOffered;
             pnlOptions.Controls.AddRange(new Control[] { chkDefaultDeadlockSchedule, chkRestoreDeleted });
 
             var bttnAdd = new Button { Text = "Add", DialogResult = DialogResult.OK, Size = new Size(110, 34) };
@@ -124,6 +127,8 @@ namespace DBADashGUI
         {
             var idx = dgv.Rows.Add();
             var row = dgv.Rows[idx];
+            // The position of its check, which the decisions are returned in - the grid can be sorted
+            row.Tag = idx;
             row.Cells["Connection"].Value = check.ConnectionForPrint;
             row.Cells["ConnectionID"].Value = check.ConnectionID;
             row.Cells["Version"].Value = check.Validated && !string.IsNullOrEmpty(check.ProductVersion) ? $"{check.ProductVersion} {check.Edition}" : string.Empty;
@@ -222,10 +227,16 @@ namespace DBADashGUI
 
         /// <summary>The decisions for each connection, in the order of the checks - null for a connection that's skipped.</summary>
         public IReadOnlyList<SourceConnectionDecisions> Decisions =>
-            dgv.Rows.Cast<DataGridViewRow>().Select(row => GetDecisions(row.Cells["Action"].Value as string, chkDefaultDeadlockSchedule.Checked)).ToList();
+            dgv.Rows.Cast<DataGridViewRow>()
+                .OrderBy(row => (int)row.Tag)
+                .Select(row => GetDecisions(row.Cells["Action"].Value as string, chkDefaultDeadlockSchedule.Checked))
+                .ToList();
 
-        /// <summary>Restore connections that are marked deleted in the repository</summary>
-        public bool RestoreDeleted => chkRestoreDeleted.Visible && chkRestoreDeleted.Checked;
+        /// <summary>
+        /// Restore connections that are marked deleted in the repository.  Not from the check box's Visible, which is
+        /// false once the dialog has closed.
+        /// </summary>
+        public bool RestoreDeleted => isRestoreOffered && chkRestoreDeleted.Checked;
 
         public static SourceConnectionDecisions GetDecisions(string action, bool useDefaultDeadlockSchedule) => action switch
         {

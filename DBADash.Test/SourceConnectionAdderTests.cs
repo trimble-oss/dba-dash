@@ -2,6 +2,7 @@ using DBADashService;
 using Microsoft.Data.SqlClient;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -126,7 +127,8 @@ namespace DBADash.Test
             var updated = SourceConnectionAdder.Apply(cfg, src, check, new SourceConnectionDecisions { UpdateExisting = true });
             Assert.AreEqual(SourceConnectionAddOutcomes.Updated, updated.Outcome);
             var replaced = cfg.SourceConnections.Single();
-            Assert.AreSame(src, replaced);
+            Assert.AreSame(updated.Source, replaced);
+            Assert.AreNotSame(existing, replaced);
             Assert.IsTrue(replaced.NoWMI);
             Assert.AreEqual("CustomID", replaced.ConnectionID); // Kept, so it stays the same instance in the repository
             Assert.AreEqual(77, replaced.SlowQueryEventFileMaxSizeMB);
@@ -174,6 +176,55 @@ namespace DBADash.Test
             Assert.AreEqual(SourceConnectionAddOutcomes.Skipped,
                 SourceConnectionAdder.Apply(cfg, src, check, new SourceConnectionDecisions { AddUnvalidated = true }).Outcome);
             Assert.AreEqual(0, cfg.SourceConnections.Count);
+        }
+        [TestMethod]
+        public async Task Update_KeepsCustomCollectionsAndSettingsThatArentOptions()
+        {
+            var cfg = NewConfig();
+            var existing = new SourceConnectionOptions().CreateSource("SQL1");
+            existing.ConnectionID = "SQL1";
+            existing.CustomCollections = new() { { "Test", new CustomCollection { ProcedureName = "dbo.Test" } } };
+            existing.PerfmonCounters = new List<PerfmonCounter>();
+            existing.TableSizeDatabases = "DB1";
+            existing.FlushDeadlockXERingBuffer = true;
+            cfg.SourceConnections.Add(existing);
+
+            // As from the GUI - no custom collections specified, and a new connection string for the same instance
+            var src = new SourceConnectionOptions { NoWMI = true }.CreateSource("Data Source=SQL1;User ID=dba;Password=x");
+            var check = await SourceConnectionAdder.CheckAsync(cfg, src, validate: false);
+            var result = SourceConnectionAdder.Apply(cfg, src, check, new SourceConnectionDecisions { UpdateExisting = true });
+
+            var updated = cfg.SourceConnections.Single();
+            Assert.AreSame(result.Source, updated);
+            Assert.IsTrue(updated.NoWMI);
+            StringAssert.Contains(updated.SourceConnection.ConnectionString, "User ID=dba");
+            Assert.AreEqual(1, updated.CustomCollections.Count);
+            Assert.IsNotNull(updated.PerfmonCounters);
+            Assert.AreEqual("DB1", updated.TableSizeDatabases);
+            Assert.IsTrue(updated.FlushDeadlockXERingBuffer);
+
+            // From the config tool, custom collections are specified - an empty set clears them
+            var fromTool = new SourceConnectionOptions { CustomCollections = new() }.CreateSource("SQL1");
+            var toolCheck = await SourceConnectionAdder.CheckAsync(cfg, fromTool, validate: false);
+            SourceConnectionAdder.Apply(cfg, fromTool, toolCheck, new SourceConnectionDecisions { UpdateExisting = true });
+            Assert.AreEqual(0, cfg.SourceConnections.Single().CustomCollections.Count);
+        }
+
+        [TestMethod]
+        public async Task Batch_SameInstanceTwiceIsAddedOnce()
+        {
+            var cfg = NewConfig();
+            var first = new SourceConnectionOptions().CreateSource("SQL1");
+            var second = new SourceConnectionOptions().CreateSource("Data Source=SQL1;Integrated Security=True");
+            var checks = new[] { await SourceConnectionAdder.CheckAsync(cfg, first, validate: false), await SourceConnectionAdder.CheckAsync(cfg, second, validate: false) };
+            Assert.IsTrue(checks.All(c => c.Existing == ExistingConnectionStates.None)); // Both look new when checked
+
+            var decisions = new SourceConnectionDecisions();
+            Assert.AreEqual(SourceConnectionAddOutcomes.Added, SourceConnectionAdder.Apply(cfg, first, checks[0], decisions).Outcome);
+            await SourceConnectionAdder.RefreshExistingAsync(cfg, second, checks[1]);
+            Assert.AreEqual(ExistingConnectionStates.Configured, checks[1].Existing);
+            Assert.AreEqual(SourceConnectionAddOutcomes.Skipped, SourceConnectionAdder.Apply(cfg, second, checks[1], decisions).Outcome);
+            Assert.AreEqual(1, cfg.SourceConnections.Count);
         }
     }
 

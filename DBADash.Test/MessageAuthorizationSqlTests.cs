@@ -536,6 +536,33 @@ AND m.name <> N'dbo'");
             Assert.IsTrue(listed, "Agent with connection changes enabled wasn't listed");
         }
 
+        /// <summary>
+        /// A ManageConnections member with read-only app access can mark an instance deleted or restore it - after
+        /// removing or adding its connection - but can't run Instance_Del, which can also hard delete.
+        /// </summary>
+        [TestMethod]
+        public void ManageConnections_CanSoftDeleteOnly()
+        {
+            using var cn = Open();
+            Execute(cn, "IF USER_ID('ReadOnlyConnections') IS NULL BEGIN CREATE USER ReadOnlyConnections WITHOUT LOGIN; ALTER ROLE AppReadOnly ADD MEMBER ReadOnlyConnections; ALTER ROLE ManageConnections ADD MEMBER ReadOnlyConnections; END");
+            string? Run(string sql)
+            {
+                try
+                {
+                    Execute(cn, $"EXECUTE AS USER = 'ReadOnlyConnections'; BEGIN TRY {sql} END TRY BEGIN CATCH REVERT; THROW; END CATCH; REVERT;");
+                    return null;
+                }
+                catch (SqlException ex)
+                {
+                    return ex.Message;
+                }
+            }
+
+            // Permitted - fails only because there's no such instance
+            Assert.AreEqual("Instance not found", Run("EXEC dbo.Instance_SetActive @ConnectionID = N'NoSuchInstance', @IsActive = 0;"));
+            StringAssert.Contains(Run("EXEC dbo.Instance_Del @ConnectionID = N'NoSuchInstance';"), "permission");
+        }
+
         private static int QueueCount()
         {
             using var cn = Open();

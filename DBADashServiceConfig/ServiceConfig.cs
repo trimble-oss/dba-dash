@@ -233,10 +233,12 @@ namespace DBADashServiceConfig
             for (var i = 0; i < sources.Count; i++)
             {
                 if (decisions[i] == null) continue;
+                // Two entries for the same instance both looked new when checked - the second must see the first
+                await SourceConnectionAdder.RefreshExistingAsync(collectionConfig, sources[i], checks[i]);
                 var result = SourceConnectionAdder.Apply(collectionConfig, sources[i], checks[i], decisions[i]);
                 if (result.Outcome != SourceConnectionAddOutcomes.Skipped && review.RestoreDeleted && checks[i].IsDeletedInRepository)
                 {
-                    RestoreInstance(sources[i].ConnectionID);
+                    RestoreInstance(result.Source.ConnectionID);
                 }
             }
 
@@ -3459,7 +3461,7 @@ namespace DBADashServiceConfig
             }
 
             var sessionName = tabSrcOptions.DeadlockXESessionName;
-            var backfill = tabSrcOptions.Options.BackfillDeadlocksFromSystemHealth;
+            var backfill = tabSrcOptions.BackfillDeadlocksFromSystemHealth;
             // system_health doesn't exist on Azure SQL Database, so that mode can't be applied there
             var isSystemHealth = string.Equals(sessionName, DBADashSource.SystemHealthXESessionName,
                 StringComparison.OrdinalIgnoreCase);
@@ -3582,9 +3584,8 @@ namespace DBADashServiceConfig
                 return;
             }
 
-            var queryStatsOptions = tabSrcOptions.Options;
-            var topN = queryStatsOptions.QueryStatsTopN;
-            var plans = queryStatsOptions.QueryStatsPlansPerCollection;
+            var topN = tabSrcOptions.QueryStatsTopN;
+            var plans = tabSrcOptions.QueryStatsPlansPerCollection;
             var description = topN > 0
                 ? $"Collect query stats with a top N of {topN} and up to {plans} plans per collection"
                 : "Switch query stats collection off";

@@ -25,6 +25,9 @@ GRANT EXECUTE ON OBJECT::AI.ServiceConfig_Get TO AIUser;
    able to write the user action log - including those with read-only app access.  App has EXECUTE on dbo already. */
 GRANT EXECUTE ON OBJECT::dbo.UserActionLog_Add TO AppReadOnly;
 GRANT EXECUTE ON OBJECT::dbo.UserActionLog_Upd TO AppReadOnly;
+/* Connections are removed and added from the GUI by ManageConnections members, who might only have read-only app access -
+   the instance is marked deleted or restored with a soft delete only proc. */
+GRANT EXECUTE ON OBJECT::dbo.Instance_SetActive TO ManageConnections;
 /* The deadlock viewer shows a pattern's previous analyses whether or not the reader could commission
    a new one, so the read is granted to the app roles rather than to the AI roles.  It reads through
    the procedure only - no SELECT on AI.DeadlockAnalysis is granted, and none is needed: the schema is

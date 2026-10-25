@@ -247,20 +247,29 @@ namespace DBADashGUI
         private bool isLoading;
 
         /// <summary>Show the Custom Collections button - config tool only, as custom collections can't be added from the GUI.</summary>
+        // Kept apart from the controls' Visible, which is false whenever their tab isn't the one selected
+        private bool showCustomCollections;
+        private bool showApplyToAll;
+
         [DefaultValue(false)]
         public bool ShowCustomCollections
         {
-            get => bttnCustomCollections.Visible;
-            set => bttnCustomCollections.Visible = value;
+            get => showCustomCollections;
+            set
+            {
+                showCustomCollections = value;
+                bttnCustomCollections.Visible = value;
+            }
         }
 
         /// <summary>Show the links that apply the deadlock and query stats configuration to every existing connection.</summary>
         [DefaultValue(false)]
         public bool ShowApplyToAll
         {
-            get => lnkApplyDeadlockConfigurationToAll.Visible;
+            get => showApplyToAll;
             set
             {
+                showApplyToAll = value;
                 lnkApplyDeadlockConfigurationToAll.Visible = value;
                 lnkApplyQueryStatsConfigurationToAll.Visible = value;
             }
@@ -319,6 +328,17 @@ namespace DBADashGUI
             }
         }
 
+        /// <summary>Backfill deadlocks from system health - read without the other options, so an invalid threshold doesn't stop it.</summary>
+        [Browsable(false)]
+        public bool BackfillDeadlocksFromSystemHealth => chkBackfillDeadlocks.Checked;
+
+        /// <summary>The query stats top N - zero when query stats aren't collected.  Read without the other options.</summary>
+        [Browsable(false)]
+        public int QueryStatsTopN => chkCollectQueryStats.Checked ? (int)numQueryStatsTopN.Value : 0;
+
+        [Browsable(false)]
+        public int QueryStatsPlansPerCollection => (int)numQueryStatsPlans.Value;
+
         /// <summary>The options chosen.  Call <see cref="ValidateOptions"/> first - the thresholds must be numbers.</summary>
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -335,8 +355,8 @@ namespace DBADashGUI
                 KeepSlowQueryXESessionRunning = chkKeepSlowQuerySessionRunning.Checked,
                 DeadlockXESessionName = DeadlockXESessionName,
                 BackfillDeadlocksFromSystemHealth = chkBackfillDeadlocks.Checked,
-                QueryStatsTopN = chkCollectQueryStats.Checked ? (int)numQueryStatsTopN.Value : 0,
-                QueryStatsPlansPerCollection = (int)numQueryStatsPlans.Value,
+                QueryStatsTopN = QueryStatsTopN,
+                QueryStatsPlansPerCollection = QueryStatsPlansPerCollection,
                 RunningQueryPlanThreshold = chkCollectPlans.Checked
                     ? new PlanCollectionThreshold
                     {

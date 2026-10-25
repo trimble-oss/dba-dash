@@ -33,7 +33,10 @@ IF NOT EXISTS(SELECT 1 FROM dbo.CollectionDates WHERE SnapshotDate>=@SnapshotDat
 BEGIN
 	BEGIN TRAN
 
-	DELETE FROM dbo.ScheduleInfo
+	/*	HOLDLOCK keeps the instance's key range locked to the end of the transaction, so a concurrent report for the same
+		instance (e.g. a connection added from the GUI reports its schedule as its first collection does) waits instead of
+		both deleting nothing and then inserting the same keys. */
+	DELETE FROM dbo.ScheduleInfo WITH (HOLDLOCK)
 	WHERE InstanceID = @InstanceID
 
 	INSERT INTO dbo.ScheduleInfo

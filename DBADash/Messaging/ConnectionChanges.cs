@@ -88,6 +88,81 @@ namespace DBADash.Messaging
         /// </summary>
         internal static CollectionConfig LoadFileConfig() => BasicConfig.Load<CollectionConfig>();
 
+        /// <summary>
+        /// ConnectionIDs of the sources in the saved config, for telling them apart from the sources the service discovered
+        /// from them (<see cref="CollectionScheduleUpdateMessage.GetDerivedSources"/>).  A source saved without a
+        /// ConnectionID has it generated at runtime, so it's taken from the running source with the same connection string.
+        /// Caller holds the lock on <paramref name="running"/>.
+        /// </summary>
+        internal static HashSet<string> GetConfiguredConnectionIDs(CollectionConfig fileConfig, IReadOnlyCollection<DBADashSource> running)
+        {
+            var ids = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
+            foreach (var src in fileConfig.SourceConnections)
+            {
+                var id = !string.IsNullOrEmpty(src.ConnectionID)
+                    ? src.ConnectionID
+                    : running.FirstOrDefault(r => r.ConnectionString == src.ConnectionString)?.ConnectionID;
+                if (!string.IsNullOrEmpty(id)) ids.Add(id);
+            }
+            return ids;
+        }
+
+        /// <summary>
+        /// Drops the DBA Dash extended events sessions each source no longer uses after its options changed from Before
+        /// to its current options (<see cref="ConnectionOptionsUpdateMessage.GetSessionsToDrop"/>), adding what was
+        /// dropped to its result and anything that failed to <paramref name="warnings"/>.
+        /// </summary>
+        internal static async Task DropRedundantSessionsAsync(CollectionConfig cfg, IReadOnlyList<(DBADashSource Source, SourceConnectionOptions Before)> changed,
+            List<ConnectionChangeResult> results, List<string> warnings, CancellationToken cancellationToken)
+        {
+            var sqlSources = changed.Where(c => c.Source.SourceConnection.Type == ConnectionType.SQL).ToList();
+            if (sqlSources.Count == 0) return;
+
+            var outcomes = await ForEachThrottledAsync(sqlSources, async c =>
+            {
+                try
+                {
+                    // Only connects when a session might need dropping, whichever platform the instance turns out to be
+                    var after = SourceConnectionOptions.FromSource(c.Source);
+                    if (ConnectionOptionsUpdateMessage.GetSessionsToDrop(c.Before, after, false, false).Count == 0
+                        && ConnectionOptionsUpdateMessage.GetSessionsToDrop(c.Before, after, true, false).Count == 0)
+                    {
+                        return (c.Source, Dropped: new List<string>(), Error: (string)null);
+                    }
+                    var info = c.Source.SourceConnection.ConnectionInfo;
+                    var sessions = ConnectionOptionsUpdateMessage.GetSessionsToDrop(c.Before, SourceConnectionOptions.FromSource(c.Source),
+                        info.IsAzureDB, info.EngineEdition == Microsoft.SqlServer.Management.Common.DatabaseEngineEdition.SqlManagedInstance);
+                    if (sessions.Count == 0)
+                    {
+                        return (c.Source, Dropped: new List<string>(), Error: (string)null);
+                    }
+                    var collector = await DBCollector.CreateAsync(c.Source, cfg.ServiceName);
+                    return (c.Source, Dropped: await collector.DropEventSessionsAsync(sessions, cancellationToken), Error: (string)null);
+                }
+                catch (Exception ex)
+                {
+                    Serilog.Log.Warning(ex, "Error dropping extended events sessions no longer used by {connection}", c.Source.SourceConnection.ConnectionForPrint);
+                    return (c.Source, Dropped: new List<string>(), Error: ex.Message);
+                }
+            }, cancellationToken);
+
+            foreach (var (src, dropped, error) in outcomes)
+            {
+                if (error != null)
+                {
+                    warnings.Add($"Extended events sessions no longer used by {src.ConnectionID} couldn't be removed - they'll be removed when the service stops.  {error}");
+                    continue;
+                }
+                if (dropped.Count == 0) continue;
+                var result = results.FirstOrDefault(r => string.Equals(r.ConnectionID, src.ConnectionID, StringComparison.InvariantCultureIgnoreCase))
+                             // A discovered database or replica that followed the connection it was found from
+                             ?? results.FirstOrDefault(r => r.ConnectionID != null && src.ConnectionID?.StartsWith(r.ConnectionID.Replace("|master", "|"), StringComparison.InvariantCultureIgnoreCase) == true);
+                if (result == null) continue;
+                var detail = $"Dropped extended events sessions on {src.ConnectionID}: {string.Join(", ", dropped)}";
+                result.Detail = string.IsNullOrEmpty(result.Detail) ? detail : result.Detail + ".  " + detail;
+            }
+        }
+
         /// <summary>Runs <paramref name="action"/> for each item, a few at a time, keeping the order of the results.</summary>
         internal static async Task<List<TResult>> ForEachThrottledAsync<T, TResult>(IReadOnlyList<T> items, Func<T, Task<TResult>> action, CancellationToken cancellationToken)
         {
