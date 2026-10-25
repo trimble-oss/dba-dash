@@ -30,7 +30,10 @@ PopulateConnectionID - Add ConnectionID to source connections without a Connecti
 PopulateConnectionID2 - Add ConnectionID to source connections without a ConnectionID.  If connection fails, set ConnectionID based on Data Source in connection string.
 SetAWS - Set AWS Credentials
 SetPerfmonCounters - Set OS-level (perfmon) counters.  Sets the global list, or a per-connection override when -c/--ConnectionID is supplied.  Use --PerfmonDefaults, --PerfmonCounters, --PerfmonClear and/or --PerfmonInherit.
-SetSchedule - Set how often a collection runs.  Sets the service level schedule, or a per-connection override when -c/--ConnectionID is supplied.  Use --CollectionType with --Schedule, --RunOnServiceStart and/or --ScheduleClear.")]
+SetSchedule - Set how often a collection runs.  Sets the service level schedule, or a per-connection override when -c/--ConnectionID is supplied.  Use --CollectionType with --Schedule, --RunOnServiceStart and/or --ScheduleClear.
+Export - Write a copy of the config encrypted with a password (--ExportPath, --ExportPassword).  Use it to move DBA Dash to another machine, or as a backup, without having to re-enter passwords.  Use --NoSecrets instead to leave the passwords out.  The config itself isn't changed.
+ListUnreadableSecrets - List the passwords that can't be decrypted on this machine, e.g. after copying the config from another machine.  Set them with SetPassword.
+SetPassword - Set the password of SQL connections (--Password).  Use --ConnectionID for one connection (a source's ConnectionID or a destination's server|database) or --UserName for every connection that logs in as that user.")]
         public CommandLineActionOption Option { get; set; }
 
         [Option('r', "Replace", Required = false, HelpText = "Option to replace the existing connection if it already exists", Default = false)]
@@ -154,6 +157,26 @@ SetSchedule - Set how often a collection runs.  Sets the service level schedule,
             HelpText = "Use in combination with --DecryptionPassword.  Password will be saved for the current user, protected with DPAPI. ")]
         public bool SavePassword { get; set; }
 
+        [Option("ExportPath", Required = false,
+            HelpText = "Use with -a Export.  The file to write the password protected copy of the config to.")]
+        public string? ExportPath { get; set; }
+
+        [Option("ExportPassword", Required = false,
+            HelpText = "Use with -a Export.  If not supplied, it's read from the " + Helper.ExportPasswordEnvironmentVariable + " environment variable, then standard input if it's redirected, then prompted for.  Passing it here leaves it in your shell history.")]
+        public string? ExportPassword { get; set; }
+
+        [Option("NoSecrets", Default = false, Required = false,
+            HelpText = "Use with -a Export to leave the passwords and AWS secret key out instead of protecting them with a password.  When the exported config is used, they're listed to be entered again (-a ListUnreadableSecrets / -a SetPassword, or the service config tool).")]
+        public bool NoSecrets { get; set; }
+
+        [Option("Password", Required = false,
+            HelpText = "Use with -a SetPassword.  If not supplied, it's read from the " + Helper.PasswordEnvironmentVariable + " environment variable, then standard input if it's redirected, then prompted for.  Passing it here leaves it in your shell history.")]
+        public string? Password { get; set; }
+
+        [Option("UserName", Required = false,
+            HelpText = "Use with -a SetPassword to set the password of every SQL connection that logs in as this user.")]
+        public string? UserName { get; set; }
+
         [Option("RetentionDays", Required = false,
             HelpText = "Use with action SetConfigFileBackupRetention.")]
         public int RetentionDays { get; set; }
@@ -234,7 +257,10 @@ SetSchedule - Set how often a collection runs.  Sets the service level schedule,
             PopulateConnectionID2,
             SetAWS,
             SetPerfmonCounters,
-            SetSchedule
+            SetSchedule,
+            Export,
+            ListUnreadableSecrets,
+            SetPassword
         }
     }
 }

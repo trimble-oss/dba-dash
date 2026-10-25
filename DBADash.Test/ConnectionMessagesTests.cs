@@ -32,6 +32,18 @@ namespace DBADash.Test
         }
 
         [TestMethod]
+        public void CreateSource_RejectsPasswordTheServiceCantDecrypt()
+        {
+            var unreadable = SecretProtection.ConfigKeyPrefix + "00000000:" + Convert.ToBase64String(new byte[40]);
+            var encrypted = MessageEncryption.Encrypt("Data Source=SQL1;User ID=dba;Password=" + unreadable, MessageEncryption.PublicKey);
+            var ex = Assert.ThrowsExactly<ArgumentException>(() => ConnectionChanges.CreateSource(encrypted, new SourceConnectionOptions()));
+            StringAssert.Contains(ex.Message, "can't be decrypted");
+
+            var plain = MessageEncryption.Encrypt("Data Source=SQL1;User ID=dba;Password=S3cret!", MessageEncryption.PublicKey);
+            Assert.IsNull(ConnectionChanges.CreateSource(plain, new SourceConnectionOptions()).SourceConnection.SecretError);
+        }
+
+        [TestMethod]
         public void Encryption_OtherKeyCantBeDecrypted()
         {
             using var other = RSA.Create(3072);
@@ -114,23 +126,34 @@ namespace DBADash.Test
         }
 
         [TestMethod]
-        public void FindInFileConfig_MatchesConnectionIDOrRunningConnectionString()
+        public void FindInFileConfig_MatchesConnectionIDOnly()
         {
             var withID = new DBADashSource("Data Source=SQL1;Integrated Security=True") { ConnectionID = "SQL1" };
             var withoutID = new DBADashSource("Data Source=SQL2;Integrated Security=True");
             var fileConfig = new CollectionConfig();
             fileConfig.SourceConnections.AddRange(new[] { withID, withoutID });
 
-            // The running source has its ConnectionID generated at runtime
-            var running = new CollectionConfig();
-            running.SourceConnections.Add(new DBADashSource("Data Source=SQL2;Integrated Security=True") { ConnectionID = "SQL2\\GENERATED" });
-
-            Assert.AreSame(withID, ConnectionRemoveMessage.FindInFileConfig(fileConfig, running, "sql1"));
-            Assert.AreSame(withoutID, ConnectionRemoveMessage.FindInFileConfig(fileConfig, running, "SQL2\\GENERATED"));
-            Assert.IsNull(ConnectionRemoveMessage.FindInFileConfig(fileConfig, running, "SQL3"));
+            Assert.AreSame(withID, ConnectionRemoveMessage.FindInFileConfig(fileConfig, "sql1"));
+            // A ConnectionID generated at runtime for a source saved without one isn't matched on its connection string
+            Assert.IsNull(ConnectionRemoveMessage.FindInFileConfig(fileConfig, "SQL2"));
+            Assert.IsNull(ConnectionRemoveMessage.FindInFileConfig(fileConfig, "SQL3"));
             // Not the source saved without a ConnectionID
-            Assert.IsNull(ConnectionRemoveMessage.FindInFileConfig(fileConfig, running, null!));
-            Assert.IsNull(ConnectionRemoveMessage.FindInFileConfig(fileConfig, running, " "));
+            Assert.IsNull(ConnectionRemoveMessage.FindInFileConfig(fileConfig, null!));
+            Assert.IsNull(ConnectionRemoveMessage.FindInFileConfig(fileConfig, " "));
+        }
+
+        [TestMethod]
+        public void MissingConnectionIDs_ThrowWithHowToFix()
+        {
+            var fileConfig = new CollectionConfig();
+            fileConfig.SourceConnections.Add(new DBADashSource("Data Source=SQL1;Integrated Security=True") { ConnectionID = "SQL1" });
+            fileConfig.SourceConnections.Add(new DBADashSource("C:\\Import")); // Folder sources don't need one
+            ConnectionChanges.ThrowIfMissingConnectionIDs(fileConfig);
+
+            fileConfig.SourceConnections.Add(new DBADashSource("Data Source=SQL2;Integrated Security=True"));
+            var ex = Assert.ThrowsExactly<InvalidOperationException>(() => ConnectionChanges.ThrowIfMissingConnectionIDs(fileConfig));
+            StringAssert.Contains(ex.Message, "SQL2");
+            StringAssert.Contains(ex.Message, "PopulateConnectionID");
         }
 
         [TestMethod]
@@ -259,12 +282,12 @@ namespace DBADash.Test
         }
 
         [TestMethod]
-        public void ConfiguredConnectionIDs_ResolvesIDsGeneratedAtRuntime()
+        public void ConfiguredConnectionIDs_ExcludeDiscoveredSources()
         {
             var fileConfig = new CollectionConfig();
             fileConfig.SourceConnections.Add(new DBADashSource("Data Source=AZ1;Initial Catalog=master;Integrated Security=True") { ConnectionID = "AZ1|master" });
-            // Saved without a ConnectionID - an Azure DB configured explicitly
-            fileConfig.SourceConnections.Add(new DBADashSource("Data Source=AZ1;Initial Catalog=DB1;Integrated Security=True"));
+            // An Azure DB configured explicitly
+            fileConfig.SourceConnections.Add(new DBADashSource("Data Source=AZ1;Initial Catalog=DB1;Integrated Security=True") { ConnectionID = "AZ1|DB1" });
             var running = new List<DBADashSource>
             {
                 new("Data Source=AZ1;Initial Catalog=master;Integrated Security=True") { ConnectionID = "AZ1|master" },
@@ -272,7 +295,7 @@ namespace DBADash.Test
                 new("Data Source=AZ1;Initial Catalog=DB2;Integrated Security=True") { ConnectionID = "AZ1|DB2" } // Discovered
             };
 
-            var configured = ConnectionChanges.GetConfiguredConnectionIDs(fileConfig, running);
+            var configured = ConnectionChanges.GetConfiguredConnectionIDs(fileConfig);
             CollectionAssert.AreEquivalent(new[] { "AZ1|master", "AZ1|DB1" }, configured.ToList());
             // So only the discovered database is derived from master
             var derived = CollectionScheduleUpdateMessage.GetDerivedSources(running, "AZ1|master", configured);

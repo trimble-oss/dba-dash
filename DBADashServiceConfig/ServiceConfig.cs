@@ -472,7 +472,8 @@ namespace DBADashServiceConfig
             if (sfd.ShowDialog() != DialogResult.OK) return false;
             try
             {
-                File.WriteAllText(sfd.FileName, txtJson.Text);
+                // As Save writes it - the JSON tab shows an encrypted config decrypted, without what's needed to decrypt its secrets
+                File.WriteAllText(sfd.FileName, collectionConfig.Serialize(collectionConfig.EncryptionOption));
                 MessageBox.Show("Config saved to " + sfd.FileName, "Save", MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
                 return true;
@@ -968,17 +969,36 @@ namespace DBADashServiceConfig
                 {
                     if (ShowPassword())
                     {
+                        // Loads the config itself
                         SetOriginalJson();
                     }
                     else
                     {
                         Application.Exit();
-                        return;
                     }
+                    return;
                 }
             }
 
             SetFromJson(originalJson);
+            PromptForUnreadableSecrets();
+        }
+
+        /// <summary>
+        /// Passwords that can't be decrypted here - the config was copied from another machine or exported without them -
+        /// are listed to be entered again.  Entered passwords show as an unsaved change.
+        /// </summary>
+        private void PromptForUnreadableSecrets()
+        {
+            var unreadable = collectionConfig.GetSecrets().Where(s => !s.IsReadable).ToList();
+            if (unreadable.Count == 0) return;
+            using var frm = new ReEnterPasswordsDialog { Secrets = unreadable };
+            if (frm.ShowDialog(Visible ? this : null) != DialogResult.OK || frm.UpdatedCount == 0) return;
+            // The destination text box still has the password that couldn't be decrypted
+            txtDestination.Text = collectionConfig.Destination;
+            SetJson();
+            UpdateSaveButton();
+            MessageBox.Show($"{frm.UpdatedCount} password(s) updated.  Save the config to keep them.", "Re-enter Passwords", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private bool ShowPassword()
@@ -1167,7 +1187,14 @@ namespace DBADashServiceConfig
         private void SetJson()
         {
             if (IsSetFromJson) return;
+            // Serializing can re-protect the destination password (e.g. after the encryption option changes).  Keep the text
+            // box showing it, or DestinationChangedAsync would set the old value back.
+            var destinationInSync = txtDestination.Text == collectionConfig.Destination;
             txtJson.Text = collectionConfig.Serialize();
+            if (destinationInSync)
+            {
+                txtDestination.Text = collectionConfig.Destination;
+            }
         }
 
         private void setDgv()
@@ -2399,6 +2426,12 @@ namespace DBADashServiceConfig
             lnkSummaryRefreshCron.Text = string.IsNullOrEmpty(description)
                 ? "Configure Summary Refresh Schedule..."
                 : description;
+        }
+
+        private void BttnExportConfig_Click(object sender, EventArgs e)
+        {
+            using var frm = new ExportConfigDialog { Config = collectionConfig };
+            frm.ShowDialog(this);
         }
 
         private void BttnCustomCollections_Click(object sender, EventArgs e)

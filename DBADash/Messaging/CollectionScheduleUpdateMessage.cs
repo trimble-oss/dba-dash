@@ -97,6 +97,11 @@ namespace DBADash.Messaging
                 try
                 {
                     var fileConfig = BasicConfig.Load<CollectionConfig>();
+                    if (Scope == ScheduleScopes.Instance)
+                    {
+                        // Telling configured sources from derived ones relies on every saved source having a ConnectionID
+                        ConnectionChanges.ThrowIfMissingConnectionIDs(fileConfig);
+                    }
                     ApplyTo(fileConfig);
                     fileConfig.Save();
                     // The running service's sources are added to by the Azure DB and read replica scans, so they're
@@ -147,7 +152,7 @@ namespace DBADash.Messaging
             var parent = sources.FirstOrDefault(s => string.Equals(s.ConnectionID, ConnectionID, StringComparison.InvariantCultureIgnoreCase));
             if (parent == null) return new List<string>();
             // Caller holds the lock on sources
-            var configured = ConnectionChanges.GetConfiguredConnectionIDs(fileConfig, sources);
+            var configured = ConnectionChanges.GetConfiguredConnectionIDs(fileConfig);
             var derived = GetDerivedSources(sources, ConnectionID, configured);
             foreach (var source in derived)
             {

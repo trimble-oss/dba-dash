@@ -49,6 +49,12 @@ namespace DBADash.Messaging
             {
                 throw new ArgumentException("Only SQL Server connections can be added from the GUI.");
             }
+            // A protected value (e.g. copied from a config file) the service can't decrypt would leave the connection with a
+            // blank password - testing or collecting it would then be failed logins, which can lock out the login
+            if (src.SourceConnection.SecretError != null)
+            {
+                throw new ArgumentException("The password in the connection string can't be decrypted by the service.  Enter the password itself rather than an encrypted value from a config file.");
+            }
             return src;
         }
 
@@ -97,28 +103,43 @@ namespace DBADash.Messaging
         /// <summary>
         /// The service's config as saved in ServiceConfig.json.  Not the running config, which includes sources the
         /// service discovered at runtime (Azure DBs, read replicas) that mustn't be saved.  Caller holds
-        /// <see cref="CollectionScheduleUpdateMessage.ConfigFileLock"/>.
+        /// <see cref="CollectionScheduleUpdateMessage.ConfigFileLock"/>.  Throws if a SQL source is saved without a
+        /// ConnectionID (<see cref="ThrowIfMissingConnectionIDs"/>).
         /// </summary>
-        internal static CollectionConfig LoadFileConfig() => BasicConfig.Load<CollectionConfig>();
+        internal static CollectionConfig LoadFileConfig()
+        {
+            var fileConfig = BasicConfig.Load<CollectionConfig>();
+            ThrowIfMissingConnectionIDs(fileConfig);
+            return fileConfig;
+        }
+
+        /// <summary>
+        /// Throws if a SQL source in the saved config has no ConnectionID.  Saved and running sources are matched on
+        /// ConnectionID only - older configs without one have it generated at runtime, so they can't be matched reliably.
+        /// </summary>
+        internal static void ThrowIfMissingConnectionIDs(CollectionConfig fileConfig)
+        {
+            var missing = fileConfig.SourceConnections
+                .Where(s => s.SourceConnection?.Type == ConnectionType.SQL && string.IsNullOrEmpty(s.ConnectionID))
+                .Select(s => s.SourceConnection.ConnectionForPrint)
+                .ToList();
+            if (missing.Count == 0) return;
+            const int maxListed = 5;
+            var list = string.Join(", ", missing.Take(maxListed)) + (missing.Count > maxListed ? $" and {missing.Count - maxListed} more" : "");
+            throw new InvalidOperationException(
+                $"{missing.Count} source connection(s) in the service config don't have a ConnectionID: {list}.  Changing connections from the GUI requires every connection to have a ConnectionID.  " +
+                "Run \"DBADashConfig -a PopulateConnectionID\" on the service host, then restart the service.");
+        }
 
         /// <summary>
         /// ConnectionIDs of the sources in the saved config, for telling them apart from the sources the service discovered
-        /// from them (<see cref="CollectionScheduleUpdateMessage.GetDerivedSources"/>).  A source saved without a
-        /// ConnectionID has it generated at runtime, so it's taken from the running source with the same connection string.
-        /// Caller holds the lock on <paramref name="running"/>.
+        /// from them (<see cref="CollectionScheduleUpdateMessage.GetDerivedSources"/>).
         /// </summary>
-        internal static HashSet<string> GetConfiguredConnectionIDs(CollectionConfig fileConfig, IReadOnlyCollection<DBADashSource> running)
-        {
-            var ids = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
-            foreach (var src in fileConfig.SourceConnections)
-            {
-                var id = !string.IsNullOrEmpty(src.ConnectionID)
-                    ? src.ConnectionID
-                    : running.FirstOrDefault(r => r.ConnectionString == src.ConnectionString)?.ConnectionID;
-                if (!string.IsNullOrEmpty(id)) ids.Add(id);
-            }
-            return ids;
-        }
+        internal static HashSet<string> GetConfiguredConnectionIDs(CollectionConfig fileConfig) =>
+            fileConfig.SourceConnections
+                .Where(s => !string.IsNullOrEmpty(s.ConnectionID))
+                .Select(s => s.ConnectionID)
+                .ToHashSet(StringComparer.InvariantCultureIgnoreCase);
 
         /// <summary>
         /// Drops the DBA Dash extended events sessions each source no longer uses after its options changed from Before

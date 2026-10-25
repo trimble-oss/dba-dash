@@ -120,13 +120,12 @@ namespace DBADash.Messaging
                 // changed under the lock those take
                 lock (cfg.SourceConnections)
                 {
-                    var configured = ConnectionChanges.GetConfiguredConnectionIDs(fileConfig, cfg.SourceConnections);
+                    var configured = ConnectionChanges.GetConfiguredConnectionIDs(fileConfig);
                     foreach (var src in applied)
                     {
                         // The connection it updates, or a database or replica the service discovered and monitors already
                         var running = cfg.SourceConnections
-                            .Where(s => string.Equals(s.ConnectionID, src.ConnectionID, StringComparison.InvariantCultureIgnoreCase)
-                                        || s.ConnectionString == src.ConnectionString)
+                            .Where(s => string.Equals(s.ConnectionID, src.ConnectionID, StringComparison.InvariantCultureIgnoreCase))
                             .ToList();
                         // Databases and read replicas discovered from an updated connection are copies of it - they'd get
                         // its new options and schedules on restart

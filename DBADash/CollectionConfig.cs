@@ -2,6 +2,7 @@
 using DBADashService;
 using Microsoft.Data.SqlClient;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Serilog;
 using System;
 using System.Collections.Concurrent;
@@ -26,7 +27,6 @@ namespace DBADash
         private int? _cachedThreadCount;
         private string _secretKey;
         private bool wasEncryptionPerformed;
-        private readonly string myString = "g&hAs2&mVOLwE6DqO!I5";
         public SchemaSnapshotDBOptions SchemaSnapshotOptions = null;
         public bool ScanForAzureDBs { get; set; } = true;
         public int ScanForAzureDBsInterval { get; set; } = 3600;
@@ -460,27 +460,199 @@ namespace DBADash
                 {
                     _secretKey = null;
                 }
-                else if (value == null || value.StartsWith("¬=!"))
+                else if (value == null || SecretProtection.IsProtected(value))
                 {
                     _secretKey = value;
                 }
                 else
                 {
-                    _secretKey = "¬=!" + value.EncryptString(myString);
+                    _secretKey = SecretProtection.Protect(value);
                     wasEncryptionPerformed = true;
                 }
             }
         }
 
-        public string GetSecretKey()
+        /// <exception cref="SecretUnprotectException">The secret key can't be decrypted on this machine</exception>
+        public string GetSecretKey() => SecretProtection.Unprotect(_secretKey);
+
+        /// <summary>The decrypted secret key, or false with the reason if it can't be decrypted on this machine</summary>
+        private bool TryGetSecretKey(out string secretKey, out string error)
         {
-            if (_secretKey != null && _secretKey.StartsWith("¬=!"))
+            try
             {
-                return _secretKey[3..].DecryptString(myString);
+                secretKey = GetSecretKey();
+                error = null;
+                return true;
             }
-            else
+            catch (SecretUnprotectException ex)
             {
-                return _secretKey;
+                secretKey = null;
+                error = ex.Message;
+                return false;
+            }
+        }
+
+        protected override void ProtectSecrets(ConfigKey key, HashSet<string> seen)
+        {
+            base.ProtectSecrets(key, seen);
+            SecondaryDestinationConnections.ForEach(d => d.ProtectSecret(key, seen));
+            lock (SourceConnections)
+            {
+                SourceConnections.ForEach(s => s.SourceConnection?.ProtectSecret(key, seen));
+            }
+            if (!SecretProtection.IsProtectedWith(_secretKey, key) && TryGetSecretKey(out var secretKey, out _))
+            {
+                _secretKey = SecretProtection.Protect(secretKey, key);
+            }
+        }
+
+        protected override bool SecretsNeedProtection(ConfigKey key)
+        {
+            lock (SourceConnections)
+            {
+                return base.SecretsNeedProtection(key)
+                       || SecondaryDestinationConnections.Exists(d => d.SecretNeedsProtection(key))
+                       || SourceConnections.Exists(s => s.SourceConnection?.SecretNeedsProtection(key) == true)
+                       || (!SecretProtection.IsProtectedWith(_secretKey, key) && TryGetSecretKey(out _, out _));
+            }
+        }
+
+        private static string SourceName(DBADashSource s) =>
+            string.IsNullOrEmpty(s.ConnectionID) ? s.SourceConnection.ConnectionForPrint : s.ConnectionID;
+
+        private static string Describe(DBADashSource s) => "Source " + SourceName(s);
+
+        /// <summary>
+        /// Remove sources and secondary destinations whose password can't be decrypted, so the running service doesn't
+        /// keep trying to log in with a blank password (which can lock out the login).  For the running config only - the
+        /// saved config keeps them so they can be re-entered.  Returns the connections removed.
+        /// </summary>
+        public List<string> RemoveConnectionsWithUnreadableSecrets()
+        {
+            var removed = SecondaryDestinationConnections.Where(d => d.SecretError != null)
+                .Select(d => $"Destination {d.ConnectionForPrint}").ToList();
+            SecondaryDestinationConnections.RemoveAll(d => d.SecretError != null);
+            lock (SourceConnections)
+            {
+                removed.AddRange(SourceConnections.Where(s => s.SourceConnection?.SecretError != null).Select(Describe));
+                SourceConnections.RemoveAll(s => s.SourceConnection?.SecretError != null);
+            }
+            return removed;
+        }
+
+        public override List<ConfigSecret> GetSecrets()
+        {
+            var list = base.GetSecrets();
+            list.AddRange(SecondaryDestinationConnections.Where(d => d.HasPassword)
+                .Select(d => ConfigSecret.ForConnection(ConfigSecret.SecretTypes.Destination, d.ConnectionForPrint, d)));
+            lock (SourceConnections)
+            {
+                list.AddRange(SourceConnections.Where(s => s.SourceConnection?.HasPassword == true)
+                    .Select(s => ConfigSecret.ForConnection(ConfigSecret.SecretTypes.Source, SourceName(s), s.SourceConnection)));
+            }
+            if (!string.IsNullOrEmpty(_secretKey))
+            {
+                TryGetSecretKey(out _, out var error);
+                list.Add(new ConfigSecret(ConfigSecret.SecretTypes.AWSSecretKey, AccessKey, null, error, value => SecretKey = value));
+            }
+            return list;
+        }
+
+        /// <summary>
+        /// A copy of the config encrypted with <paramref name="password"/>, to move DBA Dash to another machine (or keep as a
+        /// backup) without re-entering passwords.  The config itself isn't changed.  Secrets that can't be decrypted here
+        /// (<see cref="BasicConfig.GetUnreadableSecrets"/>) are copied as they are and still can't be decrypted.
+        /// </summary>
+        public string ExportEncrypted(string password)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(password);
+            // Serializing with a password changes the keys the config uses, so work on a copy - and leave new secrets
+            // entered in this process protected the way they were
+            var defaultKey = SecretProtection.DefaultKey;
+            try
+            {
+                var copy = Deserialize(Serialize());
+                copy.EncryptionOption = EncryptionOptions.Encrypt;
+                return copy.Serialize(EncryptionOptions.Encrypt, password);
+            }
+            finally
+            {
+                SecretProtection.SetDefaultKey(defaultKey);
+            }
+        }
+
+        /// <summary>
+        /// The SQL connection passwords matching <paramref name="connectionID"/> (a source's ConnectionID or a destination's
+        /// server|database) and/or <paramref name="userName"/>.  A user name can match many connections, but a ConnectionID
+        /// must match one - a source's ConnectionID can be the same as a destination's name.
+        /// </summary>
+        /// <exception cref="InvalidOperationException"><paramref name="connectionID"/> matches more than one connection</exception>
+        public List<ConfigSecret> FindConnectionSecrets(string connectionID, string userName)
+        {
+            var matches = GetSecrets()
+                .Where(s => s.Connection != null
+                            && (string.IsNullOrEmpty(connectionID) || string.Equals(s.Name, connectionID, StringComparison.OrdinalIgnoreCase))
+                            && (string.IsNullOrEmpty(userName) || string.Equals(s.UserName, userName, StringComparison.OrdinalIgnoreCase)))
+                .ToList();
+            if (!string.IsNullOrEmpty(connectionID) && matches.Count > 1)
+            {
+                throw new InvalidOperationException($"{connectionID} matches more than one connection: {string.Join(", ", matches.Select(m => $"{m.TypeDescription} {m.Name} (user {m.UserName})"))}.  " +
+                                                    "Specify the user name as well to say which, or change the password in the service config tool.  No passwords were changed.");
+            }
+            return matches;
+        }
+
+        /// <summary>
+        /// A connection string that can't be parsed is kept as it is, so any password in it can't be found and removed.
+        /// The message doesn't include the connection strings, as they might have a password in them.
+        /// </summary>
+        private void ThrowIfInvalidConnections()
+        {
+            static bool IsInvalid(DBADashConnection cn) => cn != null && !string.IsNullOrEmpty(cn.EncryptedConnectionString) && cn.Type == ConnectionType.Invalid;
+
+            var invalid = new List<string>();
+            if (IsInvalid(DestinationConnection)) invalid.Add("Destination");
+            invalid.AddRange(SecondaryDestinationConnections.Select((d, i) => (d, i)).Where(x => IsInvalid(x.d)).Select(x => $"Secondary destination {x.i + 1}"));
+            lock (SourceConnections)
+            {
+                invalid.AddRange(SourceConnections.Select((s, i) => (s, i)).Where(x => IsInvalid(x.s.SourceConnection))
+                    .Select(x => string.IsNullOrEmpty(x.s.ConnectionID) ? $"Source connection {x.i + 1}" : $"Source {x.s.ConnectionID}"));
+            }
+            if (invalid.Count > 0)
+            {
+                throw new InvalidOperationException("The config can't be exported without secrets as these connection strings can't be parsed, so a password in them can't be removed.  Fix or remove them first: " + string.Join(", ", invalid));
+            }
+        }
+
+        /// <summary>
+        /// A copy of the config without its secrets, e.g. a backup that doesn't need protecting.  Each secret is replaced
+        /// with <see cref="SecretProtection.RemovedSecret"/>, so when the config is used the secrets are listed to be
+        /// re-entered and the connections aren't used until they are.  The config itself isn't changed.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">The config has a connection string that can't be parsed.  Its password can't be found to remove it.</exception>
+        public string ExportWithoutSecrets()
+        {
+            ThrowIfInvalidConnections();
+            var defaultKey = SecretProtection.DefaultKey;
+            try
+            {
+                var copy = Deserialize(Serialize());
+                // Blank passwords too - leaving them would show which connections have a blank password.  The config tool tries
+                // a blank password for a connection that's left empty when they're re-entered.
+                foreach (var secret in copy.GetSecrets())
+                {
+                    secret.Remove();
+                }
+                copy.EncryptionOption = EncryptionOptions.Basic;
+                // No secrets, so no machine key - it would only be one that can't be decrypted on another machine
+                // Dates left as strings so they are written back unchanged
+                var json = JObject.Load(new JsonTextReader(new System.IO.StringReader(copy.Serialize())) { DateParseHandling = DateParseHandling.None });
+                json.Remove(nameof(MachineKey));
+                return json.ToString(Formatting.Indented);
+            }
+            finally
+            {
+                SecretProtection.SetDefaultKey(defaultKey);
             }
         }
 
@@ -903,24 +1075,6 @@ namespace DBADash
             replica.ConnectionID = $"{primary.SourceConnection.ConnectionInfo.ServerName}|{initialCatalog}|ReadOnly";
             Log.Information("Add read replica connection for {ConnectionID}", replica.ConnectionID);
             return replica;
-        }
-
-        public override bool ContainsSensitive()
-        {
-            if (!string.IsNullOrEmpty(SecretKey))
-            {
-                return true;
-            }
-
-            foreach (var src in SourceConnections)
-            {
-                if (src.SourceConnection.Type == ConnectionType.SQL && new SqlConnectionStringBuilder(src.SourceConnection.ConnectionString).Password.Length > 0)
-                {
-                    return true;
-                }
-            }
-
-            return base.ContainsSensitive();
         }
 
         public DBADashConnection GetDestination(string hash)

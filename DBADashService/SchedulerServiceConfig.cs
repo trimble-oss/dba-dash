@@ -68,10 +68,29 @@ namespace DBADashService
                 throw new Exception("ServiceConfig.json file is missing.  Use service config tool to create.");
             }
             var conf = BasicConfig.Load<CollectionConfig>();
+            foreach (var unreadable in conf.GetUnreadableSecrets())
+            {
+                Log.Warning("Unable to decrypt secret.  {Secret}", unreadable);
+            }
             if (conf.WasEncrypted())
             {
                 Log.Information("Saving ServiceConfig.json with encrypted password");
                 conf.Save();
+            }
+            else if (conf.RequiresSecretUpgrade())
+            {
+                Log.Information("Saving ServiceConfig.json to upgrade secret protection");
+                conf.Save();
+            }
+
+            // Don't attempt logins with a blank password - repeated failures can lock out the login
+            if (conf.DestinationConnection.SecretError != null)
+            {
+                throw new Exception($"Unable to decrypt the password for the destination {conf.DestinationConnection.ConnectionForPrint}.  {conf.DestinationConnection.SecretError}");
+            }
+            foreach (var removed in conf.RemoveConnectionsWithUnreadableSecrets())
+            {
+                Log.Error("{Connection} won't be collected until its password is re-entered in the service config tool", removed);
             }
 
             return conf;

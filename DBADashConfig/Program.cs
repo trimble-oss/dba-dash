@@ -158,6 +158,18 @@ public class Program
             case CommandLineActionOption.SetSchedule:
                 await Helper.SetScheduleAsync(config, o);
                 break;
+
+            case CommandLineActionOption.Export:
+                Helper.ExportConfig(config, o);
+                break;
+
+            case CommandLineActionOption.ListUnreadableSecrets:
+                Helper.ListUnreadableSecrets(config);
+                break;
+
+            case CommandLineActionOption.SetPassword:
+                Helper.SetPassword(config, o);
+                break;
         }
     }
 }

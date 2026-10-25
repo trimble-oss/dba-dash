@@ -32,6 +32,12 @@ namespace DBADash
 
         public bool IsEncrypted => isEncrypted;
 
+        /// <summary>
+        /// Set if the password couldn't be decrypted, e.g. it was protected with DPAPI on another machine.  The connection string is used without a password.
+        /// </summary>
+        [JsonIgnore]
+        public string SecretError { get; private set; }
+
         public bool IsIntegratedSecurity { private set; get; }
 
         public string UserName { private set; get; }
@@ -47,6 +53,7 @@ namespace DBADash
 
         private void SetConnectionString(string value)
         {
+            SecretError = null;
             if (GetConnectionType(value) == ConnectionType.SQL)
             {
                 var builder = new SqlConnectionStringBuilder(value)
@@ -55,13 +62,26 @@ namespace DBADash
                 };
                 IsIntegratedSecurity = builder.IntegratedSecurity || builder.Authentication == SqlAuthenticationMethod.ActiveDirectoryIntegrated;
                 UserName = builder.UserID;
+#pragma warning disable CS0618 // ActiveDirectoryPassword is deprecated but still supported
+                // A User ID without a password is also how a user-assigned managed identity is specified
+                usesPassword = !IsIntegratedSecurity && builder.Authentication is SqlAuthenticationMethod.NotSpecified or SqlAuthenticationMethod.SqlPassword
+                    or SqlAuthenticationMethod.ActiveDirectoryPassword or SqlAuthenticationMethod.ActiveDirectoryServicePrincipal;
+#pragma warning restore CS0618
                 value = builder.ToString();
             }
             encryptedConnectionString = GetConnectionStringWithEncryptedPassword(value);
             connectionString = GetDecryptedConnectionString(value);
             connectionType = GetConnectionType(value);
-            EncryptText.GetHash(connectionString);
+            protectedPassword = connectionType == ConnectionType.SQL ? new SqlConnectionStringBuilder(encryptedConnectionString).Password : "";
         }
+
+        // Password from encryptedConnectionString - saves parsing it again each time the config is serialized
+        private string protectedPassword = "";
+
+        internal bool HasStoredPassword => protectedPassword.Length > 0;
+
+        // The authentication method takes a password - SQL authentication, Entra Password or Entra Service Principal
+        private bool usesPassword;
 
         [JsonIgnore]
         public string ConnectionString
@@ -246,14 +266,14 @@ namespace DBADash
             {
                 SqlConnectionStringBuilder builder = new(_connectionString);
 
-                if (builder.Password.StartsWith(EncryptText.ObfuscationPrefix))
+                if (SecretProtection.IsProtected(builder.Password))
                 {
                     isEncrypted = true;
                     return _connectionString;
                 }
                 else if (builder.Password.Length > 0)
                 {
-                    builder.Password = builder.Password.EncryptObfuscated();
+                    builder.Password = SecretProtection.Protect(builder.Password);
                     wasEncryptionPerformed = true;
                     isEncrypted = true;
                     return builder.ConnectionString;
@@ -278,9 +298,17 @@ namespace DBADash
                 {
                     builder.ApplicationName = "DBADash";
                 }
-                if (builder.Password.StartsWith(EncryptText.ObfuscationPrefix))
+                if (SecretProtection.IsProtected(builder.Password))
                 {
-                    builder.Password = builder.Password.DecryptObfuscated();
+                    try
+                    {
+                        builder.Password = SecretProtection.Unprotect(builder.Password);
+                    }
+                    catch (SecretUnprotectException ex)
+                    {
+                        SecretError = ex.Message;
+                        builder.Password = "";
+                    }
                 }
                 return builder.ConnectionString;
             }
@@ -288,6 +316,56 @@ namespace DBADash
             {
                 return _connectionString;
             }
+        }
+
+        /// <summary>
+        /// Replace the password.  It's protected as it's set.
+        /// </summary>
+        public void SetPassword(string password)
+        {
+            SetConnectionString(new SqlConnectionStringBuilder(encryptedConnectionString) { Password = password }.ConnectionString);
+        }
+
+        /// <summary>
+        /// True for a SQL connection that has a password (or uses SQL authentication) - one <see cref="SetPassword"/> applies to
+        /// </summary>
+        [JsonIgnore]
+        public bool HasPassword => connectionType == ConnectionType.SQL && (protectedPassword.Length > 0 || SecretError != null || (!string.IsNullOrEmpty(UserName) && usesPassword));
+
+        /// <summary>
+        /// Re-protect the password with <paramref name="key"/> (or DPAPI/obfuscation if null) if it isn't already in that format
+        /// </summary>
+        /// <param name="key">Key to protect with</param>
+        /// <param name="seen">Protected passwords already used by other connections.  If this connection's protected password is a duplicate
+        /// (e.g. the connection was copied) it's re-protected so connections with the same password don't have the same value.</param>
+        internal void ProtectSecret(ConfigKey key, HashSet<string> seen)
+        {
+            ProtectSecret(key);
+            if (connectionType != ConnectionType.SQL || SecretError != null) return;
+            if (protectedPassword.Length == 0 || seen.Add(protectedPassword)) return;
+            ProtectSecret(key, force: true);
+            seen.Add(protectedPassword);
+        }
+
+        internal void ProtectSecret(ConfigKey key, bool force = false)
+        {
+            if (!force && !SecretNeedsProtection(key)) return;
+            var builder = new SqlConnectionStringBuilder(encryptedConnectionString)
+            {
+                Password = SecretProtection.Protect(new SqlConnectionStringBuilder(connectionString).Password, key)
+            };
+            encryptedConnectionString = builder.ConnectionString;
+            protectedPassword = builder.Password;
+            isEncrypted = true;
+        }
+
+        /// <summary>
+        /// True if the password isn't in the format <see cref="ProtectSecret(ConfigKey, bool)"/> would produce.  False for secrets that can't be decrypted, as they can't be re-protected.
+        /// </summary>
+        internal bool SecretNeedsProtection(ConfigKey key)
+        {
+            if (connectionType != ConnectionType.SQL || SecretError != null) return false;
+            return protectedPassword.Length > 0 && !SecretProtection.IsProtectedWith(protectedPassword, key);
         }
 
         [JsonIgnore]
