@@ -47,10 +47,39 @@ WHERE EXISTS(SELECT 1 FROM @Instances I WHERE I.InstanceID = BS.InstanceID)
 AND (BS.ShowInSummary = 1 OR @ShowHidden = 1)
 OPTION(RECOMPILE)
 
-/* Result set 0: Instance summary */
+/* Database count per compression algorithm for each instance & backup type - used to build the summary lists below.
+	Index declared inline (not CREATE INDEX after the fact) so the temp table can still be cached.
+*/
+CREATE TABLE #CompressionAlgorithms(
+	InstanceID INT NOT NULL,
+	BackupType CHAR(1) COLLATE DATABASE_DEFAULT NOT NULL,
+	CompressionAlgorithm NVARCHAR(32) COLLATE DATABASE_DEFAULT NULL,
+	DatabaseCount INT NOT NULL,
+	INDEX IX_CompressionAlgorithms CLUSTERED(InstanceID,BackupType,CompressionAlgorithm)
+)
+
+INSERT INTO #CompressionAlgorithms(InstanceID,BackupType,CompressionAlgorithm,DatabaseCount)
 SELECT BS.InstanceID,
-	BS.Instance,
-	BS.InstanceDisplayName,
+	A.BackupType,
+	A.CompressionAlgorithm,
+	COUNT(*) AS DatabaseCount
+FROM #BackupStatus BS
+CROSS APPLY(VALUES('D',BS.FullCompressionAlgorithm,BS.FullBackupExcludedReason),
+				('I',BS.DiffCompressionAlgorithm,BS.DiffBackupExcludedReason),
+				('L',BS.LogCompressionAlgorithm,BS.LogBackupExcludedReason)
+			) A(BackupType,CompressionAlgorithm,ExcludedReason)
+WHERE A.ExcludedReason IS NULL
+GROUP BY BS.InstanceID,
+	A.BackupType,
+	A.CompressionAlgorithm
+
+/* Result set 0: Instance summary
+	Grouped by InstanceID alone (Instance & InstanceDisplayName are per instance) so the number of groups is estimated
+	from the InstanceID statistics.  Grouping on more columns overestimated it and inflated the memory grant.
+*/
+SELECT BS.InstanceID,
+	MAX(BS.Instance) AS Instance,
+	MAX(BS.InstanceDisplayName) AS InstanceDisplayName,
 	COUNT(*) AS DatabaseCount,
 	SUM(CASE WHEN BS.recovery_model=1 THEN 1 ELSE 0 END) AS FullRecoveryCount,
 	SUM(CASE WHEN BS.recovery_model=2 THEN 1 ELSE 0 END) AS BulkLoggedCount,
@@ -96,40 +125,36 @@ SELECT BS.InstanceID,
 		 WHEN MAX(CASE WHEN BS.SnapshotBackups IN('Y','(Y)') THEN 1 ELSE 0 END) = 1 THEN 'SOME'
 		 ELSE 'NONE' END AS SnapshotBackups,
 	SUM(CASE WHEN BS.ThresholdsConfiguredLevel='DATABASE' THEN 1 ELSE 0 END) AS DBThresholdConfiguration,
-	CASE WHEN T.InstanceID IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS InstanceThresholdConfiguration,
+	CASE WHEN EXISTS(SELECT 1 FROM dbo.BackupThresholds T WHERE T.InstanceID = BS.InstanceID AND T.DatabaseID = -1) THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS InstanceThresholdConfiguration,
 	CAST(MAX(CAST(BS.IsPartnerBackup AS INT)) AS BIT) AS IsPartnerBackup,
 	MIN(CASE WHEN BS.FullBackupExcludedReason IS NULL THEN BS.LastFull ELSE NULL END) AS OldestFull,
 	MIN(CASE WHEN BS.DiffBackupExcludedReason IS NULL THEN BS.LastDiff ELSE NULL END) AS OldestDiff,
 	MIN(CASE WHEN BS.LogBackupExcludedReason IS NULL THEN BS.LastLog ELSE NULL END) AS OldestLog,
 	STUFF(
-			(SELECT ', ' + ISNULL(BSA.FullCompressionAlgorithm,'NULL') + '(' + CAST(COUNT(*) AS NVARCHAR(MAX)) + ')'
-			FROM #BackupStatus BSA
-			WHERE BSA.InstanceID=BS.InstanceID
-			AND BSA.FullBackupExcludedReason IS NULL
-			GROUP BY BSA.FullCompressionAlgorithm
+			(SELECT ', ' + ISNULL(CA.CompressionAlgorithm,'NULL') + '(' + CAST(CA.DatabaseCount AS NVARCHAR(MAX)) + ')'
+			FROM #CompressionAlgorithms CA
+			WHERE CA.InstanceID=BS.InstanceID
+			AND CA.BackupType='D'
+			ORDER BY CA.CompressionAlgorithm
 			FOR XML PATH(''),TYPE).value('.','NVARCHAR(MAX)'),1,2,'') AS FullCompressionAlgorithms,
 	STUFF(
-			(SELECT ', ' + ISNULL(BSA.DiffCompressionAlgorithm,'NULL') + '(' + CAST(COUNT(*) AS NVARCHAR(MAX)) + ')'
-			FROM #BackupStatus BSA
-			WHERE BSA.InstanceID=BS.InstanceID
-			AND BSA.DiffBackupExcludedReason IS NULL
-			GROUP BY BSA.DiffCompressionAlgorithm
+			(SELECT ', ' + ISNULL(CA.CompressionAlgorithm,'NULL') + '(' + CAST(CA.DatabaseCount AS NVARCHAR(MAX)) + ')'
+			FROM #CompressionAlgorithms CA
+			WHERE CA.InstanceID=BS.InstanceID
+			AND CA.BackupType='I'
+			ORDER BY CA.CompressionAlgorithm
 			FOR XML PATH(''),TYPE).value('.','NVARCHAR(MAX)'),1,2,'') AS DiffCompressionAlgorithms,
 	STUFF(
-			(SELECT ', ' + ISNULL(BSA.LogCompressionAlgorithm,'NULL') + '(' + CAST(COUNT(*) AS NVARCHAR(MAX)) + ')'
-			FROM #BackupStatus BSA
-			WHERE BSA.InstanceID=BS.InstanceID
-			AND BSA.LogBackupExcludedReason IS NULL
-			GROUP BY BSA.LogCompressionAlgorithm
+			(SELECT ', ' + ISNULL(CA.CompressionAlgorithm,'NULL') + '(' + CAST(CA.DatabaseCount AS NVARCHAR(MAX)) + ')'
+			FROM #CompressionAlgorithms CA
+			WHERE CA.InstanceID=BS.InstanceID
+			AND CA.BackupType='L'
+			ORDER BY CA.CompressionAlgorithm
 			FOR XML PATH(''),TYPE).value('.','NVARCHAR(MAX)'),1,2,'') AS LogCompressionAlgorithms,
 	CAST('Configure' AS NVARCHAR(20)) AS Configure
 FROM #BackupStatus BS
-LEFT JOIN dbo.BackupThresholds T ON BS.InstanceID = T.InstanceID AND T.DatabaseID = -1
-GROUP BY BS.InstanceID,
-	BS.Instance,
-	BS.InstanceDisplayName,
-	T.InstanceID
-ORDER BY BS.Instance
+GROUP BY BS.InstanceID
+ORDER BY Instance
 
 /* Result set 1: Database detail */
 ;WITH BackupStatuses AS(
