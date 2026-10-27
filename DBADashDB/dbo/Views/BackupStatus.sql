@@ -131,10 +131,10 @@ OUTER APPLY dbo.SecondsToHumanDuration(DATEDIFF(s,SSD.SnapshotDate,GETUTCDATE())
 OUTER APPLY(SELECT TOP(1) T.*,
 				CASE WHEN EXISTS(SELECT * FROM STRING_SPLIT(T.ExcludedDatabases,',') SS WHERE d.name LIKE SS.value) THEN CAST(1 AS BIT) ELSE CAST(0 as BIT) END as IsExcludedByName,
 				CASE WHEN T.MinimumAge > DATEDIFF(mi,0,GETUTCDATE()) THEN CAST(1 AS BIT) WHEN DATEADD(mi,I.UTCOffset,d.create_date) > DATEADD(mi,-T.MinimumAge,GETUTCDATE()) THEN CAST(1 AS BIT) ELSE CAST(0 as BIT) END IsExcludedByDate
-			FROM dbo.BackupThresholds T 
-			WHERE (D.InstanceID = T.InstanceID OR T.InstanceID = -1)
-			AND (D.DatabaseID = T.DatabaseID  OR T.DatabaseID = -1)
-			ORDER BY InstanceID DESC,DatabaseID DESC
+			/* Most specific threshold wins: database, instance, root */
+			FROM (VALUES(1,D.InstanceID,D.DatabaseID),(2,D.InstanceID,-1),(3,-1,D.DatabaseID),(4,-1,-1)) K(Precedence,InstanceID,DatabaseID)
+			JOIN dbo.BackupThresholds T ON T.InstanceID = K.InstanceID AND T.DatabaseID = K.DatabaseID
+			ORDER BY K.Precedence
 			) cfg
 OUTER APPLY(SELECT	DATEDIFF(mi,
 								CASE WHEN cfg.ConsiderFGBackups=1 AND (LastFG> LastFull OR LastFull IS NULL) AND (cfg.ConsiderPartialBackups=0 OR LastPartial<LastFG OR LastPartial IS NULL) THEN LastFG
