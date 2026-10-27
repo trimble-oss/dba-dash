@@ -1,0 +1,3 @@
+CREATE PARTITION FUNCTION [PF_ServiceBrokerDatabaseStats](DATETIME2 (2))
+    AS RANGE RIGHT
+    FOR VALUES ()

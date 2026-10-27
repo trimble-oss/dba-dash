@@ -66,7 +66,7 @@ namespace DBADashGUI
                                                             { "JobStatus", Tabs.Jobs }, { "CollectionErrorStatus", Tabs.DBADashErrorLog}, { "AGStatus", Tabs.AG }, {"LastGoodCheckDBStatus", Tabs.LastGood}, {"SnapshotAgeStatus",Tabs.CollectionDates  },
                                                             {"MemoryDumpStatus", null}, {"UptimeStatus",null}, {"CorruptionStatus",null }, {"AlertStatus",Tabs.SQLAgentAlerts }, {"FileFreeSpaceStatus", Tabs.Files },
                                                             {"CustomCheckStatus",Tabs.CustomChecks  }, {"MirroringStatus",Tabs.Mirroring },{"ElasticPoolStorageStatus",Tabs.AzureSummary},{"PctMaxSizeStatus",Tabs.Files}, {"QueryStoreStatus",Tabs.QS },
-                                                            {"LogFreeSpaceStatus",Tabs.Files},{"DBMailStatus",null },{"IdentityStatus",Tabs.IdentityColumns }, {"IsAgentRunningStatus",null },{"DatabaseStateStatus",Tabs.DBOptions }};
+                                                            {"LogFreeSpaceStatus",Tabs.Files},{"DBMailStatus",null },{"IdentityStatus",Tabs.IdentityColumns }, {"IsAgentRunningStatus",null },{"DatabaseStateStatus",Tabs.DBOptions }, {"ServiceBrokerStatus",Tabs.ServiceBroker }};
 
         private void ResetStatusCols()
         {
@@ -74,7 +74,7 @@ namespace DBADashGUI
                                                             { "JobStatus", false }, { "CollectionErrorStatus", false }, { "AGStatus", false }, {"LastGoodCheckDBStatus",false}, {"SnapshotAgeStatus",false },
                                                             {"MemoryDumpStatus",false }, {"UptimeStatus",false }, {"CorruptionStatus",false }, {"AlertStatus",false }, {"FileFreeSpaceStatus",false },
                                                             {"CustomCheckStatus",false }, {"MirroringStatus",false },{"ElasticPoolStorageStatus",false},{"PctMaxSizeStatus",false}, {"QueryStoreStatus",false },
-                                                            {"LogFreeSpaceStatus",false },{"DBMailStatus",false },{"IdentityStatus",false },{"IsAgentRunningStatus",false },{"DatabaseStateStatus",false}};
+                                                            {"LogFreeSpaceStatus",false },{"DBMailStatus",false },{"IdentityStatus",false },{"IsAgentRunningStatus",false },{"DatabaseStateStatus",false}, {"ServiceBrokerStatus",false}};
         }
 
         private Task<DataTable> GetSummaryAsync(bool forceRefresh, DateTime? forceRefreshDate)
@@ -366,6 +366,7 @@ namespace DBADashGUI
                 }
                 var DBMailStatus = Convert.ToString(row["DBMailStatusDescription"]);
                 dgvSummary.Rows[idx].Cells["DBMailStatus"].ToolTipText = DBMailStatus;
+                dgvSummary.Rows[idx].Cells["ServiceBrokerStatus"].ToolTipText = Convert.ToString(row["ServiceBrokerStatusDescription"]);
 
                 dgvSummary.Rows[idx].Cells["FullBackupStatus"].Value = isAzure ? "" : "View";
                 dgvSummary.Rows[idx].Cells["DiffBackupStatus"].Value = isAzure ? "" : "View";

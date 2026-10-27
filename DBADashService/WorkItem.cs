@@ -111,6 +111,7 @@ namespace DBADashService
                         CollectionConfig.DefaultFailedLoginsBackfillMinutes;
                     collector.DeadlockXERingBufferKB = config.GetDeadlockXERingBufferKB();
                     collector.DeadlockBackfillTimeLimitSeconds = config.GetDeadlockBackfillTimeLimitSeconds();
+                    collector.ServiceBrokerMaxDatabases = config.GetServiceBrokerMaxDatabases();
                     collector.ScheduleDeadlockBackfill = true;
                     collector.QueryStatsScheduleInterval = config.GetMaxScheduleInterval(Source, CollectionType.QueryStats);
 

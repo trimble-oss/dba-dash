@@ -1256,7 +1256,10 @@ FROM (VALUES('dbo','ObjectExecutionStats',120),
 				('dbo','LatchStats',120),
 				('dbo','SpinlockStats',120),
 				('dbo','LatchStats_60MIN',730),
-				('dbo','SpinlockStats_60MIN',730)
+				('dbo','SpinlockStats_60MIN',730),
+				('dbo','ServiceBrokerQueueHistory',90),
+				('dbo','ServiceBrokerStats',180),
+				('dbo','ServiceBrokerDatabaseStats',90)
 				) AS t(SchemaName,TableName,RetentionDays)
 WHERE NOT EXISTS(SELECT 1
 				FROM dbo.DataRetention DR
@@ -2112,6 +2115,35 @@ BEGIN
 		DaysCriticalThreshold
 	)
 	VALUES (-1, -1, N'', 0.5, 0.8,365,90);
+END;
+
+/*	Service Broker root thresholds.
+	Queue depth: 10,000 messages waiting.
+	Queue age: the oldest message waiting 15 mins to be received is a warning, 60 mins critical.  A queue that isn't being processed.
+	Transmission queue: messages waiting 15 mins to be sent is a warning, 60 mins critical.  Messages are usually sent in seconds.
+	Conversations: 100,000 open conversations is a warning.  Usually a sign conversations aren't being ended.  */
+IF NOT EXISTS(SELECT 1
+			FROM dbo.ServiceBrokerThresholds
+			WHERE InstanceID=-1
+			AND DatabaseID=-1
+			AND queue_name=''
+			)
+BEGIN
+	INSERT INTO dbo.ServiceBrokerThresholds
+	(
+		InstanceID,
+		DatabaseID,
+		queue_name,
+		QueueDepthWarningThreshold,
+		QueueDepthCriticalThreshold,
+		QueueAgeWarningThreshold,
+		QueueAgeCriticalThreshold,
+		TransmissionQueueAgeWarningThreshold,
+		TransmissionQueueAgeCriticalThreshold,
+		ConversationCountWarningThreshold,
+		ConversationCountCriticalThreshold
+	)
+	VALUES (-1, -1, N'', 10000, NULL, 15, 60, 15, 60, 100000, NULL);
 END;
 
 MERGE INTO Alert.NotificationChannelType AS [Target]

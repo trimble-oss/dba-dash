@@ -140,6 +140,7 @@ namespace DBADash.Messaging
             var collector = await DBCollector.CreateAsync(src, cfg.ServiceName, true);
             collector.FailedLoginsBackfillMinutes = cfg.FailedLoginsBackfillMinutes ?? CollectionConfig.DefaultFailedLoginsBackfillMinutes;
             collector.DeadlockXERingBufferKB = cfg.GetDeadlockXERingBufferKB();
+            collector.ServiceBrokerMaxDatabases = cfg.GetServiceBrokerMaxDatabases();
             collector.OnDemandDeadlockXESessionName = onDemandDeadlockSession;
             collector.ForceAGHealthEventsCheck = true;
             // The schedule the connection's query stats collection runs on, though this run wasn't scheduled: the

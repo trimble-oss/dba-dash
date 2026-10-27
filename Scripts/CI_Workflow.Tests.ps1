@@ -15,7 +15,9 @@ param(
 	[string]$SlowQueryClientApp = "DBADash CI Slow Query",
 	# The service's SlowQueryCursors.json.  Set by a leg in EventFile capture mode, which is the only mode that
 	# keeps a read position - its existence is what shows the event file path ran and committed.
-	[string]$SlowQueryCursorFile
+	[string]$SlowQueryCursorFile,
+	# Only a leg that scheduled the ServiceBroker collection (off by default) asserts it ran.
+	[bool]$ServiceBroker = $false
 )
 
 # Get SQL Server version at the script level
@@ -305,6 +307,23 @@ Describe 'CI Workflow checks' {
 		Test-Path $SlowQueryCursorFile | Should -BeTrue
 		$cursors = Get-Content $SlowQueryCursorFile -Raw | ConvertFrom-Json
 		@($cursors.PSObject.Properties | Where-Object { $_.Name -like '*|DBADash_SlowQueries' -and $_.Value.FileName -like '*DBADash_SlowQueries*.xel' }).Count | Should -BeGreaterThan 0
+	}
+
+	# Service Broker collection.  The instance may have no user queues, so these assert the collection ran and the
+	# counters were diffed rather than what it found - DBADash.Test's ServiceBrokerSqlTests covers the checks.
+	It 'Service Broker collection ran' -Skip:(-not $ServiceBroker) {
+		$results = Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "SELECT COUNT(*) cnt FROM dbo.CollectionDates WHERE Reference = 'ServiceBroker'"
+		$results.cnt | Should -BeGreaterThan 0
+	}
+	It 'Service Broker counters diffed' -Skip:(-not $ServiceBroker) {
+		# A row is written for every collection.  From the second one on, the counters are diffed against the previous snapshot.
+		$results = Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "SELECT COUNT(*) cnt FROM dbo.ServiceBrokerStats WHERE sample_ms_diff IS NOT NULL"
+		$results.cnt | Should -BeGreaterThan 0
+	}
+	It 'Service Broker report runs' -Skip:(-not $ServiceBroker) {
+		# Rows from every result set come back together.  The instances result set is the one with ServiceBrokerStatus.
+		$results = Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -ErrorAction Stop -Query "DECLARE @IDs dbo.IDs; INSERT INTO @IDs SELECT InstanceID FROM dbo.Instances; EXEC dbo.ServiceBrokerReport_Get @InstanceIDs = @IDs"
+		@($results | Where-Object { $_.Table.Columns.Contains('ServiceBrokerStatus') }).Count | Should -Be 1
 	}
 
 }

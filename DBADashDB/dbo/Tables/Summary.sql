@@ -64,5 +64,7 @@
     OfflineSince DATETIME2 NULL,
     LastFail DATETIME2 NULL,
     OSInfoSnapshotDate DATETIME2 NULL,
+    ServiceBrokerStatus INT NOT NULL CONSTRAINT DF_Summary_ServiceBrokerStatus DEFAULT(3),
+    ServiceBrokerStatusDescription NVARCHAR(500) NULL,
 	CONSTRAINT PK_Summary PRIMARY KEY(InstanceID)
 );

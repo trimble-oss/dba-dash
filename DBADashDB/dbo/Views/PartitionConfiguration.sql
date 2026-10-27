@@ -35,6 +35,9 @@ VALUES -- Daily Partitions
 	('dbo','SpinlockStats','d',14,CAST(1 AS BIT)),
 	('dbo','LatchStatsCollection','d',14,CAST(1 AS BIT)),
 	('dbo','SpinlockStatsCollection','d',14,CAST(1 AS BIT)),
+	('dbo','ServiceBrokerQueueHistory','d',14,CAST(1 AS BIT)),
+	('dbo','ServiceBrokerStats','d',14,CAST(1 AS BIT)),
+	('dbo','ServiceBrokerDatabaseStats','d',14,CAST(1 AS BIT)),
 	-- Monthly Partitions
 	('dbo','AzureDBElasticPoolResourceStats_60MIN','m',3,CAST(1 AS BIT)),
 	('dbo','AzureDBResourceStats_60MIN','m',3,CAST(1 AS BIT)),

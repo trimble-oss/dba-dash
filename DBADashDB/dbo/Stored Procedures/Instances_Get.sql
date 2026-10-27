@@ -39,6 +39,10 @@ SELECT  I.InstanceID,
 	CASE WHEN EXISTS(SELECT 1 FROM dbo.ScheduleInfo SI WHERE SI.InstanceID = I.InstanceID AND SI.Reference = ''SpinlockStats'' AND SI.IsEnabled = 1)
 			OR EXISTS(SELECT 1 FROM dbo.SpinlockStatsCollection_60MIN SS WHERE SS.InstanceID = I.InstanceID)
 		THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS HasSpinlockStats,
+	/* Service Broker collection is off by default.  Reporting is shown where it is switched on, or where there is still data from when it was. */
+	CASE WHEN EXISTS(SELECT 1 FROM dbo.ScheduleInfo SI WHERE SI.InstanceID = I.InstanceID AND SI.Reference = ''ServiceBroker'' AND SI.IsEnabled = 1)
+			OR EXISTS(SELECT 1 FROM dbo.CollectionDates SBCD WHERE SBCD.InstanceID = I.InstanceID AND SBCD.Reference = ''ServiceBroker'')
+		THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS HasServiceBroker,
 	I.UTCOffset,
 	I.IsReadOnlyReplica,
 	Paused.CollectionsPausedUntil

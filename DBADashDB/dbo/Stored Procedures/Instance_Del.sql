@@ -474,7 +474,9 @@ BEGIN
 
 	EXEC dbo.SpinlockStats_Del @InstanceID=@InstanceID,@DaysToKeep=0
 
-	DELETE dbo.IdentityColumnsHistory 
+	EXEC dbo.ServiceBroker_Del @InstanceID=@InstanceID,@DaysToKeep=0
+
+	DELETE dbo.IdentityColumnsHistory
 	WHERE InstanceID = @InstanceID
 
 	DELETE dbo.IdentityColumns

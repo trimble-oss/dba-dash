@@ -96,7 +96,8 @@ namespace DBADash
         AGHealthEvents,
         QueryStats,
         LatchStats,
-        SpinlockStats
+        SpinlockStats,
+        ServiceBroker
     }
 
     public enum HostPlatform
@@ -240,6 +241,11 @@ namespace DBADash
         /// <see cref="CollectionConfig.DeadlockBackfillTimeLimitSeconds"/>.  0 is no limit.
         /// </summary>
         public int DeadlockBackfillTimeLimitSeconds { get; set; } = CollectionConfig.DefaultDeadlockBackfillTimeLimitSeconds;
+
+        /// <summary>
+        /// Most databases the Service Broker collection will visit - see <see cref="CollectionConfig.ServiceBrokerMaxDatabases"/>.  0 is no limit.
+        /// </summary>
+        public int ServiceBrokerMaxDatabases { get; set; } = CollectionConfig.DefaultServiceBrokerMaxDatabases;
 
         /// <summary>
         /// True for a scheduled collection, which schedules the system_health backfill on an instance's first
@@ -1069,6 +1075,13 @@ namespace DBADash
             {
                 return false;
             }
+            else if (collectionType == CollectionType.ServiceBroker && SQLVersion.Major < 11)
+            {
+                // SQLServiceBroker.sql uses CONCAT, which needs SQL Server 2012. On 2008/R2 the per-database
+                // batch fails and is caught, so the collection date would advance with no queue data.
+                // += in the same script also fails the whole collection on SQL Server 2005.
+                return false;
+            }
             else if (collectionType == CollectionType.SpinlockStats && SQLVersion.Major < 10)
             {
                 return false; // sys.dm_os_spinlock_stats was added in SQL 2008
@@ -1835,6 +1848,10 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             {
                 await CollectQueryStatsAsync();
             }
+            else if (collectionType == CollectionType.ServiceBroker)
+            {
+                await CollectServiceBrokerAsync();
+            }
             else if (collectionType == CollectionType.RunningJobs)
             {
                 await CollectRunningJobsAsync();
@@ -2220,6 +2237,33 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             if (result.Events.Rows.Count > 0)
             {
                 Log.Debug("Collected {count} AlwaysOn_health event(s) on {instance}", result.Events.Rows.Count, instanceName);
+            }
+        }
+
+        /// <summary>
+        /// Service Broker queues, transmission queue, conversations, endpoint and counters.  One query returning a
+        /// result set for each - see <see cref="ServiceBrokerTables"/> for the table names, which DBImporter keys off.
+        /// </summary>
+        private async Task CollectServiceBrokerAsync()
+        {
+            await using var cn = new SqlConnection(ConnectionString);
+            await using var cmd = new SqlCommand(SetArithAbortOn + SqlStrings.ServiceBroker, cn) { CommandTimeout = CollectionType.ServiceBroker.GetCommandTimeout() };
+            cmd.Parameters.AddWithValue("MaxDatabases", ServiceBrokerMaxDatabases);
+            using var da = new SqlDataAdapter(cmd);
+            await cn.OpenAsync();
+            var ds = new DataSet();
+            da.Fill(ds);
+            if (ds.Tables.Count != ServiceBrokerTables.TableNames.Length)
+            {
+                throw new Exception($"Service Broker collection returned {ds.Tables.Count} result sets.  Expected {ServiceBrokerTables.TableNames.Length}.");
+            }
+
+            for (var i = 0; i < ServiceBrokerTables.TableNames.Length; i++)
+            {
+                var dt = ds.Tables[0];
+                ds.Tables.Remove(dt);
+                dt.TableName = ServiceBrokerTables.TableNames[i];
+                AddDT(dt);
             }
         }
 

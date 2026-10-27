@@ -314,6 +314,23 @@ namespace DBADash
         public int GetDeadlockBackfillTimeLimitSeconds() =>
             Math.Max(0, DeadlockBackfillTimeLimitSeconds ?? DefaultDeadlockBackfillTimeLimitSeconds);
 
+        /// <summary>
+        /// The Service Broker collection fails (with an error saying so) on an instance with more databases than this for it to visit -
+        /// online, accessible, Service Broker enabled and not an availability group secondary.  Null uses
+        /// <see cref="DefaultServiceBrokerMaxDatabases"/>; 0 means no limit.
+        ///
+        /// <para>Each database visited costs some catalog reads every collection.  The limit stops an instance with a very large number
+        /// of broker enabled databases timing out on every run instead.  Service level rather than per connection: it only affects
+        /// instances over it, and the collection can be disabled for one instance with a per connection schedule.</para>
+        /// </summary>
+        public int? ServiceBrokerMaxDatabases { get; set; }
+
+        public const int DefaultServiceBrokerMaxDatabases = 500;
+
+        /// <summary>The configured database limit, defaulted.  A negative value is treated as no limit, as 0 is.</summary>
+        public int GetServiceBrokerMaxDatabases() =>
+            Math.Max(0, ServiceBrokerMaxDatabases ?? DefaultServiceBrokerMaxDatabases);
+
         public const int DefaultAlertProcessingFrequencySeconds = 60;
 
         public const int DefaultAlertProcessingStartupDelaySeconds = 60;

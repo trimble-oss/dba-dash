@@ -271,7 +271,8 @@ namespace DBADashGUI
             MultiInstanceXE,
             QueryStats,
             Latches,
-            Spinlocks
+            Spinlocks,
+            ServiceBroker
         }
 
         private static readonly List<Main.Tabs> InstanceOnlyTabs = new() { Main.Tabs.PerformanceSummary, Tabs.Metrics, Tabs.Waits, Tabs.Memory, Tabs.RunningQueries };
@@ -334,6 +335,12 @@ namespace DBADashGUI
         private TabPage tabQueryStats;
 
         private CustomReportView queryStatsView;
+
+        /// <summary>
+        /// Service Broker queues, transmission queue, conversations and activity.  The collection is off by default,
+        /// so at instance level the tab is only shown where it's enabled or has data (see <see cref="DBADashContext.HasServiceBroker"/>).
+        /// </summary>
+        private TabPage tabServiceBroker;
 
         /// <summary>The node context the query stats tab was last given - see <see cref="GetQueryStatsTabContext"/>.</summary>
         private DBADashContext queryStatsSourceContext;
@@ -519,6 +526,9 @@ namespace DBADashGUI
                 Report = CustomReports.CustomReports.SystemReports.First(r => r.ProcedureName == QueryStatsReportProcedures[0])
             };
             tabQueryStats.Controls.Add(queryStatsView);
+
+            tabServiceBroker = new TabPage("Service Broker") { Name = Tabs.ServiceBroker.TabName() };
+            tabServiceBroker.Controls.Add(new ServiceBrokerView { Dock = DockStyle.Fill });
         }
 
         /// <summary>
@@ -645,7 +655,8 @@ namespace DBADashGUI
             }).Contains(tabs.SelectedTab) || (tabs.SelectedTab == tabCustomReport && (tv1.SelectedNode as SQLTreeItem)?.Report?.TimeFilterSupported == true)
             // The Deadlocks folder's tabs run reports too, and both of them are over a date range.
             || SelectedDeadlockTabReport(tv1.SelectedNode as SQLTreeItem)?.TimeFilterSupported == true
-            || tabs.SelectedTab == tabQueryStats;
+            || tabs.SelectedTab == tabQueryStats
+            || tabs.SelectedTab == tabServiceBroker;
 
         private bool IsAzureOnly;
         private bool ShowCounts;
@@ -1720,6 +1731,10 @@ namespace DBADashGUI
                     tabPerformance, tabObjectExecutionSummary, tabQueryStats, tabSlowQueries, tabFiles, tabSnapshotSummary,
                     tabDBSpace, tabDBConfiguration, tabDBOptions,  tabQS,tabTopQueries, tabQueryStoreForcedPlans, tabTuningRecommendations
                 });
+                if (n.Context.HasServiceBroker)
+                {
+                    allowedTabs.Add(tabServiceBroker);
+                }
             }
             else if (n.Type == SQLTreeItem.TreeType.AzureDatabase)
             {
@@ -1860,6 +1875,11 @@ namespace DBADashGUI
                     tabDBADashErrorLog, tabCollectionDates, tabCustomChecks, tabSnapshotSummary,
                     tabIdentityColumns
                 });
+                // Service Broker collection is off by default - only show the tab where it's enabled or has data
+                if (!IsAzureOnly && parent.Type != SQLTreeItem.TreeType.AzureInstance && n.Context.HasServiceBroker)
+                {
+                    allowedTabs.Add(tabServiceBroker);
+                }
             }
             else if (n.Type == SQLTreeItem.TreeType.Tags)
             {

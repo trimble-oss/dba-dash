@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 
 namespace DBADashGUI.CustomReports
@@ -16,6 +17,14 @@ namespace DBADashGUI.CustomReports
         /// Name of the result set
         /// </summary>
         public string ResultName { get; set; }
+
+        /// <summary>
+        /// Whether the result set's grid is shown when ALL results are selected (the default view).  False for a result set that's only
+        /// there to feed a chart - it can still be selected on its own from the results combo.
+        /// </summary>
+        [DefaultValue(true)]
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)] // Only saved with a report when false
+        public bool ShowWithAllResults { get; set; } = true;
 
         /// <summary>
         /// The result set's data bars as changed from the grid's context menu while the report is open, by column.
