@@ -2448,6 +2448,22 @@ BEGIN
 	PRINT 'Drop dbo.PartitionFunctionName'
 	DROP FUNCTION dbo.PartitionFunctionName
 END
+/* Replaced by dbo.BackupReport_Get */
+IF OBJECT_ID('dbo.BackupSummary_Get') IS NOT NULL
+BEGIN
+	PRINT 'Drop dbo.BackupSummary_Get'
+	DROP PROCEDURE dbo.BackupSummary_Get
+END
+IF OBJECT_ID('dbo.Backups_Get') IS NOT NULL
+BEGIN
+	PRINT 'Drop dbo.Backups_Get'
+	DROP PROCEDURE dbo.Backups_Get
+END
+IF OBJECT_ID('dbo.BackupSummary') IS NOT NULL
+BEGIN
+	PRINT 'Drop dbo.BackupSummary'
+	DROP VIEW dbo.BackupSummary
+END
 /* Migrate LogRestores data from old schema */
 IF OBJECT_ID('dbo.LogRestoresTemp') IS NOT NULL
 BEGIN
