@@ -92,8 +92,8 @@ SELECT BS.InstanceID,
 	CONCAT(SUM(CASE WHEN BS.DiffBackupExcludedReason IS NULL THEN CAST(BS.IsDiffCompressed AS INT) ELSE 0 END),'/',SUM(CASE WHEN BS.DiffBackupExcludedReason IS NULL THEN 1 ELSE 0 END)) AS DiffCompressed,
 	CONCAT(SUM(CASE WHEN BS.LogBackupExcludedReason IS NULL THEN CAST(BS.IsLogCompressed AS INT) ELSE 0 END),'/',SUM(CASE WHEN BS.LogBackupExcludedReason IS NULL THEN 1 ELSE 0 END)) AS LogCompressed,
 	CONCAT(SUM(CASE WHEN BS.FullBackupExcludedReason IS NULL THEN CAST(BS.IsFullPasswordProtected AS INT) ELSE 0 END),'/',SUM(CASE WHEN BS.FullBackupExcludedReason IS NULL THEN 1 ELSE 0 END)) AS FullPasswordProtected,
-	CONCAT(SUM(CASE WHEN BS.DiffBackupExcludedReason IS NULL THEN CAST(BS.IsFullPasswordProtected AS INT) ELSE 0 END),'/',SUM(CASE WHEN BS.DiffBackupExcludedReason IS NULL THEN 1 ELSE 0 END)) AS DiffPasswordProtected,
-	CONCAT(SUM(CASE WHEN BS.LogBackupExcludedReason IS NULL THEN CAST(BS.IsFullPasswordProtected AS INT) ELSE 0 END),'/',SUM(CASE WHEN BS.LogBackupExcludedReason IS NULL THEN 1 ELSE 0 END)) AS LogPasswordProtected,
+	CONCAT(SUM(CASE WHEN BS.DiffBackupExcludedReason IS NULL THEN CAST(BS.IsDiffPasswordProtected AS INT) ELSE 0 END),'/',SUM(CASE WHEN BS.DiffBackupExcludedReason IS NULL THEN 1 ELSE 0 END)) AS DiffPasswordProtected,
+	CONCAT(SUM(CASE WHEN BS.LogBackupExcludedReason IS NULL THEN CAST(BS.IsLogPasswordProtected AS INT) ELSE 0 END),'/',SUM(CASE WHEN BS.LogBackupExcludedReason IS NULL THEN 1 ELSE 0 END)) AS LogPasswordProtected,
 	CASE WHEN MIN(CASE WHEN BS.SnapshotBackups ='Y' THEN 1 WHEN BS.SnapshotBackups IS NULL THEN 2 ELSE 0 END) = 1 THEN 'ALL'
 		 WHEN MAX(CASE WHEN BS.SnapshotBackups IN('Y','(Y)') THEN 1 ELSE 0 END) = 1 THEN 'SOME'
 		 ELSE 'NONE' END AS SnapshotBackups,
