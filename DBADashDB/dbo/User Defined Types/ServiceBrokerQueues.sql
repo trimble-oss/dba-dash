@@ -1,0 +1,21 @@
+CREATE TYPE dbo.ServiceBrokerQueues AS TABLE (
+    database_name NVARCHAR(128) NOT NULL,
+    object_id INT NOT NULL,
+    schema_name NVARCHAR(128) NOT NULL,
+    queue_name NVARCHAR(128) NOT NULL,
+    is_receive_enabled BIT NOT NULL,
+    is_enqueue_enabled BIT NOT NULL,
+    is_retention_enabled BIT NOT NULL,
+    is_activation_enabled BIT NOT NULL,
+    is_poison_message_handling_enabled BIT NULL,
+    activation_procedure NVARCHAR(776) NULL,
+    activation_procedure_exists BIT NULL,
+    max_readers SMALLINT NULL,
+    message_count BIGINT NULL,
+    activated_tasks INT NOT NULL,
+    monitor_state NVARCHAR(32) NULL,
+    monitor_tasks_waiting INT NULL,
+    monitor_last_activated_time DATETIME NULL,
+    monitor_last_empty_rowset_time DATETIME NULL,
+    oldest_message_time DATETIME NULL
+);

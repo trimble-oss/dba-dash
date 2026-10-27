@@ -137,6 +137,24 @@ namespace DBADashGUI
             }
         }
 
+        private bool? _hasServiceBroker;
+
+        /// <summary>
+        /// Service Broker collection is off by default.  True if it's enabled for the instance or there is data collected from when it was.
+        /// Above instance level, true if this applies to any instance.
+        /// </summary>
+        public bool HasServiceBroker
+        {
+            get
+            {
+                if (_hasServiceBroker != null) return _hasServiceBroker.Value;
+                GetAdditionalInfo();
+                _hasServiceBroker ??= false;
+
+                return _hasServiceBroker.Value;
+            }
+        }
+
         /// <summary>
         /// Latch stats collection is off by default.  True if it's enabled for the instance or there is data collected from when it was.
         /// </summary>
@@ -190,6 +208,7 @@ namespace DBADashGUI
             if (InstanceID <= 0)
             {
                 _hasResourceGovernorWorkloadGroups = CommonData.Instances.Select("HasResourceGovernorWorkloadGroups=1").Any();
+                _hasServiceBroker = CommonData.Instances.Columns.Contains("HasServiceBroker") && CommonData.Instances.Select("HasServiceBroker=1").Any();
                 return;
             }
             var row = CommonData.Instances.Select($"InstanceID={InstanceID}").FirstOrDefault();
@@ -200,6 +219,7 @@ namespace DBADashGUI
             _hasResourceGovernorWorkloadGroups = (bool)row["HasResourceGovernorWorkloadGroups"];
             _hasLatchStats = row.Table.Columns.Contains("HasLatchStats") && row["HasLatchStats"] is true;
             _hasSpinlockStats = row.Table.Columns.Contains("HasSpinlockStats") && row["HasSpinlockStats"] is true;
+            _hasServiceBroker = row.Table.Columns.Contains("HasServiceBroker") && row["HasServiceBroker"] is true;
             try
             {
                 _productVersion = new Version((string)row["ProductVersion"]);

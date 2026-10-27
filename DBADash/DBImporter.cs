@@ -547,6 +547,10 @@ namespace DBADash
             {
                 await TryUpdateAsync(async _ => await UpdateQueryStatsAsync(), QueryStatsTables.QueryStatsTableName, exceptions);
             }
+            if (tablesInDataSet.Contains(ServiceBrokerTables.QueuesTableName))
+            {
+                await TryUpdateAsync(async _ => await UpdateServiceBrokerAsync(), CollectionType.ServiceBroker.ToString(), exceptions);
+            }
 
             // retry based on policy then let caller handle the exception
 
@@ -698,6 +702,38 @@ namespace DBADash
             if (dtQueryStats is { Rows.Count: > 0 })
             {
                 cmd.Parameters.AddWithValue("QueryStats", dtQueryStats);
+            }
+
+            cmd.Parameters.AddWithValue("InstanceID", instanceID);
+            cmd.Parameters.AddWithValue("SnapshotDate", snapshotDate);
+            await cmd.ExecuteNonQueryAsync();
+        }
+
+        /// <summary>
+        /// Imports the Service Broker collection.
+        ///
+        /// <para>Special cased rather than driven by <see cref="tablesToProcess"/> because the tables describe one
+        /// snapshot and are written together: each replaces the current state for the instance, and the counters are
+        /// diffed against the previous snapshot alongside the queue depths they are charted with.</para>
+        ///
+        /// <para>Keyed on the queues table, which is sent for every collection that ran - empty where there are no
+        /// user queues, which still clears what was there before and advances the collection date.
+        /// DatabaseNames is sent only when a visit failed; those databases keep their last collected state.</para>
+        /// </summary>
+        private async Task UpdateServiceBrokerAsync()
+        {
+            await using var cn = new SqlConnection(connectionString);
+            await using var cmd = new SqlCommand("dbo.ServiceBroker_Upd", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = CommandTimeout };
+            await cn.OpenAsync();
+
+            // A table-valued parameter that isn't supplied defaults to an empty table, so only send what we have.
+            foreach (var tableName in ServiceBrokerTables.TableNames)
+            {
+                var dt = data.Tables[tableName];
+                if (dt is { Rows.Count: > 0 })
+                {
+                    cmd.Parameters.AddWithValue(tableName, dt);
+                }
             }
 
             cmd.Parameters.AddWithValue("InstanceID", instanceID);

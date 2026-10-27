@@ -70,6 +70,7 @@ namespace DBADashGUI
             DBMailStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
             IdentityStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             DatabaseStateStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            ServiceBrokerStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             UptimeStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             tsRefresh = new System.Windows.Forms.ToolStripButton();
@@ -138,7 +139,7 @@ namespace DBADashGUI
             dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
             dgvSummary.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             dgvSummary.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvSummary.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { Instance, colHidden, MemoryDumpStatus, CorruptionStatus, LastGoodCheckDBStatus, AlertStatus, FullBackupStatus, DiffBackupStatus, LogBackupStatus, DriveStatus, JobStatus, IsAgentRunningStatus, LogShippingStatus, MirroringStatus, AGStatus, LogFreeSpaceStatus, FileFreeSpaceStatus, PctMaxSizeStatus, ElasticPoolStorageStatus, QueryStoreStatus, CustomCheckStatus, CollectionErrorStatus, SnapshotAgeStatus, DBMailStatus, IdentityStatus, DatabaseStateStatus, UptimeStatus });
+            dgvSummary.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { Instance, colHidden, MemoryDumpStatus, CorruptionStatus, LastGoodCheckDBStatus, AlertStatus, FullBackupStatus, DiffBackupStatus, LogBackupStatus, DriveStatus, JobStatus, IsAgentRunningStatus, LogShippingStatus, MirroringStatus, AGStatus, LogFreeSpaceStatus, FileFreeSpaceStatus, PctMaxSizeStatus, ElasticPoolStorageStatus, QueryStoreStatus, CustomCheckStatus, CollectionErrorStatus, SnapshotAgeStatus, DBMailStatus, IdentityStatus, DatabaseStateStatus, ServiceBrokerStatus, UptimeStatus });
             dataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle7.BackColor = System.Drawing.Color.FromArgb(241, 241, 246);
             dataGridViewCellStyle7.Font = new System.Drawing.Font("Segoe UI", 9F);
@@ -478,6 +479,18 @@ namespace DBADashGUI
             DatabaseStateStatus.ToolTipText = "Check for databases in Recovery Pending, Suspect or Emergency state";
             DatabaseStateStatus.UseColumnTextForLinkValue = true;
             DatabaseStateStatus.Width = 70;
+            // 
+            // ServiceBrokerStatus
+            // 
+            ServiceBrokerStatus.HeaderText = "Service Broker";
+            ServiceBrokerStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
+            ServiceBrokerStatus.MinimumWidth = 6;
+            ServiceBrokerStatus.Name = "ServiceBrokerStatus";
+            ServiceBrokerStatus.ReadOnly = true;
+            ServiceBrokerStatus.Text = "View";
+            ServiceBrokerStatus.ToolTipText = "Service Broker queues, transmission queue, conversations and activation.  Requires the ServiceBroker collection, which is off by default.";
+            ServiceBrokerStatus.UseColumnTextForLinkValue = true;
+            ServiceBrokerStatus.Width = 70;
             // 
             // UptimeStatus
             // 
@@ -990,6 +1003,7 @@ namespace DBADashGUI
         private System.Windows.Forms.DataGridViewTextBoxColumn DBMailStatus;
         private System.Windows.Forms.DataGridViewLinkColumn IdentityStatus;
         private System.Windows.Forms.DataGridViewLinkColumn DatabaseStateStatus;
+        private System.Windows.Forms.DataGridViewLinkColumn ServiceBrokerStatus;
         private System.Windows.Forms.DataGridViewLinkColumn UptimeStatus;
     }
 }

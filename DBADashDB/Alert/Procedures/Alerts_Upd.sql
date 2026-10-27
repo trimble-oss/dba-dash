@@ -47,6 +47,7 @@ EXEC Alert.FailedLoginsAlert_Upd
 EXEC Alert.DatabaseMailAlert_Upd
 EXEC Alert.AzureDBSpaceAlert_Upd
 EXEC Alert.ElasticPoolSpaceAlert_Upd
+EXEC Alert.ServiceBrokerAlert_Upd
 
 /* Close Alerts that have been resolved for a period of time */
 

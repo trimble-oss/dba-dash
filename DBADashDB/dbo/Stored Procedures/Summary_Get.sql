@@ -133,7 +133,9 @@ SELECT 	InstanceID,
 		LastFail,
 		OSInfoSnapshotDate,
 		Paused.CollectionsPausedUntil,
-		CASE WHEN Paused.CollectionsPausedUntil IS NULL THEN 0 ELSE 1 END AS PausedCount
+		CASE WHEN Paused.CollectionsPausedUntil IS NULL THEN 0 ELSE 1 END AS PausedCount,
+		ServiceBrokerStatus,
+		ServiceBrokerStatusDescription
 FROM dbo.Summary S
 /* Live rather than from the cached summary, so a pause shows straight away and disappears when it ends */
 OUTER APPLY(SELECT CASE WHEN I.CollectionsPausedUntil > SYSUTCDATETIME() THEN I.CollectionsPausedUntil END AS CollectionsPausedUntil
@@ -213,7 +215,9 @@ SELECT 	NULL AS InstanceID,
 		MAX(LastFail) AS LastFail,
 		MIN(OSInfoSnapshotDate) AS OSInfoSnapshotDate,
 		MAX(Paused.CollectionsPausedUntil) AS CollectionsPausedUntil,
-		COUNT(Paused.CollectionsPausedUntil) AS PausedCount
+		COUNT(Paused.CollectionsPausedUntil) AS PausedCount,
+		3 AS ServiceBrokerStatus,
+		NULL AS ServiceBrokerStatusDescription
 FROM dbo.Summary S
 OUTER APPLY(SELECT CASE WHEN I.CollectionsPausedUntil > SYSUTCDATETIME() THEN I.CollectionsPausedUntil END AS CollectionsPausedUntil
 			FROM dbo.Instances I

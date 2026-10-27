@@ -1003,6 +1003,17 @@ namespace DBADashGUI.CustomReports
 
         private bool ShowAllResults => cboResults.SelectedIndex == cboResults.Items.Count - 1;
 
+        /// <summary>
+        /// The result sets shown when ALL is selected - those not hidden with <see cref="CustomReportResult.ShowWithAllResults"/>, which are
+        /// still in the results combo to view on their own.  All of them if every one is hidden, rather than an empty table panel.
+        /// </summary>
+        private int[] ResultsShownWithAll()
+        {
+            var all = Enumerable.Range(0, reportDS.Tables.Count).ToArray();
+            var shown = all.Where(i => !Report.CustomReportResults.TryGetValue(i, out var result) || result.ShowWithAllResults).ToArray();
+            return shown.Length > 0 ? shown : all;
+        }
+
         public void RefreshData()
         {
             if (!Report.HasAccess())
@@ -1867,8 +1878,6 @@ namespace DBADashGUI.CustomReports
             }
 
             const int minDataGridViewHeight = 100; // Minimum height for a DataGridView
-            // Avoid divide by zero when reportDS has no tables (system-only chart reports)
-            var maxDataGridViewHeight = hasData ? Math.Max(300, this.Height / Math.Min(3, reportDS.Tables.Count)) : Math.Max(300, this.Height / 3);
             var parentPanel = TablePanel;
             ClearResults();
             List<Panel> panels = new();
@@ -1889,17 +1898,12 @@ namespace DBADashGUI.CustomReports
             SetChartPanelCollapsed(Charts.Count == 0 || !Report.ChartVisible);
 
             // Determine result tables to show (may be empty for system-only reports)
-            var i = 0;
-            DataTable[] tables;
-            if (hasData)
-            {
-                i = ShowAllResults ? 0 : cboResults.SelectedIndex;
-                tables = ShowAllResults ? reportDS.Tables.Cast<DataTable>().ToArray() : new[] { reportDS.Tables[cboResults.SelectedIndex] };
-            }
-            else
-            {
-                tables = Array.Empty<DataTable>();
-            }
+            var resultIndexes = !hasData ? Array.Empty<int>()
+                : ShowAllResults ? ResultsShownWithAll()
+                : new[] { cboResults.SelectedIndex };
+            var tables = resultIndexes.Select(index => reportDS.Tables[index]).ToArray();
+            // Shared between the grids shown, up to 3.  Clamped to avoid divide by zero when there are none (system-only chart reports)
+            var maxDataGridViewHeight = Math.Max(300, this.Height / Math.Clamp(tables.Length, 1, 3));
             // With multiple result sets the panels are stacked (Dock=Top). In a scrollable report the container
             // scrolls so result sets keep a usable height and overflow scrolls off-screen rather than being
             // squashed to fit; in a single-page report the result sets are fitted into the available height.
@@ -1907,8 +1911,9 @@ namespace DBADashGUI.CustomReports
             parentPanel.AutoScroll = tables.Length > 1 && !Report.SinglePageLayout;
             tsToggleSinglePage.Visible = tables.Length > 1;
             tsToggleSinglePage.Checked = Report.SinglePageLayout;
-            foreach (var table in tables)
+            foreach (var i in resultIndexes)
             {
+                var table = reportDS.Tables[i];
                 var pnl = new Panel()
                 {
                     Dock = tables.Length == 1 ? DockStyle.Fill : DockStyle.Top, // Dock to the top of the panel
@@ -2025,7 +2030,6 @@ namespace DBADashGUI.CustomReports
                     dgv.GridFilterChanged += gridFilterHandler;
                     gridFilterHandlers[dgv] = gridFilterHandler;
                 }
-                i += 1;
             }
             parentPanel.Controls.AddRange(panels.OrderByDescending(p => (int)p.Tag!).Cast<Control>().ToArray());
             OnPostGridRefresh();

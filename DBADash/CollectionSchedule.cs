@@ -92,6 +92,8 @@ namespace DBADashService
                             {CollectionType.LatchStats, new CollectionSchedule() {Schedule = disabled, RunOnServiceStart = false} },
                             /* Spinlock stats are for investigating spinlock contention - enable when needed.  every1min is the suggested schedule. */
                             {CollectionType.SpinlockStats, new CollectionSchedule() {Schedule = disabled, RunOnServiceStart = false} },
+                            /* Service Broker monitoring - enable where Service Broker is in use.  every5min is the suggested schedule. */
+                            {CollectionType.ServiceBroker, new CollectionSchedule() {Schedule = disabled, RunOnServiceStart = false} },
 
                             {CollectionType.ScheduleInfo, new CollectionSchedule() {Schedule = disabled, RunOnServiceStart = true} },
         };

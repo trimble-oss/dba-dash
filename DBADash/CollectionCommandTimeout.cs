@@ -115,6 +115,7 @@ namespace DBADash
                 { CollectionType.SlowQueries, 90 },
                 { CollectionType.Deadlocks, 90 },
                 { CollectionType.AGHealthEvents, 90 },
+                { CollectionType.ServiceBroker, 120 },
                 // Set timeouts for hourly schedules to 120, and midnight and elevenPM schedules to 300
                 { CollectionType.ServerProperties, 120 },
                 { CollectionType.Databases, 120 },
