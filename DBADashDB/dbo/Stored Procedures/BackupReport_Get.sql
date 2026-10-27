@@ -11,14 +11,12 @@ AS
 /*
 	Combined report used by the Backups tab (BackupsView).
 	Returns two result sets:
-		0 - Instance summary (dbo.BackupSummary)
+		0 - Instance summary (aggregated from dbo.BackupStatus)
 		1 - Database detail   (dbo.BackupStatus)
 	@InstanceID is supplied when drilling down from the summary to a single instance.
 
 	dbo.BackupStatus is evaluated once into #BackupStatus and both result sets are produced from it.
-	Querying the views directly evaluated BackupStatus 5 times (BackupSummary references it 4 times) and could
-	produce a plan that re-aggregated LastBackup for the whole repository once per database.
-	The summary aggregation below mirrors dbo.BackupSummary - keep the two in sync.
+	BackupStatus is expensive to evaluate, so avoid referencing it more than once per call.
 */
 
 -- Drilling down to a single instance mirrors the legacy single-instance view: show all databases including hidden ones.

@@ -712,7 +712,6 @@
     <Build Include="dbo\Stored Procedures\DBADashAgent_Upd.sql" />
     <Build Include="dbo\Views\BackupStats.sql" />
     <Build Include="dbo\Views\LastBackup.sql" />
-    <Build Include="dbo\Views\BackupSummary.sql" />
     <Build Include="dbo\Stored Procedures\LastBackup_Get.sql" />
     <Build Include="dbo\Views\RunningQueriesInfo.sql" />
     <Build Include="dbo\Stored Procedures\RunningQueriesForSession_Get.sql" />
