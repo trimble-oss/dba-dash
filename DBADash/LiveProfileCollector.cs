@@ -101,10 +101,12 @@ namespace DBADash
                             && r["statement_start_offset"] != DBNull.Value
                             && r["statement_end_offset"] != DBNull.Value
                             && r["cpu_time"] != DBNull.Value)
-                .Where(r => Convert.ToInt64(r["cpu_time"]) >= threshold.CPUThreshold
+                .Where(r => (Convert.ToInt64(r["cpu_time"]) >= threshold.CPUThreshold
+                             && StatementCouldHaveUsed(r) >= threshold.CPUThreshold)
                             // A blocked request's operators aren't moving, so how long it has been waiting doesn't make its counters worth keeping
                             || (Convert.ToInt32(r["blocking_session_id"]) == 0
-                                && ((DateTime)r["SnapshotDateUTC"]).Subtract((DateTime)r["start_time_utc"]).TotalMilliseconds >= threshold.DurationThreshold))
+                                && ((DateTime)r["SnapshotDateUTC"]).Subtract((DateTime)r["start_time_utc"]).TotalMilliseconds >= threshold.DurationThreshold
+                                && StatementRunningFor(r) >= threshold.DurationThreshold))
                 .Where(r => planKeys.Contains(new Plan((byte[])r["plan_handle"], (byte[])r["query_plan_hash"], (int)r["statement_start_offset"], (int)r["statement_end_offset"]).Key))
                 .OrderByDescending(r => Convert.ToInt64(r["cpu_time"]))
                 .Take(threshold.MaxPerCollection)
@@ -117,6 +119,31 @@ namespace DBADash
                     (byte[])r["query_plan_hash"],
                     (byte[])r["sql_handle"]))
                 .ToList();
+
+        /// <summary>
+        /// The longest the current statement can have been running, in ms.  The thresholds are on the request, which can
+        /// span many statements: a batch that has used minutes of CPU can be a few ms into a statement that isn't the
+        /// expensive one.  Outside an explicit transaction each statement runs in its own, so the session's oldest
+        /// transaction began no earlier than the statement.  Inside one it began earlier and this is only an upper bound,
+        /// which lets the request through as before.  Without a transaction begin time (not collected, or no transaction)
+        /// there is nothing to go on and nothing is held back.
+        /// </summary>
+        private static double StatementRunningFor(DataRow r) =>
+            r.Table.Columns.Contains("transaction_begin_time_utc") && r["transaction_begin_time_utc"] != DBNull.Value
+                ? ((DateTime)r["SnapshotDateUTC"]).Subtract((DateTime)r["transaction_begin_time_utc"]).TotalMilliseconds
+                : double.MaxValue;
+
+        /// <summary>
+        /// The most CPU the current statement can have used, in ms - <see cref="StatementRunningFor"/> on each of its
+        /// threads.  Without the DOP a parallel statement could have used any amount, so nothing is held back.
+        /// </summary>
+        private static double StatementCouldHaveUsed(DataRow r)
+        {
+            var runningFor = StatementRunningFor(r);
+            if (runningFor == double.MaxValue) return runningFor;
+            if (!r.Table.Columns.Contains("dop") || r["dop"] == DBNull.Value) return double.MaxValue;
+            return runningFor * Math.Max(Convert.ToInt32(r["dop"]), 1);
+        }
 
         /// <summary>
         /// The table the import passes to dbo.RunningQueryLiveProfiles_Upd.  A table-valued parameter binds by ordinal, so
