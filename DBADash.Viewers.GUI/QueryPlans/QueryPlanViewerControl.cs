@@ -280,7 +280,9 @@ namespace DBADashGUI.QueryPlans
             _tabs.TabPages.Add(_waitsTab);
             _tabs.TabPages.Add(NewPage("Query", _queryHost));
             if (_ai != null) _tabs.TabPages.Add(NewPage("AI Analysis", _ai.Control));
-            _tabs.TabPages.Add(NewPage("XML", _xmlHost));
+            var xmlPage = NewPage("XML", _xmlHost);
+            xmlPage.ToolTipText = "The plan's showplan XML.  Ctrl+F to search it.";
+            _tabs.TabPages.Add(xmlPage);
 
             // The intended order of every tab, so the ones hidden while empty go back in their place.
             _orderedTabs.AddRange(_tabs.TabPages.Cast<TabPage>());
@@ -1763,7 +1765,17 @@ namespace DBADashGUI.QueryPlans
         {
             if (e.Items.Count > 0) e.Items.Add(new ToolStripSeparator());
 
-            var show = new ToolStripMenuItem("Show") { ToolTipText = "What the bars and heat colouring measure." };
+            // The operator's own XML, for the attributes and elements the viewer does not show.
+            if (e.Operator is { NodeId: >= 0 } op && _current is { HasPlan: true } statement && !string.IsNullOrEmpty(statement.Xml))
+            {
+                e.Items.Add(new ToolStripMenuItem("View Operator XML", null, (_, _) => ShowOperatorXml(statement, op))
+                {
+                    ToolTipText = "The showplan XML of this operator, with the operators below it left out."
+                });
+                e.Items.Add(new ToolStripSeparator());
+            }
+
+            var show =new ToolStripMenuItem("Show") { ToolTipText = "What the bars and heat colouring measure." };
             foreach (var choice in _metricSelector.Items.OfType<MetricChoice>())
             {
                 show.DropDownItems.Add(new ToolStripMenuItem(choice.ToString(), null, (_, _) => _metricSelector.SelectedItem = choice)
@@ -1805,6 +1817,31 @@ namespace DBADashGUI.QueryPlans
                 Checked = _nodeIdsItem.Checked,
                 ToolTipText = _nodeIdsItem.ToolTipText
             });
+        }
+
+        private void ShowOperatorXml(PlanStatement statement, PlanOperator op)
+        {
+            string xml;
+            try
+            {
+                xml = PlanParser.ExtractOperatorXml(statement, op.NodeId);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, "Unable to read the operator XML: " + ex.Message, "View Operator XML", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (xml is null)
+            {
+                MessageBox.Show(this, "No XML was found for node " + op.NodeId.ToString(CultureInfo.CurrentCulture) + ".", "View Operator XML", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            // Modeless, so it can sit beside the plan while the node's properties are compared with it.
+            var frm = new CodeEditorForm { EditEnabled = false, Syntax = CodeEditor.CodeEditorModes.XML, Code = xml };
+            frm.Text = op.DisplayName + " (node " + op.NodeId.ToString(CultureInfo.CurrentCulture) + ") XML";
+            frm.Show(this);
         }
 
         /// <summary>

@@ -239,6 +239,36 @@ namespace DBADash.QueryPlan
         }
 
         /// <summary>
+        /// The RelOp element of one operator, as it appears in the statement's XML, for reading what
+        /// the viewer does not parse.  The operators below it are each replaced by a comment naming
+        /// them: they have their own fragment, and left in, the root's would be the whole plan.
+        /// Null when the statement has no XML or no RelOp with that node id.
+        /// </summary>
+        public static string? ExtractOperatorXml(PlanStatement statement, int nodeId)
+        {
+            ArgumentNullException.ThrowIfNull(statement);
+            if (string.IsNullOrEmpty(statement.Xml)) return null;
+
+            var id = nodeId.ToString(CultureInfo.InvariantCulture);
+            var relOp = XElement.Parse(statement.Xml)
+                .Descendants()
+                .FirstOrDefault(e => e.Name.LocalName == "RelOp" && (string?)e.Attribute("NodeId") == id);
+            if (relOp is null) return null;
+
+            // Outermost RelOps below this one only - ToList first, since replacing them edits the tree.
+            var children = relOp.Descendants()
+                .Where(e => e.Name.LocalName == "RelOp" && e.Ancestors().First(a => a.Name.LocalName == "RelOp") == relOp)
+                .ToList();
+            foreach (var child in children)
+            {
+                child.ReplaceWith(new XComment(
+                    $" RelOp NodeId=\"{(string?)child.Attribute("NodeId")}\" PhysicalOp=\"{(string?)child.Attribute("PhysicalOp")}\" omitted "));
+            }
+
+            return relOp.ToString();
+        }
+
+        /// <summary>
         /// A cheap check that a string looks like a plan, for deciding whether to offer the viewer at
         /// all.  Looks at the text rather than parsing, because this is asked about grid cells and
         /// clipboard contents where the answer is usually no.
