@@ -101,6 +101,49 @@ namespace DBADash.Test
             Assert.AreEqual((short)61, requests[0].SessionID);
         }
 
+        /// <summary>
+        /// The thresholds are on the request, but the counters are for the statement it is on now: one a few ms into a
+        /// statement after minutes of others isn't captured.  The transaction begin time bounds how long the statement has
+        /// been running, and with the DOP how much CPU it can have used.
+        /// </summary>
+        [TestMethod]
+        public void SkipsAStatementThatHasOnlyJustStarted()
+        {
+            var snapshot = DateTime.UtcNow;
+            var dt = new DataTable("RunningQueries");
+            dt.Columns.Add("SnapshotDateUTC", typeof(DateTime));
+            dt.Columns.Add("session_id", typeof(short));
+            dt.Columns.Add("start_time_utc", typeof(DateTime));
+            dt.Columns.Add("sql_handle", typeof(byte[]));
+            dt.Columns.Add("plan_handle", typeof(byte[]));
+            dt.Columns.Add("query_plan_hash", typeof(byte[]));
+            dt.Columns.Add("statement_start_offset", typeof(int));
+            dt.Columns.Add("statement_end_offset", typeof(int));
+            dt.Columns.Add("cpu_time", typeof(int));
+            dt.Columns.Add("blocking_session_id", typeof(short));
+            dt.Columns.Add("transaction_begin_time_utc", typeof(DateTime));
+            dt.Columns.Add("dop", typeof(int));
+
+            void Add(short session, int cpu, double? tranMs, int? dop) =>
+                dt.Rows.Add(snapshot, session, snapshot.AddMinutes(-10), new[] { (byte)session }, new[] { (byte)session }, new byte[] { 1, 2, 3, 4, 5, 6, 7, (byte)session },
+                    0, -1, cpu, (short)0, tranMs.HasValue ? snapshot.AddMilliseconds(-tranMs.Value) : DBNull.Value, dop.HasValue ? dop.Value : DBNull.Value);
+
+            Add(60, 120000, 5, 1);          // Over both thresholds, but 5 ms into the statement
+            Add(61, 120000, null, 1);       // No transaction begin time: nothing to go on
+            Add(62, 120000, 20000, 4);      // 20 s on 4 threads can have used 80 s of CPU - and is under the duration threshold
+            Add(63, 120000, 20000, 1);      // 20 s on 1 thread can't have used 60 s of CPU
+            Add(64, 1000, 400000, 1);       // Under the CPU threshold, statement running long enough on duration
+
+            var planKeys = dt.AsEnumerable()
+                .Select(r => new Plan((byte[])r["plan_handle"], (byte[])r["query_plan_hash"], 0, -1).Key)
+                .ToHashSet();
+            var threshold = new LiveProfileThreshold { CPUThreshold = 60000, DurationThreshold = 300000, MaxPerCollection = 10 };
+
+            var sessions = LiveProfileCollector.SelectRequests(dt, planKeys, threshold).Select(r => r.SessionID).OrderBy(s => s).ToArray();
+
+            CollectionAssert.AreEqual(new short[] { 61, 62, 64 }, sessions);
+        }
+
         [TestMethod]
         public void ThresholdIsOffUntilOneIsSet()
         {
