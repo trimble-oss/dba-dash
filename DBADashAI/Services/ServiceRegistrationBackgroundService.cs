@@ -50,14 +50,20 @@ public class ServiceRegistrationBackgroundService : BackgroundService
         await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
 
         // Register on startup
-        await RegisterServiceAsync(stoppingToken);
+        var registered = await RegisterServiceAsync(stoppingToken);
 
-        // Send periodic heartbeats
+        // Send periodic heartbeats. Registration is retried until it succeeds, as the repository
+        // database might not be available yet or might still be waiting to be upgraded.
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
                 await Task.Delay(_heartbeatInterval, stoppingToken);
+                if (!registered)
+                {
+                    registered = await RegisterServiceAsync(stoppingToken);
+                    continue;
+                }
                 await SendHeartbeatAsync(stoppingToken);
                 await RotateKeyIfDueAsync(stoppingToken);
             }
@@ -73,7 +79,10 @@ public class ServiceRegistrationBackgroundService : BackgroundService
         }
     }
 
-    private async Task RegisterServiceAsync(CancellationToken cancellationToken = default)
+    /// <summary>
+    /// Registers the service in the repository database.  Returns false if registration should be retried.
+    /// </summary>
+    private async Task<bool> RegisterServiceAsync(CancellationToken cancellationToken = default)
     {
         try
         {
@@ -81,7 +90,7 @@ public class ServiceRegistrationBackgroundService : BackgroundService
             if (string.IsNullOrWhiteSpace(connectionString))
             {
                 _logger.LogWarning("Repository connection string not configured - AI service will not be discoverable");
-                return;
+                return true; // Retrying won't help
             }
 
             var serviceUrl = NormalizeServiceUrl(_configuration["Registration:ServiceUrl"]!);
@@ -127,10 +136,22 @@ public class ServiceRegistrationBackgroundService : BackgroundService
             await SendHeartbeatAsync(cancellationToken);
 
             _logger.LogInformation("AI service registered: URL={ServiceUrl}, Version={Version}", serviceUrl, version);
+            return true;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (SqlException ex) when (ex.Number is 2812 or 8144 or 8145)
+        {
+            // Could not find stored procedure (2812) or parameter mismatch (8144/8145).
+            _logger.LogWarning("Failed to register AI service in repository database. The repository database might not be upgraded yet - will retry in {Interval}. {Message}", _heartbeatInterval, ex.Message);
+            return false;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to register AI service in repository database");
+            _logger.LogError(ex, "Failed to register AI service in repository database - will retry in {Interval}", _heartbeatInterval);
+            return false;
         }
     }
 
