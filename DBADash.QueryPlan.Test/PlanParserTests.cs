@@ -739,6 +739,26 @@ namespace DBADash.QueryPlan.Test
         }
 
         [TestMethod]
+        public void ExtractOperatorXml_HoldsThatRelOp_WithItsChildrenReplacedByComments()
+        {
+            var statement = PlanParser.Parse(TestPlans.Xml(TestPlans.KeyLookupSeek)).Statements[0];
+            var op = statement.Operators.First(o => o.NodeId >= 0 && o.Children.Count > 0);
+
+            var xml = PlanParser.ExtractOperatorXml(statement, op.NodeId);
+            var element = System.Xml.Linq.XElement.Parse(xml!);
+
+            Assert.AreEqual("RelOp", element.Name.LocalName);
+            Assert.AreEqual(op.NodeId.ToString(System.Globalization.CultureInfo.InvariantCulture), (string?)element.Attribute("NodeId"));
+            Assert.IsFalse(element.Descendants().Any(e => e.Name.LocalName == "RelOp"));
+            foreach (var child in op.Children.Where(c => c.NodeId >= 0))
+            {
+                StringAssert.Contains(xml, "RelOp NodeId=\"" + child.NodeId.ToString(System.Globalization.CultureInfo.InvariantCulture) + "\"");
+            }
+
+            Assert.IsNull(PlanParser.ExtractOperatorXml(statement, 99999));
+        }
+
+        [TestMethod]
         public void ExtractStatementXml_OfOneStatementOfABatch_LeavesTheOthersOut()
         {
             var source = TestPlans.Xml(TestPlans.Batch);

@@ -5,7 +5,39 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:DBADashGUI.SchemaCompare"
              mc:Ignorable="d" 
+             xmlns:search="clr-namespace:ICSharpCode.AvalonEdit.Search;assembly=ICSharpCode.AvalonEdit"
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <!-- A flatter find bar than AvalonEdit's default, in the Segoe UI the rest of the application uses. -->
+        <Style x:Key="SearchPanelStyle" TargetType="search:SearchPanel">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="search:SearchPanel">
+                        <Border Background="#FFF5F5F5" BorderBrush="#FFBDBDBD" BorderThickness="1" Margin="0,4,18,0" Padding="4"
+                                HorizontalAlignment="Right" VerticalAlignment="Top" Cursor="Arrow"
+                                TextElement.FontFamily="Segoe UI" TextElement.FontSize="9pt">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBox Name="PART_searchTextBox" AutomationProperties.Name="Search text" Width="180" VerticalContentAlignment="Center" Padding="2"
+                                         Text="{Binding SearchPattern, RelativeSource={RelativeSource TemplatedParent}, UpdateSourceTrigger=PropertyChanged}"/>
+                                <Button Command="search:SearchCommands.FindPrevious" ToolTip="Previous (Shift+F3)" AutomationProperties.Name="Find previous" Margin="4,0,0,0" Width="24"
+                                        Background="Transparent" BorderThickness="0" FontFamily="Segoe MDL2 Assets" Content="&#xE70E;"/>
+                                <Button Command="search:SearchCommands.FindNext" ToolTip="Next (F3)" AutomationProperties.Name="Find next" Width="24"
+                                        Background="Transparent" BorderThickness="0" FontFamily="Segoe MDL2 Assets" Content="&#xE70D;"/>
+                                <CheckBox Content="Match case" Margin="6,0,0,0" VerticalAlignment="Center"
+                                          IsChecked="{Binding MatchCase, RelativeSource={RelativeSource TemplatedParent}}"/>
+                                <CheckBox Content="Whole word" Margin="6,0,0,0" VerticalAlignment="Center"
+                                          IsChecked="{Binding WholeWords, RelativeSource={RelativeSource TemplatedParent}}"/>
+                                <CheckBox Content="Regex" Margin="6,0,0,0" VerticalAlignment="Center"
+                                          IsChecked="{Binding UseRegex, RelativeSource={RelativeSource TemplatedParent}}"/>
+                                <Button Command="search:SearchCommands.CloseSearchPanel" ToolTip="Close (Esc)" AutomationProperties.Name="Close search" Margin="6,0,0,0" Width="24"
+                                        Background="Transparent" BorderThickness="0" FontFamily="Segoe MDL2 Assets" FontSize="8pt" Content="&#xE711;"/>
+                            </StackPanel>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
     <Grid>
         <avalonEdit:TextEditor
     xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
