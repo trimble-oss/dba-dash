@@ -143,6 +143,7 @@ public class ApiKeyManager
         cmd.Parameters.AddWithValue("@IsEnabled", currentConfig.IsEnabled);
         cmd.Parameters.AddWithValue("@ServiceVersion", (object?)currentConfig.ServiceVersion ?? DBNull.Value);
         cmd.Parameters.AddWithValue("@KeyGracePeriodHours", gracePeriodHours);
+        cmd.Parameters.AddWithValue("@CertificateThumbprint", (object?)currentConfig.CertificateThumbprint ?? DBNull.Value);
 
         await cmd.ExecuteNonQueryAsync(cancellationToken);
 
@@ -199,6 +200,13 @@ public class ApiKeyManager
             }
             catch (IndexOutOfRangeException) { }
 
+            try
+            {
+                var ordinal = reader.GetOrdinal("CertificateThumbprint");
+                config.CertificateThumbprint = reader.IsDBNull(ordinal) ? null : reader.GetString(ordinal);
+            }
+            catch (IndexOutOfRangeException) { }
+
             return config;
         }
 
@@ -214,6 +222,7 @@ public class ApiKeyManager
         public DateTime? ApiKeyCreatedDate { get; set; }
         public string? PreviousApiKey { get; set; }
         public DateTime? PreviousApiKeyExpiryUtc { get; set; }
+        public string? CertificateThumbprint { get; set; }
     }
 
     internal static string GenerateApiKey()

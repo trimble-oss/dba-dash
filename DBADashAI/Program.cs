@@ -92,20 +92,115 @@ builder.Configuration.AddDpApiSecrets();
 // If empty → local mode: bind loopback only, skip DB registration, auth disabled.
 var registrationServiceUrl = builder.Configuration["Registration:ServiceUrl"];
 var isLocalMode = string.IsNullOrWhiteSpace(registrationServiceUrl);
+var listenPort = builder.Configuration.GetValue<int?>("Registration:Port") ?? 5055;
 
 if (isLocalMode)
 {
     // Bind to loopback only - not accessible from other machines.
-    var port = builder.Configuration.GetValue<int?>("Registration:Port") ?? 5055;
-    builder.WebHost.UseUrls($"http://localhost:{port}");
+    // Local mode stays on HTTP. Loopback is the security boundary, so there is no certificate.
+    builder.WebHost.UseUrls($"http://localhost:{listenPort}");
+}
+else if (AiHttpsHosting.IsCustomHostingConfigured(builder.Configuration))
+{
+    // Endpoints or an explicit listen URL are already configured.
+    // Leave that hosting in place. Register the certificate thumbprint when it can be read
+    // so GUI clients can accept a certificate Windows does not trust.
+    Log.Information("AI service is using the existing Kestrel or URL configuration. Automatic HTTPS binding was not applied.");
+    var configuredThumbprint = AiHttpsHosting.TryReadConfiguredThumbprint(
+        builder.Configuration,
+        registrationServiceUrl,
+        listenPort,
+        builder.Environment.ContentRootPath);
+    if (!string.IsNullOrWhiteSpace(configuredThumbprint))
+    {
+        Log.Information("HTTPS certificate thumbprint {Thumbprint} was read from the existing Kestrel configuration", configuredThumbprint);
+        builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            [AiHttpsCertificate.ActiveThumbprintConfigurationKey] = configuredThumbprint
+        });
+    }
+    else
+    {
+        Log.Information("No certificate thumbprint could be read from the Kestrel configuration. GUI clients will accept the server certificate when Windows trusts it for the service host.");
+    }
+}
+else if (ShouldListenOnHttps(builder.Configuration, registrationServiceUrl, listenPort)
+         && AiHttpsHosting.HasDefaultCertificate(builder.Configuration))
+{
+    // Kestrel:Certificates:Default names the certificate but not where to listen.
+    // Bind the service port on HTTPS and let Kestrel serve that certificate.
+    builder.WebHost.UseUrls($"https://*:{listenPort}");
+    var settings = new Dictionary<string, string?>
+    {
+        [AiHttpsHosting.ServiceUrlHttpsConfigurationKey] = "true"
+    };
+    var defaultThumbprint = AiHttpsHosting.TryReadConfiguredThumbprint(
+        builder.Configuration,
+        registrationServiceUrl,
+        listenPort,
+        builder.Environment.ContentRootPath);
+    if (!string.IsNullOrWhiteSpace(defaultThumbprint))
+    {
+        Log.Information("AI service HTTPS certificate {Thumbprint} from Kestrel:Certificates:Default", defaultThumbprint);
+        settings[AiHttpsCertificate.ActiveThumbprintConfigurationKey] = defaultThumbprint;
+    }
+    else
+    {
+        Log.Information("No certificate thumbprint could be read from Kestrel:Certificates:Default. GUI clients will accept the server certificate when Windows trusts it for the service host.");
+    }
+
+    builder.Configuration.AddInMemoryCollection(settings);
+}
+else if (ShouldListenOnHttps(builder.Configuration, registrationServiceUrl, listenPort))
+{
+    // Shared mode listens on HTTPS. A selected store certificate is used when configured;
+    // otherwise a self-signed certificate is created and its thumbprint is registered with the URL.
+    // ProgramData is writable by the service account. The install directory often is not.
+    var certificateDirectory = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+        "DBADash",
+        "AI");
+    var certificate = AiHttpsCertificate.LoadForService(
+        builder.Configuration["Security:CertificateThumbprint"],
+        registrationServiceUrl!,
+        certificateDirectory);
+    if (Uri.TryCreate(registrationServiceUrl, UriKind.Absolute, out var serviceUri)
+        && !AiHttpsCertificate.HostMatches(certificate, serviceUri.Host))
+    {
+        Log.Warning(
+            "HTTPS certificate {Thumbprint} does not match {Host}. Clients that require a trusted name will fail until the certificate name matches. Clients still accept this certificate while the repository thumbprint matches it.",
+            certificate.Thumbprint,
+            serviceUri.Host);
+    }
+
+    Log.Information("AI service HTTPS certificate {Thumbprint}", certificate.Thumbprint);
+    builder.WebHost.UseUrls($"https://*:{listenPort}");
+    builder.WebHost.ConfigureKestrel(options =>
+    {
+        options.ConfigureHttpsDefaults(https => https.ServerCertificate = certificate);
+    });
+    builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
+    {
+        [AiHttpsCertificate.ActiveThumbprintConfigurationKey] = certificate.Thumbprint,
+        [AiHttpsHosting.ServiceUrlHttpsConfigurationKey] = "true"
+    });
 }
 else
 {
-    // Shared mode: bind to all interfaces so remote GUI clients can connect.
-    var port = builder.Configuration.GetValue<int?>("Registration:Port") ?? 5055;
-    if (string.IsNullOrWhiteSpace(builder.Configuration["Urls"]))
+    // HTTPS is off, and no separate hosting configuration. The service URL keeps its scheme:
+    // an https:// URL means a reverse proxy terminates TLS in front of this HTTP listener.
+    builder.WebHost.UseUrls($"http://*:{listenPort}");
+    if (Uri.TryCreate(registrationServiceUrl, UriKind.Absolute, out var serviceUri)
+        && serviceUri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
     {
-        builder.WebHost.UseUrls($"http://*:{port}");
+        Log.Information(
+            "AI service is listening on HTTP port {Port}. Service URL {ServiceUrl} uses HTTPS, so TLS is expected to be terminated by a reverse proxy. Set Security:EnableHttps to true to listen on HTTPS instead.",
+            listenPort,
+            registrationServiceUrl);
+    }
+    else
+    {
+        Log.Warning("AI service HTTPS is disabled. API keys will be sent without encryption.");
     }
 }
 
@@ -223,15 +318,8 @@ if (rlOptions.Enabled)
 var app = builder.Build();
 
 // Apply security middleware - ENABLED BY DEFAULT
-var requireHttps = app.Configuration.GetValue<bool>("Security:RequireHttps");
-
 if (securityEnabled)
 {
-    if (requireHttps)
-    {
-        app.UseHttpsRedirection();
-    }
-
     app.UseAuthentication();
     app.UseAuthorization();
 
@@ -1139,4 +1227,10 @@ static void LoadSettingsFromServiceConfig(ConfigurationManager config)
         Log.Information("Error loading ServiceConfig.json for repository connection string inheritance: {Message}", ex.Message);
         }
 }
+
+// An explicit Security:EnableHttps wins. When it is not set, an https:// service URL on a different
+// port than the listener is an existing reverse-proxy setup, which keeps listening on HTTP.
+static bool ShouldListenOnHttps(IConfiguration configuration, string? serviceUrl, int listenPort) =>
+    configuration.GetValue<bool?>("Security:EnableHttps")
+    ?? !AiHttpsCertificate.IsTlsTerminatedUpstream(serviceUrl, listenPort);
 } // end RunApp

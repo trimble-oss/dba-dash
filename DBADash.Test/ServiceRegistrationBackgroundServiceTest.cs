@@ -33,4 +33,15 @@ public class ServiceRegistrationBackgroundServiceTest
 
         Assert.AreEqual(expectedUrl, result);
     }
+
+    [TestMethod]
+    [DataRow("http://lab2022", 5055, true, "https://lab2022:5055")]
+    [DataRow("https://lab2022:5055", 5055, false, "http://lab2022:5055")]
+    [DataRow("https://server.example.com:443", 5055, true, "https://server.example.com:443")]
+    [DataRow("http://server.example.com:8080", 5055, true, "https://server.example.com:8080")]
+    public void TestNormalizeServiceUrl_RewritesScheme(string inputUrl, int port, bool useHttps, string expectedUrl)
+    {
+        var result = ServiceRegistrationBackgroundService.NormalizeServiceUrl(inputUrl, port, useHttps);
+        Assert.AreEqual(expectedUrl, result);
+    }
 }

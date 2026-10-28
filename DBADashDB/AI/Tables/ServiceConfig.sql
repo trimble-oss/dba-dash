@@ -11,6 +11,9 @@ CREATE TABLE AI.ServiceConfig (
     ApiKeyCreatedBy NVARCHAR(128) NOT NULL CONSTRAINT DF_AI_ServiceConfig_ApiKeyCreatedBy DEFAULT (SUSER_SNAME()),
     CreatedDate DATETIME2(3) NOT NULL CONSTRAINT DF_AI_ServiceConfig_CreatedDate DEFAULT (SYSDATETIME()),
     LastModifiedDate DATETIME2(3) NOT NULL CONSTRAINT DF_AI_ServiceConfig_LastModifiedDate DEFAULT (SYSDATETIME()),
+    -- Thumbprint of the certificate the service is presenting. GUI clients accept this
+    -- certificate when Windows does not (the shared-mode self-signed default).
+    CertificateThumbprint NVARCHAR(64) NULL,
     CONSTRAINT PK_AI_ServiceConfig PRIMARY KEY CLUSTERED (ConfigId ASC),
     CONSTRAINT CK_AI_ServiceConfig_SingleRow CHECK (ConfigId = 1)
 );

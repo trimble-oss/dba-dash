@@ -94,6 +94,18 @@ namespace DBADashGUI.AI
                 await using var reader = await command.ExecuteReaderAsync();
                 if (await reader.ReadAsync())
                 {
+                    try
+                    {
+                        var ordinal = reader.GetOrdinal("CertificateThumbprint");
+                        AiServerCertificateValidator.SetPinnedThumbprint(
+                            reader["ServiceUrl"] as string,
+                            reader.IsDBNull(ordinal) ? null : reader.GetString(ordinal));
+                    }
+                    catch (IndexOutOfRangeException)
+                    {
+                        // Repository has not been upgraded yet.
+                    }
+
                     var key = reader["ApiKey"]?.ToString();
                     if (!string.IsNullOrWhiteSpace(key))
                         return key;

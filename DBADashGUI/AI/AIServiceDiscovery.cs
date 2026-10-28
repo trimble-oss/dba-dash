@@ -49,9 +49,14 @@ namespace DBADashGUI.AI
             /// service source (no DB auth check needed for loopback mode).
             /// </summary>
             public bool HasApiKeyAccess { get; set; }
+            /// <summary>
+            /// Thumbprint of the certificate the shared service is presenting.
+            /// Empty for the local HTTP service.
+            /// </summary>
+            public string? CertificateThumbprint { get; set; }
         }
 
-        private static readonly HttpClient _probeClient = new() { Timeout = TimeSpan.FromSeconds(3) };
+        private static readonly HttpClient _probeClient = AiServerCertificateValidator.CreateClient(TimeSpan.FromSeconds(3));
 
         /// <summary>
         /// Default loopback URL probed when no local service URL is configured in user
@@ -83,11 +88,17 @@ namespace DBADashGUI.AI
                 if (localInfo.ApiKey == null)
                     localInfo = await MergeRepositoryKeyAsync(localInfo);
 
-                return localInfo;
+                return ApplyCertificatePin(localInfo);
             }
 
             // Priority 2: shared service registered in the repository database
-            return await TryGetRepositoryServiceAsync();
+            return ApplyCertificatePin(await TryGetRepositoryServiceAsync());
+        }
+
+        private static ServiceInfo? ApplyCertificatePin(ServiceInfo? info)
+        {
+            AiServerCertificateValidator.SetPinnedThumbprint(info);
+            return info;
         }
 
         /// <summary>
@@ -170,6 +181,7 @@ namespace DBADashGUI.AI
                 {
                     localInfo.ApiKey = repoInfo.ApiKey;
                     localInfo.HasApiKeyAccess = repoInfo.HasApiKeyAccess;
+                    localInfo.CertificateThumbprint = repoInfo.CertificateThumbprint;
 
                     // Successfully retrieved the key from the current repository DB, which
                     // proves this local service IS registered against the same repository
@@ -256,6 +268,7 @@ namespace DBADashGUI.AI
                         LastHeartbeat = reader["LastHeartbeat"] as DateTime?,
                         ServiceVersion = reader["ServiceVersion"]?.ToString(),
                         HasApiKeyAccess = hasApiKeyAccess,
+                        CertificateThumbprint = ReadOptionalString(reader, "CertificateThumbprint"),
                         Source = ServiceSource.Repository
                         // Repository mode: the service was registered against this DB so
                         // a fingerprint mismatch check is not needed.
@@ -269,6 +282,19 @@ namespace DBADashGUI.AI
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"AIServiceDiscovery: repository DB lookup failed: {ex.Message}");
+                return null;
+            }
+        }
+
+        private static string? ReadOptionalString(SqlDataReader reader, string column)
+        {
+            try
+            {
+                var ordinal = reader.GetOrdinal(column);
+                return reader.IsDBNull(ordinal) ? null : reader.GetString(ordinal);
+            }
+            catch (IndexOutOfRangeException)
+            {
                 return null;
             }
         }

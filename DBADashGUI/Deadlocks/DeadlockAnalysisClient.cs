@@ -22,7 +22,7 @@ namespace DBADashGUI.Deadlocks
     /// </summary>
     internal static class DeadlockAnalysisClient
     {
-        private static readonly HttpClient Client = new() { Timeout = AIServiceTimeouts.Request };
+        private static readonly HttpClient Client = AiServerCertificateValidator.CreateClient(AIServiceTimeouts.Request);
 
         internal sealed class Result
         {
@@ -132,6 +132,7 @@ namespace DBADashGUI.Deadlocks
         {
             try
             {
+                AiServerCertificateValidator.SetPinnedThumbprint(service);
                 var baseUrl = service.ServiceUrl
                               ?? ConfigurationManager.AppSettings["AIApiBaseUrl"]
                               ?? "http://localhost:5055";

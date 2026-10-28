@@ -1,3 +1,4 @@
+using DBADash;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -115,9 +116,11 @@ public class ServiceRegistrationBackgroundService : BackgroundService
                 CommandType = System.Data.CommandType.StoredProcedure,
                 CommandTimeout = _sqlTimeoutSeconds
             };
+            var thumbprint = _configuration[AiHttpsCertificate.ActiveThumbprintConfigurationKey];
             command.Parameters.AddWithValue("@ServiceUrl", serviceUrl);
             command.Parameters.AddWithValue("@ApiKey", apiKey);
             command.Parameters.AddWithValue("@ServiceVersion", version ?? (object)DBNull.Value);
+            command.Parameters.AddWithValue("@CertificateThumbprint", string.IsNullOrWhiteSpace(thumbprint) ? DBNull.Value : thumbprint);
             await command.ExecuteNonQueryAsync(cancellationToken);
 
             // Record initial heartbeat so IsActive is true immediately after registration
@@ -216,7 +219,8 @@ public class ServiceRegistrationBackgroundService : BackgroundService
     {
         try
         {
-            return NormalizeServiceUrl(serviceUrl, _configuration.GetValue<int?>("Registration:Port") ?? 5055);
+            var port = _configuration.GetValue<int?>("Registration:Port") ?? 5055;
+            return NormalizeServiceUrl(serviceUrl, port, AiHttpsHosting.ReadSchemeOverride(_configuration));
         }
         catch (Exception ex)
         {
@@ -225,7 +229,7 @@ public class ServiceRegistrationBackgroundService : BackgroundService
         }
     }
 
-    internal static string NormalizeServiceUrl(string serviceUrl, int port)
+    internal static string NormalizeServiceUrl(string serviceUrl, int port, bool? useHttps = null)
     {
         // UriBuilder handles malformed strings gracefully during instantiation
         var builder = new UriBuilder(serviceUrl);
@@ -234,11 +238,12 @@ public class ServiceRegistrationBackgroundService : BackgroundService
         // We use uri.Host to skip the scheme, and check if the remainder contains ":port"
         string portString = $":{builder.Port}";
         bool hasExplicitPort = serviceUrl.Contains(portString, StringComparison.OrdinalIgnoreCase);
+        var explicitPort = hasExplicitPort ? builder.Port : port;
 
-        if (!hasExplicitPort)
-        {
-            builder.Port = port;
-        }
+        // Changing the scheme resets a default port (80 or 443). Put the service port back afterwards.
+        if (useHttps.HasValue)
+            builder.Scheme = useHttps.Value ? Uri.UriSchemeHttps : Uri.UriSchemeHttp;
+        builder.Port = explicitPort;
 
         // UriBuilder.ToString() automatically handles trailing slashes or formatting cleanly
         return builder.ToString().TrimEnd('/');
