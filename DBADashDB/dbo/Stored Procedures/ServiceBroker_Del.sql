@@ -51,7 +51,10 @@ END
 
 IF @DaysToKeep = 0
 BEGIN
-	DELETE dbo.ServiceBrokerQueues WHERE InstanceID = @InstanceID
+	/*	Same seek as ServiceBroker_Upd: a scan would update-lock every instance's rows and deadlock an import. */
+	DELETE SBQ
+	FROM dbo.ServiceBrokerQueues SBQ WITH (FORCESEEK (IX_ServiceBrokerQueues_InstanceID_IsActive_SnapshotDate (InstanceID)))
+	WHERE SBQ.InstanceID = @InstanceID
 	DELETE dbo.ServiceBrokerTransmissionQueue WHERE InstanceID = @InstanceID
 	DELETE dbo.ServiceBrokerConversations WHERE InstanceID = @InstanceID
 	DELETE dbo.ServiceBrokerEndpoint WHERE InstanceID = @InstanceID

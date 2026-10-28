@@ -110,7 +110,11 @@ AND DATEDIFF(mi,S.SnapshotDate,@SnapshotDate) < 2160
 
 BEGIN TRAN
 
-/* Queues */
+/*	Queues.  Imports for different instances run in parallel, and each holds its locks until commit.
+	A scan of ServiceBrokerQueues reads every instance's rows.  The update and the purge take a U lock
+	on each row they examine, so one import waits on the other's locks while holding its own and the two
+	deadlock.  A small table makes that scan the cheapest plan, so every access below is forced to seek:
+	current rows by the queue's natural key, and rows being deactivated or purged by instance. */
 UPDATE SBQ
 	SET SBQ.object_id = Q.object_id,
 	SBQ.is_receive_enabled = Q.is_receive_enabled,
@@ -132,7 +136,7 @@ UPDATE SBQ
 	SBQ.status_changed_date = CASE WHEN SBQ.is_receive_enabled <> Q.is_receive_enabled OR SBQ.is_enqueue_enabled <> Q.is_enqueue_enabled THEN @SnapshotDate ELSE SBQ.status_changed_date END,
 	SBQ.SnapshotDate = @SnapshotDate,
 	SBQ.IsActive = 1
-FROM dbo.ServiceBrokerQueues SBQ
+FROM dbo.ServiceBrokerQueues SBQ WITH (FORCESEEK (IX_ServiceBrokerQueues_DatabaseID_schema_name_queue_name (DatabaseID, schema_name, queue_name)))
 JOIN #Queues Q ON SBQ.DatabaseID = Q.DatabaseID AND SBQ.schema_name = Q.schema_name AND SBQ.queue_name = Q.queue_name
 
 INSERT INTO dbo.ServiceBrokerQueues(
@@ -183,7 +187,7 @@ SELECT @InstanceID,
 	1
 FROM #Queues Q
 WHERE NOT EXISTS(	SELECT 1
-					FROM dbo.ServiceBrokerQueues SBQ
+					FROM dbo.ServiceBrokerQueues SBQ WITH (FORCESEEK (IX_ServiceBrokerQueues_DatabaseID_schema_name_queue_name (DatabaseID, schema_name, queue_name)))
 					WHERE SBQ.DatabaseID = Q.DatabaseID
 					AND SBQ.schema_name = Q.schema_name
 					AND SBQ.queue_name = Q.queue_name
@@ -191,7 +195,7 @@ WHERE NOT EXISTS(	SELECT 1
 
 UPDATE SBQ
 	SET SBQ.IsActive = 0
-FROM dbo.ServiceBrokerQueues SBQ
+FROM dbo.ServiceBrokerQueues SBQ WITH (FORCESEEK (IX_ServiceBrokerQueues_InstanceID_IsActive_SnapshotDate (InstanceID, IsActive)))
 WHERE SBQ.InstanceID = @InstanceID
 AND SBQ.IsActive = 1
 AND NOT EXISTS(	SELECT 1
@@ -208,7 +212,7 @@ AND NOT EXISTS(	SELECT 1
 /*	Remove queues that no longer exist once their history has been purged.
 	Some applications create and drop queues frequently.  SqlDependency queues are rolled up by the collection, but others may not be. */
 DELETE SBQ
-FROM dbo.ServiceBrokerQueues SBQ
+FROM dbo.ServiceBrokerQueues SBQ WITH (FORCESEEK (IX_ServiceBrokerQueues_InstanceID_IsActive_SnapshotDate (InstanceID, IsActive, SnapshotDate)))
 WHERE SBQ.InstanceID = @InstanceID
 AND SBQ.IsActive = 0
 AND SBQ.SnapshotDate < DATEADD(d,-@HistoryRetentionDays,GETUTCDATE())
@@ -229,7 +233,7 @@ SELECT @InstanceID,
 	SBQ.QueueID,
 	Q.message_count
 FROM #Queues Q
-JOIN dbo.ServiceBrokerQueues SBQ ON SBQ.DatabaseID = Q.DatabaseID AND SBQ.schema_name = Q.schema_name AND SBQ.queue_name = Q.queue_name
+JOIN dbo.ServiceBrokerQueues SBQ WITH (FORCESEEK (IX_ServiceBrokerQueues_DatabaseID_schema_name_queue_name (DatabaseID, schema_name, queue_name))) ON SBQ.DatabaseID = Q.DatabaseID AND SBQ.schema_name = Q.schema_name AND SBQ.queue_name = Q.queue_name
 
 /* Transmission queue.  A database that could not be read keeps the rows from the last successful visit. */
 DELETE TQ
