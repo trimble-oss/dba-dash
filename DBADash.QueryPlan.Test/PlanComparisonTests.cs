@@ -64,6 +64,66 @@ namespace DBADash.QueryPlan.Test
         }
 
         [TestMethod]
+        public void CombinedComparisonTotalsTheStatements()
+        {
+            // One statement split into two through a temp table: nothing pairs up, but the totals do.
+            var comparison = PlanComparison.Compare(
+                [Plan(elapsedMs: 10000, logicalReads: 90000, grantedKb: 8192, cost: 100)],
+                [Plan(elapsedMs: 1000, logicalReads: 2000, grantedKb: 1024, cost: 5, planHash: "0x02"),
+                 Plan(elapsedMs: 500, logicalReads: 1000, grantedKb: 4096, cost: 15, planHash: "0x03")]);
+
+            Assert.IsTrue(comparison.IsCombined);
+            Assert.AreEqual(1500, comparison.Metric(PlanComparison.ElapsedName)!.After);
+            Assert.AreEqual(3000, comparison.Metric(PlanComparison.LogicalReadsName)!.After);
+            Assert.AreEqual(20, comparison.Metric(PlanComparison.CostName)!.After);
+            Assert.AreEqual(PlanComparisonChange.Better, comparison.Metric(PlanComparison.ElapsedName)!.Change);
+            // A grant is held one statement at a time, so the largest, not the total.
+            Assert.AreEqual(4096, comparison.Metric(PlanComparison.GrantedName)!.After);
+            Assert.AreEqual(2, comparison.Metric(PlanComparison.StatementsName)!.After);
+            Assert.AreEqual(false, comparison.SamePlanShape);
+            Assert.IsNull(comparison.Metric("Query Hash"));
+            // Statements that don't pair up aren't a warning when comparing a rewrite as a whole.
+            Assert.IsFalse(comparison.Highlights.Any(h => h.Text.Contains("query hashes differ")));
+
+            var share = comparison.Objects.Single().After!.CostShare;
+            Assert.AreEqual(1, share, 0.0001, "Cost shares are of the whole side, so they still add to 100%.");
+        }
+
+        [TestMethod]
+        public void CombinedComparisonOfTheSameStatementsMatchesShape()
+        {
+            var comparison = PlanComparison.Compare([Plan(), Plan(planHash: "0x02")], [Plan(), Plan(planHash: "0x02")]);
+            Assert.AreEqual(true, comparison.SamePlanShape);
+            Assert.AreEqual(PlanComparisonChange.Same, comparison.Metric(PlanComparison.ElapsedName)!.Change);
+        }
+
+        [TestMethod]
+        public void CombinedSideMeasuredOnlyInPartHasNoRunTimeTotals()
+        {
+            // 1000 ms plus an unmeasured statement is not 1000 ms, so not the same as 500 + 500.
+            var comparison = PlanComparison.Compare(
+                [Plan(elapsedMs: 1000), Plan(actual: false)],
+                [Plan(elapsedMs: 500), Plan(elapsedMs: 500)]);
+
+            Assert.AreEqual(PlanComparisonChange.NotComparable, comparison.Metric(PlanComparison.ElapsedName)!.Change);
+            Assert.AreEqual(PlanComparisonChange.NotComparable, comparison.Metric(PlanComparison.LogicalReadsName)!.Change);
+            Assert.IsTrue(comparison.Waits.All(w => w.Change == PlanComparisonChange.NotComparable));
+        }
+
+        [TestMethod]
+        public void CombinedGrantUsedIsOfTheLargestGrant()
+        {
+            const long Gb = 1024 * 1024;
+            // The 1 GB grant is the excessive one, but Granted and Grant Used are both of the 2 GB grant.
+            var side = new[] { Plan(grantedKb: 2 * Gb, usedKb: Gb * 8 / 5), Plan(grantedKb: Gb, usedKb: Gb / 10) };
+            var comparison = PlanComparison.Compare(side, side);
+
+            Assert.AreEqual(2 * Gb, comparison.Metric(PlanComparison.GrantedName)!.After);
+            Assert.AreEqual(0.8, comparison.Metric(PlanComparison.GrantUsedName)!.After!.Value, 0.0001);
+            Assert.AreEqual("Yes", comparison.Metric(PlanComparison.ExcessiveGrantName)!.AfterText);
+        }
+
+        [TestMethod]
         public void LowerElapsed_IsBetter_WithTheChangeSaidAsAMultiple()
         {
             var comparison = PlanComparison.Compare(Plan(elapsedMs: 10000), Plan(elapsedMs: 1000));
