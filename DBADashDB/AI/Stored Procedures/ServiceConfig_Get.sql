@@ -16,6 +16,7 @@ BEGIN
         ApiKeyCreatedBy,
         CreatedDate,
         LastModifiedDate,
+        CertificateThumbprint,
         -- Helper: Is service recently active (heartbeat within 2 minutes)
         CASE 
             WHEN LastHeartbeat IS NULL THEN 0

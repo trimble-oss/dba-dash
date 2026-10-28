@@ -3,22 +3,24 @@ CREATE PROCEDURE AI.ServiceConfig_Upd
     @ApiKey NVARCHAR(256),
     @IsEnabled BIT = 1,
     @ServiceVersion NVARCHAR(50) = NULL,
-    @KeyGracePeriodHours INT = 24
+    @KeyGracePeriodHours INT = 24,
+    @CertificateThumbprint NVARCHAR(64) = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
 
     -- Upsert pattern: update if exists, insert if not
     IF EXISTS (
-                SELECT ServiceUrl, ApiKey, IsEnabled, ServiceVersion
+                SELECT ServiceUrl, ApiKey, IsEnabled, ServiceVersion, CertificateThumbprint
                 FROM AI.ServiceConfig
                 WHERE ConfigId = 1
                 EXCEPT
-                SELECT @ServiceUrl, @ApiKey, @IsEnabled, @ServiceVersion
+                SELECT @ServiceUrl, @ApiKey, @IsEnabled, @ServiceVersion, @CertificateThumbprint
           )
     BEGIN
         UPDATE AI.ServiceConfig
         SET ServiceUrl        = @ServiceUrl,
+            CertificateThumbprint = @CertificateThumbprint,
             -- When key changes, preserve the old key with a grace period expiry
             PreviousApiKey         = CASE WHEN @ApiKey <> ApiKey THEN ApiKey ELSE PreviousApiKey END,
             PreviousApiKeyExpiryUtc = CASE WHEN @ApiKey <> ApiKey THEN DATEADD(HOUR, @KeyGracePeriodHours, SYSUTCDATETIME()) ELSE PreviousApiKeyExpiryUtc END,
@@ -35,6 +37,7 @@ BEGIN
         INSERT INTO AI.ServiceConfig (
             ConfigId,
             ServiceUrl,
+            CertificateThumbprint,
             ApiKey,
             IsEnabled,
             ServiceVersion,
@@ -46,6 +49,7 @@ BEGIN
         VALUES (
             1,
             @ServiceUrl,
+            @CertificateThumbprint,
             @ApiKey,
             @IsEnabled,
             @ServiceVersion,

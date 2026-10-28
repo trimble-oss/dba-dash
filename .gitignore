@@ -302,3 +302,6 @@ PR_DRAFT*.md
 
 # DBADashAI local settings override - contains real secrets, never commit
 appsettings.local.json
+# Self-signed HTTPS certificate created by the AI service on startup
+ai-https.pfx
+ai-https.pfx.password

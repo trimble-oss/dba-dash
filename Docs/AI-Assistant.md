@@ -49,7 +49,7 @@ Deploy `DBADashAI` on a central server accessible to all GUI clients. Set `Regis
   },
   "Security": {
     "Enabled": true,
-    "RequireHttps": true
+    "EnableHttps": true
   }
 }
 ```
@@ -274,7 +274,8 @@ Only applies in shared/repository mode (`ServiceUrl` set). In local mode, auth i
 {
   "Security": {
     "Enabled": true,
-    "RequireHttps": false,
+    "EnableHttps": true,
+    "CertificateThumbprint": "",
     "KeyRotationDays": 30,
     "KeyGracePeriodHours": 24
   }
@@ -284,11 +285,14 @@ Only applies in shared/repository mode (`ServiceUrl` set). In local mode, auth i
 | Key | Description |
 |---|---|
 | `Enabled` | Enables authentication in shared/repository mode. API key authentication is the current authentication model. |
-| `RequireHttps` | Redirects HTTP requests to HTTPS. Strongly recommended in shared/repository mode. |
+| `EnableHttps` | Shared mode listens on HTTPS when `true`. Set `false` to listen on HTTP, for example behind a reverse proxy that terminates TLS. When omitted, HTTPS is on unless `ServiceUrl` is `https://` on an explicit port other than `Registration:Port` (an existing reverse-proxy setup), which stays on HTTP. |
+| `CertificateThumbprint` | Thumbprint of a certificate in the Local Computer Personal store. Empty uses a self-signed certificate created by the service. The thumbprint of the certificate in use is registered in the repository, and GUI clients accept that certificate. |
 | `KeyRotationDays` | Automatically rotates the shared API key after the specified number of days. Set `0` or less to disable rotation. |
 | `KeyGracePeriodHours` | Grace period for previous keys during rotation. |
 
-**⚠️ HTTPS in shared mode** — **Strongly recommended.** Without HTTPS, API keys are transmitted in plain text and can be intercepted on the network. Set `RequireHttps: true` and configure your binding via a reverse proxy (recommended) or Kestrel certificates. The health endpoint (`/api/ai/health`) is always unauthenticated for load-balancer probes.
+**HTTPS in shared mode** is the default when hosting is not already configured. The service creates a self-signed certificate under `%ProgramData%\DBADash\AI` (readable only by SYSTEM, Administrators and the service account), listens on `https://*:5055`, and registers the URL and certificate thumbprint in the repository. GUI clients accept that certificate, or any certificate Windows trusts for that host. To use a certificate the clients already trust, select it on the **AI Service** tab (or set `CertificateThumbprint`). The certificate name should match the host in `ServiceUrl`, and the service account needs permission to use its private key.
+
+An existing hosting setup is left unchanged. That is any `Kestrel:Endpoints` entry, or a `Urls` / `ASPNETCORE_URLS` value. The service does not replace those bindings, and it does not rewrite the service URL scheme. The Service Config tool also leaves the service URL and the HTTPS settings alone for these installs. With several HTTPS endpoints, the thumbprint registered is the certificate of the endpoint that serves the service URL's host and port. A `Kestrel:Certificates:Default` certificate (`Path`, or `Subject` with optional `Store`, `Location` and `AllowInvalid`) without endpoints is served on `https://*:<Registration:Port>` instead of the self-signed certificate. As in Kestrel, a `Subject` certificate is looked up in the `CurrentUser` store unless `Location` is set, so set `"Location": "LocalMachine"` for a Local Computer certificate. When the configured certificate can be read, its thumbprint is registered so GUI clients can accept it. **Behind a reverse proxy** that terminates TLS, set `ServiceUrl` to the proxy's `https://` address and `EnableHttps` to `false`. The service listens on HTTP on `Registration:Port` and registers the proxy URL unchanged. Configs written before HTTPS became the default, with an `https://` proxy URL on a different port (such as `https://aiproxy:443`), are detected and keep working without changes. Otherwise turn `EnableHttps` off only when TLS cannot be used, because the API key is then sent without encryption. The health endpoint (`/api/ai/health`) is always unauthenticated for load-balancer probes. Local mode stays on HTTP.
 
 ### Logging
 

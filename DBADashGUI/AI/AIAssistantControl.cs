@@ -141,7 +141,7 @@ namespace DBADashGUI.AI
     };
     private readonly ProgressBar progressRunning = new() { Dock = DockStyle.Fill, Style = ProgressBarStyle.Marquee, MarqueeAnimationSpeed = 40, Visible = false };
 
-    private static readonly HttpClient HttpClient = new() { Timeout = AIServiceTimeouts.Request };
+    private static readonly HttpClient HttpClient = AiServerCertificateValidator.CreateClient(AIServiceTimeouts.Request);
 
     private bool _seedingExamples = false;
     private string? _serviceUrl = null; // Resolved by AIServiceDiscovery, not hardcoded
@@ -173,6 +173,7 @@ namespace DBADashGUI.AI
     public async Task RefreshConnectionAsync()
     {
         var serviceInfo = await AIServiceDiscovery.GetServiceInfoAsync().ConfigureAwait(false);
+        AiServerCertificateValidator.SetPinnedThumbprint(serviceInfo);
         if (IsDisposed) return;
 
         await RunOnUiThreadAsync(() => ApplyServiceInfoAsync(serviceInfo)).ConfigureAwait(false);

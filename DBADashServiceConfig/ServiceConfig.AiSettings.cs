@@ -4,7 +4,9 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
 using System.Windows.Forms;
 
 namespace DBADashServiceConfig;
@@ -19,7 +21,11 @@ public partial class ServiceConfig
     private NumericUpDown numAiPort;
     private TextBox txtAiServiceUrl;
     private ToolTip _aiToolTip;
-    private CheckBox chkAiRequireHttps;
+    private CheckBox chkAiUseHttps;
+    private ComboBox cboAiCertificate;
+    private string _aiCertificateStoreError;
+    // Kestrel endpoints or a listen URL are configured, so the service ignores Use HTTPS and keeps the URL scheme.
+    private bool _aiCustomHosting;
     private PictureBox picAiSecurityWarning;
     private Label lblAiSecurityWarning;
     private TextBox txtAiAzureEndpoint;
@@ -49,6 +55,8 @@ public partial class ServiceConfig
     private const int AiCtrlH = 27;
     private const int AiGrpX = 8;
     private const int AiGrpW = 1113;
+    // AutoScaleDimensions from ServiceConfig.Designer.cs. The form overwrites AutoScaleDimensions once it has scaled.
+    private static readonly SizeF AiDesignAutoScaleDimensions = new(8F, 20F);
 
     /// <summary>
     /// Path to the appsettings.json for DBADashAI, expected alongside this tool.
@@ -77,7 +85,15 @@ public partial class ServiceConfig
             AutoScroll = true
         };
 
-        // ── Section 4: Service Control ─────────────────────────────────────
+        // Sections stack top to bottom: provider, registration, service control.
+        const int providerY = 12;
+        const int providerH = 30 + 7 * AiRowH + 16;      // provider row, then up to six provider setting rows
+        const int registrationY = providerY + providerH + 10;
+        const int registrationPanelH = 3 * AiRowH + 58;  // three rows, then a two-line warning
+        const int registrationH = 30 + registrationPanelH + 6;
+        const int serviceY = registrationY + registrationH + 10;
+
+        // ── Section 3: Service Control ─────────────────────────────────────
         const int svcY = 35;
         const int svcH = 21;
 
@@ -159,9 +175,10 @@ public partial class ServiceConfig
 
         var grpService = new GroupBox
         {
-            Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
-            Location = new Point(AiGrpX, 626),
+            Anchor = AnchorStyles.Top | AnchorStyles.Left,
+            Location = new Point(AiGrpX, serviceY),
             Size = new Size(AiGrpW, 70),
+            TabIndex = 2,
             TabStop = false,
             Text = IsAdmin
                 ? "DBADashAI Windows Service"
@@ -172,14 +189,15 @@ public partial class ServiceConfig
             lblAiServiceStatus, lnkStartAi, lnkStopAi, lnkRefreshAi, lnkInstallAi
         });
 
-        // ── Section 3: Registration (optional) ────────────────────────────────────────
+        // ── Section 2: Registration (optional) ────────────────────────────────────────
         _aiToolTip = new ToolTip { AutoPopDelay = 10000, InitialDelay = 400, ReshowDelay = 200 };
 
         var grpRegistration = new GroupBox
         {
             Anchor = AnchorStyles.Top | AnchorStyles.Left,
-            Location = new Point(AiGrpX, 416),
-            Size = new Size(AiGrpW, 205),
+            Location = new Point(AiGrpX, registrationY),
+            Size = new Size(AiGrpW, registrationH),
+            TabIndex = 1,
             TabStop = false,
             Text = "Registration (Optional)"
         };
@@ -188,9 +206,10 @@ public partial class ServiceConfig
         {
             Anchor = AnchorStyles.Top | AnchorStyles.Left,
             Location = new Point(5, 30),
-            Size = new Size(AiGrpW - 30, 4 * AiRowH + 20)
+            Size = new Size(AiGrpW - 30, registrationPanelH)
         };
 
+        // Row 0: Port and Use HTTPS (both describe the listener). Row 1: Service URL. Row 2: Certificate. Then the warning.
         pnlReg.Controls.Add(new Label { AutoSize = true, Location = new Point(AiLabelX, 4 + 4), Text = "Port:" });
         numAiPort = new NumericUpDown
         {
@@ -204,6 +223,26 @@ public partial class ServiceConfig
         _aiToolTip.SetToolTip(numAiPort, "TCP port the AI service listens on. Default: 5055.");
         pnlReg.Controls.Add(numAiPort);
 
+        chkAiUseHttps = new CheckBox
+        {
+            AutoSize = true,
+            Location = new Point(AiInputX + 130, 4 + 2),
+            Text = "Use HTTPS"
+        };
+        const string useHttpsTooltip =
+            "Shared mode listens on HTTPS. When no certificate is selected, the service creates a\n" +
+            "self-signed certificate and registers its thumbprint in the repository. GUI clients trust that certificate.\n" +
+            "Turn this off when a reverse proxy terminates TLS (keep the proxy's https:// URL), or when the network\n" +
+            "cannot use HTTPS. Without a proxy, the API key is then sent without encryption.";
+        chkAiUseHttps.CheckedChanged += (_, _) =>
+        {
+            SyncAiServiceUrlScheme();
+            UpdateAiCertificateState();
+            UpdateAiServiceUrlState();
+        };
+        _aiToolTip.SetToolTip(chkAiUseHttps, useHttpsTooltip);
+        pnlReg.Controls.Add(chkAiUseHttps);
+
         var lblServiceUrl = new Label { AutoSize = true, Location = new Point(AiLabelX, AiRowH + 4 + 4), Text = "Service URL:" };
         pnlReg.Controls.Add(lblServiceUrl);
         txtAiServiceUrl = new TextBox
@@ -214,9 +253,10 @@ public partial class ServiceConfig
         };
         const string serviceUrlTooltip =
             "Optional. The external URL where this AI service is reachable by GUI clients on other machines\n" +
-            "(e.g., http://myserver:5055).\n\n" +
+            "(e.g., https://myserver:5055).\n\n" +
             "When set, the service binds to all network interfaces and registers itself in the\n" +
-            "repository so that remote GUI clients can discover and connect to it.\n\n" +
+            "repository so that remote GUI clients can discover and connect to it.\n" +
+            "HTTPS is used unless Use HTTPS is turned off.\n\n" +
             "Leave blank to run in local-only mode — the service binds to loopback only and\n" +
             "authentication is disabled (safe because no remote access is possible).";
         txtAiServiceUrl.TextChanged += (_, _) => ValidateAiServiceUrl();
@@ -224,17 +264,20 @@ public partial class ServiceConfig
         _aiToolTip.SetToolTip(lblServiceUrl, serviceUrlTooltip);
         pnlReg.Controls.Add(txtAiServiceUrl);
 
-        chkAiRequireHttps = new CheckBox
+        pnlReg.Controls.Add(new Label { AutoSize = true, Location = new Point(AiLabelX, 2 * AiRowH + 8), Text = "Certificate:" });
+        cboAiCertificate = new ComboBox
         {
-            AutoSize = true,
-            Location = new Point(AiInputX, 2 * AiRowH + 6),
-            Text = "Require HTTPS"
+            Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
+            DropDownStyle = ComboBoxStyle.DropDownList,
+            Location = new Point(AiInputX, 2 * AiRowH + 4),
+            Size = new Size(pnlReg.Width - AiInputX - 60, AiCtrlH)
         };
-        const string requireHttpsTooltip =
-            "Redirect HTTP requests to HTTPS for the AI service. Enable this only when the service is configured to listen on HTTPS with a valid certificate.";
-        chkAiRequireHttps.CheckedChanged += (_, _) => UpdateAiServiceUrlState();
-        _aiToolTip.SetToolTip(chkAiRequireHttps, requireHttpsTooltip);
-        pnlReg.Controls.Add(chkAiRequireHttps);
+        cboAiCertificate.SelectedIndexChanged += (_, _) => UpdateAiSecurityWarning();
+        _aiToolTip.SetToolTip(cboAiCertificate,
+            "Automatic creates a self-signed certificate on the AI server.\n" +
+            "Choose a certificate from the Local Computer Personal store to use a certificate clients already trust.\n" +
+            "The certificate name should match the host in the service URL, and the AI service account needs permission to use its private key.");
+        pnlReg.Controls.Add(cboAiCertificate);
 
         picAiSecurityWarning = new PictureBox
         {
@@ -249,7 +292,7 @@ public partial class ServiceConfig
         {
             AutoSize = false,
             Location = new Point(AiInputX + 24, 3 * AiRowH + 6),
-            Size = new Size(pnlReg.Width - AiInputX - 84, 44),
+            Size = new Size(pnlReg.Width - AiInputX - 84, 48),
             ForeColor = Color.DarkGoldenrod,
             Visible = false
         };
@@ -258,43 +301,36 @@ public partial class ServiceConfig
         grpRegistration.Controls.Add(pnlReg);
         tabAiService.Controls.Add(grpRegistration);
 
-        // ── Section 1: Provider selection ──────────────────────────────────────────
-        var grpSettings = new GroupBox
+        // ── Section 1: Provider selection and configuration ──────────────────────────
+        // The provider's settings panel sits under the provider row, in the same column layout.
+        const int providerPanelY = 30 + AiRowH;
+        var grpConfig = new GroupBox
         {
             Anchor = AnchorStyles.Top | AnchorStyles.Left,
-            Location = new Point(AiGrpX, 12),
-            Size = new Size(AiGrpW, 110),
+            Location = new Point(AiGrpX, providerY),
+            Size = new Size(AiGrpW, providerH),
+            TabIndex = 0,
             TabStop = false,
-            Text = "AI Settings"
+            Text = "AI Provider"
         };
-        grpSettings.Controls.Add(new Label { AutoSize = true, Location = new Point(AiLabelX, 50), Text = "AI Provider:" });
+        grpConfig.Controls.Add(new Label { AutoSize = true, Location = new Point(5 + AiLabelX, 30 + 4 + 4), Text = "AI Provider:" });
 
         cboAiProvider = new ComboBox
         {
             DropDownStyle = ComboBoxStyle.DropDownList,
-            Location = new Point(AiInputX, 46),
+            Location = new Point(5 + AiInputX, 30 + 4),
             Size = new Size(260, AiCtrlH)
         };
         cboAiProvider.Items.AddRange(new object[] { "AzureOpenAI", "Anthropic", "Bedrock", "Ollama" });
         cboAiProvider.SelectedIndexChanged += (_, _) => UpdateProviderFieldVisibility();
-        grpSettings.Controls.Add(cboAiProvider);
-
-        // ── Section 2: Provider configuration ──────────────────────────────
-        var grpConfig = new GroupBox
-        {
-            Anchor = AnchorStyles.Top | AnchorStyles.Left,
-            Location = new Point(AiGrpX, 122),
-            Size = new Size(AiGrpW, 50 + 6 * AiRowH + 30),
-            TabStop = false,
-            Text = "Provider Configuration"
-        };
+        grpConfig.Controls.Add(cboAiProvider);
 
         var panelWidth = grpConfig.Width - 30;
 
         pnlAzure = new Panel
         {
             Anchor = AnchorStyles.Top | AnchorStyles.Left,
-            Location = new Point(5, 40),
+            Location = new Point(5, providerPanelY),
             Size = new Size(panelWidth, 4 * AiRowH + 10),
             Visible = false
         };
@@ -306,7 +342,7 @@ public partial class ServiceConfig
         pnlAnthropic = new Panel
         {
             Anchor = AnchorStyles.Top | AnchorStyles.Left,
-            Location = new Point(5, 40),
+            Location = new Point(5, providerPanelY),
             Size = new Size(panelWidth, 5 * AiRowH + 10),
             Visible = false
         };
@@ -319,7 +355,7 @@ public partial class ServiceConfig
         pnlBedrock = new Panel
         {
             Anchor = AnchorStyles.Top | AnchorStyles.Left,
-            Location = new Point(5, 40),
+            Location = new Point(5, providerPanelY),
             Size = new Size(panelWidth, 5 * AiRowH + 10),
             Visible = false
         };
@@ -346,7 +382,7 @@ public partial class ServiceConfig
         pnlOllama = new Panel
         {
             Anchor = AnchorStyles.Top | AnchorStyles.Left,
-            Location = new Point(5, 40),
+            Location = new Point(5, providerPanelY),
             Size = new Size(panelWidth, 6 * AiRowH + 10),
             Visible = false
         };
@@ -375,8 +411,18 @@ public partial class ServiceConfig
         grpConfig.Controls.Add(pnlOllama);
 
         tabAiService.Controls.Add(grpService);
-        tabAiService.Controls.Add(grpSettings);
         tabAiService.Controls.Add(grpConfig);
+
+        // These controls are built in design units after the form has auto-scaled, so scale them
+        // the same way. Otherwise they keep their design size at other display scales.
+        var scale = new SizeF(
+            CurrentAutoScaleDimensions.Width / AiDesignAutoScaleDimensions.Width,
+            CurrentAutoScaleDimensions.Height / AiDesignAutoScaleDimensions.Height);
+        if (scale != new SizeF(1F, 1F))
+        {
+            foreach (Control control in tabAiService.Controls)
+                control.Scale(scale);
+        }
 
         var idx = tab1.TabPages.IndexOf(tabJson);
         tab1.TabPages.Insert(idx >= 0 ? idx : tab1.TabPages.Count, tabAiService);
@@ -422,7 +468,17 @@ public partial class ServiceConfig
         var port = j["Registration"]?["Port"]?.Value<int?>() ?? 5055;
         numAiPort.Value = Math.Clamp(port, 1, 65535);
         txtAiServiceUrl.Text = j["Registration"]?["ServiceUrl"]?.Value<string>() ?? string.Empty;
-        chkAiRequireHttps.Checked = j["Security"]?["RequireHttps"]?.Value<bool?>() ?? false;
+        _aiCustomHosting = AiHostingSettings.IsCustomHostingConfigured(j);
+        chkAiUseHttps.Enabled = !_aiCustomHosting;
+        // With existing hosting the box only shows the URL scheme. Otherwise, when not set explicitly,
+        // match the service's own default, which keeps a reverse-proxy setup (https:// URL on another port) on HTTP.
+        chkAiUseHttps.Checked = _aiCustomHosting
+            ? txtAiServiceUrl.Text.Trim().StartsWith("https://", StringComparison.OrdinalIgnoreCase)
+            : j["Security"]?["EnableHttps"]?.Value<bool?>()
+              ?? !AiHttpsCertificate.IsTlsTerminatedUpstream(txtAiServiceUrl.Text, port);
+
+        LoadAiCertificateList(j["Security"]?["CertificateThumbprint"]?.Value<string>());
+        SyncAiServiceUrlScheme();
 
         var provider = j["AI"]?["Provider"]?.Value<string>() ?? string.Empty;
         if (!string.IsNullOrWhiteSpace(provider) && cboAiProvider.Items.Contains(provider))
@@ -500,11 +556,16 @@ private static string GetPlainText(string value)
             var j = ReadAiLocalAppSettings();
 
             j["Registration"] ??= new JObject();
+            SyncAiServiceUrlScheme();
             j["Registration"]!["Port"] = (int)numAiPort.Value;
-            j["Registration"]!["ServiceUrl"] = txtAiServiceUrl.Text;
+            j["Registration"]!["ServiceUrl"] = txtAiServiceUrl.Text.Trim();
 
             j["Security"] ??= new JObject();
-            j["Security"]!["RequireHttps"] = chkAiRequireHttps.Checked;
+            if (!_aiCustomHosting)
+            {
+                j["Security"]!["EnableHttps"] = chkAiUseHttps.Checked;
+                j["Security"]!["CertificateThumbprint"] = (cboAiCertificate?.SelectedItem as AiCertificateListItem)?.Thumbprint ?? string.Empty;
+            }
 
             j["AI"] ??= new JObject();
             j["AI"]!["Provider"] = cboAiProvider.SelectedItem?.ToString() ?? string.Empty;
@@ -580,9 +641,115 @@ private static string GetPlainText(string value)
         ValidateAiServiceUrl();
     }
 
+    private void UpdateAiCertificateState()
+    {
+        if (cboAiCertificate == null || chkAiUseHttps == null)
+            return;
+        cboAiCertificate.Enabled = chkAiUseHttps.Checked && !_aiCustomHosting;
+    }
+
+    /// <summary>
+    /// Switches an http:// service URL to https:// while Use HTTPS is on. With it off, the URL is left
+    /// alone: an https:// URL then points at a reverse proxy that terminates TLS. With existing
+    /// hosting the URL is never changed, because the service keeps that binding's scheme.
+    /// </summary>
+    private void SyncAiServiceUrlScheme()
+    {
+        if (txtAiServiceUrl == null || chkAiUseHttps == null || !chkAiUseHttps.Checked || _aiCustomHosting)
+            return;
+
+        var text = txtAiServiceUrl.Text.Trim();
+        if (!Uri.TryCreate(text, UriKind.Absolute, out var uri))
+            return;
+        if (!uri.Scheme.Equals(Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase))
+            return;
+
+        // Keep an explicit port only. Carrying over http's default port 80 would register
+        // https://host:80 instead of letting registration fill in the service port.
+        var builder = new UriBuilder(uri) { Scheme = Uri.UriSchemeHttps, Port = uri.IsDefaultPort ? -1 : uri.Port };
+        txtAiServiceUrl.Text = builder.Uri.GetComponents(
+            UriComponents.Scheme | UriComponents.UserInfo | UriComponents.Host | UriComponents.Port | UriComponents.Path,
+            UriFormat.UriEscaped).TrimEnd('/');
+    }
+
+    private void LoadAiCertificateList(string selectedThumbprint)
+    {
+        if (cboAiCertificate == null)
+            return;
+
+        foreach (var existing in cboAiCertificate.Items)
+            (existing as AiCertificateListItem)?.Dispose();
+        cboAiCertificate.Items.Clear();
+        _aiCertificateStoreError = null;
+        cboAiCertificate.Items.Add(new AiCertificateListItem("Automatic (self-signed)", null));
+
+        try
+        {
+            using var store = new X509Store(StoreName.My, StoreLocation.LocalMachine);
+            store.Open(OpenFlags.ReadOnly | OpenFlags.OpenExistingOnly);
+            foreach (var cert in store.Certificates.Cast<X509Certificate2>().OrderBy(c => c.Subject, StringComparer.OrdinalIgnoreCase))
+            {
+                X509Certificate2 publicCert;
+                try
+                {
+                    publicCert = X509CertificateLoader.LoadCertificate(cert.Export(X509ContentType.Cert));
+                }
+                catch
+                {
+                    continue;
+                }
+
+                var hasPrivateKey = false;
+                try
+                {
+                    hasPrivateKey = cert.HasPrivateKey;
+                }
+                catch
+                {
+                    hasPrivateKey = false;
+                }
+
+                var expired = cert.NotAfter.ToUniversalTime() <= DateTime.UtcNow;
+                var caption = expired
+                    ? cert.Subject + " (expired " + cert.NotAfter.ToString("d") + ")"
+                    : cert.Subject + " (expires " + cert.NotAfter.ToString("d") + ")";
+                if (!hasPrivateKey)
+                    caption += " (no private key)";
+                cboAiCertificate.Items.Add(new AiCertificateListItem(caption, cert.Thumbprint, publicCert, cert.NotAfter, hasPrivateKey: hasPrivateKey));
+            }
+        }
+        catch (Exception ex)
+        {
+            _aiCertificateStoreError = ex.Message;
+        }
+
+        AiCertificateListItem match = null;
+        if (!string.IsNullOrWhiteSpace(selectedThumbprint))
+        {
+            var normalized = AiHttpsCertificate.NormalizeThumbprint(selectedThumbprint);
+            foreach (AiCertificateListItem item in cboAiCertificate.Items)
+            {
+                if (item.Thumbprint != null && string.Equals(AiHttpsCertificate.NormalizeThumbprint(item.Thumbprint), normalized, StringComparison.OrdinalIgnoreCase))
+                {
+                    match = item;
+                    break;
+                }
+            }
+
+            if (match == null)
+            {
+                match = new AiCertificateListItem("Not in certificate store (" + normalized + ")", normalized, missing: true);
+                cboAiCertificate.Items.Add(match);
+            }
+        }
+
+        cboAiCertificate.SelectedItem = match ?? cboAiCertificate.Items[0];
+        UpdateAiCertificateState();
+    }
+
     private string GetAiSecurityWarningMessage()
     {
-        if (txtAiServiceUrl == null || chkAiRequireHttps == null)
+        if (txtAiServiceUrl == null || chkAiUseHttps == null)
             return null;
 
         var serviceUrl = txtAiServiceUrl.Text.Trim();
@@ -592,19 +759,75 @@ private static string GetPlainText(string value)
         if (!IsAiServiceUrlValid() || !Uri.TryCreate(serviceUrl, UriKind.Absolute, out var uri))
             return null;
 
-        if (uri.Scheme.Equals(Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase))
+        if (_aiCustomHosting)
         {
-            return chkAiRequireHttps.Checked
-                ? "The registration URL uses HTTP, so traffic between GUI clients and the AI service may be transmitted unencrypted. Require HTTPS is enabled, but clients using this registration URL may still connect over plain HTTP unless the URL is changed to HTTPS."
-                : "The registration URL uses HTTP, so traffic between GUI clients and the AI service may be transmitted unencrypted. Require HTTPS is not enabled, so the service will not redirect clients to HTTPS.";
+            return "The AI service uses the Kestrel endpoints or listen URLs in its configuration, so Use HTTPS and the certificate come from that configuration. The service URL is registered as entered.";
         }
 
-        if (uri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase) && !chkAiRequireHttps.Checked)
+        if (!chkAiUseHttps.Checked)
         {
-            return "The registration URL uses HTTPS, but Require HTTPS is not enabled. Clients may expect HTTPS while the service is not configured to enforce it.";
+            return uri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase)
+                ? "Use HTTPS is off and the service URL uses HTTPS. The service listens on HTTP, so a reverse proxy must terminate TLS at this URL. The API key is not encrypted between the proxy and the service."
+                : "Use HTTPS is turned off, so the API key is sent between GUI clients and the AI service without encryption.";
+        }
+
+        if (uri.Scheme.Equals(Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase))
+        {
+            return "Use HTTPS is on. The service listens with TLS and will register an https:// address. Save to update this URL.";
+        }
+
+        if (!string.IsNullOrWhiteSpace(_aiCertificateStoreError))
+        {
+            return "The local computer certificate store could not be opened (" + _aiCertificateStoreError + "). Automatic self-signed is still available.";
+        }
+
+        var selected = cboAiCertificate?.SelectedItem as AiCertificateListItem;
+        if (selected == null || selected.IsAutomatic)
+            return null;
+        if (selected.Missing)
+        {
+            return "The selected certificate is not in the Local Computer Personal store. The AI service will not start until it is installed, or Automatic (self-signed) is selected.";
+        }
+
+        if (!selected.HasPrivateKey)
+        {
+            return "The selected certificate has no private key this process can use. The AI service account also needs permission to use the key.";
+        }
+
+        if (selected.NotAfter.HasValue && selected.NotAfter.Value.ToUniversalTime() <= DateTime.UtcNow)
+        {
+            return "The selected certificate expired on " + selected.NotAfter.Value.ToString("d") + ".";
+        }
+
+        if (selected.Certificate != null && !AiHttpsCertificate.HostMatches(selected.Certificate, uri.Host))
+        {
+            return "The certificate name does not match " + uri.Host + ". GUI clients that rely on Windows trust will reject it. Clients can still connect while the repository thumbprint matches this certificate.";
         }
 
         return null;
+    }
+
+    private sealed class AiCertificateListItem : IDisposable
+    {
+        public AiCertificateListItem(string caption, string thumbprint, X509Certificate2 certificate = null, DateTime? notAfter = null, bool missing = false, bool hasPrivateKey = true)
+        {
+            Caption = caption;
+            Thumbprint = thumbprint;
+            Certificate = certificate;
+            NotAfter = notAfter;
+            Missing = missing;
+            HasPrivateKey = hasPrivateKey;
+        }
+
+        public string Caption { get; }
+        public string Thumbprint { get; }
+        public X509Certificate2 Certificate { get; }
+        public DateTime? NotAfter { get; }
+        public bool Missing { get; }
+        public bool HasPrivateKey { get; }
+        public bool IsAutomatic => string.IsNullOrEmpty(Thumbprint) && Certificate == null && !Missing;
+        public override string ToString() => Caption;
+        public void Dispose() => Certificate?.Dispose();
     }
 
     private void UpdateAiSecurityWarning()

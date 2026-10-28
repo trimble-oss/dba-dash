@@ -20,7 +20,7 @@ namespace DBADashGUI.AI
     /// </summary>
     internal sealed class AIModelMenu
     {
-        private static readonly HttpClient Client = new() { Timeout = TimeSpan.FromSeconds(10) };
+        private static readonly HttpClient Client = AiServerCertificateValidator.CreateClient(TimeSpan.FromSeconds(10));
 
         /// <summary>
         /// The reader's choice, shared by every tab for the rest of the session: someone who switched to a
@@ -210,6 +210,7 @@ namespace DBADashGUI.AI
 
         private static async Task<JsonDocument> GetJsonAsync(AIServiceDiscovery.ServiceInfo service, string path)
         {
+            AiServerCertificateValidator.SetPinnedThumbprint(service);
             var baseUrl = service.ServiceUrl
                           ?? ConfigurationManager.AppSettings["AIApiBaseUrl"]
                           ?? "http://localhost:5055";
