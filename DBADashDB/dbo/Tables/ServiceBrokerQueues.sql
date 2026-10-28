@@ -35,4 +35,7 @@ CREATE TABLE dbo.ServiceBrokerQueues(
 GO
 CREATE UNIQUE NONCLUSTERED INDEX IX_ServiceBrokerQueues_DatabaseID_schema_name_queue_name ON dbo.ServiceBrokerQueues(DatabaseID,schema_name,queue_name);
 GO
-CREATE NONCLUSTERED INDEX IX_ServiceBrokerQueues_InstanceID ON dbo.ServiceBrokerQueues(InstanceID) INCLUDE(IsActive);
+/*	One instance's rows, then inactive ones, then the oldest.  ServiceBroker_Upd seeks this to deactivate
+	and purge queues.  A scan of the clustered key would take update locks on every instance's rows and
+	deadlock imports running in parallel. */
+CREATE NONCLUSTERED INDEX IX_ServiceBrokerQueues_InstanceID_IsActive_SnapshotDate ON dbo.ServiceBrokerQueues(InstanceID, IsActive, SnapshotDate);
