@@ -19,18 +19,31 @@ namespace DBADash.QueryPlan.Compare
     ///
     /// "Before" and "after" are only names for the two sides: every difference is the after side
     /// relative to the before side, and swapping them swaps every sign.
+    ///
+    /// A side can also be several statements - every statement of a batch or a procedure - for the
+    /// change that rewrote it, splitting one statement into a few with temp tables.  The statements
+    /// no longer match one for one, so they are not paired: each side's figures are added up (or the
+    /// largest taken, for the ones that don't add, like a memory grant), and the totals compared.
     /// </summary>
     public sealed class PlanComparison
     {
-        private PlanComparison(PlanStatement before, PlanStatement after)
+        private PlanComparison(IReadOnlyList<PlanStatement> before, IReadOnlyList<PlanStatement> after)
         {
-            Before = before;
-            After = after;
+            BeforeStatements = before;
+            AfterStatements = after;
         }
 
-        public PlanStatement Before { get; }
+        /// <summary>The before side's first statement - its only one unless <see cref="IsCombined"/>.</summary>
+        public PlanStatement Before => BeforeStatements[0];
 
-        public PlanStatement After { get; }
+        public PlanStatement After => AfterStatements[0];
+
+        public IReadOnlyList<PlanStatement> BeforeStatements { get; }
+
+        public IReadOnlyList<PlanStatement> AfterStatements { get; }
+
+        /// <summary>Either side is more than one statement, so the figures are totals across them.</summary>
+        public bool IsCombined => BeforeStatements.Count > 1 || AfterStatements.Count > 1;
 
         /// <summary>Statement level figures, in the groups the summary shows them in.</summary>
         public IReadOnlyList<PlanComparisonMetric> Metrics { get; private set; } = [];
@@ -53,17 +66,21 @@ namespace DBADash.QueryPlan.Compare
         public IReadOnlyList<PlanMissingIndexComparison> MissingIndexes { get; private set; } = [];
 
         /// <summary>True when both statements carry measurements, so run time figures can be compared at all.</summary>
-        public bool BothActual => Before.IsActualPlan && After.IsActualPlan;
+        public bool BothActual => IsActual(BeforeStatements) && IsActual(AfterStatements);
+
+        /// <summary>Every statement of the side carries measurements.</summary>
+        private static bool IsActual(IReadOnlyList<PlanStatement> statements) => statements.All(s => s.IsActualPlan);
 
         /// <summary>
         /// Showplan's query hash matches: the two are the same query, give or take literals.  When it
         /// does not, they may still be - a comment or a changed column list changes the hash - but it
-        /// is worth saying, since comparing two different queries is rarely what was meant.
+        /// is worth saying, since comparing two different queries is rarely what was meant.  For
+        /// several statements, every statement matches the one in the same place on the other side.
         /// </summary>
-        public bool? SameQuery => HashesMatch(Before.QueryHash, After.QueryHash);
+        public bool? SameQuery => HashesMatch(BeforeStatements, AfterStatements, s => s.QueryHash);
 
         /// <summary>Showplan's query plan hash matches: the optimiser chose the same shape both times.</summary>
-        public bool? SamePlanShape => HashesMatch(Before.QueryPlanHash, After.QueryPlanHash);
+        public bool? SamePlanShape => HashesMatch(BeforeStatements, AfterStatements, s => s.QueryPlanHash);
 
         /// <summary>
         /// Compare <paramref name="before"/> with <paramref name="after"/>.  The builds are the SQL
@@ -74,6 +91,20 @@ namespace DBADash.QueryPlan.Compare
         {
             ArgumentNullException.ThrowIfNull(before);
             ArgumentNullException.ThrowIfNull(after);
+
+            return Compare([before], [after], beforeBuild, afterBuild);
+        }
+
+        /// <summary>
+        /// Compare one set of statements with another as a whole - a procedure before and after it
+        /// was rewritten - by the totals of each side's figures.
+        /// </summary>
+        public static PlanComparison Compare(IReadOnlyList<PlanStatement> before, IReadOnlyList<PlanStatement> after, string? beforeBuild = null, string? afterBuild = null)
+        {
+            ArgumentNullException.ThrowIfNull(before);
+            ArgumentNullException.ThrowIfNull(after);
+            if (before.Count == 0) throw new ArgumentException("No statements to compare.", nameof(before));
+            if (after.Count == 0) throw new ArgumentException("No statements to compare.", nameof(after));
 
             var comparison = new PlanComparison(before, after);
             comparison.Metrics = BuildMetrics(before, after, beforeBuild, afterBuild);
@@ -118,10 +149,13 @@ namespace DBADash.QueryPlan.Compare
             return text.ToString().TrimEnd() + Environment.NewLine;
         }
 
-        private static bool? HashesMatch(string? before, string? after) =>
-            string.IsNullOrEmpty(before) || string.IsNullOrEmpty(after)
-                ? null
-                : string.Equals(before, after, StringComparison.OrdinalIgnoreCase);
+        private static bool? HashesMatch(IReadOnlyList<PlanStatement> before, IReadOnlyList<PlanStatement> after, Func<PlanStatement, string?> hash)
+        {
+            if (before.Concat(after).Any(s => string.IsNullOrEmpty(hash(s)))) return null;
+            if (before.Count != after.Count) return false;
+
+            return before.Zip(after).All(pair => string.Equals(hash(pair.First), hash(pair.Second), StringComparison.OrdinalIgnoreCase));
+        }
 
         // ---------------------------------------------------------------- statement figures
 
@@ -150,19 +184,25 @@ namespace DBADash.QueryPlan.Compare
         public const string WarningsName = "Warnings";
         public const string DopName = "Degree of Parallelism";
         public const string OperatorsName = "Operators";
+        public const string StatementsName = "Statements";
 
         // Differences smaller than these are noise between two runs of the same plan, not a change.
         public const double MillisecondsNoise = 10;
         public const double KilobytesNoise = 1024;
 
-        private static IReadOnlyList<PlanComparisonMetric> BuildMetrics(PlanStatement before, PlanStatement after, string? beforeBuild, string? afterBuild)
+        private static IReadOnlyList<PlanComparisonMetric> BuildMetrics(IReadOnlyList<PlanStatement> before, IReadOnlyList<PlanStatement> after, string? beforeBuild, string? afterBuild)
         {
             var metrics = new List<PlanComparisonMetric>();
             // An estimated plan can't have the warnings only a run raises, so against an actual plan
             // they would count as the actual plan's fault.  Left out of both sides when the types differ.
-            var countRuntimeWarnings = before.IsActualPlan == after.IsActualPlan;
+            var countRuntimeWarnings = IsActual(before) == IsActual(after);
             var b = StatementFigures.For(before, countRuntimeWarnings);
             var a = StatementFigures.For(after, countRuntimeWarnings);
+            var combined = before.Count > 1 || after.Count > 1;
+
+            // Said of the figures that don't add up across statements - a grant is held by one
+            // statement at a time, so the total of them is memory no query ever had.
+            var largest = combined ? "  Across several statements, the largest of them." : string.Empty;
 
             void Number(string group, string name, PlanComparisonUnit unit, PlanComparisonDirection direction,
                 Func<StatementFigures, double?> figure, string description, double minimumDifference = 0, bool estimate = false)
@@ -179,19 +219,20 @@ namespace DBADash.QueryPlan.Compare
 
 
             Number(RuntimeGroup, ElapsedName, PlanComparisonUnit.Milliseconds, PlanComparisonDirection.LowerIsBetter,
-                f => f.Statement.QueryTimeStats?.ElapsedMs, "How long the statement took, start to finish.", MillisecondsNoise);
+                f => f.Measured(f.SumOfAll(s => s.QueryTimeStats?.ElapsedMs)), "How long the statement took, start to finish.", MillisecondsNoise);
             Number(RuntimeGroup, CpuName, PlanComparisonUnit.Milliseconds, PlanComparisonDirection.LowerIsBetter,
-                f => f.Statement.QueryTimeStats?.CpuMs, "CPU used across every thread.", MillisecondsNoise);
+                f => f.Measured(f.SumOfAll(s => s.QueryTimeStats?.CpuMs)), "CPU used across every thread.", MillisecondsNoise);
             Number(RuntimeGroup, "CPU per Elapsed", PlanComparisonUnit.Multiple, PlanComparisonDirection.Neutral,
                 f => f.CpuPerElapsed, "CPU time divided by elapsed time: roughly how many cores were busy on average.  Well under 1 is a query that spent its time waiting.");
             Number(RuntimeGroup, WaitName, PlanComparisonUnit.Milliseconds, PlanComparisonDirection.LowerIsBetter,
                 f => f.WaitMs, "The total of the waits the plan recorded - see the Waits tab for which.", MillisecondsNoise);
             Number(RuntimeGroup, "UDF Elapsed Time", PlanComparisonUnit.Milliseconds, PlanComparisonDirection.LowerIsBetter,
-                f => f.Statement.QueryTimeStats?.UdfElapsedMs, "Time spent inside scalar user defined functions.", MillisecondsNoise);
+                f => f.Measured(f.Sum(s => s.QueryTimeStats?.UdfElapsedMs)), "Time spent inside scalar user defined functions.", MillisecondsNoise);
             Number(RuntimeGroup, "UDF CPU Time", PlanComparisonUnit.Milliseconds, PlanComparisonDirection.LowerIsBetter,
-                f => f.Statement.QueryTimeStats?.UdfCpuMs, "CPU spent inside scalar user defined functions.", MillisecondsNoise);
+                f => f.Measured(f.Sum(s => s.QueryTimeStats?.UdfCpuMs)), "CPU spent inside scalar user defined functions.", MillisecondsNoise);
             Number(RuntimeGroup, "Rows Returned", PlanComparisonUnit.Rows, PlanComparisonDirection.Neutral,
-                f => f.Statement.RootOperator?.ActualRows, "Rows the statement produced.  A different count usually means different parameters or data, which makes the other figures harder to compare.");
+                f => f.Measured(f.Sum(s => s.RootOperator?.ActualRows)), "Rows the statement produced.  A different count usually means different parameters or data, which makes the other figures harder to compare." +
+                                                             (combined ? "  Across several statements, rows inserted into a temp table count as well as rows returned." : string.Empty));
 
             Number(IoGroup, LogicalReadsName, PlanComparisonUnit.Count, PlanComparisonDirection.LowerIsBetter,
                 f => f.LogicalReads, "Pages read from the buffer pool, summed over every operator.");
@@ -205,48 +246,56 @@ namespace DBADash.QueryPlan.Compare
                 f => f.RowsRead, "Rows the scans and seeks examined before their predicates, where SQL Server reported it.");
 
             Number(MemoryGroup, "Requested", PlanComparisonUnit.Kilobytes, PlanComparisonDirection.LowerIsBetter,
-                f => f.Statement.MemoryGrant?.RequestedMemoryKb, "Query memory the statement asked for, sized from the optimiser's estimates.  More is not worse in itself: a grant sized from better estimates is often what stops a spill.", KilobytesNoise, estimate: true);
+                f => f.Max(s => s.MemoryGrant?.RequestedMemoryKb), "Query memory the statement asked for, sized from the optimiser's estimates.  More is not worse in itself: a grant sized from better estimates is often what stops a spill." + largest, KilobytesNoise, estimate: true);
             Number(MemoryGroup, GrantedName, PlanComparisonUnit.Kilobytes, PlanComparisonDirection.LowerIsBetter,
-                f => f.Statement.MemoryGrant?.GrantedMemoryKb, "Query memory it was given - memory no other query could use meanwhile.  Whether it was the right size is Grant Used and Spills.", KilobytesNoise, estimate: true);
+                f => f.Max(s => s.MemoryGrant?.GrantedMemoryKb), "Query memory it was given - memory no other query could use meanwhile.  Whether it was the right size is Grant Used and Spills." + largest, KilobytesNoise, estimate: true);
             Number(MemoryGroup, "Max Used", PlanComparisonUnit.Kilobytes, PlanComparisonDirection.Neutral,
-                f => f.Statement.MemoryGrant?.MaxUsedMemoryKb, "The most of the grant that was used.", KilobytesNoise);
+                f => f.Measured(f.Max(s => s.MemoryGrant?.MaxUsedMemoryKb)), "The most of the grant that was used." + largest, KilobytesNoise);
             // Neither way is better: low is memory reserved for nothing, high is little headroom before a
             // spill, and anywhere between is fine.  The two ends that are a problem are judged on their
             // own - an excessive grant below, and a spill by Spills.
             Number(MemoryGroup, GrantUsedName, PlanComparisonUnit.Percent, PlanComparisonDirection.Neutral,
-                f => f.Statement.MemoryGrant?.GrantUsedFraction,
-                "The share of the grant that was used.  Neither higher nor lower is better in itself: very low on a large grant is memory reserved for nothing (see Excessive Grant), and very high leaves little headroom before a spill (see Spills).", 0.05);
+                f => f.Measured(f.LargestGrant?.GrantUsedFraction),
+                "The share of the grant that was used.  Neither higher nor lower is better in itself: very low on a large grant is memory reserved for nothing (see Excessive Grant), and very high leaves little headroom before a spill (see Spills)." +
+                (combined ? "  Across several statements, of the largest grant." : string.Empty), 0.05);
 
             var excessive = PlanComparisonMetric.Flag(MemoryGroup, ExcessiveGrantName,
                 b.ExcessiveGrant, a.ExcessiveGrant,
                 "A large grant that went mostly unused: at least " + PlanFormat.Kilobytes(PlanMemoryGrantInfo.ExcessiveGrantMinKb) +
                 " granted and under " + PlanFormat.Percent(PlanMemoryGrantInfo.ExcessiveGrantMaxUsedFraction) +
-                " of it used - the same rule as the viewer's excessive grant warning.  Memory reserved that other queries could not have.");
+                " of it used - the same rule as the viewer's excessive grant warning.  Memory reserved that other queries could not have." +
+                (combined ? "  Across several statements, any of them." : string.Empty));
             if (excessive is not null) metrics.Add(excessive);
             Number(MemoryGroup, "Desired", PlanComparisonUnit.Kilobytes, PlanComparisonDirection.Neutral,
-                f => f.Statement.MemoryGrant?.EffectiveDesiredMemoryKb, "What the optimiser wanted, from its estimates.", KilobytesNoise, estimate: true);
+                f => f.Max(s => s.MemoryGrant?.EffectiveDesiredMemoryKb), "What the optimiser wanted, from its estimates." + largest, KilobytesNoise, estimate: true);
             Number(MemoryGroup, GrantWaitName, PlanComparisonUnit.Milliseconds, PlanComparisonDirection.LowerIsBetter,
-                f => f.Statement.MemoryGrant?.GrantWaitTimeMs, "Time spent waiting for the grant (RESOURCE_SEMAPHORE).", MillisecondsNoise);
+                f => f.Measured(f.Sum(s => s.MemoryGrant?.GrantWaitTimeMs)), "Time spent waiting for the grant (RESOURCE_SEMAPHORE).", MillisecondsNoise);
             Number(MemoryGroup, SpillsName, PlanComparisonUnit.Count, PlanComparisonDirection.LowerIsBetter,
                 f => f.Spills, "Operators that ran out of memory and spilled to tempdb.");
 
             Number(EstimatesGroup, CostName, PlanComparisonUnit.Cost, PlanComparisonDirection.LowerIsBetter,
-                f => f.Statement.StatementSubTreeCost, "The optimiser's cost for the statement.  A model figure, not a time: it says what the optimiser expected, which is not always what happened.  Lower is better, but a plan built from more accurate estimates can cost more and still run faster.", estimate: true);
+                f => f.Sum(s => s.StatementSubTreeCost), "The optimiser's cost for the statement.  A model figure, not a time: it says what the optimiser expected, which is not always what happened.  Lower is better, but a plan built from more accurate estimates can cost more and still run faster.", estimate: true);
             Number(EstimatesGroup, "Estimated Rows", PlanComparisonUnit.Rows, PlanComparisonDirection.Neutral,
-                f => f.Statement.StatementEstRows, "Rows the optimiser expected the statement to return.");
+                f => f.Sum(s => s.StatementEstRows), "Rows the optimiser expected the statement to return.");
             Number(EstimatesGroup, "Worst Row Estimate", PlanComparisonUnit.Multiple, PlanComparisonDirection.LowerIsBetter,
                 f => f.WorstEstimateError, "The furthest any operator's row estimate was out, either way.  Bad estimates are the usual reason the optimiser chose a poor plan.");
-            Text(EstimatesGroup, "Cardinality Estimator", f => f.Statement.CardinalityEstimationModelVersion,
+            Text(EstimatesGroup, "Cardinality Estimator", f => f.Distinct(s => s.CardinalityEstimationModelVersion),
                 "The cardinality estimator version - a change here, from a compatibility level or a hint, changes estimates across the plan.");
 
             Number(ParallelismGroup, DopName, PlanComparisonUnit.Count, PlanComparisonDirection.Neutral,
-                f => f.Statement.DegreeOfParallelism, "The degree of parallelism the plan was built for.");
+                f => f.Max(s => s.DegreeOfParallelism), "The degree of parallelism the plan was built for." + largest);
             Number(ParallelismGroup, "Threads Reserved", PlanComparisonUnit.Count, PlanComparisonDirection.Neutral,
-                f => f.Statement.ReservedThreads, "Worker threads reserved for the parallel branches.");
+                f => f.Max(s => s.ReservedThreads), "Worker threads reserved for the parallel branches." + largest);
             Number(ParallelismGroup, "Threads Used", PlanComparisonUnit.Count, PlanComparisonDirection.Neutral,
-                f => f.Statement.UsedThreads, "Worker threads that were used.");
-            Text(ParallelismGroup, "Non-Parallel Reason", f => f.Statement.NonParallelPlanReason,
+                f => f.Max(s => s.UsedThreads), "Worker threads that were used." + largest);
+            Text(ParallelismGroup, "Non-Parallel Reason", f => f.Distinct(s => s.NonParallelPlanReason),
                 "Why the optimiser could not use a parallel plan, where it said.");
+
+            if (combined)
+            {
+                Number(ShapeGroup, StatementsName, PlanComparisonUnit.Count, PlanComparisonDirection.Neutral,
+                    f => f.Statements.Count, "Statements compared on this side, every figure being their total.");
+            }
 
             Number(ShapeGroup, OperatorsName, PlanComparisonUnit.Count, PlanComparisonDirection.Neutral,
                 f => f.OperatorCount, "Operators in the plan.");
@@ -254,7 +303,7 @@ namespace DBADash.QueryPlan.Compare
                 f => f.WarningCount, "Warnings SQL Server put on the statement and its operators - listed, with DBA Dash's own findings, on the Insights tab." +
                                      (countRuntimeWarnings ? string.Empty : "  Not counting the warnings only a run can raise - spills, grant warnings, waits - since one plan is estimated."));
             Number(ShapeGroup, "Missing Indexes", PlanComparisonUnit.Count, PlanComparisonDirection.LowerIsBetter,
-                f => f.Statement.MissingIndexes.Count, "Indexes the optimiser said it wanted.");
+                f => f.Sum(s => s.MissingIndexes.Count), "Indexes the optimiser said it wanted.");
             Number(ShapeGroup, "Scans", PlanComparisonUnit.Count, PlanComparisonDirection.Neutral,
                 f => f.Scans, "Table and index scans.");
             Number(ShapeGroup, "Seeks", PlanComparisonUnit.Count, PlanComparisonDirection.Neutral,
@@ -267,35 +316,43 @@ namespace DBADash.QueryPlan.Compare
                 f => f.BatchModeOperators, "Operators the optimiser planned to run in batch mode.");
 
             Number(CompilationGroup, "Compile Time", PlanComparisonUnit.Milliseconds, PlanComparisonDirection.LowerIsBetter,
-                f => f.Statement.CompileTimeMs, "Time taken to compile the plan.", MillisecondsNoise);
+                f => f.Sum(s => s.CompileTimeMs), "Time taken to compile the plan.", MillisecondsNoise);
             Number(CompilationGroup, "Compile CPU", PlanComparisonUnit.Milliseconds, PlanComparisonDirection.LowerIsBetter,
-                f => f.Statement.CompileCpuMs, "CPU taken to compile the plan.", MillisecondsNoise);
+                f => f.Sum(s => s.CompileCpuMs), "CPU taken to compile the plan.", MillisecondsNoise);
             Number(CompilationGroup, "Compile Memory", PlanComparisonUnit.Kilobytes, PlanComparisonDirection.LowerIsBetter,
-                f => f.Statement.CompileMemoryKb, "Memory used to compile the plan.", KilobytesNoise);
+                f => f.Sum(s => s.CompileMemoryKb), "Memory used to compile the plan.", KilobytesNoise);
             Number(CompilationGroup, "Cached Plan Size", PlanComparisonUnit.Kilobytes, PlanComparisonDirection.LowerIsBetter,
-                f => f.Statement.CachedPlanSizeKb, "The plan's size in the plan cache.");
-            Text(CompilationGroup, "Optimisation Level", f => f.Statement.OptimisationLevel,
+                f => f.Sum(s => s.CachedPlanSizeKb), "The plan's size in the plan cache.");
+            Text(CompilationGroup, "Optimisation Level", f => f.Distinct(s => s.OptimisationLevel),
                 "TRIVIAL or FULL.  A trivial plan was never costed against alternatives.");
-            Text(CompilationGroup, "Early Abort Reason", f => f.Statement.OptimisationEarlyAbortReason,
+            Text(CompilationGroup, "Early Abort Reason", f => f.Distinct(s => s.OptimisationEarlyAbortReason),
                 "Why the optimiser stopped searching early, where it did - a time out means it may have missed a better plan.");
 
-            Text(IdentityGroup, "Plan Type", f => f.Statement.IsActualPlan ? "Actual" : "Estimated",
+            Text(IdentityGroup, "Plan Type", f => f.PlanType,
                 "Actual plans carry run time figures; estimated plans only the optimiser's expectations.");
-            Text(IdentityGroup, "Statement Type", f => f.Statement.StatementType, "SELECT, INSERT, UPDATE and the rest.");
-            Text(IdentityGroup, "Query Hash", f => f.Statement.QueryHash,
-                "Identifies the query, give or take literals.  Different hashes usually mean different queries.");
-            Text(IdentityGroup, "Query Plan Hash", f => f.Statement.QueryPlanHash,
-                "Identifies the plan's shape.  The same hash means the optimiser chose the same plan.");
+            Text(IdentityGroup, "Statement Type", f => f.Distinct(s => s.StatementType), "SELECT, INSERT, UPDATE and the rest.");
+            // A list of hashes is unreadable, and statements that don't pair up have none to compare.
+            if (!combined)
+            {
+                Text(IdentityGroup, "Query Hash", f => f.Statements[0].QueryHash,
+                    "Identifies the query, give or take literals.  Different hashes usually mean different queries.");
+                Text(IdentityGroup, "Query Plan Hash", f => f.Statements[0].QueryPlanHash,
+                    "Identifies the plan's shape.  The same hash means the optimiser chose the same plan.");
+            }
+
             var build = PlanComparisonMetric.Text(IdentityGroup, "SQL Server Build", beforeBuild, afterBuild, "The SQL Server version the plan came from.");
             if (build is not null) metrics.Add(build);
 
             return metrics;
         }
 
-        /// <summary>The statement level figures that have to be worked out from the operators, worked out once.</summary>
+        /// <summary>
+        /// A side's figures that have to be worked out - from the operators, or across its statements -
+        /// worked out once.  With one statement, every total is that statement's own figure.
+        /// </summary>
         private sealed class StatementFigures
         {
-            public required PlanStatement Statement { get; init; }
+            public required IReadOnlyList<PlanStatement> Statements { get; init; }
             public double? CpuPerElapsed { get; init; }
             public double? WaitMs { get; init; }
             public double? LogicalReads { get; init; }
@@ -307,6 +364,26 @@ namespace DBADash.QueryPlan.Compare
 
             /// <summary>The grant was excessive, or null where there is no used figure to judge it by - an estimated plan.</summary>
             public bool? ExcessiveGrant { get; init; }
+
+            /// <summary>The biggest grant of the side's statements, which Granted and Grant Used are of.</summary>
+            public PlanMemoryGrantInfo? LargestGrant { get; init; }
+
+            /// <summary>The grant the excessive grant figure is about: the biggest excessive one, or the biggest.</summary>
+            public PlanMemoryGrantInfo? ExcessiveOrLargestGrant { get; init; }
+
+            /// <summary>
+            /// Every statement of the side was measured, or none was.  A side of actual and estimated
+            /// statements has run time figures for only some of them, and a total of those would be
+            /// compared as though it were the whole - so it has none.
+            /// </summary>
+            public bool Complete { get; init; }
+
+            /// <summary>A run time figure, kept only where the side is <see cref="Complete"/>.</summary>
+            public double? Measured(double? value) => Complete ? value : null;
+
+            /// <summary>The statements' figure added up, or null unless every one of them has it.</summary>
+            public double? SumOfAll(Func<PlanStatement, double?> figure) =>
+                Statements.All(s => figure(s) is not null) ? Sum(figure) : null;
             public double? WorstEstimateError { get; init; }
             public int OperatorCount { get; init; }
             public int WarningCount { get; init; }
@@ -315,30 +392,63 @@ namespace DBADash.QueryPlan.Compare
             public int Lookups { get; init; }
             public int Sorts { get; init; }
             public int BatchModeOperators { get; init; }
+            public required string PlanType { get; init; }
 
-            public static StatementFigures For(PlanStatement statement, bool countRuntimeWarnings)
+            /// <summary>The statements' figure added up, or null when none of them has it.</summary>
+            public double? Sum(Func<PlanStatement, double?> figure)
             {
-                var operators = statement.Operators.ToList();
+                double? total = null;
+                foreach (var statement in Statements)
+                {
+                    if (figure(statement) is { } value) total = (total ?? 0) + value;
+                }
+
+                return total;
+            }
+
+            public double? Max(Func<PlanStatement, double?> figure) =>
+                Statements.Select(figure).Max();
+
+            /// <summary>The statements' differing values, listed once each in order.</summary>
+            public string? Distinct(Func<PlanStatement, string?> figure)
+            {
+                var values = Statements.Select(figure).Where(v => !string.IsNullOrEmpty(v))
+                    .Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+                return values.Count == 0 ? null : string.Join(", ", values);
+            }
+
+            public static StatementFigures For(IReadOnlyList<PlanStatement> statements, bool countRuntimeWarnings)
+            {
+                var operators = statements.SelectMany(s => s.Operators).ToList();
                 var runtime = operators.Where(o => o.Runtime is not null).Select(o => o.Runtime!).ToList();
-                var actual = statement.IsActualPlan;
-                var warnings = statement.AllWarnings.ToList();
-                var time = statement.QueryTimeStats;
+                var actual = statements.Where(s => s.IsActualPlan).ToList();
+                var warnings = statements.SelectMany(s => s.AllWarnings).ToList();
+                var complete = actual.Count == 0 || actual.Count == statements.Count;
+                var timed = statements.All(s => s.QueryTimeStats is { CpuMs: not null, ElapsedMs: not null });
+                var cpu = statements.Sum(s => s.QueryTimeStats?.CpuMs ?? 0);
+                var elapsed = statements.Sum(s => s.QueryTimeStats?.ElapsedMs ?? 0);
+                var grants = statements.Select(s => s.MemoryGrant).Where(g => g is not null).Select(g => g!).ToList();
+                var judged = grants.Where(g => g.GrantUsedFraction is not null).ToList();
 
                 return new StatementFigures
                 {
-                    Statement = statement,
-                    CpuPerElapsed = time is { CpuMs: { } cpu, ElapsedMs: > 0 } ? cpu / (double)time.ElapsedMs.Value : null,
+                    Statements = statements,
+                    Complete = complete,
+                    CpuPerElapsed = complete && timed && elapsed > 0 ? cpu / (double)elapsed : null,
                     // Wait stats came to showplan with the time stats (SQL Server 2016 SP1), so an actual
                     // plan without time stats is one from before that - no figure, rather than no waits.
-                    WaitMs = actual && time is not null ? statement.WaitStats.Sum(w => w.WaitTimeMs) : null,
-                    LogicalReads = SumOf(runtime, r => r.ActualLogicalReads),
-                    PhysicalReads = SumOf(runtime, r => r.ActualPhysicalReads),
-                    ReadAheads = SumOf(runtime, r => r.ActualReadAheads),
-                    LobLogicalReads = SumOf(runtime, r => r.ActualLobLogicalReads),
-                    RowsRead = SumOf(runtime, r => r.ActualRowsRead),
+                    WaitMs = HasWaitStats(statements) ? statements.Sum(s => s.WaitStats.Sum(w => w.WaitTimeMs)) : null,
+                    LogicalReads = complete ? SumOf(runtime, r => r.ActualLogicalReads) : null,
+                    PhysicalReads = complete ? SumOf(runtime, r => r.ActualPhysicalReads) : null,
+                    ReadAheads = complete ? SumOf(runtime, r => r.ActualReadAheads) : null,
+                    LobLogicalReads = complete ? SumOf(runtime, r => r.ActualLobLogicalReads) : null,
+                    RowsRead = complete ? SumOf(runtime, r => r.ActualRowsRead) : null,
                     // Only a run can spill, so an estimated plan has no figure rather than a zero.
-                    Spills = actual ? warnings.Count(w => w.IsSpill) : null,
-                    ExcessiveGrant = statement.MemoryGrant is { GrantUsedFraction: not null } grant ? grant.IsExcessive : null,
+                    Spills = actual.Count > 0 && complete ? actual.Sum(s => s.AllWarnings.Count(w => w.IsSpill)) : null,
+                    ExcessiveGrant = judged.Count > 0 && complete ? judged.Any(g => g.IsExcessive) : null,
+                    // By size alone for Granted and Grant Used, so both describe the same grant.
+                    LargestGrant = grants.MaxBy(g => g.GrantedMemoryKb ?? 0),
+                    ExcessiveOrLargestGrant = grants.OrderByDescending(g => g.IsExcessive).ThenByDescending(g => g.GrantedMemoryKb ?? 0).FirstOrDefault(),
                     WorstEstimateError = operators.Select(o => o.RowEstimateError).Max(),
                     OperatorCount = operators.Count,
                     WarningCount = warnings.Count(w => countRuntimeWarnings || !w.IsRuntime),
@@ -346,7 +456,8 @@ namespace DBADash.QueryPlan.Compare
                     Seeks = operators.Count(o => IsSeek(o.Kind) && !o.IsLookup),
                     Lookups = operators.Count(o => o.IsLookup || o.Kind is PlanOperatorKind.KeyLookup or PlanOperatorKind.RidLookup),
                     Sorts = operators.Count(o => o.Kind is PlanOperatorKind.Sort or PlanOperatorKind.TopSort),
-                    BatchModeOperators = operators.Count(o => string.Equals(o.EstimatedExecutionMode, "Batch", StringComparison.OrdinalIgnoreCase))
+                    BatchModeOperators = operators.Count(o => string.Equals(o.EstimatedExecutionMode, "Batch", StringComparison.OrdinalIgnoreCase)),
+                    PlanType = actual.Count == statements.Count ? "Actual" : actual.Count == 0 ? "Estimated" : "Mixed"
                 };
             }
 
@@ -374,13 +485,16 @@ namespace DBADash.QueryPlan.Compare
 
         // ---------------------------------------------------------------- operators and objects
 
-        private static IReadOnlyList<PlanOperatorGroupComparison> GroupOperators(PlanStatement before, PlanStatement after, bool byObject)
+        private static IReadOnlyList<PlanOperatorGroupComparison> GroupOperators(IReadOnlyList<PlanStatement> before, IReadOnlyList<PlanStatement> after, bool byObject)
         {
             var groups = new Dictionary<string, PlanOperatorGroupComparison>(StringComparer.OrdinalIgnoreCase);
 
-            void Add(PlanStatement statement, bool isBefore)
+            void Add(IReadOnlyList<PlanStatement> statements, bool isBefore)
             {
-                foreach (var op in statement.Operators)
+                // An operator's cost share is of its own statement, so across several it is weighted by
+                // that statement's share of the side's cost.
+                var sideCost = statements.Sum(EffectiveCost);
+                foreach (var (statement, op) in statements.SelectMany(s => s.Operators.Select(o => (s, o))))
                 {
                     if (op.NodeId < 0) continue;
 
@@ -406,7 +520,8 @@ namespace DBADash.QueryPlan.Compare
                         groups.Add(key, group);
                     }
 
-                    (isBefore ? group.BeforeFigures : group.AfterFigures).Add(op);
+                    var weight = statements.Count > 1 && sideCost > 0 ? EffectiveCost(statement) / sideCost : 1;
+                    (isBefore ? group.BeforeFigures : group.AfterFigures).Add(op, weight);
                 }
             }
 
@@ -422,6 +537,14 @@ namespace DBADash.QueryPlan.Compare
                 .ThenBy(g => g.Operator, StringComparer.OrdinalIgnoreCase)
                 .ToList();
         }
+
+        /// <summary>
+        /// The cost an operator's <see cref="PlanOperator.CostPercent"/> is a share of - the parser's
+        /// statement total, which falls back to the root's subtree cost where showplan gives the
+        /// statement none (a cursor operation).
+        /// </summary>
+        private static double EffectiveCost(PlanStatement statement) =>
+            Math.Max(statement.StatementSubTreeCost, statement.RootOperator?.EstimatedTotalSubtreeCost ?? 0);
 
         /// <summary>
         /// The operator's caption, with its logical operation where that says which job it is doing -
@@ -444,11 +567,11 @@ namespace DBADash.QueryPlan.Compare
 
         // ---------------------------------------------------------------- waits, parameters, warnings
 
-        private static IReadOnlyList<PlanWaitComparison> CompareWaits(PlanStatement before, PlanStatement after)
+        private static IReadOnlyList<PlanWaitComparison> CompareWaits(IReadOnlyList<PlanStatement> before, IReadOnlyList<PlanStatement> after)
         {
-            var beforeWaits = before.WaitStats.GroupBy(w => w.WaitType, StringComparer.OrdinalIgnoreCase)
+            var beforeWaits = before.SelectMany(s => s.WaitStats).GroupBy(w => w.WaitType, StringComparer.OrdinalIgnoreCase)
                 .ToDictionary(g => g.Key, g => (Ms: g.Sum(w => w.WaitTimeMs), Count: g.Sum(w => w.WaitCount)), StringComparer.OrdinalIgnoreCase);
-            var afterWaits = after.WaitStats.GroupBy(w => w.WaitType, StringComparer.OrdinalIgnoreCase)
+            var afterWaits = after.SelectMany(s => s.WaitStats).GroupBy(w => w.WaitType, StringComparer.OrdinalIgnoreCase)
                 .ToDictionary(g => g.Key, g => (Ms: g.Sum(w => w.WaitTimeMs), Count: g.Sum(w => w.WaitCount)), StringComparer.OrdinalIgnoreCase);
 
             // A wait missing from one side only means none was recorded where that side could record
@@ -471,21 +594,27 @@ namespace DBADash.QueryPlan.Compare
 
         private static bool HasWaitStats(PlanStatement statement) => statement.IsActualPlan && statement.QueryTimeStats is not null;
 
-        private static IReadOnlyList<PlanParameterComparison> CompareParameters(PlanStatement before, PlanStatement after)
+        /// <summary>Every statement could record waits - with only some, a missing wait may just be one not measured.</summary>
+        private static bool HasWaitStats(IReadOnlyList<PlanStatement> statements) => statements.All(HasWaitStats);
+
+        private static IReadOnlyList<PlanParameterComparison> CompareParameters(IReadOnlyList<PlanStatement> before, IReadOnlyList<PlanStatement> after)
         {
-            var names = before.Parameters.Select(p => p.Name)
-                .Concat(after.Parameters.Select(p => p.Name))
+            // A procedure's statements share its parameters, so the first statement to have one speaks for it.
+            var beforeParameters = before.SelectMany(s => s.Parameters).ToList();
+            var afterParameters = after.SelectMany(s => s.Parameters).ToList();
+            var names = beforeParameters.Select(p => p.Name)
+                .Concat(afterParameters.Select(p => p.Name))
                 .Distinct(StringComparer.OrdinalIgnoreCase);
 
             return names
                 .Select(name => new PlanParameterComparison(
                     name,
-                    before.Parameters.FirstOrDefault(p => string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase)),
-                    after.Parameters.FirstOrDefault(p => string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase))))
+                    beforeParameters.FirstOrDefault(p => string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase)),
+                    afterParameters.FirstOrDefault(p => string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase))))
                 .ToList();
         }
 
-        private static IReadOnlyList<PlanWarningComparison> CompareWarnings(PlanStatement before, PlanStatement after)
+        private static IReadOnlyList<PlanWarningComparison> CompareWarnings(IReadOnlyList<PlanStatement> before, IReadOnlyList<PlanStatement> after)
         {
             // Keyed on the source as well as the title, so one of DBA Dash's findings is never counted
             // in with a plan warning that happens to share its name.
@@ -503,9 +632,9 @@ namespace DBADash.QueryPlan.Compare
                 return group;
             }
 
-            void Add(PlanStatement statement, bool isBefore)
+            void Add(IReadOnlyList<PlanStatement> statements, bool isBefore)
             {
-                foreach (var warning in statement.AllWarnings)
+                foreach (var warning in statements.SelectMany(s => s.AllWarnings))
                 {
                     Group(false, warning.Title).Add(warning.Severity, warning.IsRuntime, isBefore);
                 }
@@ -513,7 +642,7 @@ namespace DBADash.QueryPlan.Compare
                 // DBA Dash's own findings too, as the viewer lists them beside the warnings - a scalar
                 // UDF or an optimizer time out gone from the new plan is as much the answer as a spill
                 // gone.  Not the note that a plan is estimated, which is about the plan, not the query.
-                foreach (var insight in PlanInsights.AnalysisFor(statement).Where(i => i.Title != PlanInsights.EstimatedPlanTitle))
+                foreach (var insight in statements.SelectMany(PlanInsights.AnalysisFor).Where(i => i.Title != PlanInsights.EstimatedPlanTitle))
                 {
                     Group(true, insight.Title!).Add(insight.Severity, insight.DependsOnPlanKind, isBefore);
                 }
@@ -523,7 +652,7 @@ namespace DBADash.QueryPlan.Compare
             Add(after, isBefore: false);
 
             // A warning only a run can raise, against a plan that never ran, says nothing either way.
-            var sameType = before.IsActualPlan == after.IsActualPlan;
+            var sameType = IsActual(before) == IsActual(after);
             foreach (var group in groups.Values)
             {
                 group.Change = !sameType && group.DependsOnPlanKind ? PlanComparisonChange.NotComparable
@@ -542,13 +671,13 @@ namespace DBADash.QueryPlan.Compare
                 .ToList();
         }
 
-        private static IReadOnlyList<PlanMissingIndexComparison> CompareMissingIndexes(PlanStatement before, PlanStatement after)
+        private static IReadOnlyList<PlanMissingIndexComparison> CompareMissingIndexes(IReadOnlyList<PlanStatement> before, IReadOnlyList<PlanStatement> after)
         {
             // Matched on the index they describe, which is the recommendation - the impact is the
             // optimiser's guess for that plan and differs even for the same index.
-            var beforeIndexes = before.MissingIndexes.GroupBy(i => i.CreateStatementOneLine, StringComparer.OrdinalIgnoreCase)
+            var beforeIndexes = before.SelectMany(s => s.MissingIndexes).GroupBy(i => i.CreateStatementOneLine, StringComparer.OrdinalIgnoreCase)
                 .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
-            var afterIndexes = after.MissingIndexes.GroupBy(i => i.CreateStatementOneLine, StringComparer.OrdinalIgnoreCase)
+            var afterIndexes = after.SelectMany(s => s.MissingIndexes).GroupBy(i => i.CreateStatementOneLine, StringComparer.OrdinalIgnoreCase)
                 .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
 
             return beforeIndexes.Keys.Union(afterIndexes.Keys, StringComparer.OrdinalIgnoreCase)
@@ -581,29 +710,47 @@ namespace DBADash.QueryPlan.Compare
                 : "No longer an excessive memory grant: " + Grant(after) + " (was " + Grant(before) + ").";
         }
 
+        private static string Statements(int count) => count.ToString(CultureInfo.InvariantCulture) + (count == 1 ? " statement" : " statements");
+
+        /// <summary>The grant a side's excessive grant figure is about - see <see cref="StatementFigures.ExcessiveOrLargestGrant"/>.</summary>
+        private static PlanMemoryGrantInfo? ExcessiveOrLargestGrant(IReadOnlyList<PlanStatement> statements) =>
+            StatementFigures.For(statements, countRuntimeWarnings: true).ExcessiveOrLargestGrant;
+
         private static IReadOnlyList<PlanComparisonHighlight> BuildHighlights(PlanComparison comparison)
         {
             var highlights = new List<PlanComparisonHighlight>();
-            var before = comparison.Before;
-            var after = comparison.After;
+            var before = comparison.BeforeStatements;
+            var after = comparison.AfterStatements;
 
-            if (comparison.SameQuery == false)
+            if (comparison.IsCombined)
+            {
+                highlights.Add(new PlanComparisonHighlight(PlanComparisonChange.Changed,
+                    "Comparing " + Statements(before.Count) + " with " + Statements(after.Count) +
+                    " as a whole: times, reads and costs are totals across them; memory grants and parallelism the largest."));
+            }
+
+            // Statements that don't pair up are expected when comparing a rewrite as a whole.
+            if (comparison.SameQuery == false && !comparison.IsCombined)
             {
                 highlights.Add(new PlanComparisonHighlight(PlanComparisonChange.Changed,
                     "The query hashes differ - these may be different queries, so compare with care."));
             }
 
-            if (!before.IsActualPlan || !after.IsActualPlan)
+            if (!IsActual(before) || !IsActual(after))
             {
-                var estimated = !before.IsActualPlan && !after.IsActualPlan
+                var estimated = !IsActual(before) && !IsActual(after)
                     ? "Both plans are estimated"
-                    : (before.IsActualPlan ? "The after plan" : "The before plan") + " is estimated";
+                    : (IsActual(before) ? "The after plan" : "The before plan") + " is estimated";
                 highlights.Add(new PlanComparisonHighlight(PlanComparisonChange.NotComparable,
                     estimated + ", so run time figures can't be compared - only the optimiser's estimates."));
             }
 
             highlights.Add(comparison.SamePlanShape switch
             {
+                true when comparison.IsCombined => new PlanComparisonHighlight(PlanComparisonChange.Same,
+                    "Same plan shapes: every statement's query plan hash matches the statement in the same place."),
+                false when comparison.IsCombined => new PlanComparisonHighlight(PlanComparisonChange.Changed,
+                    "Different plan shapes: the statements' query plan hashes don't all match one for one."),
                 true => new PlanComparisonHighlight(PlanComparisonChange.Same,
                     "Same plan shape (the query plan hashes match): the same operators in the same arrangement, though estimates, memory grant and DOP can still differ."),
                 false => new PlanComparisonHighlight(PlanComparisonChange.Changed,
@@ -616,7 +763,7 @@ namespace DBADash.QueryPlan.Compare
                 if (comparison.Metric(name) is not { Change: PlanComparisonChange.Better or PlanComparisonChange.Worse } metric) continue;
 
                 var text = name == ExcessiveGrantName
-                    ? ExcessiveGrantText(metric.Change, before.MemoryGrant!, after.MemoryGrant!)
+                    ? ExcessiveGrantText(metric.Change, ExcessiveOrLargestGrant(before)!, ExcessiveOrLargestGrant(after)!)
                     : metric.Name + ": " + metric.BeforeText + " → " + metric.AfterText + " (" + metric.DifferenceText + ")";
                 highlights.Add(new PlanComparisonHighlight(metric.Change, text, metric));
             }
@@ -980,10 +1127,10 @@ namespace DBADash.QueryPlan.Compare
 
         public int WarningCount { get; private set; }
 
-        internal void Add(PlanOperator op)
+        internal void Add(PlanOperator op, double costWeight = 1)
         {
             _operators.Add(op);
-            CostShare += op.CostPercent;
+            CostShare += op.CostPercent * costWeight;
             Rows += op.RowsForDisplay;
             WarningCount += op.Warnings.Count;
             ActualExecutions = Plus(ActualExecutions, op.Runtime?.ActualExecutions);

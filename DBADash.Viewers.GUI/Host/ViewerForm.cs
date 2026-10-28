@@ -464,7 +464,8 @@ namespace DBADashGUI.Viewers
 
         /// <summary>
         /// Every statement of every plan open in the window, as a side a comparison can take.  A plan
-        /// of several statements offers each one that has a plan, in batch order.
+        /// of several statements offers all of them together first - for a rewrite whose statements
+        /// no longer pair up - then each one that has a plan, in batch order.
         /// </summary>
         private IReadOnlyList<PlanCompareSide> ComparableSides() =>
             PlanViewers
@@ -472,23 +473,33 @@ namespace DBADashGUI.Viewers
                 {
                     var statements = viewer.Plan.StatementsWithPlans.ToList();
                     if (statements.Count == 0) statements = viewer.Plan.Statements.ToList();
-                    return statements.Select(statement => new PlanCompareSide(viewer.Title, viewer.Plan, statement));
+                    var sides = statements.Select(statement => new PlanCompareSide(viewer.Title, viewer.Plan, statement));
+                    return statements.Count > 1 ? sides.Prepend(new PlanCompareSide(viewer.Title, viewer.Plan)) : sides;
                 })
                 .ToList();
 
+        /// <summary>All of the plan's statements where it has several with plans, otherwise the one shown.</summary>
+        private static PlanCompareSide WholePlanSide(QueryPlanViewerControl viewer) =>
+            viewer.Plan.StatementsWithPlans.Skip(1).Any()
+                ? new PlanCompareSide(viewer.Title, viewer.Plan)
+                : new PlanCompareSide(viewer.Title, viewer.Plan, viewer.CurrentStatement);
+
         /// <summary>
-        /// Compare the statement shown in <paramref name="before"/> with the one shown in
-        /// <paramref name="after"/>, on a tab of their window.  Either side can then be changed to any
+        /// Compare <paramref name="before"/> with <paramref name="after"/>, on a tab of their window:
+        /// each plan's statements as a whole, or with <paramref name="afterStatement"/>, the statement
+        /// shown in <paramref name="before"/> with that one.  Either side can then be changed to any
         /// statement of any plan open in the window.
         /// </summary>
         internal static void OpenPlanComparison(QueryPlanViewerControl before, QueryPlanViewerControl after, PlanStatement afterStatement = null)
         {
             if (before?.FindForm() is not ViewerForm window || after is null) return;
 
-            var control = new QueryPlanCompareControl(
-                new PlanCompareSide(before.Title, before.Plan, before.CurrentStatement),
-                new PlanCompareSide(after.Title, after.Plan, afterStatement ?? after.CurrentStatement),
-                window.ComparableSides)
+            // Two plans are compared whole - a rewritten procedure's statements rarely pair up - and a
+            // statement asked for is compared with the one shown.
+            var beforeSide = afterStatement is null ? WholePlanSide(before) : new PlanCompareSide(before.Title, before.Plan, before.CurrentStatement);
+            var afterSide = afterStatement is null ? WholePlanSide(after) : new PlanCompareSide(after.Title, after.Plan, afterStatement);
+
+            var control = new QueryPlanCompareControl(beforeSide, afterSide, window.ComparableSides)
             {
                 Dock = DockStyle.Fill
             };

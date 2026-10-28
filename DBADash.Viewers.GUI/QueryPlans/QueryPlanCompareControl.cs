@@ -15,7 +15,8 @@ using System.Windows.Forms.Integration;
 namespace DBADashGUI.QueryPlans
 {
     /// <summary>
-    /// One statement's plan, from one of the plans open in the window, as a side of a comparison.
+    /// One statement's plan, from one of the plans open in the window, as a side of a comparison - or
+    /// every statement of it, compared as a whole.
     /// </summary>
     public sealed class PlanCompareSide
     {
@@ -25,7 +26,27 @@ namespace DBADashGUI.QueryPlans
             Plan = plan ?? throw new ArgumentNullException(nameof(plan));
             Statement = statement ?? throw new ArgumentNullException(nameof(statement));
             Ordinal = plan.Statements.ToList().IndexOf(statement) + 1;
+            Statements = [statement];
         }
+
+        /// <summary>
+        /// Every statement of <paramref name="plan"/> that has a plan, compared as a whole - a
+        /// procedure rewritten into different statements, which no longer pair up one for one.
+        /// </summary>
+        public PlanCompareSide(string title, ExecutionPlan plan)
+        {
+            Title = title;
+            Plan = plan ?? throw new ArgumentNullException(nameof(plan));
+            var statements = plan.StatementsWithPlans.ToList();
+            Statements = statements.Count > 0 ? statements : plan.Statements.ToList();
+            Statement = Statements[0];
+            IsAllStatements = true;
+        }
+
+        /// <summary>The statements compared: <see cref="Statement"/> alone, unless <see cref="IsAllStatements"/>.</summary>
+        public IReadOnlyList<PlanStatement> Statements { get; }
+
+        public bool IsAllStatements { get; }
 
         /// <summary>The plan's tab title.</summary>
         public string Title { get; }
@@ -34,15 +55,18 @@ namespace DBADashGUI.QueryPlans
 
         public PlanStatement Statement { get; }
 
-        /// <summary>Position of the statement in its plan, from 1.</summary>
+        /// <summary>Position of the statement in its plan, from 1 - 0 for all statements.</summary>
         public int Ordinal { get; }
 
         /// <summary>The tab's title, and which statement when the plan has more than one.</summary>
         public string Caption =>
-            Plan.Statements.Count > 1 ? Title + "  -  " + Ordinal.ToString(CultureInfo.InvariantCulture) + ". " + Statement.Caption : Title;
+            IsAllStatements ? Title + "  -  All statements (" + Statements.Count.ToString(CultureInfo.InvariantCulture) + ")"
+            : Plan.Statements.Count > 1 ? Title + "  -  " + Ordinal.ToString(CultureInfo.InvariantCulture) + ". " + Statement.Caption
+            : Title;
 
         public bool IsSameAs(PlanCompareSide other) =>
-            other is not null && ReferenceEquals(Plan, other.Plan) && ReferenceEquals(Statement, other.Statement);
+            other is not null && ReferenceEquals(Plan, other.Plan) && IsAllStatements == other.IsAllStatements &&
+            (IsAllStatements || ReferenceEquals(Statement, other.Statement));
 
         public override string ToString() => Caption;
     }
@@ -210,7 +234,8 @@ namespace DBADashGUI.QueryPlans
                 ? Shorten(_before.Title, 30) + " " + StatementNumber(_before) + " vs " + StatementNumber(_after)
                 : Shorten(_before.Title, 20) + StatementSuffix(_before) + " vs " + Shorten(_after.Title, 20) + StatementSuffix(_after);
 
-        private static string StatementNumber(PlanCompareSide side) => "#" + side.Ordinal.ToString(CultureInfo.InvariantCulture);
+        private static string StatementNumber(PlanCompareSide side) =>
+            side.IsAllStatements ? "(all)" : "#" + side.Ordinal.ToString(CultureInfo.InvariantCulture);
 
         private static string StatementSuffix(PlanCompareSide side) => side.Plan.Statements.Count > 1 ? " " + StatementNumber(side) : string.Empty;
 
@@ -229,7 +254,7 @@ namespace DBADashGUI.QueryPlans
 
             toolbar.Items.Add(new ToolStripLabel("Before:"));
             toolbar.Items.Add(_beforeCombo);
-            _beforeCombo.ToolTipText = "The plan compared against.  Any statement of any plan open in this window.";
+            _beforeCombo.ToolTipText = "The plan compared against.  Any statement of any plan open in this window, or all of a plan's statements together.";
 
             toolbar.Items.Add(new ToolStripButton("Swap", null, (_, _) => Swap())
             {
@@ -240,7 +265,7 @@ namespace DBADashGUI.QueryPlans
 
             toolbar.Items.Add(new ToolStripLabel("After:"));
             toolbar.Items.Add(_afterCombo);
-            _afterCombo.ToolTipText = "The plan compared.  Any statement of any plan open in this window.";
+            _afterCombo.ToolTipText = "The plan compared.  Any statement of any plan open in this window, or all of a plan's statements together.";
 
             _beforeCombo.DropDown += (_, _) => FillCombo(_beforeCombo, _before);
             _afterCombo.DropDown += (_, _) => FillCombo(_afterCombo, _after);
@@ -477,7 +502,7 @@ namespace DBADashGUI.QueryPlans
 
         private void ShowComparison()
         {
-            _comparison = PlanComparison.Compare(_before.Statement, _after.Statement, _before.Plan.Build, _after.Plan.Build);
+            _comparison = PlanComparison.Compare(_before.Statements, _after.Statements, _before.Plan.Build, _after.Plan.Build);
 
             FillCombo(_beforeCombo, _before);
             FillCombo(_afterCombo, _after);
@@ -485,12 +510,13 @@ namespace DBADashGUI.QueryPlans
             ShowHighlights();
             ShowMetrics();
             ShowPlans();
-            ShowGroups(_operatorsGrid, _comparison.Operators, byObject: false);
-            ShowGroups(_objectsGrid, _comparison.Objects, byObject: true);
+            ShowGroups(_operatorsGrid, _comparison.Operators, byObject: false, _comparison.IsCombined);
+            ShowGroups(_objectsGrid, _comparison.Objects, byObject: true, _comparison.IsCombined);
             ShowWaits();
             ShowParameters();
             ShowInsights();
             ShowQueryText();
+            ShowPlansTab();
             ClearSelections();
 
             _operatorsTab.Text = Counted("Operators", _comparison.Operators.Count(o => o.Status != PlanPresence.Both), "changed");
@@ -658,7 +684,12 @@ namespace DBADashGUI.QueryPlans
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing) _groupFont?.Dispose();
+            if (disposing)
+            {
+                _groupFont?.Dispose();
+                // Out of the control tree while a combined comparison hides it, so not disposed with the tabs.
+                if (!_tabs.TabPages.Contains(_plansTab)) _plansTab.Dispose();
+            }
             base.Dispose(disposing);
         }
 
@@ -766,6 +797,19 @@ namespace DBADashGUI.QueryPlans
             }
         }
 
+        /// <summary>
+        /// The Plans tab only while both sides are one statement: a graph shows one statement, and
+        /// statements compared as a whole have no one plan to set beside the other.
+        /// </summary>
+        private void ShowPlansTab()
+        {
+            var show = !_comparison.IsCombined;
+            if (show == _tabs.TabPages.Contains(_plansTab)) return;
+
+            if (show) _tabs.TabPages.Insert(1, _plansTab);
+            else _tabs.TabPages.Remove(_plansTab);
+        }
+
         private static void ShowPlan(QueryPlanGraphControl graph, PlanStatement statement)
         {
             graph.Visible = statement.HasPlan;
@@ -818,7 +862,7 @@ namespace DBADashGUI.QueryPlans
         /// <summary>Double clicking a group shows its operators on the Plans tab, on whichever sides have them.</summary>
         private void ShowGroupInPlans(DataGridView grid, int rowIndex)
         {
-            if (rowIndex < 0 || grid.Rows[rowIndex].Tag is not PlanOperatorGroupComparison group) return;
+            if (rowIndex < 0 || _comparison.IsCombined || grid.Rows[rowIndex].Tag is not PlanOperatorGroupComparison group) return;
 
             _tabs.SelectedTab = _plansTab;
 
@@ -836,7 +880,7 @@ namespace DBADashGUI.QueryPlans
 
         // ---------------------------------------------------------------- operators and objects
 
-        private static void ShowGroups(DataGridView grid, IReadOnlyList<PlanOperatorGroupComparison> groups, bool byObject)
+        private static void ShowGroups(DataGridView grid, IReadOnlyList<PlanOperatorGroupComparison> groups, bool byObject, bool combined)
         {
             ResetGrid(grid);
 
@@ -904,7 +948,7 @@ namespace DBADashGUI.QueryPlans
 
                 var index = grid.Rows.Add(values.ToArray());
                 grid.Rows[index].Tag = group;
-                grid.Rows[index].Cells["Operator"].ToolTipText = "Double click to show on the Plans tab.";
+                if (!combined) grid.Rows[index].Cells["Operator"].ToolTipText = "Double click to show on the Plans tab.";
             }
 
             HideEmptyColumns(grid);
@@ -1045,10 +1089,19 @@ namespace DBADashGUI.QueryPlans
         {
             _queryDiff.OldTextHeader = "Before: " + _before.Title;
             _queryDiff.NewTextHeader = "After: " + _after.Title;
-            _queryDiff.OldText = _before.Statement.StatementText ?? string.Empty;
-            _queryDiff.NewText = _after.Statement.StatementText ?? string.Empty;
+            _queryDiff.OldText = QueryText(_before);
+            _queryDiff.NewText = QueryText(_after);
             _queryDiff.ShowSideBySide();
         }
+
+        /// <summary>
+        /// The side's statements' text, a blank line between each, so a rewrite diffs as a whole.  All
+        /// of the plan's statements for an all statements side, including those with no plan of their
+        /// own - an IF's condition is part of the change even though only the figures leave it out.
+        /// </summary>
+        private static string QueryText(PlanCompareSide side) =>
+            string.Join(Environment.NewLine + Environment.NewLine,
+                (side.IsAllStatements ? side.Plan.Statements : side.Statements).Select(s => s.StatementText ?? string.Empty));
 
         // ---------------------------------------------------------------- grid helpers
 
