@@ -170,6 +170,22 @@ public class Program
             case CommandLineActionOption.SetPassword:
                 Helper.SetPassword(config, o);
                 break;
+
+            case CommandLineActionOption.ListCommunityTools:
+                CommunityToolsHelper.ListTools();
+                break;
+
+            case CommandLineActionOption.CheckCommunityTools:
+                await CommunityToolsHelper.CheckAsync(config, o);
+                break;
+
+            case CommandLineActionOption.DeployCommunityTools:
+                await CommunityToolsHelper.DeployAsync(config, o);
+                break;
+
+            case CommandLineActionOption.UpdateCommunityToolsManifest:
+                await CommunityToolsHelper.UpdateManifestAsync(o);
+                break;
         }
     }
 }

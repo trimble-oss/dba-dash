@@ -1,0 +1,159 @@
+{
+  "Families": [
+    {
+      "Name": "FirstResponderKit",
+      "DisplayName": "SQL Server First Responder Kit",
+      "Author": "Brent Ozar Unlimited",
+      "Repository": "BrentOzarULTD/SQL-Server-First-Responder-Kit",
+      "Ref": "20260708",
+      "LatestRef": "release",
+      "License": "MIT",
+      "LicenseUrl": "https://github.com/BrentOzarULTD/SQL-Server-First-Responder-Kit/blob/main/LICENSE.md",
+      "VersionPattern": "@Version\\s*=\\s*'(?<version>[^']+)'\\s*,\\s*@VersionDate\\s*=\\s*'(?<date>\\d{8})'",
+      "Tools": [
+        {
+          "Name": "sp_Blitz",
+          "MinMajorVersion": 13,
+          "AzureSqlDb": true,
+          "Files": [ { "Path": "sp_Blitz.sql", "Version": "8.34", "VersionDate": "20260702", "Sha256": "3fec0ca79c2126c466098f6a64f4cb4506ba17e62b61c0dd6802c6e656a2938c" } ]
+        },
+        {
+          "Name": "sp_BlitzFirst",
+          "MinMajorVersion": 13,
+          "AzureSqlDb": true,
+          "Files": [ { "Path": "sp_BlitzFirst.sql", "Version": "8.34", "VersionDate": "20260702", "Sha256": "9b14bbc8877b398acb4d5cad4dd92a089d78963689773cf91d75c28ed3ef0a21" } ]
+        },
+        {
+          "Name": "sp_BlitzIndex",
+          "MinMajorVersion": 13,
+          "AzureSqlDb": true,
+          "Files": [ { "Path": "sp_BlitzIndex.sql", "Version": "8.34", "VersionDate": "20260702", "Sha256": "be73c4cb986b750f5501db8bd233887fe4861b7a53c9c6bdc665dcd23ce95946" } ]
+        },
+        {
+          "Name": "sp_BlitzCache",
+          "MinMajorVersion": 13,
+          "AzureSqlDb": true,
+          "Files": [ { "Path": "sp_BlitzCache.sql", "Version": "8.34", "VersionDate": "20260702", "Sha256": "aba9ed53aba3ebabac30b696deec97f83ab5aa84490173315d4a21db45762aac" } ]
+        },
+        {
+          "Name": "sp_BlitzWho",
+          "MinMajorVersion": 13,
+          "AzureSqlDb": true,
+          "Files": [ { "Path": "sp_BlitzWho.sql", "Version": "8.34", "VersionDate": "20260702", "Sha256": "685347e601826f59bf2010123859f683ab7a8190e2f8df42701ba6cad4b09ff6" } ]
+        },
+        {
+          "Name": "sp_BlitzLock",
+          "MinMajorVersion": 13,
+          "AzureSqlDb": false,
+          "Files": [ { "Path": "sp_BlitzLock.sql", "Version": "8.34", "VersionDate": "20260702", "Sha256": "fe0bbeed5b7d4119d0b484e31502d60b93c9e6fb08b2ef672cd38793c6ef9e49" } ]
+        },
+        {
+          "Name": "sp_BlitzBackups",
+          "MinMajorVersion": 13,
+          "AzureSqlDb": false,
+          "Files": [ { "Path": "sp_BlitzBackups.sql", "Version": "8.34", "VersionDate": "20260702", "Sha256": "3abd7a198af7b6f21905e0387d1c8bf61a13f8faf4b299e7ff9fd941ff04edc7" } ]
+        }
+      ]
+    },
+    {
+      "Name": "DarlingData",
+      "DisplayName": "DarlingData",
+      "Author": "Erik Darling",
+      "Repository": "erikdarlingdata/DarlingData",
+      "Ref": "Updates_20261001",
+      "LatestRef": "release",
+      "License": "MIT",
+      "LicenseUrl": "https://github.com/erikdarlingdata/DarlingData/blob/main/LICENSE",
+      "VersionPattern": "@version\\s*=\\s*'(?<version>[^']+)'\\s*,\\s*@version_date\\s*=\\s*'(?<date>\\d{8})'",
+      "Tools": [
+        {
+          "Name": "sp_HealthParser",
+          "MinMajorVersion": 13,
+          "AzureSqlDb": false,
+          "Files": [ { "Path": "sp_HealthParser/sp_HealthParser.sql", "Version": "3.10", "VersionDate": "20261001", "Sha256": "e456d1b7b59c88dde0e215d30772545d2f79fad5f9a80290f5fe538203adc195" } ]
+        },
+        {
+          "Name": "sp_HumanEvents",
+          "MinMajorVersion": 13,
+          "AzureSqlDb": true,
+          "Files": [ { "Path": "sp_HumanEvents/sp_HumanEvents.sql", "Version": "7.10", "VersionDate": "20261001", "Sha256": "ed6eef97c90daa2d1ecedcb49b36196d277cffbf567ec176e6bf45de844aea76" } ]
+        },
+        {
+          "Name": "sp_HumanEventsBlockViewer",
+          "MinMajorVersion": 13,
+          "AzureSqlDb": true,
+          "Files": [ { "Path": "sp_HumanEvents/sp_HumanEventsBlockViewer.sql", "Version": "5.10", "VersionDate": "20261001", "Sha256": "a3aea7f1ab7c90c5aafd90413d20ae4bf9a43fa64a7fe42ee80abaa0199e5a31" } ]
+        },
+        {
+          "Name": "sp_IndexCleanup",
+          "MinMajorVersion": 13,
+          "AzureSqlDb": true,
+          "Files": [ { "Path": "sp_IndexCleanup/sp_IndexCleanup.sql", "Version": "2.10", "VersionDate": "20261001", "Sha256": "c0f5fd21c01ccdaf55a6142c4c771075a43811ab4a37d3fd5b4091b11f0ae1fd" } ]
+        },
+        {
+          "Name": "sp_LogHunter",
+          "MinMajorVersion": 13,
+          "AzureSqlDb": false,
+          "Files": [ { "Path": "sp_LogHunter/sp_LogHunter.sql", "Version": "3.10", "VersionDate": "20261001", "Sha256": "5fba812d4a98eb6f3cfb5ea28b63864a785fdc1507aef40f8b50c608a569a7f2" } ]
+        },
+        {
+          "Name": "sp_PressureDetector",
+          "MinMajorVersion": 13,
+          "AzureSqlDb": true,
+          "Files": [ { "Path": "sp_PressureDetector/sp_PressureDetector.sql", "Version": "6.10", "VersionDate": "20261001", "Sha256": "3cefacc042bdca78efc385848e5bfd05e20f27b2190d8c72d4e858e426aa2cb7" } ]
+        },
+        {
+          "Name": "sp_QuickieStore",
+          "MinMajorVersion": 13,
+          "AzureSqlDb": true,
+          "Files": [ { "Path": "sp_QuickieStore/sp_QuickieStore.sql", "Version": "6.10", "VersionDate": "20261001", "Sha256": "bae954c0def339240efe539fbcd2f71b5b313f75dc2110859d887dee77cf32df" } ]
+        }
+      ]
+    },
+    {
+      "Name": "WhoIsActive",
+      "DisplayName": "sp_WhoIsActive",
+      "Author": "Adam Machanic",
+      "Repository": "amachanic/sp_whoisactive",
+      "Ref": "20260409",
+      "LatestRef": "release",
+      "License": "GPL-3.0",
+      "LicenseUrl": "https://github.com/amachanic/sp_whoisactive/blob/master/LICENSE",
+      "VersionPattern": "Who Is Active\\? v(?<version>[\\d.]+)",
+      "Tools": [
+        {
+          "Name": "sp_WhoIsActive",
+          "AzureSqlDb": true,
+          "Files": [
+            { "Path": "sp_WhoIsActive.sql", "MinMajorVersion": 16, "Version": "2200.20260409", "Sha256": "4c528a139d7e2259e46a7656d056fb359fc8472818cbc9569ae83ff96278c466" },
+            { "Path": "2019/sp_WhoIsActive.sql", "MinMajorVersion": 11, "MaxMajorVersion": 15, "Version": "1219.20260409", "Sha256": "0a0984a4f24b6237684a1dec31d4d7eae2ecc2631f80d1af0336da60959cb6de" },
+            { "Path": "2008/sp_WhoIsActive.sql", "MaxMajorVersion": 10, "Version": "0508.20260409", "Sha256": "003fb8aa72f796799fb018bb0acbfebca50f020c021b22103eda5aa8a2e597a4" }
+          ]
+        }
+      ]
+    },
+    {
+      "Name": "SQLStudies",
+      "DisplayName": "Kenneth Fisher's permission scripts",
+      "Author": "Kenneth Fisher",
+      "Repository": "sqlstudent144/SQL-Server-Scripts",
+      "Ref": "970f29200339d3c05364016f202d813617675737",
+      "LatestRef": "branch:main",
+      "License": "MIT",
+      "LicenseUrl": "https://github.com/sqlstudent144/SQL-Server-Scripts/blob/main/LICENSE",
+      "VersionPattern": "sp_(?:Srv|DB)Permissions V(?<version>[\\d.]+)",
+      "Tools": [
+        {
+          "Name": "sp_SrvPermissions",
+          "AzureSqlDb": false,
+          "Files": [ { "Path": "sp_SrvPermissions.sql", "Version": "6.1", "Sha256": "61c3cc6dcee87fbd787950c30e1f193ec3adbff20c2c265d381f732c5aed0d0a" } ]
+        },
+        {
+          "Name": "sp_DBPermissions",
+          "AzureSqlDb": false,
+          "Files": [ { "Path": "sp_DBPermissions.sql", "Version": "7.0", "Sha256": "d57e18ab7d8e43d82444e2954beca9a6b9b80e79e9dd3ba65d7754d5c04fd7c7" } ]
+        }
+      ]
+    }
+  ]
+}

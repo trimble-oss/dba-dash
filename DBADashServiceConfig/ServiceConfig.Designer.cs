@@ -138,6 +138,7 @@ namespace DBADashServiceConfig
             lnkAllowNoJobs = new System.Windows.Forms.LinkLabel();
             lnkAllowAllJobs = new System.Windows.Forms.LinkLabel();
             lnkAllowExplicit = new System.Windows.Forms.LinkLabel();
+            lnkDeployCommunityTools = new System.Windows.Forms.LinkLabel();
             lnkAllowNone = new System.Windows.Forms.LinkLabel();
             lnkAllowAll = new System.Windows.Forms.LinkLabel();
             label18 = new System.Windows.Forms.Label();
@@ -156,6 +157,7 @@ namespace DBADashServiceConfig
             bttnAdd = new System.Windows.Forms.Button();
             groupBox1 = new System.Windows.Forms.GroupBox();
             bttnPermissionsHelper = new System.Windows.Forms.Button();
+            bttnCommunityTools = new System.Windows.Forms.Button();
             label12 = new System.Windows.Forms.Label();
             cboDeleteAction = new System.Windows.Forms.ComboBox();
             dgvConnections = new DBADashGUI.CustomReports.DBADashDataGridView();
@@ -1347,6 +1349,7 @@ namespace DBADashServiceConfig
             grpMessaging.Controls.Add(lnkAllowAllJobs);
             grpMessaging.Controls.Add(txtAllowedJobs);
             grpMessaging.Controls.Add(label21);
+            grpMessaging.Controls.Add(lnkDeployCommunityTools);
             grpMessaging.Controls.Add(lnkAllowExplicit);
             grpMessaging.Controls.Add(lnkAllowNone);
             grpMessaging.Controls.Add(lnkAllowAll);
@@ -1407,6 +1410,18 @@ namespace DBADashServiceConfig
             lnkAllowExplicit.TabStop = true;
             lnkAllowExplicit.Text = "ALL (Explicit)";
             lnkAllowExplicit.LinkClicked += lnkAllowExplicit_LinkClicked;
+            //
+            // lnkDeployCommunityTools
+            //
+            lnkDeployCommunityTools.AutoSize = true;
+            lnkDeployCommunityTools.Location = new System.Drawing.Point(822, 98);
+            lnkDeployCommunityTools.Name = "lnkDeployCommunityTools";
+            lnkDeployCommunityTools.Size = new System.Drawing.Size(105, 20);
+            lnkDeployCommunityTools.TabIndex = 12;
+            lnkDeployCommunityTools.TabStop = true;
+            lnkDeployCommunityTools.Text = "Deploy Tools...";
+            toolTip1.SetToolTip(lnkDeployCommunityTools, "Deploy or update community tools on the monitored instances");
+            lnkDeployCommunityTools.LinkClicked += lnkDeployCommunityTools_LinkClicked;
             // 
             // lnkAllowNone
             // 
@@ -1587,6 +1602,7 @@ namespace DBADashServiceConfig
             // groupBox1
             // 
             groupBox1.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            groupBox1.Controls.Add(bttnCommunityTools);
             groupBox1.Controls.Add(bttnPermissionsHelper);
             groupBox1.Controls.Add(label12);
             groupBox1.Controls.Add(cboDeleteAction);
@@ -1608,11 +1624,23 @@ namespace DBADashServiceConfig
             bttnPermissionsHelper.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
             bttnPermissionsHelper.Location = new System.Drawing.Point(533, 341);
             bttnPermissionsHelper.Name = "bttnPermissionsHelper";
-            bttnPermissionsHelper.Size = new System.Drawing.Size(214, 35);
+            bttnPermissionsHelper.Size = new System.Drawing.Size(145, 35);
             bttnPermissionsHelper.TabIndex = 26;
             bttnPermissionsHelper.Text = "Permissions Helper";
             bttnPermissionsHelper.UseVisualStyleBackColor = true;
             bttnPermissionsHelper.Click += bttnPermissionsHelper_Click;
+            //
+            // bttnCommunityTools
+            //
+            bttnCommunityTools.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
+            bttnCommunityTools.Location = new System.Drawing.Point(684, 341);
+            bttnCommunityTools.Name = "bttnCommunityTools";
+            bttnCommunityTools.Size = new System.Drawing.Size(136, 35);
+            bttnCommunityTools.TabIndex = 27;
+            bttnCommunityTools.Text = "Community Tools";
+            toolTip1.SetToolTip(bttnCommunityTools, "Deploy or update community tools on the monitored instances");
+            bttnCommunityTools.UseVisualStyleBackColor = true;
+            bttnCommunityTools.Click += bttnCommunityTools_Click;
             // 
             // label12
             // 
@@ -2079,6 +2107,7 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.Label label18;
         private System.Windows.Forms.TextBox txtAllowScripts;
         private System.Windows.Forms.LinkLabel lnkAllowExplicit;
+        private System.Windows.Forms.LinkLabel lnkDeployCommunityTools;
         private System.Windows.Forms.GroupBox groupBox7;
         private System.Windows.Forms.CheckBox chkProcessAlerts;
         private System.Windows.Forms.CheckBox chkAlertPollingFrequency;
@@ -2092,6 +2121,7 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.TextBox txtAllowedJobs;
         private System.Windows.Forms.Label label21;
         private System.Windows.Forms.Button bttnPermissionsHelper;
+        private System.Windows.Forms.Button bttnCommunityTools;
         private System.Windows.Forms.LinkLabel lnkGrant;
         private System.Windows.Forms.Button bttnGrantAccessToServiceAccount;
         private System.Windows.Forms.Button bttnRestartAsAdmin;

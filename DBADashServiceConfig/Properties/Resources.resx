@@ -160,4 +160,7 @@
   <data name="Security_Shields_Alert_32xLG_color" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Security_Shields_Alert_32xLG_color.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="CommunityTools" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\CommunityTools.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>

@@ -2867,6 +2867,27 @@ namespace DBADashServiceConfig
             }
         }
 
+        private void bttnCommunityTools_Click(object sender, EventArgs e) => ShowCommunityToolsDeploy();
+
+        private void lnkDeployCommunityTools_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e) => ShowCommunityToolsDeploy();
+
+        private void ShowCommunityToolsDeploy()
+        {
+            try
+            {
+                using var frm = new CommunityToolsDeploy { Connections = collectionConfig.SourceConnections, Config = collectionConfig };
+                frm.ShowDialog(this);
+                if (frm.AllowedScriptsChanged)
+                {
+                    txtAllowScripts.Text = collectionConfig.AllowedScripts;
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex, "Error loading Community Tools");
+            }
+        }
+
         private void lnkGrant_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             var connections = GetNewSourceConnections();

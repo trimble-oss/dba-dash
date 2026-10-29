@@ -776,7 +776,7 @@ namespace DBADashConfig
         /// it can be scripted (e.g. a scheduled backup) without the password being on the command line.
         /// </summary>
         /// <param name="confirm">Prompt twice, so a typo doesn't leave something nobody can decrypt</param>
-        private static string? ReadSecret(string? option, string environmentVariable, string prompt, bool confirm)
+        internal static string? ReadSecret(string? option, string environmentVariable, string prompt, bool confirm)
         {
             if (!string.IsNullOrEmpty(option)) return option;
             var fromEnvironment = Environment.GetEnvironmentVariable(environmentVariable);
