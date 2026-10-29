@@ -1,5 +1,6 @@
 ﻿using CommandLine;
 using DBADash;
+using DBADash.CommunityTools;
 
 namespace DBADashConfig
 {
@@ -33,7 +34,11 @@ SetPerfmonCounters - Set OS-level (perfmon) counters.  Sets the global list, or 
 SetSchedule - Set how often a collection runs.  Sets the service level schedule, or a per-connection override when -c/--ConnectionID is supplied.  Use --CollectionType with --Schedule, --RunOnServiceStart and/or --ScheduleClear.
 Export - Write a copy of the config encrypted with a password (--ExportPath, --ExportPassword).  Use it to move DBA Dash to another machine, or as a backup, without having to re-enter passwords.  Use --NoSecrets instead to leave the passwords out.  The config itself isn't changed.
 ListUnreadableSecrets - List the passwords that can't be decrypted on this machine, e.g. after copying the config from another machine.  Set them with SetPassword.
-SetPassword - Set the password of SQL connections (--Password).  Use --ConnectionID for one connection (a source's ConnectionID or a destination's server|database) or --UserName for every connection that logs in as that user.")]
+SetPassword - Set the password of SQL connections (--Password).  Use --ConnectionID for one connection (a source's ConnectionID or a destination's server|database) or --UserName for every connection that logs in as that user.
+ListCommunityTools - List the community tools DBA Dash can deploy and the version each is pinned to.
+CheckCommunityTools - Show which community tools are installed on each instance and whether they are up to date.  Use --Tools with -c, --ConnectionID or --ConnectionIDs.
+DeployCommunityTools - Deploy or update community tools.  Use --Tools with -c, --ConnectionID or --ConnectionIDs, and --AcceptDisclaimer.  Connects as the current Windows user for integrated security connections, or use --SqlUser/--SqlPassword.
+UpdateCommunityToolsManifest - For the DBA Dash release workflow.  Move the community tools manifest (--ManifestPath) to the newest upstream releases.  With -c, deploys the updated tools to that instance and checks their versions.  --SummaryPath writes a markdown summary.")]
         public CommandLineActionOption Option { get; set; }
 
         [Option('r', "Replace", Required = false, HelpText = "Option to replace the existing connection if it already exists", Default = false)]
@@ -232,6 +237,42 @@ SetPassword - Set the password of SQL connections (--Password).  Use --Connectio
         [Option("ScheduleClear", Default = false, Required = false, HelpText = "Use with -a SetSchedule to remove the schedule override and go back to the level above - the service level schedule for a connection, or the shipped default for the service.")]
         public bool ScheduleClear { get; set; }
 
+        [Option("Tools", Default = "*", Required = false, HelpText = "Use with the community tools actions.  Comma-separated list of tools and/or families, e.g. \"FirstResponderKit,sp_WhoIsActive\".  \"*\" (the default) for all.  -a ListCommunityTools lists them.")]
+        public string Tools { get; set; } = "*";
+
+        [Option("ConnectionIDs", Required = false, HelpText = "Use with the community tools actions.  Comma-separated list of ConnectionIDs from the config, or \"*\" for every SQL instance in the config.")]
+        public string? ConnectionIDs { get; set; }
+
+        [Option("Source", Default = CommunityToolScriptSource.SourceTypes.Pinned, Required = false, HelpText = "Use with -a DeployCommunityTools.  Pinned (the default) downloads the version tested with this build of DBA Dash from GitHub and checks its hash.  Latest downloads the newest release from GitHub, which hasn't been tested with DBA Dash.  Folder uses scripts from --SourceFolder, for servers without internet access.")]
+        public CommunityToolScriptSource.SourceTypes Source { get; set; }
+
+        [Option("SourceFolder", Required = false, HelpText = "Use with --Source Folder.  Folder containing the scripts, either at their repository paths (e.g. sp_HumanEvents\\sp_HumanEvents.sql) or directly in the folder.")]
+        public string? SourceFolder { get; set; }
+
+        [Option("Database", Required = false, HelpText = "Use with the community tools actions.  Database to deploy to or check.  By default each tool is checked or updated where DBA Dash runs it from: the database the connection lands in, then master (the sp_ lookup order).  Tools that aren't installed go in the connection's database.")]
+        public string? Database { get; set; }
+
+        [Option("SqlUser", Required = false, HelpText = "Use with the community tools actions to connect with SQL authentication instead of the credentials in the connection string.  Deploying needs permission to create procedures in the target database.")]
+        public string? SqlUser { get; set; }
+
+        [Option("SqlPassword", Required = false, HelpText = "Use with --SqlUser.  If not supplied, it's read from the " + Helper.PasswordEnvironmentVariable + " environment variable, then standard input if it's redirected, then prompted for.  Passing it here leaves it in your shell history.")]
+        public string? SqlPassword { get; set; }
+
+        [Option("AcceptDisclaimer", Default = false, Required = false, HelpText = "Required with -a DeployCommunityTools.  Confirms you understand community tools are third-party scripts provided under their own licenses and not maintained by DBA Dash.")]
+        public bool AcceptDisclaimer { get; set; }
+
+        [Option("AddToAllowedScripts", Default = false, Required = false, HelpText = "Use with -a DeployCommunityTools to allow the deployed tools to be run from the DBA Dash GUI by adding them to AllowedScripts in the service config.  The service account also needs EXECUTE permission - see the permissions helper in the service configuration tool.")]
+        public bool AddToAllowedScripts { get; set; }
+
+        [Option("ManifestPath", Required = false, HelpText = "Use with -a UpdateCommunityToolsManifest.  Path of CommunityToolsManifest.json to update.")]
+        public string? ManifestPath { get; set; }
+
+        [Option("SummaryPath", Required = false, HelpText = "Use with -a UpdateCommunityToolsManifest.  Writes a markdown summary of the updates, e.g. for a PR description.")]
+        public string? SummaryPath { get; set; }
+
+        [Option("GuiSourcePath", Required = false, HelpText = "Use with -a UpdateCommunityToolsManifest.  The DBADashGUI/CommunityTools source folder.  Removed parameters the GUI passes are highlighted in the summary.")]
+        public string? GuiSourcePath { get; set; }
+
         public enum CommandLineActionOption
         {
             Add,
@@ -260,7 +301,11 @@ SetPassword - Set the password of SQL connections (--Password).  Use --Connectio
             SetSchedule,
             Export,
             ListUnreadableSecrets,
-            SetPassword
+            SetPassword,
+            ListCommunityTools,
+            CheckCommunityTools,
+            DeployCommunityTools,
+            UpdateCommunityToolsManifest
         }
     }
 }

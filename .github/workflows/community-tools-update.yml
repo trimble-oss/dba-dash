@@ -1,0 +1,122 @@
+name: Community Tools Manifest Update
+
+# Checks each community tool for a new upstream release, deploys the new versions to a test instance and raises a PR
+# that moves the pins in CommunityToolsManifest.json.
+#
+# The test job runs unreviewed upstream SQL as sa, so it gets a read-only token that isn't left on disk or in the
+# environment.  Only the PR job can write, and it never runs upstream code.
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  test:
+    name: Update and test manifest
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    outputs:
+      changed: ${{ steps.changes.outputs.changed }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+          dotnet-quality: 'ga'
+
+      - name: Build
+        run: dotnet build DBADashConfig -o DBADashBuild\ManifestUpdate
+
+      - name: Install SQL
+        uses: potatoqualitee/mssqlsuite@v2
+        with:
+          install: sqlengine
+          version: 2022
+
+      # No GITHUB_TOKEN here: the few unauthenticated GitHub API calls are well within the rate limit.
+      - name: Update and test
+        run: |
+          New-Item -ItemType Directory -Force $env:RUNNER_TEMP\update | Out-Null
+          DBADashBuild\ManifestUpdate\DBADashConfig.exe -a UpdateCommunityToolsManifest --ManifestPath DBADash\CommunityTools\CommunityToolsManifest.json --SummaryPath $env:RUNNER_TEMP\update\summary.md --GuiSourcePath DBADashGUI\CommunityTools -c "Data Source=localhost;User ID=sa;Password=dbatools.I0;Encrypt=True;Trust Server Certificate=True"
+
+      - name: Job summary
+        if: always()
+        shell: pwsh
+        run: |
+          $path = "$env:RUNNER_TEMP\update\summary.md"
+          if (Test-Path $path) { Get-Content $path | Out-File $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8 }
+
+      - name: Check for changes
+        id: changes
+        shell: pwsh
+        run: |
+          git diff --quiet -- DBADash/CommunityTools/CommunityToolsManifest.json
+          $changed = $LASTEXITCODE -ne 0
+          "changed=$($changed.ToString().ToLower())" >> $env:GITHUB_OUTPUT
+          if ($changed) { Copy-Item DBADash\CommunityTools\CommunityToolsManifest.json $env:RUNNER_TEMP\update\ }
+          exit 0
+
+      - name: Upload update
+        if: steps.changes.outputs.changed == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: manifest-update
+          path: ${{ runner.temp }}/update/
+
+  pr:
+    name: Create or update PR
+    needs: test
+    if: needs.test.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Download update
+        uses: actions/download-artifact@v4
+        with:
+          name: manifest-update
+          path: ${{ runner.temp }}/update
+
+      # The branch is rebuilt from the default branch each run, so an open PR is updated in place rather than duplicated.
+      # Only the manifest is taken from the test job.
+      - name: Create or update PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BASE_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          branch=community-tools/update-manifest
+          manifest=DBADash/CommunityTools/CommunityToolsManifest.json
+          title='Community Tools - Update manifest to the latest releases'
+          body="$RUNNER_TEMP/update/summary.md"
+
+          cp "$RUNNER_TEMP/update/CommunityToolsManifest.json" "$manifest"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git switch -C "$branch"
+          git commit -m "$title" -- "$manifest"
+          git push --force origin "$branch"
+
+          pr=$(gh pr list --head "$branch" --state open --json number --jq '.[0].number')
+          if [ -n "$pr" ]; then
+            gh pr edit "$pr" --body-file "$body"
+          else
+            gh pr create --base "$BASE_BRANCH" --head "$branch" --title "$title" --body-file "$body"
+          fi
