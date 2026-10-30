@@ -93,6 +93,22 @@ namespace DBADashGUI.AI
                     data.Blocking = First(await Query("dbo.BlockingSnapshots_Get", ("FromDate", from), ("ToDate", to), ("Top", data.BlockingSnapshotLimit)));
                     data.BlockingBaseline = First(await Query("dbo.BlockingSnapshots_Get", ("FromDate", baseFrom), ("ToDate", baseTo), ("Top", data.BlockingSnapshotLimit)));
                 }),
+                Section(PerformanceSection.RunningQueries, async () =>
+                {
+                    data.RunningQueries = First(await Query("dbo.RunningQueriesSummary_Get", ("FromDate", from), ("ToDate", to), ("MaxRows", data.RunningQueriesSnapshotLimit)));
+                    data.RunningQueriesBaseline = First(await Query("dbo.RunningQueriesSummary_Get", ("FromDate", baseFrom), ("ToDate", baseTo), ("MaxRows", data.RunningQueriesSnapshotLimit)));
+                }),
+                Section(PerformanceSection.Deadlocks, async () =>
+                {
+                    // Both take a list of instances as well as the one - the list is what decides whether the collection is enabled.
+                    data.Deadlocks = await Query("dbo.DeadlockCharts_Get", ("InstanceIDs", new[] { instanceId }.AsDataTable()), ("FromDate", from), ("ToDate", to),
+                        ("DateGroupingMin", bucket), ("TopN", PerformanceAnalysisOptions.MaxTopN));
+                    data.DeadlocksBaseline = await Query("dbo.DeadlockCharts_Get", ("InstanceIDs", new[] { instanceId }.AsDataTable()), ("FromDate", baseFrom), ("ToDate", baseTo),
+                        ("DateGroupingMin", 60), ("TopN", 1));
+                    // Only the signatures: the later results carry every participant's statement and input buffer.
+                    data.DeadlockSignatures = await FirstResultAsync("dbo.DeadlockSummary_Get", instanceId,
+                        [("InstanceIDs", new[] { instanceId }.AsDataTable()), ("FromDate", from), ("ToDate", to)], cancellationToken);
+                }),
                 Section(PerformanceSection.ObjectExecution, async () =>
                 {
                     data.ObjectExecution = First(await Query("dbo.ObjectExecutionStatsSummary_Get", ("FromDate", from), ("ToDate", to),
@@ -117,17 +133,7 @@ namespace DBADashGUI.AI
         private static async Task<DataSet> QueryAsync(string procedure, int? instanceId, IEnumerable<(string Name, object Value)> parameters, CancellationToken cancellationToken)
         {
             await using var cn = new SqlConnection(Common.ConnectionString);
-            await using var cmd = new SqlCommand(procedure, cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Config.DefaultCommandTimeout };
-            if (instanceId.HasValue)
-            {
-                cmd.Parameters.AddWithValue("InstanceID", instanceId.Value);
-            }
-
-            foreach (var (name, value) in parameters)
-            {
-                cmd.Parameters.AddWithValue(name, value);
-            }
-
+            await using var cmd = Command(procedure, cn, instanceId, parameters);
             await cn.OpenAsync(cancellationToken);
             await using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
 
@@ -143,6 +149,47 @@ namespace DBADashGUI.AI
             return set;
         }
 
+        /// <summary>The first result set only, for a procedure whose later results are large and not needed.  Null when it returned a message in place of data.</summary>
+        private static async Task<DataTable> FirstResultAsync(string procedure, int? instanceId, IEnumerable<(string Name, object Value)> parameters, CancellationToken cancellationToken)
+        {
+            await using var cn = new SqlConnection(Common.ConnectionString);
+            await using var cmd = Command(procedure, cn, instanceId, parameters);
+            await cn.OpenAsync(cancellationToken);
+            await using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
+            var table = new DataTable();
+            for (var i = 0; i < reader.FieldCount; i++)
+            {
+                table.Columns.Add(reader.GetName(i), reader.GetFieldType(i));
+            }
+
+            var values = new object[reader.FieldCount];
+            while (await reader.ReadAsync(cancellationToken))
+            {
+                reader.GetValues(values);
+                table.Rows.Add(values);
+            }
+
+            // Cancel rather than drain the rest - closing the reader would otherwise read every remaining result to the end.
+            cmd.Cancel();
+            return table.Columns.Contains("Message") ? null : table;
+        }
+
+        private static SqlCommand Command(string procedure, SqlConnection cn, int? instanceId, IEnumerable<(string Name, object Value)> parameters)
+        {
+            var cmd = new SqlCommand(procedure, cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Config.DefaultCommandTimeout };
+            if (instanceId.HasValue)
+            {
+                cmd.Parameters.AddWithValue("InstanceID", instanceId.Value);
+            }
+
+            foreach (var (name, value) in parameters)
+            {
+                cmd.Parameters.AddWithValue(name, value);
+            }
+
+            return cmd;
+        }
+
         /// <summary>The sections that came back with nothing at all - for the dialog to grey out rather than offer.</summary>
         public static IEnumerable<PerformanceSection> Empty(PerformanceAnalysisData data)
         {
@@ -154,6 +201,8 @@ namespace DBADashGUI.AI
             if (data.ObjectExecution is null || !data.ObjectExecution.Rows.Cast<DataRow>().Any(r => !PerformanceAnalysisPayload.IsIdleWait(r))) yield return PerformanceSection.ObjectExecution;
             if (NotCollected(data.Latches)) yield return PerformanceSection.Latches;
             if (NotCollected(data.Spinlocks)) yield return PerformanceSection.Spinlocks;
+            if (data.RunningQueries is not { Rows.Count: > 0 }) yield return PerformanceSection.RunningQueries;
+            if (NotCollected(data.Deadlocks)) yield return PerformanceSection.Deadlocks;
         }
 
         private static bool NotCollected(DataSet set) =>

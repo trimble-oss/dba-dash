@@ -86,6 +86,29 @@ namespace DBADash.PerformanceAnalysis
         /// <summary>The dbo.BlockingSnapshots_Get row limit - at it, the count is a floor rather than a count.</summary>
         public int BlockingSnapshotLimit { get; init; } = 500;
 
+        /// <summary>
+        /// dbo.RunningQueriesSummary_Get: one row per running queries snapshot - running and blocked counts,
+        /// the longest query and oldest transaction, and tempdb allocation and metadata contention.  Small
+        /// enough per row to summarise here rather than going to the full snapshots.
+        /// </summary>
+        public DataTable? RunningQueries { get; set; }
+
+        public DataTable? RunningQueriesBaseline { get; set; }
+
+        /// <summary>The dbo.RunningQueriesSummary_Get row limit - newest first, so at it the start of the window is missing.</summary>
+        public int RunningQueriesSnapshotLimit { get; init; } = 50000;
+
+        /// <summary>
+        /// dbo.DeadlockCharts_Get: over time, then by signature, application, database, login, host and
+        /// procedure.  A single Message table when the deadlocks collection is not enabled.
+        /// </summary>
+        public DataSet? Deadlocks { get; set; }
+
+        public DataSet? DeadlocksBaseline { get; set; }
+
+        /// <summary>The first result of dbo.DeadlockSummary_Get: deadlocks by signature, with the objects and procedures involved.</summary>
+        public DataTable? DeadlockSignatures { get; set; }
+
         /// <summary>Sections that failed to load, and why.  Said in the section rather than failing the whole analysis.</summary>
         public Dictionary<PerformanceSection, string> Errors { get; } = new();
 

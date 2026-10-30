@@ -80,6 +80,36 @@ namespace DBADashAI.Services
             return resultSets;
         }
 
+        /// <summary>Whether a repository connection is configured - in local mode there is none.</summary>
+        public bool IsConfigured => !string.IsNullOrWhiteSpace(_connectionString);
+
+        /// <summary>Every result set of a procedure that takes its own parameters rather than the tool convention.</summary>
+        public async Task<List<List<Dictionary<string, object?>>>> QueryMultiAsync(string storedProcedure, IEnumerable<(string Name, object? Value)> parameters, CancellationToken cancellationToken)
+        {
+            await using var cn = new SqlConnection(RequiredConnectionString);
+            await using var cmd = new SqlCommand(storedProcedure, cn)
+            {
+                CommandType = CommandType.StoredProcedure,
+                CommandTimeout = _sqlTimeoutSeconds
+            };
+            foreach (var (name, value) in parameters)
+            {
+                cmd.Parameters.AddWithValue(name, value ?? DBNull.Value);
+            }
+
+            await cn.OpenAsync(cancellationToken);
+            await using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
+
+            var resultSets = new List<List<Dictionary<string, object?>>>();
+            do
+            {
+                resultSets.Add(await ReadResultSetAsync(reader, cancellationToken));
+            }
+            while (await reader.NextResultAsync(cancellationToken));
+
+            return resultSets;
+        }
+
         public async Task<List<Dictionary<string, object?>>> QueryNoParamsAsync(string storedProcedure, CancellationToken cancellationToken)
         {
             await using var cn = new SqlConnection(RequiredConnectionString);

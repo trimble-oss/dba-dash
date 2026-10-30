@@ -871,6 +871,10 @@
     <Build Include="AI\Stored Procedures\OSPerformance_Get.sql" />
     <Build Include="AI\Stored Procedures\ReliabilityRisk_Get.sql" />
     <Build Include="AI\Stored Procedures\RunningQueries_Get.sql" />
+    <Build Include="AI\Stored Procedures\PerformanceInvestigationBlocking_Get.sql" />
+    <Build Include="AI\Stored Procedures\PerformanceInvestigationDeadlock_Get.sql" />
+    <Build Include="AI\Stored Procedures\PerformanceInvestigationLongRunning_Get.sql" />
+    <Build Include="AI\Stored Procedures\PerformanceInvestigationWaits_Get.sql" />
     <Build Include="AI\Stored Procedures\SlowQueries_Get.sql" />
     <Build Include="AI\Stored Procedures\StorageSpace_Get.sql" />
     <Build Include="AI\Stored Procedures\TableSize_Get.sql" />

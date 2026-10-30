@@ -37,7 +37,7 @@ namespace DBADash.PerformanceAnalysis
         /// What kind of request this is - which is to say, what the model was given to reason from.  Bump
         /// it when the content changes materially, not for wording.
         /// </summary>
-        public const string Revision = "1";
+        public const string Revision = "2";
 
         /// <summary>
         /// A payload large enough to be worth a word before it goes.  Not a limit - the service has its
@@ -48,6 +48,26 @@ namespace DBADash.PerformanceAnalysis
         public string Instance { get; private init; } = string.Empty;
 
         public int InstanceId { get; private init; }
+
+        /// <summary>
+        /// The window in UTC, and the reader's offset from it, for the lookups the model can make - it asks
+        /// in the reader's times, as the payload gives them, and the service reads in UTC.  Not shown in the
+        /// preview: they say nothing the window line does not.
+        /// </summary>
+        public DateTime FromUtc { get; private init; }
+
+        public DateTime ToUtc { get; private init; }
+
+        public int UtcOffsetMinutes { get; private init; }
+
+        /// <summary>
+        /// Where the reader's offset changes inside the window - a clock change - as the UTC time it applies from
+        /// and the offset from then on.  Empty for most windows; <see cref="UtcOffsetMinutes"/> is the offset at the
+        /// end, so the offset before the first change is in the first entry's <c>PreviousOffsetMinutes</c>.
+        /// </summary>
+        public IReadOnlyList<UtcOffsetChange> UtcOffsetChanges { get; private init; } = Array.Empty<UtcOffsetChange>();
+
+        public sealed record UtcOffsetChange(DateTime FromUtc, int PreviousOffsetMinutes, int OffsetMinutes);
 
         public PerformanceAnalysisFocus Focus { get; private init; }
 
@@ -155,6 +175,10 @@ namespace DBADash.PerformanceAnalysis
             {
                 Instance = data.Instance,
                 InstanceId = data.InstanceId,
+                FromUtc = DateTime.SpecifyKind(window.FromUtc, DateTimeKind.Utc),
+                ToUtc = DateTime.SpecifyKind(window.ToUtc, DateTimeKind.Utc),
+                UtcOffsetMinutes = Offset(toLocal, window.ToUtc),
+                UtcOffsetChanges = OffsetChanges(toLocal, window.FromUtc, window.ToUtc),
                 Focus = options.Focus,
                 Window = $"{FormatFull(toLocal(window.FromUtc))} to {FormatFull(toLocal(window.ToUtc))} ({timeZone}), " +
                          $"{PerformanceAnalysisWindow.Describe(window.Length)}.  Time series are in {window.BucketMinutes}-minute buckets.",
@@ -194,6 +218,44 @@ namespace DBADash.PerformanceAnalysis
         }
 
         private static string FormatFull(DateTime value) => value.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+
+        private static int Offset(Func<DateTime, DateTime> toLocal, DateTime utc) => (int)Math.Round((toLocal(utc) - utc).TotalMinutes);
+
+        /// <summary>
+        /// The clock changes in a window, found by stepping through it an hour at a time and narrowing each
+        /// change to the minute.  Only <paramref name="toLocal"/> is known - the reader's zone may be one chosen in
+        /// DBA Dash rather than the machine's - so the changes are found by asking it rather than from a zone id.
+        /// </summary>
+        internal static List<UtcOffsetChange> OffsetChanges(Func<DateTime, DateTime> toLocal, DateTime fromUtc, DateTime toUtc)
+        {
+            var changes = new List<UtcOffsetChange>();
+            var previous = fromUtc;
+            var previousOffset = Offset(toLocal, previous);
+            while (previous < toUtc)
+            {
+                var next = previous.AddHours(1) < toUtc ? previous.AddHours(1) : toUtc;
+                var offset = Offset(toLocal, next);
+                if (offset != previousOffset)
+                {
+                    // The change is after low and at or before high.
+                    var low = previous;
+                    var high = next;
+                    while ((high - low).TotalMinutes > 1)
+                    {
+                        var mid = low.AddMinutes(Math.Floor((high - low).TotalMinutes / 2));
+                        if (Offset(toLocal, mid) == previousOffset) low = mid;
+                        else high = mid;
+                    }
+
+                    changes.Add(new UtcOffsetChange(DateTime.SpecifyKind(high, DateTimeKind.Utc), previousOffset, offset));
+                    previousOffset = offset;
+                }
+
+                previous = next;
+            }
+
+            return changes;
+        }
 
         /// <summary>The per-section work, holding what every section needs.</summary>
         private sealed class Builder
@@ -237,6 +299,8 @@ namespace DBADash.PerformanceAnalysis
                         case PerformanceSection.ObjectExecution: ObjectExecution(text, section); break;
                         case PerformanceSection.Latches: Latches(text, section); break;
                         case PerformanceSection.Spinlocks: Spinlocks(text, section); break;
+                        case PerformanceSection.RunningQueries: RunningQueries(text, section); break;
+                        case PerformanceSection.Deadlocks: Deadlocks(text, section); break;
                     }
                 }
 
@@ -681,6 +745,183 @@ namespace DBADash.PerformanceAnalysis
                 var sessions = rows.Max(r => PerformanceAnalysisTable.Double(r, "BlockedSessionCount") ?? 0);
                 return $"{count} snapshots with blocking, at most {Num(wait)} sec of blocked wait in one snapshot, at most {Num(sessions)} sessions blocked at once.";
             }
+
+            private void RunningQueries(StringBuilder text, PerformanceSectionOptions section)
+            {
+                var rows = Rows(_data.RunningQueries).ToList();
+                if (rows.Count == 0)
+                {
+                    text.AppendLine("No running queries snapshots were collected in this window.");
+                    return;
+                }
+
+                text.AppendLine("From the summary DBA Dash keeps of each running queries snapshot.  Each snapshot is a point in time, so durations are " +
+                                "how long something had been running when it was seen, and counts are sessions at that moment - not totals.");
+                if (rows.Count >= _data.RunningQueriesSnapshotLimit)
+                {
+                    text.AppendLine($"Only the latest {rows.Count:N0} snapshots were read, so the start of the window is missing.");
+                }
+
+                var hasBaseline = Baseline && HasRows(_data.RunningQueriesBaseline);
+                var activity = new PerformanceAnalysisTable("period", "snapshots", "avg_running", "max_running", "pct_snapshots_blocked", "max_blocked", "max_blocked_wait_sec",
+                    "max_longest_query_sec", "max_oldest_tran_sec", "max_sleeping_sessions", "max_memory_grant_mb");
+                AddActivity(activity, "window", rows);
+                if (hasBaseline) AddActivity(activity, "baseline", Rows(_data.RunningQueriesBaseline).ToList());
+                else if (Baseline) activity.Add("baseline", "no data", "", "", "", "", "", "", "", "", "");
+                activity.AppendTo(text);
+
+                text.AppendLine();
+                if (!rows.Any(r => PerformanceAnalysisTable.Get(r, "TempDBAllocationWaitCount") is not null))
+                {
+                    text.AppendLine("Tempdb: allocation and metadata contention are not captured for this instance (an older DBA Dash agent).  " +
+                                    $"Waits on tempdb resources (any wait type - page latch, lock or I/O): seen in {Num(Pct(rows, "TempDBWaitCount"))}% of snapshots, at most {Num(Max(rows, "TempDBWaitCount"))} sessions waiting at once.");
+                }
+                else
+                {
+                    text.AppendLine("Tempdb page latch contention.  allocation is PFS/GAM/SGAM pages - helped by more equally sized data files; metadata is any other tempdb page - usually system table " +
+                                    "pages from temp table creates and drops, but it can also be a hot page in a user temp table, so confirm which (a lookup of the waiting queries helps) " +
+                                    "before recommending memory-optimized tempdb metadata (SQL 2019+).  wait_ms is the total wait of the sessions waiting in the snapshot.");
+                    var tempdb = new PerformanceAnalysisTable("period", "pct_snapshots_allocation", "max_allocation_waiting", "max_allocation_wait_ms",
+                        "pct_snapshots_metadata", "max_metadata_waiting", "max_metadata_wait_ms", "max_tempdb_used_mb");
+                    AddTempdb(tempdb, "window", rows);
+                    if (hasBaseline) AddTempdb(tempdb, "baseline", Rows(_data.RunningQueriesBaseline).ToList());
+                    tempdb.AppendTo(text);
+                }
+
+                if (section.TimeSeries != true) return;
+
+                text.AppendLine();
+                text.AppendLine($"Over time, in {_data.Window.BucketMinutes}-minute buckets - the average of running, and the worst snapshot for the rest:");
+                var series = new PerformanceAnalysisTable("time", "avg_running", "max_running", "max_blocked", "max_blocked_wait_sec", "longest_query_sec",
+                    "tempdb_allocation_waiting", "tempdb_metadata_waiting", "tempdb_used_mb");
+                var bucket = TimeSpan.FromMinutes(Math.Max(1, _data.Window.BucketMinutes));
+                foreach (var group in rows
+                             .Select(r => (Row: r, Time: PerformanceAnalysisTable.Time(r, "SnapshotDateUTC")))
+                             .Where(r => r.Time.HasValue)
+                             .GroupBy(r => new DateTime(r.Time!.Value.Ticks - r.Time.Value.Ticks % bucket.Ticks))
+                             .OrderBy(g => g.Key))
+                {
+                    var bucketRows = group.Select(g => g.Row).ToList();
+                    series.Add(Time(group.Key),
+                        Num(bucketRows.Average(r => PerformanceAnalysisTable.Double(r, "RunningQueries") ?? 0)),
+                        Num(Max(bucketRows, "RunningQueries")),
+                        Num(Max(bucketRows, "BlockedQueries")),
+                        Num(Max(bucketRows, "BlockedQueriesWaitMs") / 1000),
+                        Num(Max(bucketRows, "LongestRunningQueryMs") / 1000),
+                        Num(Max(bucketRows, "TempDBAllocationWaitCount")),
+                        Num(Max(bucketRows, "TempDBMetadataWaitCount")),
+                        Num(Max(bucketRows, "TempDBCurrentMB")));
+                }
+
+                series.AppendTo(text);
+            }
+
+            /// <summary>The largest value of a column, or null where no row has one - a column the agent did not capture.</summary>
+            private static double? Max(IReadOnlyList<DataRow> rows, string column)
+            {
+                var values = rows.Select(r => PerformanceAnalysisTable.Double(r, column)).Where(v => v.HasValue).ToList();
+                return values.Count == 0 ? null : values.Max();
+            }
+
+            /// <summary>The percentage of snapshots in which a count was above zero.</summary>
+            private static double Pct(IReadOnlyList<DataRow> rows, string column) =>
+                rows.Count == 0 ? 0 : rows.Count(r => PerformanceAnalysisTable.Double(r, column) is > 0) * 100d / rows.Count;
+
+            private static void AddActivity(PerformanceAnalysisTable table, string period, IReadOnlyList<DataRow> rows)
+            {
+                table.Add(period,
+                    rows.Count.ToString("N0", CultureInfo.InvariantCulture),
+                    Num(rows.Average(r => PerformanceAnalysisTable.Double(r, "RunningQueries") ?? 0)),
+                    Num(Max(rows, "RunningQueries")),
+                    Num(Pct(rows, "BlockedQueries")),
+                    Num(Max(rows, "BlockedQueries")),
+                    Num(Max(rows, "BlockedQueriesWaitMs") / 1000),
+                    Num(Max(rows, "LongestRunningQueryMs") / 1000),
+                    Num(Max(rows, "OldestTransactionMs") / 1000),
+                    Num(Max(rows, "SleepingSessionsCount")),
+                    Num(Max(rows, "SumMemoryGrantKB") / 1024));
+            }
+
+            private static void AddTempdb(PerformanceAnalysisTable table, string period, IReadOnlyList<DataRow> rows)
+            {
+                table.Add(period,
+                    Num(Pct(rows, "TempDBAllocationWaitCount")),
+                    Num(Max(rows, "TempDBAllocationWaitCount")),
+                    Num(Max(rows, "TempDBAllocationWaitTimeMs")),
+                    Num(Pct(rows, "TempDBMetadataWaitCount")),
+                    Num(Max(rows, "TempDBMetadataWaitCount")),
+                    Num(Max(rows, "TempDBMetadataWaitTimeMs")),
+                    Num(Max(rows, "TempDBCurrentMB")));
+            }
+
+            private void Deadlocks(StringBuilder text, PerformanceSectionOptions section)
+            {
+                if (NotCollected(_data.Deadlocks) is { } message)
+                {
+                    text.AppendLine($"Not collected for this instance.  ({message})  The Metrics section may still carry the Number of Deadlocks/sec counter.");
+                    return;
+                }
+
+                var overTime = Rows(Table(_data.Deadlocks, 0)).ToList();
+                var count = overTime.Sum(r => PerformanceAnalysisTable.Double(r, "Deadlocks") ?? 0);
+                var victims = overTime.Sum(r => PerformanceAnalysisTable.Double(r, "Victims") ?? 0);
+                var summary = $"Window: {count:N0} deadlocks, {victims:N0} victims.";
+                if (Baseline)
+                {
+                    var before = Rows(Table(_data.DeadlocksBaseline, 0)).Sum(r => PerformanceAnalysisTable.Double(r, "Deadlocks") ?? 0);
+                    summary += NotCollected(_data.DeadlocksBaseline) is null ? $"  Baseline: {before:N0} deadlocks ({Change(count, before)})." : "  Baseline: not collected.";
+                }
+
+                text.AppendLine(summary);
+                if (count == 0) return;
+
+                var top = Top(section, 5);
+                text.AppendLine("A signature is the shape of a deadlock - the same objects, lock modes and statements - so recurrences of one problem group together.");
+                var signatures = Rows(_data.DeadlockSignatures).ToList();
+                if (signatures.Count > 0)
+                {
+                    text.AppendLine($"Top {Math.Min(top, signatures.Count)} of {signatures.Count} signatures:");
+                    var table = new PerformanceAnalysisTable("signature", "occurrences", "victims", "first_seen", "last_seen", "parallel", "objects", "procedures");
+                    foreach (var row in signatures.Take(top))
+                    {
+                        table.Add(PerformanceAnalysisTable.Text(row, "Signature"),
+                            Num(PerformanceAnalysisTable.Double(row, "Occurrences")),
+                            Num(PerformanceAnalysisTable.Double(row, "Victims")),
+                            PerformanceAnalysisTable.Time(row, "FirstSeen") is { } first ? Time(first) : "",
+                            PerformanceAnalysisTable.Time(row, "LastSeen") is { } last ? Time(last) : "",
+                            PerformanceAnalysisTable.Flag(row, "IsParallel") ? "yes" : "",
+                            PerformanceAnalysisTable.Text(row, "ObjectNames"),
+                            PerformanceAnalysisTable.Text(row, "ProcedureNames"));
+                    }
+
+                    table.AppendTo(text);
+                }
+
+                // Counted per deadlock rather than per process: a deadlock between two sessions of one application is one deadlock involving it.
+                foreach (var (index, name) in new[] { (2, "application"), (3, "database"), (6, "procedure") })
+                {
+                    var rows = Rows(Table(_data.Deadlocks, index)).Take(top).ToList();
+                    if (rows.Count == 0) continue;
+
+                    text.AppendLine($"Deadlocks by {name}: " +
+                                    string.Join(", ", rows.Select(r => $"{PerformanceAnalysisTable.Text(r, "GroupValue")} {Num(PerformanceAnalysisTable.Double(r, "Deadlocks"))}")));
+                }
+
+                if (section.TimeSeries != true || overTime.Count == 0) return;
+
+                text.AppendLine();
+                text.AppendLine($"Over time, in {_data.Window.BucketMinutes}-minute buckets (buckets without deadlocks are left out):");
+                var series = new PerformanceAnalysisTable("time", "deadlocks", "victims");
+                foreach (var row in overTime)
+                {
+                    if (PerformanceAnalysisTable.Time(row, "EventTime") is not { } time) continue;
+                    series.Add(Time(time), Num(PerformanceAnalysisTable.Double(row, "Deadlocks")), Num(PerformanceAnalysisTable.Double(row, "Victims")));
+                }
+
+                series.AppendTo(text);
+            }
+
+            private static DataTable? Table(DataSet? set, int index) => set is not null && set.Tables.Count > index ? set.Tables[index] : null;
 
             private void ObjectExecution(StringBuilder text, PerformanceSectionOptions section)
             {

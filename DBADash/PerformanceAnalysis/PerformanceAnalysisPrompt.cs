@@ -90,7 +90,18 @@ namespace DBADash.PerformanceAnalysis
             prompt.AppendLine("1. Summary - two or three sentences: is the instance under pressure in this window, and if so what is the main constraint.");
             prompt.AppendLine("2. What stands out - the findings that matter, most important first, each with the figures that show it, " +
                               "how it compares with the baseline, and the other sections that corroborate it (PAGEIOLATCH waits with read " +
-                              "latency and buffer pool memory, CXPACKET with CPU and MAXDOP, WRITELOG with log drive write latency).");
+                              "latency and buffer pool memory, CXPACKET with CPU and MAXDOP, WRITELOG with log drive write latency, " +
+                              "LCK_M waits with blocked sessions in the running queries snapshots and with deadlocks, PAGELATCH waits with " +
+                              "tempdb allocation or metadata contention).");
+            prompt.AppendLine(
+                "Running queries snapshots are points in time: a long-running query or an old open transaction seen in them is a lead " +
+                "worth naming (it can hold locks and log), not proof of a problem.  Tell tempdb allocation contention apart from " +
+                "metadata contention - they have different fixes.  Object execution stats show what used CPU and time, not what " +
+                "waited: do not name an object as the cause of tempdb, latch or lock waits because it is busy - only where the figures " +
+                "tie it to those waits.  Otherwise say the cause is not identified yet.  For deadlocks, a signature that recurs is one problem to fix; " +
+                "name its objects and procedures.  DBA Dash already keeps these snapshots with each query's text, waits, blocking and " +
+                "plan, so where the reader needs to know which query it was, point them at DBA Dash's Running Queries tab for the time " +
+                "it was seen - not at sys.dm_exec_requests or other live DMVs, which only show what is running now.");
             prompt.AppendLine("3. What to do - ranked, cheapest and safest first, each with its trade-off.");
             prompt.AppendLine("4. What to check next - what these figures cannot tell you, and where to look.");
         }
