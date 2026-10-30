@@ -42,6 +42,7 @@ namespace DBADashServiceConfig
         private static CommunityToolsManifest Manifest => CommunityToolsManifest.Default;
 
         private CheckBox chkAccept;
+        private CheckBox chkOverrideSafety;
         private ComboBox cboSource;
         private TextBox txtFolder;
         private Button bttnBrowse;
@@ -153,6 +154,11 @@ namespace DBADashServiceConfig
             txtDatabase = new TextBox { Width = 170, Margin = new Padding(3, 5, 3, 3), PlaceholderText = "Connection's default" };
             grpDatabase.Controls.Add(txtDatabase);
             pnlOptions.Controls.Add(grpDatabase);
+            var grpSafety = OptionGroup();
+            chkOverrideSafety = new CheckBox { Text = "Override safety checks", AutoSize = true, Margin = new Padding(3, 8, 3, 3) };
+            new ToolTip().SetToolTip(chkOverrideSafety, "Replace Ola Hallengren's Maintenance Solution procedures even if they don't match a known release (they may have been customized)\nor the update removes a parameter an Agent job passes.  A rollback script is still saved.  Objects that aren't the tool are never replaced.");
+            grpSafety.Controls.Add(chkOverrideSafety);
+            pnlOptions.Controls.Add(grpSafety);
             var grpCredentials = OptionGroup();
             grpCredentials.Controls.Add(new Label { Text = "Connect as:", AutoSize = true, Margin = new Padding(3, 8, 3, 3) });
             lnkCredentials = new LinkLabel { AutoSize = true, Margin = new Padding(3, 8, 3, 3) };
@@ -211,7 +217,7 @@ namespace DBADashServiceConfig
             pnlButtons.Controls.Add(pnlLeft, 0, 0);
             var pnlRight = new FlowLayoutPanel { AutoSize = true, WrapContents = false, Anchor = AnchorStyles.Right };
             bttnAllow = new Button { Text = "Allow in GUI", AutoSize = true, Margin = new Padding(3) };
-            bttnAllow.Click += (_, _) => AllowTools(SelectedTools.Select(t => t.Name));
+            bttnAllow.Click += (_, _) => AllowTools(SelectedTools.Where(t => t.RunFromGui).Select(t => t.Name));
             pnlRight.Controls.Add(bttnAllow);
             bttnPermissions = new Button { Text = "Permissions Helper", AutoSize = true, Margin = new Padding(3) };
             bttnPermissions.Click += (_, _) => ShowPermissionsHelper();
@@ -334,9 +340,10 @@ namespace DBADashServiceConfig
                 var i = dgvInstances.Rows.Add(true, InstanceName(src), "");
                 dgvInstances.Rows[i].Tag = src;
             }
-            // Tools already allowed in the GUI are the ones the user is most likely to want
+            // Tools already allowed in the GUI are the ones the user is most likely to want.  Tools the GUI doesn't run
+            // (e.g. the Maintenance Solution) are never selected by default - deploying those is a deliberate choice.
             var allowed = (Config?.AllowedScripts ?? "").Split(',', StringSplitOptions.TrimEntries);
-            SetToolSelection(t => Config?.AllowedScripts == "*" || allowed.Contains(t.Name, StringComparer.OrdinalIgnoreCase));
+            SetToolSelection(t => t.RunFromGui && (Config?.AllowedScripts == "*" || allowed.Contains(t.Name, StringComparer.OrdinalIgnoreCase)));
             SetCredentials(null);
         }
 
@@ -398,6 +405,7 @@ namespace DBADashServiceConfig
             bttnPermissions.Enabled = !running && Config != null;
             cboSource.Enabled = !running;
             txtDatabase.Enabled = !running;
+            chkOverrideSafety.Enabled = !running;
             lnkCredentials.Enabled = !running;
             lnkResetCredentials.Enabled = !running;
             selectionLinks.ForEach(l => l.Enabled = !running);
@@ -474,6 +482,10 @@ namespace DBADashServiceConfig
             {
                 message += "\n\nThe latest releases haven't been tested with DBA Dash.";
             }
+            if (chkOverrideSafety.Checked)
+            {
+                message += "\n\nSafety checks are overridden: customized procedures, and procedures whose update would break an Agent job, will be replaced.  A rollback script is still saved.";
+            }
             if (MessageBox.Show(message, Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
             {
                 return;
@@ -491,27 +503,40 @@ namespace DBADashServiceConfig
             }
 
             var deployed = new List<CommunityToolDeployResult>();
+            var rollbackScripts = new List<string>();
             var completed = await RunAsync("Deploying", async (_, _, token) =>
             {
-                var deployer = new CommunityToolDeployer(source) { Database = Database };
+                var deployer = new CommunityToolDeployer(source) { Database = Database, OverrideSafetyChecks = chkOverrideSafety.Checked };
+                // Deploying can add tools to the selection (required tools, and the rest of a set that's updated together)
+                var resultTools = new List<CommunityTool>(tools);
                 await ForEachInstanceAsync(instances, async src =>
                 {
                     var result = await deployer.DeployAsync(ConnectionString(src), tools, token);
                     ShowDeployResult(src, tools, result);
                     deployed.AddRange(result.Tools.Where(t => t.Status == CommunityToolDeployStatus.Deployed));
+                    resultTools.AddRange(result.Tools.Select(t => t.Tool).Where(t => !resultTools.Contains(t)));
+                    if (result.RollbackScript != null) rollbackScripts.Add(result.RollbackScript);
                 }, token);
                 // Show the versions now installed alongside the deployment result.
                 lblStatus.Text = "Checking versions";
-                await CheckVersionsAsync(tools, instances, token, clearResults: false);
+                await CheckVersionsAsync(resultTools, instances, token, clearResults: false);
                 return true;
             }, clearResults: true);
 
             var failed = dtResults.Rows.Cast<DataRow>().Count(r => (r["Result"] as string) == nameof(CommunityToolDeployStatus.Failed));
             var skipped = dtResults.Rows.Cast<DataRow>().Count(r => (r["Result"] as string) == nameof(CommunityToolDeployStatus.Skipped));
-            lblStatus.Text = $"{deployed.Count} deployed, {failed} failed, {skipped} skipped" + (completed ? "" : " (cancelled)");
+            var upToDate = dtResults.Rows.Cast<DataRow>().Count(r => (r["Result"] as string) == nameof(CommunityToolDeployStatus.UpToDate));
+            lblStatus.Text = $"{deployed.Count} deployed, {upToDate} already up to date, {failed} failed, {skipped} skipped" + (completed ? "" : " (cancelled)")
+                + (rollbackScripts.Count > 0 ? $".  Rollback scripts saved to {System.IO.Path.GetDirectoryName(rollbackScripts[0])}" : "");
+            // Only prompt when tools people run their backups with were replaced - routine updates just note it in the status
+            if (rollbackScripts.Count > 0 && deployed.Any(d => d.Tool.Family.GuardCustomizations) && MessageBox.Show($"Rollback scripts that put back what was replaced were saved to:\n\n{string.Join("\n", rollbackScripts)}\n\nOpen the folder?",
+                    Text, MessageBoxButtons.YesNo, MessageBoxIcon.Information) == DialogResult.Yes)
+            {
+                CommonShared.OpenFolder(System.IO.Path.GetDirectoryName(rollbackScripts[0]));
+            }
             if (deployed.Count > 0)
             {
-                OfferToAllow(deployed.Select(d => d.Tool.Name).Distinct().ToList());
+                OfferToAllow(deployed.Where(d => d.Tool.RunFromGui).Select(d => d.Tool.Name).Distinct().ToList());
             }
         }
 
@@ -653,7 +678,7 @@ namespace DBADashServiceConfig
             var (back, fore) = (e.Value as string) switch
             {
                 nameof(CommunityToolStatus.UpToDate) or nameof(CommunityToolDeployStatus.Deployed) => (DashColors.Success, Color.White),
-                nameof(CommunityToolStatus.Outdated) => (DashColors.Warning, Color.Black),
+                nameof(CommunityToolStatus.Outdated) or nameof(CommunityToolStatus.Conflict) or nameof(CommunityToolStatus.Modified) => (DashColors.Warning, Color.Black),
                 nameof(CommunityToolDeployStatus.Failed) or "Error" => (DashColors.Fail, Color.White),
                 _ => (Color.Empty, Color.Empty)
             };
@@ -673,6 +698,8 @@ namespace DBADashServiceConfig
 
         private void OfferToAllow(List<string> deployedTools)
         {
+            // Only tools the GUI runs need allowing or EXECUTE for the service (e.g. not the Maintenance Solution)
+            if (deployedTools.Count == 0) return;
             var notAllowed = NotYetAllowed(deployedTools);
             if (notAllowed.Count > 0)
             {

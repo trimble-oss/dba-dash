@@ -77,7 +77,11 @@ namespace DBADashConfig
             {
                 Log.Warning("Deploying the latest release of each tool.  These versions haven't been tested with DBA Dash.");
             }
-            var deployer = new CommunityToolDeployer(source) { Database = o.Database };
+            if (o.OverrideSafetyChecks)
+            {
+                Log.Warning("Safety checks are overridden: customized procedures and procedures whose update would break Agent jobs will be replaced");
+            }
+            var deployer = new CommunityToolDeployer(source) { Database = o.Database, OverrideSafetyChecks = o.OverrideSafetyChecks, RollbackFolder = o.RollbackFolder };
             var results = await RunAsync(connections, async cn => await deployer.DeployAsync(cn.ConnectionString, tools));
 
             var rows = new List<string[]>();
@@ -100,16 +104,21 @@ namespace DBADashConfig
                 }));
             }
             WriteTable(new[] { "Instance", "Database", "Tool", "Status", "Version", "Message" }, rows);
+            foreach (var rollback in results.Select(r => r.Result?.RollbackScript).Where(p => p != null))
+            {
+                Log.Information("Rollback script: {Path}", rollback);
+            }
 
             var toolResults = results.Where(r => r.Result?.Error == null && r.Error == null).SelectMany(r => r.Result!.Tools).ToList();
             var deployedCount = toolResults.Count(t => t.Status == CommunityToolDeployStatus.Deployed);
             var failedCount = toolResults.Count(t => t.Status == CommunityToolDeployStatus.Failed) + results.Count(r => r.Error != null || r.Result?.Error != null);
+            var upToDateCount = toolResults.Count(t => t.Status == CommunityToolDeployStatus.UpToDate);
             var skippedCount = toolResults.Count(t => t.Status == CommunityToolDeployStatus.Skipped);
-            Log.Information("{Deployed} deployed, {Failed} failed, {Skipped} skipped", deployedCount, failedCount, skippedCount);
+            Log.Information("{Deployed} deployed, {UpToDate} already up to date, {Failed} failed, {Skipped} skipped", deployedCount, upToDateCount, failedCount, skippedCount);
 
             if (o.AddToAllowedScripts)
             {
-                AddToAllowedScripts(config, o, toolResults.Where(t => t.Status == CommunityToolDeployStatus.Deployed).Select(t => t.Tool.Name));
+                AddToAllowedScripts(config, o, toolResults.Where(t => t.Status is CommunityToolDeployStatus.Deployed or CommunityToolDeployStatus.UpToDate && t.Tool.RunFromGui).Select(t => t.Tool.Name));
             }
             if (failedCount > 0)
             {
@@ -142,6 +151,7 @@ namespace DBADashConfig
             {
                 await File.WriteAllTextAsync(o.ManifestPath, newJson);
                 Log.Information("Updated {Path}", o.ManifestPath);
+                await AddPinnedKnownVersionsAsync(o.ManifestPath, CommunityToolsManifest.Parse(newJson), updates);
                 if (!string.IsNullOrEmpty(o.ConnectionString))
                 {
                     var (passed, testSummary) = await TestUpdatesAsync(o.ConnectionString, CommunityToolsManifest.Parse(json), CommunityToolsManifest.Parse(newJson), updates, o.GuiSourcePath);
@@ -157,6 +167,57 @@ namespace DBADashConfig
             {
                 Environment.Exit(1);
             }
+        }
+
+        private static string KnownVersionsPath(string manifestPath) =>
+            Path.Combine(Path.GetDirectoryName(Path.GetFullPath(manifestPath))!, CommunityToolKnownVersions.FileName);
+
+        /// <summary>The new pins of guarded families become known releases, so installs of them can be updated later.</summary>
+        private static async Task AddPinnedKnownVersionsAsync(string manifestPath, CommunityToolsManifest manifest, List<CommunityToolFamilyUpdate> updates)
+        {
+            var families = updates.Where(u => u.Error == null && u.Family.GuardCustomizations).Select(u => u.Family.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            if (families.Count == 0)
+            {
+                return;
+            }
+            var path = KnownVersionsPath(manifestPath);
+            var known = CommunityToolKnownVersions.Parse(await File.ReadAllTextAsync(path));
+            var source = new PinnedGitHubScriptSource();
+            foreach (var tool in manifest.Tools.Where(t => families.Contains(t.Family.Name)))
+            {
+                foreach (var file in tool.Files)
+                {
+                    var script = await source.GetScriptAsync(tool, file);
+                    if (!known.Add(tool, script.Text))
+                    {
+                        Log.Information("{Tool} {Version} is already a known release", tool.Name, file.Version);
+                    }
+                }
+            }
+            await File.WriteAllTextAsync(path, known.ToJson());
+            // This build's embedded catalog doesn't have the new releases yet, and they're tested next
+            CommunityToolKnownVersions.UseInstead(known);
+        }
+
+        /// <summary>Adds each guarded tool release found in the .sql files under --SourceFolder to the known versions.</summary>
+        public static async Task AddKnownVersionsAsync(Options o)
+        {
+            if (string.IsNullOrEmpty(o.ManifestPath) || string.IsNullOrEmpty(o.SourceFolder))
+            {
+                throw new ArgumentException("--ManifestPath and --SourceFolder are required");
+            }
+            var manifest = CommunityToolsManifest.Parse(await File.ReadAllTextAsync(o.ManifestPath));
+            var tools = manifest.Tools.Where(t => t.Family.GuardCustomizations).ToList();
+            var path = KnownVersionsPath(o.ManifestPath);
+            var known = CommunityToolKnownVersions.Parse(await File.ReadAllTextAsync(path));
+            var added = 0;
+            foreach (var file in Directory.EnumerateFiles(o.SourceFolder, "*.sql", SearchOption.AllDirectories))
+            {
+                var text = await File.ReadAllTextAsync(file);
+                added += tools.Count(tool => known.Add(tool, text));
+            }
+            await File.WriteAllTextAsync(path, known.ToJson());
+            Log.Information("Added {Count} known releases to {Path}", added, path);
         }
 
         private static async Task<(bool Passed, string Summary)> TestUpdatesAsync(string connectionString, CommunityToolsManifest oldManifest, CommunityToolsManifest manifest, List<CommunityToolFamilyUpdate> updates, string? guiSourcePath)
@@ -186,7 +247,7 @@ namespace DBADashConfig
             foreach (var result in deployed.Tools)
             {
                 var version = versions.First(v => v.Tool == result.Tool);
-                var ok = result.Status == CommunityToolDeployStatus.Skipped
+                var ok = result.Status is CommunityToolDeployStatus.Skipped or CommunityToolDeployStatus.UpToDate
                     || (result.Status == CommunityToolDeployStatus.Deployed && version.Status == CommunityToolStatus.UpToDate);
                 passed &= ok;
                 sb.AppendLine($"| {result.Tool.Name} | {result.Status} {result.Message} | {version.Status} {version.InstalledVersion} |");

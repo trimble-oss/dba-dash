@@ -154,6 +154,54 @@
           "Files": [ { "Path": "sp_DBPermissions.sql", "Version": "7.0", "Sha256": "d57e18ab7d8e43d82444e2954beca9a6b9b80e79e9dd3ba65d7754d5c04fd7c7" } ]
         }
       ]
+    },
+    {
+      "Name": "MaintenanceSolution",
+      "DisplayName": "Ola Hallengren's SQL Server Maintenance Solution",
+      "Author": "Ola Hallengren",
+      "Repository": "olahallengren/sql-server-maintenance-solution",
+      "Ref": "41617578643e722b790ea4d57ef80f8de38ae747",
+      "LatestRef": "branch:main",
+      "License": "MIT",
+      "LicenseUrl": "https://github.com/olahallengren/sql-server-maintenance-solution/blob/main/LICENSE",
+      "VersionPattern": "--//\\s*Version:\\s*(?<version>(?<date>\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}))",
+      "OwnershipPattern": "--//\\s*Source:\\s*https://ola\\.hallengren\\.com",
+      "ExactDatabase": true,
+      "GuardCustomizations": true,
+      "SetupFiles": [
+        { "Path": "CommandLog.sql", "Table": "CommandLog", "Columns": [ "ID", "DatabaseName", "SchemaName", "ObjectName", "ObjectType", "IndexName", "IndexType", "StatisticsName", "PartitionNumber", "ExtendedInfo", "Command", "CommandType", "StartTime", "EndTime", "ErrorNumber", "ErrorMessage" ], "Sha256": "7a508fa7ed562ec5ee09d4f587f7f2a87f7a4eb3c57450602ee99cdeb4e18b31" },
+        { "Path": "Queue.sql", "Table": "Queue", "Columns": [ "QueueID", "SchemaName", "ObjectName", "Parameters", "QueueStartTime", "SessionID", "RequestID", "RequestStartTime" ], "Sha256": "c30c3b986cc53efe75420e073af5ae9f0830c8f5b0dd1989649e249533588308" },
+        { "Path": "QueueDatabase.sql", "Table": "QueueDatabase", "Columns": [ "QueueID", "DatabaseName", "DatabaseOrder", "DatabaseStartTime", "DatabaseEndTime", "SessionID", "RequestID", "RequestStartTime" ], "Sha256": "8e61a33a6b6755ceae483968d8dedea87da3f82534dc37fba4786e9fbe9c1ec9" }
+      ],
+      "Tools": [
+        {
+          "Name": "CommandExecute",
+          "MinMajorVersion": 14,
+          "AzureSqlDb": false,
+          "Files": [ { "Path": "CommandExecute.sql", "Version": "2026-09-12 15:02:38", "VersionDate": "20260912150238", "Sha256": "190962fc9802ce8d8f5082a23119567d27f05d2bfc36e1bdf5ce79edea5d8e76" } ]
+        },
+        {
+          "Name": "DatabaseBackup",
+          "MinMajorVersion": 14,
+          "AzureSqlDb": false,
+          "Requires": [ "CommandExecute" ],
+          "Files": [ { "Path": "DatabaseBackup.sql", "Version": "2026-09-12 15:02:38", "VersionDate": "20260912150238", "Sha256": "1d69bd624c10cace994083006919df2c04bcaf084bb8a07e4f0b2c8ea43cb14b" } ]
+        },
+        {
+          "Name": "DatabaseIntegrityCheck",
+          "MinMajorVersion": 14,
+          "AzureSqlDb": false,
+          "Requires": [ "CommandExecute" ],
+          "Files": [ { "Path": "DatabaseIntegrityCheck.sql", "Version": "2026-09-12 15:02:38", "VersionDate": "20260912150238", "Sha256": "0a07ad49c18e17954114be8a8fb9c5c5fd022ae50b699462fba9a23e97e6b4ab" } ]
+        },
+        {
+          "Name": "IndexOptimize",
+          "MinMajorVersion": 14,
+          "AzureSqlDb": false,
+          "Requires": [ "CommandExecute" ],
+          "Files": [ { "Path": "IndexOptimize.sql", "Version": "2026-09-12 15:02:38", "VersionDate": "20260912150238", "Sha256": "ae23d8bd3d866c8c83a6ce27d982b0573e4f96a30e744b3549fa63a9548abed6" } ]
+        }
+      ]
     }
   ]
 }

@@ -61,10 +61,10 @@ jobs:
         id: changes
         shell: pwsh
         run: |
-          git diff --quiet -- DBADash/CommunityTools/CommunityToolsManifest.json
+          git diff --quiet -- DBADash/CommunityTools/CommunityToolsManifest.json DBADash/CommunityTools/CommunityToolsKnownVersions.json
           $changed = $LASTEXITCODE -ne 0
           "changed=$($changed.ToString().ToLower())" >> $env:GITHUB_OUTPUT
-          if ($changed) { Copy-Item DBADash\CommunityTools\CommunityToolsManifest.json $env:RUNNER_TEMP\update\ }
+          if ($changed) { Copy-Item DBADash\CommunityTools\CommunityToolsManifest.json, DBADash\CommunityTools\CommunityToolsKnownVersions.json $env:RUNNER_TEMP\update\ }
           exit 0
 
       - name: Upload update
@@ -96,7 +96,7 @@ jobs:
           path: ${{ runner.temp }}/update
 
       # The branch is rebuilt from the default branch each run, so an open PR is updated in place rather than duplicated.
-      # Only the manifest is taken from the test job.
+      # Only the manifest and known versions are taken from the test job.
       - name: Create or update PR
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -104,14 +104,16 @@ jobs:
         run: |
           branch=community-tools/update-manifest
           manifest=DBADash/CommunityTools/CommunityToolsManifest.json
+          known=DBADash/CommunityTools/CommunityToolsKnownVersions.json
           title='Community Tools - Update manifest to the latest releases'
           body="$RUNNER_TEMP/update/summary.md"
 
           cp "$RUNNER_TEMP/update/CommunityToolsManifest.json" "$manifest"
+          cp "$RUNNER_TEMP/update/CommunityToolsKnownVersions.json" "$known"
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git switch -C "$branch"
-          git commit -m "$title" -- "$manifest"
+          git commit -m "$title" -- "$manifest" "$known"
           git push --force origin "$branch"
 
           pr=$(gh pr list --head "$branch" --state open --json number --jq '.[0].number')
