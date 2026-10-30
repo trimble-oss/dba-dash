@@ -191,7 +191,7 @@ namespace DBADash.CommunityTools
                 Path.Combine(folder, tool.Family.Name, relative)
             }.ToList();
             // Flat folder only works when the file name is unique to this build.
-            if (tool.Files.Count(f => string.Equals(f.FileName, file.FileName, StringComparison.OrdinalIgnoreCase)) == 1)
+            if (tool.Family.Tools.SelectMany(t => t.Files).Concat(tool.Family.SetupFiles).Count(f => string.Equals(f.FileName, file.FileName, StringComparison.OrdinalIgnoreCase)) == 1)
             {
                 candidates.Add(Path.Combine(folder, file.FileName));
             }

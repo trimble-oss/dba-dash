@@ -186,6 +186,10 @@ public class Program
             case CommandLineActionOption.UpdateCommunityToolsManifest:
                 await CommunityToolsHelper.UpdateManifestAsync(o);
                 break;
+
+            case CommandLineActionOption.AddCommunityToolKnownVersions:
+                await CommunityToolsHelper.AddKnownVersionsAsync(o);
+                break;
         }
     }
 }

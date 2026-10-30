@@ -72,24 +72,24 @@ namespace DBADash.CommunityTools
             Log.Information("{family}: checking {newRef} (pinned {ref})", family.Name, newRef, family.Ref);
 
             var update = new CommunityToolFamilyUpdate { Family = family, NewRef = newRef };
-            foreach (var tool in family.Tools)
+            // Setup files (tables) have no version - only their hash is pinned.  They're attributed to the family's first tool.
+            var files = family.SetupFiles.Select(f => (Tool: family.Tools[0], File: f, Versioned: false))
+                .Concat(family.Tools.SelectMany(t => t.Files.Select(f => (Tool: t, File: f, Versioned: true))));
+            foreach (var (tool, file, versioned) in files)
             {
-                foreach (var file in tool.Files)
+                var url = CommunityToolScriptSource.RawGitHubUrl(family, newRef, file.Path);
+                var bytes = await CommunityToolScriptSource.DownloadAsync(url, cancellationToken);
+                var hash = CommunityToolScriptSource.ComputeSha256(bytes);
+                if (string.Equals(hash, file.Sha256, StringComparison.OrdinalIgnoreCase))
                 {
-                    var url = CommunityToolScriptSource.RawGitHubUrl(family, newRef, file.Path);
-                    var bytes = await CommunityToolScriptSource.DownloadAsync(url, cancellationToken);
-                    var hash = CommunityToolScriptSource.ComputeSha256(bytes);
-                    if (string.Equals(hash, file.Sha256, StringComparison.OrdinalIgnoreCase))
-                    {
-                        continue;
-                    }
-                    var (version, date) = CommunityToolVersionChecker.ParseVersion(family, Encoding.UTF8.GetString(bytes));
-                    if (version == null)
-                    {
-                        throw new InvalidOperationException($"VersionPattern no longer matches {file.Path} at {newRef}");
-                    }
-                    update.Files.Add(new CommunityToolFileUpdate { Tool = tool, File = file, NewVersion = version, NewVersionDate = date, NewSha256 = hash });
+                    continue;
                 }
+                var (version, date) = versioned ? CommunityToolVersionChecker.ParseVersion(family, Encoding.UTF8.GetString(bytes)) : (null, null);
+                if (versioned && version == null)
+                {
+                    throw new InvalidOperationException($"VersionPattern no longer matches {file.Path} at {newRef}");
+                }
+                update.Files.Add(new CommunityToolFileUpdate { Tool = tool, File = file, NewVersion = version, NewVersionDate = date, NewSha256 = hash });
             }
             if (update.Files.Count == 0)
             {
@@ -223,7 +223,10 @@ namespace DBADash.CommunityTools
                 sb.AppendLine("|---|---|---|");
                 foreach (var file in update.Files)
                 {
-                    sb.AppendLine($"| {file.Tool.Name} | {file.File.Path} | {Describe(file.File.Version, file.File.VersionDate)} → {Describe(file.NewVersion, file.NewVersionDate)} |");
+                    var versionChange = file.File.Version == null && file.NewVersion == null
+                        ? "changed"
+                        : $"{Describe(file.File.Version, file.File.VersionDate)} → {Describe(file.NewVersion, file.NewVersionDate)}";
+                    sb.AppendLine($"| {file.Tool.Name} | {file.File.Path} | {versionChange} |");
                 }
                 sb.AppendLine();
             }

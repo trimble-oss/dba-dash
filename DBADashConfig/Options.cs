@@ -38,7 +38,8 @@ SetPassword - Set the password of SQL connections (--Password).  Use --Connectio
 ListCommunityTools - List the community tools DBA Dash can deploy and the version each is pinned to.
 CheckCommunityTools - Show which community tools are installed on each instance and whether they are up to date.  Use --Tools with -c, --ConnectionID or --ConnectionIDs.
 DeployCommunityTools - Deploy or update community tools.  Use --Tools with -c, --ConnectionID or --ConnectionIDs, and --AcceptDisclaimer.  Connects as the current Windows user for integrated security connections, or use --SqlUser/--SqlPassword.
-UpdateCommunityToolsManifest - For the DBA Dash release workflow.  Move the community tools manifest (--ManifestPath) to the newest upstream releases.  With -c, deploys the updated tools to that instance and checks their versions.  --SummaryPath writes a markdown summary.")]
+UpdateCommunityToolsManifest - For the DBA Dash release workflow.  Move the community tools manifest (--ManifestPath) to the newest upstream releases.  With -c, deploys the updated tools to that instance and checks their versions.  --SummaryPath writes a markdown summary.
+AddCommunityToolKnownVersions - For DBA Dash maintainers.  Adds every release of the guarded tools (Ola Hallengren's Maintenance Solution) found in the .sql files under --SourceFolder (e.g. each historical version exported from the upstream git history) to CommunityToolsKnownVersions.json next to --ManifestPath.")]
         public CommandLineActionOption Option { get; set; }
 
         [Option('r', "Replace", Required = false, HelpText = "Option to replace the existing connection if it already exists", Default = false)]
@@ -273,6 +274,12 @@ UpdateCommunityToolsManifest - For the DBA Dash release workflow.  Move the comm
         [Option("GuiSourcePath", Required = false, HelpText = "Use with -a UpdateCommunityToolsManifest.  The DBADashGUI/CommunityTools source folder.  Removed parameters the GUI passes are highlighted in the summary.")]
         public string? GuiSourcePath { get; set; }
 
+        [Option("OverrideSafetyChecks", Default = false, Required = false, HelpText = "Use with -a DeployCommunityTools.  Replace tools that protect existing installs (Ola Hallengren's Maintenance Solution) even if the installed copy doesn't match a known release (it may have been customized) or the update removes a parameter an Agent job passes.  A rollback script is still saved.")]
+        public bool OverrideSafetyChecks { get; set; }
+
+        [Option("RollbackFolder", Required = false, HelpText = "Use with -a DeployCommunityTools.  Folder for the rollback scripts saved before procedures are replaced.  Defaults to CommunityToolsRollback in the DBA Dash folder.")]
+        public string? RollbackFolder { get; set; }
+
         public enum CommandLineActionOption
         {
             Add,
@@ -305,7 +312,8 @@ UpdateCommunityToolsManifest - For the DBA Dash release workflow.  Move the comm
             ListCommunityTools,
             CheckCommunityTools,
             DeployCommunityTools,
-            UpdateCommunityToolsManifest
+            UpdateCommunityToolsManifest,
+            AddCommunityToolKnownVersions
         }
     }
 }

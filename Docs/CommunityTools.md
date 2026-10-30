@@ -12,8 +12,24 @@ DBA Dash can run popular community tools such as sp_WhoIsActive, the First Respo
 | [DarlingData](https://github.com/erikdarlingdata/DarlingData) | sp_HealthParser, sp_HumanEvents, sp_HumanEventsBlockViewer, sp_IndexCleanup, sp_LogHunter, sp_PressureDetector, sp_QuickieStore | MIT |
 | [WhoIsActive](https://github.com/amachanic/sp_whoisactive) | sp_WhoIsActive | GPL-3.0 |
 | [SQLStudies](https://github.com/sqlstudent144/SQL-Server-Scripts) | sp_SrvPermissions, sp_DBPermissions | MIT |
+| [Maintenance Solution](https://github.com/olahallengren/sql-server-maintenance-solution) (Ola Hallengren) | CommandExecute, DatabaseBackup, DatabaseIntegrityCheck, IndexOptimize | MIT |
 
 Run `DBADashConfig -a ListCommunityTools` for the version of each tool this build of DBA Dash is pinned to.
+
+### Ola Hallengren's Maintenance Solution
+
+DBA Dash doesn't use the Maintenance Solution itself, but it can deploy and update it.  Only the procedures and the tables they use (CommandLog, Queue, QueueDatabase) are deployed, from the individual scripts in the repository - **no SQL Agent jobs are created**, and existing jobs that call the procedures are left alone.  Selecting a procedure also deploys CommandExecute, which they all call.
+
+* The procedures aren't sp_ procedures, so there's no lookup in master.  They go in the connection's database (usually master), or the database you specify.  DBA Dash never searches other databases for an existing install - if you have it elsewhere, specify that database.  If it's installed in several databases, deploy to each one explicitly.
+* The names are generic, so an existing procedure is only replaced if its definition identifies it as Ola Hallengren's.  Anything else (or an encrypted procedure) is reported as a **Conflict** and left alone.  An existing CommandLog, Queue or QueueDatabase table without the expected columns stops the deployment to that database.
+* Current releases need SQL Server 2017 or later (they use STRING_AGG), or Azure SQL Managed Instance.  Older instances are skipped.  Azure SQL Database isn't supported - upstream has a separate combined script for it.
+* Your backups depend on these procedures, so updates are protected:
+  * **Customized copies aren't replaced.**  DBA Dash knows every upstream release since 2017 (`CommunityToolsKnownVersions.json`, built from the repository history and extended each time the pin moves).  An installed procedure that doesn't match one of them shows as **Modified** and isn't updated.
+  * **Agent jobs are checked when parameters change.**  If the new version removes a parameter the installed one has (or adds one without a default), DBA Dash looks for Agent job steps that call the procedure.  If a job passes a removed parameter (or doesn't pass a new required one) the procedure isn't updated.  If no job is affected, it's updated with a warning - check anything else that calls it.  Jobs aren't read unless the parameters change.
+  * **The procedures are updated as a set.**  They call each other, so selecting one also updates the others already installed in that database, and if any of them can't be updated safely, none are.
+  * **A rollback script is saved** before anything is replaced: `CommunityToolsRollback` in the DBA Dash folder (or `--RollbackFolder`).  It puts back each procedure as it was.  If it can't be written, nothing is replaced.  Rollback scripts are saved for every community tool, not just this one.
+  * Use **Override safety checks** in the service configuration tool (`--OverrideSafetyChecks` on the command line) to replace Modified procedures or ones whose update would break a job.  Objects that aren't Ola Hallengren's are never replaced.
+* The GUI doesn't run these procedures, so they're never selected by default and aren't added to Allowed Scripts.
 
 ## Where the scripts come from
 

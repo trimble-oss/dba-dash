@@ -99,6 +99,28 @@ namespace DBADash.CommunityTools
         /// </summary>
         public string VersionPattern { get; set; }
 
+        /// <summary>
+        /// When set, an object that already has a tool's name is only replaced if its definition matches.  For tools with
+        /// generic names (e.g. DatabaseBackup) that could just as easily be someone else's procedure.
+        /// </summary>
+        public string OwnershipPattern { get; set; }
+
+        /// <summary>
+        /// The tools aren't sp_ procedures, so there's no lookup in master: they're checked and deployed in the target
+        /// database only (the connection's database unless one is specified).  Never found by searching other databases.
+        /// </summary>
+        public bool ExactDatabase { get; set; }
+
+        /// <summary>
+        /// For tools people depend on (backups): an installed copy that doesn't match a known release
+        /// (<see cref="CommunityToolKnownVersions"/>) isn't replaced, and parameters the new version removes are checked
+        /// against Agent job steps.  Both can be overridden.
+        /// </summary>
+        public bool GuardCustomizations { get; set; }
+
+        /// <summary>Scripts run before any of the family's tools, e.g. the tables they log to.  Each must be safe to re-run.</summary>
+        public List<CommunityToolFile> SetupFiles { get; set; } = new();
+
         public List<CommunityTool> Tools { get; set; } = new();
 
         [JsonIgnore]
@@ -110,6 +132,13 @@ namespace DBADash.CommunityTools
         public Regex VersionRegex => string.IsNullOrEmpty(VersionPattern)
             ? null
             : _versionRegex ??= new Regex(VersionPattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant, TimeSpan.FromSeconds(5));
+
+        private Regex _ownershipRegex;
+
+        [JsonIgnore]
+        public Regex OwnershipRegex => string.IsNullOrEmpty(OwnershipPattern)
+            ? null
+            : _ownershipRegex ??= new Regex(OwnershipPattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant, TimeSpan.FromSeconds(5));
     }
 
     public sealed class CommunityTool
@@ -125,10 +154,38 @@ namespace DBADash.CommunityTools
         /// <summary>One file normally.  Tools with builds for different SQL versions list one per version range.</summary>
         public List<CommunityToolFile> Files { get; set; } = new();
 
+        /// <summary>Tools in the same family this one calls.  Always deployed alongside it.</summary>
+        public List<string> Requires { get; set; } = new();
+
         [JsonIgnore]
         public CommunityToolFamily Family { get; internal set; }
 
+        /// <summary>Whether the DBA Dash GUI can run the tool (and so whether it belongs in AllowedScripts).</summary>
+        [JsonIgnore]
+        public bool RunFromGui => Messaging.ProcedureExecutionMessage.IsCommunityProc(Schema, Name);
+
         public const string Schema = "dbo";
+
+        /// <summary>The tools plus any they require, required tools first so they're in place before the tools that call them.</summary>
+        public static List<CommunityTool> WithRequired(IEnumerable<CommunityTool> tools)
+        {
+            var result = new List<CommunityTool>();
+            void Add(CommunityTool tool)
+            {
+                if (result.Contains(tool)) return;
+                foreach (var name in tool.Requires)
+                {
+                    Add(tool.Family.Tools.FirstOrDefault(t => string.Equals(t.Name, name, StringComparison.OrdinalIgnoreCase))
+                        ?? throw new InvalidOperationException($"{tool.Name} requires unknown tool {name}"));
+                }
+                result.Add(tool);
+            }
+            foreach (var tool in tools)
+            {
+                Add(tool);
+            }
+            return result;
+        }
 
         /// <summary>
         /// The file to deploy to an instance, or null with a reason when the tool doesn't support it.
@@ -179,8 +236,17 @@ namespace DBADash.CommunityTools
         /// <summary>The version the pinned script reports, as captured by the family's VersionPattern.</summary>
         public string Version { get; set; }
 
-        /// <summary>The pinned script's version date (yyyyMMdd), when the family's VersionPattern captures one.</summary>
+        /// <summary>
+        /// The pinned script's version date as digits only (yyyyMMdd, or yyyyMMddHHmmss), when the family's VersionPattern
+        /// captures one.
+        /// </summary>
         public string VersionDate { get; set; }
+
+        /// <summary>Setup files only: the table the script creates if it doesn't exist.</summary>
+        public string Table { get; set; }
+
+        /// <summary>Setup files only: columns an existing table must have to be the one the tools expect.</summary>
+        public List<string> Columns { get; set; } = new();
 
         /// <summary>SHA-256 of the pinned script, lower-case hex.</summary>
         public string Sha256 { get; set; }

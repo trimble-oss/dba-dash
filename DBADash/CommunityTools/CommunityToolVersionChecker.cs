@@ -20,7 +20,19 @@ namespace DBADash.CommunityTools
         Unknown,
 
         /// <summary>The tool doesn't support this instance (version or platform).</summary>
-        NotSupported
+        NotSupported,
+
+        /// <summary>
+        /// A procedure with the tool's name exists but can't be confirmed as the tool (fails the family's
+        /// OwnershipPattern, or its definition can't be read).  It's never replaced.
+        /// </summary>
+        Conflict,
+
+        /// <summary>
+        /// The tool, but not any known release of it (GuardCustomizations families) - probably customized.  Only replaced
+        /// with the safety checks overridden.
+        /// </summary>
+        Modified
     }
 
     public sealed class CommunityToolVersionInfo
@@ -66,7 +78,9 @@ namespace DBADash.CommunityTools
             var databases = string.IsNullOrWhiteSpace(database) ? lookupOrder : lookupOrder.Append(database).ToList();
             var installed = await CommunityToolLocator.GetInstalledAsync(cn, tools, databases, cancellationToken);
 
-            var locations = tools.ToDictionary(t => t, t => CommunityToolLocator.Locate(database, lookupOrder, installed[t.Name]));
+            var locations = tools.ToDictionary(t => t, t => t.Family.ExactDatabase
+                ? new CommunityToolLocation(string.IsNullOrWhiteSpace(database) ? cn.Database : database, null)
+                : CommunityToolLocator.Locate(database, lookupOrder, installed[t.Name]));
             var definitions = new Dictionary<CommunityTool, string>();
             foreach (var group in locations.GroupBy(l => l.Value.Database, StringComparer.OrdinalIgnoreCase))
             {
@@ -96,8 +110,34 @@ namespace DBADash.CommunityTools
                     Message = notSupportedReason
                 };
             }
+            if (!IsOwned(tool, definition))
+            {
+                return new CommunityToolVersionInfo
+                {
+                    Tool = tool,
+                    Status = CommunityToolStatus.Conflict,
+                    ExpectedVersion = file?.Version,
+                    Database = database,
+                    Note = note,
+                    Message = ConflictMessage(tool)
+                };
+            }
 
             var (version, date) = ParseVersion(tool.Family, definition);
+            if (tool.Family.GuardCustomizations && CommunityToolKnownVersions.Default.Find(tool.Name, definition) == null)
+            {
+                return new CommunityToolVersionInfo
+                {
+                    Tool = tool,
+                    Status = CommunityToolStatus.Modified,
+                    InstalledVersion = version,
+                    InstalledVersionDate = date,
+                    ExpectedVersion = file?.Version,
+                    Database = database,
+                    Note = note,
+                    Message = $"Doesn't match any known release{(version == null ? "" : $" of {version}")} - it may have been customized.  Deploying it needs the safety checks overridden."
+                };
+            }
             var comparison = file == null ? null : CompareToPin(version, date, file);
             return new CommunityToolVersionInfo
             {
@@ -118,6 +158,16 @@ namespace DBADash.CommunityTools
             };
         }
 
+        /// <summary>
+        /// Whether an existing definition is the tool, for families with an OwnershipPattern.  A definition that can't be
+        /// read (encrypted, or no VIEW DEFINITION) can't be confirmed, so it isn't.
+        /// </summary>
+        public static bool IsOwned(CommunityTool tool, string definition) =>
+            tool.Family.OwnershipRegex == null || (!string.IsNullOrEmpty(definition) && tool.Family.OwnershipRegex.IsMatch(definition));
+
+        public static string ConflictMessage(CommunityTool tool) =>
+            $"dbo.{tool.Name} exists but can't be confirmed as {tool.Family.DisplayName}'s.  It won't be replaced.";
+
         public static (string version, string date) ParseVersion(CommunityToolFamily family, string definition)
         {
             var match = family.VersionRegex?.Match(definition);
@@ -126,7 +176,8 @@ namespace DBADash.CommunityTools
                 return (null, null);
             }
             var date = match.Groups["date"];
-            return (match.Groups["version"].Value, date.Success ? date.Value : null);
+            // Digits only, so a date captured as e.g. "2026-09-12 15:02:38" still orders as a string.
+            return (match.Groups["version"].Value, date.Success ? new string(date.Value.Where(char.IsAsciiDigit).ToArray()) : null);
         }
 
         /// <summary>
@@ -164,7 +215,12 @@ namespace DBADash.CommunityTools
                 cmd.Parameters.AddWithValue("@p" + i, tool.Name);
                 return "@p" + i;
             }).ToList();
-            cmd.CommandText = $@"SELECT O.name, LEFT(M.definition, {DefinitionPrefixLength})
+            // Guarded tools are compared with known releases, so they need the whole definition.
+            var guardedNames = parameterNames.Where((_, i) => tools.ElementAt(i).Family.GuardCustomizations).ToList();
+            var definition = guardedNames.Count == 0
+                ? $"LEFT(M.definition, {DefinitionPrefixLength})"
+                : $"CASE WHEN O.name IN ({string.Join(',', guardedNames)}) THEN M.definition ELSE LEFT(M.definition, {DefinitionPrefixLength}) END";
+            cmd.CommandText = $@"SELECT O.name, {definition}
 FROM sys.objects O
 JOIN sys.sql_modules M ON M.object_id = O.object_id
 WHERE O.schema_id = SCHEMA_ID(N'{CommunityTool.Schema}')

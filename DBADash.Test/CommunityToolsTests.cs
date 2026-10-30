@@ -26,9 +26,158 @@ namespace DBADash.Test
         [TestMethod]
         public void Manifest_CoversEveryCommunityProcTheGuiCanRun()
         {
-            var manifestNames = Manifest.Tools.Select(t => t.Name).OrderBy(n => n).ToList();
+            // Tools the GUI doesn't run (the Maintenance Solution) are deploy-only.
+            var manifestNames = Manifest.Tools.Where(t => t.RunFromGui).Select(t => t.Name).OrderBy(n => n).ToList();
             var procNames = Enum.GetNames<ProcedureExecutionMessage.CommunityProcs>().OrderBy(n => n).ToList();
             CollectionAssert.AreEqual(procNames, manifestNames);
+            CollectionAssert.AreEquivalent(new[] { "CommandExecute", "DatabaseBackup", "DatabaseIntegrityCheck", "IndexOptimize" },
+                Manifest.Tools.Where(t => !t.RunFromGui).Select(t => t.Name).ToList());
+        }
+
+        [TestMethod]
+        public void MaintenanceSolution_VersionAndOwnership()
+        {
+            var tool = Manifest.GetTool("IndexOptimize");
+            const string header = "--// Source:  https://ola.hallengren.com      //--\n  --// Version: 2026-09-12 15:02:38      //--";
+            Assert.AreEqual(("2026-09-12 15:02:38", "20260912150238"), CommunityToolVersionChecker.ParseVersion(tool.Family, header));
+            // Ola's, but not any known release - probably customized
+            var modified = CommunityToolVersionChecker.GetVersionInfo(tool, Instance(16), "master", "CREATE PROCEDURE dbo.IndexOptimize AS\n" + header, null);
+            Assert.AreEqual(CommunityToolStatus.Modified, modified.Status);
+            Assert.AreEqual("2026-09-12 15:02:38", modified.InstalledVersion);
+
+            // Generic names: anything that can't be confirmed as Ola's is a conflict, never replaced
+            Assert.AreEqual(CommunityToolStatus.Conflict, CommunityToolVersionChecker.GetVersionInfo(tool, Instance(16), "master", "CREATE PROCEDURE dbo.IndexOptimize AS SELECT 1", null).Status);
+            Assert.AreEqual(CommunityToolStatus.Conflict, CommunityToolVersionChecker.GetVersionInfo(tool, Instance(16), "master", "", null).Status, "Encrypted - can't be confirmed");
+            Assert.IsTrue(CommunityToolVersionChecker.IsOwned(Manifest.GetTool("sp_Blitz"), ""), "Families without an OwnershipPattern aren't checked");
+
+            // Current releases use STRING_AGG (SQL 2017+).  Azure SQL Database has its own combined script upstream.
+            Assert.IsNull(tool.GetFile(Instance(13), out _));
+            Assert.IsNotNull(tool.GetFile(Instance(14), out _));
+            Assert.IsNotNull(tool.GetFile(Instance(12, DatabaseEngineEdition.SqlManagedInstance), out _));
+            Assert.IsNull(tool.GetFile(Instance(12, DatabaseEngineEdition.SqlDatabase, "UserDB"), out _));
+        }
+
+        [TestMethod]
+        public void WithRequired_AddsRequiredToolsFirst()
+        {
+            var tools = CommunityTool.WithRequired(new[] { Manifest.GetTool("IndexOptimize"), Manifest.GetTool("DatabaseBackup"), Manifest.GetTool("sp_Blitz") });
+            CollectionAssert.AreEqual(new[] { "CommandExecute", "IndexOptimize", "DatabaseBackup", "sp_Blitz" }, tools.Select(t => t.Name).ToList());
+        }
+
+        [TestMethod]
+        public void NormalizeDefinition_IgnoresCreateOrAlterAndLineEndings()
+        {
+            // SQL Server stores an ALTER PROCEDURE batch as CREATE PROCEDURE
+            const string sent = "\r\n-- create procedure in a comment\r\n/* ALTER */\r\nALTER PROCEDURE [dbo].[X]  \r\n@a int = 1\r\nAS\r\nSELECT 'ALTER'\r\n";
+            const string stored = "\n-- create procedure in a comment\n/* ALTER */\nCREATE PROCEDURE [dbo].[X]\n@a int = 1\nAS\nSELECT 'ALTER'   ";
+            Assert.AreEqual(CommunityToolSafety.HashDefinition(sent), CommunityToolSafety.HashDefinition(stored));
+            Assert.AreNotEqual(CommunityToolSafety.HashDefinition(stored), CommunityToolSafety.HashDefinition(stored.Replace("@a int = 1", "@a int = 2")));
+        }
+
+        [TestMethod]
+        public void KnownVersions_CoverThePinnedMaintenanceSolution()
+        {
+            foreach (var tool in Manifest.Tools.Where(t => t.Family.GuardCustomizations))
+            {
+                var versions = CommunityToolKnownVersions.Default.Tools[tool.Name];
+                Assert.IsTrue(versions.Any(v => v.Version == tool.Files.Single().Version), $"{tool.Name}: the pinned release must be known");
+                Assert.IsTrue(versions.Count > 100, $"{tool.Name}: history should go back years");
+            }
+        }
+
+        [TestMethod]
+        public void ParseParameters_StopsAtAs()
+        {
+            const string batch = "ALTER PROCEDURE [dbo].[X]\n\n@Databases nvarchar(max) = NULL,\n@Ratio numeric(18,10) = 1.5,\n@Required int,\n@Last nvarchar(max) = 'N' -- note\n\nAS\n\nBEGIN\n  DECLARE @Inside int\nEND";
+            var parameters = CommunityToolSafety.ParseParameters(batch);
+            CollectionAssert.AreEqual(new[] { "@Databases", "@Ratio", "@Required", "@Last" }, parameters.Select(p => p.Name).ToList());
+            CollectionAssert.AreEqual(new[] { true, true, false, true }, parameters.Select(p => p.HasDefault).ToList());
+            Assert.IsNotNull(CommunityToolSafety.FindProcedureBatch("SET ANSI_NULLS ON\nGO\n" + batch + "\nGO\n", "X"));
+            Assert.IsNull(CommunityToolSafety.FindProcedureBatch(batch, "X2"));
+        }
+
+        [TestMethod]
+        public void ParseParameters_HandlesOtherLayouts()
+        {
+            static System.Collections.Generic.List<string> Names(string batch) => CommunityToolSafety.ParseParameters(batch).Select(p => p.Name).ToList();
+            CollectionAssert.AreEqual(new[] { "@A", "@B" }, Names("CREATE PROCEDURE dbo.X @A int, @B nvarchar(10) = 'a,b' AS SELECT 1"));
+            CollectionAssert.AreEqual(new[] { "@A", "@B" }, Names("CREATE PROC [dbo].[X] (@A int, @B decimal(18,2)) AS SELECT 1"));
+            CollectionAssert.AreEqual(new[] { "@A", "@B" }, Names("CREATE PROCEDURE dbo.X\n@A AS int, -- first\n/* @NotAParam int, */ @B int = 1\nAS -- body\nSELECT @Inside = 1"));
+            CollectionAssert.AreEqual(new[] { "@A" }, Names("CREATE PROCEDURE dbo.X @A int WITH RECOMPILE AS SELECT 1"));
+            CollectionAssert.AreEqual(new string[0], Names("CREATE PROCEDURE dbo.X AS SELECT @A = 1"));
+        }
+
+        [TestMethod]
+        public void JobSteps_OnlyCountCallsToTheTargetDatabase()
+        {
+            static CommunityToolSafety.JobStep Step(string command, string subsystem = "TSQL", string? database = "master") => new("J", 1, "S", command, subsystem, database);
+            Assert.IsTrue(CommunityToolSafety.CallsProcedureIn(Step("EXECUTE [dbo].[DatabaseBackup] @Databases = 'USER_DATABASES'"), "DatabaseBackup", "master"));
+            Assert.IsFalse(CommunityToolSafety.CallsProcedureIn(Step("EXECUTE [dbo].[DatabaseBackup] @Databases = 'USER_DATABASES'", database: "DBA"), "DatabaseBackup", "master"));
+            Assert.IsTrue(CommunityToolSafety.CallsProcedureIn(Step("EXEC master.dbo.DatabaseBackup @Databases = 'X'", database: "msdb"), "DatabaseBackup", "master"));
+            Assert.IsFalse(CommunityToolSafety.CallsProcedureIn(Step("EXEC [DBA].[dbo].[DatabaseBackup] @Databases = 'X'"), "DatabaseBackup", "master"));
+            Assert.IsTrue(CommunityToolSafety.CallsProcedureIn(Step("sqlcmd -Q \"EXECUTE [dbo].[DatabaseBackup]\"", "CmdExec", null), "DatabaseBackup", "master"));
+            Assert.IsFalse(CommunityToolSafety.CallsProcedureIn(Step("EXEC dbo.DatabaseBackupHistory"), "DatabaseBackup", "master"));
+
+            Assert.IsTrue(CommunityToolSafety.PassesPositionalParameters("EXEC dbo.DatabaseBackup 'USER_DATABASES', NULL", "DatabaseBackup"));
+            Assert.IsFalse(CommunityToolSafety.PassesPositionalParameters("EXEC dbo.DatabaseBackup @Databases = 'USER_DATABASES'", "DatabaseBackup"));
+            Assert.IsFalse(CommunityToolSafety.PassesPositionalParameters("EXECUTE [dbo].[DatabaseBackup] \r\n@Databases = 'X'", "DatabaseBackup"));
+            Assert.IsTrue(CommunityToolSafety.PassesPositionalParameters("EXEC dbo.DatabaseBackup\r\n'USER_DATABASES'", "DatabaseBackup"));
+            Assert.IsTrue(CommunityToolSafety.PassesPositionalParameters("EXEC dbo.DatabaseBackup @dbs, NULL", "DatabaseBackup"));
+            Assert.IsTrue(CommunityToolSafety.PassesPositionalParameters("EXEC dbo.DatabaseBackup\r\nN'X'", "DatabaseBackup"));
+            Assert.IsFalse(CommunityToolSafety.PassesPositionalParameters("EXEC dbo.DatabaseBackup\r\nSELECT 1", "DatabaseBackup"));
+            Assert.IsFalse(CommunityToolSafety.PassesPositionalParameters("sqlcmd -Q \"EXECUTE [dbo].[DatabaseBackup]\" -b", "DatabaseBackup"));
+
+            // A step that changes database could be calling any copy
+            Assert.IsTrue(CommunityToolSafety.CallsProcedureIn(Step("USE DBA;\r\nEXEC dbo.DatabaseBackup @Databases = 'X'"), "DatabaseBackup", "DBA"));
+        }
+
+        [TestMethod]
+        public void GetSetOptions_UsesTheLastSetBeforeTheProcedure()
+        {
+            const string proc = "CREATE PROCEDURE dbo.X AS SELECT 1";
+            Assert.AreEqual((true, true), CommunityToolSafety.GetSetOptions(proc, proc));
+            var script = "SET ANSI_NULLS ON\nGO\nSET QUOTED_IDENTIFIER OFF\nGO\n" + proc + "\nGO\nSET QUOTED_IDENTIFIER ON\nGO\n";
+            Assert.AreEqual((true, false), CommunityToolSafety.GetSetOptions(script, CommunityToolSafety.FindProcedureBatch(script, "X")));
+        }
+
+        [TestMethod]
+        public void UsesParameter_MatchesWholeNames()
+        {
+            const string step = "sqlcmd -E -S $(ESCAPE_SQUOTE(SRVR)) -Q \"EXECUTE [dbo].[DatabaseBackup] @Databases = 'USER_DATABASES', @CleanupTime = 24\"";
+            Assert.IsTrue(CommunityToolSafety.UsesParameter(step, "@CleanupTime"));
+            Assert.IsTrue(CommunityToolSafety.UsesParameter(step, "@cleanuptime"));
+            Assert.IsFalse(CommunityToolSafety.UsesParameter(step, "@Cleanup"));
+            Assert.IsFalse(CommunityToolSafety.UsesParameter(step, "@CleanupMode"));
+        }
+
+        [TestMethod]
+        public void RollbackScript_RestoresWithAlter()
+        {
+            var folder = Path.Combine(Path.GetTempPath(), "DBADashRollbackTest_" + Guid.NewGuid().ToString("N"));
+            try
+            {
+                var rollback = new CommunityToolRollbackScript(folder, @"SERVER\INST");
+                rollback.Add(@"SERVER\INST", "DBA", Manifest.GetTool("IndexOptimize"), new CommunityToolRollbackScript.ExistingProcedure("-- header\nCREATE PROCEDURE [dbo].[IndexOptimize] AS SELECT 1", true, false));
+                rollback.Add(@"SERVER\INST", "DBA", Manifest.GetTool("CommandExecute"), null);
+                StringAssert.StartsWith(Path.GetFileName(rollback.Path), "SERVER_INST_");
+                var text = File.ReadAllText(rollback.Path);
+                StringAssert.Contains(text, "USE [DBA]");
+                StringAssert.Contains(text, "SET QUOTED_IDENTIFIER OFF");
+                StringAssert.Contains(text, "IF OBJECT_ID(N'dbo.[IndexOptimize]', N'P') IS NULL EXEC(N'CREATE PROCEDURE dbo.[IndexOptimize] AS RETURN')");
+                StringAssert.Contains(text, "-- header\nALTER PROCEDURE [dbo].[IndexOptimize] AS SELECT 1");
+                StringAssert.Contains(text, "-- DROP PROCEDURE dbo.[CommandExecute]");
+
+                rollback.Add(@"SERVER\INST", "DBA", Manifest.GetTool("DatabaseIntegrityCheck"), new CommunityToolRollbackScript.ExistingProcedure("CREATE OR ALTER PROCEDURE [dbo].[DatabaseIntegrityCheck] AS SELECT 1", true, true));
+                StringAssert.Contains(File.ReadAllText(rollback.Path), "\nALTER PROCEDURE [dbo].[DatabaseIntegrityCheck] AS SELECT 1");
+
+                // A GO line inside the definition would split the batch, so it's run as a string instead
+                rollback.Add(@"SERVER\INST", "DBA", Manifest.GetTool("DatabaseBackup"), new CommunityToolRollbackScript.ExistingProcedure("CREATE PROCEDURE [dbo].[DatabaseBackup] AS\n/*\nGO\n*/\nSELECT 'x'", true, true));
+                StringAssert.Contains(File.ReadAllText(rollback.Path), "EXEC(N'ALTER PROCEDURE [dbo].[DatabaseBackup] AS\n/*\nGO\n*/\nSELECT ''x''')");
+            }
+            finally
+            {
+                if (Directory.Exists(folder)) Directory.Delete(folder, true);
+            }
         }
 
         [TestMethod]
