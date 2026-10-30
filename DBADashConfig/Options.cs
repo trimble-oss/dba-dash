@@ -277,6 +277,9 @@ AddCommunityToolKnownVersions - For DBA Dash maintainers.  Adds every release of
         [Option("OverrideSafetyChecks", Default = false, Required = false, HelpText = "Use with -a DeployCommunityTools.  Replace tools that protect existing installs (Ola Hallengren's Maintenance Solution) even if the installed copy doesn't match a known release (it may have been customized) or the update removes a parameter an Agent job passes.  A rollback script is still saved.")]
         public bool OverrideSafetyChecks { get; set; }
 
+        [Option("IncludeAzureSqlDb", Default = false, Required = false, HelpText = "Use with -a DeployCommunityTools.  Also deploy to Azure SQL Database connections (user databases only).  Skipped by default.")]
+        public bool IncludeAzureSqlDb { get; set; }
+
         [Option("RollbackFolder", Required = false, HelpText = "Use with -a DeployCommunityTools.  Folder for the rollback scripts saved before procedures are replaced.  Defaults to CommunityToolsRollback in the DBA Dash folder.")]
         public string? RollbackFolder { get; set; }
 
