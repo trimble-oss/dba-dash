@@ -8,16 +8,23 @@ using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Data;
 using System.Linq;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace DBADashGUI.Performance
 {
     public partial class ObjectExecutionLineChart : UserControl
     {
+        private readonly LoadingOverlay loading;
+
         public ObjectExecutionLineChart()
         {
             InitializeComponent();
+            loading = new LoadingOverlay(this);
+            // Stop a load still running on the server when the control goes away
+            Disposed += (_, _) => refreshCts?.Cancel();
         }
 
         public int InstanceID;
@@ -55,7 +62,9 @@ namespace DBADashGUI.Performance
                 {"TotalWrites", new ColumnMetaData{Name="Total Writes",IsVisible=false, AxisName="Pages" } },
             };
 
-        public void RefreshData()
+        private CancellationTokenSource refreshCts;
+
+        public async void RefreshData()
         {
             var newDurationMins = Convert.ToInt32(ToDate.Subtract(FromDate).TotalMinutes);
             if (newDurationMins != durationMins) // Update date grouping only if duration has changed
@@ -65,7 +74,35 @@ namespace DBADashGUI.Performance
                 durationMins = newDurationMins;
             }
 
-            var dt = CommonData.ObjectExecutionStats(InstanceID, -1, ObjectID, dateGrouping, "AvgDuration", FromDate, ToDate, Instance);
+            // A newer refresh supersedes one still loading
+            refreshCts?.Cancel();
+            var cts = new CancellationTokenSource();
+            refreshCts = cts;
+            DataTable dt;
+            try
+            {
+                loading.Show();
+                dt = await CommonData.ObjectExecutionStatsAsync(InstanceID, -1, ObjectID, dateGrouping, "AvgDuration", FromDate, ToDate, Instance, token: cts.Token);
+                if (cts.IsCancellationRequested || IsDisposed) return;
+            }
+            catch (Exception) when (cts.IsCancellationRequested)
+            {
+                return; // Superseded by a newer refresh
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex, "Error loading object execution stats");
+                return;
+            }
+            finally
+            {
+                if (refreshCts == cts)
+                {
+                    refreshCts = null;
+                    loading.Hide();
+                }
+                cts.Dispose();
+            }
 
             if (dt == null || dt.Rows.Count == 0)
             {
