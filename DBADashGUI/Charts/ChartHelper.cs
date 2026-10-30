@@ -1022,6 +1022,25 @@ namespace DBADashGUI.Charts
         }
 
         /// <summary>
+        /// LiveCharts draws on a SkiaSharp control inside its canvas that is anchored, not docked, starting at
+        /// 1000x1000.  If the canvas is resized while the chart is still being laid out - e.g. a chart created and
+        /// added to a report's panels - the anchor margins can leave that surface a different size from the canvas.
+        /// The chart then shows its empty default axes in place of the data until the window is next resized.
+        /// </summary>
+        private static void FitDrawingSurface(CartesianChart chart)
+        {
+            foreach (Control canvas in chart.Controls)
+            {
+                foreach (Control surface in canvas.Controls)
+                {
+                    if (surface.Bounds == canvas.ClientRectangle) continue;
+                    surface.Bounds = canvas.ClientRectangle;
+                    chart.CoreChart.Update(new ChartUpdateParams { IsAutomaticUpdate = false, Throttling = false });
+                }
+            }
+        }
+
+        /// <summary>
         /// Updates an existing CartesianChart with new data from a DataTable
         /// </summary>
         /// <param name="chart">The existing CartesianChart to update</param>
@@ -1049,6 +1068,8 @@ namespace DBADashGUI.Charts
                 return;
             }
             ConfigureChart(chart, dt, config, overlays);
+
+            FitDrawingSurface(chart);
 
             // Ensure custom tooltips are enabled
             chart.EnableCustomTooltips();
