@@ -43,6 +43,7 @@ namespace DBADashServiceConfig
 
         private CheckBox chkAccept;
         private CheckBox chkOverrideSafety;
+        private CheckBox chkIncludeAzure;
         private ComboBox cboSource;
         private TextBox txtFolder;
         private Button bttnBrowse;
@@ -68,6 +69,9 @@ namespace DBADashServiceConfig
         private CancellationTokenSource cancellation;
 
         private bool closeRequested;
+
+        /// <summary>Result columns are fitted to the first results only, so widths the user sets are kept.</summary>
+        private bool resultsSized;
 
         private sealed record SourceOption(CommunityToolScriptSource.SourceTypes Type, string Text)
         {
@@ -121,7 +125,6 @@ namespace DBADashServiceConfig
             var lblDisclaimer = new Label { Text = CommunityToolsManifest.Disclaimer, AutoSize = true, MaximumSize = new Size(1080, 0), Margin = new Padding(3, 3, 3, 6) };
             pnlDisclaimer.Controls.Add(lblDisclaimer);
             chkAccept = new CheckBox { Text = "I understand.  Deploy these third-party scripts to the selected instances.", AutoSize = true };
-            chkAccept.CheckedChanged += (_, _) => UpdateButtons();
             pnlDisclaimer.Controls.Add(chkAccept);
             pnlDisclaimer.SizeChanged += (_, _) => lblDisclaimer.MaximumSize = new Size(Math.Max(300, pnlDisclaimer.ClientSize.Width - 10), 0);
             tlp.Controls.Add(pnlDisclaimer, 0, 0);
@@ -158,6 +161,9 @@ namespace DBADashServiceConfig
             chkOverrideSafety = new CheckBox { Text = "Override safety checks", AutoSize = true, Margin = new Padding(3, 8, 3, 3) };
             new ToolTip().SetToolTip(chkOverrideSafety, "Replace Ola Hallengren's Maintenance Solution procedures even if they don't match a known release (they may have been customized)\nor the update removes a parameter an Agent job passes.  A rollback script is still saved.  Objects that aren't the tool are never replaced.");
             grpSafety.Controls.Add(chkOverrideSafety);
+            chkIncludeAzure = new CheckBox { Text = "Include Azure SQL DB", AutoSize = true, Margin = new Padding(3, 8, 3, 3) };
+            new ToolTip().SetToolTip(chkIncludeAzure, "Azure SQL Database connections are skipped by default.  Tools can't be deployed to master there, only to the connected user database.");
+            grpSafety.Controls.Add(chkIncludeAzure);
             pnlOptions.Controls.Add(grpSafety);
             var grpCredentials = OptionGroup();
             grpCredentials.Controls.Add(new Label { Text = "Connect as:", AutoSize = true, Margin = new Padding(3, 8, 3, 3) });
@@ -175,7 +181,16 @@ namespace DBADashServiceConfig
             split.Panel1.Controls.Add(BuildToolsPanel());
             split.Panel2.Controls.Add(BuildInstancesPanel());
             // The split container has no real size until the form is shown
-            Shown += (_, _) => split.SplitterDistance = split.Width * 3 / 5;
+            Shown += (_, _) =>
+            {
+                split.SplitterDistance = split.Width * 3 / 5;
+                // Size the columns to their content once, then leave them for the user to resize
+                foreach (var dgv in new[] { dgvTools, dgvInstances })
+                {
+                    dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+                    dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
+                }
+            };
             tlp.Controls.Add(split, 0, 2);
 
             // Row 3 - results
@@ -186,7 +201,7 @@ namespace DBADashServiceConfig
                 AllowUserToAddRows = false,
                 AllowUserToDeleteRows = false,
                 AutoGenerateColumns = false,
-                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None
             };
             foreach (var column in dtResults.Columns.Cast<DataColumn>().Where(c => c.ColumnName != ToolOrderColumn))
             {
@@ -253,7 +268,7 @@ namespace DBADashServiceConfig
                 Dock = DockStyle.Fill,
                 AllowUserToAddRows = false,
                 AllowUserToDeleteRows = false,
-                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells,
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None,
                 RowHeadersVisible = false
             };
             dgvTools.Columns.Add(new DataGridViewCheckBoxColumn { HeaderText = "", Name = "Selected", Width = 30, AutoSizeMode = DataGridViewAutoSizeColumnMode.None });
@@ -297,7 +312,7 @@ namespace DBADashServiceConfig
                 Dock = DockStyle.Fill,
                 AllowUserToAddRows = false,
                 AllowUserToDeleteRows = false,
-                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells,
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None,
                 RowHeadersVisible = false
             };
             dgvInstances.Columns.Add(new DataGridViewCheckBoxColumn { HeaderText = "", Name = "Selected", Width = 30, AutoSizeMode = DataGridViewAutoSizeColumnMode.None });
@@ -399,13 +414,14 @@ namespace DBADashServiceConfig
             var hasSelection = dgvTools.Rows.Cast<DataGridViewRow>().Any(r => r.Cells["Selected"].Value is true)
                                && dgvInstances.Rows.Cast<DataGridViewRow>().Any(r => r.Cells["Selected"].Value is true);
             bttnCheck.Enabled = hasSelection && !running;
-            bttnDeploy.Enabled = hasSelection && !running && chkAccept.Checked && (!isFolder || !string.IsNullOrWhiteSpace(txtFolder.Text));
+            bttnDeploy.Enabled = hasSelection && !running && (!isFolder || !string.IsNullOrWhiteSpace(txtFolder.Text));
             bttnCancel.Visible = running;
             bttnAllow.Enabled = !running && Config != null;
             bttnPermissions.Enabled = !running && Config != null;
             cboSource.Enabled = !running;
             txtDatabase.Enabled = !running;
             chkOverrideSafety.Enabled = !running;
+            chkIncludeAzure.Enabled = !running;
             lnkCredentials.Enabled = !running;
             lnkResetCredentials.Enabled = !running;
             selectionLinks.ForEach(l => l.Enabled = !running);
@@ -475,6 +491,12 @@ namespace DBADashServiceConfig
 
         private async void Deploy_Click(object sender, EventArgs e)
         {
+            if (!chkAccept.Checked)
+            {
+                MessageBox.Show("These are third-party scripts.  Read the notice at the top of this window and tick \"I understand\" to deploy them.", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                chkAccept.Focus();
+                return;
+            }
             var tools = SelectedTools;
             var instances = SelectedInstances;
             var message = $"Deploy {tools.Count} community tool{(tools.Count == 1 ? "" : "s")} to {instances.Count} instance{(instances.Count == 1 ? "" : "s")}?";
@@ -506,7 +528,7 @@ namespace DBADashServiceConfig
             var rollbackScripts = new List<string>();
             var completed = await RunAsync("Deploying", async (_, _, token) =>
             {
-                var deployer = new CommunityToolDeployer(source) { Database = Database, OverrideSafetyChecks = chkOverrideSafety.Checked };
+                var deployer = new CommunityToolDeployer(source) { Database = Database, OverrideSafetyChecks = chkOverrideSafety.Checked, IncludeAzureSqlDb = chkIncludeAzure.Checked };
                 // Deploying can add tools to the selection (required tools, and the rest of a set that's updated together)
                 var resultTools = new List<CommunityTool>(tools);
                 await ForEachInstanceAsync(instances, async src =>
@@ -574,7 +596,11 @@ namespace DBADashServiceConfig
                 cancellation.Dispose();
                 cancellation = null;
                 UpdateButtons();
-                dgvResults.AutoResizeColumnsWithMaxColumnWidth(DataGridViewAutoSizeColumnsMode.DisplayedCells, 0.4f);
+                if (!resultsSized && dtResults.Rows.Count > 0)
+                {
+                    dgvResults.AutoResizeColumnsWithMaxColumnWidth(DataGridViewAutoSizeColumnsMode.DisplayedCells, 0.4f);
+                    resultsSized = true;
+                }
                 if (closeRequested)
                 {
                     BeginInvoke(Close);

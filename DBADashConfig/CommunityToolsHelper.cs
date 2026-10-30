@@ -81,7 +81,7 @@ namespace DBADashConfig
             {
                 Log.Warning("Safety checks are overridden: customized procedures and procedures whose update would break Agent jobs will be replaced");
             }
-            var deployer = new CommunityToolDeployer(source) { Database = o.Database, OverrideSafetyChecks = o.OverrideSafetyChecks, RollbackFolder = o.RollbackFolder };
+            var deployer = new CommunityToolDeployer(source) { Database = o.Database, OverrideSafetyChecks = o.OverrideSafetyChecks, IncludeAzureSqlDb = o.IncludeAzureSqlDb, RollbackFolder = o.RollbackFolder };
             var results = await RunAsync(connections, async cn => await deployer.DeployAsync(cn.ConnectionString, tools));
 
             var rows = new List<string[]>();
@@ -227,10 +227,10 @@ namespace DBADashConfig
             var tools = manifest.Tools.Where(t => familyNames.Contains(t.Family.Name)).ToList();
 
             // The old pins go on first so their parameters can be compared with the new release's.
-            var oldDeployed = await new CommunityToolDeployer(new PinnedGitHubScriptSource()).DeployAsync(connectionString, oldTools);
+            var oldDeployed = await new CommunityToolDeployer(new PinnedGitHubScriptSource()) { IncludeAzureSqlDb = true }.DeployAsync(connectionString, oldTools);
             var oldParameters = oldDeployed.Error == null ? await GetParametersAsync(connectionString, oldDeployed.Database, oldTools) : null;
 
-            var deployed = await new CommunityToolDeployer(new PinnedGitHubScriptSource()).DeployAsync(connectionString, tools);
+            var deployed = await new CommunityToolDeployer(new PinnedGitHubScriptSource()) { IncludeAzureSqlDb = true }.DeployAsync(connectionString, tools);
             if (deployed.Error != null)
             {
                 Log.Error("Test deployment failed: {Error}", deployed.Error);

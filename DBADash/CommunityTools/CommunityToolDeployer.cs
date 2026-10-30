@@ -78,6 +78,12 @@ namespace DBADash.CommunityTools
         /// </summary>
         public bool OverrideSafetyChecks { get; init; }
 
+        /// <summary>
+        /// Deploy to Azure SQL Database.  Off by default: the tools can't go in master there, and user databases are often
+        /// owned by application teams, so every tool is skipped unless this is set.
+        /// </summary>
+        public bool IncludeAzureSqlDb { get; init; }
+
         /// <summary>Where rollback scripts are saved.  Null for <see cref="CommunityToolRollbackScript.DefaultFolder"/>.</summary>
         public string RollbackFolder { get; init; }
 
@@ -139,6 +145,15 @@ namespace DBADash.CommunityTools
             try
             {
                 info = await ConnectionInfo.GetConnectionInfoAsync(connectionString);
+                if (info.IsAzureDB && !IncludeAzureSqlDb)
+                {
+                    return new CommunityToolInstanceDeployResult
+                    {
+                        Instance = info.ServerName is { Length: > 0 } azureServer ? azureServer : instance,
+                        Database = info.DatabaseName,
+                        Tools = tools.Select(t => new CommunityToolDeployResult { Tool = t, Status = CommunityToolDeployStatus.Skipped, Message = "Azure SQL Database is skipped unless Azure SQL DB deployment is enabled", Database = info.DatabaseName }).ToList()
+                    };
+                }
                 database = GetTargetDatabase(info, Database);
             }
             catch (Exception ex)
