@@ -67,6 +67,58 @@ namespace DBADashAI.Models
         /// <summary>The conversation this turn belongs to.  Minted here on the first turn and echoed back.</summary>
         public Guid? ConversationId { get; set; }
 
+        /// <summary>
+        /// Let the model look up more detail from the repository before it answers - see
+        /// PerformanceInvestigation.  Needs the instance id and the window in UTC, and a repository
+        /// connection on the service; without any of them the analysis is answered from the payload alone.
+        /// </summary>
+        public bool AllowInvestigation { get; set; }
+
+        /// <summary>The window in UTC.  The model can only look inside it.</summary>
+        public DateTime? FromUtc { get; set; }
+
+        public DateTime? ToUtc { get; set; }
+
+        /// <summary>
+        /// The reader's offset from UTC over the window.  The payload's times are the reader's, so the
+        /// times the model asks for are too, and this turns them back into UTC.
+        /// </summary>
+        public int UtcOffsetMinutes { get; set; }
+
+        /// <summary>
+        /// Clock changes inside the window, oldest first.  <see cref="UtcOffsetMinutes"/> is the offset at the
+        /// end, so without these a window across a change is read an hour out before it.
+        /// </summary>
+        public List<AiUtcOffsetChange> UtcOffsetChanges { get; set; } = new();
+
+        /// <summary>The reader's offset at a UTC time.</summary>
+        public int OffsetAt(DateTime utc)
+        {
+            var offset = UtcOffsetChanges.Count > 0 ? UtcOffsetChanges[0].PreviousOffsetMinutes : UtcOffsetMinutes;
+            foreach (var change in UtcOffsetChanges)
+            {
+                if (utc >= change.FromUtc) offset = change.OffsetMinutes;
+            }
+
+            return offset;
+        }
+
+        /// <summary>
+        /// A reader's time in UTC.  Each offset in the window is tried and the first that lands where it
+        /// applies is used; a time the clocks skipped falls back to the offset at the end.
+        /// </summary>
+        public DateTime LocalToUtc(DateTime local)
+        {
+            var offsets = UtcOffsetChanges.Select(c => c.PreviousOffsetMinutes).Append(UtcOffsetMinutes).Distinct();
+            foreach (var offset in offsets)
+            {
+                var utc = local.AddMinutes(-offset);
+                if (OffsetAt(utc) == offset) return DateTime.SpecifyKind(utc, DateTimeKind.Utc);
+            }
+
+            return DateTime.SpecifyKind(local.AddMinutes(-UtcOffsetMinutes), DateTimeKind.Utc);
+        }
+
         public bool IsLatchesAndSpinlocks => string.Equals(Focus, LatchesAndSpinlocksFocus, StringComparison.OrdinalIgnoreCase);
 
         public string? Validate()
@@ -117,8 +169,30 @@ namespace DBADashAI.Models
                 return $"The sections exceed {MaxSectionsLength:N0} characters.  Leave out a section or a time series.";
             }
 
+            if (FromUtc.HasValue != ToUtc.HasValue || FromUtc >= ToUtc || Math.Abs(UtcOffsetMinutes) > 14 * 60)
+            {
+                return "The window in UTC is a start before an end, and the offset from UTC is at most 14 hours.";
+            }
+
+            if (UtcOffsetChanges is null || UtcOffsetChanges.Count > 10
+                || UtcOffsetChanges.Any(c => c is null || Math.Abs(c.OffsetMinutes) > 14 * 60 || Math.Abs(c.PreviousOffsetMinutes) > 14 * 60))
+            {
+                return "Clock changes in the window are a short list of offsets of at most 14 hours.";
+            }
+
+            UtcOffsetChanges.Sort((a, b) => a.FromUtc.CompareTo(b.FromUtc));
+
             return AiConversation.Validate(History, Question);
         }
+    }
+
+    public class AiUtcOffsetChange
+    {
+        public DateTime FromUtc { get; set; }
+
+        public int PreviousOffsetMinutes { get; set; }
+
+        public int OffsetMinutes { get; set; }
     }
 
     public class AiPerformanceAnalysisSection

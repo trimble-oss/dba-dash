@@ -24,7 +24,17 @@ namespace DBADashGUI.AI
         {
             /// <summary>The opening turn, whose question was the artifact rather than anything typed.</summary>
             public bool IsOpening => string.IsNullOrWhiteSpace(Question);
+
+            /// <summary>
+            /// What the model looked up between the question and the answer, where it could - only the
+            /// performance analysis offers lookups.  Replayed in the history ahead of the answer, so a
+            /// follow-up is asked of a model that still has what it found.
+            /// </summary>
+            public IReadOnlyList<Investigation> Investigations { get; init; } = Array.Empty<Investigation>();
         }
+
+        /// <summary>One lookup: a line for the reader, the model's turn that asked for it, and the turn that answered it.</summary>
+        internal sealed record Investigation(string Summary, string Request, string Result);
 
         private readonly List<Turn> _turns = new();
 
@@ -83,6 +93,13 @@ namespace DBADashGUI.AI
                 // to add a third turn to an exchange sitting on their screen.
                 if (i > 0 && !turn.IsOpening) history.Add(new WireTurn("user", turn.Question!));
 
+                // Each lookup is the model asking and the service answering, so the turns still alternate.
+                foreach (var investigation in turn.Investigations)
+                {
+                    history.Add(new WireTurn("assistant", investigation.Request));
+                    history.Add(new WireTurn("user", investigation.Result));
+                }
+
                 history.Add(new WireTurn("assistant", turn.Answer));
             }
 
@@ -118,6 +135,17 @@ namespace DBADashGUI.AI
                     markdown.AppendLine();
                 }
 
+                if (turn.Investigations.Count > 0)
+                {
+                    markdown.AppendLine("*Looked up before answering:*");
+                    markdown.AppendLine();
+                    foreach (var investigation in turn.Investigations)
+                    {
+                        markdown.AppendLine("- *" + investigation.Summary.Replace("*", "\\*") + "*");
+                    }
+                    markdown.AppendLine();
+                }
+
                 markdown.AppendLine(turn.Answer);
             }
 
@@ -141,7 +169,12 @@ namespace DBADashGUI.AI
                     ? string.Empty
                     : "Q: " + Lines(turn.Question!) + Environment.NewLine + Environment.NewLine;
 
-                return question + Lines(turn.Answer);
+                var lookups = turn.Investigations.Count == 0
+                    ? string.Empty
+                    : "Looked up before answering:" + Environment.NewLine +
+                      string.Concat(turn.Investigations.Select(i => "- " + i.Summary + Environment.NewLine)) + Environment.NewLine;
+
+                return question + lookups + Lines(turn.Answer);
             }
 
             // Models answer with bare newlines, and a WinForms text box wants the pair.

@@ -19,5 +19,24 @@ namespace DBADashAI.Models
         public int TurnNumber { get; set; }
 
         public long TotalExecutionMs { get; set; }
+
+        /// <summary>
+        /// What the model looked up before answering, in order.  The caller puts each one's request and
+        /// result into the history ahead of the answer, so a follow-up is asked of a model that still
+        /// knows what it found.
+        /// </summary>
+        public List<AiPerformanceInvestigation> Investigations { get; set; } = new();
+    }
+
+    /// <summary>One lookup the model asked for: what it said, what it was given back, and a line for the reader.</summary>
+    public class AiPerformanceInvestigation
+    {
+        public string Summary { get; set; } = string.Empty;
+
+        /// <summary>The model's turn that asked for it.</summary>
+        public string Request { get; set; } = string.Empty;
+
+        /// <summary>The turn that answered it.</summary>
+        public string Result { get; set; } = string.Empty;
     }
 }

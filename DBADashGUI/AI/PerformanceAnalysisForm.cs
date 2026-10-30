@@ -41,6 +41,21 @@ namespace DBADashGUI.AI
         private readonly CheckBox _baseline = new() { Text = "Compare with the same window a week earlier", AutoSize = true, Checked = true };
         private readonly Label _windowNote = new() { AutoSize = true, MaximumSize = new Size(380, 0) };
 
+        /// <summary>
+        /// Lets the model ask for more detail before it answers - blocking, waiting queries, long running
+        /// queries, a deadlock signature - which goes to it on top of the request previewed here.  What it
+        /// looked up is listed with the answer.
+        /// </summary>
+        private readonly CheckBox _investigate = new()
+        {
+            Text = "Let the AI look up more detail",
+            AutoSize = true,
+            Checked = true
+        };
+
+        /// <summary>Whether the conversation on screen was started with lookups allowed - its follow-ups keep the same offer.</summary>
+        private bool _conversationInvestigate;
+
         private readonly DataGridView _sections = new()
         {
             Dock = DockStyle.Fill,
@@ -138,6 +153,7 @@ namespace DBADashGUI.AI
             };
 
             Text = $"AI Performance Analysis - {instance}";
+            Icon = Icon.FromHandle(Properties.Resources.DeadlockAnalyse_16x.GetHicon());
             StartPosition = FormStartPosition.CenterParent;
             ClientSize = new Size(1200, 760);
             MinimumSize = new Size(800, 500);
@@ -196,8 +212,15 @@ namespace DBADashGUI.AI
         internal static void Open(IWin32Window owner, int instanceId, string instance, PerformanceAnalysisFocus focus = PerformanceAnalysisFocus.General,
             (DateTime FromUtc, DateTime ToUtc)? windowUtc = null)
         {
-            var form = new PerformanceAnalysisForm(instanceId, instance, focus, windowUtc);
-            form.Show(owner);
+            // Not owned: an owned window always sits in front of the main window, which leaves the reader
+            // working around it while an analysis runs.  A window of its own can go behind and has a taskbar entry.
+            var form = new PerformanceAnalysisForm(instanceId, instance, focus, windowUtc) { ShowInTaskbar = true };
+            if (owner is Control { TopLevelControl: Form parent })
+            {
+                form.StartPosition = FormStartPosition.Manual;
+                form.Location = new Point(parent.Left + Math.Max(0, (parent.Width - form.Width) / 2), parent.Top + Math.Max(0, (parent.Height - form.Height) / 2));
+            }
+            form.Show();
         }
 
         private static DateTimePicker NewPicker() => new()
@@ -223,11 +246,16 @@ namespace DBADashGUI.AI
             window.Controls.Add(toRow, 1, 2);
             window.Controls.Add(_baseline, 0, 3);
             window.SetColumnSpan(_baseline, 2);
-            window.Controls.Add(_windowNote, 0, 4);
+            window.Controls.Add(_investigate, 0, 4);
+            window.SetColumnSpan(_investigate, 2);
+            window.Controls.Add(_windowNote, 0, 5);
             window.SetColumnSpan(_windowNote, 2);
+            new ToolTip().SetToolTip(_investigate,
+                "Blocking, waiting queries, long running queries and deadlocks: the model can ask for up to a few lookups from the repository for this instance and window before it answers.  " +
+                "Their results go to the model on top of the request shown here, and each one is listed with the answer.");
 
             _sections.Columns.Add(new DataGridViewCheckBoxColumn { HeaderText = "Send", FillWeight = 14 });
-            _sections.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Section", ReadOnly = true, FillWeight = 46 });
+            _sections.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Section", ReadOnly = true, AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells });
             _sections.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Top N", FillWeight = 16, ToolTipText = $"Rows named individually (1-{PerformanceAnalysisOptions.MaxTopN}); the rest are summarised." });
             _sections.Columns.Add(new DataGridViewCheckBoxColumn { HeaderText = "Over time", FillWeight = 20, ToolTipText = "Send a series over the window as well as the summary.  Most of a section's size." });
             _sections.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Size", ReadOnly = true, FillWeight = 22 });
@@ -448,7 +476,7 @@ namespace DBADashGUI.AI
                     var isEmpty = empty.Contains(section) || _data.Errors.ContainsKey(section);
                     row.DefaultCellStyle.ForeColor = isEmpty ? DashColors.NotApplicable : Color.Empty;
 
-                    if (isEmpty && section is PerformanceSection.Latches or PerformanceSection.Spinlocks)
+                    if (isEmpty && section is PerformanceSection.Latches or PerformanceSection.Spinlocks or PerformanceSection.RunningQueries or PerformanceSection.Deadlocks)
                     {
                         _options[section].Include = false;
                         row.Cells[IncludeColumn].Value = false;
@@ -572,6 +600,7 @@ namespace DBADashGUI.AI
             if (question is null && _payload is null) return;
 
             var payload = continuing is null ? _payload : _conversationPayload;
+            var investigate = continuing is null ? _investigate.Checked : _conversationInvestigate;
 
             _inFlight = new CancellationTokenSource();
             _submit.Enabled = false;
@@ -582,7 +611,7 @@ namespace DBADashGUI.AI
 
             try
             {
-                var result = await PerformanceAnalysisClient.AnalyseAsync(payload, _service, _inFlight.Token, continuing, question, _model.SelectedModel);
+                var result = await PerformanceAnalysisClient.AnalyseAsync(payload, _service, _inFlight.Token, continuing, question, _model.SelectedModel, investigate);
                 if (IsDisposed) return;
 
                 if (!result.Success)
@@ -597,10 +626,14 @@ namespace DBADashGUI.AI
                 }
 
                 var conversation = continuing ?? AiConversation.Restore(result.ConversationId ?? Guid.NewGuid(), Array.Empty<AiConversation.Turn>());
-                conversation.Add(new AiConversation.Turn(question, result.Analysis ?? string.Empty, result.Model, result.GeneratedUtc ?? DateTime.UtcNow));
+                conversation.Add(new AiConversation.Turn(question, result.Analysis ?? string.Empty, result.Model, result.GeneratedUtc ?? DateTime.UtcNow)
+                {
+                    Investigations = result.Investigations
+                });
 
                 _current = conversation;
                 _conversationPayload = payload;
+                _conversationInvestigate = investigate;
 
                 if (!_tabs.TabPages.Contains(_analysisTab)) _tabs.TabPages.Add(_analysisTab);
                 _tabs.SelectedTab = _analysisTab;

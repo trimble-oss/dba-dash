@@ -257,6 +257,7 @@ builder.Services.AddScoped<AiDeadlockPromptBuilder>();
 builder.Services.AddScoped<DeadlockAnalysisStore>();
 builder.Services.AddScoped<AiPlanPromptBuilder>();
 builder.Services.AddScoped<AiPerformancePromptBuilder>();
+builder.Services.AddScoped<PerformanceInvestigation>();
 builder.Services.AddScoped<PlanAnalysisStore>();
 builder.Services.AddScoped<AiRunbookLinkService>();
 builder.Services.AddScoped<AiRiskForecastService>();
@@ -1015,8 +1016,10 @@ ApplyAuthAndRateLimit(app.MapPost("/api/ai/analyse-performance", async (
     AiPerformanceAnalysisRequest request,
     AiChatClient aiChat,
     AiPerformancePromptBuilder promptBuilder,
+    PerformanceInvestigation investigation,
     AiRequestTelemetryService telemetry,
     IConfiguration config,
+    ILogger<PerformanceInvestigation> logger,
     CancellationToken cancellationToken) =>
 {
     var validationError = request.Validate();
@@ -1044,28 +1047,100 @@ ApplyAuthAndRateLimit(app.MapPost("/api/ai/analyse-performance", async (
         // Rebuilt from the payload on every turn, so a follow-up cannot quietly change the figures the
         // first answer was about.
         var prompt = promptBuilder.Build(request);
-        var messages = AiConversation.Build(prompt, request.History, request.Question);
-        var result = await aiChat.ChatAsync(messages, cancellationToken, request.ModelOverride);
 
-        if (!result.Success)
+        // The lookups the model may make before it answers - see PerformanceInvestigation.  Offered on
+        // follow-ups too, and the offer is part of the rebuilt opening prompt, so it reads the same on
+        // every turn of a conversation that was started with it.
+        var canInvestigate = investigation.CanInvestigate(request);
+        var maxLookups = Math.Clamp(config.GetValue<int?>("AI:PerformanceInvestigation:MaxLookups") ?? PerformanceInvestigation.DefaultMaxLookups, 0, 6);
+        if (canInvestigate && maxLookups > 0) prompt += PerformanceInvestigation.Instructions(request, maxLookups);
+
+        var messages = AiConversation.Build(prompt, request.History, request.Question);
+        var investigations = new List<AiPerformanceInvestigation>();
+        var lookupsLeft = canInvestigate ? maxLookups : 0;
+        // No lookup starts after this, so the request ends within the deadline plus two model calls (the one
+        // in flight and the answer) - inside the GUI's wait, which is set from the same figures.
+        var lookupDeadline = TimeSpan.FromSeconds(Math.Clamp(config.GetValue<int?>("AI:PerformanceInvestigation:DeadlineSeconds") ?? PerformanceInvestigation.DefaultDeadlineSeconds, 30, 3600));
+        var toldToAnswer = false;
+        AiChatResult result;
+
+        while (true)
         {
-            return AnalysisFailure(telemetry, requestId, "Performance analysis failed", result,
-                result.Failure == AiChatFailure.TooLarge
-                    ? "Send it again with fewer sections or without the time series, or configure a model with a larger context window."
-                    : null);
+            result = await aiChat.ChatAsync(messages, cancellationToken, request.ModelOverride);
+            if (!result.Success)
+            {
+                return AnalysisFailure(telemetry, requestId, "Performance analysis failed", result,
+                    result.Failure == AiChatFailure.TooLarge
+                        ? "Send it again with fewer sections or without the time series, or configure a model with a larger context window."
+                        : null);
+            }
+
+            var lookup = canInvestigate ? PerformanceInvestigation.FindRequest(result.Text) : null;
+            if (lookup is null) break;
+            if (lookupsLeft == 0 || totalSw.Elapsed > lookupDeadline)
+            {
+                // Asked once more for the answer itself, rather than returning a reply that is only a request.
+                if (toldToAnswer) break;
+                toldToAnswer = true;
+                messages.Add(new AiConversationTurn { Role = AiConversationTurn.Assistant, Content = result.Text });
+                messages.Add(new AiConversationTurn { Role = AiConversationTurn.User, Content = PerformanceInvestigation.NoMoreLookups });
+                continue;
+            }
+            lookupsLeft--;
+
+            string summary, lookupResult;
+            try
+            {
+                (summary, lookupResult) = await investigation.RunAsync(lookup, request, cancellationToken);
+                if (summary.StartsWith("A lookup the model asked for could not be read", StringComparison.Ordinal))
+                {
+                    logger.LogInformation("Performance investigation request could not be read. RequestId={RequestId}, Request={Request}",
+                        requestId, LogSanitizer.TruncateAndSanitizeForLog(lookup, 500));
+                }
+            }
+            catch (Microsoft.Data.SqlClient.SqlException ex) when (ex.Number == 2812)
+            {
+                // The procedures arrive with the repository upgrade.  None of the others will be there either,
+                // so the model is told it has no more lookups rather than trying each in turn.
+                logger.LogWarning("Performance investigation is unavailable: {Message} Upgrade the repository database. RequestId={RequestId}", ex.Message, requestId);
+                summary = "Lookups are not available - the repository database needs upgrading to this version of DBA Dash";
+                lookupResult = "Lookups are not available on this repository.";
+                lookupsLeft = 0;
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                // A slow query or a lost connection: the analysis goes on without it.
+                var errorId = Guid.NewGuid().ToString("N")[..8];
+                logger.LogWarning(ex, "Performance investigation lookup failed. ErrorId={ErrorId}, RequestId={RequestId}", errorId, requestId);
+                summary = $"A lookup failed (ErrorId={errorId})";
+                lookupResult = "That lookup failed in the repository.  Answer from what you have.";
+            }
+
+            var turn = PerformanceInvestigation.ResultTurn(lookupResult, lookupsLeft);
+            investigations.Add(new AiPerformanceInvestigation { Summary = summary, Request = result.Text, Result = turn });
+            messages.Add(new AiConversationTurn { Role = AiConversationTurn.Assistant, Content = result.Text });
+            messages.Add(new AiConversationTurn { Role = AiConversationTurn.User, Content = turn });
+        }
+
+        // Told there were no more lookups, a model can still ask for one.  What it said around the request is the answer.
+        var analysis = canInvestigate ? PerformanceInvestigation.RemoveRequests(result.Text) : result.Text;
+        if (string.IsNullOrWhiteSpace(analysis))
+        {
+            analysis = "The model asked for more detail than it was allowed and gave no answer.  Ask a follow-up for its reading of what it found.";
         }
 
         totalSw.Stop();
-        telemetry.Complete(requestId, "performance-analysis", 1, 0, totalSw.ElapsedMilliseconds, 0, "n/a");
+        telemetry.Complete(requestId, "performance-analysis", 1 + investigations.Count, 0, totalSw.ElapsedMilliseconds, 0, "n/a");
 
         return Results.Ok(new AiPerformanceAnalysisResponse
         {
             RequestId = requestId,
-            Analysis = result.Text,
+            Analysis = analysis,
             Model = model,
             ConversationId = conversationId,
             TurnNumber = turnNumber,
-            TotalExecutionMs = totalSw.ElapsedMilliseconds
+            TotalExecutionMs = totalSw.ElapsedMilliseconds,
+            Investigations = investigations
         });
     }
     catch (OperationCanceledException)

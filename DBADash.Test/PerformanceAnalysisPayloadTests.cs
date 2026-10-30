@@ -367,6 +367,112 @@ namespace DBADash.Test
             }
         }
 
+        private static DataTable RunningQueries(bool tempdbDetail, params (int Running, int Blocked, long BlockedWaitMs, int AllocWaiting, int MetaWaiting)[] snapshots)
+        {
+            var table = new DataTable();
+            table.Columns.Add("SnapshotDateUTC", typeof(DateTime));
+            table.Columns.Add("RunningQueries", typeof(short));
+            table.Columns.Add("BlockedQueries", typeof(short));
+            table.Columns.Add("BlockedQueriesWaitMs", typeof(long));
+            table.Columns.Add("LongestRunningQueryMs", typeof(long));
+            table.Columns.Add("TempDBWaitCount", typeof(int));
+            table.Columns.Add("TempDBAllocationWaitCount", typeof(int));
+            table.Columns.Add("TempDBAllocationWaitTimeMs", typeof(long));
+            table.Columns.Add("TempDBMetadataWaitCount", typeof(int));
+            table.Columns.Add("TempDBMetadataWaitTimeMs", typeof(long));
+            for (var i = 0; i < snapshots.Length; i++)
+            {
+                var s = snapshots[i];
+                table.Rows.Add(To.AddMinutes(-snapshots.Length + i), (short)s.Running, (short)s.Blocked, s.BlockedWaitMs, 60_000L, s.AllocWaiting + s.MetaWaiting,
+                    tempdbDetail ? s.AllocWaiting : DBNull.Value, tempdbDetail ? s.AllocWaiting * 50L : DBNull.Value,
+                    tempdbDetail ? s.MetaWaiting : DBNull.Value, tempdbDetail ? s.MetaWaiting * 20L : DBNull.Value);
+            }
+
+            return table;
+        }
+
+        [TestMethod]
+        public void RunningQueries_SummarisesBlockingAndTellsTempdbAllocationFromMetadata()
+        {
+            var data = Data();
+            data.RunningQueries = RunningQueries(true, (10, 0, 0, 0, 0), (20, 4, 30_000, 6, 0), (30, 2, 5_000, 0, 3), (40, 0, 0, 0, 0));
+
+            var running = Section(Build(data), PerformanceSection.RunningQueries);
+
+            // 4 snapshots: avg 25 running, max 40, blocked in half, at most 4 blocked, 30 sec of blocked wait, longest query 60 sec.
+            StringAssert.Contains(running, "window | 4 | 25 | 40 | 50 | 4 | 30 | 60 |");
+            // Allocation in 1 of 4 snapshots, 6 waiting, 300ms; metadata in 1 of 4, 3 waiting, 60ms.
+            StringAssert.Contains(running, "window | 25 | 6 | 300 | 25 | 3 | 60 |");
+            StringAssert.Contains(running, "baseline | no data");
+            StringAssert.Contains(running, "Over time");
+        }
+
+        [TestMethod]
+        public void RunningQueries_OlderAgent_SaysTempdbDetailIsNotCaptured()
+        {
+            var data = Data();
+            data.RunningQueries = RunningQueries(false, (10, 0, 0, 2, 0));
+
+            StringAssert.Contains(Section(Build(data), PerformanceSection.RunningQueries), "not captured");
+        }
+
+        private static DataSet DeadlockCharts(params (DateTime Time, int Deadlocks)[] points)
+        {
+            var set = new DataSet();
+            var overTime = set.Tables.Add();
+            overTime.Columns.Add("EventTime", typeof(DateTime));
+            overTime.Columns.Add("Deadlocks", typeof(int));
+            overTime.Columns.Add("Victims", typeof(int));
+            foreach (var (time, deadlocks) in points)
+            {
+                overTime.Rows.Add(time, deadlocks, deadlocks);
+            }
+
+            for (var i = 1; i <= 6; i++)
+            {
+                var group = set.Tables.Add();
+                group.Columns.Add("GroupValue", typeof(string));
+                group.Columns.Add("Deadlocks", typeof(int));
+                if (points.Length > 0) group.Rows.Add(i == 2 ? "OrdersApp" : i == 6 ? "Sales.dbo.usp_UpdateOrder" : "Sales", points.Sum(p => p.Deadlocks));
+            }
+
+            return set;
+        }
+
+        [TestMethod]
+        public void Deadlocks_GroupBySignatureAndCompareWithTheBaseline()
+        {
+            var data = Data();
+            data.Deadlocks = DeadlockCharts((To.AddHours(-2), 30), (To.AddHours(-1), 10));
+            data.DeadlocksBaseline = DeadlockCharts((To.AddDays(-7), 4));
+            data.DeadlockSignatures = new DataTable();
+            data.DeadlockSignatures.Columns.Add("Signature", typeof(string));
+            data.DeadlockSignatures.Columns.Add("Occurrences", typeof(int));
+            data.DeadlockSignatures.Columns.Add("ObjectNames", typeof(string));
+            data.DeadlockSignatures.Rows.Add("0x0102030405060708", 40, "Sales.dbo.Orders");
+
+            var deadlocks = Section(Build(data), PerformanceSection.Deadlocks);
+
+            StringAssert.Contains(deadlocks, "Window: 40 deadlocks, 40 victims.  Baseline: 4 deadlocks (10x).");
+            StringAssert.Contains(deadlocks, "0x0102030405060708 | 40 |");
+            StringAssert.Contains(deadlocks, "Sales.dbo.Orders");
+            StringAssert.Contains(deadlocks, "Deadlocks by application: OrdersApp 40");
+            StringAssert.Contains(deadlocks, "Deadlocks by procedure: Sales.dbo.usp_UpdateOrder 40");
+        }
+
+        [TestMethod]
+        public void Deadlocks_NotCollected_SaysSo()
+        {
+            var message = new DataTable();
+            message.Columns.Add("Message", typeof(string));
+            message.Rows.Add("Enable the Deadlocks collection in the service config tool to see data here.");
+            var data = Data();
+            data.Deadlocks = new DataSet();
+            data.Deadlocks.Tables.Add(message);
+
+            StringAssert.Contains(Section(Build(data), PerformanceSection.Deadlocks), "Not collected");
+        }
+
         [TestMethod]
         public void Numbers_KeepTheDigitsWorthReading()
         {
@@ -375,6 +481,22 @@ namespace DBADash.Test
             Assert.AreEqual("0.012", PerformanceAnalysisTable.Num(0.0123));
             Assert.AreEqual("0", PerformanceAnalysisTable.Num(0));
             Assert.AreEqual(string.Empty, PerformanceAnalysisTable.Num(null));
+        }
+
+        [TestMethod]
+        public void OffsetChanges_FindsAClockChangeToTheMinute()
+        {
+            // BST until 01:00 UTC on 2026-10-25, GMT after.
+            var change = new DateTime(2026, 10, 25, 1, 0, 0, DateTimeKind.Utc);
+            DateTime ToLocal(DateTime utc) => utc < change ? utc.AddHours(1) : utc;
+
+            var changes = PerformanceAnalysisPayload.OffsetChanges(ToLocal, change.AddMinutes(-150), change.AddHours(2));
+            Assert.AreEqual(1, changes.Count);
+            Assert.AreEqual(change, changes[0].FromUtc);
+            Assert.AreEqual(60, changes[0].PreviousOffsetMinutes);
+            Assert.AreEqual(0, changes[0].OffsetMinutes);
+
+            Assert.AreEqual(0, PerformanceAnalysisPayload.OffsetChanges(ToLocal, change, change.AddDays(7)).Count);
         }
     }
 }

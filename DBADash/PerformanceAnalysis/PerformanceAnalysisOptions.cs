@@ -17,7 +17,9 @@ namespace DBADash.PerformanceAnalysis
         Blocking,
         ObjectExecution,
         Latches,
-        Spinlocks
+        Spinlocks,
+        RunningQueries,
+        Deadlocks
     }
 
     /// <summary>
@@ -99,6 +101,8 @@ namespace DBADash.PerformanceAnalysis
                     new() { Section = PerformanceSection.Metrics, Include = general, TopN = 40, TimeSeries = null },
                     new() { Section = PerformanceSection.Memory, Include = general, TopN = 10, TimeSeries = null },
                     new() { Section = PerformanceSection.Blocking, Include = general, TopN = 5, TimeSeries = null },
+                    new() { Section = PerformanceSection.RunningQueries, Include = general, TopN = null, TimeSeries = general },
+                    new() { Section = PerformanceSection.Deadlocks, Include = general, TopN = 5, TimeSeries = general },
                     new() { Section = PerformanceSection.ObjectExecution, Include = general, TopN = 10, TimeSeries = null },
                     new() { Section = PerformanceSection.Latches, Include = true, TopN = general ? 5 : 20, TimeSeries = !general },
                     new() { Section = PerformanceSection.Spinlocks, Include = true, TopN = general ? 5 : 20, TimeSeries = !general }
@@ -125,6 +129,8 @@ namespace DBADash.PerformanceAnalysis
             PerformanceSection.ObjectExecution => "Object execution",
             PerformanceSection.Latches => "Latches",
             PerformanceSection.Spinlocks => "Spinlocks",
+            PerformanceSection.RunningQueries => "Running queries and tempdb",
+            PerformanceSection.Deadlocks => "Deadlocks",
             _ => section.ToString()
         };
     }
