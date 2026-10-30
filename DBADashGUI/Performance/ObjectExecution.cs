@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Linq;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace DBADashGUI.Performance
@@ -23,11 +24,16 @@ namespace DBADashGUI.Performance
             objectExecChart.Visible = !show;
         }
 
+        private readonly LoadingOverlay loading;
+
         public ObjectExecution()
         {
             InitializeComponent();
             this.Controls.Add(lblError);
             lblError.BringToFront();
+            loading = new LoadingOverlay(this);
+            // Stop a load still running on the server when the control goes away
+            Disposed += (_, _) => refreshCts?.Cancel();
         }
 
         private bool isLoading;
@@ -142,8 +148,14 @@ namespace DBADashGUI.Performance
             RefreshData(InstanceID, -1, -1);
         }
 
-        public void RefreshData()
+        private CancellationTokenSource refreshCts;
+
+        public async void RefreshData()
         {
+            // A newer refresh supersedes one still loading
+            refreshCts?.Cancel();
+            var cts = new CancellationTokenSource();
+            refreshCts = cts;
             try
             {
                 if (mins != DateRange.DurationMins)
@@ -166,7 +178,9 @@ namespace DBADashGUI.Performance
                 toolStrip1.Tag = databaseid > 0 ? "ALT" : null; // set tag to ALT to use the alternate menu renderer
                 toolStrip1.ApplyTheme(DBADashUser.SelectedTheme);
 
-                var dt = CommonData.ObjectExecutionStats(instanceID, databaseid, objectID, dateGrouping, Metric.Measure, DateRange.FromUTC, DateRange.ToUTC, default, TopRows, IncludeOther);
+                loading.Show();
+                var dt = await CommonData.ObjectExecutionStatsAsync(instanceID, databaseid, objectID, dateGrouping, Metric.Measure, DateRange.FromUTC, DateRange.ToUTC, default, TopRows, IncludeOther, cts.Token);
+                if (cts.IsCancellationRequested || IsDisposed) return;
 
                 if (dt == null || dt.Rows.Count == 0)
                 {
@@ -204,9 +218,22 @@ namespace DBADashGUI.Performance
 
                 ChartHelper.UpdateChart(objectExecChart, dt, config);
             }
+            catch (Exception) when (cts.IsCancellationRequested)
+            {
+                // Superseded by a newer refresh
+            }
             catch (Exception ex)
             {
                 ToggleError(true, "Error loading data: " + ex.Message);
+            }
+            finally
+            {
+                if (refreshCts == cts)
+                {
+                    refreshCts = null;
+                    loading.Hide();
+                }
+                cts.Dispose();
             }
         }
 

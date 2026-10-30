@@ -29,8 +29,9 @@ SET DATEFIRST 1 /* Start week on Monday */
 	the whole window either read every raw row of a long window or, for a window that didn't start on the hour,
 	left out the part hour - all of it, for a window that started after the last whole hour.
 
-	Each period is split into three half open ranges by dbo.RollupRanges.  Each range is a seek per instance on the
-	clustered key, as in dbo.QueryStats_Get, which has the measurements behind the shape.
+	Each period is split into three half open ranges by dbo.RollupRanges and read by dbo.ObjectExecutionStatsBetweenDates.
+	Each range is a seek on the clustered key - per instance as in dbo.QueryStats_Get, which has the measurements behind
+	the shape, or for a single instance as a seek that can be a parallel range scan.
 */
 DECLARE @HasDaysOfWeek BIT = CASE WHEN EXISTS(SELECT 1 FROM @DaysOfWeek) THEN 1 ELSE 0 END
 DECLARE @HasHours BIT = CASE WHEN EXISTS(SELECT 1 FROM @Hours) THEN 1 ELSE 0 END
@@ -45,6 +46,8 @@ WHERE (@InstanceID IS NULL OR I.InstanceID = @InstanceID)
 AND (@Instance IS NULL OR I.Instance = @Instance)
 AND (@InstanceGroupName IS NULL OR I.InstanceGroupName = @InstanceGroupName)
 AND (@HasInstanceIDs = 0 OR EXISTS(SELECT 1 FROM @InstanceIDs T WHERE T.ID = I.InstanceID));
+
+DECLARE @SingleInstanceID INT = CASE WHEN (SELECT COUNT(*) FROM #Scope) = 1 THEN (SELECT InstanceID FROM #Scope) END
 
 CREATE TABLE #Facts (
 	Period TINYINT NOT NULL, /* 0 = base, 1 = compare */
@@ -103,38 +106,15 @@ BEGIN
 			   SUM(F.total_physical_reads),
 			   SUM(F.execution_count),
 			   MAX(F.MaxExecutionsPerMin)
-		FROM (/* The part hour at the start of the window, from the raw rows */
-			  SELECT R.*
-			  FROM #Scope T
-			  CROSS APPLY (SELECT OES.InstanceID, OES.ObjectID, OES.SnapshotDate, OES.PeriodTime, OES.total_worker_time,
-								  OES.total_elapsed_time, OES.total_logical_reads, OES.total_logical_writes,
-								  OES.total_physical_reads, OES.execution_count, OES.MaxExecutionsPerMin
-						   FROM dbo.ObjectExecutionStats OES WITH (FORCESEEK)
-						   WHERE OES.InstanceID = T.InstanceID
-						   AND OES.SnapshotDate >= @From
-						   AND OES.SnapshotDate < @HourFrom) R
+		FROM (/* A single instance is read directly, so each seek can be a parallel range scan */
+			  SELECT F.*
+			  FROM dbo.ObjectExecutionStatsBetweenDates(@SingleInstanceID, @From, @HourFrom, @HourTo, @To) F
+			  WHERE @SingleInstanceID IS NOT NULL
 			  UNION ALL
-			  /* The whole hours, from the rollup */
-			  SELECT H.*
+			  SELECT F.*
 			  FROM #Scope T
-			  CROSS APPLY (SELECT OES.InstanceID, OES.ObjectID, OES.SnapshotDate, OES.PeriodTime, OES.total_worker_time,
-								  OES.total_elapsed_time, OES.total_logical_reads, OES.total_logical_writes,
-								  OES.total_physical_reads, OES.execution_count, OES.MaxExecutionsPerMin
-						   FROM dbo.ObjectExecutionStats_60MIN OES WITH (FORCESEEK)
-						   WHERE OES.InstanceID = T.InstanceID
-						   AND OES.SnapshotDate >= @HourFrom
-						   AND OES.SnapshotDate < @HourTo) H
-			  UNION ALL
-			  /* The part hour at the end */
-			  SELECT R.*
-			  FROM #Scope T
-			  CROSS APPLY (SELECT OES.InstanceID, OES.ObjectID, OES.SnapshotDate, OES.PeriodTime, OES.total_worker_time,
-								  OES.total_elapsed_time, OES.total_logical_reads, OES.total_logical_writes,
-								  OES.total_physical_reads, OES.execution_count, OES.MaxExecutionsPerMin
-						   FROM dbo.ObjectExecutionStats OES WITH (FORCESEEK)
-						   WHERE OES.InstanceID = T.InstanceID
-						   AND OES.SnapshotDate >= @HourTo
-						   AND OES.SnapshotDate < @To) R) F
+			  CROSS APPLY dbo.ObjectExecutionStatsBetweenDates(T.InstanceID, @From, @HourFrom, @HourTo, @To) F
+			  WHERE @SingleInstanceID IS NULL) F
 		WHERE (@ObjectID IS NULL OR F.ObjectID = @ObjectID)
 		AND (@HasDaysOfWeek = 0 OR EXISTS(SELECT 1 FROM @DaysOfWeek D WHERE D.ID = DATEPART(dw, DATEADD(mi, @UTCOffset, F.SnapshotDate))))
 		AND (@HasHours = 0 OR EXISTS(SELECT 1 FROM @Hours H WHERE H.ID = DATEPART(hh, DATEADD(mi, @UTCOffset, F.SnapshotDate))))
