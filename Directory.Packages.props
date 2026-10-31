@@ -60,6 +60,7 @@
     <PackageVersion Include="Microsoft.Extensions.FileProviders.Abstractions" Version="10.0.13" />
     <PackageVersion Include="Microsoft.Extensions.FileProviders.Physical" Version="10.0.13" />
     <PackageVersion Include="Microsoft.Extensions.FileSystemGlobbing" Version="10.0.13" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.13" />
     <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.13" />
     <PackageVersion Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.0.13" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.13" />
@@ -84,6 +85,9 @@
     <PackageVersion Include="Microsoft.SqlServer.TransactSql.ScriptDom" Version="180.140.0" />
     <PackageVersion Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="3.14.2075" />
     <PackageVersion Include="Microsoft.Web.WebView2" Version="1.0.4258.31" />
+    <PackageVersion Include="ModelContextProtocol" Version="2.2.0" />
+    <PackageVersion Include="ModelContextProtocol.AspNetCore" Version="2.2.0" />
+    <PackageVersion Include="ModelContextProtocol.Core" Version="2.2.0" />
     <PackageVersion Include="MSTest.TestAdapter" Version="4.5.1" />
     <PackageVersion Include="MSTest.TestFramework" Version="4.5.1" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />

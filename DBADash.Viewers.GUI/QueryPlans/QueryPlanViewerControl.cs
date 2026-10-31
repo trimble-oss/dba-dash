@@ -387,6 +387,11 @@ namespace DBADashGUI.QueryPlans
         /// <summary>The statement being shown - the one a comparison starting from this plan takes.</summary>
         public PlanStatement CurrentStatement => _current ?? _plan.PrimaryStatement ?? _plan.Statements[0];
 
+        /// <summary>Where it came from, when the GUI opened it - null for a file opened on its own.</summary>
+        public IViewerHost Host => _host;
+
+        public string FileName => _fileName;
+
         /// <summary>
         /// What the plan's tab is called: the file name when it came from one, otherwise the start of
         /// its most expensive statement - the one it opens on, and the likeliest to tell two apart.
@@ -674,6 +679,15 @@ namespace DBADashGUI.QueryPlans
 
             toolbar.Items.Add(new ToolStripSeparator());
             toolbar.Items.Add(BuildSettingsMenu());
+            if (_host?.CreateAskButton(() => new ViewerAskRequest(null, _sourceXml ?? string.Empty, Title,
+                    Math.Max(1, _plan.StatementsWithPlans.ToList().IndexOf(CurrentStatement) + 1))) is { } ask)
+            {
+                // The button hides while no AI tool is set up; its separator goes with it.
+                var separator = new ToolStripSeparator { Available = ask.Available };
+                ask.AvailableChanged += (_, _) => separator.Available = ask.Available;
+                toolbar.Items.Add(separator);
+                toolbar.Items.Add(ask);
+            }
 
             // Captioned, unlike the other icons: a reader who does not know what a marker means is the
             // reader least likely to guess which icon explains it.

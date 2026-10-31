@@ -16,6 +16,9 @@ namespace DBADashGUI.Viewers
         /// <summary>The instance the artifact came from, where known.</summary>
         string InstanceName => null;
 
+        /// <summary>The repository's InstanceID for <see cref="InstanceName"/>, where known.</summary>
+        int? InstanceId => null;
+
         /// <summary>
         /// The panel for the plan viewer's AI Analysis tab.  Null when there is no AI analysis to offer, which
         /// leaves the tab out.
@@ -63,7 +66,20 @@ namespace DBADashGUI.Viewers
         void ShowHashDetail(string queryHash, string queryPlanHash)
         {
         }
+
+        /// <summary>
+        /// A toolbar button that hands what the viewer shows to an AI tool - the DBA Dash GUI's Ask menu of Claude Code,
+        /// Cursor and the like.  Null leaves it out, which every host but the GUI does.
+        /// </summary>
+        /// <param name="request">What the viewer is showing, read when a tool is picked.</param>
+        ToolStripItem CreateAskButton(System.Func<ViewerAskRequest> request) => null;
     }
+
+    /// <summary>
+    /// What a viewer hands to an AI tool: the deadlock shown, or the plan and the statement shown in it (numbered from 1
+    /// among those with plans).
+    /// </summary>
+    public sealed record ViewerAskRequest(DeadlockGraph Deadlock, string PlanXml, string Title, int Statement);
 
     /// <summary>The AI Analysis tab of the plan viewer.</summary>
     public interface IPlanAiPanel

@@ -2,6 +2,7 @@ using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Azure.Identity;
 using DBADash;
 using DBADashAI.Configuration;
+using DBADashAI.Mcp;
 using DBADashAI.Models;
 using System.Text.Json;
 using DBADashAI.Services;
@@ -243,7 +244,6 @@ if (securityEnabled)
 builder.Services.AddSingleton<ToolSimilarityScorer>();
 builder.Services.AddSingleton<SystemPromptLoader>();
 builder.Services.AddHttpClient();
-builder.Services.AddScoped<SqlToolExecutor>();
 builder.Services.AddScoped<AiChatClient>();
 builder.Services.AddScoped<AiRequestTelemetryService>();
 builder.Services.AddScoped<AiIntentRouter>();
@@ -262,33 +262,19 @@ builder.Services.AddScoped<PlanAnalysisStore>();
 builder.Services.AddScoped<AiRunbookLinkService>();
 builder.Services.AddScoped<AiRiskForecastService>();
 
-builder.Services.AddScoped<IAiTool, ActiveAlertsSummaryTool>();
-builder.Services.AddScoped<IAiTool, BlockingSummaryTool>();
-builder.Services.AddScoped<IAiTool, AgentJobAlertsTool>();
-builder.Services.AddScoped<IAiTool, WaitsSummaryTool>();
-builder.Services.AddScoped<IAiTool, DeadlocksSummaryTool>();
-builder.Services.AddScoped<IAiTool, SlowQueriesSummaryTool>();
-builder.Services.AddScoped<IAiTool, BackupsRiskSummaryTool>();
-builder.Services.AddScoped<IAiTool, DrivesRiskSummaryTool>();
-builder.Services.AddScoped<IAiTool, ConfigDriftSummaryTool>();
-builder.Services.AddScoped<IAiTool, InstanceMetadataSummaryTool>();
-builder.Services.AddScoped<IAiTool, AgDrRiskSummaryTool>();
-builder.Services.AddScoped<IAiTool, WorkloadPressureSummaryTool>();
-builder.Services.AddScoped<IAiTool, ReliabilityRiskSummaryTool>();
-builder.Services.AddScoped<IAiTool, CapacityForecastSummaryTool>();
-builder.Services.AddScoped<IAiTool, ConfigRiskDriftSummaryTool>();
-builder.Services.AddScoped<IAiTool, ConfigCurrentSummaryTool>();
-builder.Services.AddScoped<IAiTool, DbConfigSummaryTool>();
-builder.Services.AddScoped<IAiTool, RunningQueriesSummaryTool>();
-builder.Services.AddScoped<IAiTool, IdentityColumnsSummaryTool>();
-builder.Services.AddScoped<IAiTool, StorageSpaceSummaryTool>();
-builder.Services.AddScoped<IAiTool, TableSizeSummaryTool>();
-builder.Services.AddScoped<IAiTool, OSPerformanceSummaryTool>();
-builder.Services.AddScoped<IAiTool, OperationalHygieneSummaryTool>();
-builder.Services.AddScoped<IAiTool, CrossSignalCorrelationSummaryTool>();
-builder.Services.AddScoped<IAiTool, FailedLoginsSummaryTool>();
-builder.Services.AddScoped<IAiTool, MemoryClerkSummaryTool>();
-builder.Services.AddScoped<IAiTool, JobStepConfigSummaryTool>();
+builder.Services.AddAiTools();
+
+// MCP: the same tools for clients that bring their own model, such as Claude Code.  Nothing here calls a
+// model, so it works without an AI provider configured.  On by default in local mode, where only this
+// machine can reach it; in shared mode it has to be turned on with Mcp:Enabled.
+var mcpEnabled = builder.Configuration.GetValue<bool?>("Mcp:Enabled") ?? isLocalMode;
+if (mcpEnabled)
+{
+    builder.Services
+        .AddMcpServer(options => McpToolRegistration.Configure(options, typeof(Program).Assembly.GetName().Version?.ToString()))
+        .WithHttpTransport();
+    builder.Services.AddMcpTools();
+}
 
 // Rate limiting: per-IP token bucket applied to costly AI endpoints.
 // Configured via "RateLimiting" in appsettings.json; defaults allow short bursts
@@ -317,6 +303,13 @@ if (rlOptions.Enabled)
 }
 
 var app = builder.Build();
+
+// Local mode has no authentication, so it only answers requests addressed to this machine by a loopback name - a web
+// page can't reach it through the browser by rebinding a hostname of its own.  See LoopbackHostGuard.
+if (isLocalMode)
+{
+    app.UseLoopbackHostGuard();
+}
 
 // Apply security middleware - ENABLED BY DEFAULT
 if (securityEnabled)
@@ -383,6 +376,20 @@ app.MapGet("/api/ai/health", () =>
         repositoryFingerprint = cachedRepositoryFingerprint
     });
 }).AllowAnonymous();
+
+// Behind the same API key as everything else in shared mode: claude mcp add --transport http dbadash
+// http://host:5055/mcp --header "X-API-Key: <key>".  Not rate limited - a tool call costs a repository
+// query, not model tokens, and one question from a client is often several calls.
+if (mcpEnabled)
+{
+    var mcpEndpoint = app.MapMcp("/mcp");
+    if (securityEnabled)
+    {
+        mcpEndpoint.RequireAuthorization();
+    }
+
+    app.Logger.LogInformation("MCP endpoint enabled at /mcp");
+}
 
 ApplyAuth(app.MapGet("/api/ai/diagnostics", (IConfiguration config, IHttpClientFactory httpClientFactory, SystemPromptLoader systemPromptLoader) =>
 {

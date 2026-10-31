@@ -635,6 +635,22 @@ namespace DBADashGUI
             };
 
             view.ToolStrip.Items.Add(button);
+
+            // The same analysis by an AI tool of the user's - Claude Code, Cursor and the like - using DBA Dash's MCP server.
+            // Not shown when there is no tool to hand to.
+            var ask = AskMenu.Create(() =>
+            {
+                var context = view.CurrentContext;
+                if (context is not { InstanceID: > 0 } || context.Type == SQLTreeItem.TreeType.AzureDatabase || string.IsNullOrEmpty(context.InstanceName))
+                {
+                    MessageBox.Show(view.FindForm(), "Select a SQL Server instance in the tree.", "Ask", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return null;
+                }
+
+                var (fromUtc, toUtc) = view.GetReportDateRangeUtc() ?? (DateRange.FromUTC, DateRange.ToUTC);
+                return AgentAsk.Performance(context.InstanceName, fromUtc, toUtc, focus == PerformanceAnalysisFocus.LatchesAndSpinlocks);
+            }, () => view.FindForm());
+            if (ask is not null) view.ToolStrip.Items.Add(ask);
         }
 
         private bool CurrentTabSupportsDayOfWeekFilter =>
@@ -761,6 +777,91 @@ namespace DBADashGUI
             InitializeNotifyIcon();
             desktopNotificationsToolStripMenuItem.Checked = Properties.Settings.Default.DesktopNotificationsEnabled;
             _ = Task.Run(GetNewAlertsLoop);
+
+            optionsToolStripMenuItem.DropDownItems.Add(new ToolStripMenuItem("Connect AI Tools (MCP)...", null, (_, _) =>
+            {
+                using var frm = new ConnectAIToolsForm();
+                frm.ShowDialog(this);
+                // A tool registered or removed can show or hide the Ask buttons.
+                AskMenu.RefreshAll();
+            })
+            {
+                ToolTipText = "Register DBA Dash's MCP server with Claude Code, Cursor, VS Code and other AI tools"
+            });
+
+            var contextPipe = GuiContextPipeServer.Start(CaptureGuiContext, () => Common.ConnectionString);
+            FormClosed += (_, _) => contextPipe.Dispose();
+        }
+
+        /// <summary>
+        /// What the tree, the tabs and the time filter are showing, for the local MCP server - see
+        /// <see cref="GuiContextPipeServer"/>.  Called from the pipe's thread, so it reads the controls on the UI thread.
+        /// </summary>
+        private GuiContextSnapshot CaptureGuiContext() => (GuiContextSnapshot)Invoke(new Func<GuiContextSnapshot>(() =>
+        {
+            var node = tv1.SelectedNode as SQLTreeItem;
+            var context = node?.Context;
+            var type = node?.Type;
+            var window = tabs.SelectedTab?.Controls.OfType<CustomReportView>().FirstOrDefault()?.GetReportDateRangeUtc()
+                         ?? (DateRange.FromUTC, DateRange.ToUTC);
+
+            return new GuiContextSnapshot
+            {
+                NodePath = tv1.SelectedNode?.FullPath,
+                NodeType = type?.ToString(),
+                Tab = tabs.SelectedTab?.Text,
+                Instance = string.IsNullOrEmpty(context?.InstanceName) ? null : context.InstanceName,
+                InstanceId = context is { InstanceID: > 0 } ? context.InstanceID : null,
+                InstanceIds = context?.InstanceIDs.Order().ToList() ?? [],
+                Database = string.IsNullOrEmpty(context?.DatabaseName) ? null : context.DatabaseName,
+                Object = string.IsNullOrEmpty(context?.ObjectName) || context.Type is not (SQLTreeItem.TreeType.Table
+                    or SQLTreeItem.TreeType.View or SQLTreeItem.TreeType.StoredProcedure or SQLTreeItem.TreeType.CLRProcedure
+                    or SQLTreeItem.TreeType.ScalarFunction or SQLTreeItem.TreeType.TableFunction or SQLTreeItem.TreeType.InlineFunction
+                    or SQLTreeItem.TreeType.CLRScalarFunction or SQLTreeItem.TreeType.CLRTableFunction or SQLTreeItem.TreeType.Trigger)
+                    ? null
+                    : $"{context.SchemaName}.{context.ObjectName}",
+                // The report's own dates where the tab shows one - a drill-down or its parameters can differ from the global
+                // range, which also moves when it is relative - as the AI Analysis and Ask buttons use.
+                FromUtc = window.FromUtc,
+                ToUtc = window.ToUtc,
+                Deadlock = OpenDeadlockContext(),
+                Plan = OpenPlanContext()
+            };
+        }));
+
+        private static GuiContextDeadlock OpenDeadlockContext()
+        {
+            var viewer = ViewerForm.ShowingDeadlock();
+            var graph = viewer?.CurrentGraph;
+            if (graph is null) return null;
+
+            return new GuiContextDeadlock
+            {
+                Instance = viewer.Host?.InstanceName,
+                InstanceId = viewer.Host?.InstanceId,
+                FileName = viewer.FileName,
+                Title = viewer.Title,
+                Xml = graph.Xml,
+                DeadlockHash = DBADash.Deadlock.Analysis.DeadlockHash.ToHex(DBADash.Deadlock.Analysis.DeadlockHash.Compute(graph))
+            };
+        }
+
+        private static GuiContextPlan OpenPlanContext()
+        {
+            var viewer = ViewerForm.ShowingQueryPlan();
+            if (viewer?.Plan is null) return null;
+
+            var statement = viewer.CurrentStatement;
+            return new GuiContextPlan
+            {
+                Instance = viewer.Host?.InstanceName,
+                InstanceId = viewer.Host?.InstanceId,
+                FileName = viewer.FileName,
+                Title = viewer.Title,
+                Xml = viewer.SourceXml ?? string.Empty,
+                QueryPlanHash = statement?.QueryPlanHash,
+                StatementIndex = Math.Max(0, viewer.Plan.Statements.ToList().IndexOf(statement))
+            };
         }
 
         /// <summary>

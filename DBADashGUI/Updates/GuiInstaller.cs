@@ -132,6 +132,10 @@ namespace DBADashGUI.Updates
 
             try
             {
+                // The MCP servers AI tools started from this install hold its DLLs open, which can fail the update when
+                // it replaces them - so they are stopped first.  The AI tools start them again when next used.
+                DBADash.Mcp.McpServerProcesses.StopRunningFrom(AppContext.BaseDirectory);
+
                 // Waits for this process to end, installs, and starts the new version with the same arguments.
                 manager.WaitExitThenApplyUpdates(info.TargetFullRelease, silent: false, restart: true,
                     restartArgs: Environment.GetCommandLineArgs().Skip(1).ToArray());

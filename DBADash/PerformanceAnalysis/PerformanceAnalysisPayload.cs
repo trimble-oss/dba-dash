@@ -169,7 +169,7 @@ namespace DBADash.PerformanceAnalysis
                 notes.Add($"The range selected was longer than {PerformanceAnalysisWindow.Describe(PerformanceAnalysisWindow.MaxLength)}, so only its last {PerformanceAnalysisWindow.Describe(PerformanceAnalysisWindow.MaxLength)} are included.");
             }
 
-            notes.Add("Rates are per second of time the collection covered, as in the DBA Dash charts.  Times are local to the reader.");
+            notes.Add("Rates are per second of time the collection covered, as in the DBA Dash charts.  Times are in the time zone the window gives.");
 
             return new PerformanceAnalysisPayload
             {

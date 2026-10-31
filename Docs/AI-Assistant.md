@@ -2,6 +2,8 @@
 
 The AI Assistant analyses your DBA Dash repository data and answers natural-language questions about alerts, performance, waits, backups, blocking, slow queries, and more.
 
+To use the same repository tools from Claude Code or another MCP client instead, see [MCP server](MCP.md).
+
 ## How it works
 
 Two components work together:
@@ -23,6 +25,7 @@ Run `DBADashAI` on the same machine as the GUI. It binds to `localhost` only and
 - No API key required
 - Not registered in the repository database
 - Only the GUI on that machine can use it
+- Requests must address it as `localhost`, `127.0.0.1` or `[::1]`. A request addressed by any other host name gets a 400. This stops a web page from reaching the service by pointing a host name of its own at 127.0.0.1 (DNS rebinding). If you set `LocalAIServiceUrl` in the GUI, or `AIApiBaseUrl`, use one of those names.
 
 **`appsettings.json` — leave `Registration:ServiceUrl` empty:**
 
@@ -365,6 +368,7 @@ If neither source is available the AI Assistant tab is hidden.
 | `POST /api/ai/feedback` | Required | Submit helpful/not-helpful feedback |
 | `GET /api/ai/feedback` | Required | Recent feedback |
 | `GET /api/ai/test-anthropic` | Required | Test Anthropic provider connectivity and configuration |
+| `/mcp` | Required (shared mode) | MCP server - the same tools for MCP clients such as Claude Code.  See [MCP server](MCP.md). |
 
 ---
 

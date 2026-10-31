@@ -451,6 +451,32 @@ namespace DBADashGUI.Viewers
             AddTab(control, control.Title, control.TabToolTip);
         }
 
+        /// <summary>
+        /// The deadlock viewer the user is most likely looking at, for the GUI's MCP context - see <see cref="Showing{T}"/>.
+        /// </summary>
+        public static DeadlockViewerControl ShowingDeadlock() => Showing<DeadlockViewerControl>();
+
+        /// <summary>The plan viewer the user is most likely looking at - see <see cref="Showing{T}"/>.</summary>
+        public static QueryPlanViewerControl ShowingQueryPlan() => Showing<QueryPlanViewerControl>();
+
+        /// <summary>
+        /// The open viewer of a kind that the user is most likely looking at: the selected tab of the viewer window
+        /// used last, then the selected tab of any other viewer window, then the newest tab of that kind in the
+        /// window used last.  Null when none is open.  Called on the UI thread.
+        /// </summary>
+        private static T Showing<T>() where T : Control
+        {
+            static T Content(TabPage page) => page?.Controls.Count > 0 ? page.Controls[0] as T : null;
+
+            var windows = Application.OpenForms.OfType<ViewerForm>().Where(w => !w.IsDisposed)
+                .OrderBy(w => ReferenceEquals(w, _current) ? 0 : 1)
+                .ToList();
+
+            return windows.Select(w => Content(w._documents.SelectedTab)).FirstOrDefault(c => c is not null)
+                   ?? windows.SelectMany(w => w._documents.TabPages.Cast<TabPage>().Reverse()).Select(Content)
+                       .FirstOrDefault(c => c is not null);
+        }
+
         /// <summary>The plan viewers open in this window, in tab order.</summary>
         private IReadOnlyList<QueryPlanViewerControl> PlanViewers =>
             _documents.TabPages.Cast<TabPage>()

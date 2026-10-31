@@ -437,7 +437,7 @@ namespace DBADashGUI.AI
 
             try
             {
-                var data = await PerformanceAnalysisLoader.LoadAsync(_instanceId, _instance, window, token);
+                var data = await PerformanceAnalysisLoader.LoadAsync(Common.ConnectionString, Config.DefaultCommandTimeout, _instanceId, _instance, window, token);
                 if (token.IsCancellationRequested || IsDisposed) return;
 
                 _data = data;

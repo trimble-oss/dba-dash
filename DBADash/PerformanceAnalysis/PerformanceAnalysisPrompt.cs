@@ -31,6 +31,27 @@ namespace DBADash.PerformanceAnalysis
         {
             var prompt = new StringBuilder();
 
+            prompt.Append(Instructions(latchesAndSpinlocks));
+            prompt.AppendLine();
+            prompt.AppendLine(
+                "The reader can ask follow-up questions after this answer.  Answer those directly and as briefly as the " +
+                "question allows, without the headings and without repeating what you have already said.  Everything " +
+                "below is still all you know about this instance, so where a follow-up asks for something it does not " +
+                "contain, say what would answer it - which DBA Dash view or which DMV - rather than guessing.");
+            prompt.AppendLine();
+            prompt.Append(Data(instance, window, baseline, notes, sections));
+
+            return prompt.ToString();
+        }
+
+        /// <summary>
+        /// What to answer and how to weigh the figures, without the figures.  The MCP servers offer it as a prompt
+        /// that has the client's model fetch the figures with get-performance-summary.
+        /// </summary>
+        public static string Instructions(bool latchesAndSpinlocks)
+        {
+            var prompt = new StringBuilder();
+
             if (latchesAndSpinlocks)
             {
                 LatchesAndSpinlocks(prompt);
@@ -49,14 +70,20 @@ namespace DBADash.PerformanceAnalysis
                 "not collected or has no data tells you nothing either way - say so where the missing data matters, " +
                 "rather than reading its absence as good news.  Do not invent object names, figures or settings that " +
                 "are not below.");
-            prompt.AppendLine();
-            prompt.AppendLine(
-                "The reader can ask follow-up questions after this answer.  Answer those directly and as briefly as the " +
-                "question allows, without the headings and without repeating what you have already said.  Everything " +
-                "below is still all you know about this instance, so where a follow-up asks for something it does not " +
-                "contain, say what would answer it - which DBA Dash view or which DMV - rather than guessing.");
 
-            prompt.AppendLine();
+            return prompt.ToString();
+        }
+
+        /// <summary>The figures: the instance, the window and baseline, and each section.</summary>
+        public static string Data(
+            string instance,
+            string window,
+            string? baseline,
+            IEnumerable<string> notes,
+            IEnumerable<(string Title, string Content)> sections)
+        {
+            var prompt = new StringBuilder();
+
             prompt.AppendLine($"Instance: {instance}");
             prompt.AppendLine($"Window: {window}");
             prompt.AppendLine(string.IsNullOrWhiteSpace(baseline)

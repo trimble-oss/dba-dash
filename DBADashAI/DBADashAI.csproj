@@ -21,6 +21,7 @@
     <PackageReference Include="Azure.Identity" />
     <PackageReference Include="Microsoft.Data.SqlClient" />
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" />
+    <PackageReference Include="ModelContextProtocol.AspNetCore" />
     <PackageReference Include="Serilog" />
     <PackageReference Include="Serilog.Enrichers.Thread" />
     <PackageReference Include="Serilog.Extensions.Hosting" />
@@ -36,6 +37,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DBADash\DBADash.csproj" />
+    <ProjectReference Include="..\DBADashAI.Tools\DBADashAI.Tools.csproj" />
   </ItemGroup>
 
   <ItemGroup>

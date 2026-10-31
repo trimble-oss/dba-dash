@@ -1,7 +1,9 @@
 CREATE PROC AI.WorkloadPressure_Get(
 	@MaxRows INT = 300,
 	@InstanceFilter NVARCHAR(256) = NULL,
-	@HoursBack INT = 24
+	@HoursBack INT = 24,
+	/* When the window ends, for looking at a past incident.  NULL ends it now, as before. */
+	@ToDate DATETIME2(3) = NULL
 )
 AS
 SET NOCOUNT ON
@@ -13,7 +15,7 @@ SELECT TOP (@MaxRows)
 FROM dbo.Waits_60MIN w
 INNER JOIN dbo.WaitType wt ON wt.WaitTypeID = w.WaitTypeID
 INNER JOIN dbo.Instances i ON i.InstanceID = w.InstanceID
-WHERE w.SnapshotDate >= DATEADD(HOUR,-@HoursBack,SYSUTCDATETIME())
+WHERE w.SnapshotDate >= DATEADD(HOUR, -@HoursBack, ISNULL(@ToDate, SYSUTCDATETIME())) AND (@ToDate IS NULL OR w.SnapshotDate < @ToDate)
   AND wt.IsExcluded = 0
   AND i.IsActive = 1
   AND (@InstanceFilter IS NULL OR i.InstanceDisplayName LIKE @InstanceFilter + '%')
@@ -27,7 +29,7 @@ SELECT TOP (@MaxRows)
 	SUM(bs.BlockedWaitTime) AS BlockedWaitMs
 FROM dbo.BlockingSnapshotSummary bs
 INNER JOIN dbo.Instances i ON i.InstanceID = bs.InstanceID
-WHERE bs.SnapshotDateUTC >= DATEADD(HOUR,-@HoursBack,SYSUTCDATETIME())
+WHERE bs.SnapshotDateUTC >= DATEADD(HOUR, -@HoursBack, ISNULL(@ToDate, SYSUTCDATETIME())) AND (@ToDate IS NULL OR bs.SnapshotDateUTC < @ToDate)
   AND i.IsActive = 1
   AND (@InstanceFilter IS NULL OR i.InstanceDisplayName LIKE @InstanceFilter + '%')
 GROUP BY i.InstanceDisplayName
@@ -40,7 +42,7 @@ SELECT TOP (@MaxRows)
 FROM dbo.PerformanceCounters_60MIN pc
 INNER JOIN dbo.Counters c ON c.CounterID = pc.CounterID
 INNER JOIN dbo.Instances i ON i.InstanceID = pc.InstanceID
-WHERE pc.SnapshotDate >= DATEADD(HOUR,-@HoursBack,SYSUTCDATETIME())
+WHERE pc.SnapshotDate >= DATEADD(HOUR, -@HoursBack, ISNULL(@ToDate, SYSUTCDATETIME())) AND (@ToDate IS NULL OR pc.SnapshotDate < @ToDate)
   AND c.counter_name = 'Number of Deadlocks/sec'
   AND c.object_name = 'Locks'
   AND c.instance_name = '_Total'
@@ -57,7 +59,7 @@ SELECT TOP (@MaxRows)
 	COUNT_BIG(*) AS SlowQueryExecCount
 FROM dbo.SlowQueries sq
 INNER JOIN dbo.Instances i ON i.InstanceID = sq.InstanceID
-WHERE sq.timestamp >= DATEADD(HOUR,-@HoursBack,SYSUTCDATETIME())
+WHERE sq.timestamp >= DATEADD(HOUR, -@HoursBack, ISNULL(@ToDate, SYSUTCDATETIME())) AND (@ToDate IS NULL OR sq.timestamp < @ToDate)
   AND i.IsActive = 1
   AND (@InstanceFilter IS NULL OR i.InstanceDisplayName LIKE @InstanceFilter + '%')
 GROUP BY i.InstanceDisplayName

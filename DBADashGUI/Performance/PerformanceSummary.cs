@@ -54,6 +54,22 @@ namespace DBADashGUI.Performance
             };
             toolStrip1.Items.Add(button);
 
+            // The same analysis by an AI tool of the user's, for the selected instance over the date range shown.
+            if (AI.AskMenu.Create(() =>
+                {
+                    var row = dgv.CurrentRow ?? (dgv.Rows.Count == 1 ? dgv.Rows[0] : null);
+                    if (row?.DataBoundItem is not DataRowView view)
+                    {
+                        MessageBox.Show(this, "Select an instance in the grid to analyse.", "Ask", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        return null;
+                    }
+
+                    return AI.AgentAsk.Performance(Convert.ToString(view["InstanceDisplayName"]), DateRange.FromUTC, DateRange.ToUTC, latchesAndSpinlocks: false);
+                }, FindForm) is { } ask)
+            {
+                toolStrip1.Items.Add(ask);
+            }
+
             var menuItem = new ToolStripMenuItem("Analyse performance with AI...", Properties.Resources.DeadlockAnalyse_16x, (_, _) =>
             {
                 if (dgv.ClickedRowIndex >= 0) OpenPerformanceAnalysis(dgv.Rows[dgv.ClickedRowIndex]);
