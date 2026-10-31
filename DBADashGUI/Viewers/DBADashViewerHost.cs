@@ -29,6 +29,19 @@ namespace DBADashGUI.Viewers
 
         public string InstanceName => _context?.InstanceName;
 
+        public int? InstanceId => _context is { InstanceID: > 0 } ? _context.InstanceID : null;
+
+        /// <summary>The Ask menu - see <see cref="DBADashGUI.AI.AskMenu"/>.  None when no AI tool is available.</summary>
+        public ToolStripItem CreateAskButton(System.Func<ViewerAskRequest> request) =>
+            DBADashGUI.AI.AskMenu.Create(() =>
+            {
+                var r = request();
+                return r.Deadlock is { } graph
+                    ? DBADashGUI.AI.AgentAsk.Deadlock(graph.Xml,
+                        DBADash.Deadlock.Analysis.DeadlockHash.ToHex(DBADash.Deadlock.Analysis.DeadlockHash.Compute(graph)), InstanceName)
+                    : DBADashGUI.AI.AgentAsk.Plan(r.PlanXml, r.Title, r.Statement);
+            }, () => Form.ActiveForm);
+
         public IPlanAiPanel CreatePlanAiPanel() => new QueryPlanAiControl(_context);
 
         public IDeadlockAiPanel CreateDeadlockAiPanel() => new DeadlockAiControl(_context);

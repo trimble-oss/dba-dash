@@ -1,7 +1,9 @@
 CREATE PROC AI.Waits_Get(
 	@MaxRows INT = 200,
 	@InstanceFilter NVARCHAR(256) = NULL,
-	@HoursBack INT = 24
+	@HoursBack INT = 24,
+	/* When the window ends, for looking at a past incident.  NULL ends it now, as before. */
+	@ToDate DATETIME2(3) = NULL
 )
 AS
 SET NOCOUNT ON
@@ -15,7 +17,7 @@ SELECT TOP (@MaxRows)
 FROM dbo.Waits_60MIN w
 INNER JOIN dbo.WaitType wt ON wt.WaitTypeID = w.WaitTypeID
 INNER JOIN dbo.Instances i ON i.InstanceID = w.InstanceID
-WHERE w.SnapshotDate >= DATEADD(HOUR, -@HoursBack, SYSUTCDATETIME())
+WHERE w.SnapshotDate >= DATEADD(HOUR, -@HoursBack, ISNULL(@ToDate, SYSUTCDATETIME())) AND (@ToDate IS NULL OR w.SnapshotDate < @ToDate)
   AND wt.IsExcluded = 0
   AND i.IsActive = 1
   AND (@InstanceFilter IS NULL OR i.InstanceDisplayName LIKE @InstanceFilter + '%')

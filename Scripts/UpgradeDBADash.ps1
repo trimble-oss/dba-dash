@@ -250,6 +250,8 @@ if ($versionCompare -eq -1 -or $ForceUpgrade){
     Get-Process -Name DBADash -ErrorAction Ignore | Where-Object { $_.Path -like $installDirPrefix } | Stop-Process -Force
     Get-Process -Name DBADashServiceConfigTool -ErrorAction Ignore | Where-Object { $_.Path -like $installDirPrefix } | Stop-Process -Force
     Get-Process -Name DBADashConfig -ErrorAction Ignore | Where-Object { $_.Path -like $installDirPrefix } | Stop-Process -Force
+    # The MCP server AI tools (Claude Code, Cursor, VS Code...) start from this folder.  They start it again when next used.
+    Get-Process -Name DBADashMCP -ErrorAction Ignore | Where-Object { $_.Path -like $installDirPrefix } | Stop-Process -Force
     # Service should already be stopped but this will ensure the process isn't running.
     Get-Process -Name DBADashService -ErrorAction Ignore | Where-Object { $_.Path -like $installDirPrefix } | Stop-Process -Force
 

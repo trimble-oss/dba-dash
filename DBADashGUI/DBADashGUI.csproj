@@ -215,6 +215,9 @@
     <ProjectReference Include="..\DBADashCoreGUI\DBADashCoreGUI.csproj" />
     <ProjectReference Include="..\DBADashSharedGUI\DBADashSharedGUI.csproj" />
     <ProjectReference Include="..\DBADash\DBADash.csproj" />
+    <!-- Not used by the GUI's code: referenced so DBADashMCP.exe, the local MCP server for Claude Code and other AI
+         tools, is built into the GUI's output - and so into the GUI-only zip and installer - beside DBADash.exe. -->
+    <ProjectReference Include="..\DBADashMCP\DBADashMCP.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AsyncKeyedLock" />

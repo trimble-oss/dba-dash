@@ -21,6 +21,71 @@ GRANT SELECT ON SCHEMA::Alert TO App;
 GRANT SELECT ON SCHEMA::Alert TO AppReadOnly
 GRANT EXECUTE ON SCHEMA::AI TO AIService;
 GRANT EXECUTE ON OBJECT::AI.ServiceConfig_Get TO AIUser;
+/* DBADashMCP.exe reads the repository as the user running it.  McpUser runs the summary procs its tools are built
+   on, and nothing else in the AI schema - not the service config, API keys or stored analyses.  The procs read
+   dbo tables through ownership chaining, so no SELECT is needed. */
+GRANT EXECUTE ON OBJECT::AI.ActiveAlerts_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::AI.AgDrRisk_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::AI.AgentJobAlerts_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::AI.BackupsRisk_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::AI.Blocking_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::AI.CapacityForecast_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::AI.ConfigCurrent_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::AI.ConfigDrift_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::AI.ConfigRiskDrift_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::AI.CrossSignalCorrelation_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::AI.DBConfigCurrent_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::AI.Deadlocks_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::AI.DrivesRisk_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::AI.FailedLoginsRisk_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::AI.IdentityColumns_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::AI.InstanceMetadata_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::AI.JobStepConfig_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::AI.MemoryClerkUsage_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::AI.OperationalHygiene_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::AI.OSPerformance_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::AI.ReliabilityRisk_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::AI.RunningQueries_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::AI.SlowQueries_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::AI.StorageSpace_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::AI.TableSize_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::AI.Waits_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::AI.WorkloadPressure_Get TO McpUser;
+/* The MCP tools that fetch one deadlock, plan or instance's performance */
+GRANT EXECUTE ON OBJECT::AI.DeadlockList_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::AI.DeadlockGraph_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::AI.QueryPlan_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::AI.Instance_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::dbo.DeadlockObjectDDL_Get TO McpUser;
+/* top-queries reads through the Query Stats tab's own procedure, which takes its instances as a dbo.IDs table */
+GRANT EXECUTE ON OBJECT::dbo.QueryStats_Get TO McpUser;
+/* The performance lookups: root blockers, waiting queries, long running queries and one deadlock signature */
+GRANT EXECUTE ON OBJECT::AI.PerformanceInvestigationBlocking_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::AI.PerformanceInvestigationWaits_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::AI.PerformanceInvestigationLongRunning_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::AI.PerformanceInvestigationDeadlock_Get TO McpUser;
+GRANT EXECUTE ON TYPE::dbo.IDs TO McpUser;
+/* get-performance-summary reads through the performance charts' own procedures (see PerformanceAnalysisLoader).  Several
+   build dynamic SQL, which breaks ownership chaining, so McpUser also reads dbo - as App does, which is what a GUI user
+   already has.  The AI service's role is not a member: to offer get-performance-summary over /mcp, add the service's
+   user to McpUser. */
+GRANT EXECUTE ON OBJECT::dbo.InstanceInfo_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::dbo.Configuration_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::dbo.CPU_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::dbo.WaitsSummary_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::dbo.Waits_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::dbo.IOSummary_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::dbo.IOStats_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::dbo.PerformanceCounterSummary_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::dbo.MemoryUsage_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::dbo.BlockingSnapshots_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::dbo.ObjectExecutionStatsSummary_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::dbo.LatchStats_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::dbo.SpinlockStats_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::dbo.RunningQueriesSummary_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::dbo.DeadlockCharts_Get TO McpUser;
+GRANT EXECUTE ON OBJECT::dbo.DeadlockSummary_Get TO McpUser;
+GRANT SELECT ON SCHEMA::dbo TO McpUser;
 /* Actions are logged before they're made (e.g. a schedule change, which needs its own role), so any app user must be
    able to write the user action log - including those with read-only app access.  App has EXECUTE on dbo already. */
 GRANT EXECUTE ON OBJECT::dbo.UserActionLog_Add TO AppReadOnly;

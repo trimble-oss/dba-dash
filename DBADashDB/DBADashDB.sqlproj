@@ -856,6 +856,10 @@
     <Build Include="AI\Stored Procedures\CrossSignalCorrelation_Get.sql" />
     <Build Include="AI\Stored Procedures\DBConfigCurrent_Get.sql" />
     <Build Include="AI\Stored Procedures\Deadlocks_Get.sql" />
+    <Build Include="AI\Stored Procedures\DeadlockList_Get.sql" />
+    <Build Include="AI\Stored Procedures\DeadlockGraph_Get.sql" />
+    <Build Include="AI\Stored Procedures\QueryPlan_Get.sql" />
+    <Build Include="AI\Stored Procedures\Instance_Get.sql" />
     <Build Include="AI\Stored Procedures\DeadlockAnalysis_Upd.sql" />
     <Build Include="AI\User Defined Types\DeadlockAnalysisSignatures.sql" />
     <Build Include="AI\Stored Procedures\DeadlockAnalysisSignatureRecompute_Get.sql" />
@@ -1148,6 +1152,7 @@
     <Build Include="AI\Stored Procedures\ServiceConfig_Heartbeat.sql" />
     <Build Include="Security\AIService.sql" />
     <Build Include="Security\AIUser.sql" />
+    <Build Include="Security\McpUser.sql" />
     <Build Include="Migration\DBFileSnapshot.sql" />
     <Build Include="Security\Migration.sql" />
     <Build Include="dbo\Stored Procedures\DBOptionsSummary_Get.sql" />

@@ -1,7 +1,9 @@
 CREATE PROC AI.OSPerformance_Get(
     @MaxRows INT = 300,
     @InstanceFilter NVARCHAR(256) = NULL,
-    @HoursBack INT = 24
+    @HoursBack INT = 24,
+    /* When the window ends, for looking at a past incident.  NULL ends it now, as before. */
+    @ToDate DATETIME2(3) = NULL
 )
 AS
 SET NOCOUNT ON
@@ -14,7 +16,7 @@ SET NOCOUNT ON
         MAX(CAST(c.SQLProcessCPU AS INT)) AS MaxSqlCpu,
         MAX(100 - CAST(c.SystemIdleCPU AS INT)) AS MaxTotalCpu
     FROM dbo.CPU c
-    WHERE c.EventTime >= DATEADD(HOUR, -@HoursBack, SYSUTCDATETIME())
+    WHERE c.EventTime >= DATEADD(HOUR, -@HoursBack, ISNULL(@ToDate, SYSUTCDATETIME())) AND (@ToDate IS NULL OR c.EventTime < @ToDate)
     GROUP BY c.InstanceID, DATEADD(HOUR, DATEDIFF(HOUR, 0, c.EventTime), 0)
 )
 SELECT TOP (@MaxRows)
@@ -36,7 +38,7 @@ ORDER BY ch.HourUtc DESC, ch.AvgTotalCpu DESC
     SELECT pc.InstanceID, pc.CounterID, pc.Value, pc.SnapshotDate,
         ROW_NUMBER() OVER (PARTITION BY pc.InstanceID, pc.CounterID ORDER BY pc.SnapshotDate DESC) AS rn
     FROM dbo.PerformanceCounters pc
-    WHERE pc.SnapshotDate >= DATEADD(HOUR, -@HoursBack, SYSUTCDATETIME())
+    WHERE pc.SnapshotDate >= DATEADD(HOUR, -@HoursBack, ISNULL(@ToDate, SYSUTCDATETIME())) AND (@ToDate IS NULL OR pc.SnapshotDate < @ToDate)
 )
 SELECT TOP (@MaxRows)
     i.InstanceDisplayName,
@@ -84,7 +86,7 @@ ORDER BY i.InstanceDisplayName, c.object_name, c.counter_name
         SUM(oes.total_physical_reads) AS TotalPhysicalReads,
         SUM(oes.total_logical_writes) AS TotalLogicalWrites
     FROM dbo.ObjectExecutionStats oes
-    WHERE oes.SnapshotDate >= DATEADD(HOUR, -@HoursBack, SYSUTCDATETIME())
+    WHERE oes.SnapshotDate >= DATEADD(HOUR, -@HoursBack, ISNULL(@ToDate, SYSUTCDATETIME())) AND (@ToDate IS NULL OR oes.SnapshotDate < @ToDate)
     GROUP BY oes.InstanceID, oes.ObjectID
 )
 SELECT TOP (@MaxRows)

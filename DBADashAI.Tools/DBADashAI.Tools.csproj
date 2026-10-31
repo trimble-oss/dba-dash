@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Library</OutputType>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>DBADashAI</RootNamespace>
+    <BaseOutputPath>..\DBADashBuild</BaseOutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <Configurations>Debug;Release;CLI</Configurations>
+    <IsPackable>false</IsPackable>
+
+    <!--
+      The repository tools the AI service answers questions from, shared with the MCP servers.  Both the
+      DBADashAI web service (/ask and /mcp) and the local stdio DBADashMCP host reference this, so it must
+      not take a dependency on ASP.NET or on WinForms.
+    -->
+    <UseWindowsForms>false</UseWindowsForms>
+    <UseWPF>false</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Using Include="Microsoft.Extensions.Configuration" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.SqlClient" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="ModelContextProtocol.Core" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- DBADash for the performance analysis loader and payload, Deadlock and QueryPlan for parsing what the
+         artifact tools fetch, with the same rules the GUI's viewers run. -->
+    <ProjectReference Include="..\DBADash\DBADash.csproj" />
+    <ProjectReference Include="..\DBADash.Deadlock\DBADash.Deadlock.csproj" />
+    <ProjectReference Include="..\DBADash.QueryPlan\DBADash.QueryPlan.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\GlobalAssemblyInfo.cs" Link="Properties\GlobalAssemblyInfo.cs" />
+  </ItemGroup>
+
+</Project>

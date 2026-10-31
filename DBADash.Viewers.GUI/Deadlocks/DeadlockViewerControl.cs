@@ -235,6 +235,14 @@ namespace DBADashGUI.Deadlocks
         /// <summary>The source XML exactly as it was opened, so the same source opened twice is recognised.</summary>
         public string SourceXml => _sourceXml;
 
+        /// <summary>The deadlock being shown - the selected one when the source held several.</summary>
+        public DeadlockGraph CurrentGraph => _current ?? _graphs.FirstOrDefault();
+
+        /// <summary>Where it came from, when the GUI opened it - null for a file opened on its own.</summary>
+        public IViewerHost Host => _host;
+
+        public string FileName => _fileName;
+
         /// <summary>
         /// What the source's tab is called: the file name when it came from one, otherwise the victim
         /// of its first deadlock - the likeliest thing to tell two apart.
@@ -298,6 +306,14 @@ namespace DBADashGUI.Deadlocks
             toolbar.Items.Add(new ToolStripButton("Save As...", Resources.Save_16x, (_, _) => SaveAs()) { DisplayStyle = ToolStripItemDisplayStyle.Image });
             toolbar.Items.Add(new ToolStripSeparator());
             toolbar.Items.Add(BuildSettingsMenu());
+            if (_host?.CreateAskButton(() => new ViewerAskRequest(CurrentGraph, null, Title, 0)) is { } ask)
+            {
+                // The button hides while no AI tool is set up; its separator goes with it.
+                var separator = new ToolStripSeparator { Available = ask.Available };
+                ask.AvailableChanged += (_, _) => separator.Available = ask.Available;
+                toolbar.Items.Add(separator);
+                toolbar.Items.Add(ask);
+            }
             toolbar.Items.Add(new ToolStripSeparator());
             toolbar.Items.Add(new ToolStripButton("Signature", null, (_, _) => ShowSignature())
             {

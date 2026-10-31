@@ -1,7 +1,9 @@
 CREATE PROC AI.RunningQueries_Get(
     @MaxRows INT = 300,
     @InstanceFilter NVARCHAR(256) = NULL,
-    @HoursBack INT = 24
+    @HoursBack INT = 24,
+    /* When the window ends, for looking at a past incident.  NULL ends it now, as before. */
+    @ToDate DATETIME2(3) = NULL
 )
 AS
 SET NOCOUNT ON
@@ -27,7 +29,7 @@ SELECT TOP (@MaxRows)
     rqs.TempDBMetadataWaitTimeMs
 FROM dbo.RunningQueriesSummary rqs
 INNER JOIN dbo.Instances i ON i.InstanceID = rqs.InstanceID
-WHERE rqs.SnapshotDateUTC >= DATEADD(HOUR, -@HoursBack, SYSUTCDATETIME())
+WHERE rqs.SnapshotDateUTC >= DATEADD(HOUR, -@HoursBack, ISNULL(@ToDate, SYSUTCDATETIME())) AND (@ToDate IS NULL OR rqs.SnapshotDateUTC < @ToDate)
   AND i.IsActive = 1
   AND (@InstanceFilter IS NULL OR i.InstanceDisplayName LIKE @InstanceFilter + '%')
 ORDER BY rqs.SnapshotDateUTC DESC
@@ -56,10 +58,12 @@ SELECT TOP (@MaxRows)
     rq.program_name,
     rq.database_id,
     rq.start_time_utc,
-    rq.tempdb_alloc_page_count AS TempDBAllocPages
+    rq.tempdb_alloc_page_count AS TempDBAllocPages,
+    /* For get-query-plan */
+    CONVERT(VARCHAR(18), rq.query_plan_hash, 1) AS query_plan_hash
 FROM dbo.RunningQueries rq
 INNER JOIN dbo.Instances i ON i.InstanceID = rq.InstanceID
-WHERE rq.SnapshotDateUTC >= DATEADD(HOUR, -@HoursBack, SYSUTCDATETIME())
+WHERE rq.SnapshotDateUTC >= DATEADD(HOUR, -@HoursBack, ISNULL(@ToDate, SYSUTCDATETIME())) AND (@ToDate IS NULL OR rq.SnapshotDateUTC < @ToDate)
   AND i.IsActive = 1
   AND (@InstanceFilter IS NULL OR i.InstanceDisplayName LIKE @InstanceFilter + '%')
   AND (

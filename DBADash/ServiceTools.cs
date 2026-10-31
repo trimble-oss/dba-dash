@@ -543,7 +543,7 @@ namespace DBADash
             internal static extern bool CloseHandle(IntPtr hObject);
         }
 
-        private static readonly string[] UpgradeProcessNames = ["DBADash", "DBADashServiceConfigTool", "DBADashConfig", "DBADashService"];
+        private static readonly string[] UpgradeProcessNames = ["DBADash", "DBADashServiceConfigTool", "DBADashConfig", "DBADashService", DBADash.Mcp.McpServerProcesses.ProcessName];
 
         /// <summary>
         /// Checks whether any DBA Dash processes currently running from the service folder can be terminated

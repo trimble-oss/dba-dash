@@ -1,7 +1,9 @@
 CREATE PROC AI.FailedLoginsRisk_Get(
     @MaxRows INT = 200,
     @InstanceFilter NVARCHAR(256) = NULL,
-    @HoursBack INT = 24
+    @HoursBack INT = 24,
+    /* When the window ends, for looking at a past incident.  NULL ends it now, as before. */
+    @ToDate DATETIME2(3) = NULL
 )
 AS
 SET NOCOUNT ON
@@ -13,7 +15,7 @@ SELECT TOP (@MaxRows)
     MAX(fl.LogDate) AS LastFailedLogin
 FROM dbo.Instances i
 INNER JOIN dbo.FailedLogins fl ON fl.InstanceID = i.InstanceID
-    AND fl.LogDate >= DATEADD(HOUR, -@HoursBack, SYSUTCDATETIME())
+    AND fl.LogDate >= DATEADD(HOUR, -@HoursBack, ISNULL(@ToDate, SYSUTCDATETIME())) AND (@ToDate IS NULL OR fl.LogDate < @ToDate)
 WHERE i.IsActive = 1
   AND (@InstanceFilter IS NULL OR i.InstanceDisplayName LIKE @InstanceFilter + '%')
 GROUP BY i.InstanceDisplayName
@@ -30,7 +32,7 @@ FROM dbo.FailedLogins fl
 INNER JOIN dbo.Instances i ON i.InstanceID = fl.InstanceID
 OUTER APPLY (SELECT NULLIF(CHARINDEX('''', fl.Text), 0) AS Pos1) AS Calc1
 OUTER APPLY (SELECT NULLIF(CHARINDEX('''', fl.Text, Calc1.Pos1 + 1), 0) AS Pos2) AS Calc2
-WHERE fl.LogDate >= DATEADD(HOUR, -@HoursBack, SYSUTCDATETIME())
+WHERE fl.LogDate >= DATEADD(HOUR, -@HoursBack, ISNULL(@ToDate, SYSUTCDATETIME())) AND (@ToDate IS NULL OR fl.LogDate < @ToDate)
   AND i.IsActive = 1
   AND (@InstanceFilter IS NULL OR i.InstanceDisplayName LIKE @InstanceFilter + '%')
 GROUP BY

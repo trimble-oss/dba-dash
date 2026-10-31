@@ -27,14 +27,6 @@ namespace DBADashGUI.Deadlocks
     /// </summary>
     internal static class DeadlockSchemaLookup
     {
-        /// <summary>
-        /// Definitions run long - a wide table with its indexes, a procedure with a few hundred lines
-        /// - and the whole payload has to stay a sensible thing to send.  Cut rather than drop: the
-        /// first part of a definition carries the columns and the beginning of the logic, which is
-        /// most of the value.
-        /// </summary>
-        private const int MaxDdlLength = 8000;
-
         internal static async Task<IReadOnlyList<DeadlockObjectDefinition>> FetchAsync(
             DBADashContext? context,
             DeadlockGraph graph,
@@ -42,7 +34,7 @@ namespace DBADashGUI.Deadlocks
         {
             if (context is not { InstanceID: > 0 } || graph is null) return Array.Empty<DeadlockObjectDefinition>();
 
-            var wanted = ObjectsByDatabase(graph);
+            var wanted = DeadlockSchemaObjects.ByDatabase(graph);
             if (wanted.Count == 0) return Array.Empty<DeadlockObjectDefinition>();
 
             var definitions = new List<DeadlockObjectDefinition>();
@@ -63,42 +55,6 @@ namespace DBADashGUI.Deadlocks
             }
 
             return definitions;
-        }
-
-        /// <summary>
-        /// The objects worth asking about, grouped by the database they live in: the tables and
-        /// indexes the deadlock was over, and the modules the statements were running in.
-        /// </summary>
-        private static Dictionary<string, List<string>> ObjectsByDatabase(DeadlockGraph graph)
-        {
-            var wanted = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
-
-            void Add(string? database, string? name)
-            {
-                if (string.IsNullOrWhiteSpace(database) || string.IsNullOrWhiteSpace(name)) return;
-
-                if (!wanted.TryGetValue(database!, out var objects))
-                {
-                    wanted[database!] = objects = new List<string>();
-                }
-
-                if (!objects.Contains(name!, StringComparer.OrdinalIgnoreCase)) objects.Add(name!);
-            }
-
-            foreach (var resource in graph.Resources)
-            {
-                // Object names in a graph are three part - "Sales.dbo.Orders" - so the database comes
-                // from the name itself rather than from the process that happened to be waiting.  The
-                // resource splits its own name; Add ignores anything that came back null.
-                Add(resource.DatabaseName, resource.SchemaQualifiedName);
-            }
-
-            foreach (var frame in graph.Processes.Select(p => p.PrimaryFrame).Where(f => f is { IsModule: true }))
-            {
-                Add(frame!.ModuleDatabaseName, $"{frame.ModuleSchemaName}.{frame.ModuleObjectName}");
-            }
-
-            return wanted;
         }
 
         private static async Task<List<DeadlockObjectDefinition>> FetchAsync(
@@ -127,18 +83,12 @@ namespace DBADashGUI.Deadlocks
 
             while (await reader.ReadAsync(cancellationToken))
             {
-                var ddl = SMOBaseClass.Unzip((byte[])reader["DDL"]) ?? string.Empty;
-                var truncated = ddl.Length > MaxDdlLength;
-
-                definitions.Add(new DeadlockObjectDefinition
-                {
-                    Database = database,
-                    Name = $"{reader["SchemaName"]}.{reader["ObjectName"]}",
-                    ObjectType = Convert.ToString(reader["TypeDescription"]) ?? string.Empty,
-                    AsAt = reader["SnapshotDate"] as DateTime?,
-                    Ddl = truncated ? ddl[..MaxDdlLength] + Environment.NewLine + "-- [truncated]" : ddl,
-                    Truncated = truncated
-                });
+                definitions.Add(DeadlockSchemaObjects.Definition(
+                    database,
+                    $"{reader["SchemaName"]}.{reader["ObjectName"]}",
+                    Convert.ToString(reader["TypeDescription"]) ?? string.Empty,
+                    reader["SnapshotDate"] as DateTime?,
+                    SMOBaseClass.Unzip((byte[])reader["DDL"]) ?? string.Empty));
             }
 
             return definitions;

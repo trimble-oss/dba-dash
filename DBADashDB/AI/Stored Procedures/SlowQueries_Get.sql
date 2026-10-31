@@ -1,7 +1,9 @@
 CREATE PROC AI.SlowQueries_Get(
 	@MaxRows INT = 200,
 	@InstanceFilter NVARCHAR(256) = NULL,
-	@HoursBack INT = 24
+	@HoursBack INT = 24,
+	/* When the window ends, for looking at a past incident.  NULL ends it now, as before. */
+	@ToDate DATETIME2(3) = NULL
 )
 AS
 SET NOCOUNT ON
@@ -24,7 +26,7 @@ SELECT TOP (@MaxRows)
 FROM dbo.SlowQueries sq
 INNER JOIN dbo.Instances i ON i.InstanceID = sq.InstanceID
 LEFT JOIN dbo.Databases d ON d.DatabaseID = sq.DatabaseID
-WHERE sq.timestamp >= DATEADD(HOUR, -@HoursBack, SYSUTCDATETIME())
+WHERE sq.timestamp >= DATEADD(HOUR, -@HoursBack, ISNULL(@ToDate, SYSUTCDATETIME())) AND (@ToDate IS NULL OR sq.timestamp < @ToDate)
   AND i.IsActive = 1
   AND (@InstanceFilter IS NULL OR i.InstanceDisplayName LIKE @InstanceFilter + '%')
 GROUP BY i.InstanceDisplayName, ISNULL(d.name, ''), ISNULL(NULLIF(sq.object_name, ''), '{ad-hoc}')

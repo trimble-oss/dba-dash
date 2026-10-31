@@ -1,7 +1,9 @@
 CREATE PROC AI.AgentJobAlerts_Get(
 	@MaxRows INT = 200,
 	@InstanceFilter NVARCHAR(256) = NULL,
-	@HoursBack INT = 168
+	@HoursBack INT = 168,
+	/* When the window ends, for looking at a past incident.  NULL ends it now, as before. */
+	@ToDate DATETIME2(3) = NULL
 )
 AS
 SET NOCOUNT ON
@@ -20,7 +22,7 @@ SELECT TOP (@MaxRows)
 FROM Alert.ActiveAlerts aa
 INNER JOIN dbo.Instances i ON i.InstanceID = aa.InstanceID
 WHERE (aa.AlertType LIKE '%AgentJob%' OR aa.AlertKey LIKE '%AgentJob%' OR aa.AlertKey LIKE '%Job%')
-  AND aa.UpdatedDate >= DATEADD(HOUR, -@HoursBack, SYSUTCDATETIME())
+  AND aa.UpdatedDate >= DATEADD(HOUR, -@HoursBack, ISNULL(@ToDate, SYSUTCDATETIME())) AND (@ToDate IS NULL OR aa.UpdatedDate < @ToDate)
   AND (@InstanceFilter IS NULL OR i.InstanceDisplayName LIKE @InstanceFilter + '%')
 ORDER BY aa.IsResolved ASC, aa.Priority ASC, aa.UpdatedDate DESC
 
@@ -68,7 +70,7 @@ FROM dbo.JobHistory jh
 INNER JOIN dbo.Jobs j ON j.InstanceID = jh.InstanceID AND j.job_id = jh.job_id
 INNER JOIN dbo.Instances i ON i.InstanceID = jh.InstanceID
 WHERE jh.run_status <> 1 /* not succeeded */
-  AND jh.RunDateTime >= DATEADD(HOUR, -@HoursBack, SYSUTCDATETIME())
+  AND jh.RunDateTime >= DATEADD(HOUR, -@HoursBack, ISNULL(@ToDate, SYSUTCDATETIME())) AND (@ToDate IS NULL OR jh.RunDateTime < @ToDate)
   AND j.IsActive = 1
   AND EXISTS (
 		SELECT 1

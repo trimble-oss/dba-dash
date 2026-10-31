@@ -23,10 +23,12 @@ namespace DBADashAI.Services
     /// </summary>
     public sealed partial class PerformanceInvestigation
     {
-        public const string BlockingTool = "blocking";
-        public const string WaitingQueriesTool = "waiting_queries";
-        public const string LongRunningTool = "long_running";
-        public const string DeadlockTool = "deadlock";
+        // The lookups themselves - procedures, parameters, how results read - are shared with the MCP server's tools; see
+        // PerformanceLookups.  What is here is how this service's model asks for them.
+        public const string BlockingTool = PerformanceLookups.Blocking;
+        public const string WaitingQueriesTool = PerformanceLookups.WaitingQueries;
+        public const string LongRunningTool = PerformanceLookups.LongRunning;
+        public const string DeadlockTool = PerformanceLookups.Deadlock;
 
         /// <summary>Lookups in one answer.  Each is a round trip to the model as well as a query.</summary>
         public const int DefaultMaxLookups = 3;
@@ -102,12 +104,6 @@ namespace DBADashAI.Services
         /// <summary>The reply with any lookup request taken out - for a model that asks again when it has been told it can't.</summary>
         public static string RemoveRequests(string reply) => RequestBlock().Replace(reply, string.Empty).Trim();
 
-        [GeneratedRegex(@"^[A-Za-z0-9_%]{1,60}$")]
-        private static partial Regex WaitTypePattern();
-
-        [GeneratedRegex(@"^0x[0-9A-Fa-f]{16}$")]
-        private static partial Regex SignaturePattern();
-
         /// <summary>
         /// Runs one lookup.  Returns the line the reader is shown and what the model is given back - which
         /// for a request it got wrong is what was wrong with it, so it can ask again properly.
@@ -126,32 +122,9 @@ namespace DBADashAI.Services
                 return ($"A lookup the model asked for could not be read: {reason}", $"That lookup could not be run: {ex.Message}");
             }
 
-            var parameters = new List<(string, object?)>
-            {
-                ("@InstanceID", request.InstanceId!.Value),
-                ("@FromDate", lookup.FromUtc),
-                ("@ToDate", lookup.ToUtc)
-            };
-
-            var procedure = lookup.Tool switch
-            {
-                BlockingTool => "AI.PerformanceInvestigationBlocking_Get",
-                WaitingQueriesTool => "AI.PerformanceInvestigationWaits_Get",
-                LongRunningTool => "AI.PerformanceInvestigationLongRunning_Get",
-                _ => "AI.PerformanceInvestigationDeadlock_Get"
-            };
-
-            if (lookup.Tool == WaitingQueriesTool)
-            {
-                parameters.Add(("@WaitType", lookup.WaitType));
-                parameters.Add(("@TempDBOnly", lookup.TempDBOnly));
-            }
-            else if (lookup.Tool == DeadlockTool)
-            {
-                parameters.Add(("@Signature", lookup.Signature));
-            }
-
-            var sets = await _sql.QueryMultiAsync(procedure, parameters, cancellationToken);
+            var parameters = PerformanceLookups.Parameters(lookup.Tool, request.InstanceId!.Value, lookup.FromUtc, lookup.ToUtc,
+                lookup.WaitType, lookup.TempDBOnly, lookup.Signature);
+            var sets = await _sql.QueryMultiAsync(PerformanceLookups.Procedure(lookup.Tool), parameters, cancellationToken);
 
             var period = $"{Local(lookup.FromUtc, request)} to {Local(lookup.ToUtc, request)}";
             var summary = lookup.Tool switch
@@ -194,7 +167,7 @@ namespace DBADashAI.Services
             if (tool == WaitingQueriesTool)
             {
                 waitType = Text(root, "wait_type")?.Trim().ToUpperInvariant();
-                if (waitType is null || !WaitTypePattern().IsMatch(waitType))
+                if (!PerformanceLookups.IsWaitType(waitType))
                 {
                     throw new FormatException("\"wait_type\" is required: a wait type, or a pattern such as PAGELATCH%.");
                 }
@@ -202,7 +175,7 @@ namespace DBADashAI.Services
             else if (tool == DeadlockTool)
             {
                 signature = Text(root, "signature")?.Trim();
-                if (signature is null || !SignaturePattern().IsMatch(signature))
+                if (!PerformanceLookups.IsSignature(signature))
                 {
                     throw new FormatException("\"signature\" is required, as 0x followed by 16 hex digits, as in the Deadlocks section.");
                 }
@@ -229,59 +202,13 @@ namespace DBADashAI.Services
         internal static string Local(DateTime utc, AiPerformanceAnalysisRequest request) =>
             utc.AddMinutes(request.OffsetAt(utc)).ToString(TimeFormat, CultureInfo.InvariantCulture);
 
-        private static readonly Dictionary<string, string[]> Titles = new()
-        {
-            [BlockingTool] = ["Snapshots", "Root blockers, worst first", "What the blocked sessions waited on"],
-            [WaitingQueriesTool] = ["Snapshots", "Waiting queries, most sessions first"],
-            [LongRunningTool] = ["Long running queries and transactions, longest first"],
-            [DeadlockTool] = ["Occurrences in the window", "Processes of the latest occurrences", "Resources"]
-        };
-
         /// <summary>
-        /// The result sets as the model is given them: pipe-separated tables under a title, times in the
-        /// reader's zone like everything else it has, and cut off at <see cref="MaxResultLength"/>.
+        /// The result sets as the model is given them: times in the reader's zone like everything else it has, and cut
+        /// off at <see cref="MaxResultLength"/>.
         /// </summary>
-        internal static string Format(string summary, List<List<Dictionary<string, object?>>> sets, string tool, AiPerformanceAnalysisRequest request)
-        {
-            var text = new StringBuilder();
-            text.AppendLine($"Lookup result: {summary}");
-            text.AppendLine("Times are in the same zone as the figures above.  Durations are milliseconds.  Snapshots are points in time, so durations are how long each had been running when seen.");
-            var titles = Titles.TryGetValue(tool, out var t) ? t : [];
-
-            for (var i = 0; i < sets.Count; i++)
-            {
-                text.AppendLine();
-                text.AppendLine(i < titles.Length ? $"{titles[i]}:" : $"Result {i + 1}:");
-                var rows = sets[i];
-                if (rows.Count == 0)
-                {
-                    text.AppendLine("(none)");
-                    continue;
-                }
-
-                var columns = rows[0].Keys.ToList();
-                text.AppendLine(string.Join(" | ", columns.Select(c => c.EndsWith("UTC", StringComparison.Ordinal) ? c[..^3] : c)));
-                foreach (var row in rows)
-                {
-                    text.AppendLine(string.Join(" | ", columns.Select(c => Value(row[c], request))));
-                }
-            }
-
-            var result = text.ToString();
-            return result.Length <= MaxResultLength
-                ? result
-                : result[..MaxResultLength] + Environment.NewLine + "(cut short - the rest of the result was left out)";
-        }
-
-        private static string Value(object? value, AiPerformanceAnalysisRequest request) => value switch
-        {
-            null => string.Empty,
-            DateTime time => Local(time, request),
-            bool b => b ? "yes" : "no",
-            string s => Regex.Replace(s, @"\s+", " ").Replace("|", "/").Trim(),
-            IFormattable f => f.ToString(null, CultureInfo.InvariantCulture),
-            _ => value.ToString() ?? string.Empty
-        };
+        internal static string Format(string summary, List<List<Dictionary<string, object?>>> sets, string tool, AiPerformanceAnalysisRequest request) =>
+            PerformanceLookups.Format(summary, sets, tool, time => Local(time, request),
+                "Times are in the same zone as the figures above.", timesAreLocal: true, MaxResultLength);
 
         /// <summary>What the model is told after a lookup: the result, and how many more it can have.</summary>
         public static string ResultTurn(string result, int remaining) =>
