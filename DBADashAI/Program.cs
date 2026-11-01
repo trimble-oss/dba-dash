@@ -245,6 +245,10 @@ builder.Services.AddSingleton<ToolSimilarityScorer>();
 builder.Services.AddSingleton<SystemPromptLoader>();
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<AiChatClient>();
+// The built-in AI's least masking: starts at parametersAndLiterals and follows AI.DataDetail in the repository.
+var dataDetailSetting = new AiDataDetailSetting();
+builder.Services.AddSingleton(dataDetailSetting);
+builder.Services.AddHostedService<AiDataDetailRefreshService>();
 builder.Services.AddScoped<AiRequestTelemetryService>();
 builder.Services.AddScoped<AiIntentRouter>();
 builder.Services.AddScoped<AiConfidenceScorer>();
@@ -268,10 +272,13 @@ builder.Services.AddAiTools();
 // model, so it works without an AI provider configured.  On by default in local mode, where only this
 // machine can reach it; in shared mode it has to be turned on with Mcp:Enabled.
 var mcpEnabled = builder.Configuration.GetValue<bool?>("Mcp:Enabled") ?? isLocalMode;
+var mcpMask = AiDataMask.FromConfiguration(builder.Configuration);
 if (mcpEnabled)
 {
     builder.Services
-        .AddMcpServer(options => McpToolRegistration.Configure(options, typeof(Program).Assembly.GetName().Version?.ToString()))
+        // Mcp:DataDetail for this endpoint, and never less than AI.DataDetail, the minimum for everything the service sends.
+        .AddMcpServer(options => McpToolRegistration.Configure(options, typeof(Program).Assembly.GetName().Version?.ToString(),
+            AiDataMaskSource.From(() => mcpMask.Union(dataDetailSetting.Value))))
         .WithHttpTransport();
     builder.Services.AddMcpTools();
 }
@@ -621,6 +628,7 @@ ApplyAuthAndRateLimit(app.MapPost("/api/ai/ask", async (
     AiSummaryFormatter summaryFormatter,
     AiEvidenceRanker evidenceRanker,
     AiRcaTemplateService rcaTemplateService,
+    AiDataDetailSetting dataDetail,
     CancellationToken cancellationToken) =>
 {
     var validationError = request.Validate();
@@ -631,6 +639,7 @@ ApplyAuthAndRateLimit(app.MapPost("/api/ai/ask", async (
 
     var requestId = Guid.NewGuid().ToString("N");
     var totalSw = telemetry.Start(requestId, request.Question, request.ToolName);
+    var mask = dataDetail.For(request.DataDetail);
 
     try
     {
@@ -665,7 +674,8 @@ ApplyAuthAndRateLimit(app.MapPost("/api/ai/ask", async (
             toolResults.Add(new AiToolExecutionResult
             {
                 Tool = tool.Name,
-                Data = JsonSerializer.SerializeToElement(result.Data),
+                // Masked here, by column name, before it is summarised or sent back for a follow-up.
+                Data = DBADashAI.Mcp.AiDataMasker.MaskJson(JsonSerializer.SerializeToElement(result.Data), mask),
                 Evidence = result.Evidence,
                 RowCount = result.RowCount,
                 ExecutionMs = toolSw.ElapsedMilliseconds
@@ -711,7 +721,7 @@ ApplyAuthAndRateLimit(app.MapPost("/api/ai/ask", async (
             var selectedToolNames = toolResults.Select(t => t.Tool).ToList();
             var rcaTemplate = rcaTemplateService.GetTemplate(request.Question, selectedToolNames);
             var prompt = summaryFormatter.BuildSummaryPayload(request.Question, toolResults, rankedEvidence, response.ConfidenceLabel, rcaTemplate);
-            response.Summary = await aiChat.SummarizeWithPromptAsync(prompt, cancellationToken, request.ModelOverride);
+            response.Summary = await aiChat.SummarizeWithPromptAsync(prompt, cancellationToken, request.ModelOverride, mask);
         }
 
         totalSw.Stop();
@@ -753,6 +763,7 @@ ApplyAuthAndRateLimit(app.MapPost("/api/ai/ask/follow-up", async (
     AiRequestTelemetryService telemetry,
     AiSummaryFormatter summaryFormatter,
     AiRcaTemplateService rcaTemplateService,
+    AiDataDetailSetting dataDetail,
     IConfiguration config,
     CancellationToken cancellationToken) =>
 {
@@ -766,6 +777,14 @@ ApplyAuthAndRateLimit(app.MapPost("/api/ai/ask/follow-up", async (
     if (toolResults is null)
     {
         return Results.BadRequest(new { error = "Data is not the shape ToolRuns describes." });
+    }
+
+    // The data comes back from the client as the first answer had it.  Masked again with this request's masking, in case
+    // the minimum has risen since: the backstop in ChatAsync sees it only once it is prose.
+    var mask = dataDetail.For(request.DataDetail);
+    foreach (var toolResult in toolResults)
+    {
+        toolResult.Data = AiDataMasker.MaskJson(toolResult.Data, mask);
     }
 
     var requestId = Guid.NewGuid().ToString("N");
@@ -784,7 +803,7 @@ ApplyAuthAndRateLimit(app.MapPost("/api/ai/ask/follow-up", async (
             string.IsNullOrWhiteSpace(request.ConfidenceLabel) ? "Low" : request.ConfidenceLabel!, rcaTemplate);
 
         var messages = AiConversation.Build(prompt, request.History, request.Question);
-        var result = await aiChat.ChatAsync(messages, cancellationToken, request.ModelOverride);
+        var result = await aiChat.ChatAsync(messages, cancellationToken, request.ModelOverride, mask);
 
         if (!result.Success)
         {
@@ -828,13 +847,24 @@ ApplyAuthAndRateLimit(app.MapPost("/api/ai/analyse-deadlock", async (
     AiDeadlockPromptBuilder promptBuilder,
     AiRequestTelemetryService telemetry,
     DeadlockAnalysisStore store,
+    AiDataDetailSetting dataDetail,
     IConfiguration config,
     CancellationToken cancellationToken) =>
 {
-    var validationError = request.Validate();
+    var validationError = request.Validate() ?? dataDetail.Refusal(request.DataDetail);
     if (!string.IsNullOrWhiteSpace(validationError))
     {
         return Results.BadRequest(new { error = validationError });
+    }
+
+    // The caller masked the graph before summarising it - the participants are prose the service can't mask - and said
+    // how; Refusal has checked that covers the setting.  The graph and definitions are masked again here, which changes
+    // nothing for a caller that did it right.
+    var mask = dataDetail.For(request.DataDetail);
+    request.GraphXml = DBADashAI.Mcp.AiDataMasker.MaskXml(request.GraphXml, mask);
+    foreach (var definition in request.Schema)
+    {
+        definition.Ddl = DBADashAI.Mcp.AiDataMasker.MaskSql(definition.Ddl, mask);
     }
 
     var requestId = Guid.NewGuid().ToString("N");
@@ -868,7 +898,7 @@ ApplyAuthAndRateLimit(app.MapPost("/api/ai/analyse-deadlock", async (
         // was told the first time.
         var prompt = promptBuilder.Build(request);
         var messages = AiConversation.Build(prompt, request.History, request.Question);
-        var result = await aiChat.ChatAsync(messages, cancellationToken, request.ModelOverride);
+        var result = await aiChat.ChatAsync(messages, cancellationToken, request.ModelOverride, mask);
 
         if (!result.Success)
         {
@@ -889,7 +919,7 @@ ApplyAuthAndRateLimit(app.MapPost("/api/ai/analyse-deadlock", async (
         if (!clientStores)
         {
             await store.SaveAsync(request.Signature, model, payloadVersion, analysis, request.InstanceId,
-                request.SignatureVersion, request.GraphXml, conversationId, turnNumber, request.Question,
+                request.SignatureVersion, request.GraphXml, request.DeadlockHash, conversationId, turnNumber, request.Question,
                 cancellationToken);
         }
 
@@ -930,14 +960,21 @@ ApplyAuthAndRateLimit(app.MapPost("/api/ai/analyse-plan", async (
     AiPlanPromptBuilder promptBuilder,
     AiRequestTelemetryService telemetry,
     PlanAnalysisStore store,
+    AiDataDetailSetting dataDetail,
     IConfiguration config,
     CancellationToken cancellationToken) =>
 {
-    var validationError = request.Validate();
+    var validationError = request.Validate() ?? dataDetail.Refusal(request.DataDetail);
     if (!string.IsNullOrWhiteSpace(validationError))
     {
         return Results.BadRequest(new { error = validationError });
     }
+
+    // As for a deadlock: the caller masked the plan before summarising it, Refusal has checked that covers the setting,
+    // and what can be masked again here is, which changes nothing for a caller that did it right.
+    var mask = dataDetail.For(request.DataDetail);
+    request.StatementText = DBADashAI.Mcp.AiDataMasker.MaskSql(request.StatementText, mask);
+    request.PlanXml = string.IsNullOrEmpty(request.PlanXml) ? request.PlanXml : DBADashAI.Mcp.AiDataMasker.MaskXml(request.PlanXml, mask);
 
     var requestId = Guid.NewGuid().ToString("N");
     var isFollowUp = request.History.Count > 0;
@@ -961,7 +998,7 @@ ApplyAuthAndRateLimit(app.MapPost("/api/ai/analyse-plan", async (
         // cannot quietly change the plan the first answer was about.
         var prompt = promptBuilder.Build(request);
         var messages = AiConversation.Build(prompt, request.History, request.Question);
-        var result = await aiChat.ChatAsync(messages, cancellationToken, request.ModelOverride);
+        var result = await aiChat.ChatAsync(messages, cancellationToken, request.ModelOverride, mask);
 
         if (!result.Success)
         {
@@ -1027,6 +1064,7 @@ ApplyAuthAndRateLimit(app.MapPost("/api/ai/analyse-performance", async (
     AiRequestTelemetryService telemetry,
     IConfiguration config,
     ILogger<PerformanceInvestigation> logger,
+    AiDataDetailSetting dataDetail,
     CancellationToken cancellationToken) =>
 {
     var validationError = request.Validate();
@@ -1034,6 +1072,9 @@ ApplyAuthAndRateLimit(app.MapPost("/api/ai/analyse-performance", async (
     {
         return Results.BadRequest(new { error = validationError });
     }
+
+    // The figures are aggregates with nothing to mask; the lookups the model asks for are masked as they are formatted.
+    var mask = dataDetail.For(request.DataDetail);
 
     var requestId = Guid.NewGuid().ToString("N");
     var isFollowUp = request.History.Count > 0;
@@ -1073,7 +1114,7 @@ ApplyAuthAndRateLimit(app.MapPost("/api/ai/analyse-performance", async (
 
         while (true)
         {
-            result = await aiChat.ChatAsync(messages, cancellationToken, request.ModelOverride);
+            result = await aiChat.ChatAsync(messages, cancellationToken, request.ModelOverride, mask);
             if (!result.Success)
             {
                 return AnalysisFailure(telemetry, requestId, "Performance analysis failed", result,
@@ -1098,7 +1139,7 @@ ApplyAuthAndRateLimit(app.MapPost("/api/ai/analyse-performance", async (
             string summary, lookupResult;
             try
             {
-                (summary, lookupResult) = await investigation.RunAsync(lookup, request, cancellationToken);
+                (summary, lookupResult) = await investigation.RunAsync(lookup, request, cancellationToken, mask);
                 if (summary.StartsWith("A lookup the model asked for could not be read", StringComparison.Ordinal))
                 {
                     logger.LogInformation("Performance investigation request could not be read. RequestId={RequestId}, Request={Request}",

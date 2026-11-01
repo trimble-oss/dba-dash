@@ -20,12 +20,12 @@ namespace DBADashGUI.AI
     internal sealed record AgentAsk(string Prompt, string? ArtifactFile, string? Artifact, Func<string, Dictionary<string, string>> Arguments)
     {
         public static AgentAsk Deadlock(string graphXml, string deadlockHash, string? instance) =>
-            new("analyse-deadlock", $"deadlock-{AgentHandoff.Safe(deadlockHash)}.xdl", graphXml,
+            new("analyse-deadlock", $"deadlock-{AgentHandoff.Safe(deadlockHash)}-{AgentHandoff.Unique()}.xdl", graphXml,
                 path => instance is null ? new() { ["path"] = path } : new() { ["path"] = path, ["instance"] = instance });
 
         /// <param name="statement">The statement shown, numbered from 1 among those with plans.</param>
         public static AgentAsk Plan(string planXml, string title, int statement) =>
-            new("analyse-query-plan", $"plan-{AgentHandoff.Safe(title)}-{DateTime.Now:yyyyMMddHHmmss}.sqlplan", planXml,
+            new("analyse-query-plan", $"plan-{AgentHandoff.Safe(title)}-{AgentHandoff.Unique()}.sqlplan", planXml,
                 path => new() { ["path"] = path, ["statement"] = statement.ToString() });
 
         public static AgentAsk Performance(string instance, DateTime fromUtc, DateTime toUtc, bool latchesAndSpinlocks)
@@ -43,7 +43,7 @@ namespace DBADashGUI.AI
     }
 
     /// <summary>An <see cref="AgentAsk"/> written to the workspace: the request file and the prompt text in it.</summary>
-    internal sealed record PreparedAsk(string RequestPath, string RequestRelativePath, string Text);
+    internal sealed record PreparedAsk(string RequestPath, string RequestRelativePath, string Text, string McpConfigFile);
 
     /// <summary>
     /// Hands a deadlock, a plan or an instance's performance to an AI tool that has DBA Dash's MCP server: the GUI's Ask
@@ -62,32 +62,60 @@ namespace DBADashGUI.AI
     /// </summary>
     internal static class AgentHandoff
     {
-        /// <summary>The workspace's MCP config, which a Claude Code session is started with.</summary>
-        internal const string McpConfigFile = "dbadash.mcp.json";
+        /// <summary>The workspace's one MCP config before each request had its own, removed when the workspace is next prepared.</summary>
+        internal const string LegacyMcpConfigFile = "dbadash.mcp.json";
+
+        /// <summary>
+        /// The MCP config a Claude Code session is started with, named for what is in it - the request's masking and a hash
+        /// of the rest - so preparing another request never changes a file a session already started from.  Claude Code
+        /// starts the server again from it when a session is resumed or reconnects, and that server must mask as the
+        /// session's own request said.
+        /// </summary>
+        internal static string McpConfigFileFor(McpServerEntry entry, string dataDetail)
+        {
+            var hash = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(entry.ToConfigJson())))[..8].ToLowerInvariant();
+            return $"dbadash.{dataDetail}.{hash}.mcp.json";
+        }
 
         internal static string McpExe => Path.Combine(Application.StartupPath, "DBADashMCP.exe");
 
+        /// <summary>Where every tool's handoff is prepared - Claude Code, VS Code, Cursor or a copied prompt.</summary>
         internal static string Workspace => Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "DBADash", "AIWorkspace");
+
+        /// <summary>The workspace before it was named for every tool: left to empty out, then removed - see <see cref="CleanUp()"/>.</summary>
+        internal static string LegacyWorkspace => Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "DBADash", "ClaudeCode");
 
-        /// <summary>Writes the workspace, the artifact and the request; returns where the request is and what it says.</summary>
-        public static PreparedAsk Prepare(AgentAsk ask, string? workspace = null, string? connectionName = null)
+        /// <summary>How long a handed-over file is kept: long enough for a session to come back to it.</summary>
+        internal static readonly TimeSpan KeepFor = TimeSpan.FromDays(7);
+
+        /// <summary>
+        /// Writes the workspace, the artifact and the request; returns where the request is and what it says.
+        ///
+        /// <paramref name="mask"/> is this request's masking - the user's MCP setting unless the Ask menu changed it.  It is
+        /// applied to the artifact as it is written, since the tool can read the file directly as well as through
+        /// describe-query-plan, and it is what the workspace's own MCP server is started with.  A tool using a dbadash
+        /// server registered with it masks that server's results as Options > Connect AI Tools says, read on each call.
+        /// </summary>
+        public static PreparedAsk Prepare(AgentAsk ask, AiDataMask? mask = null, string? workspace = null, string? connectionName = null)
         {
             workspace ??= Workspace;
-            PrepareWorkspace(workspace, connectionName ?? CurrentConnectionName(), McpExe);
+            var dataMask = mask ?? DataDetailLevels.McpCurrentMask();
+            var mcpConfig = PrepareWorkspace(workspace, connectionName ?? CurrentConnectionName(), McpExe, dataMask.Word);
 
             var artifactPath = string.Empty;
             if (ask.ArtifactFile is not null)
             {
                 artifactPath = Path.Combine(workspace, "artifacts", ask.ArtifactFile);
-                File.WriteAllText(artifactPath, ask.Artifact);
+                File.WriteAllText(artifactPath, AiDataMasker.MaskXml(ask.Artifact, dataMask));
             }
 
             var text = Render(ask.Prompt, ask.Arguments(artifactPath));
             var relative = Path.Combine("requests", $"{ask.Prompt}-{DateTime.Now:yyyyMMdd-HHmmss}.md");
             var path = Path.Combine(workspace, relative);
             File.WriteAllText(path, text);
-            return new PreparedAsk(path, relative, text);
+            return new PreparedAsk(path, relative, text, mcpConfig);
         }
 
         /// <summary>The MCP server's own analyse prompt for these arguments - the same text /mcp__dbadash__ would give.</summary>
@@ -99,18 +127,22 @@ namespace DBADashGUI.AI
 
         /// <summary>
         /// Writes the workspace's own files, every time - so a moved install or a different repository connection is
-        /// picked up - and clears out artifacts and requests more than a week old.  Anything else in the folder is left.
+        /// picked up - and clears out artifacts, requests and MCP configs more than a week old.  Anything else in the folder
+        /// is left.  Returns the request's MCP config file, which pins <paramref name="dataDetail"/> for its server.
         /// </summary>
-        internal static void PrepareWorkspace(string workspace, string? connectionName, string mcpExe)
+        internal static string PrepareWorkspace(string workspace, string? connectionName, string mcpExe, string dataDetail)
         {
             Directory.CreateDirectory(Path.Combine(workspace, ".claude"));
             Directory.CreateDirectory(Path.Combine(workspace, "artifacts"));
             Directory.CreateDirectory(Path.Combine(workspace, "requests"));
 
             // Not .mcp.json: Claude Code loads it with --mcp-config, and a project .mcp.json would clash with a dbadash the
-            // user has registered for themselves if they started claude here on their own.
-            var entry = McpServerEntry.ForConnection(mcpExe, connectionName);
-            File.WriteAllText(Path.Combine(workspace, McpConfigFile), entry.ToConfigJson());
+            // user has registered for themselves if they started claude here on their own.  Rewritten with the same
+            // content when it is there already, which keeps it from being cleared out while it is still being used.
+            var entry = McpServerEntry.ForConnection(mcpExe, connectionName, dataDetail);
+            var mcpConfig = McpConfigFileFor(entry, dataDetail);
+            File.WriteAllText(Path.Combine(workspace, mcpConfig), entry.ToConfigJson());
+            TryDelete(Path.Combine(workspace, LegacyMcpConfigFile));
 
             // The server's tools - all read-only - allowed without asking.
             var settings = new JsonObject
@@ -121,19 +153,72 @@ namespace DBADashGUI.AI
 
             File.WriteAllText(Path.Combine(workspace, "CLAUDE.md"), ClaudeMd(connectionName));
 
-            foreach (var folder in new[] { "artifacts", "requests" })
+            CleanUp(workspace);
+            return mcpConfig;
+        }
+
+        /// <summary>
+        /// Clears what the Ask button has handed over that is older than <see cref="KeepFor"/>: run each time it is used,
+        /// and when the GUI starts, so the files don't stay for good when it isn't used again.  The workspace before it was
+        /// renamed is cleared the same way, and removed once nothing in it is newer - a session still open there keeps it
+        /// until then.  Never throws: a file in use is left for next time.
+        /// </summary>
+        public static void CleanUp()
+        {
+            CleanUp(Workspace);
+
+            var legacy = LegacyWorkspace;
+            if (!Directory.Exists(legacy)) return;
+            try
             {
-                foreach (var file in Directory.GetFiles(Path.Combine(workspace, folder)))
+                foreach (var file in Directory.GetFiles(legacy, "*", SearchOption.AllDirectories).Where(IsOld))
                 {
-                    try
-                    {
-                        if (File.GetLastWriteTimeUtc(file) < DateTime.UtcNow.AddDays(-7)) File.Delete(file);
-                    }
-                    catch (IOException)
-                    {
-                        // In use: next time.
-                    }
+                    TryDelete(file);
                 }
+
+                if (Directory.GetFiles(legacy, "*", SearchOption.AllDirectories).Length == 0)
+                {
+                    Directory.Delete(legacy, recursive: true);
+                }
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                Serilog.Log.Debug(ex, "Couldn't clear {Folder}", legacy);
+            }
+        }
+
+        /// <summary>The workspace's handed-over files - artifacts, requests and per-request MCP configs - older than <see cref="KeepFor"/>.</summary>
+        internal static void CleanUp(string workspace)
+        {
+            try
+            {
+                var files = new[] { "artifacts", "requests" }
+                    .Select(folder => Path.Combine(workspace, folder))
+                    .Where(Directory.Exists)
+                    .SelectMany(Directory.GetFiles)
+                    .Concat(Directory.Exists(workspace) ? Directory.GetFiles(workspace, "dbadash.*.mcp.json") : []);
+                foreach (var file in files.Where(IsOld))
+                {
+                    TryDelete(file);
+                }
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                Serilog.Log.Debug(ex, "Couldn't clear {Folder}", workspace);
+            }
+        }
+
+        private static bool IsOld(string file) => File.GetLastWriteTimeUtc(file) < DateTime.UtcNow - KeepFor;
+
+        private static void TryDelete(string file)
+        {
+            try
+            {
+                File.Delete(file);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                // In use: next time.
             }
         }
 
@@ -142,13 +227,14 @@ namespace DBADashGUI.AI
             var text = new StringBuilder();
             text.AppendLine("# DBA Dash workspace");
             text.AppendLine();
-            text.AppendLine("The DBA Dash GUI opens AI tools here when its user clicks Ask.  DBA Dash rewrites this file, `dbadash.mcp.json` and `.claude/settings.json` each time, and clears `artifacts/` and `requests/` of files more than a week old.");
+            text.AppendLine("The DBA Dash GUI opens AI tools here when its user clicks Ask.  DBA Dash rewrites this file and `.claude/settings.json` each time, writes a `dbadash.*.mcp.json` for each request's masking, and clears those, `artifacts/` and `requests/` of files more than a week old.");
             text.AppendLine();
             text.AppendLine("DBA Dash monitors SQL Server instances and keeps what it collects in a repository database.  The `dbadash` MCP server reads that repository " +
                             $"({(connectionName is null ? "the GUI's default connection" : $"the GUI connection `{connectionName}`")}) as the user, read-only - it never connects to the monitored instances and changes nothing.  Its tools are allowed here without asking.");
             text.AppendLine();
             text.AppendLine("- `requests/` holds what the user asked for, written by the GUI.  Do what the request says, using the `dbadash` tools.");
             text.AppendLine("- `artifacts/` holds the deadlock graph or plan the request is about, for `describe-deadlock-graph` or `describe-query-plan`.");
+            text.AppendLine("- DBA Dash may mask what it hands over: `?` for a literal, `(value A)` for a parameter value (the same placeholder is the same value), `[withheld]` for text left out, `login#…`, `host#…` and `app#…` for a login, host or application name (the same code is the same name).  These are masking, not the query.");
             text.AppendLine("- Times from the tools are UTC.  The user sees the GUI in their own time zone, so say UTC when you give a time.");
             text.AppendLine("- `get-gui-context` says what the user has open in the GUI now - for a follow-up question about \"this instance\" or \"now\".");
             text.AppendLine("- When the user asks for a change - an index, a setting, a code fix - write it out for them to review and run.  Nothing here can run it.");
@@ -158,6 +244,12 @@ namespace DBADashGUI.AI
         /// <summary>The saved GUI connection the repository is open on, which the workspace's MCP server is started with.</summary>
         private static string? CurrentConnectionName() =>
             Common.ConnectionString is { } cs ? RepositoryConnectionList.GetRepositoryConnectionList().FindByConnectionString(cs)?.Name : null;
+
+        /// <summary>
+        /// A part of a file name that no other handoff has: a session started earlier keeps reading the file it was given,
+        /// masked as it was then, however the same deadlock or plan is handed over again.
+        /// </summary>
+        internal static string Unique() => $"{DateTime.Now:yyyyMMddHHmmss}-{Guid.NewGuid():N}"[..23];
 
         /// <summary>A name safe for a file: a hash or a tab title, with anything a path can't hold replaced.</summary>
         internal static string Safe(string value)
@@ -281,13 +373,13 @@ namespace DBADashGUI.AI
 
         public override string? Launch(PreparedAsk ask)
         {
-            AgentHandoff.StartCli(cli, Arguments($"Read {ask.RequestRelativePath} and do what it asks."), AgentHandoff.Workspace, keepWindow: true);
+            AgentHandoff.StartCli(cli, Arguments(ask.McpConfigFile, $"Read {ask.RequestRelativePath} and do what it asks."), AgentHandoff.Workspace, keepWindow: true);
             return null;
         }
 
         /// <summary>--mcp-config and --allowedTools each take a list, so -- ends them: without it the prompt is read as one more.</summary>
-        internal static IReadOnlyList<string> Arguments(string prompt) =>
-            ["--strict-mcp-config", "--mcp-config", AgentHandoff.McpConfigFile, "--allowedTools", $"mcp__{McpServerEntry.ServerName}", "--", prompt];
+        internal static IReadOnlyList<string> Arguments(string mcpConfig, string prompt) =>
+            ["--strict-mcp-config", "--mcp-config", mcpConfig, "--allowedTools", $"mcp__{McpServerEntry.ServerName}", "--", prompt];
     }
 
     /// <summary>

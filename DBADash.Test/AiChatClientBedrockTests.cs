@@ -63,7 +63,8 @@ namespace DBADash.Test
             var client = new AiChatClient(config,
                 new FakeFactory(handler),
                 NullLogger<AiChatClient>.Instance,
-                new SystemPromptLoader(config, NullLogger<SystemPromptLoader>.Instance));
+                new SystemPromptLoader(config, NullLogger<SystemPromptLoader>.Instance),
+                new DBADashAI.Services.AiDataDetailSetting());
             return (client, handler);
         }
 

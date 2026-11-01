@@ -41,6 +41,7 @@ namespace DBADashAI.Services
             int? instanceId,
             byte? signatureVersion,
             string? graphXml,
+            string? deadlockHash,
             Guid conversationId,
             int turnNumber,
             string? question,
@@ -72,10 +73,11 @@ namespace DBADashAI.Services
                     string.IsNullOrWhiteSpace(question) ? DBNull.Value : question;
                 // The graph the answer was produced from, so its signature can be recomputed when the version changes.
                 command.Parameters.Add("@GraphXml", SqlDbType.NVarChar, -1).Value = (object?)graphXml ?? DBNull.Value;
-                // Hashed here rather than taken from the caller, so every stored answer gets one.  The viewer sends the
-                // graph as the parser re-serialised it, which is what the collector hashes too.
+                // The caller's hash of the graph it masked this one from, or hashed here, so every stored answer gets one.
+                // The viewer hashes the graph as the parser re-serialised it, which is what the collector hashes too.
                 command.Parameters.Add("@DeadlockHash", SqlDbType.Binary, DeadlockHash.Bytes).Value =
-                    string.IsNullOrWhiteSpace(graphXml) ? DBNull.Value : (object)DeadlockHash.Compute(graphXml);
+                    !string.IsNullOrWhiteSpace(deadlockHash) ? Convert.FromHexString(deadlockHash[2..])
+                    : string.IsNullOrWhiteSpace(graphXml) ? DBNull.Value : (object)DeadlockHash.Compute(graphXml);
 
                 await connection.OpenAsync(cancellationToken);
                 await command.ExecuteNonQueryAsync(cancellationToken);

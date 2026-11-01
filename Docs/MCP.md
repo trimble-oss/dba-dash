@@ -47,15 +47,15 @@ The menu lists the tools available on your machine:
 
 If none of these is available, the button isn't shown. **Options > Connect AI Tools** registers DBA Dash with the tools. The menu checks again each time it opens, so a tool you register while the GUI is running appears straight away.
 
-Whichever tool you pick, the GUI prepares a DBA Dash workspace folder, `%LOCALAPPDATA%\DBADash\ClaudeCode`, the same way each time:
+Whichever tool you pick, the GUI prepares a DBA Dash workspace folder, `%LOCALAPPDATA%\DBADash\AIWorkspace`, the same way each time:
 
-- `dbadash.mcp.json` starts DBA Dash's MCP server with the GUI's current repository connection, for Claude Code. Its session uses only this server, so a `dbadash` you registered yourself, with another copy or connection, doesn't get in the way.
+- `dbadash.<masking>.<hash>.mcp.json` starts DBA Dash's MCP server with the GUI's current repository connection and the request's masking, for Claude Code. Each request gets its own, so a later request never changes the masking of a session already open. Its session uses only this server, so a `dbadash` you registered yourself, with another copy or connection, doesn't get in the way.
 - `.claude/settings.json` allows the server's tools, which only read, so Claude Code doesn't ask before each one.
 - `CLAUDE.md` tells Claude Code what DBA Dash is and how the folder works.
 - `artifacts/` holds the deadlock graph or plan as a file, so the answer is about the one you clicked on, even if you've moved on in the GUI by the time the tool reads it.
 - `requests/` holds the full prompt, the same one the `analyse-*` prompts give.
 
-Cursor, VS Code and pasted prompts use the `dbadash` server registered with that tool, so they read the artifact through the local `DBADashMCP.exe`. Files in `artifacts/` and `requests/` are removed after a week. The first time Claude Code opens the folder, it asks whether you trust it.
+Cursor, VS Code and pasted prompts use the `dbadash` server registered with that tool, so they read the artifact through the local `DBADashMCP.exe`. Files in `artifacts/` and `requests/`, and the MCP configs, are removed after a week - each time you use Ask, and when the GUI starts. Before this folder was used for every tool it was `%LOCALAPPDATA%\DBADash\ClaudeCode`; that folder is emptied the same way and then removed. The first time Claude Code opens the folder, it asks whether you trust it.
 
 ### Server processes
 

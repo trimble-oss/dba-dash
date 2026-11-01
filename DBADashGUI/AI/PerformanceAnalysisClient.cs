@@ -51,7 +51,8 @@ namespace DBADashGUI.AI
             string? modelOverride = null,
             AiConversation? conversation = null,
             string? question = null,
-            bool allowInvestigation = false)
+            bool allowInvestigation = false,
+            string? dataDetail = null)
         {
             // Everything said so far.  The figures are not in here: the service builds the opening question
             // from the payload below on every turn, so a follow-up cannot quietly change them.
@@ -71,6 +72,7 @@ namespace DBADashGUI.AI
                     sections = payload.Sections.Select(s => new { title = s.Title, content = s.Content }),
                     payloadVersion = payload.Version,
                     allowInvestigation,
+                    dataDetail,
                     fromUtc = payload.FromUtc,
                     toUtc = payload.ToUtc,
                     utcOffsetMinutes = payload.UtcOffsetMinutes,
@@ -112,7 +114,8 @@ namespace DBADashGUI.AI
             AiConversation? conversation = null,
             string? question = null,
             string? modelOverride = null,
-            bool allowInvestigation = false)
+            bool allowInvestigation = false,
+            string? dataDetail = null)
         {
             try
             {
@@ -123,7 +126,7 @@ namespace DBADashGUI.AI
 
                 using var request = new HttpRequestMessage(HttpMethod.Post, $"{baseUrl.TrimEnd('/')}/api/ai/analyse-performance")
                 {
-                    Content = new StringContent(ToJson(payload, modelOverride, conversation, question, allowInvestigation), Encoding.UTF8, "application/json")
+                    Content = new StringContent(ToJson(payload, modelOverride, conversation, question, allowInvestigation, dataDetail), Encoding.UTF8, "application/json")
                 };
 
                 var apiKey = service.ApiKey ?? await AIApiKeyProvider.GetApiKeyAsync();

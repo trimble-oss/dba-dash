@@ -71,6 +71,12 @@ namespace DBADashGUI.AI
         Margin = new Padding(0, 0, 4, 0)
     };
     private readonly Button btnAsk = new() { Text = "Ask", Dock = DockStyle.Fill, MinimumSize = new System.Drawing.Size(0, 36) };
+
+    // This question's masking: the same options as the plan, deadlock and performance panels, starting where the last
+    // change in any of them left off.  The service never masks less than its own setting, whatever these say.  A
+    // follow-up keeps the masking its question was asked with.
+    private readonly AiMasking.MaskToggles _masking = AiMasking.Toggles(() => { });
+    private DBADashAI.Mcp.AiDataMask _conversationMask = DBADashAI.Mcp.AiDataMask.Default;
     private readonly TextBox txtSummary = new() { Dock = DockStyle.Fill, Multiline = true, ScrollBars = ScrollBars.Vertical, ReadOnly = true };
     private readonly TextBox txtJson = new() { Dock = DockStyle.Fill, Multiline = true, ScrollBars = ScrollBars.Both, ReadOnly = true, WordWrap = false };
     private readonly AiConversationView conversationView = new() { Dock = DockStyle.Fill };
@@ -544,7 +550,23 @@ namespace DBADashGUI.AI
         headerPanel.ColumnStyles.Add(modelColumn);
         headerPanel.Resize += (_, _) => FitModelPicker();
         headerPanel.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        headerPanel.Controls.Add(questionLabel, 0, 0);
+        var questionHeader = new FlowLayoutPanel { AutoSize = true, Dock = DockStyle.Fill, WrapContents = false, Margin = new Padding(0) };
+        questionHeader.Controls.Add(questionLabel);
+        var masking = new ToolStripDropDownButton("Masking")
+        {
+            ToolTipText = "What is masked in what the tools return, for this question."
+        };
+        masking.DropDownItems.AddRange(_masking.Items);
+        questionHeader.Controls.Add(new ToolStrip
+        {
+            GripStyle = ToolStripGripStyle.Hidden,
+            Dock = DockStyle.None,
+            AutoSize = true,
+            BackColor = System.Drawing.Color.Transparent,
+            Margin = new Padding(12, 0, 0, 0),
+            Items = { masking }
+        });
+        headerPanel.Controls.Add(questionHeader, 0, 0);
         headerPanel.Controls.Add(lblModel, 1, 0);
         headerPanel.Controls.Add(cboModel, 2, 0);
 
@@ -916,6 +938,7 @@ namespace DBADashGUI.AI
         }
 
         var question = txtQuestion.Text;
+        if (!AiMasking.ConfirmUnmasked(_masking.Mask, FindForm())) return;
 
         // A new question is a new conversation.
         ResetAnswer();
@@ -927,13 +950,15 @@ namespace DBADashGUI.AI
             SetBusy(true, "Running AI analysis...");
 
             var selectedModel = (cboModel.SelectedItem as ModelItem)?.ModelName;
+            _conversationMask = _masking.Mask;
             var payload = new
             {
                 question,
                 toolName = _configuredToolName,
                 includeAiSummary = _configuredIncludeSummary,
                 maxRows = _configuredMaxRows,
-                modelOverride = string.IsNullOrWhiteSpace(selectedModel) ? (string?)null : selectedModel
+                modelOverride = string.IsNullOrWhiteSpace(selectedModel) ? (string?)null : selectedModel,
+                dataDetail = _conversationMask.Word
             };
 
             var (response, body) = await PostJsonAsync("/api/ai/ask", payload);
@@ -1043,7 +1068,8 @@ namespace DBADashGUI.AI
                 confidenceLabel = context.ConfidenceLabel,
                 history = conversation.ToHistory(),
                 question,
-                modelOverride = string.IsNullOrWhiteSpace(selectedModel) ? (string?)null : selectedModel
+                modelOverride = string.IsNullOrWhiteSpace(selectedModel) ? (string?)null : selectedModel,
+                dataDetail = _conversationMask.Word
             };
 
             var (response, body) = await PostJsonAsync("/api/ai/ask/follow-up", payload);

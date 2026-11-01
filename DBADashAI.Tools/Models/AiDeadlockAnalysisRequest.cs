@@ -36,6 +36,16 @@ namespace DBADashAI.Models
             new(@"\A0x[0-9a-fA-F]{16}\z", RegexOptions.CultureInvariant);
 
         /// <summary>
+        /// The occurrence hash of the graph the caller masked <see cref="GraphXml"/> from, in "0x..." hex - what the
+        /// collector stored for this deadlock.  Without it the service hashes <see cref="GraphXml"/>, which for a masked
+        /// graph matches nothing the collector stored.
+        /// </summary>
+        public string? DeadlockHash { get; set; }
+
+        private static readonly Regex DeadlockHashPattern =
+            new(@"\A0x[0-9a-fA-F]{32}\z", RegexOptions.CultureInvariant);
+
+        /// <summary>
         /// The version of the signature algorithm the caller computed <see cref="Signature"/> with.  Stored with the
         /// analysis, alongside the graph, so the signature can be recomputed when the version changes.  Null from
         /// callers that predate it, which the recompute treats as older than any version.
@@ -76,6 +86,12 @@ namespace DBADashAI.Models
 
         /// <summary>Override the configured AI model for this request.  Null = use configured default.</summary>
         public string? ModelOverride { get; set; }
+
+        /// <summary>
+        /// The masking the caller applied to the graph before building this payload, as an <see cref="Mcp.AiDataMask"/>
+        /// word.  Null means none.  The service refuses a request masked less than its own setting requires.
+        /// </summary>
+        public string? DataDetail { get; set; }
 
         /// <summary>
         /// What has been said about this deadlock already, when this is a follow-up: the model's first
@@ -131,6 +147,11 @@ namespace DBADashAI.Models
             if (!string.IsNullOrWhiteSpace(Signature) && !SignaturePattern.IsMatch(Signature!))
             {
                 return "Signature is not a deadlock signature.";
+            }
+
+            if (!string.IsNullOrWhiteSpace(DeadlockHash) && !DeadlockHashPattern.IsMatch(DeadlockHash!))
+            {
+                return "DeadlockHash is not a deadlock hash.";
             }
 
             if (Schema.Sum(s => s.Ddl?.Length ?? 0) > MaxSchemaLength)

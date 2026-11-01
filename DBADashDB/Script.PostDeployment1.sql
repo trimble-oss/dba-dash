@@ -21,6 +21,8 @@ GRANT SELECT ON SCHEMA::Alert TO App;
 GRANT SELECT ON SCHEMA::Alert TO AppReadOnly
 GRANT EXECUTE ON SCHEMA::AI TO AIService;
 GRANT EXECUTE ON OBJECT::AI.ServiceConfig_Get TO AIUser;
+GRANT EXECUTE ON OBJECT::AI.DataDetail_Get TO AIUser;
+GRANT EXECUTE ON OBJECT::AI.DataDetail_Set TO AIUser;
 /* DBADashMCP.exe reads the repository as the user running it.  McpUser runs the summary procs its tools are built
    on, and nothing else in the AI schema - not the service config, API keys or stored analyses.  The procs read
    dbo tables through ownership chaining, so no SELECT is needed. */

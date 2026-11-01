@@ -102,7 +102,7 @@ namespace DBADash.Test
 
             StringAssert.Contains(text, "Root blockers, worst first:");
             StringAssert.Contains(text, "ObjectName | StatementText | FirstSeen");
-            StringAssert.Contains(text, "dbo.usp_Orders | UPDATE Orders / SET x = 1 | 2026-10-18 11:00");
+            StringAssert.Contains(text, "dbo.usp_Orders | UPDATE Orders / SET x = ? | 2026-10-18 11:00");
             StringAssert.Contains(text, "(none)");
 
             var big = new List<Dictionary<string, object>>();

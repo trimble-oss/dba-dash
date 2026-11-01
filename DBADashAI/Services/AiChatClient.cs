@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using DBADashAI.Mcp;
 using DBADashAI.Models;
 
 namespace DBADashAI.Services
@@ -10,13 +11,16 @@ namespace DBADashAI.Services
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger<AiChatClient> _logger;
         private readonly SystemPromptLoader _systemPromptLoader;
+        private readonly AiDataDetailSetting _dataDetail;
 
-        public AiChatClient(IConfiguration configuration, IHttpClientFactory httpClientFactory, ILogger<AiChatClient> logger, SystemPromptLoader systemPromptLoader)
+        public AiChatClient(IConfiguration configuration, IHttpClientFactory httpClientFactory, ILogger<AiChatClient> logger, SystemPromptLoader systemPromptLoader, AiDataDetailSetting? dataDetail = null)
         {
             _configuration = configuration;
             _httpClientFactory = httpClientFactory;
             _logger = logger;
             _systemPromptLoader = systemPromptLoader;
+            // The service registers the shared setting; without it the default is the masked one, never full.
+            _dataDetail = dataDetail ?? new AiDataDetailSetting();
         }
 
         private string SystemPrompt => _systemPromptLoader.Prompt;
@@ -29,11 +33,12 @@ namespace DBADashAI.Services
         /// the provider refused is a perfectly good thing to show in place of one.  An analysis is
         /// stored, which is why that caller has to be able to tell the two apart.
         /// </summary>
-        public async Task<string> SummarizeWithPromptAsync(string userPrompt, CancellationToken cancellationToken, string? modelOverride = null) =>
+        public async Task<string> SummarizeWithPromptAsync(string userPrompt, CancellationToken cancellationToken, string? modelOverride = null, AiDataMask? mask = null) =>
             (await ChatAsync(
                 new[] { new AiConversationTurn { Role = AiConversationTurn.User, Content = userPrompt } },
                 cancellationToken,
-                modelOverride)).Text;
+                modelOverride,
+                mask)).Text;
 
         /// <summary>
         /// Sends a conversation and returns the next answer.
@@ -42,13 +47,28 @@ namespace DBADashAI.Services
         /// everything said so far on every turn.  Both providers take the same alternating
         /// user/assistant array, so the only difference between a first analysis and a tenth
         /// follow-up is the length of the list.
+        ///
+        /// <paramref name="mask"/> is the request's masking, which the caller has applied at the source already; it is
+        /// never less than the service's setting.
         /// </summary>
-        public async Task<AiChatResult> ChatAsync(IReadOnlyList<AiConversationTurn> messages, CancellationToken cancellationToken, string? modelOverride = null)
+        public async Task<AiChatResult> ChatAsync(IReadOnlyList<AiConversationTurn> messages, CancellationToken cancellationToken, string? modelOverride = null, AiDataMask? mask = null)
         {
             if (messages.Count == 0)
             {
                 return AiChatResult.Failed(AiChatFailure.NotConfigured, "Nothing was asked.");
             }
+
+            // The backstop: every turn is filtered before it reaches a provider, whichever tool the data came from - this
+            // is the one place all of the built-in AI's text leaves the service.  The data was masked where it was still
+            // structured; this catches XML and JSON that reached a prompt some other way.  See AiDataDetailSetting.
+            var dataMask = (mask ?? _dataDetail.Value).Union(_dataDetail.Value);
+            messages = messages
+                .Select(turn => new AiConversationTurn
+                {
+                    Role = turn.Role,
+                    Content = AiDataMasker.FilterText(turn.Content, dataMask)
+                })
+                .ToList();
 
             var provider = _configuration["AI:Provider"]?.Trim();
 

@@ -119,7 +119,7 @@ namespace DBADashAI.Mcp
             var execution = new AiToolExecutionResult
             {
                 Tool = ProtocolTool.Name,
-                Data = McpResultNotes.RoundNumbers(JsonSerializer.SerializeToElement(new { rows, coverage })),
+                Data = McpResultNotes.RoundNumbers(AiDataMasker.MaskJson(JsonSerializer.SerializeToElement(new { rows, coverage }), Mask)),
                 RowCount = rows.Count,
                 Evidence = []
             };

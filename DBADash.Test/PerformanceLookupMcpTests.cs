@@ -33,7 +33,7 @@ namespace DBADash.Test
             StringAssert.Contains(text, "SnapshotDateUTC | Blocked");
             StringAssert.Contains(text, "2026-10-24 14:00:00 | 3");
             StringAssert.Contains(text, "Root blockers, worst first:");
-            StringAssert.Contains(text, "55 | UPDATE dbo.T SET x = 1 / 2 | yes", "Whitespace collapsed and pipes kept out of the table.");
+            StringAssert.Contains(text, "55 | UPDATE dbo.T SET x = ? / ? | yes", "Whitespace collapsed, pipes kept out of the table and literals masked.");
             StringAssert.Contains(text, "What the blocked sessions waited on:\n(none)".Replace("\n", Environment.NewLine));
         }
 

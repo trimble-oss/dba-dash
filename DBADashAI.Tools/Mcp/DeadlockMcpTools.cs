@@ -109,7 +109,7 @@ namespace DBADashAI.Mcp
             IReadOnlyList<DeadlockGraph> graphs;
             try
             {
-                graphs = DeadlockParser.Parse(Convert.ToString(rows[0]["DeadlockGraph"]));
+                graphs = DeadlockParser.Parse(AiDataMasker.MaskXml(Convert.ToString(rows[0]["DeadlockGraph"]), Mask));
             }
             catch (DeadlockParseException ex)
             {
@@ -127,13 +127,14 @@ namespace DBADashAI.Mcp
                 heading += $"  The stored graph holds {graphs.Count} deadlocks; this is the first.";
             }
 
-            return await DescribeAsync(graphs[0], instance, instanceId, heading, includeSchema, sql, cancellationToken);
+            return await DescribeAsync(graphs[0], instance, instanceId, heading, includeSchema, sql, Mask, cancellationToken);
         }
 
         /// <summary>
         /// A deadlock as get-deadlock describes it, wherever the graph came from - the repository here, the GUI's viewer
         /// for the local server's get-open-deadlock.  Object definitions are looked up only with an
-        /// <paramref name="instanceId"/>, since the schema snapshots are per instance.
+        /// <paramref name="instanceId"/>, since the schema snapshots are per instance.  The graph must already be masked -
+        /// parsed from <see cref="AiDataMasker.MaskXml"/>; the object definitions are masked here.
         /// </summary>
         public static async Task<string> DescribeAsync(
             DeadlockGraph graph,
@@ -142,15 +143,20 @@ namespace DBADashAI.Mcp
             string heading,
             bool includeSchema,
             SqlToolExecutor sql,
+            AiDataMask mask,
             CancellationToken cancellationToken)
         {
             var schema = includeSchema && instanceId is { } id
-                ? await FetchSchemaAsync(sql, id, graph, cancellationToken)
+                ? await FetchSchemaAsync(sql, id, graph, mask, cancellationToken)
                 : [];
             var payload = DeadlockAnalysisPayload.Build(graph, DeadlockAnalyser.Analyse(graph), instance, schema);
 
             var text = new StringBuilder();
             text.AppendLine(heading);
+            if (GetQueryPlanTool.MaskNote(mask) is { } note)
+            {
+                text.AppendLine(note);
+            }
 
             if (includeSchema && schema.Count == 0)
             {
@@ -195,6 +201,7 @@ namespace DBADashAI.Mcp
             SqlToolExecutor sql,
             int instanceId,
             DeadlockGraph graph,
+            AiDataMask mask,
             CancellationToken cancellationToken)
         {
             var definitions = new List<DeadlockObjectDefinition>();
@@ -222,7 +229,7 @@ namespace DBADashAI.Mcp
                     $"{row["SchemaName"]}.{row["ObjectName"]}",
                     Convert.ToString(row["TypeDescription"]) ?? string.Empty,
                     row["SnapshotDate"] as DateTime?,
-                    row["DDL"] is byte[] ddl ? SMOBaseClass.Unzip(ddl) ?? string.Empty : string.Empty)));
+                    AiDataMasker.MaskSql(row["DDL"] is byte[] ddl ? SMOBaseClass.Unzip(ddl) ?? string.Empty : string.Empty, mask))));
             }
 
             return definitions;

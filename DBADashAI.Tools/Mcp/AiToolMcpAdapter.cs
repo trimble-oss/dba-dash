@@ -71,13 +71,15 @@ namespace DBADashAI.Mcp
         private readonly Type _toolType;
         private readonly bool _supportsEndTime;
         private readonly AiPromptDataSerializer _serializer;
+        private readonly AiDataMask _mask;
 
         public AiToolMcpAdapter(Type toolType, string name, string description, AiPromptDataSerializer serializer,
-            bool supportsEndTime = false)
+            bool supportsEndTime = false, AiDataMask? mask = null)
         {
             _toolType = toolType;
             _serializer = serializer;
             _supportsEndTime = supportsEndTime;
+            _mask = mask ?? AiDataMask.Default;
             ProtocolTool = new Tool
             {
                 Name = name,
@@ -113,7 +115,7 @@ namespace DBADashAI.Mcp
                 AiAskRequest.MaxAllowedRows,
                 config?.GetValue<int?>("Mcp:MaxStringValueLength") ?? DefaultMaxStringValueLength);
 
-            return new AiToolMcpAdapter(toolType, tool.Name, Describe(tool), serializer, tool.SupportsEndTime);
+            return new AiToolMcpAdapter(toolType, tool.Name, Describe(tool), serializer, tool.SupportsEndTime, AiDataMask.FromConfiguration(config));
         }
 
         internal static string Describe(IAiTool tool) => $"{tool.Description} {tool.InputHint}";
@@ -154,7 +156,7 @@ namespace DBADashAI.Mcp
             var execution = new AiToolExecutionResult
             {
                 Tool = ProtocolTool.Name,
-                Data = McpResultNotes.RoundNumbers(JsonSerializer.SerializeToElement(result.Data)),
+                Data = McpResultNotes.RoundNumbers(AiDataMasker.MaskJson(JsonSerializer.SerializeToElement(result.Data), AiDataMaskSource.ForCall ?? _mask)),
                 Evidence = result.Evidence,
                 RowCount = result.RowCount,
                 ExecutionMs = sw.ElapsedMilliseconds

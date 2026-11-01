@@ -46,6 +46,9 @@ namespace DBADashAI.Models
         /// <summary>Override the configured AI model for this request.  Null = use configured default.</summary>
         public string? ModelOverride { get; set; }
 
+        /// <summary>What to mask, as an <see cref="Mcp.AiDataMask"/> word.  Null = the default.  Never less than the service's setting.</summary>
+        public string? DataDetail { get; set; }
+
         /// <summary>
         /// Checks the request, given the names of the tools this service has.  A tool name goes into the
         /// prompt, so one the service does not know is refused rather than passed on.

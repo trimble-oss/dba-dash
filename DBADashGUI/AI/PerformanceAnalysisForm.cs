@@ -56,6 +56,13 @@ namespace DBADashGUI.AI
         /// <summary>Whether the conversation on screen was started with lookups allowed - its follow-ups keep the same offer.</summary>
         private bool _conversationInvestigate;
 
+        /// <summary>
+        /// The masking of what the lookups return - the figures sent are aggregates with nothing to mask.  The conversation
+        /// on screen keeps the masking it started with, as it keeps its figures.
+        /// </summary>
+        private readonly AiMasking.MaskToggles _masking;
+        private DBADashAI.Mcp.AiDataMask _conversationMask;
+
         private readonly DataGridView _sections = new()
         {
             Dock = DockStyle.Fill,
@@ -157,6 +164,8 @@ namespace DBADashGUI.AI
             StartPosition = FormStartPosition.CenterParent;
             ClientSize = new Size(1200, 760);
             MinimumSize = new Size(800, 500);
+
+            _masking = AiMasking.Toggles(() => { });
 
             _focus.Items.AddRange([PerformanceAnalysisPayload.DescribeFocus(PerformanceAnalysisFocus.General), PerformanceAnalysisPayload.DescribeFocus(PerformanceAnalysisFocus.LatchesAndSpinlocks)]);
             _focus.SelectedIndex = focus == PerformanceAnalysisFocus.LatchesAndSpinlocks ? 1 : 0;
@@ -275,6 +284,7 @@ namespace DBADashGUI.AI
                 ToolTipText = "Options for the analysis request."
             };
             options.DropDownItems.Add(_model.Item);
+            options.DropDownItems.AddRange(_masking.Items);
 
             var toolbar = new ToolStrip { GripStyle = ToolStripGripStyle.Hidden };
             toolbar.Items.Add(_submit);
@@ -601,6 +611,10 @@ namespace DBADashGUI.AI
 
             var payload = continuing is null ? _payload : _conversationPayload;
             var investigate = continuing is null ? _investigate.Checked : _conversationInvestigate;
+            var mask = continuing is null ? _masking.Mask : _conversationMask;
+
+            // Only the lookups carry statement text; without them there is nothing masking would change.
+            if (continuing is null && investigate && !AiMasking.ConfirmUnmasked(mask, this)) return;
 
             _inFlight = new CancellationTokenSource();
             _submit.Enabled = false;
@@ -611,7 +625,7 @@ namespace DBADashGUI.AI
 
             try
             {
-                var result = await PerformanceAnalysisClient.AnalyseAsync(payload, _service, _inFlight.Token, continuing, question, _model.SelectedModel, investigate);
+                var result = await PerformanceAnalysisClient.AnalyseAsync(payload, _service, _inFlight.Token, continuing, question, _model.SelectedModel, investigate, mask.Word);
                 if (IsDisposed) return;
 
                 if (!result.Success)
@@ -634,6 +648,7 @@ namespace DBADashGUI.AI
                 _current = conversation;
                 _conversationPayload = payload;
                 _conversationInvestigate = investigate;
+                _conversationMask = mask;
 
                 if (!_tabs.TabPages.Contains(_analysisTab)) _tabs.TabPages.Add(_analysisTab);
                 _tabs.SelectedTab = _analysisTab;

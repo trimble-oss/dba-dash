@@ -45,11 +45,22 @@ namespace DBADashGUI.AI
         private readonly Label _result = new() { Dock = DockStyle.Bottom, AutoSize = true, MaximumSize = new Size(740, 0), Padding = new Padding(6) };
         private string? _grantStatement;
 
+        private readonly ComboBox _mcpDetail = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 340 };
+        private readonly Label _mcpDetailText = new() { AutoSize = true, MaximumSize = new Size(700, 0), Padding = new Padding(0, 4, 0, 4) };
+        private readonly ComboBox _builtInDetail = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 340 };
+        private readonly Label _builtInDetailText = new() { AutoSize = true, MaximumSize = new Size(700, 0), Padding = new Padding(0, 4, 0, 4) };
+        private readonly Button _builtInSave = new() { Text = "Save", AutoSize = true, Enabled = false };
+        private bool _loadingBuiltIn;
+
+        /// <summary>Counts the reads of the built-in setting, so one that finishes after the repository has changed is ignored.</summary>
+        private int _builtInLoad;
+
         public ConnectAIToolsForm()
         {
             Text = "Connect AI Tools";
-            Width = 780;
-            Height = 500;
+            Width = 860;
+            Height = 660;
+            MinimumSize = new Size(700, 560);
             StartPosition = FormStartPosition.CenterParent;
             MinimizeBox = false;
             ShowInTaskbar = false;
@@ -71,6 +82,56 @@ namespace DBADashGUI.AI
             top.Controls.Add(_connection);
             top.SetFlowBreak(_connection, true);
             top.Controls.Add(_access);
+
+            // What the AI tools send on.  The MCP setting is this user's, in a file their registered servers read on each call; the built-in AI's is
+            // the repository's, changed here by a db_owner.
+            var detail = new TableLayoutPanel { Dock = DockStyle.Top, AutoSize = true, ColumnCount = 2, Padding = new Padding(6, 0, 6, 0) };
+            detail.Controls.Add(new Label { Text = "Masking for MCP tools:", AutoSize = true, Padding = new Padding(0, 6, 0, 0) }, 0, 0);
+            detail.Controls.Add(_mcpDetail, 1, 0);
+            // The descriptions span both columns, so they wrap to the window rather than running off it past the labels.
+            detail.Controls.Add(_mcpDetailText, 0, 1);
+            detail.SetColumnSpan(_mcpDetailText, 2);
+            detail.Controls.Add(new Label { Text = "Least masking for built-in AI:", AutoSize = true, Padding = new Padding(0, 6, 0, 0) }, 0, 2);
+            var builtInRow = new FlowLayoutPanel { AutoSize = true, FlowDirection = FlowDirection.LeftToRight, WrapContents = false, Margin = Padding.Empty };
+            builtInRow.Controls.Add(_builtInDetail);
+            builtInRow.Controls.Add(_builtInSave);
+            detail.Controls.Add(builtInRow, 1, 2);
+            detail.Controls.Add(_builtInDetailText, 0, 3);
+            detail.SetColumnSpan(_builtInDetailText, 2);
+
+            foreach (var level in DataDetailLevels.All)
+            {
+                _mcpDetail.Items.Add(new DataDetailItem(level.Word, level.Label));
+                _builtInDetail.Items.Add(new DataDetailItem(level.Word, level.Label));
+            }
+
+            // Wide enough for the longest level's label.
+            var comboWidth = DataDetailLevels.All.Max(l => TextRenderer.MeasureText(l.Label, Font).Width) + SystemInformation.VerticalScrollBarWidth + 16;
+            _mcpDetail.Width = comboWidth;
+            _builtInDetail.Width = comboWidth;
+
+            _mcpDetail.SelectedItem = _mcpDetail.Items.Cast<DataDetailItem>().FirstOrDefault(i => i.Word == DataDetailLevels.McpCurrent());
+            DescribeMcpDetail();
+            _mcpDetail.SelectedIndexChanged += (_, _) =>
+            {
+                if (_mcpDetail.SelectedItem is not DataDetailItem item) return;
+                try
+                {
+                    DataDetailLevels.SetMcp(item.Word);
+                }
+                catch (Exception ex) when (ex is System.IO.IOException or UnauthorizedAccessException)
+                {
+                    MessageBox.Show(this, $"Couldn't save the masking setting: {ex.Message}", Text, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+                DescribeMcpDetail();
+            };
+            _builtInDetail.SelectedIndexChanged += (_, _) =>
+            {
+                if (_builtInDetail.SelectedItem is not DataDetailItem item) return;
+                _builtInDetailText.Text = DataDetailLevels.Describe(item.Word) + "  A request can mask more than this, never less.";
+                _builtInSave.Enabled = !_loadingBuiltIn;
+            };
+            _builtInSave.Click += async (_, _) => await SaveBuiltInAsync();
 
             _grid.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "AI tool", FillWeight = 22 });
             _grid.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Status", FillWeight = 58 });
@@ -98,7 +159,21 @@ namespace DBADashGUI.AI
             buttons.Controls.Add(copyGrant);
             CancelButton = close;
 
+            // Wrapped text follows the window's width.
+            void Wrap()
+            {
+                var width = Math.Max(200, ClientSize.Width - 24);
+                intro.MaximumSize = new Size(width, 0);
+                _access.MaximumSize = new Size(width, 0);
+                _mcpDetailText.MaximumSize = new Size(width, 0);
+                _builtInDetailText.MaximumSize = new Size(width, 0);
+                _result.MaximumSize = new Size(width, 0);
+            }
+            Resize += (_, _) => Wrap();
+            Wrap();
+
             Controls.Add(_grid);
+            Controls.Add(detail);
             Controls.Add(top);
             Controls.Add(intro);
             Controls.Add(_result);
@@ -115,6 +190,7 @@ namespace DBADashGUI.AI
             {
                 RefreshStatus();
                 await CheckAccessAsync(copyGrant);
+                await LoadBuiltInAsync();
             };
 
             Load += async (_, _) =>
@@ -129,12 +205,100 @@ namespace DBADashGUI.AI
 
                 RefreshStatus();
                 await CheckAccessAsync(copyGrant);
+                await LoadBuiltInAsync();
             };
 
             this.ApplyTheme();
         }
 
+        private void DescribeMcpDetail() =>
+            _mcpDetailText.Text = _mcpDetail.SelectedItem is DataDetailItem item
+                ? DataDetailLevels.Describe(item.Word) + "  Your registered AI tools mask their next call with it, sessions already open included.  The Ask button's Claude Code window can change it for one request."
+                : string.Empty;
+
+        /// <summary>No masking level: a registered server follows the setting above on each call.</summary>
         private McpServerEntry Entry() => McpServerEntry.ForConnection(_exePath, _connection.SelectedItem as string);
+
+        private sealed record DataDetailItem(string Word, string Label)
+        {
+            public override string ToString() => Label;
+        }
+
+        /// <summary>
+        /// Reads the built-in AI's setting from the chosen repository.  A repository without the procedure, or a
+        /// connection that fails, says so and leaves the Save button off.
+        /// </summary>
+        private async Task LoadBuiltInAsync()
+        {
+            var load = ++_builtInLoad;
+            _loadingBuiltIn = true;
+            _builtInSave.Enabled = false;
+            try
+            {
+                var name = _connection.SelectedItem as string;
+                var connection = name is null ? null : _connections.FindByName(name);
+                if (connection is null)
+                {
+                    _builtInDetailText.Text = string.Empty;
+                    return;
+                }
+
+                _builtInDetailText.Text = "Reading the setting...";
+                var word = DataDetailLevels.Normalise(await DataDetailLevels.ReadBuiltInAsync(connection.ConnectionString));
+                if (load != _builtInLoad) return; // another repository was chosen meanwhile, and its read is under way
+                if (word is null)
+                {
+                    _builtInDetailText.Text = "This repository doesn't have the built-in AI data setting yet - upgrade the repository to the same version as this copy of DBA Dash.";
+                    _builtInDetailText.ForeColor = DashColors.Warning;
+                    _builtInDetail.Enabled = false;
+                    return;
+                }
+
+                _builtInDetail.Enabled = true;
+                _builtInDetail.SelectedItem = _builtInDetail.Items.Cast<DataDetailItem>().First(i => i.Word == word);
+                _builtInDetailText.ForeColor = SystemColors.ControlText;
+                _builtInDetailText.Text = DataDetailLevels.Describe(word) + "  A request can mask more than this, never less.";
+            }
+            catch (Exception ex)
+            {
+                if (load != _builtInLoad) return;
+                _builtInDetailText.Text = $"Couldn't read the built-in AI setting: {ex.Message}";
+                _builtInDetailText.ForeColor = DashColors.Warning;
+                _builtInDetail.Enabled = false;
+            }
+            finally
+            {
+                if (load == _builtInLoad) _loadingBuiltIn = false;
+            }
+        }
+
+        /// <summary>Saves the built-in AI's setting to the chosen repository.  Only a db_owner can; the procedure says so if not.</summary>
+        private async Task SaveBuiltInAsync()
+        {
+            var name = _connection.SelectedItem as string;
+            var connection = name is null ? null : _connections.FindByName(name);
+            if (connection is null || _builtInDetail.SelectedItem is not DataDetailItem item) return;
+
+            if (item.Word == DataDetailLevels.Full &&
+                MessageBox.Show(this, "Full lets a built-in AI request turn masking off, sending statement text, parameter values, logins, hosts and application names to the AI provider.  Requests are still masked unless the user unticks masking for that request.  Save it?",
+                    Text, MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
+            {
+                await LoadBuiltInAsync();
+                return;
+            }
+
+            try
+            {
+                await DataDetailLevels.WriteBuiltInAsync(connection.ConnectionString, item.Word);
+                _result.Text = $"Saved.  The built-in AI uses '{item.Label}' within a minute.";
+                _builtInSave.Enabled = false;
+            }
+            catch (Exception ex)
+            {
+                _result.Text = $"Not saved: {ex.Message}";
+                await LoadBuiltInAsync();
+            }
+        }
 
         private void RefreshStatus()
         {

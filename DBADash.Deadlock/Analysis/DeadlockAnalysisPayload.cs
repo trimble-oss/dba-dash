@@ -85,18 +85,23 @@ namespace DBADash.Deadlock.Analysis
             DeadlockGraph graph,
             IReadOnlyList<DeadlockFinding> findings,
             string? instance = null,
-            IReadOnlyList<DeadlockObjectDefinition>? schema = null)
+            IReadOnlyList<DeadlockObjectDefinition>? schema = null,
+            DeadlockGraph? original = null)
         {
             ArgumentNullException.ThrowIfNull(graph);
             ArgumentNullException.ThrowIfNull(findings);
 
-            var signature = DeadlockSignature.Compute(graph);
+            // A masked graph is identified by the graph it was masked from, so its history and the collector's rows still
+            // match whatever the masking - and metadata only, which withholds the statements, doesn't make different
+            // statements one deadlock.  What the preview says the signature is based on is the masked graph's, as sent.
+            var identity = original ?? graph;
+            var signature = DeadlockSignature.Compute(identity);
 
             return new DeadlockAnalysisPayload
             {
                 Signature = signature.Value,
-                DeadlockHash = Analysis.DeadlockHash.ToHex(Analysis.DeadlockHash.Compute(graph)),
-                SignatureComponents = signature.Components,
+                DeadlockHash = Analysis.DeadlockHash.ToHex(Analysis.DeadlockHash.Compute(identity)),
+                SignatureComponents = original is null ? signature.Components : DeadlockSignature.Compute(graph).Components,
                 Instance = instance,
                 Participants = graph.Processes.Select(Describe).ToList(),
                 Objects = graph.Resources
@@ -201,6 +206,9 @@ namespace DBADash.Deadlock.Analysis
             if (process.IsVictim) parts.Add("victim");
             if (!string.IsNullOrWhiteSpace(process.CurrentDatabaseName)) parts.Add($"database {process.CurrentDatabaseName}");
             if (!string.IsNullOrWhiteSpace(process.ClientApp)) parts.Add($"application {process.ClientApp}");
+            // Who and where from: a question about the users involved is answered from here, not from the application.
+            if (!string.IsNullOrWhiteSpace(process.LoginName)) parts.Add($"login {process.LoginName}");
+            if (!string.IsNullOrWhiteSpace(process.HostName)) parts.Add($"host {process.HostName}");
             if (!string.IsNullOrWhiteSpace(process.IsolationLevel)) parts.Add($"isolation {process.IsolationLevel}");
             if (process.WaitTime is { } wait) parts.Add($"waited {DeadlockFormat.Duration(wait)}");
             if (process.LogUsed is { } log) parts.Add($"log used {DeadlockFormat.Bytes(log)}");

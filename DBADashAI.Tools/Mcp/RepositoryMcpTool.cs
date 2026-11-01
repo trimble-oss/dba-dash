@@ -32,6 +32,7 @@ namespace DBADashAI.Mcp
                 ? properties.EnumerateObject().Select(p => p.Name).ToHashSet(StringComparer.Ordinal)
                 : [];
             MaxOutputChars = config?.GetValue<int?>("Mcp:MaxOutputChars") ?? AiToolMcpAdapter.DefaultMaxOutputChars;
+            _configuredMask = AiDataMask.FromConfiguration(config);
 
             ProtocolTool = new Tool
             {
@@ -55,6 +56,19 @@ namespace DBADashAI.Mcp
 
         protected int MaxOutputChars { get; }
 
+        private readonly AiDataMask _configuredMask;
+
+        /// <summary>
+        /// What this call holds back: the mask the server's call filter read when the call started, or Mcp:DataDetail for
+        /// a tool run without one.  Each tool applies it to its data before describing it.
+        /// </summary>
+        protected AiDataMask Mask => AiDataMaskSource.ForCall ?? _configuredMask;
+
+        private static readonly AsyncLocal<McpServer?> CallClient = new();
+
+        /// <summary>The connection to the client making this call, to ask it things such as its roots; null for a tool run without one.</summary>
+        protected static McpServer? Client => CallClient.Value;
+
         protected abstract Task<string> RunAsync(Arguments args, SqlToolExecutor sql, CancellationToken cancellationToken);
 
         public override async ValueTask<CallToolResult> InvokeAsync(
@@ -63,6 +77,7 @@ namespace DBADashAI.Mcp
         {
             var services = request.Services ?? request.Server.Services
                 ?? throw new InvalidOperationException("The MCP server has no service provider.");
+            CallClient.Value = request.Server;
 
             try
             {

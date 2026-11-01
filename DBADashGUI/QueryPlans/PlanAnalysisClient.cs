@@ -73,7 +73,8 @@ namespace DBADashGUI.QueryPlans
             int? instanceId = null,
             string? modelOverride = null,
             AiConversation? conversation = null,
-            string? question = null)
+            string? question = null,
+            string? dataDetail = null)
         {
             // Everything said about this plan so far.  Empty on a first analysis, which is what the
             // service reads as one.  The plan itself is not in here: the service builds the opening
@@ -105,6 +106,8 @@ namespace DBADashGUI.QueryPlans
                     objects = payload.Objects,
                     isActualPlan = payload.IsActualPlan,
                     modelOverride,
+                    // How the plan was masked before the payload was built - the service refuses less than its setting.
+                    dataDetail,
                     conversationId = conversation?.Id,
                     history,
                     question,
@@ -128,7 +131,8 @@ namespace DBADashGUI.QueryPlans
             int? instanceId = null,
             AiConversation? conversation = null,
             string? question = null,
-            string? modelOverride = null)
+            string? modelOverride = null,
+            string? dataDetail = null)
         {
             try
             {
@@ -142,7 +146,7 @@ namespace DBADashGUI.QueryPlans
                     $"{baseUrl.TrimEnd('/')}/api/ai/analyse-plan")
                 {
                     Content = new StringContent(
-                        ToJson(payload, instanceId, modelOverride, conversation, question),
+                        ToJson(payload, instanceId, modelOverride, conversation, question, dataDetail),
                         Encoding.UTF8,
                         "application/json")
                 };

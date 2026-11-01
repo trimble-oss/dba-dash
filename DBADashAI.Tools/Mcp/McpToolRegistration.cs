@@ -33,10 +33,18 @@ namespace DBADashAI.Mcp
             "describe-query-plan analyse XML the user already has.  Times are UTC; the tools that offer a to argument " +
             "can look at a past window, which is how to investigate an incident after the fact.  Results are capped; " +
             "when one says it hit maxRows or was trimmed, ask for a single instance or a shorter window.  A permission " +
-            "error is for the user to fix - say what it says rather than retrying.";
+            "error is for the user to fix - say what it says rather than retrying.  Results may be masked: ? for a literal, " +
+            "(value A) for a parameter value (the same placeholder is the same value), [withheld] for text left out, and " +
+            "login#..., host#... and app#... codes for logins, hosts and applications - these are masking, not part of " +
+            "the query, so don't read them as its values or quote them back as if they were.  Nothing here can make a " +
+            "change: when the user asks for one - an index, a setting, a code fix - write it out for them to review and run.";
 
         /// <summary>Names and describes the server to the client.</summary>
-        public static void Configure(McpServerOptions options, string? version)
+        public static void Configure(McpServerOptions options, string? version, AiDataMask? mask = null) =>
+            Configure(options, version, AiDataMaskSource.Fixed(mask ?? AiDataMask.Default));
+
+        /// <summary>Names and describes the server, masking each call as <paramref name="masks"/> says when the call starts.</summary>
+        public static void Configure(McpServerOptions options, string? version, AiDataMaskSource masks)
         {
             options.ServerInfo = new Implementation
             {
@@ -45,6 +53,24 @@ namespace DBADashAI.Mcp
                 Version = version ?? "unknown"
             };
             options.ServerInstructions = ServerInstructions;
+
+            // The tools mask their data at the source (see RepositoryMcpTool.Mask).  This is the backstop: every tool's text
+            // goes through the text filter too, so XML or JSON a tool passes on unmasked is still caught.  The mask is read
+            // once, here, and the tools read the same one (AiDataMaskSource.ForCall).
+            options.Filters.Request.CallToolFilters.Add(next => async (context, cancellationToken) =>
+            {
+                var dataMask = masks.Current;
+                AiDataMaskSource.BeginCall(dataMask);
+                var result = await next(context, cancellationToken);
+                if (!dataMask.IsNone)
+                {
+                    foreach (var block in result.Content.OfType<TextContentBlock>())
+                    {
+                        block.Text = AiDataMasker.FilterText(block.Text, dataMask);
+                    }
+                }
+                return result;
+            });
         }
 
         /// <summary>

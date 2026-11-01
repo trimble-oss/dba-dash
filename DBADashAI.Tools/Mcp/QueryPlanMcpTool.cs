@@ -63,7 +63,7 @@ namespace DBADashAI.Mcp
             ExecutionPlan plan;
             try
             {
-                plan = PlanParser.Parse(Convert.ToString(row["QueryPlan"]));
+                plan = PlanParser.Parse(AiDataMasker.MaskXml(Convert.ToString(row["QueryPlan"]), Mask));
             }
             catch (PlanParseException ex)
             {
@@ -78,13 +78,17 @@ namespace DBADashAI.Mcp
             var heading = $"Plan {hash} on {instance}, from the {Convert.ToString(row["Source"])?.ToLowerInvariant()} collection, " +
                           $"captured {row["CaptureDate"]:yyyy-MM-dd HH:mm} UTC.";
 
-            return Describe(plan, statement, instance, Convert.ToInt32(row["InstanceID"]), heading, includePlanXml, MaxOutputChars);
+            return Describe(plan, statement, instance, Convert.ToInt32(row["InstanceID"]), heading, includePlanXml, MaxOutputChars, Mask);
         }
 
         /// <summary>
         /// A plan statement as get-query-plan describes it, wherever the plan came from - the repository here, the GUI's
         /// viewer for the local server's get-open-query-plan.  The plan XML is dropped whole, with a note, when it would
         /// take the result over <paramref name="maxOutputChars"/>.
+        ///
+        /// The plan must already be masked - parsed from <see cref="AiDataMasker.MaskXml"/> - so that the statement, the
+        /// parameters and everything worked out from them are.  <paramref name="mask"/> is only said in the result, so the
+        /// model reads ? and (value A) as masking rather than as the query.
         /// </summary>
         public static string Describe(
             ExecutionPlan plan,
@@ -93,7 +97,8 @@ namespace DBADashAI.Mcp
             int? instanceId,
             string heading,
             bool includePlanXml,
-            int maxOutputChars)
+            int maxOutputChars,
+            AiDataMask mask)
         {
             var withPlans = plan.StatementsWithPlans.ToList();
             var payload = PlanAnalysisPayload.Build(plan, statement, instance, includePlanXml: includePlanXml);
@@ -106,6 +111,11 @@ namespace DBADashAI.Mcp
             if (withPlans.Count > 1 && withPlans.Contains(statement))
             {
                 header.AppendLine($"The plan has {withPlans.Count} statements with plans; this is statement {withPlans.IndexOf(statement) + 1}.");
+            }
+
+            if (MaskNote(mask) is { } note)
+            {
+                header.AppendLine(note);
             }
 
             if (includePlanXml && payload.PlanXmlOmittedReason is { } reason)
@@ -126,6 +136,16 @@ namespace DBADashAI.Mcp
 
             return text;
         }
+
+        /// <summary>What the masking means for a model reading a plan or deadlock, or null when nothing is masked.</summary>
+        public static string? MaskNote(AiDataMask mask) => mask switch
+        {
+            { MetadataOnly: true } => "DBA Dash's data setting (metadataOnly) withholds statement text, parameter values and literals, and replaces logins, hosts and application names with codes - login#..., host#..., app#... - the same code for the same name.",
+            { Parameters: true, Literals: true } => "Masked by DBA Dash's data setting: literals are ?, and parameter values are placeholders such as (value A) - the same placeholder is the same value.  NULL is left as it is.",
+            { Parameters: true } => "Masked by DBA Dash's data setting: parameter values are placeholders such as (value A) - the same placeholder is the same value.  NULL is left as it is.  Literals in the statement are not masked.",
+            { Literals: true } => "Masked by DBA Dash's data setting: literals are ?.  Parameter values are not masked.",
+            _ => null
+        };
 
         /// <summary>The payload as the AI service receives it from the plan viewer - see PlanAnalysisClient.ToJson.</summary>
         internal static AiPlanAnalysisRequest ToRequest(PlanAnalysisPayload payload, int? instanceId) => new()

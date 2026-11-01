@@ -175,12 +175,15 @@ namespace DBADash.QueryPlan.Analysis
             PlanStatement statement,
             string? instance = null,
             string? fileName = null,
-            bool includePlanXml = true)
+            bool includePlanXml = true,
+            PlanStatement? original = null)
         {
             ArgumentNullException.ThrowIfNull(plan);
             ArgumentNullException.ThrowIfNull(statement);
 
-            var identity = PlanIdentity.For(statement, statement.Xml);
+            // A masked statement is identified by the one it was masked from: a plan without QueryHash or QueryPlanHash
+            // falls back to hashing the text and XML, which masking changes - and metadata only withholds.
+            var identity = PlanIdentity.For(original ?? statement, (original ?? statement).Xml);
             var text = statement.StatementText ?? string.Empty;
 
             var payload = new PlanAnalysisPayload
