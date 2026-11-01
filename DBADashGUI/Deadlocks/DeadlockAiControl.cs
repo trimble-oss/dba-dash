@@ -4,6 +4,7 @@ using DBADash.Deadlock.Model;
 using DBADashGUI.AgentJobs;
 using DBADash;
 using DBADashGUI.AI;
+using DBADashAI.Mcp;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -55,8 +56,21 @@ namespace DBADashGUI.Deadlocks
         private readonly ToolStripStatusLabel _status = new();
 
         private readonly ToolStripMenuItem _includeSchema;
+        private readonly AiMasking.MaskToggles _masking;
 
         private DeadlockAnalysisPayload _payload;
+
+        /// <summary>The masking <see cref="_payload"/> was built with.</summary>
+        private AiDataMask _payloadMask = AiDataMask.Default;
+
+        /// <summary>
+        /// The payload and masking the conversation on screen is about.  The service builds the opening from the payload on
+        /// every turn, so a follow-up sends these - not what the options say now - and changing them can't change what an
+        /// exchange already under way is about.
+        /// </summary>
+        private DeadlockAnalysisPayload _conversationPayload;
+
+        private AiDataMask _conversationMask = AiDataMask.Default;
         private AIServiceDiscovery.ServiceInfo _service;
 
         /// <summary>Why <see cref="_service"/> is null - none configured, or no access to it.  Null until the lookup has run.</summary>
@@ -121,9 +135,12 @@ namespace DBADashGUI.Deadlocks
                               "time of the deadlock.  They make the analysis better and the request larger."
             };
 
+            _masking = AiMasking.Toggles(RebuildPayload);
+
             _options.DropDownItems.Add(_model.Item);
             _options.DropDownItems.Add(_showRequest);
             _options.DropDownItems.Add(_includeSchema);
+            _options.DropDownItems.AddRange(_masking.Items);
 
             // Follow-up questions stay on this machine, which is what makes them private and also what
             // means they need moving by hand.  The dialog lives with the feature it belongs to.
@@ -201,6 +218,7 @@ namespace DBADashGUI.Deadlocks
 
             // A new deadlock means the previous conversation is about something else.
             _current = null;
+            _conversationPayload = null;
             _conversation.Clear();
             _split.Panel1Collapsed = false;
             _split.Panel2Collapsed = true;
@@ -276,6 +294,10 @@ namespace DBADashGUI.Deadlocks
                 entry.ConversationId ?? Guid.NewGuid(),
                 entry.Turns.Select(t => new AiConversation.Turn(t.Question, t.Analysis, t.Model, t.GeneratedUtc)));
 
+            // Its follow-ups go with the deadlock as the options say now, held from here on like a fresh one.
+            _conversationPayload = _payload;
+            _conversationMask = _payloadMask;
+
             if (!await ShowConversationAsync(conversation, graph)) return;
 
             foreach (var item in _history.DropDownItems.OfType<ToolStripMenuItem>())
@@ -328,8 +350,11 @@ namespace DBADashGUI.Deadlocks
         {
             if (_graph is null) return;
 
-            var schema = _includeSchema.Checked ? _schema : Array.Empty<DeadlockObjectDefinition>();
-            _payload = DeadlockAnalysisPayload.Build(_graph, DeadlockAnalyser.Analyse(_graph), _instance, schema);
+            // Built from the masked graph and definitions, so the preview is what goes, participants included.
+            _payloadMask = _masking.Mask;
+            var graph = AiMasking.MaskGraph(_graph, _payloadMask);
+            var schema = _includeSchema.Checked ? AiMasking.MaskDefinitions(_schema, _payloadMask) : Array.Empty<DeadlockObjectDefinition>();
+            _payload = DeadlockAnalysisPayload.Build(graph, DeadlockAnalyser.Analyse(graph), _instance, schema, original: _graph);
 
             _preview.Text = _payload.ToPreview().Replace("\n", Environment.NewLine);
             _signature.Text = $"Signature {_payload.Signature}";
@@ -397,6 +422,9 @@ namespace DBADashGUI.Deadlocks
             // front, which is not what was asked for.
             var continuing = question is null ? null : _current;
             if (question is not null && continuing is null) return;
+            var payload = continuing is null ? _payload : _conversationPayload ?? _payload;
+            var mask = continuing is null || _conversationPayload is null ? _payloadMask : _conversationMask;
+            if (continuing is null && !AiMasking.ConfirmUnmasked(mask, FindForm())) return;
 
             _inFlight = new CancellationTokenSource();
             _submit.Enabled = false;
@@ -409,7 +437,7 @@ namespace DBADashGUI.Deadlocks
             {
                 var graph = _graph;
                 var result = await DeadlockAnalysisClient.AnalyseAsync(
-                    _payload, _service, _inFlight.Token, _instanceId, continuing, question, _model.SelectedModel);
+                    payload, _service, _inFlight.Token, _instanceId, continuing, question, _model.SelectedModel, mask.Word);
 
                 // The answer is stored either way; it just isn't shown against a deadlock selected while it was coming.
                 if (IsDisposed || !ReferenceEquals(graph, _graph)) return;
@@ -459,6 +487,9 @@ namespace DBADashGUI.Deadlocks
                             result.Analysis ?? string.Empty,
                             result.Model,
                             result.GeneratedUtc ?? DateTime.UtcNow));
+
+                _conversationPayload = payload;
+                _conversationMask = mask;
 
                 if (!await ShowConversationAsync(conversation, graph)) return;
 

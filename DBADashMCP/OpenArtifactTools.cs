@@ -87,7 +87,7 @@ namespace DBADashMCP
             IReadOnlyList<DeadlockGraph> graphs;
             try
             {
-                graphs = DeadlockParser.Parse(open.Xml);
+                graphs = DeadlockParser.Parse(AiDataMasker.MaskXml(open.Xml, Mask));
             }
             catch (DeadlockParseException ex)
             {
@@ -107,7 +107,7 @@ namespace DBADashMCP
             }
 
             return await GetDeadlockTool.DescribeAsync(graphs[0], open.Instance, GuiContextReader.InstanceId(open, same),
-                heading, includeSchema, sql, cancellationToken);
+                heading, includeSchema, sql, Mask, cancellationToken);
         }
     }
 
@@ -145,7 +145,7 @@ namespace DBADashMCP
             ExecutionPlan plan;
             try
             {
-                plan = PlanParser.Parse(open.Xml);
+                plan = PlanParser.Parse(AiDataMasker.MaskXml(open.Xml, Mask));
             }
             catch (PlanParseException ex)
             {
@@ -160,7 +160,7 @@ namespace DBADashMCP
                           (open.QueryPlanHash is { } hash ? $"  query_plan_hash {hash}." : "");
 
             return GetQueryPlanTool.Describe(plan, statement, open.Instance, GuiContextReader.InstanceId(open, same),
-                heading, includePlanXml, MaxOutputChars);
+                heading, includePlanXml, MaxOutputChars, Mask);
         }
     }
 }

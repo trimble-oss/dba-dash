@@ -16,9 +16,27 @@ namespace DBADash.Mcp
     {
         public const string ServerName = "dbadash";
 
-        /// <summary>The entry for DBADashMCP.exe serving the saved GUI connection called <paramref name="connectionName"/>.</summary>
-        public static McpServerEntry ForConnection(string exePath, string? connectionName) =>
-            new(exePath, string.IsNullOrWhiteSpace(connectionName) ? [] : ["--connection", connectionName]);
+        /// <summary>
+        /// The entry for DBADashMCP.exe serving the saved GUI connection called <paramref name="connectionName"/>.
+        /// <paramref name="dataDetail"/>, when given, is a <c>--data-detail</c> level fixed for the server's life - for a
+        /// server started for one request.  A registration leaves it out: the server then follows the user's setting in
+        /// Options > Connect AI Tools on each call, so a change reaches sessions the AI tool already has open.
+        /// </summary>
+        public static McpServerEntry ForConnection(string exePath, string? connectionName, string? dataDetail = null)
+        {
+            var args = new List<string>();
+            if (!string.IsNullOrWhiteSpace(connectionName))
+            {
+                args.AddRange(["--connection", connectionName]);
+            }
+
+            if (!string.IsNullOrWhiteSpace(dataDetail))
+            {
+                args.AddRange(["--data-detail", dataDetail]);
+            }
+
+            return new McpServerEntry(exePath, args);
+        }
 
         public bool SameAs(string? command, IEnumerable<string>? args) =>
             !string.IsNullOrWhiteSpace(command)

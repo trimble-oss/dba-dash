@@ -3,6 +3,7 @@ using DBADash.QueryPlan.Analysis;
 using DBADash.QueryPlan.Model;
 using DBADash;
 using DBADashGUI.AI;
+using DBADashAI.Mcp;
 using System;
 using System.Drawing;
 using System.Linq;
@@ -41,7 +42,13 @@ namespace DBADashGUI.QueryPlans
         private readonly ToolStripDropDownButton _options;
         private readonly ToolStripMenuItem _showRequest;
         private readonly ToolStripMenuItem _includePlanXml;
+        private readonly AiMasking.MaskToggles _masking;
         private readonly AIModelMenu _model = new();
+
+        /// <summary>The masking <see cref="_payload"/> was built with, and the masking <see cref="_conversationPayload"/> was.</summary>
+        private AiDataMask _payloadMask = AiDataMask.Default;
+
+        private AiDataMask _conversationMask = AiDataMask.Default;
         private readonly ToolStripLabel _identity = new();
 
         /// <summary>Every stored conversation about this plan and this query, to pick from.  Hidden when there are none.</summary>
@@ -144,9 +151,12 @@ namespace DBADashGUI.QueryPlans
                               "to the next analysis: a follow-up keeps the plan its conversation started with."
             };
 
+            _masking = AiMasking.Toggles(RebuildPayload);
+
             _options.DropDownItems.Add(_model.Item);
             _options.DropDownItems.Add(_showRequest);
             _options.DropDownItems.Add(_includePlanXml);
+            _options.DropDownItems.AddRange(_masking.Items);
 
             // Follow-up questions stay on this machine, which is what makes them private and also what
             // means they need moving by hand.  The dialog lives with the feature it belongs to.
@@ -262,7 +272,10 @@ namespace DBADashGUI.QueryPlans
         {
             if (_plan is null || _statement is null) return;
 
-            _payload = PlanAnalysisPayload.Build(_plan, _statement, _instance, _fileName, _includePlanXml.Checked);
+            // Built from the masked plan, so the preview is what goes, parameters and insights included.
+            _payloadMask = _masking.Mask;
+            var (plan, statement) = AiMasking.MaskPlan(_plan, _statement, _payloadMask);
+            _payload = PlanAnalysisPayload.Build(plan, statement, _instance, _fileName, _includePlanXml.Checked, original: _statement);
 
             _preview.Text = _payload.ToPreview().Replace("\n", Environment.NewLine);
             _identity.Text = $"Query {_payload.Signature}  Plan {_payload.PlanHash}";
@@ -363,6 +376,7 @@ namespace DBADashGUI.QueryPlans
             // payload as it stands now.  Pinned at the moment it is restored for the same reason a
             // fresh one is: so the toggle cannot change it out from under the exchange.
             _conversationPayload = _payload;
+            _conversationMask = _payloadMask;
 
             if (!await ShowConversationAsync(conversation, statement, entry.IsThisPlan)) return;
 
@@ -459,6 +473,8 @@ namespace DBADashGUI.QueryPlans
             // What this conversation is about was settled when it started.  A first analysis sends what
             // is switched on now; a follow-up sends what the answer above it was given.
             var payload = continuing is null ? _payload : _conversationPayload ?? _payload;
+            var mask = continuing is null || _conversationPayload is null ? _payloadMask : _conversationMask;
+            if (continuing is null && !AiMasking.ConfirmUnmasked(mask, FindForm())) return;
 
             _inFlight = new CancellationTokenSource();
             _submit.Enabled = false;
@@ -471,7 +487,7 @@ namespace DBADashGUI.QueryPlans
             {
                 var statement = _statement;
                 var result = await PlanAnalysisClient.AnalyseAsync(
-                    payload, _service, _inFlight.Token, _instanceId, continuing, question, _model.SelectedModel);
+                    payload, _service, _inFlight.Token, _instanceId, continuing, question, _model.SelectedModel, mask.Word);
 
                 // The answer is stored either way; it just isn't shown against a statement selected while
                 // it was coming.
@@ -503,6 +519,7 @@ namespace DBADashGUI.QueryPlans
                 // Held from here on, so that toggling the plan XML changes the next analysis rather
                 // than the artifact this exchange is about.
                 _conversationPayload = payload;
+                _conversationMask = mask;
 
                 // A follow-up is the reader's own and is kept on their machine rather than in the
                 // repository - see AiLocalConversationStore.  The opening analysis is shared and the

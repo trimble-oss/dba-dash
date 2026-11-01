@@ -50,7 +50,7 @@ namespace DBADashAI.Mcp
                 PerformanceLookups.Parameters(lookup, instanceId, fromUtc, toUtc, waitType, tempDBOnly, signature), cancellationToken);
 
             var summary = $"{Title}{describes} on {instance}, {Utc(fromUtc)} to {Utc(toUtc)} UTC";
-            return PerformanceLookups.Format(summary, sets, lookup, Utc, "Times are UTC.", timesAreLocal: false, MaxOutputChars);
+            return PerformanceLookups.Format(summary, sets, lookup, Utc, "Times are UTC.", timesAreLocal: false, MaxOutputChars, Mask);
         }
 
         private static string Utc(DateTime time) => time.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);

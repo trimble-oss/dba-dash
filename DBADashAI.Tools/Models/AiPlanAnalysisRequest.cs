@@ -110,6 +110,12 @@ namespace DBADashAI.Models
         /// <summary>Override the configured AI model for this request.  Null = use configured default.</summary>
         public string? ModelOverride { get; set; }
 
+        /// <summary>
+        /// The masking the caller applied to the plan before building this payload, as an <see cref="Mcp.AiDataMask"/> word.
+        /// Null means none.  The service refuses a request masked less than its own setting requires.
+        /// </summary>
+        public string? DataDetail { get; set; }
+
         /// <summary>What has been said about this plan already - see <see cref="AiConversation"/>.</summary>
         public List<AiConversationTurn> History { get; set; } = new();
 

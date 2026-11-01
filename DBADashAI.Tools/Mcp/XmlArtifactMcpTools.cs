@@ -3,6 +3,7 @@ using DBADash.Deadlock.Model;
 using DBADash.QueryPlan;
 using DBADash.QueryPlan.Model;
 using DBADashAI.Services;
+using ModelContextProtocol.Server;
 
 namespace DBADashAI.Mcp
 {
@@ -19,11 +20,26 @@ namespace DBADashAI.Mcp
         /// <summary>Plans run to megabytes; much past this is not a plan.</summary>
         private const long MaxFileBytes = 32L * 1024 * 1024;
 
-        public static string PathDescription(bool allowFilePaths, string kind) => allowFilePaths
-            ? $"The path of a {kind} file on this machine.  Pass xml or path, not both."
+        /// <summary>The files a deadlock graph is read from: SSMS saves .xdl, and an XE session's export is .xml.</summary>
+        public static readonly string[] DeadlockExtensions = [".xdl", ".xml"];
+
+        /// <summary>The files a plan is read from: SSMS saves .sqlplan.</summary>
+        public static readonly string[] PlanExtensions = [".sqlplan", ".xml"];
+
+        public static string PathDescription(bool allowFilePaths, string[] extensions) => allowFilePaths
+            ? $"The path of a {string.Join(" or ", extensions)} file on this machine.  Pass xml or path, not both."
             : "Not available on this server: reading files is only offered by the local DBA Dash MCP server.  Pass xml instead.";
 
-        public static string Read(RepositoryMcpTool.Arguments args, bool allowFilePaths)
+        /// <summary>
+        /// The XML passed in, or the file at path.  Only a file with one of <paramref name="extensions"/>, in one of the
+        /// <see cref="FileFolders"/>, is read, and both are checked before the file is looked at: the path can come from
+        /// text the model read rather than from the user, so the tool isn't a way to read other files or to find out whether
+        /// they exist.  Both are checked again on where the opened file really is, so a link can't lead out of them.  An
+        /// NTFS alternate data stream (file.sqlplan:hidden) is refused too.  What isn't a graph or plan is rejected by the
+        /// parser without its text.
+        /// </summary>
+        public static async Task<string> ReadAsync(RepositoryMcpTool.Arguments args, bool allowFilePaths, string[] extensions,
+            McpServer? client, CancellationToken cancellationToken)
         {
             var xml = args.String("xml");
             var path = args.String("path");
@@ -48,19 +64,72 @@ namespace DBADashAI.Mcp
                 throw new McpToolException("This server doesn't read files.  Read the file yourself and pass its contents as xml.");
             }
 
-            var file = new FileInfo(path);
-            if (!file.Exists)
+            if (!IsReadable(path, extensions))
+            {
+                throw new McpToolException($"Only {string.Join(" and ", extensions)} files are read.  Pass the XML as xml instead.");
+            }
+
+            var full = Path.GetFullPath(path);
+            var folders = await FileFolders.ForCallAsync(client, cancellationToken);
+            var outside = $"{path} isn't in a folder this server reads files from ({string.Join(", ", folders)}).  " +
+                          "Read the file yourself and pass its contents as xml.";
+            if (!FileFolders.Contains(folders, full))
+            {
+                throw new McpToolException(outside);
+            }
+
+            FileStream stream;
+            try
+            {
+                stream = new FileStream(full, FileMode.Open, FileAccess.Read, FileShare.Read);
+            }
+            catch (Exception ex) when (ex is FileNotFoundException or DirectoryNotFoundException)
             {
                 throw new McpToolException($"There is no file at {path}.");
             }
-
-            if (file.Length > MaxFileBytes)
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
             {
-                throw new McpToolException($"{path} is {file.Length / 1024 / 1024} MB, too large to be a deadlock graph or plan.");
+                throw new McpToolException($"Couldn't read {path}: {ex.Message}");
             }
 
-            // .xdl and .sqlplan files are often UTF-16 with a byte order mark, which this detects.
-            return File.ReadAllText(path);
+            await using (stream)
+            {
+                // Where it really is, past any link.  A file whose place can't be told - off Windows, or when Windows
+                // can't say - isn't read: the lexical check alone would let a link inside a folder lead out of it.
+                if (FileFolders.FinalPath(stream.SafeFileHandle) is not { } final
+                    || !IsReadable(final, extensions) || !FileFolders.Contains(folders, final))
+                {
+                    throw new McpToolException(outside);
+                }
+
+                if (stream.Length > MaxFileBytes)
+                {
+                    throw new McpToolException($"{path} is {stream.Length / 1024 / 1024} MB, too large to be a deadlock graph or plan.");
+                }
+
+                // .xdl and .sqlplan files are often UTF-16 with a byte order mark, which this detects.
+                using var reader = new StreamReader(stream, detectEncodingFromByteOrderMarks: true);
+                return await reader.ReadToEndAsync(cancellationToken);
+            }
+        }
+
+        /// <summary>Whether <paramref name="path"/> names a file with one of <paramref name="extensions"/>, and not a stream within one.</summary>
+        internal static bool IsReadable(string path, string[] extensions)
+        {
+            string full;
+            try
+            {
+                full = Path.GetFullPath(path);
+            }
+            catch (Exception ex) when (ex is ArgumentException or NotSupportedException or PathTooLongException)
+            {
+                return false;
+            }
+
+            // A colon after the drive (C:) is a stream: file.sqlplan:hidden, or file.sqlplan::$DATA.
+            var afterRoot = full[Path.GetPathRoot(full)!.Length..];
+            return !afterRoot.Contains(':')
+                   && extensions.Contains(Path.GetExtension(full), StringComparer.OrdinalIgnoreCase);
         }
     }
 
@@ -84,7 +153,7 @@ namespace DBADashAI.Mcp
               "type": "object",
               "properties": {
                 "xml": { "type": "string", "description": "The deadlock graph XML: a <deadlock> element, a deadlock list, or the XE event around it." },
-                "path": { "type": "string", "description": "{{XmlSource.PathDescription(allowFilePaths, ".xdl or .xml")}}" },
+                "path": { "type": "string", "description": "{{XmlSource.PathDescription(allowFilePaths, XmlSource.DeadlockExtensions)}}" },
                 "graph": { "type": "integer", "minimum": 1, "description": "Which deadlock, when the XML holds several.  Defaults to 1." },
                 "instance": { "type": "string", "description": "The instance it happened on, to look up the object definitions." }
               },
@@ -94,14 +163,14 @@ namespace DBADashAI.Mcp
 
         protected override async Task<string> RunAsync(Arguments args, SqlToolExecutor sql, CancellationToken cancellationToken)
         {
-            var xml = XmlSource.Read(args, _allowFilePaths);
+            var xml = await XmlSource.ReadAsync(args, _allowFilePaths, XmlSource.DeadlockExtensions, Client, cancellationToken);
             var which = args.Int("graph", 1, 1000) ?? 1;
             var instanceName = args.String("instance");
 
             IReadOnlyList<DeadlockGraph> graphs;
             try
             {
-                graphs = DeadlockParser.Parse(xml);
+                graphs = DeadlockParser.Parse(AiDataMasker.MaskXml(xml, Mask));
             }
             catch (DeadlockParseException ex)
             {
@@ -127,7 +196,7 @@ namespace DBADashAI.Mcp
                 : "The deadlock in the XML given.";
 
             return await GetDeadlockTool.DescribeAsync(graphs[which - 1], instance?.Instance, instance?.InstanceId, heading,
-                includeSchema: instance is not null, sql, cancellationToken);
+                includeSchema: instance is not null, sql, Mask, cancellationToken);
         }
     }
 
@@ -151,7 +220,7 @@ namespace DBADashAI.Mcp
               "type": "object",
               "properties": {
                 "xml": { "type": "string", "description": "The showplan XML." },
-                "path": { "type": "string", "description": "{{XmlSource.PathDescription(allowFilePaths, ".sqlplan or .xml")}}" },
+                "path": { "type": "string", "description": "{{XmlSource.PathDescription(allowFilePaths, XmlSource.PlanExtensions)}}" },
                 "statement": { "type": "integer", "minimum": 1, "description": "Which statement with a plan, numbered from 1.  Defaults to the most expensive." },
                 "includePlanXml": { "type": "boolean", "description": "Include the statement's showplan XML in the result.  Defaults to false." }
               },
@@ -159,16 +228,16 @@ namespace DBADashAI.Mcp
             }
             """;
 
-        protected override Task<string> RunAsync(Arguments args, SqlToolExecutor sql, CancellationToken cancellationToken)
+        protected override async Task<string> RunAsync(Arguments args, SqlToolExecutor sql, CancellationToken cancellationToken)
         {
-            var xml = XmlSource.Read(args, _allowFilePaths);
+            var xml = await XmlSource.ReadAsync(args, _allowFilePaths, XmlSource.PlanExtensions, Client, cancellationToken);
             var which = args.Int("statement", 1, 10000);
             var includePlanXml = args.Bool("includePlanXml") ?? false;
 
             ExecutionPlan plan;
             try
             {
-                plan = PlanParser.Parse(xml);
+                plan = PlanParser.Parse(AiDataMasker.MaskXml(xml, Mask));
             }
             catch (PlanParseException ex)
             {
@@ -196,7 +265,7 @@ namespace DBADashAI.Mcp
                 : "The plan in the XML given.  Its statements with plans: " +
                   string.Join("; ", withPlans.Select((s, i) => $"{i + 1}: {Shorten(s.StatementText)}"));
 
-            return Task.FromResult(GetQueryPlanTool.Describe(plan, statement, null, null, heading, includePlanXml, MaxOutputChars));
+            return GetQueryPlanTool.Describe(plan, statement, null, null, heading, includePlanXml, MaxOutputChars, Mask);
         }
 
         private static string Shorten(string? text)

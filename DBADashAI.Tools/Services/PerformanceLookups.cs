@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
+using DBADashAI.Mcp;
 
 namespace DBADashAI.Services
 {
@@ -77,6 +78,8 @@ namespace DBADashAI.Services
         /// The result sets as a model reads them: pipe-separated tables under a title, cut off at
         /// <paramref name="maxLength"/>.  <paramref name="formatTime"/> writes the times - in the reader's zone for the AI
         /// service, which says so in <paramref name="timeNote"/> and drops the UTC from the column names; in UTC for MCP.
+        /// Statement text and the like are masked by column name as <paramref name="mask"/> says - parameter values and
+        /// literals when it is left out.
         /// </summary>
         public static string Format(
             string summary,
@@ -85,8 +88,10 @@ namespace DBADashAI.Services
             Func<DateTime, string> formatTime,
             string timeNote,
             bool timesAreLocal,
-            int maxLength)
+            int maxLength,
+            AiDataMask? mask = null)
         {
+            var dataMask = mask ?? AiDataMask.Default;
             var text = new StringBuilder();
             text.AppendLine($"Lookup result: {summary}");
             text.AppendLine($"{timeNote}  Durations are milliseconds.  Snapshots are points in time, so durations are how long each had been running when seen.");
@@ -107,7 +112,7 @@ namespace DBADashAI.Services
                 text.AppendLine(string.Join(" | ", columns.Select(c => timesAreLocal && c.EndsWith("UTC", StringComparison.Ordinal) ? c[..^3] : c)));
                 foreach (var row in rows)
                 {
-                    text.AppendLine(string.Join(" | ", columns.Select(c => Value(row[c], formatTime))));
+                    text.AppendLine(string.Join(" | ", columns.Select(c => Value(row[c] is string s ? AiDataMasker.MaskNamed(c, s, dataMask) : row[c], formatTime))));
                 }
             }
 

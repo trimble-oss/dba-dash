@@ -108,7 +108,7 @@ namespace DBADashAI.Services
         /// Runs one lookup.  Returns the line the reader is shown and what the model is given back - which
         /// for a request it got wrong is what was wrong with it, so it can ask again properly.
         /// </summary>
-        public async Task<(string Summary, string Result)> RunAsync(string json, AiPerformanceAnalysisRequest request, CancellationToken cancellationToken)
+        public async Task<(string Summary, string Result)> RunAsync(string json, AiPerformanceAnalysisRequest request, CancellationToken cancellationToken, DBADashAI.Mcp.AiDataMask? mask = null)
         {
             Lookup lookup;
             try
@@ -136,7 +136,7 @@ namespace DBADashAI.Services
             };
             if (!string.IsNullOrWhiteSpace(lookup.Reason)) summary += $" - {lookup.Reason}";
 
-            return (summary, Format(summary, sets, lookup.Tool, request));
+            return (summary, Format(summary, sets, lookup.Tool, request, mask));
         }
 
         internal sealed record Lookup(string Tool, DateTime FromUtc, DateTime ToUtc, string? WaitType, bool TempDBOnly, string? Signature, string? Reason);
@@ -206,9 +206,9 @@ namespace DBADashAI.Services
         /// The result sets as the model is given them: times in the reader's zone like everything else it has, and cut
         /// off at <see cref="MaxResultLength"/>.
         /// </summary>
-        internal static string Format(string summary, List<List<Dictionary<string, object?>>> sets, string tool, AiPerformanceAnalysisRequest request) =>
+        internal static string Format(string summary, List<List<Dictionary<string, object?>>> sets, string tool, AiPerformanceAnalysisRequest request, DBADashAI.Mcp.AiDataMask? mask = null) =>
             PerformanceLookups.Format(summary, sets, tool, time => Local(time, request),
-                "Times are in the same zone as the figures above.", timesAreLocal: true, MaxResultLength);
+                "Times are in the same zone as the figures above.", timesAreLocal: true, MaxResultLength, mask);
 
         /// <summary>What the model is told after a lookup: the result, and how many more it can have.</summary>
         public static string ResultTurn(string result, int remaining) =>

@@ -58,6 +58,9 @@ namespace DBADashAI.Models
         /// <summary>Override the configured AI model for this request.  Null = use configured default.</summary>
         public string? ModelOverride { get; set; }
 
+        /// <summary>What to mask in the lookups' results, as an <see cref="Mcp.AiDataMask"/> word.  Null = the default.  Never less than the service's setting.</summary>
+        public string? DataDetail { get; set; }
+
         /// <summary>What has been said about this window already - see <see cref="AiConversation"/>.</summary>
         public List<AiConversationTurn> History { get; set; } = new();
 

@@ -72,7 +72,8 @@ namespace DBADashGUI.Deadlocks
             int? instanceId = null,
             string? modelOverride = null,
             AiConversation? conversation = null,
-            string? question = null)
+            string? question = null,
+            string? dataDetail = null)
         {
             // Everything said about this deadlock so far.  Empty on a first analysis, which is what the
             // service reads as one.  The deadlock itself is not in here: the service builds the opening
@@ -87,6 +88,7 @@ namespace DBADashGUI.Deadlocks
                 {
                     graphXml = payload.GraphXml,
                     signature = payload.Signature,
+                    deadlockHash = payload.DeadlockHash,
                     signatureVersion = payload.SignatureVersion,
                     payloadVersion = payload.Version,
                     instanceId,
@@ -105,6 +107,8 @@ namespace DBADashGUI.Deadlocks
                         truncated = s.Truncated
                     }),
                     modelOverride,
+                    // How the graph was masked before the payload was built - the service refuses less than its setting.
+                    dataDetail,
                     conversationId = conversation?.Id,
                     history,
                     question,
@@ -128,7 +132,8 @@ namespace DBADashGUI.Deadlocks
             int? instanceId = null,
             AiConversation? conversation = null,
             string? question = null,
-            string? modelOverride = null)
+            string? modelOverride = null,
+            string? dataDetail = null)
         {
             try
             {
@@ -142,7 +147,7 @@ namespace DBADashGUI.Deadlocks
                     $"{baseUrl.TrimEnd('/')}/api/ai/analyse-deadlock")
                 {
                     Content = new StringContent(
-                        ToJson(payload, instanceId, modelOverride, conversation, question),
+                        ToJson(payload, instanceId, modelOverride, conversation, question, dataDetail),
                         Encoding.UTF8,
                         "application/json")
                 };

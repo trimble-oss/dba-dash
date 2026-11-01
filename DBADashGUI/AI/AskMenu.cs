@@ -1,4 +1,5 @@
 #nullable enable
+using DBADashAI.Mcp;
 using Serilog;
 using System;
 using System.Drawing;
@@ -17,6 +18,14 @@ namespace DBADashGUI.AI
     internal static class AskMenu
     {
         private static readonly Lazy<Bitmap> Sparkle = new(() => DrawSparkle(32));
+
+        /// <summary>
+        /// What the masking options were last set to, in any Ask menu, and the setting they were set against.  Each menu is
+        /// rebuilt when it opens, and a plan or deadlock viewer has its own, so the choice is kept here: every Ask menu
+        /// starts from it until the setting changes in Options > Connect AI Tools.  Nothing is saved: a restart starts from
+        /// the setting.  UI thread only.
+        /// </summary>
+        private static (AiDataMask Setting, AiDataMask Mask)? chosen;
 
         /// <summary>Raised on the UI thread when the tools available may have changed.</summary>
         private static event Action? AvailabilityChanged;
@@ -45,10 +54,25 @@ namespace DBADashGUI.AI
 
             // A placeholder, so the arrow shows and the menu opens: it is rebuilt from what is available every time.
             button.DropDownItems.Add(new ToolStripMenuItem("..."));
+
+            // Ticking an option leaves the menu open, so it can be changed before picking a tool.
+            var keepOpen = false;
+            button.DropDown.Closing += (_, e) =>
+            {
+                if (keepOpen && e.CloseReason == ToolStripDropDownCloseReason.ItemClicked) e.Cancel = true;
+                keepOpen = false;
+            };
+
             button.DropDownOpening += (_, _) =>
             {
                 button.DropDown.SuspendLayout();
                 button.DropDownItems.Clear();
+
+                var setting = DataDetailLevels.McpCurrentMask();
+                if (chosen is { } last && last.Setting != setting) chosen = null;
+                var settingLabel = DataDetailLevels.Label(setting.Word);
+                AiMasking.MaskToggles masking = null!;
+                masking = AiMasking.Toggles(() => chosen = (setting, masking.Mask), chosen?.Mask ?? setting);
                 var targets = AgentTarget.Available();
                 foreach (var target in targets)
                 {
@@ -57,10 +81,14 @@ namespace DBADashGUI.AI
                         button.DropDownItems.Add(new ToolStripSeparator());
                     }
 
+                    // Only Claude Code's window is started with a server of its own; the others use the one registered with
+                    // them, which masks as the setting says whatever is ticked here.
                     button.DropDownItems.Add(new ToolStripMenuItem(target.MenuText, ProgramIcon(target.ProgramPath),
-                        (_, _) => Launch(target, ask, owner()))
+                        (_, _) => Launch(target, ask, owner(), RequestMask()))
                     {
-                        ToolTipText = target.ToolTip
+                        ToolTipText = target is ClaudeCodeTarget
+                            ? target.ToolTip
+                            : $"{target.ToolTip}.  Its DBA Dash tools mask as set in Options > Connect AI Tools ({settingLabel}); the options below mask the plan or deadlock handed over."
                     });
                 }
 
@@ -69,18 +97,57 @@ namespace DBADashGUI.AI
                     button.DropDownItems.Add(new ToolStripMenuItem("No AI tools - see Options > Connect AI Tools") { Enabled = false });
                 }
 
+                // The same options as the built-in AI panels, starting from the setting: every level Connect AI Tools offers.
+                button.DropDownItems.Add(new ToolStripSeparator());
+                const string scope = "  This covers the plan or deadlock handed over, and everything Claude Code's own DBA Dash server returns.  " +
+                                     "Other AI tools' registered servers mask as Options > Connect AI Tools says.";
+                foreach (var item in masking.Items.OfType<ToolStripMenuItem>())
+                {
+                    item.ToolTipText += scope;
+                    item.MouseDown += (_, _) => keepOpen = true;
+                }
+                button.DropDownItems.AddRange(masking.Items);
+
+                if (targets.Any(t => t is not ClaudeCodeTarget))
+                {
+                    button.DropDownItems.Add(new ToolStripMenuItem($"Other AI tools' DBA Dash tools: {settingLabel}")
+                    {
+                        Enabled = false,
+                        ToolTipText = "Set in Options > Connect AI Tools.  The registered servers read it on each call, in sessions already open too."
+                    });
+                }
+
                 button.DropDown.ResumeLayout();
+
+                AiDataMask RequestMask() => masking.Mask;
             };
 
             return button;
         }
 
-        private static void Launch(AgentTarget target, Func<AgentAsk?> ask, IWin32Window? owner)
+        private static void Launch(AgentTarget target, Func<AgentAsk?> ask, IWin32Window? owner, AiDataMask mask)
         {
             try
             {
                 if (ask() is not { } request) return;
-                var message = target.Launch(AgentHandoff.Prepare(request));
+                var setting = DataDetailLevels.McpCurrentMask();
+                if (mask.IsNone && !setting.IsNone)
+                {
+                    // Say what unticking actually changes: for a registered server, only the file handed over.
+                    var warning = target is ClaudeCodeTarget
+                        ? "Masking is off for this request: the plan or deadlock and the query text DBA Dash's tools return go to the AI tool with their parameter values and literals.  Continue?"
+                        : request.ArtifactFile is not null
+                            ? $"Masking is off for this request: the plan or deadlock goes to {target.Name} with its parameter values and literals.  " +
+                              $"What its DBA Dash tools return is still masked as Options > Connect AI Tools says ({DataDetailLevels.Label(setting.Word)}).  Continue?"
+                            : null;
+                    if (warning is not null &&
+                        MessageBox.Show(owner, warning, target.Name, MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
+                    {
+                        return;
+                    }
+                }
+
+                var message = target.Launch(AgentHandoff.Prepare(request, mask));
                 if (message is not null)
                 {
                     MessageBox.Show(owner, message, target.Name, MessageBoxButtons.OK, MessageBoxIcon.Information);

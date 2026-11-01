@@ -21,6 +21,7 @@ using ModelContextProtocol.Server;
 
 string? connectionName = null;
 string? connectionString = null;
+string? dataDetail = null;
 
 for (var i = 0; i < args.Length; i++)
 {
@@ -31,6 +32,14 @@ for (var i = 0; i < args.Length; i++)
             break;
         case "--connection-string" when i + 1 < args.Length:
             connectionString = args[++i];
+            break;
+        case "--data-detail" when i + 1 < args.Length:
+            dataDetail = args[++i];
+            if (!AiDataMask.TryParse(dataDetail, out _))
+            {
+                await Console.Error.WriteLineAsync($"--data-detail must be one of: {string.Join(", ", AiDataMask.Words)}.");
+                return 1;
+            }
             break;
         case "--list-connections":
             foreach (var saved in RepositoryConnectionResolver.GetSavedConnections())
@@ -46,6 +55,17 @@ for (var i = 0; i < args.Length; i++)
                   --connection <name>          Use the saved GUI repository connection with this name.
                   --connection-string <value>  Use this connection string instead of a saved connection.
                   --list-connections           List the saved GUI repository connections and exit.
+                  --data-detail <level>        What is masked before results reach the model, fixed for as long
+                                               as the server runs.  Without it, the server follows the setting in
+                                               the DBA Dash GUI's Options > Connect AI Tools, read on each call:
+                                                 parametersAndLiterals (default)  parameter values and the literals
+                                                                                  in statement text and plans
+                                                 parameters                       parameter values only
+                                                 literals                         literals only
+                                                 full                             nothing
+                                                 metadataOnly                     statement text, plans and input
+                                                                                  buffers withheld; logins, hosts and
+                                                                                  application names coded
 
                 With no options it uses the default repository connection saved in the DBA Dash GUI.
 
@@ -79,15 +99,34 @@ var builder = Host.CreateApplicationBuilder(new HostApplicationBuilderSettings
 
 builder.Configuration.AddJsonFile(Path.Combine(AppContext.BaseDirectory, "DBADashMCP.json"), optional: true);
 builder.Configuration["ConnectionStrings:Repository"] = repository;
+// The command line wins over DBADashMCP.json; either fixes the masking.  With neither, the server follows the user's
+// setting in the GUI, read on each call - an AI tool's session, and this server with it, can run for days.
+if (dataDetail is not null)
+{
+    builder.Configuration[AiDataMask.SettingName] = dataDetail;
+}
+var followUserSetting = string.IsNullOrWhiteSpace(builder.Configuration[AiDataMask.SettingName]);
 // The client and this server run as the same user on the same machine, so reading a file the user names is no more
 // than the client could do itself - unlike on the AI service.
 builder.Configuration[McpToolRegistration.AllowFilePathsSetting] ??= "true";
+// An unrecognised value in DBADashMCP.json is a startup error, not a silent fall back to full detail.
+AiDataMask dataMask;
+try
+{
+    dataMask = AiDataMask.FromConfiguration(builder.Configuration);
+}
+catch (InvalidOperationException ex)
+{
+    await Console.Error.WriteLineAsync(ex.Message);
+    return 1;
+}
 
 builder.Logging.AddConsole(options => options.LogToStandardErrorThreshold = LogLevel.Trace);
 builder.Logging.SetMinimumLevel(LogLevel.Warning);
 
 builder.Services
-    .AddMcpServer(options => McpToolRegistration.Configure(options, typeof(Program).Assembly.GetName().Version?.ToString()))
+    .AddMcpServer(options => McpToolRegistration.Configure(options, typeof(Program).Assembly.GetName().Version?.ToString(),
+        followUserSetting ? AiDataMaskSource.FromUserSetting() : AiDataMaskSource.Fixed(dataMask)))
     .WithStdioServerTransport();
 
 builder.Services

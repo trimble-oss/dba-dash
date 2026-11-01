@@ -25,6 +25,9 @@ namespace DBADashAI.Models
         /// <summary>Override the configured AI model for this request. Null = use configured default.</summary>
         public string? ModelOverride { get; set; }
 
+        /// <summary>What to mask in the tools' data, as an <see cref="Mcp.AiDataMask"/> word.  Null = the default.  Never less than the service's setting.</summary>
+        public string? DataDetail { get; set; }
+
         public string? Validate()
         {
             if (string.IsNullOrWhiteSpace(Question))

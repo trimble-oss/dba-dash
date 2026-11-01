@@ -777,6 +777,8 @@ namespace DBADashGUI
             InitializeNotifyIcon();
             desktopNotificationsToolStripMenuItem.Checked = Properties.Settings.Default.DesktopNotificationsEnabled;
             _ = Task.Run(GetNewAlertsLoop);
+            // What the Ask button handed over more than a week ago, whether or not it is used again.
+            _ = Task.Run(AI.AgentHandoff.CleanUp);
 
             optionsToolStripMenuItem.DropDownItems.Add(new ToolStripMenuItem("Connect AI Tools (MCP)...", null, (_, _) =>
             {

@@ -1150,6 +1150,9 @@
     <Build Include="AI\Stored Procedures\ServiceConfig_Get.sql" />
     <Build Include="AI\Stored Procedures\ServiceConfig_Upd.sql" />
     <Build Include="AI\Stored Procedures\ServiceConfig_Heartbeat.sql" />
+    <Build Include="AI\Tables\DataDetail.sql" />
+    <Build Include="AI\Stored Procedures\DataDetail_Get.sql" />
+    <Build Include="AI\Stored Procedures\DataDetail_Set.sql" />
     <Build Include="Security\AIService.sql" />
     <Build Include="Security\AIUser.sql" />
     <Build Include="Security\McpUser.sql" />
