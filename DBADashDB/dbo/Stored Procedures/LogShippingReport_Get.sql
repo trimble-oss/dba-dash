@@ -69,7 +69,8 @@ SELECT LSS.InstanceID,
 	LSS.IsExcluded,
 	LSS.ExcludedBy,
 	LSS.ShowInSummary,
-	LSS.IsNewDatabase
+	LSS.IsNewDatabase,
+LSS.create_date
 INTO #LogShippingStatus
 FROM dbo.LogShippingStatus LSS
 WHERE EXISTS(SELECT 1 FROM #Instances I WHERE I.InstanceID = LSS.InstanceID)
@@ -80,7 +81,8 @@ AND (LSS.ShowInSummary=1 OR @ShowHidden=1)
 	SELECT LSS.InstanceID,
 		   LSS.InstanceDisplayName,
 		   ISNULL(MIN(NULLIF(LSS.Status,3)),3) AS Status,
-		   SUM(CASE WHEN LSS.IsMissing=0 AND LSS.Status<>3 THEN 1 ELSE 0 END) AS LogShippedDBCount,
+		   /* Conflicts have no DatabaseID - they are not log shipped, so they are counted in CriticalCount only */
+		   SUM(CASE WHEN LSS.IsMissing=0 AND LSS.DatabaseID IS NOT NULL AND LSS.Status<>3 THEN 1 ELSE 0 END) AS LogShippedDBCount,
 		   SUM(CASE WHEN LSS.Status=2 THEN 1 ELSE 0 END) AS WarningCount,
 		   SUM(CASE WHEN LSS.Status=1 THEN 1 ELSE 0 END) AS CriticalCount,
 		   MAX(CASE WHEN LSS.Status<>3 THEN LSS.TotalTimeBehind END) MaxTotalTimeBehind,
@@ -202,9 +204,12 @@ SELECT LSS.InstanceID,
        LSS.PrimaryInstanceDisplayName,
        LSS.state_desc,
        LSS.IsExcluded,
-       LSS.ExcludedBy
+       LSS.ExcludedBy,
+       LSS.create_date,
+       DatabaseAgeHD.HumanDuration AS DatabaseAgeDuration
 FROM #LogShippingStatus LSS
 CROSS APPLY dbo.ParseFileName(LSS.last_file) f
+OUTER APPLY dbo.SecondsToHumanDuration(DATEDIFF_BIG(s,LSS.create_date,GETUTCDATE())) AS DatabaseAgeHD
 OUTER APPLY dbo.SecondsToHumanDuration(LSS.TimeSinceLast*60.0) AS TimeSinceLastHD
 OUTER APPLY dbo.SecondsToHumanDuration(LSS.LatencyOfLast*60.0) AS LatencyOfLastHD
 OUTER APPLY dbo.SecondsToHumanDuration(LSS.TotalTimeBehind*60.0) AS TotalTimeBehindHD

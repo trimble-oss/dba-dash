@@ -418,8 +418,10 @@ namespace DBADashGUI.LogShipping
                         ["SnapshotAgeDuration"] = new ColumnMetadata { DisplayIndex = 13, Alias = "Snapshot Age", Highlighting = SnapshotHighlight() },
                         ["SnapshotDate"] = new ColumnMetadata { DisplayIndex = 14, Alias = "Snapshot Date" },
                         ["last_file"] = new ColumnMetadata { DisplayIndex = 15, Alias = "Last File" },
-                        ["ThresholdConfiguredLevel"] = new ColumnMetadata { DisplayIndex = 16, Alias = "Threshold Level" },
-                        ["Configure"] = new ColumnMetadata { DisplayIndex = 17, Alias = "Configure", Link = new LogShippingConfigureThresholdLink { DatabaseLevel = true }, Description = "Configure database-level thresholds", Highlighting = ConfiguredHighlight("ThresholdConfiguredLevel", "Database") },
+                        ["create_date"] = new ColumnMetadata { DisplayIndex = 16, Alias = "Create Date", Description = "When the database was created.  Missing and Conflict rows show the primary's database; other rows show the database on this instance." },
+                        ["DatabaseAgeDuration"] = new ColumnMetadata { DisplayIndex = 17, Alias = "Database Age" },
+                        ["ThresholdConfiguredLevel"] = new ColumnMetadata { DisplayIndex = 18, Alias = "Threshold Level" },
+                        ["Configure"] = new ColumnMetadata { DisplayIndex = 19, Alias = "Configure", Link = new LogShippingConfigureThresholdLink { DatabaseLevel = true }, Description = "Configure database-level thresholds", Highlighting = ConfiguredHighlight("ThresholdConfiguredLevel", "Database") },
                         // Numeric (minutes) columns - hidden by default, available via the column chooser.
                         ["TotalTimeBehind"] = Hidden(18),
                         ["LatencyOfLast"] = Hidden(19),

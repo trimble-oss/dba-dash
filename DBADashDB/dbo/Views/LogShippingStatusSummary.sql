@@ -5,7 +5,8 @@ WITH Summary AS (
 		   LSS.InstanceDisplayName,
 		   ISNULL(MIN(NULLIF(LSS.Status,3)),3) AS Status,
 		   CASE ISNULL(MIN(NULLIF(LSS.Status,3)),3) WHEN 1 THEN 'Critical' WHEN 2 THEN 'Warning' WHEN 3 THEN 'N/A' WHEN 4 THEN 'OK' ELSE 'N/A' END AS StatusDescription,
-		   SUM(CASE WHEN LSS.IsMissing=0 AND LSS.Status<>3 THEN 1 ELSE 0 END) AS LogShippedDBCount,
+		   /* Conflicts have no DatabaseID - they are not log shipped, so they are counted in CriticalCount only */
+		   SUM(CASE WHEN LSS.IsMissing=0 AND LSS.DatabaseID IS NOT NULL AND LSS.Status<>3 THEN 1 ELSE 0 END) AS LogShippedDBCount,
 		   SUM(CASE WHEN LSS.Status=2 THEN 1 ELSE 0 END) AS WarningCount,
 		   SUM(CASE WHEN LSS.Status=1 THEN 1 ELSE 0 END) AS CriticalCount,
 		   MAX(CASE WHEN LSS.Status<>3 THEN LSS.TotalTimeBehind END) MaxTotalTimeBehind,

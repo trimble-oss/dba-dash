@@ -30,7 +30,8 @@ SELECT I.InstanceID,
 	pri.PrimaryInstanceDisplayName,
 	CASE WHEN excl.DatabaseName IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS IsExcluded,
 	CASE WHEN excl.DatabaseName IS NULL THEN NULL ELSE CONCAT(excl.DatabaseName,CASE WHEN excl.InstanceID = -1 THEN ' (Root)' ELSE ' (Instance)' END) END AS ExcludedBy,
-	nd.IsNewDatabase
+	nd.IsNewDatabase,
+	utc.create_date_utc AS create_date
 FROM dbo.Instances I
 JOIN dbo.Databases D ON I.InstanceID = D.InstanceID
 JOIN dbo.CollectionDatesStatus SSD ON SSD.InstanceID = I.InstanceID AND SSD.Reference='LogRestores'
@@ -108,7 +109,8 @@ OUTER APPLY(SELECT TOP(1) P.PrimaryInstanceID,
 			AND PD.IsActive=1
 			ORDER BY P.PrimaryInstanceID
 			) pri
-WHERE (D.state =1 OR D.is_in_standby=1)
+/* RECOVERING (state 2) is reported only while it has a recent restore (within the critical threshold in minutes, if configured) */
+WHERE (D.state = 1 OR D.is_in_standby=1 OR (D.state = 2 AND LR.restore_date IS NOT NULL AND (cfg.TimeSinceLastCriticalThreshold IS NULL OR utc.restore_date_utc > DATEADD(mi,-cfg.TimeSinceLastCriticalThreshold,GETUTCDATE()))))
 AND D.IsActive=1
 AND I.IsActive=1
 AND D.recovery_model<>3
@@ -140,17 +142,18 @@ SELECT SI.InstanceID,
 	SSD.SnapshotDate,
 	SSD.Status AS SnapshotAgeStatus,
 	chk.Status,
-	CASE WHEN excl.DatabaseName IS NOT NULL THEN 'Missing (Excluded)' WHEN nd.IsNewDatabase=1 THEN 'Missing (New Database)' ELSE 'Missing' END AS StatusDescription,
+	CASE WHEN excl.DatabaseName IS NOT NULL THEN 'Missing (Excluded)' WHEN SD.name IS NOT NULL THEN 'Conflict' WHEN nd.IsNewDatabase=1 THEN 'Missing (New Database)' ELSE 'Missing' END AS StatusDescription,
 	NULL AS last_file,
 	SD.state_desc,
 	CASE WHEN cfg.InstanceID = SI.InstanceID THEN 'Instance' ELSE 'Root' END AS ThresholdConfiguredLevel,
 	SI.ShowInSummary,
-	CAST(1 AS BIT) AS IsMissing,
+	CAST(CASE WHEN SD.name IS NULL THEN 1 ELSE 0 END AS BIT) AS IsMissing,
 	P.PrimaryInstanceID,
 	PI.InstanceDisplayName AS PrimaryInstanceDisplayName,
 	CASE WHEN excl.DatabaseName IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS IsExcluded,
 	CASE WHEN excl.DatabaseName IS NULL THEN NULL ELSE CONCAT(excl.DatabaseName,CASE WHEN excl.InstanceID = -1 THEN ' (Root)' ELSE ' (Instance)' END) END AS ExcludedBy,
-	nd.IsNewDatabase
+	nd.IsNewDatabase,
+	utc.create_date_utc AS create_date
 FROM dbo.LogShippingPairs P
 JOIN dbo.Instances PI ON P.PrimaryInstanceID = PI.InstanceID
 JOIN dbo.Instances SI ON P.SecondaryInstanceID = SI.InstanceID
@@ -164,6 +167,21 @@ OUTER APPLY(SELECT TOP(1) T.*
 			AND T.DatabaseID = -1
 			ORDER BY T.InstanceID DESC
 			) cfg
+OUTER APPLY(SELECT TOP(1) DATEADD(mi,SI.UTCOffset,R.restore_date) AS restore_date_utc
+				FROM dbo.LogRestores R
+				WHERE R.InstanceID = SD.InstanceID
+				AND R.DatabaseID = SD.DatabaseID
+				) SLR
+/* Same most specific threshold lookup as the first SELECT (database, instance, root database, root) for the secondary's copy */
+OUTER APPLY(SELECT TOP(1) T.TimeSinceLastCriticalThreshold
+			FROM (VALUES(1,SI.InstanceID,SD.DatabaseID),
+						(2,SI.InstanceID,-1),
+						(3,-1,SD.DatabaseID),
+						(4,-1,-1)
+				) K(Priority,InstanceID,DatabaseID)
+			JOIN dbo.LogRestoreThresholds T ON T.InstanceID = K.InstanceID AND T.DatabaseID = K.DatabaseID
+			ORDER BY K.Priority
+			) scfg
 OUTER APPLY(SELECT DATEADD(mi,PI.UTCOffset,PD.create_date) AS create_date_utc) AS utc
 OUTER APPLY(SELECT DATEDIFF_BIG(s,SSD.SnapshotDate,GETUTCDATE())/60.0 AS SnapshotAge) l
 OUTER APPLY dbo.SecondsToHumanDuration(l.SnapshotAge*60.0) AS SnapshotAgeHD
@@ -178,6 +196,7 @@ OUTER APPLY(SELECT TOP(1) X.InstanceID,
 /* Created within the new database exclude period.  Excluded databases take precedence */
 OUTER APPLY(SELECT CASE WHEN excl.DatabaseName IS NULL AND utc.create_date_utc > DATEADD(mi,-cfg.NewDatabaseExcludePeriodMin,GETUTCDATE()) THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS IsNewDatabase) nd
 OUTER APPLY(SELECT CASE WHEN excl.DatabaseName IS NOT NULL THEN 3
+					WHEN SD.name IS NOT NULL THEN 1
 					WHEN nd.IsNewDatabase=1 THEN 3
 					ELSE 1 END AS Status) chk
 WHERE PI.IsActive=1
@@ -188,5 +207,5 @@ AND PD.source_database_id IS NULL
 AND PD.state = 0
 AND ISNULL(PD.is_in_standby,0) = 0
 AND PD.recovery_model<>3
-/* Missing from the secondary or not restoring/in standby there (e.g. ONLINE) */
-AND NOT (ISNULL(SD.state,0) = 1 OR ISNULL(SD.is_in_standby,0) = 1)
+/* Missing from the secondary, or not restoring/in standby there (e.g. ONLINE).  RECOVERING only counts while it has a recent restore - see above */
+AND NOT (ISNULL(SD.state,0) = 1 OR ISNULL(SD.is_in_standby,0) = 1 OR (SD.state = 2 AND SLR.restore_date_utc IS NOT NULL AND (scfg.TimeSinceLastCriticalThreshold IS NULL OR SLR.restore_date_utc > DATEADD(mi,-scfg.TimeSinceLastCriticalThreshold,GETUTCDATE()))))
