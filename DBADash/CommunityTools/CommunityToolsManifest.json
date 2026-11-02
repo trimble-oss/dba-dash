@@ -60,7 +60,7 @@
       "DisplayName": "DarlingData",
       "Author": "Erik Darling",
       "Repository": "erikdarlingdata/DarlingData",
-      "Ref": "Updates_20261001",
+      "Ref": "Updates_20261101",
       "LatestRef": "release",
       "License": "MIT",
       "LicenseUrl": "https://github.com/erikdarlingdata/DarlingData/blob/main/LICENSE",
@@ -70,43 +70,43 @@
           "Name": "sp_HealthParser",
           "MinMajorVersion": 13,
           "AzureSqlDb": false,
-          "Files": [ { "Path": "sp_HealthParser/sp_HealthParser.sql", "Version": "3.10", "VersionDate": "20261001", "Sha256": "e456d1b7b59c88dde0e215d30772545d2f79fad5f9a80290f5fe538203adc195" } ]
+          "Files": [ { "Path": "sp_HealthParser/sp_HealthParser.sql", "Version": "3.11", "VersionDate": "20261101", "Sha256": "214cdf6e687c7c8da585b9a3ccdb934a791d0c271e1931d27474f833bb4d7f8a" } ]
         },
         {
           "Name": "sp_HumanEvents",
           "MinMajorVersion": 13,
           "AzureSqlDb": true,
-          "Files": [ { "Path": "sp_HumanEvents/sp_HumanEvents.sql", "Version": "7.10", "VersionDate": "20261001", "Sha256": "ed6eef97c90daa2d1ecedcb49b36196d277cffbf567ec176e6bf45de844aea76" } ]
+          "Files": [ { "Path": "sp_HumanEvents/sp_HumanEvents.sql", "Version": "7.11", "VersionDate": "20261101", "Sha256": "e75988196d16e3171e61f585976ed6f42a929acf266b144e4cf474e97e963ac5" } ]
         },
         {
           "Name": "sp_HumanEventsBlockViewer",
           "MinMajorVersion": 13,
           "AzureSqlDb": true,
-          "Files": [ { "Path": "sp_HumanEvents/sp_HumanEventsBlockViewer.sql", "Version": "5.10", "VersionDate": "20261001", "Sha256": "a3aea7f1ab7c90c5aafd90413d20ae4bf9a43fa64a7fe42ee80abaa0199e5a31" } ]
+          "Files": [ { "Path": "sp_HumanEvents/sp_HumanEventsBlockViewer.sql", "Version": "5.11", "VersionDate": "20261101", "Sha256": "41befa32737d2413c6318f127dd783bf08f24521a1042ae3915e63a94967a4b0" } ]
         },
         {
           "Name": "sp_IndexCleanup",
           "MinMajorVersion": 13,
           "AzureSqlDb": true,
-          "Files": [ { "Path": "sp_IndexCleanup/sp_IndexCleanup.sql", "Version": "2.10", "VersionDate": "20261001", "Sha256": "c0f5fd21c01ccdaf55a6142c4c771075a43811ab4a37d3fd5b4091b11f0ae1fd" } ]
+          "Files": [ { "Path": "sp_IndexCleanup/sp_IndexCleanup.sql", "Version": "2.11", "VersionDate": "20261101", "Sha256": "52d9f3e682928e1b79cdbaa8f6e02a8524a254222849bc3f06d2571b51067017" } ]
         },
         {
           "Name": "sp_LogHunter",
           "MinMajorVersion": 13,
           "AzureSqlDb": false,
-          "Files": [ { "Path": "sp_LogHunter/sp_LogHunter.sql", "Version": "3.10", "VersionDate": "20261001", "Sha256": "5fba812d4a98eb6f3cfb5ea28b63864a785fdc1507aef40f8b50c608a569a7f2" } ]
+          "Files": [ { "Path": "sp_LogHunter/sp_LogHunter.sql", "Version": "3.11", "VersionDate": "20261101", "Sha256": "4fbcaa455a3baae64d39235f2b9fc763af0ef4c8a87d781b7b23bbea59b5b22d" } ]
         },
         {
           "Name": "sp_PressureDetector",
           "MinMajorVersion": 13,
           "AzureSqlDb": true,
-          "Files": [ { "Path": "sp_PressureDetector/sp_PressureDetector.sql", "Version": "6.10", "VersionDate": "20261001", "Sha256": "3cefacc042bdca78efc385848e5bfd05e20f27b2190d8c72d4e858e426aa2cb7" } ]
+          "Files": [ { "Path": "sp_PressureDetector/sp_PressureDetector.sql", "Version": "6.11", "VersionDate": "20261101", "Sha256": "6e91c8d09342b40f8c02b313c8a71f9a46ec63d80e8fd296484ad12cdbb2e1a0" } ]
         },
         {
           "Name": "sp_QuickieStore",
           "MinMajorVersion": 13,
           "AzureSqlDb": true,
-          "Files": [ { "Path": "sp_QuickieStore/sp_QuickieStore.sql", "Version": "6.10", "VersionDate": "20261001", "Sha256": "bae954c0def339240efe539fbcd2f71b5b313f75dc2110859d887dee77cf32df" } ]
+          "Files": [ { "Path": "sp_QuickieStore/sp_QuickieStore.sql", "Version": "6.11", "VersionDate": "20261101", "Sha256": "a8c1f3d271f6be02c4c24825a0a9131ef7b1acbf8216c97f6c7265a5fdffea16" } ]
         }
       ]
     },
