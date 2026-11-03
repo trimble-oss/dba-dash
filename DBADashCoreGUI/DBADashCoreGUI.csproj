@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <PackageReference Include="Octokit" />
+    <PackageReference Include="System.Management.Automation" />
   </ItemGroup>
 
   <ItemGroup>

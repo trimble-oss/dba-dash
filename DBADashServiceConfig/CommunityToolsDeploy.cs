@@ -1,5 +1,6 @@
 using DBADash;
 using DBADash.CommunityTools;
+using DBADashGUI;
 using DBADashGUI.CustomReports;
 using DBADashGUI.Theme;
 using Microsoft.Data.SqlClient;

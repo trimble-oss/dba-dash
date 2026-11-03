@@ -1,4 +1,4 @@
-using DBADash;
+﻿using DBADash;
 using DBADash.Messaging;
 using DBADashGUI.Messaging;
 using DBADashGUI.Theme;
@@ -39,6 +39,9 @@ namespace DBADashGUI.Connections
         private readonly Button bttnAdd = new() { Text = "Check && Add...", Location = new Point(844, 302), Size = new Size(130, 36), Anchor = AnchorStyles.Top | AnchorStyles.Right };
         private readonly Button bttnCancel = new() { Text = "Cancel", DialogResult = DialogResult.Cancel, Location = new Point(982, 302), Size = new Size(110, 36), Anchor = AnchorStyles.Top | AnchorStyles.Right };
 
+        /// <summary>The account the selected service runs as, from its last check (null until then, or from an older service)</summary>
+        private string serviceAccount;
+
         /// <summary>Something was added or updated - the tree needs refreshing</summary>
         public bool ConnectionsChanged { get; private set; }
 
@@ -64,7 +67,10 @@ namespace DBADashGUI.Connections
             };
             var bttnBuild = new Button { Text = "Build...", Location = new Point(914, 36), Size = new Size(110, 34), Anchor = AnchorStyles.Top | AnchorStyles.Right };
             bttnBuild.Click += (_, _) => BuildConnectionString();
-            tabConnections.Controls.AddRange(new Control[] { lblConnections, txtConnections, bttnBuild });
+            var lnkPermissions = new LinkLabel { Text = "Permissions...", Location = new Point(914, 80), AutoSize = true, Anchor = AnchorStyles.Top | AnchorStyles.Right };
+            new ToolTip().SetToolTip(lnkPermissions, "Grant the service account the permissions it needs on these instances, connecting from this computer as you");
+            lnkPermissions.LinkClicked += (_, _) => ShowPermissionsHelper(ConnectionLines);
+            tabConnections.Controls.AddRange(new Control[] { lblConnections, txtConnections, bttnBuild, lnkPermissions });
             tabs.TabPages.Insert(0, tabConnections);
             tabs.SelectedTab = tabConnections;
 
@@ -93,6 +99,7 @@ namespace DBADashGUI.Connections
                 // Default to the service that collects the most instances
                 cboService.SelectedItem = agents.MaxBy(a => a.InstanceCount);
                 cboService.Enabled = agents.Count > 1;
+                cboService.SelectedIndexChanged += (_, _) => serviceAccount = null;
             }
             catch (Exception ex)
             {
@@ -122,6 +129,64 @@ namespace DBADashGUI.Connections
             if (frm.ShowDialog(this) != DialogResult.OK) return;
             var text = txtConnections.Text.TrimEnd();
             txtConnections.Text = (text.Length == 0 ? string.Empty : text + Environment.NewLine) + frm.ConnectionString;
+        }
+
+        /// <summary>
+        /// Opens the Permissions Helper for <paramref name="lines"/>, to grant the service account access.  It connects from
+        /// this computer as the current user (Windows authentication for instance names), so the user needs rights to grant
+        /// permissions on the instances.  Returns true if it was shown.
+        /// </summary>
+        private bool ShowPermissionsHelper(IReadOnlyCollection<string> lines)
+        {
+            if (cboService.SelectedItem is not AgentItem agent)
+            {
+                SetStatus("Select the service that will collect the connections", null, DashColors.Warning);
+                return false;
+            }
+            if (lines.Count == 0)
+            {
+                tabs.SelectedIndex = 0;
+                SetStatus("Enter the instances to grant access to", null, DashColors.Warning);
+                return false;
+            }
+            try
+            {
+                var options = tabs.Options;
+                var sources = new List<DBADashSource>();
+                foreach (var line in lines)
+                {
+                    var src = options.CreateSource(line);
+                    if (src.SourceConnection.Type == DBADashConnection.ConnectionType.SQL)
+                    {
+                        src.SetConnectionIDFromBuilderIfNotSet();
+                        sources.Add(src);
+                    }
+                }
+                if (sources.Count == 0)
+                {
+                    SetStatus("None of the connections are SQL Server connections", null, DashColors.Warning);
+                    return false;
+                }
+
+                var collectAgent = DBADashAgent.GetDBADashAgent(Common.ConnectionString, agent.CollectAgentID);
+                // Only what the helper uses to choose the permissions - the features enabled on the service
+                var config = new CollectionConfig
+                {
+                    AllowKillSession = collectAgent.KillSessionEnabled,
+                    AllowPlanForcing = collectAgent.PlanForcingEnabled,
+                    AllowedScripts = collectAgent.AllowedScriptsCSV,
+                    AllowedCustomProcs = collectAgent.AllowedCustomProcsCSV
+                };
+                // Not a service on this computer, so the helper mustn't look it up.  Unknown until a check reports it - typed in then.
+                using var frm = new PermissionsHelper { Connections = sources, Config = config, ServiceAccount = serviceAccount ?? string.Empty };
+                frm.ShowDialog(this);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex, "Error loading Permissions Helper");
+                return false;
+            }
         }
 
         private void SetStatus(string message, string details, Color color)
@@ -216,10 +281,19 @@ namespace DBADashGUI.Connections
                 return;
             }
             AddRepositoryStatus(checks, agent.CollectAgentID);
+            serviceAccount = checks.Select(c => c.ServiceAccount).FirstOrDefault(a => !string.IsNullOrEmpty(a)) ?? serviceAccount;
             SetStatus($"Checked {checks.Count} connection(s)", null, DashColors.Success);
 
-            using var review = new AddConnectionsReviewDialog(checks, $"{agent.DisplayName}");
-            if (review.ShowDialog(this) != DialogResult.OK) return;
+            using var review = new AddConnectionsReviewDialog(checks, agent.DisplayName + (string.IsNullOrEmpty(serviceAccount) ? "" : $" as {serviceAccount}"),
+                failed => ShowPermissionsHelper(failed.Select(i => lines[i]).ToList()));
+            var reviewResult = review.ShowDialog(this);
+            if (reviewResult == DialogResult.Retry)
+            {
+                // Access was provisioned - check them again
+                await CheckAndAddAsync(agent, lines, options);
+                return;
+            }
+            if (reviewResult != DialogResult.OK) return;
 
             var requests = new List<ConnectionAddMessage.ConnectionRequest>();
             var requested = new List<SourceConnectionCheck>();

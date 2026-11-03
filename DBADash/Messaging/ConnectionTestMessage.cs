@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Threading;
@@ -59,6 +59,8 @@ namespace DBADash.Messaging
                 return await SourceConnectionAdder.CheckAsync(fileConfig, src);
             }, cancellationToken);
 
+            var serviceAccount = OperatingSystem.IsWindows() ? System.Security.Principal.WindowsIdentity.GetCurrent().Name : null;
+            checks.ForEach(c => c.ServiceAccount = serviceAccount);
             return ConnectionChanges.ToDataSet(checks);
         }
     }
