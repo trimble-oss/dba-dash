@@ -39,7 +39,10 @@ namespace DBADashGUI.AgentJobs
         public int[] StatusRuns { get; init; }
 
         /// <summary>How many of the bar's runs had <paramref name="status"/>.</summary>
-        public int RunsWith(RunStatus status) => StatusRuns != null ? StatusRuns[(int)status] : status == Status ? Executions : 0;
+        public int RunsWith(RunStatus status) =>
+            StatusRuns == null ? (status == Status ? Executions : 0)
+            // Counted only for the statuses history has: none are predicted
+            : (int)status < StatusRuns.Length ? StatusRuns[(int)status] : 0;
 
         /// <summary>
         /// msdb instance_id of the history row, which identifies the execution.  Null while still running, and for a date
@@ -62,6 +65,24 @@ namespace DBADashGUI.AgentJobs
         /// <summary>A single execution (finished or running) that execution details can be shown for.</summary>
         public bool IsSingleExecution => Executions == 1 && JobId != Guid.Empty && (HistoryId.HasValue || IsRunning);
 
+        /// <summary>Where a run moved by a what-if was before the move, drawn as a dotted outline.  Null for one that hasn't moved.</summary>
+        public DateTime? GhostStart { get; set; }
+
+        /// <summary>The tooltip's header colour, when the run's status colour doesn't describe it - e.g. a planned run that overlaps</summary>
+        public Color? TooltipColor { get; set; }
+
+        /// <summary>
+        /// Parts of the run to pick out, e.g. where it overlaps another job, drawn in <see cref="HighlightColor"/> across the
+        /// lower part of the bar so its status colour still shows.  Null for none.
+        /// </summary>
+        public IReadOnlyList<(DateTime Start, DateTime End)> Highlights { get; set; }
+
+        /// <summary>
+        /// The colour <see cref="Highlights"/> are drawn in: purple, which no status uses, so an overlap isn't taken for a
+        /// failure (red) or a retry (amber).
+        /// </summary>
+        public static Color HighlightColor => DBADashUser.IsDarkTheme ? Color.FromArgb(0xC0, 0x8C, 0xF0) : Color.FromArgb(0x7B, 0x3F, 0xB5);
+
         /// <summary>Which of its row's stacked lanes the bar is drawn in, so overlapping runs don't hide each other.</summary>
         public int Lane { get; set; }
 
@@ -79,12 +100,21 @@ namespace DBADashGUI.AgentJobs
         /// </summary>
         public static Color StatusColor(RunStatus status) => DBADashUser.IsDarkTheme ? DarkStatusColor(status) : LightStatusColor(status);
 
+        /// <summary>
+        /// Slate blue for a predicted run: no outcome uses it, and it's greyer and darker than the light blue of a run in
+        /// progress - readable with white text, and against the dark theme's background
+        /// </summary>
+        private static readonly Color PredictedLight = Color.FromArgb(0x4F, 0x6D, 0x8F);
+
+        private static readonly Color PredictedDark = Color.FromArgb(0x8A, 0xA6, 0xC8);
+
         private static Color DarkStatusColor(RunStatus status) => status switch
         {
             RunStatus.Succeeded => DashColors.GreenLight,
             RunStatus.Retry => DashColors.Warning,
             RunStatus.InProgress => DashColors.ProgressBarTo,
             RunStatus.Cancelled => DashColors.Gray3,
+            RunStatus.Predicted => PredictedDark,
             _ => DashColors.RedLight
         };
 
@@ -94,6 +124,7 @@ namespace DBADashGUI.AgentJobs
             RunStatus.Retry => DashColors.Warning,
             RunStatus.InProgress => DashColors.BlueLight,
             RunStatus.Cancelled => DashColors.Gray5,
+            RunStatus.Predicted => PredictedLight,
             _ => DashColors.Fail
         };
 
@@ -104,6 +135,19 @@ namespace DBADashGUI.AgentJobs
         };
     }
 
+
+    /// <summary>A job's bars dragged sideways on the schedule preview: the row, the bar grabbed and how far</summary>
+    internal sealed record RowShift(TimelineRowModel Row, TimelineBar Bar, TimeSpan Delta);
+
+    internal enum LegendSwatch
+    {
+        Solid,
+        Striped,
+        Dotted
+    }
+
+    /// <summary>An entry for a legend the chart's host supplies, in place of the run status counts</summary>
+    internal sealed record LegendEntry(Color Color, string Text, LegendSwatch Swatch = LegendSwatch.Solid);
 
     internal enum TimelineRowKind
     {
@@ -121,7 +165,7 @@ namespace DBADashGUI.AgentJobs
     internal sealed class TimelineRowModel
     {
         public TimelineRowKind Kind { get; init; } = TimelineRowKind.Job;
-        public string Label { get; init; }
+        public string Label { get; set; }
         public Guid JobId { get; init; }
         public string JobName { get; init; }
         public int InstanceId { get; init; }
@@ -130,6 +174,13 @@ namespace DBADashGUI.AgentJobs
         public List<TimelineRowModel> Children { get; } = new();
         public TimelineRowModel Parent { get; set; }
         public List<TimelineBar> Bars { get; } = new();
+
+        /// <summary>
+        /// Runs drawn only as a dotted outline in their status colour, under the bars - e.g. the runs that happened before a
+        /// job's schedule changed, where the plan shows the runs it predicts now.  Not counted, hovered or dragged.
+        /// </summary>
+        public List<(DateTime Start, DateTime End, RunStatus Status)> Outlines { get; } = new();
+
         public bool Collapsed { get; set; }
 
         /// <summary>The children haven't been fetched yet - they're loaded the first time the row is expanded.</summary>

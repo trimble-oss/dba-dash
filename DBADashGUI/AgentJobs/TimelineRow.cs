@@ -13,7 +13,10 @@ namespace DBADashGUI.AgentJobs
             Retry = 2,
             Succeeded = 1,
             Cancelled = 3,
-            InProgress = 4
+            InProgress = 4,
+
+            /// <summary>Not a run that happened: when a schedule is expected to run the job (the job timeline's plan mode)</summary>
+            Predicted = 5
         }
 
         public DateTime ActualStart { get; set; }

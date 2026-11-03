@@ -58,7 +58,8 @@ namespace DBADashGUI.AgentJobs
             ZoomRange,
             Overview,
             ScrollThumb,
-            LabelSplitter
+            LabelSplitter,
+            ShiftRow
         }
 
         private DragMode _drag = DragMode.None;
@@ -193,6 +194,7 @@ namespace DBADashGUI.AgentJobs
             var (viewFrom, viewTo) = (_viewFrom, _viewTo);
 
             _model = model ?? JobTimelineModel.Empty;
+            _ghostReach = _model.Bars.Where(b => b.GhostStart.HasValue).Select(b => (b.Start - b.GhostStart!.Value).Duration()).DefaultIfEmpty().Max();
             if (!resetView)
             {
                 foreach (var root in _model.Roots.Where(r => r.IsGroup))
@@ -351,7 +353,7 @@ namespace DBADashGUI.AgentJobs
             bar.StatusRuns == null ? !_hiddenStatuses.Contains(bar.Status) : StatusSeverity.Any(s => bar.RunsWith(s) > 0 && !_hiddenStatuses.Contains(s));
 
         /// <summary>Statuses from worst to best, as a merged bar takes the worst of its runs.</summary>
-        private static readonly RunStatus[] StatusSeverity = { RunStatus.Failed, RunStatus.Retry, RunStatus.Cancelled, RunStatus.InProgress, RunStatus.Succeeded };
+        private static readonly RunStatus[] StatusSeverity = { RunStatus.Failed, RunStatus.Retry, RunStatus.Cancelled, RunStatus.InProgress, RunStatus.Succeeded, RunStatus.Predicted };
 
         /// <summary>The status to colour a bar by: the worst of its runs that isn't hidden in the legend.</summary>
         private RunStatus ShownStatus(TimelineBar bar)
@@ -378,8 +380,11 @@ namespace DBADashGUI.AgentJobs
         private float ChartWidth => Math.Max(1, ChartRight - ChartLeft);
         private float RowsTop => HeaderHeight + BandHeight;
 
-        /// <summary>The concurrency band, between the axis and the rows, when shown.</summary>
-        private float BandHeight => ShowConcurrency ? 36 * Dpi : 0;
+        /// <summary>The bands between the axis and the rows, when shown: how many jobs were running at once, then CPU.</summary>
+        private float BandHeight => ConcurrencyBandHeight + CpuBandHeight;
+
+        private float ConcurrencyBandHeight => ShowConcurrency ? 36 * Dpi : 0;
+        private float CpuBandHeight => ShowCpu ? 44 * Dpi : 0;
         private float RowsBottom => CanvasHeight - OverviewHeight;
         private float RowsHeight => Math.Max(0, RowsBottom - RowsTop);
 
@@ -419,6 +424,12 @@ namespace DBADashGUI.AgentJobs
             var top = RowScreenTop(row) + RowPadding + bar.Lane * LaneHeight + 2 * Dpi;
             var left = TimeToX(bar.Start < _periodFrom ? _periodFrom : bar.Start);
             var right = TimeToX(bar.End > _periodTo ? _periodTo : bar.End);
+            if (IsShifting(bar))
+            {
+                // Following the pointer - not clipped to the period, so the bars visibly move
+                left = TimeToX(bar.Start + _shiftDelta);
+                right = TimeToX(bar.End + _shiftDelta);
+            }
             if (right - left < 3 * Dpi) right = left + 3 * Dpi;
             return new SKRect(left, top, right, top + LaneHeight - 4 * Dpi);
         }
@@ -538,6 +549,23 @@ namespace DBADashGUI.AgentJobs
 
         private bool _showConcurrency;
 
+        private IReadOnlyList<LegendEntry> _legendEntries;
+
+        /// <summary>Legend entries to show in place of the run status counts (which can hide statuses).  Null for the status legend.</summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public IReadOnlyList<LegendEntry> LegendEntries
+        {
+            get => _legendEntries;
+            set
+            {
+                _legendEntries = value;
+                _canvas.Invalidate();
+            }
+        }
+
+        /// <summary>The furthest a bar is from its <see cref="TimelineBar.GhostStart"/>, so ghosts in view are found with their bars out of it</summary>
+        private TimeSpan _ghostReach;
+
         /// <summary>Show the band of how many jobs were running at once, between the axis and the rows.</summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool ShowConcurrency
@@ -590,6 +618,52 @@ namespace DBADashGUI.AgentJobs
             return index < 0 ? null : _bandPeaks[index];
         }
 
+        private bool _showCpu;
+
+        /// <summary>Show the instance's CPU, below the concurrency band (if shown) and above the rows.</summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool ShowCpu
+        {
+            get => _showCpu;
+            set
+            {
+                if (_showCpu == value) return;
+                _showCpu = value;
+                ClampScroll();
+                _layoutVersion++;
+                _canvas.Invalidate();
+            }
+        }
+
+        /// <summary>CPU over a span of time, as percentages: SQL Server, other processes, and the highest total in the span</summary>
+        internal readonly record struct CpuSample(DateTime Start, DateTime End, float Sql, float Other, float Max);
+
+        private CpuSample[] _cpu = Array.Empty<CpuSample>();
+
+        /// <summary>
+        /// The CPU band's data, in start order and in the app time zone.  It needn't cover the whole period - the host fetches
+        /// it for the view.
+        /// </summary>
+        public void SetCpu(IEnumerable<CpuSample> samples)
+        {
+            _cpu = samples?.OrderBy(s => s.Start).ToArray() ?? Array.Empty<CpuSample>();
+            _canvas.Invalidate();
+        }
+
+        /// <summary>The CPU sample covering <paramref name="t"/>, or null where there's none.</summary>
+        private CpuSample? CpuAt(DateTime t)
+        {
+            int lo = 0, hi = _cpu.Length - 1;
+            while (lo <= hi)
+            {
+                var mid = (lo + hi) / 2;
+                if (_cpu[mid].End <= t) lo = mid + 1;
+                else if (_cpu[mid].Start > t) hi = mid - 1;
+                else return _cpu[mid];
+            }
+            return null;
+        }
+
         /// <summary>A note shown across the top of the rows, e.g. that runs are merged at this zoom.  Null for none.</summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string Banner
@@ -604,6 +678,65 @@ namespace DBADashGUI.AgentJobs
         }
 
         private string _banner;
+
+        /// <summary>The dashed line at the current time.  Off for a chart that isn't in the app time zone, like a schedule preview.</summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool ShowNowLine { get; set; } = true;
+
+        /// <summary>Tooltip and "Copy details" lines for a bar, in place of the execution details.  Null for those.</summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public Func<TimelineBar, IEnumerable<(string, string)>> BarDetailsProvider { get; set; }
+
+        /// <summary>
+        /// Set to let a job's bars be dragged sideways to move the job's runs (those <see cref="ShiftsWith"/> says) - the schedule preview.  The move is
+        /// rounded to this, and reported by <see cref="RowShifted"/> when the bars are dropped.  Zero rounds to a step that
+        /// suits the zoom (<see cref="AutoSnap"/>), and holding Shift rounds to a second.  Null (the default) for no
+        /// dragging: a drag pans as usual.
+        /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public TimeSpan? RowShiftSnap { get; set; }
+
+        /// <summary>Steps a drag rounds to with the automatic snap, in seconds</summary>
+        private static readonly int[] SnapSteps = { 1, 2, 5, 10, 15, 30, 60, 120, 300, 600, 900, 1800, 3600 };
+
+        /// <summary>The smallest step that's at least 5 pixels at the current zoom - seconds zoomed in, minutes zoomed out</summary>
+        private TimeSpan AutoSnap()
+        {
+            var secondsPerPixel = ViewTicks / Math.Max(1, ChartWidth) / TimeSpan.TicksPerSecond;
+            return TimeSpan.FromSeconds(SnapSteps.FirstOrDefault(s => s >= secondsPerPixel * 5, SnapSteps[^1]));
+        }
+
+        /// <summary>A job's bars were dragged by <see cref="RowShift.Delta"/> (with <see cref="RowShiftSnap"/> set)</summary>
+        public event EventHandler<RowShift> RowShifted;
+
+        /// <summary>
+        /// How far the bar grabbed has been moved already, from where it originally was.  A drag is rounded, and shown, as
+        /// the whole move from there - so dragging a job moved +1m 20s on a 1 minute snap lands on whole minutes from the
+        /// original time, and the pill says the total.  Unset, a drag is taken from where the bars are.
+        /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public Func<TimelineBar, TimeSpan> RowShiftOffset { get; set; }
+
+        /// <summary>
+        /// Which of the row's bars a drag moves, given the one grabbed (the first argument) - e.g. only the runs of its
+        /// schedule, and not the grabbed bar itself when it won't move.  Unset, the whole row moves.
+        /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public Func<TimelineBar, TimelineBar, bool> ShiftsWith { get; set; }
+
+        /// <summary>The row whose bars are being dragged, the bar grabbed, and how far so far</summary>
+        private TimelineRowModel _shiftRow;
+
+        private TimelineBar _shiftBar;
+
+        /// <summary>The bar is being dragged, so drawn where the drag has it</summary>
+        private bool IsShifting(TimelineBar bar) =>
+            _drag == DragMode.ShiftRow && bar.Row == _shiftRow && (ShiftsWith == null || ShiftsWith(_shiftBar, bar));
+
+        private TimeSpan _shiftDelta;
+
+        /// <summary>The dragged row's move before the drag</summary>
+        private TimeSpan _shiftOffset;
 
         /// <summary>Zoom by <paramref name="factor"/> (below 1 zooms in) keeping the time under <paramref name="x"/> still.</summary>
         private void ZoomAt(float x, double factor)
@@ -703,6 +836,15 @@ namespace DBADashGUI.AgentJobs
             {
                 _drag = DragMode.ZoomRange;
             }
+            // Before Shift's zoom: holding Shift while dragging a bar moves it by the second
+            else if (RowShiftSnap.HasValue && e.Y >= RowsTop && e.Y < RowsBottom && BarAt(e.Location) is { IsSummary: false } shiftBar)
+            {
+                _drag = DragMode.ShiftRow;
+                _shiftRow = shiftBar.Row;
+                _shiftBar = shiftBar;
+                _shiftDelta = TimeSpan.Zero;
+                _shiftOffset = RowShiftOffset?.Invoke(shiftBar) ?? TimeSpan.Zero;
+            }
             else if (e.X >= ChartLeft && e.X <= ChartRight && (ModifierKeys & Keys.Shift) == Keys.Shift)
             {
                 _drag = DragMode.ZoomRange;
@@ -758,6 +900,17 @@ namespace DBADashGUI.AgentJobs
                 case DragMode.ZoomRange:
                     break;
 
+                case DragMode.ShiftRow:
+                    {
+                        var snapTo = (ModifierKeys & Keys.Shift) != 0 ? TimeSpan.FromSeconds(1) : RowShiftSnap!.Value == TimeSpan.Zero ? AutoSnap() : RowShiftSnap.Value;
+                        var snap = Math.Max(TimeSpan.TicksPerSecond, snapTo.Ticks);
+                        var ticks = (long)((e.X - _dragStart.X) / ChartWidth * ViewTicks);
+                        // Rounded as the whole move from the original time, then taken back to the change from here
+                        var total = _shiftOffset.Ticks + ticks;
+                        _shiftDelta = TimeSpan.FromTicks((long)Math.Round((double)total / snap) * snap - _shiftOffset.Ticks);
+                        _canvas.Cursor = Cursors.SizeWE;
+                        break;
+                    }
                 default:
                     UpdateHover(e.Location);
                     break;
@@ -779,14 +932,21 @@ namespace DBADashGUI.AgentJobs
         {
             var drag = _drag;
             _drag = DragMode.None;
+            var (shiftRow, shiftBar) = (_shiftRow, _shiftBar);
+            _shiftRow = null;
+            _shiftBar = null;
 
-            if (drag == DragMode.ZoomRange && _dragMoved)
+            if (drag == DragMode.ShiftRow && _dragMoved)
+            {
+                if (_shiftDelta != TimeSpan.Zero) RowShifted?.Invoke(this, new RowShift(shiftRow, shiftBar, _shiftDelta));
+            }
+            else if (drag == DragMode.ZoomRange && _dragMoved)
             {
                 var a = XToTime(Math.Min(_dragStart.X, e.X));
                 var b = XToTime(Math.Max(_dragStart.X, e.X));
                 if (b > a) SetView(a, b);
             }
-            else if (!_dragMoved && e.Button == MouseButtons.Left && drag is DragMode.Pan or DragMode.None or DragMode.ZoomRange)
+            else if (!_dragMoved && e.Button == MouseButtons.Left && drag is DragMode.Pan or DragMode.None or DragMode.ZoomRange or DragMode.ShiftRow)
             {
                 HandleClick(e.Location);
             }
@@ -1104,11 +1264,18 @@ namespace DBADashGUI.AgentJobs
 
         #endregion Input
 
-        private static string BarDetailsText(TimelineBar bar) =>
+        private string BarDetailsText(TimelineBar bar) =>
             string.Join(Environment.NewLine, BarDetails(bar).Prepend((bar.JobName, null)).Select(l => l.Item2 == null ? l.Item1 : $"{l.Item1}: {l.Item2}"));
 
         /// <summary>Label/value lines describing an execution, for the tooltip and for copying.</summary>
-        private static IEnumerable<(string, string)> BarDetails(TimelineBar bar)
+        /// <summary>The provider's details - or, for a bar it doesn't know (e.g. the timeline's own, shown while a plan loads), the execution's</summary>
+        private List<(string, string)> BarDetails(TimelineBar bar)
+        {
+            var details = BarDetailsProvider?.Invoke(bar)?.ToList();
+            return details is { Count: > 0 } ? details : ExecutionDetails(bar).ToList();
+        }
+
+        private static IEnumerable<(string, string)> ExecutionDetails(TimelineBar bar)
         {
             if (bar.IsSummary)
             {
