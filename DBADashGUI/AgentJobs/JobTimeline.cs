@@ -256,6 +256,7 @@ namespace DBADashGUI.AgentJobs
                 viewTimer.Stop();
                 FetchDetailForView();
                 FetchConcurrencyForView(false);
+                FetchCpuForView(false);
             };
             Disposed += (_, _) =>
             {
@@ -490,6 +491,7 @@ namespace DBADashGUI.AgentJobs
         /// </summary>
         private async void FetchConcurrencyForView(bool force)
         {
+            if (PlanMode) return;
             if (context == null || !chart.ShowConcurrency || chart.ViewTo <= chart.ViewFrom || to <= from) return;
             if (!ViewToUtc(out var viewFrom, out var viewTo)) return;
             var span = viewTo - viewFrom;
@@ -576,6 +578,8 @@ namespace DBADashGUI.AgentJobs
             var at = toolStrip1.Items.IndexOf(tsSort) + 1;
             toolStrip1.Items.Insert(at, tsRuns);
             toolStrip1.Items.Insert(at + 1, tsConcurrency);
+            AddPlanItems(at + 2);
+            AddCpuItems(at + 2);
         }
 
         private void RunFiltersChanged()
@@ -653,6 +657,12 @@ namespace DBADashGUI.AgentJobs
         /// </summary>
         public async void RefreshData()
         {
+            if (PlanMode)
+            {
+                RefreshCategories();
+                LoadPlan();
+                return;
+            }
             var generation = ++loadGeneration;
             try
             {
@@ -693,6 +703,7 @@ namespace DBADashGUI.AgentJobs
                 }
                 Display();
                 FetchConcurrencyForView(true);
+                FetchCpuForView(true);
                 resetView = false;
             }
             catch (Exception ex)
@@ -763,6 +774,7 @@ namespace DBADashGUI.AgentJobs
         /// </summary>
         private async void FetchDetailForView()
         {
+            if (PlanMode) return;
             if (context == null || !AutoDetail || chart.ViewTo <= chart.ViewFrom) return;
             if (!ViewToUtc(out var viewFrom, out var viewTo)) return;
             var need = GapFor(viewTo - viewFrom);
@@ -820,6 +832,8 @@ namespace DBADashGUI.AgentJobs
         /// </summary>
         private void Display()
         {
+            // Plan mode draws the plan
+            if (PlanMode) return;
             var windowFrom = detailFromUtc?.ToAppTimeZone();
             var windowTo = detailToUtc?.ToAppTimeZone();
             if (MultiInstance)
@@ -1146,6 +1160,11 @@ namespace DBADashGUI.AgentJobs
             tsIncludeSteps.Visible = _context.JobID == Guid.Empty && !MultiInstance; // outcome only across instances
             // How many of one job were running at once isn't worth a band
             tsConcurrency.Visible = _context.JobID == Guid.Empty;
+            // One instance's schedules - they're in its local time
+            tsPlan.Visible = _context.JobID == Guid.Empty && !MultiInstance;
+            SetCpuContext(sameContext);
+            // A plan is for one instance's schedules
+            if (!sameContext) DiscardPlan();
             chart.ShowConcurrency = tsConcurrency.Checked && _context.JobID == Guid.Empty;
             if (!sameContext)
             {

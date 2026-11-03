@@ -149,6 +149,25 @@ namespace DBADashGUI.AgentJobs
 
             canvas.Save();
             canvas.ClipRect(new SKRect(ChartLeft, RowsTop, ChartRight, RowsBottom));
+            // Runs shown only in outline - where they happened - under the bars
+            foreach (var row in visibleRows.Where(r => r.Outlines.Count > 0))
+            {
+                foreach (var (start, end, status) in row.Outlines)
+                {
+                    if (end > _viewFrom && start < _viewTo) DrawOutline(canvas, row, start, end, status);
+                }
+            }
+            // Where moved runs were, under the bars
+            if (_ghostReach > TimeSpan.Zero)
+            {
+                foreach (var row in visibleRows)
+                {
+                    foreach (var bar in row.BarsBetween(_viewFrom - _ghostReach, _viewTo + _ghostReach))
+                    {
+                        if (bar.GhostStart.HasValue && IsVisible(bar)) DrawGhost(canvas, p, bar);
+                    }
+                }
+            }
             // And of those, only the bars in the time in view
             foreach (var row in visibleRows)
             {
@@ -164,6 +183,7 @@ namespace DBADashGUI.AgentJobs
 
             DrawHeader(canvas, p, width, step, ticks);
             if (ShowConcurrency) DrawConcurrencyBand(canvas, p, ticks);
+            if (ShowCpu) DrawCpuBand(canvas, p, ticks);
             if (!string.IsNullOrEmpty(Banner)) DrawBanner(canvas, p, Banner);
             if (interactive) DrawCursor(canvas, p);
             DrawOverview(canvas, p);
@@ -174,6 +194,16 @@ namespace DBADashGUI.AgentJobs
                 var text = _model.Bars.Count == 0 ? EmptyText : "No jobs match the filter";
                 _text.Color = p.Dim;
                 canvas.DrawText(text, ChartLeft + ChartWidth / 2, RowsTop + 40 * Dpi, SKTextAlign.Center, _font, _text);
+            }
+
+            if (interactive && _drag == DragMode.ShiftRow && _shiftRow != null)
+            {
+                // The whole move from the original time, when the host says where that was
+                var move = _shiftOffset + _shiftDelta;
+                var sign = move < TimeSpan.Zero ? "-" : "+";
+                var text = move == TimeSpan.Zero ? (RowShiftOffset == null ? "No change" : "Original time")
+                    : sign + FormatDuration(move.Duration(), true) + (RowShiftOffset == null ? "" : " from original");
+                DrawPill(canvas, text, _mouse.X, Math.Max(RowsTop + 10 * Dpi, RowScreenTop(_shiftRow) - 10 * Dpi), p.TipBack, p.TipFore);
             }
 
             if (interactive && _drag == DragMode.None && _hoverBar != null && _mouseInside)
@@ -315,6 +345,40 @@ namespace DBADashGUI.AgentJobs
             _legendRects.Clear();
             var x = 8 * Dpi;
             var y = 36 * Dpi;
+            if (_legendEntries != null)
+            {
+                foreach (var entry in _legendEntries)
+                {
+                    var width = 12 * Dpi + _smallFont.MeasureText(entry.Text, (SKPaint)null);
+                    var swatch = new SKRect(x, y - 8 * Dpi, x + 9 * Dpi, y + 1 * Dpi);
+                    var color = entry.Color.ToSKColor();
+                    if (entry.Swatch == LegendSwatch.Dotted)
+                    {
+                        using var dash = SKPathEffect.CreateDash(new[] { 2 * Dpi, 1.5f * Dpi }, 0);
+                        using var paint = new SKPaint { IsAntialias = true, Style = SKPaintStyle.Stroke, StrokeWidth = 1.2f * Dpi, Color = color, PathEffect = dash };
+                        canvas.DrawRoundRect(swatch, 2 * Dpi, 2 * Dpi, paint);
+                    }
+                    else
+                    {
+                        _fill.Color = color;
+                        canvas.DrawRoundRect(swatch, 2 * Dpi, 2 * Dpi, _fill);
+                        if (entry.Swatch == LegendSwatch.Striped)
+                        {
+                            canvas.Save();
+                            canvas.ClipRect(swatch);
+                            _stroke.Color = SKColors.White.WithAlpha(110);
+                            _stroke.StrokeWidth = 2 * Dpi;
+                            for (var sx = swatch.Left - swatch.Height; sx < swatch.Right; sx += 5 * Dpi) canvas.DrawLine(sx, swatch.Bottom, sx + swatch.Height, swatch.Top, _stroke);
+                            canvas.Restore();
+                        }
+                    }
+                    _text.Color = p.Fore;
+                    canvas.DrawText(entry.Text, x + 12 * Dpi, y, _smallFont, _text);
+                    // Closer than the status legend: a plan has more to fit beside the row labels
+                    x += width + 5 * Dpi;
+                }
+                return;
+            }
             // A hidden status stays in the legend even when nothing of it matches, so it can be shown again
             foreach (var status in LegendOrder.Where(s => _legendCounts.ContainsKey(s) || _hiddenStatuses.Contains(s)))
             {
@@ -366,9 +430,27 @@ namespace DBADashGUI.AgentJobs
             _fill.Color = color;
             canvas.DrawRoundRect(rect, radius, radius, _fill);
 
-            if (bar.IsRunning)
+            if (bar.Highlights is { Count: > 0 })
             {
-                // Diagonal stripes for work still in progress
+                // Just the parts picked out, so a run that touches another for a moment isn't all marked.  The lower part
+                // of the bar, so the top still shows how the run ended.
+                canvas.Save();
+                canvas.ClipRoundRect(new SKRoundRect(rect, radius), antialias: true);
+                var offset = IsShifting(bar) ? _shiftDelta : TimeSpan.Zero;
+                _fill.Color = TimelineBar.HighlightColor.ToSKColor().WithAlpha(color.Alpha);
+                var top = rect.Height < 8 * Dpi ? rect.Top : rect.Top + rect.Height * 0.4f;
+                foreach (var (start, end) in bar.Highlights)
+                {
+                    var x1 = TimeToX(start + offset);
+                    var x2 = Math.Max(x1 + 1.5f * Dpi, TimeToX(end + offset));
+                    canvas.DrawRect(new SKRect(x1, top, x2, rect.Bottom), _fill);
+                }
+                canvas.Restore();
+            }
+
+            if (bar.IsRunning || bar.GhostStart.HasValue)
+            {
+                // Diagonal stripes for work still in progress, or a run a what-if has moved
                 canvas.Save();
                 canvas.ClipRoundRect(new SKRoundRect(rect, radius), antialias: true);
                 _stroke.Color = SKColors.White.WithAlpha(60);
@@ -410,6 +492,35 @@ namespace DBADashGUI.AgentJobs
                 _text.Color = selectionActive && !sameJob ? SKColors.White.WithAlpha(150) : SKColors.White;
                 canvas.DrawText(label, visibleLeft + 4 * Dpi, CenterBaseline(rect, _smallFont), _smallFont, _text);
             }
+        }
+
+        /// <summary>A dotted outline where a moved run was before the move, in its lane</summary>
+        /// <summary>A run in dotted outline, in its status colour, in the row's first lane</summary>
+        private void DrawOutline(SKCanvas canvas, TimelineRowModel row, DateTime start, DateTime end, RunStatus status)
+        {
+            var top = RowScreenTop(row) + RowPadding + 2 * Dpi;
+            var left = TimeToX(start);
+            var right = Math.Max(left + 3 * Dpi, TimeToX(end));
+            if (right < ChartLeft || left > ChartRight) return;
+            var rect = new SKRect(left, top, right, top + LaneHeight - 4 * Dpi);
+            rect.Inflate(-0.5f * Dpi, -0.5f * Dpi);
+            using var dash = SKPathEffect.CreateDash(new[] { 2 * Dpi, 2 * Dpi }, 0);
+            using var paint = new SKPaint { IsAntialias = true, Style = SKPaintStyle.Stroke, StrokeWidth = 1.2f * Dpi, Color = TimelineBar.StatusColor(status).ToSKColor(), PathEffect = dash };
+            canvas.DrawRoundRect(rect, 3 * Dpi, 3 * Dpi, paint);
+        }
+
+        private void DrawGhost(SKCanvas canvas, Palette p, TimelineBar bar)
+        {
+            var moved = BarRect(bar);
+            var delta = bar.GhostStart!.Value - bar.Start;
+            var left = TimeToX(bar.Start + delta);
+            var right = Math.Max(left + 3 * Dpi, TimeToX(bar.End + delta));
+            if (right < ChartLeft || left > ChartRight) return;
+            var rect = new SKRect(left, moved.Top, right, moved.Bottom);
+            rect.Inflate(-0.5f * Dpi, -0.5f * Dpi);
+            using var dash = SKPathEffect.CreateDash(new[] { 3 * Dpi, 2 * Dpi }, 0);
+            using var paint = new SKPaint { IsAntialias = true, Style = SKPaintStyle.Stroke, StrokeWidth = 1.2f * Dpi, Color = p.Dim, PathEffect = dash };
+            canvas.DrawRoundRect(rect, 3 * Dpi, 3 * Dpi, paint);
         }
 
         private static void FadeEdge(SKCanvas canvas, Palette p, SKRect rect, float width, bool left)
@@ -535,6 +646,7 @@ namespace DBADashGUI.AgentJobs
 
         private void DrawNowLine(SKCanvas canvas, Palette p)
         {
+            if (!ShowNowLine) return;
             var now = DateTime.UtcNow.ToAppTimeZone();
             if (now < _viewFrom || now > _viewTo) return;
             var x = TimeToX(now);
@@ -565,8 +677,74 @@ namespace DBADashGUI.AgentJobs
             // How many were running then, on the band
             if (ShowConcurrency && ConcurrencyAt(t) is int running)
             {
-                DrawPill(canvas, running == 1 ? "1 job running" : $"{running:N0} jobs running", _mouse.X, HeaderHeight + BandHeight / 2, p.Accent, SKColors.White);
+                DrawPill(canvas, running == 1 ? "1 job running" : $"{running:N0} jobs running", _mouse.X, HeaderHeight + ConcurrencyBandHeight / 2, p.Accent, SKColors.White);
             }
+            // And the CPU then
+            if (ShowCpu && CpuAt(t) is { } cpu)
+            {
+                DrawPill(canvas, $"CPU {cpu.Sql + cpu.Other:0}% (SQL {cpu.Sql:0}%), peak {cpu.Max:0}%", _mouse.X, HeaderHeight + ConcurrencyBandHeight + CpuBandHeight / 2, CpuColor, SKColors.White);
+            }
+        }
+
+        private static readonly SKColor CpuColor = new(0x1f, 0x77, 0xb4);
+        private static readonly SKColor CpuOtherColor = new(0x9a, 0xa5, 0xb1);
+        private static readonly SKColor CpuPeakColor = new(0xd6, 0x27, 0x28);
+
+        /// <summary>
+        /// The instance's CPU on a fixed 0-100% scale: SQL Server's share as a column per sample, other processes stacked on
+        /// top in grey, and the highest total in each sample as a red tick - so a busy minute inside a quiet hour still shows.
+        /// </summary>
+        private void DrawCpuBand(SKCanvas canvas, Palette p, List<DateTime> ticks)
+        {
+            var top = HeaderHeight + ConcurrencyBandHeight;
+            var bottom = top + CpuBandHeight;
+            _fill.Color = p.Panel;
+            canvas.DrawRect(new SKRect(0, top, _canvas.Width, bottom), _fill);
+            _stroke.Color = p.GridStrong;
+            _stroke.StrokeWidth = 1;
+            canvas.DrawLine(0, bottom, _canvas.Width, bottom, _stroke);
+
+            // The samples in view
+            var inView = _cpu.Where(s => s.End > _viewFrom && s.Start < _viewTo).ToList();
+            _text.Color = p.Dim;
+            canvas.DrawText("CPU", 8 * Dpi, top + 15 * Dpi, _smallFont, _text);
+            _text.Color = p.Fore;
+            canvas.DrawText(inView.Count == 0 ? "no data" : $"avg {inView.Average(s => s.Sql + s.Other):0}%, peak {inView.Max(s => s.Max):0}%", 8 * Dpi, top + 29 * Dpi, _smallFont, _text);
+
+            canvas.Save();
+            canvas.ClipRect(new SKRect(ChartLeft, top, ChartRight, bottom));
+            _stroke.Color = p.Grid;
+            foreach (var t in ticks)
+            {
+                var x = TimeToX(t);
+                canvas.DrawLine(x, top, x, bottom, _stroke);
+            }
+            var height = bottom - top - 4 * Dpi;
+            var half = bottom - height / 2;
+            using (var dash = SKPathEffect.CreateDash(new[] { 2 * Dpi, 3 * Dpi }, 0))
+            {
+                _stroke.PathEffect = dash;
+                canvas.DrawLine(ChartLeft, half, ChartRight, half, _stroke);
+                _stroke.PathEffect = null;
+            }
+            foreach (var s in inView)
+            {
+                var x1 = TimeToX(s.Start);
+                var x2 = Math.Max(x1 + 1, TimeToX(s.End));
+                var sql = height * Math.Clamp(s.Sql, 0, 100) / 100;
+                var other = height * Math.Clamp(s.Other, 0, 100 - s.Sql) / 100;
+                _fill.Color = CpuColor.WithAlpha(200);
+                canvas.DrawRect(new SKRect(x1, bottom - sql, x2, bottom), _fill);
+                _fill.Color = CpuOtherColor.WithAlpha(200);
+                canvas.DrawRect(new SKRect(x1, bottom - sql - other, x2, bottom - sql), _fill);
+                if (s.Max > s.Sql + s.Other + 0.5f)
+                {
+                    var y = bottom - height * Math.Clamp(s.Max, 0, 100) / 100;
+                    _fill.Color = CpuPeakColor;
+                    canvas.DrawRect(new SKRect(x1, y, x2, y + Math.Max(1, 1.5f * Dpi)), _fill);
+                }
+            }
+            canvas.Restore();
         }
 
         /// <summary>
@@ -576,7 +754,7 @@ namespace DBADashGUI.AgentJobs
         private void DrawConcurrencyBand(SKCanvas canvas, Palette p, List<DateTime> ticks)
         {
             var top = HeaderHeight;
-            var bottom = RowsTop;
+            var bottom = HeaderHeight + ConcurrencyBandHeight;
             _fill.Color = p.Panel;
             canvas.DrawRect(new SKRect(0, top, _canvas.Width, bottom), _fill);
             _stroke.Color = p.GridStrong;
@@ -741,14 +919,15 @@ namespace DBADashGUI.AgentJobs
 
         private void DrawTooltip(SKCanvas canvas, Palette p, TimelineBar bar, int width, int height)
         {
-            var lines = BarDetails(bar).ToList();
+            var lines = BarDetails(bar);
             var pad = 8 * Dpi;
             var lineHeight = 17 * Dpi;
             var titleHeight = 24 * Dpi;
-            var labelWidth = lines.Max(l => _smallFont.MeasureText(l.Item1, (SKPaint)null)) + 10 * Dpi;
-            var valueWidth = lines.Max(l => _font.MeasureText(l.Item2, (SKPaint)null));
+            var labelWidth = lines.Select(l => _smallFont.MeasureText(l.Item1, (SKPaint)null)).DefaultIfEmpty().Max() + 10 * Dpi;
+            var valueWidth = lines.Select(l => _font.MeasureText(l.Item2, (SKPaint)null)).DefaultIfEmpty().Max();
             var titleWidth = Math.Min(_boldFont.MeasureText(bar.JobName, (SKPaint)null), 420 * Dpi);
             var hint = bar.IsSummary ? (bar.Row.Collapsed ? "Double-click to show the instance's jobs" : null)
+                : RowShiftSnap.HasValue ? "Drag sideways to move the job's start time"
                 : ActivateHint && BarActivated != null && bar.IsSingleExecution ? $"Double-click for {BarActivatedText.ToLowerInvariant()}" : null;
             var hintWidth = hint == null ? 0 : _smallFont.MeasureText(hint, (SKPaint)null);
             var w = Math.Max(Math.Max(titleWidth, hintWidth), labelWidth + valueWidth) + pad * 2;
@@ -771,7 +950,7 @@ namespace DBADashGUI.AgentJobs
             var title = new SKRect(rect.Left, rect.Top, rect.Right, rect.Top + titleHeight);
             canvas.Save();
             canvas.ClipRoundRect(new SKRoundRect(rect, radius), antialias: true);
-            _fill.Color = TimelineBar.StatusColor(ShownStatus(bar)).ToSKColor();
+            _fill.Color = (bar.TooltipColor ?? TimelineBar.StatusColor(ShownStatus(bar))).ToSKColor();
             canvas.DrawRect(title, _fill);
             canvas.Restore();
             _text.Color = SKColors.White;
