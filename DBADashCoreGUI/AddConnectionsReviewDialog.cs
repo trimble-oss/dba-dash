@@ -1,4 +1,4 @@
-using DBADash;
+﻿using DBADash;
 using DBADashGUI.CustomReports;
 using DBADashGUI.Theme;
 using DBADashSharedGUI;
@@ -50,7 +50,10 @@ namespace DBADashGUI
 
         /// <param name="checks">A check for each connection, in the order they were entered</param>
         /// <param name="checkedFrom">Where the connections were checked from - e.g. "this computer" or the service's name.  With Windows authentication, that's the account that connected.</param>
-        public AddConnectionsReviewDialog(IReadOnlyList<SourceConnectionCheck> checks, string checkedFrom)
+        /// <param name="provisionAccess">Offered for the connections that couldn't connect: provisions access for them, given
+        /// their positions in <paramref name="checks"/>.  Returns true if anything was done, and the dialog closes with
+        /// <see cref="DialogResult.Retry"/> so they can be checked again.</param>
+        public AddConnectionsReviewDialog(IReadOnlyList<SourceConnectionCheck> checks, string checkedFrom, Func<IReadOnlyList<int>, bool> provisionAccess = null)
         {
             this.checks = checks;
             Text = "Review New Connections";
@@ -94,6 +97,24 @@ namespace DBADashGUI
             isRestoreOffered = checks.Any(c => c.IsDeletedInRepository);
             chkRestoreDeleted.Visible = isRestoreOffered;
             pnlOptions.Controls.AddRange(new Control[] { chkDefaultDeadlockSchedule, chkRestoreDeleted });
+
+            var failed = checks.Select((c, i) => (c, i)).Where(x => !x.c.IsInvalid && !x.c.Validated && !string.IsNullOrEmpty(x.c.ValidationError)).Select(x => x.i).ToList();
+            if (provisionAccess != null && failed.Count > 0)
+            {
+                var lnkProvision = new LinkLabel
+                {
+                    Text = $"Couldn't connect to {failed.Count} connection(s)?  Provision access for the service account with the Permissions Helper...",
+                    AutoSize = true
+                };
+                lnkProvision.LinkClicked += (_, _) =>
+                {
+                    if (provisionAccess(failed))
+                    {
+                        DialogResult = DialogResult.Retry;
+                    }
+                };
+                pnlOptions.Controls.Add(lnkProvision);
+            }
 
             var bttnAdd = new Button { Text = "Add", DialogResult = DialogResult.OK, Size = new Size(110, 34) };
             var bttnCancel = new Button { Text = "Cancel", DialogResult = DialogResult.Cancel, Size = new Size(110, 34) };

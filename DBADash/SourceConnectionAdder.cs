@@ -1,4 +1,4 @@
-using DBADashService;
+﻿using DBADashService;
 using Microsoft.Data.SqlClient;
 using Newtonsoft.Json;
 using System;
@@ -275,6 +275,12 @@ namespace DBADash
 
         /// <summary>The login the connection was made as (SUSER_SNAME()) - with Windows authentication, the account checking.</summary>
         public string LoginName { get; set; }
+
+        /// <summary>
+        /// The Windows account the service checking the connection runs as - the login to provision when it couldn't
+        /// connect.  Only set when the service checks connections for the GUI (null from older services).
+        /// </summary>
+        public string ServiceAccount { get; set; }
 
         /// <summary>Slow query capture needs an extended events session, which the instance doesn't support</summary>
         public bool SlowQueryWillBeDisabled { get; set; }

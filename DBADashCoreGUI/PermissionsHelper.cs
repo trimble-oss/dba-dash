@@ -2,13 +2,14 @@
 using DBADash.Messaging;
 using DBADashGUI.SchemaCompare;
 using DBADashGUI.Theme;
+using DBADashSharedGUI;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Linq;
-using System.Management;
+using System.Runtime.Versioning;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Security;
@@ -18,8 +19,9 @@ using System.Threading;
 using System.Windows.Forms;
 using Task = System.Threading.Tasks.Task;
 
-namespace DBADashServiceConfig
+namespace DBADashGUI
 {
+    [SupportedOSPlatform("windows")]
     public partial class PermissionsHelper : Form
     {
         public PermissionsHelper()
@@ -40,10 +42,17 @@ namespace DBADashServiceConfig
 
         private List<string> ProcedureNames =>
             Connections
-                .SelectMany(src => src.CustomCollections.Values.Select(cc => cc.ProcedureName))
+                .SelectMany(src => src.CustomCollections?.Values.Select(cc => cc.ProcedureName) ?? Enumerable.Empty<string>())
                 .Concat(Config.AllowedCustomProcs?.Split(',') ?? Array.Empty<string>())
                 .Distinct()
                 .ToList();
+
+        /// <summary>
+        /// The account the service runs as, when it isn't a service on this computer - e.g. reported by a remote service
+        /// when the GUI adds connections.  Otherwise it's read from the local service named in <see cref="Config"/>.
+        /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public string ServiceAccount { get; set; }
 
         private string ServiceName => Config.ServiceName;
         private List<DBADashSource> _connections;
@@ -69,10 +78,10 @@ namespace DBADashServiceConfig
         {
             try
             {
-                var serviceInfo = ServiceTools.GetServiceInfoFromName(ServiceName);
-                ServiceAccountName = serviceInfo?.AccountName;
-
                 bttnGrantRepositoryDB.Enabled = Config.SQLDestinations.Count != 0;
+                lnkViewRepositoryDBScript.Enabled = Config.SQLDestinations.Count != 0;
+                ServiceAccountName = ServiceAccount ?? ServiceTools.GetServiceInfoFromName(ServiceName)?.AccountName;
+
                 LoadConnections();
             }
             catch (Exception ex)
