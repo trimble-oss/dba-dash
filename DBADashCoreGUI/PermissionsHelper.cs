@@ -162,16 +162,26 @@ namespace DBADashGUI
 
             var excluded = new[]
             {
-                ProcedureExecutionMessage.CommunityProcs.sp_Blitz,
                 ProcedureExecutionMessage.CommunityProcs.sp_LogHunter
             }; // EXECUTE permission is insufficient
+            var procs = new List<string>();
             foreach (var p in Enum.GetValues<ProcedureExecutionMessage.CommunityProcs>().Where(proc =>
                         ProcedureExecutionMessage.IsAllowedCommunityProc(proc, Config.AllowedScripts)))
             {
                 if (excluded.Contains(p)) continue;
+                procs.Add(p.ToString());
+                if (p == ProcedureExecutionMessage.CommunityProcs.sp_Blitz)
+                {
+                    // sp_Blitz's First Responder Kit consistency check (CheckID 226) runs each FRK proc installed alongside
+                    // it with @VersionCheckMode = 1, so it fails without EXECUTE on them.  Granted only if they exist.
+                    procs.AddRange(SpBlitzVersionCheckedProcs);
+                }
+            }
+            foreach (var p in procs.Distinct(StringComparer.OrdinalIgnoreCase))
+            {
                 Permissions.Add(new PermissionItem()
                 {
-                    Name = p.ToString(),
+                    Name = p,
                     PermissionState = PermissionItem.PermissionStates.Grant,
                     PermissionType = PermissionItem.PermissionTypes.ExecuteProcedure
                 });
@@ -193,7 +203,14 @@ namespace DBADashGUI
             dgvPermissions.AutoResizeColumns();
         }
 
-        private void SetPermissionState(string name, PermissionItem.PermissionStates state)
+        /// <summary>The FRK components sp_Blitz executes to check their versions (its FRKComponents list)</summary>
+        private static readonly string[] SpBlitzVersionCheckedProcs =
+        {
+            "sp_BlitzBackups", "sp_BlitzCache", "sp_BlitzFirst", "sp_BlitzIndex", "sp_BlitzLock", "sp_BlitzWho",
+            "sp_DatabaseRestore", "sp_ineachdb"
+        };
+
+        private void SetPermissionState(string name,PermissionItem.PermissionStates state)
         {
             var item = Permissions.FirstOrDefault(p => p.Name == name);
             if (item != null)

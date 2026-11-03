@@ -67,7 +67,7 @@ The account needs permission to create and alter procedures in the target databa
 
 Checking versions only needs VIEW DEFINITION.  Versions are read from each procedure's definition - DBA Dash doesn't execute the tools to check them.
 
-To run the tools from the GUI, they also need to be allowed in the service config (`--AddToAllowedScripts`, or the service configuration tool), and the service account needs EXECUTE permission on them (see the permissions helper in the service configuration tool).
+To run the tools from the GUI, they also need to be allowed in the service config (`--AddToAllowedScripts`, or the service configuration tool), and the service account needs EXECUTE permission on them (see the permissions helper in the service configuration tool, also linked from Add Connections in the GUI).  sp_Blitz also needs EXECUTE on the other First Responder Kit procs installed alongside it - it runs them to check their versions - so the permissions helper grants those with it.  Without sysadmin, sp_Blitz skips the checks it doesn't have permission for.
 
 ## Service configuration tool
 
