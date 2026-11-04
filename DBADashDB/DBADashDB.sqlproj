@@ -602,6 +602,10 @@
     <Build Include="dbo\Stored Procedures\DatabaseMirroringSummary_Get.sql" />
     <Build Include="dbo\Stored Procedures\DatabaseMirroring_Get.sql" />
     <Build Include="dbo\Stored Procedures\Instance_Del.sql" />
+    <Build Include="dbo\Stored Procedures\BusyPeriod_Del.sql" />
+    <Build Include="dbo\Stored Procedures\BusyPeriod_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\BusyPeriods_Copy.sql" />
+    <Build Include="dbo\Stored Procedures\BusyPeriods_Get.sql" />
     <Build Include="dbo\Stored Procedures\Counters_Get.sql" />
     <Build Include="dbo\Tables\AzureDBElasticPoolStorageThresholds.sql" />
     <Build Include="dbo\Views\AzureDBElasticPoolResourceStats_Current.sql" />
@@ -747,6 +751,7 @@
     <Build Include="dbo\Stored Procedures\IOSummary_Get.sql" />
     <Build Include="dbo\Views\AzureDBInfo.sql" />
     <Build Include="dbo\Tables\InstanceIDsTags.sql" />
+    <Build Include="dbo\Tables\BusyPeriod.sql" />
     <Build Include="dbo\Stored Procedures\InstanceAlias_Upd.sql" />
     <Build Include="dbo\Stored Procedures\CounterThresholds_Upd.sql" />
     <Build Include="dbo\Stored Procedures\CounterThresholds_Get.sql" />
