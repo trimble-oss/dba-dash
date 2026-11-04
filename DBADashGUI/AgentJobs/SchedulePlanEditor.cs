@@ -469,8 +469,8 @@ namespace DBADashGUI.AgentJobs
             _plan.SetJobs(analysis.AllJobs, analysis.ActualRuns, analysis.History);
             _overlapsBefore = null;
             _whatIfUtcOffset = analysis.UtcOffset;
-            // The busy hours are in server time by the offset
-            _busy = null;
+            // The busy hours are in server time by the offset and any clock change
+            ResetBusy();
             _rangeFrom = analysis.Report.From;
             _rangeTo = analysis.Report.To;
             _report = analysis.Report;
@@ -1346,7 +1346,7 @@ namespace DBADashGUI.AgentJobs
                 : $"{included.Count} jobs, {range}: {overlaps:N0} overlapping pairs of runs" +
                   (anyMoves ? $" (was {before:N0} before the moves)" : "") +
                   (unavoidable > 0 ? $", {unavoidable:N0} of them between jobs no start times can keep apart (shown faintly).  " : ".  ") +
-                  BusySummary(included, anyMoves));
+                  BusySummary(included, from, to, anyMoves));
             if (clear + collide + cannot > 0)
             {
                 text.Append($"Of the pairs on fixed cycles, the start times keep {clear} apart, {collide} collide but could be moved apart and {cannot} can't be kept apart by start times alone.");

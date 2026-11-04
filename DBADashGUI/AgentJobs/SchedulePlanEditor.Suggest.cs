@@ -116,7 +116,8 @@ namespace DBADashGUI.AgentJobs
                 return;
             }
             // One job can still be moved out of busy hours
-            var busy = _suggestAvoidsBusy ? Busy : BusyPeriods.None;
+            // Predicted from midnight today, so by the server's clock now
+            var busy = _suggestAvoidsBusy ? BusyNow : BusyPeriods.None;
             if (_plan.IncludedJobs.Count < (busy.IsEmpty ? 2 : 1))
             {
                 _whatIfWarning = busy.IsEmpty ? "Tick at least two jobs to preview, then suggest start times for them." : "Tick jobs to preview, then suggest start times for them.";
@@ -138,11 +139,13 @@ namespace DBADashGUI.AgentJobs
             _suggest.Text = "Stop Suggesting";
             UseWaitCursor = true;
             // The suggestion is worked out from the plan as it is now: the moves, the jobs previewed and kept, the data
-            var started = (Moves: _plan.Snapshot(), Included: _plan.Included.ToHashSet(), Pinned: _plan.Pinned.ToHashSet(), Jobs: _plan.AllJobs);
+            var started = (Moves: _plan.Snapshot(), Included: _plan.Included.ToHashSet(), Pinned: _plan.Pinned.ToHashSet(), Jobs: _plan.AllJobs, Busy: _busyUtc);
             try
             {
                 var suggestion = await _plan.SuggestAsync(options, cancel.Token);
-                if (!started.Moves.SameAs(_plan.Snapshot()) || !started.Included.SetEquals(_plan.Included) || !started.Pinned.SetEquals(_plan.Pinned) || !ReferenceEquals(started.Jobs, _plan.AllJobs))
+                if (!started.Moves.SameAs(_plan.Snapshot()) || !started.Included.SetEquals(_plan.Included) || !started.Pinned.SetEquals(_plan.Pinned) || !ReferenceEquals(started.Jobs, _plan.AllJobs)
+                    // Busy hours edited or loaded again since: the suggestion steered by the old ones
+                    || !ReferenceEquals(started.Busy, _busyUtc))
                 {
                     // Applied to a plan that's changed since, it would move jobs from the wrong place - or a job since kept
                     _whatIfWarning = "The plan changed while start times were being suggested, so nothing was moved.  Suggest again for the plan as it is now.";
