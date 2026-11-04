@@ -81,4 +81,27 @@ FROM Converted C
 WHERE C.StartUtc < @ToDate
 AND C.EndUtc > @FromDate
 ORDER BY C.StartUtc
-OPTION (MAXRECURSION 0)
+OPTION (MAXRECURSION 0);
+
+/* The periods themselves, for the editor: the instance's own, its tags' and all instances', with whether each applies.
+   Periods at a less specific level than @Level are listed so they can still be edited, but don't apply to this instance. */
+SELECT BP.BusyPeriodID,
+	BP.ApplyToInstanceID,
+	BP.ApplyToTagID,
+	T.TagName,
+	T.TagValue,
+	CHOOSE(L.SourceLevel, 'Instance', 'Tag', 'All') AS Source,
+	CAST(CASE WHEN L.SourceLevel = @Level THEN 1 ELSE 0 END AS BIT) AS Applies,
+	BP.Monday, BP.Tuesday, BP.Wednesday, BP.Thursday, BP.Friday, BP.Saturday, BP.Sunday,
+	BP.TimeFrom,
+	BP.TimeTo,
+	BP.TimeZone,
+	BP.Description
+FROM dbo.BusyPeriod BP
+CROSS APPLY(SELECT CASE WHEN BP.ApplyToInstanceID = @InstanceID THEN 1
+						WHEN BP.ApplyToTagID IN (SELECT TagID FROM @InstanceTags) THEN 2
+						WHEN BP.ApplyToInstanceID = -1 AND BP.ApplyToTagID = -1 THEN 3
+					END AS SourceLevel) L
+LEFT JOIN dbo.Tags T ON T.TagID = BP.ApplyToTagID
+WHERE L.SourceLevel IS NOT NULL
+ORDER BY L.SourceLevel, BP.TimeFrom, BP.BusyPeriodID;

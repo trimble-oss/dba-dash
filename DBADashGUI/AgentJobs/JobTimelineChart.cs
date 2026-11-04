@@ -569,6 +569,37 @@ namespace DBADashGUI.AgentJobs
         /// <summary>The furthest a bar is from its <see cref="TimelineBar.GhostStart"/>, so ghosts in view are found with their bars out of it</summary>
         private TimeSpan _ghostReach;
 
+        private IReadOnlyList<(DateTime Start, DateTime End)> _busyPeriods = Array.Empty<(DateTime Start, DateTime End)>();
+        private bool _showBusyPeriods = true;
+
+        /// <summary>
+        /// When the instance is busy (dbo.BusyPeriod), in the app time zone like the bars, shaded behind the runs so it's
+        /// plain which runs land in busy hours.  Empty for none.
+        /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public IReadOnlyList<(DateTime Start, DateTime End)> BusyPeriods
+        {
+            get => _busyPeriods;
+            set
+            {
+                _busyPeriods = value ?? Array.Empty<(DateTime Start, DateTime End)>();
+                _canvas.Invalidate();
+            }
+        }
+
+        /// <summary>Shade <see cref="BusyPeriods"/> - the toolbar toggle</summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool ShowBusyPeriods
+        {
+            get => _showBusyPeriods;
+            set
+            {
+                if (_showBusyPeriods == value) return;
+                _showBusyPeriods = value;
+                _canvas.Invalidate();
+            }
+        }
+
         /// <summary>Show the band of how many jobs were running at once, between the axis and the rows.</summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool ShowConcurrency

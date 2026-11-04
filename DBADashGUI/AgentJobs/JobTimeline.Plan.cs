@@ -98,6 +98,7 @@ namespace DBADashGUI.AgentJobs
                 planEditor.BasisChanged += (_, _) => AnalyzePlan();
                 // The runs filter on the toolbar says which jobs the plan lists
                 planEditor.DurationFilterChanged += (_, _) => ShowRunFilters();
+                planEditor.EditBusyHoursRequested += (_, _) => EditBusyHours();
                 planSplitter = new Splitter { Dock = DockStyle.Bottom, Height = LogicalToDeviceUnits(5) };
                 // Docked last, so it docks first: the editor at the very bottom, the splitter above it
                 Controls.Add(planSplitter);
@@ -191,13 +192,18 @@ namespace DBADashGUI.AgentJobs
             {
                 // Analysed there too: a busy week is hundreds of thousands of runs, seconds of work that froze the window
                 var basis = planEditor.Basis;
+                var (busyFrom, busyTo) = PlanBusyRange(fromUtc, toUtc);
+                var busyTask = FetchBusyUtc(instanceId, busyFrom, busyTo);
                 var (data, analysis) = await Task.Run(() =>
                 {
                     var loaded = ScheduleOverlapData.Load(instanceId, fromUtc, toUtc, category);
                     return (loaded, loaded.Analyze(basis));
                 });
+                var busy = await busyTask;
                 if (generation != planGeneration || !PlanMode) return;
                 planData = data;
+                // Set before the data, so the first preview has them
+                planEditor.BusyPeriodsUtc = busy;
                 // The duration basis may have changed while it loaded: analysed again for the one chosen now
                 AnalyzePlan(basis == planEditor.Basis ? analysis : null);
             }

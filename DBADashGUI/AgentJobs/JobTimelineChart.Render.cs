@@ -148,6 +148,8 @@ namespace DBADashGUI.AgentJobs
                 }
             }
 
+            // Busy hours behind the runs and under the grid lines, so they read as a backdrop
+            DrawBusyPeriods(canvas);
             DrawGrid(canvas, p, step, ticks);
             DrawNowLine(canvas, p);
 
@@ -415,6 +417,39 @@ namespace DBADashGUI.AgentJobs
             }
         }
 
+        /// <summary>Busy hours: faint and amber</summary>
+        private static SKColor BusyShade => DashColors.Warning.ToSKColor().WithAlpha(34);
+
+        private bool BusyInView => ShowBusyPeriods && _busyPeriods.Any(b => b.End > _viewFrom && b.Start < _viewTo);
+
+        /// <summary>Shaded columns for the busy hours in view, down the rows</summary>
+        private void DrawBusyPeriods(SKCanvas canvas)
+        {
+            if (!ShowBusyPeriods || _busyPeriods.Count == 0) return;
+            canvas.Save();
+            canvas.ClipRect(new SKRect(ChartLeft, RowsTop, ChartRight, RowsBottom));
+            _fill.Color = BusyShade;
+            foreach (var (start, end) in _busyPeriods)
+            {
+                if (end <= _viewFrom || start >= _viewTo) continue;
+                var x1 = TimeToX(start < _viewFrom ? _viewFrom : start);
+                var x2 = TimeToX(end > _viewTo ? _viewTo : end);
+                canvas.DrawRect(new SKRect(x1, RowsTop, Math.Max(x1 + 1, x2), RowsBottom), _fill);
+            }
+            canvas.Restore();
+        }
+
+        /// <summary>The legend's chip for busy hours, when any are in view</summary>
+        private void DrawBusyLegend(SKCanvas canvas, Palette p, float x, float y)
+        {
+            if (!BusyInView) return;
+            const string text = "Busy hours";
+            _fill.Color = BusyShade.WithAlpha(110);
+            canvas.DrawRoundRect(new SKRect(x, y - 8 * Dpi, x + 10 * Dpi, y + 2 * Dpi), 2 * Dpi, 2 * Dpi, _fill);
+            _text.Color = p.Fore;
+            canvas.DrawText(text, x + 14 * Dpi, y, _smallFont, _text);
+        }
+
         private void DrawLegend(SKCanvas canvas, Palette p)
         {
             _legendRects.Clear();
@@ -452,6 +487,7 @@ namespace DBADashGUI.AgentJobs
                     // Closer than the status legend: a plan has more to fit beside the row labels
                     x += width + 5 * Dpi;
                 }
+                DrawBusyLegend(canvas, p, x, y);
                 return;
             }
             // A hidden status stays in the legend even when nothing of it matches, so it can be shown again
@@ -475,6 +511,7 @@ namespace DBADashGUI.AgentJobs
                 _legendRects.Add((rect, status));
                 x = rect.Right + 8 * Dpi;
             }
+            DrawBusyLegend(canvas, p, x, y);
         }
 
         private RunStatus? LegendHit(Point pt)
