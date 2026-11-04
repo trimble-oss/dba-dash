@@ -40,6 +40,18 @@ namespace DBADash.JobSchedules
         /// the short gaps between their runs would draw moves for no real gain
         /// </summary>
         public double AlwaysRunningFraction { get; init; } = 0.9;
+
+        /// <summary>
+        /// When the instance is busy, in server time like <see cref="From"/>, covering the period compared and
+        /// <see cref="MaxShiftSec"/> either side.  Jobs that could keep clear of it (<see cref="BusyPeriods.CanAvoid"/>) are
+        /// steered out of it; the rest aren't held to it.  <see cref="BusyPeriods.None"/> (the default) leaves it out.
+        /// </summary>
+        public BusyPeriods Busy { get; init; } = BusyPeriods.None;
+
+        /// <summary>
+        /// What a second of a run in busy hours costs, against a second of overlap with another job.  0 ignores busy hours.
+        /// </summary>
+        public double BusyWeight { get; init; } = 1;
     }
 
     public sealed class ScheduleOptimizerResult
@@ -61,6 +73,25 @@ namespace DBADash.JobSchedules
         /// <summary>Of <see cref="ConflictSecAfter"/>, the time between jobs still sharing a schedule - they start together, so start times can't help</summary>
         public double SharedConflictSecAfter { get; init; }
 
+        /// <summary>
+        /// Time the runs of jobs that could keep clear of busy hours spend in them, before and after the moves.  0 when busy
+        /// hours aren't considered (<see cref="ScheduleOptimizerOptions.Busy"/>).
+        /// </summary>
+        public double BusySecBefore { get; init; }
+
+        public double BusySecAfter { get; init; }
+
+        /// <summary>Jobs that could keep clear of busy hours, so were steered out of them</summary>
+        public IReadOnlyCollection<Guid> BusyAvoiding { get; init; } = Array.Empty<Guid>();
+
+        /// <summary>The weight busy time was given (<see cref="ScheduleOptimizerOptions.BusyWeight"/>)</summary>
+        public double BusyWeight { get; init; }
+
+        /// <summary>What the search minimises: overlap, plus busy time by its weight - before and after the moves</summary>
+        public double CostBefore => ConflictSecBefore + BusyWeight * BusySecBefore;
+
+        public double CostAfter => ConflictSecAfter + BusyWeight * BusySecAfter;
+
         /// <summary>Each job's overlap time with the others, before and after the moves</summary>
         public IReadOnlyDictionary<Guid, double> JobConflictSecBefore { get; init; }
 
@@ -73,7 +104,7 @@ namespace DBADash.JobSchedules
         public IReadOnlyDictionary<Guid, IReadOnlyList<string>> Notes { get; init; }
 
         /// <summary>The moves reduce the overlap</summary>
-        public bool HasBenefit => Shifts.Count > 0 && ConflictSecAfter < ConflictSecBefore - Tolerance;
+        public bool HasBenefit => Shifts.Count > 0 && CostAfter < CostBefore - Tolerance;
 
         internal const double Tolerance = 0.001;
     }
@@ -115,7 +146,9 @@ namespace DBADash.JobSchedules
             var step = Math.Max(1, options.StepSec);
             var maxShift = Math.Max(0, options.MaxShiftSec) / step * step;
             var gap = TimeSpan.FromSeconds(Math.Max(0, options.MinGapSec));
-            var everyDay = jobs.All(j => j.Schedules.Where(AgentScheduleShifter.IsMovable).All(AgentScheduleShifter.IsEveryDay));
+            var busy = options.BusyWeight > 0 && options.Busy is { IsEmpty: false } b ? b : BusyPeriods.None;
+            // Busy hours can differ day to day (weekdays only), so with them a day isn't enough to judge a move by
+            var everyDay = busy.IsEmpty && jobs.All(j => j.Schedules.Where(AgentScheduleShifter.IsMovable).All(AgentScheduleShifter.IsEveryDay));
             var period = everyDay ? TimeSpan.FromDays(1) : TimeSpan.FromDays(7);
             var from = options.From;
             var to = from + period;
@@ -138,6 +171,8 @@ namespace DBADash.JobSchedules
             var ignored = new HashSet<int>(Enumerable.Range(0, n).Where(i =>
                 projected[i].Sum(r => Math.Max(0, ((r.End < to ? r.End : to) - (r.Start > from ? r.Start : from)).TotalSeconds)) >= options.AlwaysRunningFraction * period.TotalSeconds));
             List<JobRun> WithGap(IEnumerable<JobRun> runs) => runs.Select(r => r with { End = r.End + gap }).ToList();
+            // Only jobs whose runs could all fit outside busy hours pay for being in them - one every minute can't help it
+            var avoiding = Enumerable.Range(0, n).Select(i => !ignored.Contains(i) && busy.CanAvoid(jobs[i])).ToArray();
             var baseRuns = projected.Select((runs, i) => ignored.Contains(i) ? new List<JobRun>() : WithGap(runs)).ToList();
             // A job with runs a schedule that doesn't move starts (one-time) can't just be slid: those runs stay, and which
             // starts Agent skips can change - its runs are worked out again for each move tried
@@ -170,6 +205,12 @@ namespace DBADash.JobSchedules
 
             double JobConflict(int i) => Enumerable.Range(0, n).Where(j => j != i).Sum(j => Overlap(slid[i], slid[j]));
 
+            // Busy time a job's runs would cost, by its weight.  The runs carry the gap, so a run ending just before busy hours
+            // starts is kept that gap clear of them too.
+            double BusyCost(int i, List<JobRun> runs) => avoiding[i] ? options.BusyWeight * busy.Seconds(runs) : 0;
+
+            double TotalBusySec() => Enumerable.Range(0, n).Where(i => avoiding[i]).Sum(i => busy.Seconds(slid[i]));
+
             // A unit's overlap with jobs outside it, were it moved by shift.  Overlaps inside a unit don't change as it moves.
             double UnitConflict(int u, int shift)
             {
@@ -181,6 +222,7 @@ namespace DBADash.JobSchedules
                     {
                         if (unitOf[j] != u) total += Overlap(runs, slid[j]);
                     }
+                    total += BusyCost(i, runs);
                 }
                 return total;
             }
@@ -205,6 +247,7 @@ namespace DBADash.JobSchedules
             }
 
             var before = TotalConflict();
+            var busyBefore = TotalBusySec();
             var jobBefore = Enumerable.Range(0, n).ToDictionary(i => jobs[i].JobId, JobConflict);
             for (var pass = 0; pass < MaxPasses; pass++)
             {
@@ -291,6 +334,10 @@ namespace DBADash.JobSchedules
                 ConflictSecBefore = before,
                 ConflictSecAfter = TotalConflict(),
                 SharedConflictSecAfter = shared,
+                BusySecBefore = busyBefore,
+                BusySecAfter = TotalBusySec(),
+                BusyAvoiding = Enumerable.Range(0, n).Where(i => avoiding[i]).Select(i => jobs[i].JobId).ToList(),
+                BusyWeight = busy.IsEmpty ? 0 : options.BusyWeight,
                 JobConflictSecBefore = jobBefore,
                 JobConflictSecAfter = Enumerable.Range(0, n).ToDictionary(i => jobs[i].JobId, JobConflict),
                 Period = period,
