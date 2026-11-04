@@ -89,6 +89,15 @@ namespace DBADashGUI.AgentJobs
         /// </summary>
         public IReadOnlyList<(DateTime Start, DateTime End)> FaintHighlights { get; set; }
 
+        /// <summary>
+        /// A planned run of a job that could keep clear of busy hours (<see cref="DBADash.JobSchedules.BusyPeriods.CanAvoid"/>)
+        /// that lands in them - drawn with an amber outline, leaving purple to the overlaps
+        /// </summary>
+        public bool InBusyHours { get; set; }
+
+        /// <summary>The outline of a run <see cref="InBusyHours"/>: amber, the busy hours' shading made solid</summary>
+        public static Color BusyOutlineColor => DashColors.Warning;
+
         /// <summary>The colour <see cref="FaintHighlights"/> are drawn in</summary>
         public static Color FaintHighlightColor => Color.FromArgb(DBADashUser.IsDarkTheme ? 90 : 70, HighlightColor);
 

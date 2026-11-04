@@ -146,7 +146,7 @@ namespace DBADashGUI.AgentJobs
         private static readonly Dictionary<string, string> OverlapColumns = new() { ["OverlapSec"] = "OverlapChangeSec" };
 
         /// <summary>Columns whose tooltip is the text in a hidden column: both overlap measures, a job's schedules, its durations</summary>
-        private static readonly Dictionary<string, string> DetailColumns = new() { ["OverlapSec"] = "OverlapDetail", ["Job"] = "JobDetail", ["ExpectedSec"] = "DurationDetail" };
+        private static readonly Dictionary<string, string> DetailColumns = new() { ["OverlapSec"] = "OverlapDetail", ["Job"] = "JobDetail", ["ExpectedSec"] = "DurationDetail", ["BusyRuns"] = "BusyDetail" };
 
         /// <summary>+4m 10s, -1h 2m, or blank for no change</summary>
         private static string FormatChange(double seconds) =>
@@ -328,7 +328,7 @@ namespace DBADashGUI.AgentJobs
             _whatIfGrid.DataError += (_, e) => e.ThrowException = false;
             // Hidden here rather than straight after binding: bound while it hasn't been shown, the grid makes the
             // columns visible again when it's first displayed
-            _whatIfGrid.DataBindingComplete += (_, _) => HideColumns(_whatIfGrid, "job_id", "OverlapChangeSec", "OverlapDetail", "JobDetail", "DurationDetail", "Warn");
+            _whatIfGrid.DataBindingComplete += (_, _) => HideColumns(_whatIfGrid, "job_id", "OverlapChangeSec", "OverlapDetail", "JobDetail", "DurationDetail", "Warn", "BusyRunsChange", "BusyDetail");
 
             _pairsGrid.CellFormatting += Grid_CellFormatting;
             _pairsGrid.CellFormatting += PairsGrid_CellFormatting;
@@ -469,6 +469,8 @@ namespace DBADashGUI.AgentJobs
             _plan.SetJobs(analysis.AllJobs, analysis.ActualRuns, analysis.History);
             _overlapsBefore = null;
             _whatIfUtcOffset = analysis.UtcOffset;
+            // The busy hours are in server time by the offset
+            _busy = null;
             _rangeFrom = analysis.Report.From;
             _rangeTo = analysis.Report.To;
             _report = analysis.Report;
@@ -617,6 +619,16 @@ namespace DBADashGUI.AgentJobs
                 e.FormattingApplied = true;
                 return;
             }
+            if (name == "BusyRuns")
+            {
+                // Runs in busy hours, and how the moves change it: more in red, fewer in green
+                var runs = Convert.ToInt32(e.Value);
+                var change = grid.Rows[e.RowIndex].DataBoundItem is DataRowView { Row: var busyRow } && busyRow["BusyRunsChange"] is int c ? c : 0;
+                e.Value = (runs == 0 ? (change == 0 ? "" : "none") : runs.ToString("N0")) + (change == 0 ? "" : $" ({(change > 0 ? "+" : "")}{change:N0})");
+                if (change != 0) e.CellStyle.ForeColor = change > 0 ? DashColors.Fail : DashColors.Success;
+                e.FormattingApplied = true;
+                return;
+            }
             // Jobs worth a second look - the pairs' notes have no such flag
             if (name == "Note" && grid.Rows[e.RowIndex].DataBoundItem is DataRowView { Row: var noteRow } && noteRow.Table.Columns.Contains("Warn") && noteRow["Warn"] is true)
             {
@@ -724,6 +736,10 @@ namespace DBADashGUI.AgentJobs
             dt.Columns.Add("DurationDetail", typeof(string));
             dt.Columns.Add("Warn", typeof(bool));
             dt.Columns.Add("Note", typeof(string));
+            // After the others, so the rows below fill the columns before them in order; shown beside Overlap
+            dt.Columns.Add("BusyRuns", typeof(int));
+            dt.Columns.Add("BusyRunsChange", typeof(int));
+            dt.Columns.Add("BusyDetail", typeof(string));
             foreach (var job in _plan.Jobs.OrderBy(j => _plan.Included.Contains(j.JobId) ? 0 : 1).ThenBy(j => j.Name))
             {
                 var notes = new List<string>();
@@ -785,6 +801,10 @@ namespace DBADashGUI.AgentJobs
                 _whatIfGrid.Columns["Include"].Width = LogicalToDeviceUnits(60);
                 _whatIfGrid.Columns["Job"].Width = LogicalToDeviceUnits(220);
                 _whatIfGrid.Columns["OverlapSec"].Width = LogicalToDeviceUnits(110);
+                SetHeader(_whatIfGrid, "BusyRuns", "Busy Hours", "Runs in busy hours over the selected range, moved as planned, and how the moves change it: more in red, fewer in green.  " +
+                                                                 "Only for jobs that could run outside them - daily, weekly, or repeating less often than the longest busy stretch.  Busy Hours... on the toolbar sets them.");
+                _whatIfGrid.Columns["BusyRuns"].DisplayIndex = _whatIfGrid.Columns["OverlapSec"].DisplayIndex + 1;
+                _whatIfGrid.Columns["BusyRuns"].Width = LogicalToDeviceUnits(80);
                 _whatIfGrid.Columns["Shift"].DefaultCellStyle.Font = new Font(_whatIfGrid.Font, FontStyle.Bold);
                 // No MinimumWidth: setting it before the tab has been shown throws inside DataGridViewBand
                 _whatIfGrid.Columns["Note"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
@@ -913,6 +933,7 @@ namespace DBADashGUI.AgentJobs
                 .Select(j => (j.JobId, Count: _plan.ClashesAdded(j, _rangeFrom, _rangeTo)))
                 .Where(x => x.Count > 0)
                 .ToDictionary(x => x.JobId, x => x.Count);
+            FindMovedIntoBusy();
 
             UpdateJobRows(included, pairs, anyMoves);
             FillPairs(pairs, anyMoves, included, shifted, cycles);
@@ -962,6 +983,7 @@ namespace DBADashGUI.AgentJobs
                         r["OverlapChangeSec"] = DBNull.Value;
                         r["OverlapDetail"] = DBNull.Value;
                     }
+                    SetBusyCells(r, job, included.Contains(job), anyMoves);
                     if (r["OwnSchedule"] != DBNull.Value) r["OwnSchedule"] = _plan.OwnSchedule.Contains(job.JobId);
                     var warn = Warns(job);
                     r["Warn"] = warn;
@@ -978,6 +1000,7 @@ namespace DBADashGUI.AgentJobs
         private bool Warns(JobScheduleInput job) =>
             _plan.OwnSchedule.Contains(job.JobId)
             || _clashes.ContainsKey(job.JobId)
+            || _movedIntoBusy.Contains(job.JobId)
             || PreviewActual && _plan.Included.Contains(job.JobId) && ScheduleChanged(job);
 
         /// <summary>The runs on the chart: coloured by outcome, overlaps picked out, outlines where moved runs were, and the legend</summary>
@@ -1041,6 +1064,9 @@ namespace DBADashGUI.AgentJobs
             if (unavoidableOnly > 0) legend.Add(new LegendEntry(TimelineBar.FaintHighlightColor, $"{unavoidableOnly:N0} unavoidable"));
             // The dotted outline where a moved run was is explained in the summary: there isn't room for it here too
             if (anyMoves) legend.Add(new LegendEntry(TimelineBar.StatusColor(PreviewActual ? TimelineRow.RunStatus.Succeeded : TimelineRow.RunStatus.Predicted), "moved", LegendSwatch.Striped));
+            // Runs of jobs that could keep clear of busy hours that are in them: outlined in amber
+            var inBusy = FlagBusyRuns(included, runs);
+            if (inBusy > 0) legend.Add(new LegendEntry(TimelineBar.BusyOutlineColor, $"{inBusy:N0} in busy hours", LegendSwatch.Dotted));
             ShowBusyOnChart();
             _preview.LegendEntries = legend;
             _preview.Title = (PreviewActual ? "Plan: actual runs" : "Plan: predicted runs") + (ShowAppTimeZone ? "" : " (server time)");
@@ -1221,7 +1247,8 @@ namespace DBADashGUI.AgentJobs
                         FaintHighlights = detail.Unavoidable != null ? detail.Unavoidable[k - first]?.Select(s => (Display(s.Start), Display(s.End))).ToList()
                             : (flags[k] & PlanOverlaps.Unavoidable) != 0 ? new[] { (Display(run.Start), Display(run.End)) } : null,
                         // Only the runs that moved get an outline where they were: one started by hand or at agent start stays put
-                        GhostStart = movedBy == 0 ? null : Display(run.Start.AddSeconds(-movedBy))
+                        GhostStart = movedBy == 0 ? null : Display(run.Start.AddSeconds(-movedBy)),
+                        InBusyHours = RunInBusy(i, k)
                     });
                 }
                 k = end;
@@ -1263,7 +1290,8 @@ namespace DBADashGUI.AgentJobs
                 DenseLabel = $"every {JobTimelineChart.FormatDuration(TimeSpan.FromSeconds(Math.Round(every)))}, {each} each",
                 Highlights = highlights.Count == 0 ? null : highlights.Select(s => (Display(s.Start), Display(s.End))).ToList(),
                 FaintHighlights = faint.Count == 0 ? null : faint.Select(s => (Display(s.Start), Display(s.End))).ToList(),
-                GhostStart = movedBy == 0 ? null : Display(start.AddSeconds(-movedBy))
+                GhostStart = movedBy == 0 ? null : Display(start.AddSeconds(-movedBy)),
+                InBusyHours = AnyRunInBusy(i, first, end)
             };
         }
 
@@ -1317,7 +1345,8 @@ namespace DBADashGUI.AgentJobs
                 ? "Tick jobs below to preview their runs.  "
                 : $"{included.Count} jobs, {range}: {overlaps:N0} overlapping pairs of runs" +
                   (anyMoves ? $" (was {before:N0} before the moves)" : "") +
-                  (unavoidable > 0 ? $", {unavoidable:N0} of them between jobs no start times can keep apart (shown faintly).  " : ".  "));
+                  (unavoidable > 0 ? $", {unavoidable:N0} of them between jobs no start times can keep apart (shown faintly).  " : ".  ") +
+                  BusySummary(included, anyMoves));
             if (clear + collide + cannot > 0)
             {
                 text.Append($"Of the pairs on fixed cycles, the start times keep {clear} apart, {collide} collide but could be moved apart and {cannot} can't be kept apart by start times alone.");
@@ -1341,6 +1370,7 @@ namespace DBADashGUI.AgentJobs
             if (_clashes.Count > 0) cautions.Add($"{(_clashes.Count == 1 ? "1 job has" : $"{_clashes.Count} jobs have")} schedules moved so they clash - Agent skips a start while the job is running");
             var changed = PreviewActual ? _plan.IncludedJobs.Count(ScheduleChanged) : 0;
             if (changed > 0) cautions.Add($"schedules changed during the range for {(changed == 1 ? "1 job" : $"{changed} jobs")} - before then its runs are predicted");
+            if (_movedIntoBusy.Count > 0) cautions.Add($"{(_movedIntoBusy.Count == 1 ? "1 job that could avoid busy hours is" : $"{_movedIntoBusy.Count} jobs that could avoid busy hours are")} moved into them");
             if (_clockChange is { } clock)
             {
                 // Until isn't corrected, so Display takes nothing off it
@@ -1353,7 +1383,7 @@ namespace DBADashGUI.AgentJobs
             _whatIfCaution.ForeColor = DashColors.Warning;
             if (cautions.Count == 0) return;
             var text = string.Join("; ", cautions);
-            _whatIfCaution.Text = "⚠ " + char.ToUpper(text[0], CultureInfo.CurrentCulture) + text[1..] + (copies + _clashes.Count + changed > 0 ? ".  See Note." : ".");
+            _whatIfCaution.Text = "⚠ " + char.ToUpper(text[0], CultureInfo.CurrentCulture) + text[1..] + (copies + _clashes.Count + changed + _movedIntoBusy.Count > 0 ? ".  See Note." : ".");
             SizeToText(_whatIfCaution);
         }
 
@@ -1502,6 +1532,7 @@ namespace DBADashGUI.AgentJobs
                 if (overlapSec > 0) yield return ("Overlap", JobTimelineChart.FormatDuration(TimeSpan.FromSeconds(overlapSec), true) + " that moving could change");
                 if (unavoidableSec > 0) yield return ("Unavoidable", JobTimelineChart.FormatDuration(TimeSpan.FromSeconds(unavoidableSec), true) + " with jobs no start times can keep it apart from (shown faintly)");
                 if (p.Run.MovedBySec != 0) yield return ("Moved by", ScheduleMath.Shift(p.Run.MovedBySec));
+                if (AnyRunInBusy(d.JobIndex, d.First, d.Last)) yield return ("In busy hours", "Some of these runs - the job could run outside busy hours");
                 yield break;
             }
             yield return ("Start", p.Run.Start.ToString("G", CultureInfo.CurrentCulture) + " (server)");
@@ -1514,6 +1545,7 @@ namespace DBADashGUI.AgentJobs
             var overlapsWith = runOverlaps.With[0]?.Distinct().ToList();
             yield return ("Overlaps", overlapsWith == null ? "None" : string.Join(", ", overlapsWith));
             if (runOverlaps.Unavoidable[0] != null) yield return ("Unavoidable", "Some of it is with jobs no start times can keep it apart from - shown faintly");
+            if (RunInBusy(p.JobIndex, p.RunIndex)) yield return ("In busy hours", "Yes - the job could run outside them (outlined in amber)");
             var shift = p.Run.MovedBySec;
             if (p.Run.Predicted && PreviewActual) yield return ("Predicted", "Its schedules have changed since the runs then - this is when they'd run it now.  The dotted outlines are the runs that happened.");
             if (!PreviewActual || p.Run.Predicted)

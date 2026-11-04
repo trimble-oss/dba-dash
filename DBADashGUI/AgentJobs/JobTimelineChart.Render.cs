@@ -417,7 +417,7 @@ namespace DBADashGUI.AgentJobs
             }
         }
 
-        /// <summary>Busy hours: faint and amber</summary>
+        /// <summary>Busy hours: faint and amber, like the outline on runs in them in plan mode</summary>
         private static SKColor BusyShade => DashColors.Warning.ToSKColor().WithAlpha(34);
 
         private bool BusyInView => ShowBusyPeriods && _busyPeriods.Any(b => b.End > _viewFrom && b.Start < _viewTo);
@@ -624,6 +624,15 @@ namespace DBADashGUI.AgentJobs
             if (bar.Start < _periodFrom) FadeEdge(canvas, p, rect, fadeWidth, true);
             if (bar.End > _periodTo && !bar.IsRunning) FadeEdge(canvas, p, rect, fadeWidth, false);
 
+            // A run in busy hours that could have kept out of them: an amber outline, under the selection's
+            if (bar.InBusyHours && bar != _selectedBar && bar != _hoverBar)
+            {
+                _stroke.Color = TimelineBar.BusyOutlineColor.ToSKColor();
+                _stroke.StrokeWidth = 1.5f * Dpi;
+                var outline = rect;
+                outline.Inflate(1f * Dpi, 1f * Dpi);
+                canvas.DrawRoundRect(outline, radius + 1, radius + 1, _stroke);
+            }
             if (bar == _selectedBar || bar == _hoverBar)
             {
                 _stroke.Color = bar == _selectedBar ? p.Fore : color;

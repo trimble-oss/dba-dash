@@ -102,6 +102,7 @@ namespace DBADashGUI.AgentJobs
             var notes = new List<string>();
             if (_baseNotes.TryGetValue(jobId, out var note) && note != null) notes.Add(note);
             if (_plan.OwnSchedule.Contains(jobId)) notes.Add("Gets its own copy of the schedule, to move on its own");
+            if (_movedIntoBusy.Contains(jobId)) notes.Add("Moved into busy hours, though it could run outside them");
             if (_clashes.TryGetValue(jobId, out var clashes)) notes.Add($"Its schedules are moved so they clash: Agent would skip {clashes:N0} {(clashes == 1 ? "start" : "starts")} over the range as the job is still running from another of its schedules");
             if (_suggestionNotes != null && _suggestionNotes.TryGetValue(jobId, out var suggested)) notes.AddRange(suggested);
             return notes.Count == 0 ? null : string.Join(".  ", notes);
