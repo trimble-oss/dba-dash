@@ -300,7 +300,7 @@ namespace DBADashGUI.AgentJobs
                 _plan.IncludeMostOverlapping(_report, MaxDefaultIncluded, LongEnough);
                 SetIncluded(_plan.Included.ToList());
             });
-            _whatIfToolStrip.Items.AddRange(new ToolStripItem[] { periodButton, _basisButton, new ToolStripSeparator(), previewButton, _undoButton, reset });
+            _whatIfToolStrip.Items.AddRange(new ToolStripItem[] { periodButton, _basisButton, new ToolStripSeparator(), previewButton, _undoButton, reset, CreateBusyItem() });
             _whatIfToolStrip.Items.AddRange(CreateSuggestItems());
             _whatIfToolStrip.Items.AddRange(CreateScriptItems());
 
@@ -449,6 +449,7 @@ namespace DBADashGUI.AgentJobs
             chart.ShiftsWith = null;
             chart.RowShiftSnap = null;
             chart.LegendEntries = null;
+            chart.BusyPeriods = null;
             (chart.Title, chart.ShowConcurrency, chart.ShowNowLine, chart.ActivateHint, chart.EmptyText) = _chartWas;
         }
 
@@ -1040,6 +1041,7 @@ namespace DBADashGUI.AgentJobs
             if (unavoidableOnly > 0) legend.Add(new LegendEntry(TimelineBar.FaintHighlightColor, $"{unavoidableOnly:N0} unavoidable"));
             // The dotted outline where a moved run was is explained in the summary: there isn't room for it here too
             if (anyMoves) legend.Add(new LegendEntry(TimelineBar.StatusColor(PreviewActual ? TimelineRow.RunStatus.Succeeded : TimelineRow.RunStatus.Predicted), "moved", LegendSwatch.Striped));
+            ShowBusyOnChart();
             _preview.LegendEntries = legend;
             _preview.Title = (PreviewActual ? "Plan: actual runs" : "Plan: predicted runs") + (ShowAppTimeZone ? "" : " (server time)");
             _preview.SetData(BuildPreviewModel(), Display(from), Display(to), _resetPreviewView);

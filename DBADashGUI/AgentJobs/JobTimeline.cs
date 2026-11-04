@@ -588,6 +588,7 @@ namespace DBADashGUI.AgentJobs
             toolStrip1.Items.Insert(at + 1, tsConcurrency);
             AddPlanItems(at + 2);
             AddCpuItems(at + 2);
+            AddBusyItems(at + 2);
         }
 
         /// <summary>A duration on the runs filter's menu - null seconds for Auto</summary>
@@ -723,6 +724,7 @@ namespace DBADashGUI.AgentJobs
                     if (generation != loadGeneration) return;
                     SetBase(queryFrom, queryTo, usedGap, capped);
                     baseSummary = ds;
+                    busyUtc = new List<(DateTime Start, DateTime End)>();
                     hTMLToolStripMenuItem.Enabled = false;
                 }
                 else
@@ -731,13 +733,18 @@ namespace DBADashGUI.AgentJobs
                     var jobId = context.JobID;
                     var steps = IncludeSteps;
                     var outcome = IncludeOutcome;
+                    // Fetched alongside the runs, shaded behind them
+                    var busyTask = FetchBusyUtc(instanceId, queryFrom, queryTo);
                     var (data, usedGap, capped) = await Task.Run(() => FetchCapped(g => GetJobTimelineData(instanceId, queryFrom, queryTo, filters, jobId, steps, outcome, dateGroup, g), d => d.Rows.Count, gap));
+                    var busy = await busyTask;
                     if (generation != loadGeneration) return;
                     SetBase(queryFrom, queryTo, usedGap, capped);
                     baseData = data;
+                    busyUtc = busy;
                     hTMLToolStripMenuItem.Enabled = true;
                 }
                 Display();
+                ShowBusyOnTimeline();
                 FetchConcurrencyForView(true);
                 FetchCpuForView(true);
                 resetView = false;

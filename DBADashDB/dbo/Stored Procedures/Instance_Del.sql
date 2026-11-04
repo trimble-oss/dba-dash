@@ -539,6 +539,9 @@ BEGIN
 	DELETE Alert.BlackoutPeriod
 	WHERE ApplyToInstanceID = @InstanceID
 
+	DELETE dbo.BusyPeriod
+	WHERE ApplyToInstanceID = @InstanceID
+
 	DELETE Alert.Rules
 	WHERE ApplyToInstanceID = @InstanceID
 
