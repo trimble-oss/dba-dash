@@ -61,7 +61,10 @@ namespace DBADash.JobSchedules
             if (count == 0) return (sink.With, sink.Segments, sink.Unavoidable);
             var mine = new RunSlice(_runs[job], first, last);
             var from = mine[0].Start;
-            var to = mine[count - 1].End;
+            // The latest end, not the last run's: a run started by hand stays where it ran as the job moves, so a job's
+            // runs can end out of order
+            var to = mine[0].End;
+            for (var k = 1; k < count; k++) if (mine[k].End > to) to = mine[k].End;
             for (var j = 0; j < _runs.Count; j++)
             {
                 if (j == job) continue;
@@ -343,9 +346,10 @@ namespace DBADash.JobSchedules
             var score = new Dictionary<Guid, int>();
             var inRange = Jobs.Where(j => eligible?.Invoke(j) ?? true).Select(j => j.JobId).ToHashSet();
             // Pairs no start times can keep apart don't count: moving either can't help, and a job that runs every few
-            // seconds beside long jobs has thousands of those overlaps, which picked it over the jobs a move could help
+            // seconds beside long jobs has thousands of those overlaps, which picked it over the jobs a move could help.
+            // Pairs running part of the day still count - moving one's window could keep them apart.
             foreach (var p in report.Pairs.Where(p => inRange.Contains(p.A.JobId) && inRange.Contains(p.B.JobId)
-                                                      && p.Verdict is not (CycleVerdict.CannotSeparate or CycleVerdict.AlwaysRunning)
+                                                      && (p.PartOfDay || p.Verdict is not (CycleVerdict.CannotSeparate or CycleVerdict.AlwaysRunning))
                                                       && (p.PredictedOverlaps > 0 || p.ActualOverlaps > 0 || p.Verdict is CycleVerdict.Collides)))
             {
                 var weight = p.PredictedOverlaps + p.ActualOverlaps + 1;
@@ -951,14 +955,20 @@ namespace DBADash.JobSchedules
             }
         }
 
-        /// <summary>The runs that overlap <paramref name="from"/> to <paramref name="to"/>, as a range of indexes - a job's runs are in order and don't overlap, so their ends are in order too</summary>
+        /// <summary>
+        /// The runs that may overlap <paramref name="from"/> to <paramref name="to"/>, as a range of indexes: every one that
+        /// does is in it.  A job's runs are in start order, but not always end order - a run started by hand stays where it
+        /// ran as the job moves, and can overlap a moved one - so the range starts at the first run the latest end so far
+        /// reaches past <paramref name="from"/>.
+        /// </summary>
         public static (int First, int Last) RunsBetween(IReadOnlyList<JobRun> runs, DateTime from, DateTime to)
         {
+            var latestEnd = LatestEnds.GetValue(runs, LatestEndsOf);
             int lo = 0, hi = runs.Count;
             while (lo < hi)
             {
                 var mid = (lo + hi) / 2;
-                if (runs[mid].End <= from) lo = mid + 1;
+                if (latestEnd[mid] <= from) lo = mid + 1;
                 else hi = mid;
             }
             var first = lo;
@@ -970,6 +980,16 @@ namespace DBADash.JobSchedules
                 else hi = mid;
             }
             return (first, lo);
+        }
+
+        /// <summary>For each run list, the latest end of the runs up to each one - the lists are shared and not changed (see <see cref="Cached"/>)</summary>
+        private static readonly ConditionalWeakTable<IReadOnlyList<JobRun>, DateTime[]> LatestEnds = new();
+
+        private static DateTime[] LatestEndsOf(IReadOnlyList<JobRun> runs)
+        {
+            var latest = new DateTime[runs.Count];
+            for (var k = 0; k < runs.Count; k++) latest[k] = k > 0 && latest[k - 1] > runs[k].End ? latest[k - 1] : runs[k].End;
+            return latest;
         }
 
         /// <summary>The most runs going at once in each of <paramref name="slices"/> slices of the period</summary>

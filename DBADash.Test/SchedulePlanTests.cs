@@ -64,6 +64,11 @@ namespace DBADash.Test
             plan.Included.Clear();
             plan.IncludeMostOverlapping(report, 2, j => j != b);
             Assert.AreEqual(0, plan.Included.Count, "Without B no pair is left that a move could help");
+
+            // Running part of the day, moving one's window could keep them apart after all
+            var partOfDay = new JobOverlapReport { Pairs = new[] { new JobPairOverlap { A = a, B = c, ActualOverlaps = 10, Verdict = CycleVerdict.CannotSeparate, PartOfDay = true } } };
+            plan.IncludeMostOverlapping(partOfDay, 2);
+            CollectionAssert.AreEquivalent(new[] { a.JobId, c.JobId }, plan.Included.ToList());
         }
 
         [TestMethod]
@@ -200,6 +205,19 @@ namespace DBADash.Test
             var (edges, peaks) = SchedulePlan.Concurrency(a.Concat(b), Monday, Monday.AddHours(1), slices: 6);
             Assert.AreEqual(7, edges.Length);
             CollectionAssert.AreEqual(new[] { 2, 1, 0, 1, 0, 0 }, peaks);
+        }
+
+        [TestMethod]
+        public void Overlaps_RunsEndingOutOfOrder()
+        {
+            // A run started by hand stays put as the job moves, so a job's runs can end out of order
+            var a = new List<JobRun> { new(Monday, Monday.AddMinutes(20)), new(Monday.AddMinutes(10), Monday.AddMinutes(11)) };
+            var b = new List<JobRun> { new(Monday.AddMinutes(15), Monday.AddMinutes(16)) };
+            CollectionAssert.AreEqual(new[] { 0, 2 }, SchedulePlan.RunsBetween(a, Monday.AddMinutes(15), Monday.AddMinutes(16)) is var (f, l) ? new[] { f, l } : null);
+            var overlaps = SchedulePlan.FindOverlaps(new List<List<JobRun>> { a, b }, new[] { "A", "B" });
+            Assert.AreEqual("A", overlaps.Detail(1, 0, 1).With[0]?.Single(), "B overlaps A's long run");
+            Assert.IsNull(overlaps.Detail(0, 1, 2).With[0], "A's short run doesn't overlap B");
+            Assert.AreEqual("B", overlaps.Detail(0, 0, 2).With[0]?.Single(), "Asked about both, the long one overlaps B");
         }
 
         [TestMethod]

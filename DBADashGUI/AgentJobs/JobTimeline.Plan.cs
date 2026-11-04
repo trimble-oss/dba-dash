@@ -198,7 +198,8 @@ namespace DBADashGUI.AgentJobs
                 });
                 if (generation != planGeneration || !PlanMode) return;
                 planData = data;
-                AnalyzePlan(analysis);
+                // The duration basis may have changed while it loaded: analysed again for the one chosen now
+                AnalyzePlan(basis == planEditor.Basis ? analysis : null);
             }
             catch (Exception ex)
             {
