@@ -49,6 +49,22 @@ namespace DBADash.Test
         }
 
         [TestMethod]
+        public void PastMidnight_UpdatesTheDaysToo()
+        {
+            var sunday = new AgentSchedule
+            {
+                Name = "Weekly", FrequencyType = AgentSchedule.Weekly, FrequencyInterval = 1, FrequencyRecurrenceFactor = 1,
+                FrequencySubdayType = AgentSchedule.SubdayAtTime, ActiveStartDate = 20260104, ActiveStartTime = 0, ScheduleUid = Uid
+            };
+            var build = AgentScheduleScripter.Build(new[] { Moved(sunday, -3 * 3600, "Maintenance") }, "SQL01", new DateTime(2026, 11, 1, 12, 0, 0));
+            StringAssert.Contains(build.Script, "@active_start_time = 210000, @active_end_time = 235959, @freq_interval = 64, @active_start_date = 20260103, @active_end_date = 99991231");
+            StringAssert.Contains(build.Script, "@active_start_time = 0, @active_end_time = 235959, @freq_interval = 1, @active_start_date = 20260104, @active_end_date = 99991231");
+
+            var script = AgentScheduleScripter.Build(new[] { Moved(Every15, 120, "ETL load") }, "SQL01", new DateTime(2026, 11, 1, 12, 0, 0)).Script;
+            Assert.IsFalse(script.Contains("@freq_interval = "), "A move within the day leaves its days alone");
+        }
+
+        [TestMethod]
         public void OneScript_RollbackChoosesTheDirection()
         {
             var built = AgentScheduleScripter.Build(new[] { Moved(Every15, 120, "ETL load") }, "SQL01", DateTime.UtcNow);

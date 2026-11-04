@@ -356,12 +356,74 @@ namespace DBADash.Test
             Assert.IsTrue(AgentScheduleShifter.TryShift(DailyAt(3000), -3600, out shifted, out _));
             Assert.AreEqual(233000, shifted.ActiveStartTime);
 
-            Assert.IsFalse(AgentScheduleShifter.TryShift(DailyAt(233000, 2), 3600, out _, out var reason));
+            Assert.IsFalse(AgentScheduleShifter.TryShift(DailyAt(233000, 2), 3600, out _, out var reason, changeDays: false));
             Assert.IsNotNull(reason);
-            var weekly = new AgentSchedule { FrequencyType = AgentSchedule.Weekly, FrequencyInterval = 2, FrequencyRecurrenceFactor = 1, FrequencySubdayType = AgentSchedule.SubdayAtTime, ActiveStartTime = 233000 };
-            Assert.IsFalse(AgentScheduleShifter.TryShift(weekly, 3600, out _, out _));
-            Assert.IsTrue(AgentScheduleShifter.TryShift(weekly, -3600, out shifted, out _));
+            var weekly = Weekly(2, 1, 233000);
+            Assert.IsFalse(AgentScheduleShifter.TryShift(weekly, 3600, out _, out _, changeDays: false));
+            Assert.IsTrue(AgentScheduleShifter.TryShift(weekly, -3600, out shifted, out _, changeDays: false));
             Assert.AreEqual(223000, shifted.ActiveStartTime);
+        }
+
+        private static AgentSchedule Weekly(int days, int everyWeeks, int time, int startDate = 20260101, int subdayMinutes = 0, int endTime = 235959) => new()
+        {
+            FrequencyType = AgentSchedule.Weekly,
+            FrequencyInterval = days,
+            FrequencyRecurrenceFactor = everyWeeks,
+            FrequencySubdayType = subdayMinutes > 0 ? AgentSchedule.SubdayMinutes : AgentSchedule.SubdayAtTime,
+            FrequencySubdayInterval = subdayMinutes,
+            ActiveStartDate = startDate,
+            ActiveStartTime = time,
+            ActiveEndTime = endTime
+        };
+
+        /// <summary>Asserts the moved schedule runs at each of the original's run times moved by <paramref name="seconds"/></summary>
+        private static void AssertRunsMoved(AgentSchedule schedule, int seconds)
+        {
+            Assert.IsTrue(AgentScheduleShifter.TryShift(schedule, seconds, out var shifted, out var reason), reason);
+            DateTime from = new(2026, 11, 1), to = new(2027, 3, 1);
+            List<DateTime> Starts(AgentSchedule s, int offset) => JobOverlapAnalyzer.ProjectRuns(new JobScheduleInput { Schedules = new[] { s }, ExpectedDurationSec = 1 }, from, to, out _)
+                .Select(r => r.Start.AddSeconds(offset)).Where(t => t >= from.AddDays(2) && t < to.AddDays(-2)).ToList();
+            var expected = Starts(schedule, seconds);
+            Assert.IsTrue(expected.Count > 0);
+            CollectionAssert.AreEqual(expected, Starts(shifted, 0));
+        }
+
+        [TestMethod]
+        public void Shift_PastMidnight_MovesTheDays()
+        {
+            AssertRunsMoved(Weekly(1, 1, 0), -3 * 3600); // Sunday 00:00 to Saturday 21:00
+            AssertRunsMoved(Weekly(1 | 4 | 16, 1, 230000), 2 * 3600); // Sun/Tue/Thu 23:00 to Mon/Wed/Fri 01:00
+            AssertRunsMoved(Weekly(64, 1, 220000), 3 * 3600); // Saturday into Sunday
+            AssertRunsMoved(DailyAt(3000, 3), -3600);
+            AssertRunsMoved(DailyAt(233000, 2), 3600);
+            AssertRunsMoved(Weekly(2, 1, 0, subdayMinutes: 30, endTime: 20000), -3 * 3600); // A window, Monday 00:00-02:00 to Sunday 21:00-23:00
+
+            Assert.IsTrue(AgentScheduleShifter.TryShift(Weekly(1, 1, 0), -3 * 3600, out var shifted, out _));
+            Assert.AreEqual(64, shifted.FrequencyInterval);
+            Assert.AreEqual(210000, shifted.ActiveStartTime);
+        }
+
+        [TestMethod]
+        public void Shift_PastMidnight_EveryNWeeks()
+        {
+            // Every 2 weeks: Sunday a day earlier is Saturday of the week before, so the week it's counted from moves too -
+            // whatever day it starts on
+            AssertRunsMoved(Weekly(1, 2, 0, startDate: 20260104), -3 * 3600); // Starting on a Sunday
+            AssertRunsMoved(Weekly(1, 2, 0, startDate: 20260107), -3 * 3600); // And mid week
+            AssertRunsMoved(Weekly(64, 3, 230000, startDate: 20260107), 3600);
+            AssertRunsMoved(Weekly(2 | 8, 2, 0, startDate: 20260107), -3600); // Mon/Wed to Sun/Tue, all in the same week
+
+            Assert.IsFalse(AgentScheduleShifter.TryShift(Weekly(1 | 8, 2, 0), -3600, out _, out var reason), "Sunday leaves the week, Wednesday doesn't");
+            StringAssert.Contains(reason, "every 2 weeks");
+        }
+
+        [TestMethod]
+        public void Shift_PastMidnight_RefusedForMonthly()
+        {
+            var monthly = new AgentSchedule { FrequencyType = AgentSchedule.Monthly, FrequencyInterval = 1, FrequencyRecurrenceFactor = 1, FrequencySubdayType = AgentSchedule.SubdayAtTime, ActiveStartDate = 20260101, ActiveStartTime = 0 };
+            Assert.IsFalse(AgentScheduleShifter.TryShift(monthly, -3600, out _, out var reason));
+            StringAssert.Contains(reason, "day of the month");
+            Assert.IsTrue(AgentScheduleShifter.TryShift(monthly, 3600, out _, out _));
         }
 
         [TestMethod]

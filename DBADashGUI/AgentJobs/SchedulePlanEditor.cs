@@ -1,4 +1,4 @@
-using DBADash.JobSchedules;
+﻿using DBADash.JobSchedules;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -29,6 +29,43 @@ namespace DBADashGUI.AgentJobs
     {
         /// <summary>Jobs ticked to start with: those most involved in overlaps</summary>
         private const int MaxDefaultIncluded = 12;
+
+        /// <summary>
+        /// The shortest expected duration of a job listed and previewed - null for Auto, which goes by the preview's range
+        /// (<see cref="EffectiveMinDurationSec"/>).  Over a week, jobs of a few seconds are a band at most and drown out the
+        /// jobs a move would help; they're for a closer look at a shorter range.  Set by the host, from its own filter.
+        /// </summary>
+        private TimeSpan? _minDuration;
+
+        /// <summary>The shortest expected duration, in seconds, of a job listed and previewed.  Null for Auto, which goes by the range previewed.</summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public int? MinDurationSec
+        {
+            get => _minDuration is { } d ? (int)d.TotalSeconds : null;
+            set
+            {
+                _minDuration = value is { } seconds ? TimeSpan.FromSeconds(seconds) : null;
+                ApplyDurationFilter();
+            }
+        }
+
+        /// <summary>What the duration filter does now, e.g. "Jobs 5m or longer (auto)", for the host's button</summary>
+        public string DurationFilterText { get; private set; } = "";
+
+        /// <summary>How many jobs the duration filter leaves off, and why, for the host's tooltip</summary>
+        public string DurationFilterDetail { get; private set; } = "";
+
+        /// <summary>Raised when what the duration filter does changes - <see cref="DurationFilterText"/></summary>
+        public event EventHandler DurationFilterChanged;
+
+        /// <summary>
+        /// The user has ticked or cleared jobs to preview.  Until then every job the duration filter lists is previewed, and
+        /// changing the filter previews the jobs it lists then.
+        /// </summary>
+        private bool _includedByUser;
+
+        /// <summary>The lengths Auto picks from, the longest no more than a 2000th of the range</summary>
+        private static readonly TimeSpan[] DurationSteps = { TimeSpan.Zero, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(30), TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(15), TimeSpan.FromHours(1) };
 
         /// <summary>The chart drawn on, while attached</summary>
         private JobTimelineChart _preview;
@@ -86,7 +123,6 @@ namespace DBADashGUI.AgentJobs
 
         private readonly Stack<PlanState> _redo = new();
 
-        private bool _includedChosen;
         private int _instanceId;
         private int _whatIfUtcOffset;
         private DataTable _whatIfTable;
@@ -97,7 +133,9 @@ namespace DBADashGUI.AgentJobs
         /// <summary>The previewed runs, by the source index of their bar</summary>
         private List<PreviewRun> _previewRuns = new();
 
-        private sealed record PreviewRun(JobScheduleInput Job, JobRun Run, IReadOnlyCollection<string> OverlapsWith);
+        /// <param name="JobIndex">The job's place in the jobs previewed, for <see cref="PlanOverlaps.Detail"/></param>
+        /// <param name="RunIndex">The run's place in the job's runs</param>
+        private sealed record PreviewRun(JobScheduleInput Job, JobRun Run, int JobIndex, int RunIndex);
 
         private static readonly HashSet<string> DurationColumns = new() { "ExpectedSec", "CycleSec" };
 
@@ -158,10 +196,32 @@ namespace DBADashGUI.AgentJobs
         private string DisplayTimeName => ShowAppTimeZone ? "(your time zone)" : "server time";
 
         /// <summary>A time in the preview as shown: in the app time zone, or server time as it is</summary>
-        private DateTime Display(DateTime serverTime) => ShowAppTimeZone ? ToUtc(serverTime, PreviewActual).ToAppTimeZone() : serverTime;
+        private DateTime Display(DateTime serverTime) => ShowAppTimeZone ? ToAppZone(ToUtc(serverTime, PreviewActual)) : serverTime;
 
         /// <summary>A time among the runs that happened as shown, whichever preview is on</summary>
-        private DateTime DisplayRan(DateTime serverTime) => ShowAppTimeZone ? ToUtc(serverTime, true).ToAppTimeZone() : serverTime;
+        private DateTime DisplayRan(DateTime serverTime) => ShowAppTimeZone ? ToAppZone(ToUtc(serverTime, true)) : serverTime;
+
+        // The app time zone's offset by quarter hour of UTC - clocks only change on a quarter hour.  Converting each time, a
+        // busy week's runs and their overlaps were a million conversions every time the preview was drawn again.
+        private readonly Dictionary<long, (TimeSpan Offset, DateTimeKind Kind)> _zoneOffsets = new();
+        private TimeZoneInfo _offsetsZone;
+
+        private DateTime ToAppZone(DateTime utc)
+        {
+            if (!ReferenceEquals(_offsetsZone, DateHelper.AppTimeZone))
+            {
+                _zoneOffsets.Clear();
+                _offsetsZone = DateHelper.AppTimeZone;
+            }
+            var quarter = utc.Ticks / (TimeSpan.TicksPerMinute * 15);
+            if (!_zoneOffsets.TryGetValue(quarter, out var zone))
+            {
+                var start = new DateTime(quarter * TimeSpan.TicksPerMinute * 15, DateTimeKind.Utc);
+                var converted = start.ToAppTimeZone();
+                _zoneOffsets[quarter] = zone = (converted - start, converted.Kind);
+            }
+            return DateTime.SpecifyKind(utc + zone.Offset, zone.Kind);
+        }
 
         /// <summary>
         /// A server time in UTC.  The runs that happened (<paramref name="ran"/>) are in the server's time as its clock showed
@@ -186,6 +246,7 @@ namespace DBADashGUI.AgentJobs
 
         public SchedulePlanEditor()
         {
+            _viewTimer.Tick += ViewTimer_Tick;
             var periodButton = new ToolStripDropDownButton
             {
                 ToolTipText = "What to preview: the runs in the selected range, moved as set here - or the runs the schedules predict, from midnight today (server time)"
@@ -194,7 +255,8 @@ namespace DBADashGUI.AgentJobs
                 {
                     _previewLength = length;
                     _resetPreviewView = true;
-                    RefreshWhatIf();
+                    if (_minDuration == null && _whatIfTable != null) ApplyDurationFilter();
+                    else RefreshWhatIf();
                 },
                 (TimeSpan.Zero, "Selected range (actual runs)"),
                 (TimeSpan.FromHours(2), "2 hours predicted"), (TimeSpan.FromHours(6), "6 hours predicted"), (TimeSpan.FromDays(1), "1 day predicted"), (TimeSpan.FromDays(7), "7 days predicted"));
@@ -216,15 +278,26 @@ namespace DBADashGUI.AgentJobs
             { ToolTipText = "Put every job back to its current start time and schedule.  Undo brings the moves back." };
             var previewButton = new ToolStripDropDownButton("Preview", Properties.Resources.SelectRows)
             {
-                ToolTipText = "Choose which jobs to preview: all of them, none, or the ones that overlap most.  Clicking the Preview column's header ticks or clears them all too."
+                ToolTipText = "Choose which jobs to preview: all those listed, none, or the ones that overlap most in ways a move could help.  Clicking the Preview column's header ticks or clears them all too.  " +
+                              "Which jobs are listed is up to the duration filter on the toolbar above."
             };
-            previewButton.DropDownItems.Add("All Jobs", null, (_, _) => SetIncluded(_plan.Jobs.Select(j => j.JobId)));
-            previewButton.DropDownItems.Add("None", null, (_, _) => SetIncluded(Array.Empty<Guid>()));
+            previewButton.DropDownItems.Add("All Listed Jobs", null, (_, _) =>
+            {
+                // Back to previewing whatever the duration filter lists
+                _includedByUser = false;
+                SetIncluded(_plan.Jobs.Where(LongEnough).Select(j => j.JobId));
+            });
+            previewButton.DropDownItems.Add("None", null, (_, _) =>
+            {
+                _includedByUser = true;
+                SetIncluded(Array.Empty<Guid>());
+            });
             previewButton.DropDownItems.Add($"Most Overlapping ({MaxDefaultIncluded})", null, (_, _) =>
             {
                 if (_report == null) return;
+                _includedByUser = true;
                 _plan.Included.Clear();
-                _plan.IncludeMostOverlapping(_report, MaxDefaultIncluded);
+                _plan.IncludeMostOverlapping(_report, MaxDefaultIncluded, LongEnough);
                 SetIncluded(_plan.Included.ToList());
             });
             _whatIfToolStrip.Items.AddRange(new ToolStripItem[] { periodButton, _basisButton, new ToolStripSeparator(), previewButton, _undoButton, reset });
@@ -242,8 +315,10 @@ namespace DBADashGUI.AgentJobs
             _whatIfGrid.ColumnHeaderMouseClick += (_, e) =>
             {
                 if (_whatIfGrid.Columns[e.ColumnIndex].Name != "Include" || e.Button != MouseButtons.Left) return;
-                var all = _plan.Jobs.Count > 0 && _plan.Jobs.All(j => _plan.Included.Contains(j.JobId));
-                SetIncluded(all ? Array.Empty<Guid>() : _plan.Jobs.Select(j => j.JobId));
+                var listed = _plan.Jobs.Where(LongEnough).ToList();
+                var all = listed.Count > 0 && listed.All(j => _plan.Included.Contains(j.JobId));
+                _includedByUser = all;
+                SetIncluded(all ? Array.Empty<Guid>() : listed.Select(j => j.JobId));
             };
             // Own Schedule only applies to jobs that share one
             _whatIfGrid.CellBeginEdit += (_, e) =>
@@ -329,7 +404,11 @@ namespace DBADashGUI.AgentJobs
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing) _tips.Dispose();
+            if (disposing)
+            {
+                _tips.Dispose();
+                _viewTimer.Dispose();
+            }
             base.Dispose(disposing);
         }
 
@@ -347,6 +426,7 @@ namespace DBADashGUI.AgentJobs
             // Snaps to suit the zoom; Shift moves by the second
             chart.RowShiftSnap = TimeSpan.Zero;
             chart.RowShifted += Preview_RowShifted;
+            chart.ViewChanged += Preview_ViewChanged;
             chart.BarDetailsProvider = PreviewDetails;
             // A drag is the whole move from where the run grabbed was, and moves the runs that move with it
             chart.RowShiftOffset = bar => TimeSpan.FromSeconds(RunOf(bar) is { } p ? DragSchedule(p) is { } s ? _plan.ScheduleShift(p.Job, s) : _plan.JobShift(p.Job) : 0);
@@ -362,6 +442,8 @@ namespace DBADashGUI.AgentJobs
             var chart = _preview;
             _preview = null;
             chart.RowShifted -= Preview_RowShifted;
+            chart.ViewChanged -= Preview_ViewChanged;
+            _viewTimer.Stop();
             chart.BarDetailsProvider = null;
             chart.RowShiftOffset = null;
             chart.ShiftsWith = null;
@@ -384,18 +466,14 @@ namespace DBADashGUI.AgentJobs
             InstanceName = instanceName;
             // Only the jobs that ran in the selected range (and category) are previewed and moved; every job on the instance counts for shared schedules
             _plan.SetJobs(analysis.AllJobs, analysis.ActualRuns, analysis.History);
+            _overlapsBefore = null;
             _whatIfUtcOffset = analysis.UtcOffset;
             _rangeFrom = analysis.Report.From;
             _rangeTo = analysis.Report.To;
             _report = analysis.Report;
             _clockChange = analysis.ClockChange;
-            if (!_includedChosen)
-            {
-                _plan.IncludeMostOverlapping(analysis.Report, MaxDefaultIncluded);
-                _includedChosen = true;
-            }
             BuildWhatIfTable(analysis);
-            RefreshWhatIf();
+            ApplyDurationFilter();
         }
 
         /// <summary>Make a change to the plan as one step to undo - when it changes anything</summary>
@@ -461,6 +539,40 @@ namespace DBADashGUI.AgentJobs
         }
 
         /// <summary>Preview just these jobs, ticking the grid to match</summary>
+        /// <summary>The shortest expected duration of a job listed and previewed, in seconds - for Auto, a 2000th of the preview's range, rounded down to a step: 5 minutes for a week, 30 seconds for a day</summary>
+        private double EffectiveMinDurationSec()
+        {
+            if (_minDuration is { } chosen) return chosen.TotalSeconds;
+            var (from, to) = PreviewRange();
+            var limit = (to - from).TotalSeconds / 2000;
+            return DurationSteps.Last(d => d.TotalSeconds <= limit).TotalSeconds;
+        }
+
+        /// <summary>The job is long enough to list and preview (<see cref="EffectiveMinDurationSec"/>) - or how long it takes isn't known</summary>
+        private bool LongEnough(JobScheduleInput job) => job.ExpectedDurationSec is not { } seconds || seconds >= EffectiveMinDurationSec();
+
+        /// <summary>
+        /// Lists only the jobs long enough, and previews only those: one that's left off is unticked.  Until the user picks
+        /// jobs to preview, every job listed is previewed.
+        /// </summary>
+        private void ApplyDurationFilter()
+        {
+            if (_whatIfTable == null) return;
+            var min = EffectiveMinDurationSec();
+            _whatIfTable.DefaultView.RowFilter = min <= 0 ? "" : $"ExpectedSec IS NULL OR ExpectedSec >= {min.ToString(CultureInfo.InvariantCulture)}";
+            var hidden = _plan.Jobs.Count(j => !LongEnough(j));
+            var shown = min <= 0 ? "all durations" : JobTimelineChart.FormatDuration(TimeSpan.FromSeconds(min)) + " or longer";
+            DurationFilterText = min <= 0 ? "All jobs" : $"Jobs {shown}" + (_minDuration == null ? " (auto)" : "");
+            DurationFilterDetail = hidden == 0 ? "Every job is listed." : $"{hidden} shorter {(hidden == 1 ? "job is" : "jobs are")} left off the plan.";
+            DurationFilterChanged?.Invoke(this, EventArgs.Empty);
+            var included = _includedByUser
+                ? _plan.Jobs.Where(j => _plan.Included.Contains(j.JobId) && LongEnough(j)).Select(j => j.JobId).ToList()
+                : _plan.Jobs.Where(LongEnough).Select(j => j.JobId).ToList();
+            // The same jobs ticked keep the last suggestion
+            if (_plan.Included.SetEquals(included)) RefreshWhatIf();
+            else SetIncluded(included);
+        }
+
         private void SetIncluded(IEnumerable<Guid> jobIds)
         {
             if (_whatIfTable == null) return;
@@ -724,6 +836,7 @@ namespace DBADashGUI.AgentJobs
             }
             else if (column == "Include")
             {
+                _includedByUser = true;
                 if (view["Include"] is true) _plan.Included.Add(job.JobId);
                 else _plan.Included.Remove(job.JobId);
                 ClearSuggestion();
@@ -779,14 +892,18 @@ namespace DBADashGUI.AgentJobs
             var included = _plan.IncludedJobs;
             var names = included.Select(j => j.Name).ToList();
             var runs = included.Select(j => PreviewRunsOf(j, moved: true, from, to)).ToList();
-            var overlaps = SchedulePlan.FindOverlaps(runs, names);
-            var anyMoves = included.Any(_plan.IsMoved);
-            var before = anyMoves ? SchedulePlan.FindOverlaps(included.Select(j => PreviewRunsOf(j, moved: false, from, to)).ToList(), names).Count : overlaps.Count;
-            // Which pairs overlap over the selected range - in what ran and what the schedules predict - with the moves and before
-            var pairs = _plan.PairOverlaps(included, _rangeFrom, _rangeTo);
             // The jobs as moved, and their cycles - for whether start times keep each pair apart
             var shifted = included.Select(_plan.ShiftedJob).ToList();
             var cycles = shifted.Select(JobOverlapAnalyzer.GetCycle).ToList();
+            // Overlaps between jobs no start times can keep apart are drawn faintly: what's picked out is what a move could change
+            bool Unavoidable(int a, int b) =>
+                cycles[a] is { } ca && cycles[b] is { } cb && shifted[a].ExpectedDurationSec is { } da && shifted[b].ExpectedDurationSec is { } db
+                && JobOverlapAnalyzer.CompareCycles(ca, da, cb, db, out _) is CycleVerdict.CannotSeparate or CycleVerdict.AlwaysRunning;
+            var overlaps = SchedulePlan.FindOverlaps(runs, names, Unavoidable);
+            var anyMoves = included.Any(_plan.IsMoved);
+            var before = anyMoves ? OverlapsBeforeMoves(included, names, from, to) : overlaps.Count;
+            // Which pairs overlap over the selected range - in what ran and what the schedules predict - with the moves and before
+            var pairs = _plan.PairOverlaps(included, _rangeFrom, _rangeTo);
             // Jobs whose own schedules the moves put in each other's way, for their notes and the cautions
             _clashes = _plan.Jobs.Where(_plan.IsMoved)
                 .Select(j => (j.JobId, Count: _plan.ClashesAdded(j, _rangeFrom, _rangeTo)))
@@ -797,10 +914,19 @@ namespace DBADashGUI.AgentJobs
             FillPairs(pairs, anyMoves, included, shifted, cycles);
             ShowNetEffect(included, pairs, anyMoves);
             ShowRuns(included, runs, overlaps, from, to, anyMoves);
-            _whatIfSummary.Text = SummaryText(included, shifted, cycles, from, to, overlaps.Count, before, anyMoves);
+            _whatIfSummary.Text = SummaryText(included, shifted, cycles, from, to, overlaps.Count, before, anyMoves, overlaps.Count - overlaps.AvoidableCount);
             _whatIfSummary.ForeColor = _whatIfWarning == null ? ForeColor : DashColors.Fail;
             ShowCautions();
         }
+
+        /// <summary>
+        /// The days a weekly schedule runs on, before its start time - a move past midnight changes them (Sun 00:00 three
+        /// hours earlier is Sat 21:00).  Empty for one that runs every day, or isn't weekly.
+        /// </summary>
+        private static string WeekDays(AgentSchedule s) =>
+            s.FrequencyType != AgentSchedule.Weekly || AgentScheduleShifter.IsEveryDay(s) ? string.Empty
+                : string.Join("/", Enumerable.Range(0, 7).Where(d => (s.FrequencyInterval & (1 << d)) != 0)
+                    .Select(d => CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedDayNames[d])) + " ";
 
         /// <summary>Each job's row: its move, its schedules' times after it, its overlap and its note</summary>
         private void UpdateJobRows(List<JobScheduleInput> included, List<PlanPairOverlap> pairs, bool anyMoves)
@@ -815,7 +941,7 @@ namespace DBADashGUI.AgentJobs
                     // Each schedule the move changes, as they all move together: starting at, and ending at for one that
                     // repeats through the day (one that runs once a day has no end - a dash keeps the schedules in step)
                     var moving = SchedulePlan.MovableSchedules(_plan.ShiftedJob(job));
-                    r["StartTime"] = moving.Count == 0 ? DBNull.Value : string.Join(", ", moving.Select(s => s.StartTime.ToString(@"hh\:mm\:ss")));
+                    r["StartTime"] = moving.Count == 0 ? DBNull.Value : string.Join(", ", moving.Select(s => WeekDays(s) + s.StartTime.ToString(@"hh\:mm\:ss")));
                     r["EndTime"] = moving.All(s => s.SubdayStepSeconds == 0) ? DBNull.Value
                         : string.Join(", ", moving.Select(s => s.SubdayStepSeconds > 0 ? s.EndTime.ToString(@"hh\:mm\:ss") : "-"));
                     if (included.Contains(job))
@@ -851,84 +977,293 @@ namespace DBADashGUI.AgentJobs
             || PreviewActual && _plan.Included.Contains(job.JobId) && ScheduleChanged(job);
 
         /// <summary>The runs on the chart: coloured by outcome, overlaps picked out, outlines where moved runs were, and the legend</summary>
+        /// <summary>What <see cref="ShowRuns"/> was last given, to make the bars again for another part of the range as the view moves</summary>
+        private (List<JobScheduleInput> Included, List<IReadOnlyList<JobRun>> Runs, PlanOverlaps Overlaps, DateTime From, DateTime To, bool AnyMoves) _shown;
+
+        /// <summary>The part of the range, in server time, the bars were made for, and the seconds a pixel stood for then</summary>
+        private (DateTime From, DateTime To, double SecondsPerPixel) _barsFor;
+
+        /// <summary>A band standing for many runs too close together to draw apart, by the <see cref="TimelineBar.SourceIndex"/> of its bar</summary>
+        /// <param name="JobIndex">The job's place in the jobs previewed</param>
+        /// <param name="First">The band's first run's place in the job's runs</param>
+        /// <param name="Last">The place after its last</param>
+        private sealed record DenseSpan(int Runs, DateTime Start, DateTime End, double BusySec, double EverySec, int JobIndex, int First, int Last)
+        {
+            /// <summary>The jobs its runs overlap, and for how long - a move could change, or not - worked out when first asked for</summary>
+            public (IReadOnlyCollection<string> With, double Seconds, double UnavoidableSec) Overlaps(PlanOverlaps overlaps)
+            {
+                if (_overlaps is { } known) return known;
+                var (with, segments, unavoidable) = overlaps.Detail(JobIndex, First, Last);
+                var names = new HashSet<string>();
+                foreach (var w in with) if (w != null) names.UnionWith(w);
+                static double Seconds(List<(DateTime Start, DateTime End)>[] runs) => runs.Where(r => r != null).SelectMany(r => r).Sum(o => (o.End - o.Start).TotalSeconds);
+                return (_overlaps = (names, Seconds(segments), Seconds(unavoidable))).Value;
+            }
+
+            private (IReadOnlyCollection<string>, double, double)? _overlaps;
+        }
+
+        private readonly Dictionary<int, DenseSpan> _denseSpans = new();
+
+        /// <summary>Runs closer together than this many pixels are drawn as a band (<see cref="TimelineBar.IsDense"/>)</summary>
+        private const float DenseGapPixels = 6;
+
+        /// <summary>Waits for the view to settle before making bars for it</summary>
+        private readonly Timer _viewTimer = new() { Interval = 150 };
+
         private void ShowRuns(List<JobScheduleInput> included, List<IReadOnlyList<JobRun>> runs, PlanOverlaps overlaps, DateTime from, DateTime to, bool anyMoves)
         {
-            var dt = new DataTable();
-            dt.Columns.Add("name", typeof(string));
-            dt.Columns.Add("job_id", typeof(Guid));
-            dt.Columns.Add("step_id", typeof(int));
-            dt.Columns.Add("step_name", typeof(string));
-            dt.Columns.Add("RunDateTime", typeof(DateTime));
-            dt.Columns.Add("FinishDateTime", typeof(DateTime));
-            dt.Columns.Add("RunDurationSec", typeof(int));
-            dt.Columns.Add("run_status", typeof(int));
-            dt.Columns.Add("Executions", typeof(int));
-            var previewRuns = new List<PreviewRun>();
-            for (var i = 0; i < included.Count; i++)
+            _shown = (included, runs, overlaps, from, to, anyMoves);
+            if (_preview == null) return;
+            // The outcomes there are, counted as on the timeline, then the overlaps - over the whole range, not just what's in view
+            var statusCounts = new Dictionary<TimelineRow.RunStatus, int>();
+            var (overlapping, unavoidableOnly) = (0, 0);
+            for (var i = 0; i < runs.Count; i++)
             {
                 for (var k = 0; k < runs[i].Count; k++)
                 {
-                    var run = runs[i][k];
-                    var with = overlaps.With[i][k];
-                    // Coloured by how the run ended, as on the timeline - or as a prediction, for one the schedules predict
-                    dt.Rows.Add(included[i].Name, included[i].JobId, 0, "Outcome", Display(run.Start), Display(run.End), (int)run.Seconds, (int)ShownStatus(run), 1);
-                    previewRuns.Add(new PreviewRun(included[i], run, with == null ? Array.Empty<string>() : with.Distinct().ToList()));
+                    var status = ShownStatus(runs[i][k]);
+                    statusCounts[status] = statusCounts.GetValueOrDefault(status) + 1;
+                    var flags = overlaps.Flags[i][k];
+                    if ((flags & PlanOverlaps.Avoidable) != 0) overlapping++;
+                    else if (flags != 0) unavoidableOnly++;
                 }
             }
-            _previewRuns = previewRuns;
-            var model = JobTimelineModel.Build(dt, singleJob: false, includeSteps: false, _instanceId);
-            // Bars are built in row order: the overlapping parts picked out, and a dotted outline where a moved run was
-            var barIndex = 0;
-            for (var i = 0; i < included.Count; i++)
-            {
-                for (var k = 0; k < runs[i].Count; k++, barIndex++)
-                {
-                    var bar = model.Bars[barIndex];
-                    bar.Highlights = overlaps.Segments[i][k]?.Select(s => (Display(s.Start), Display(s.End))).ToList();
-                    // Only the runs that moved: one started by hand or at agent start stays put, without an outline
-                    var movedBy = runs[i][k].MovedBySec;
-                    if (movedBy != 0) bar.GhostStart = Display(runs[i][k].Start.AddSeconds(-movedBy));
-                }
-            }
-            // Moved jobs say so beside their name, and by stripes on their runs
-            foreach (var row in model.Roots)
-            {
-                var job = included.FirstOrDefault(j => j.JobId == row.JobId);
-                if (job == null) continue;
-                // Where the runs happened, before its schedules changed to what's shown
-                if (PreviewActual)
-                {
-                    foreach (var r in _plan.ReplacedRuns(job, from, to))
-                    {
-                        row.Outlines.Add((Display(r.Start), Display(r.End), (TimelineRow.RunStatus)(r.Status ?? (int)TimelineRow.RunStatus.Succeeded)));
-                    }
-                }
-                if (_plan.IsMoved(job) || _plan.OwnSchedule.Contains(job.JobId)) row.Label = $"{row.Label}  {_plan.DescribeShift(job)}" + (_plan.OwnSchedule.Contains(job.JobId) ? " (own schedule)" : "");
-            }
-            if (_preview == null) return;
-            var overlappingRuns = previewRuns.Count(r => r.OverlapsWith.Count > 0);
-            // The outcomes there are, counted as on the timeline, then the overlaps
-            var legend = previewRuns
-                .GroupBy(r => ShownStatus(r.Run))
-                .OrderBy(g => g.Key switch { TimelineRow.RunStatus.Succeeded => 0, TimelineRow.RunStatus.Failed => 1, _ => 2 })
-                .Select(g => new LegendEntry(TimelineBar.StatusColor(g.Key), g.Key == TimelineRow.RunStatus.Predicted ? $"{g.Count():N0} predicted" : g.Count().ToString("N0")))
+            var legend = statusCounts
+                .OrderBy(c => c.Key switch { TimelineRow.RunStatus.Succeeded => 0, TimelineRow.RunStatus.Failed => 1, _ => 2 })
+                .Select(c => new LegendEntry(TimelineBar.StatusColor(c.Key), c.Key == TimelineRow.RunStatus.Predicted ? $"{c.Value:N0} predicted" : c.Value.ToString("N0")))
                 .ToList();
-            legend.Add(new LegendEntry(TimelineBar.HighlightColor, $"{overlappingRuns:N0} overlap"));
+            legend.Add(new LegendEntry(TimelineBar.HighlightColor, $"{overlapping:N0} overlap"));
+            if (unavoidableOnly > 0) legend.Add(new LegendEntry(TimelineBar.FaintHighlightColor, $"{unavoidableOnly:N0} unavoidable"));
             // The dotted outline where a moved run was is explained in the summary: there isn't room for it here too
             if (anyMoves) legend.Add(new LegendEntry(TimelineBar.StatusColor(PreviewActual ? TimelineRow.RunStatus.Succeeded : TimelineRow.RunStatus.Predicted), "moved", LegendSwatch.Striped));
             _preview.LegendEntries = legend;
             _preview.Title = (PreviewActual ? "Plan: actual runs" : "Plan: predicted runs") + (ShowAppTimeZone ? "" : " (server time)");
-            _preview.SetData(model, Display(from), Display(to), _resetPreviewView);
+            _preview.SetData(BuildPreviewModel(), Display(from), Display(to), _resetPreviewView);
             var (edges, peaks) = SchedulePlan.Concurrency(runs.SelectMany(r => r), from, to);
             _preview.SetConcurrency(edges.Select(Display).ToArray(), peaks);
             _resetPreviewView = false;
         }
 
         /// <summary>
+        /// The part of the range to make bars for, in server time - the time in view and as much again either side, so a pan
+        /// shows bars while the view settles - and the seconds a pixel stands for at the zoom
+        /// </summary>
+        private (DateTime From, DateTime To, double SecondsPerPixel) BarsWindow()
+        {
+            var (from, to) = (_shown.From, _shown.To);
+            var shownFrom = Display(from);
+            var viewFrom = _preview.ViewFrom;
+            var viewTo = _preview.ViewTo;
+            // The view is in the time shown; the runs in server time.  The difference at the start of the range is close
+            // enough, with the margin either side - a clock change in the range is an hour at most.
+            if (_resetPreviewView || viewTo <= viewFrom || viewTo <= shownFrom || viewFrom >= Display(to))
+            {
+                viewFrom = shownFrom;
+                viewTo = Display(to);
+            }
+            var span = viewTo - viewFrom;
+            var offset = shownFrom - from;
+            var windowFrom = viewFrom - offset - span;
+            var windowTo = viewTo - offset + span;
+            var secondsPerPixel = span.TotalSeconds / Math.Max(200, _preview.ChartPixelWidth);
+            return (windowFrom < from ? from : windowFrom, windowTo > to ? to : windowTo, secondsPerPixel);
+        }
+
+        /// <summary>Makes the bars for the part of the range in view again, when the view has moved past them or the zoom has changed much</summary>
+        private void ViewTimer_Tick(object sender, EventArgs e)
+        {
+            _viewTimer.Stop();
+            if (_preview == null || _shown.Included == null) return;
+            var window = BarsWindow();
+            var view = (From: _preview.ViewFrom, To: _preview.ViewTo);
+            var shownFrom = Display(_barsFor.From);
+            var shownTo = Display(_barsFor.To);
+            var zoomChanged = window.SecondsPerPixel > _barsFor.SecondsPerPixel * 1.5 || window.SecondsPerPixel < _barsFor.SecondsPerPixel / 1.5;
+            var covered = view.From >= shownFrom - TimeSpan.FromHours(1) && view.To <= shownTo + TimeSpan.FromHours(1)
+                          || (_barsFor.From <= _shown.From && _barsFor.To >= _shown.To);
+            if (covered && !zoomChanged) return;
+            _preview.SetData(BuildPreviewModel(), Display(_shown.From), Display(_shown.To));
+        }
+
+        private void Preview_ViewChanged(object sender, EventArgs e)
+        {
+            _viewTimer.Stop();
+            _viewTimer.Start();
+        }
+
+        /// <summary>
+        /// The preview's bars.  A job whose runs are mostly closer together than <see cref="DenseGapPixels"/> is drawn as bands
+        /// rather than a bar per run - a week of a job that runs every 10 seconds is 60,000 runs, tens to a pixel - and they
+        /// come back as the view zooms in.  Around the view (<see cref="BarsWindow"/>) that's judged at the zoom; outside it,
+        /// at the zoom of the whole range, so the overview and a pan show the runs there too while the view settles.
+        /// </summary>
+        private JobTimelineModel BuildPreviewModel()
+        {
+            var (included, runs, overlaps, from, to, _) = _shown;
+            var window = BarsWindow();
+            _barsFor = window;
+            var wholeRange = (to - from).TotalSeconds / Math.Max(200, _preview.ChartPixelWidth);
+            var previewRuns = new List<PreviewRun>();
+            var bars = new List<TimelineBar>();
+            _denseSpans.Clear();
+            for (var i = 0; i < included.Count; i++)
+            {
+                var (first, last) = SchedulePlan.RunsBetween(runs[i], window.From, window.To);
+                AddBars(bars, previewRuns, included[i], runs[i], overlaps, i, 0, first, wholeRange, exact: false);
+                AddBars(bars, previewRuns, included[i], runs[i], overlaps, i, first, last, window.SecondsPerPixel, exact: true);
+                AddBars(bars, previewRuns, included[i], runs[i], overlaps, i, last, runs[i].Count, wholeRange, exact: false);
+            }
+            var denseGap = TimeSpan.FromSeconds(window.SecondsPerPixel * DenseGapPixels);
+            _previewRuns = previewRuns;
+            var model = JobTimelineModel.FromBars(bars, _instanceId);
+            // Moved jobs say so beside their name, and by stripes on their runs
+            foreach (var row in model.Roots)
+            {
+                var job = included.FirstOrDefault(j => j.JobId == row.JobId);
+                if (job == null) continue;
+                // Where the runs happened, before its schedules changed to what's shown - those close together as one outline
+                if (PreviewActual)
+                {
+                    foreach (var r in _plan.ReplacedRuns(job, window.From, window.To))
+                    {
+                        var outline = (Start: Display(r.Start), End: Display(r.End), Status: (TimelineRow.RunStatus)(r.Status ?? (int)TimelineRow.RunStatus.Succeeded));
+                        if (row.Outlines.Count > 0 && row.Outlines[^1] is var previous && previous.Status == outline.Status && outline.Start - previous.End < denseGap)
+                        {
+                            row.Outlines[^1] = (previous.Start, outline.End, previous.Status);
+                        }
+                        else
+                        {
+                            row.Outlines.Add(outline);
+                        }
+                    }
+                }
+                if (_plan.IsMoved(job) || _plan.OwnSchedule.Contains(job.JobId)) row.Label = $"{row.Label}  {_plan.DescribeShift(job)}" + (_plan.OwnSchedule.Contains(job.JobId) ? " (own schedule)" : "");
+            }
+            return model;
+        }
+
+        /// <summary>Bars for runs <paramref name="first"/> up to <paramref name="last"/> of job <paramref name="i"/>, as bands where they're too close together at <paramref name="secondsPerPixel"/></summary>
+        /// <param name="exact">
+        /// Pick out just when a run's own bar overlaps, as <see cref="PlanOverlaps.Detail"/> works out - around the view.
+        /// Otherwise the whole of a run that overlaps, which is all that shows at the zoom of the whole range.  Bands are
+        /// always picked out by run.
+        /// </param>
+        private void AddBars(List<TimelineBar> bars, List<PreviewRun> previewRuns, JobScheduleInput job, IReadOnlyList<JobRun> jobRuns, PlanOverlaps overlaps, int i, int first, int last, double secondsPerPixel, bool exact)
+        {
+            if (first >= last) return;
+            var denseGap = TimeSpan.FromSeconds(secondsPerPixel * DenseGapPixels);
+            var mergeGap = TimeSpan.FromSeconds(secondsPerPixel);
+            var closeRuns = 0;
+            for (var k = first; k + 1 < last; k++)
+            {
+                if (jobRuns[k + 1].Start - jobRuns[k].Start < denseGap) closeRuns++;
+            }
+            var dense = last - first >= 20 && closeRuns * 2 > last - first;
+            var detail = exact && !dense ? overlaps.Detail(i, first, last) : default;
+            var flags = overlaps.Flags[i];
+            for (var k = first; k < last;)
+            {
+                var run = jobRuns[k];
+                var movedBy = run.MovedBySec;
+                var status = ShownStatus(run);
+                var end = k + 1;
+                // A band runs on while the runs are close, end the same way and moved the same - a failure among them is its own short band, so it shows
+                if (dense)
+                {
+                    while (end < last && jobRuns[end].Start - jobRuns[end - 1].End < denseGap && ShownStatus(jobRuns[end]) == status && jobRuns[end].MovedBySec == movedBy) end++;
+                }
+                var index = previewRuns.Count;
+                previewRuns.Add(new PreviewRun(job, run, i, k));
+                if (end - k > 1)
+                {
+                    bars.Add(DenseBar(job, jobRuns, overlaps, i, k, end, status, index, mergeGap));
+                }
+                else
+                {
+                    bars.Add(new TimelineBar
+                    {
+                        InstanceId = _instanceId,
+                        JobId = job.JobId,
+                        JobName = job.Name,
+                        StepName = "Outcome",
+                        Start = Display(run.Start),
+                        End = Display(run.End),
+                        DurationSec = (int)run.Seconds,
+                        // Coloured by how the run ended, as on the timeline - or as a prediction, for one the schedules predict
+                        Status = status,
+                        Executions = 1,
+                        SourceIndex = index,
+                        // The overlapping parts picked out - faintly where no move could avoid them
+                        Highlights = detail.Segments != null ? detail.Segments[k - first]?.Select(s => (Display(s.Start), Display(s.End))).ToList()
+                            : (flags[k] & PlanOverlaps.Avoidable) != 0 ? new[] { (Display(run.Start), Display(run.End)) } : null,
+                        FaintHighlights = detail.Unavoidable != null ? detail.Unavoidable[k - first]?.Select(s => (Display(s.Start), Display(s.End))).ToList()
+                            : (flags[k] & PlanOverlaps.Unavoidable) != 0 ? new[] { (Display(run.Start), Display(run.End)) } : null,
+                        // Only the runs that moved get an outline where they were: one started by hand or at agent start stays put
+                        GhostStart = movedBy == 0 ? null : Display(run.Start.AddSeconds(-movedBy))
+                    });
+                }
+                k = end;
+            }
+        }
+
+        /// <summary>A band for runs <paramref name="first"/> up to <paramref name="end"/> of job <paramref name="i"/>, the runs that overlap picked out - merged where they're less than a pixel apart</summary>
+        private TimelineBar DenseBar(JobScheduleInput job, IReadOnlyList<JobRun> runs, PlanOverlaps overlaps, int i, int first, int end, TimelineRow.RunStatus status, int index, TimeSpan mergeGap)
+        {
+            var count = end - first;
+            double busy = 0;
+            var highlights = new List<(DateTime Start, DateTime End)>();
+            var faint = new List<(DateTime Start, DateTime End)>();
+            var flags = overlaps.Flags[i];
+            for (var k = first; k < end; k++)
+            {
+                busy += runs[k].Seconds;
+                if ((flags[k] & PlanOverlaps.Avoidable) != 0) Merge(highlights, runs[k], mergeGap);
+                if ((flags[k] & PlanOverlaps.Unavoidable) != 0) Merge(faint, runs[k], mergeGap);
+            }
+            var start = runs[first].Start;
+            var finish = runs[end - 1].End;
+            var every = count > 1 ? (runs[end - 1].Start - start).TotalSeconds / (count - 1) : 0;
+            var movedBy = runs[first].MovedBySec;
+            _denseSpans[index] = new DenseSpan(count, start, finish, busy, every, i, first, end);
+            var each = JobTimelineChart.FormatDuration(TimeSpan.FromSeconds(busy / count));
+            return new TimelineBar
+            {
+                InstanceId = _instanceId,
+                JobId = job.JobId,
+                JobName = job.Name,
+                StepName = "Outcome",
+                Start = Display(start),
+                End = Display(finish),
+                DurationSec = (int)Math.Round(busy / count),
+                Status = status,
+                Executions = count,
+                SourceIndex = index,
+                DenseLabel = $"every {JobTimelineChart.FormatDuration(TimeSpan.FromSeconds(Math.Round(every)))}, {each} each",
+                Highlights = highlights.Count == 0 ? null : highlights.Select(s => (Display(s.Start), Display(s.End))).ToList(),
+                FaintHighlights = faint.Count == 0 ? null : faint.Select(s => (Display(s.Start), Display(s.End))).ToList(),
+                GhostStart = movedBy == 0 ? null : Display(start.AddSeconds(-movedBy))
+            };
+        }
+
+        /// <summary>Adds <paramref name="run"/> to <paramref name="into"/>, joined to the last if it's less than <paramref name="gap"/> after it</summary>
+        private static void Merge(List<(DateTime Start, DateTime End)> into, JobRun run, TimeSpan gap)
+        {
+            if (into.Count > 0 && run.Start - into[^1].End < gap)
+            {
+                if (run.End > into[^1].End) into[^1] = (into[^1].Start, run.End);
+            }
+            else
+            {
+                into.Add((run.Start, run.End));
+            }
+        }
+
+        /// <summary>
         /// The summary under the toolbar: what's previewed and how many runs overlap, what the fixed cycles allow, then a
         /// warning, the last suggestion, or how to use the plan
         /// </summary>
-        private string SummaryText(List<JobScheduleInput> included, List<JobScheduleInput> shifted, List<JobCycle?> cycles, DateTime from, DateTime to, int overlaps, int before, bool anyMoves)
+        private string SummaryText(List<JobScheduleInput> included, List<JobScheduleInput> shifted, List<JobCycle?> cycles, DateTime from, DateTime to, int overlaps, int before, bool anyMoves, int unavoidable = 0)
         {
             var (clear, collide, cannot, sharedPairs) = (0, 0, 0, 0);
             for (var i = 0; i < shifted.Count; i++)
@@ -960,7 +1295,8 @@ namespace DBADashGUI.AgentJobs
             text.Append(included.Count == 0
                 ? "Tick jobs below to preview their runs.  "
                 : $"{included.Count} jobs, {range}: {overlaps:N0} overlapping pairs of runs" +
-                  (anyMoves ? $" (was {before:N0} before the moves).  " : ".  "));
+                  (anyMoves ? $" (was {before:N0} before the moves)" : "") +
+                  (unavoidable > 0 ? $", {unavoidable:N0} of them between jobs no start times can keep apart (shown faintly).  " : ".  "));
             if (clear + collide + cannot > 0)
             {
                 text.Append($"Of the pairs on fixed cycles, the start times keep {clear} apart, {collide} collide but could be moved apart and {cannot} can't be kept apart by start times alone.");
@@ -1004,6 +1340,19 @@ namespace DBADashGUI.AgentJobs
         /// The job's runs to preview, in start order: those it actually ran in the selected range, moved as planned - or
         /// those its schedules predict.  <paramref name="moved"/> false for where they are now.
         /// </summary>
+        // The overlaps before the moves don't change as jobs are moved, and finding them took a second on a busy week - so
+        // they're found again only when the jobs previewed, the range, what's previewed or the data change
+        private (string Key, int Count)? _overlapsBefore;
+
+        private int OverlapsBeforeMoves(List<JobScheduleInput> included, List<string> names, DateTime from, DateTime to)
+        {
+            var key = $"{PreviewActual}|{from.Ticks}|{to.Ticks}|{string.Join(",", included.Select(j => j.JobId))}";
+            if (_overlapsBefore is { } cached && cached.Key == key) return cached.Count;
+            var count = SchedulePlan.FindOverlaps(included.Select(j => PreviewRunsOf(j, moved: false, from, to)).ToList(), names).Count;
+            _overlapsBefore = (key, count);
+            return count;
+        }
+
         private IReadOnlyList<JobRun> PreviewRunsOf(JobScheduleInput job, bool moved, DateTime from, DateTime to) =>
             PreviewActual ? _plan.ActualRuns(job, moved, from, to) : _plan.PredictedRuns(job, moved, from, to);
 
@@ -1118,13 +1467,32 @@ namespace DBADashGUI.AgentJobs
             // Only the plan's own bars: while a plan loads, the chart can still be showing the timeline's, whose indexes mean
             // something else.  Nothing here leaves the chart to describe the bar itself.
             if (RunOf(bar) is not { } p) yield break;
+            if (bar.IsDense && _denseSpans.TryGetValue(bar.SourceIndex, out var d))
+            {
+                yield return ("Runs", $"{d.Runs:N0} - too close together to show apart at this zoom.  Zoom in to see each one.");
+                yield return ("From", d.Start.ToString("G", CultureInfo.CurrentCulture) + " (server)");
+                yield return ("To", d.End.ToString("G", CultureInfo.CurrentCulture) + " (server)");
+                if (d.Runs > 1) yield return ("Every", "About " + JobTimelineChart.FormatDuration(TimeSpan.FromSeconds(Math.Round(d.EverySec)), true));
+                yield return ("Duration", JobTimelineChart.FormatDuration(TimeSpan.FromSeconds(d.BusySec / d.Runs), true) + " on average");
+                var spanSec = Math.Max(1, (d.End - d.Start).TotalSeconds);
+                yield return ("Running", $"{d.BusySec / spanSec:P0} of the time");
+                var (with, overlapSec, unavoidableSec) = d.Overlaps(_shown.Overlaps);
+                yield return ("Overlaps", with.Count == 0 ? "None" : string.Join(", ", with.OrderBy(n => n)));
+                if (overlapSec > 0) yield return ("Overlap", JobTimelineChart.FormatDuration(TimeSpan.FromSeconds(overlapSec), true) + " that moving could change");
+                if (unavoidableSec > 0) yield return ("Unavoidable", JobTimelineChart.FormatDuration(TimeSpan.FromSeconds(unavoidableSec), true) + " with jobs no start times can keep it apart from (shown faintly)");
+                if (p.Run.MovedBySec != 0) yield return ("Moved by", ScheduleMath.Shift(p.Run.MovedBySec));
+                yield break;
+            }
             yield return ("Start", p.Run.Start.ToString("G", CultureInfo.CurrentCulture) + " (server)");
             if (ShowAppTimeZone) yield return ("Your time", Display(p.Run.Start).ToString("G", CultureInfo.CurrentCulture));
             yield return ("End", p.Run.End.ToString("G", CultureInfo.CurrentCulture) + " (server)");
             var predicted = !PreviewActual || p.Run.Predicted;
             yield return ("Duration", !predicted ? JobTimelineChart.FormatDuration(TimeSpan.FromSeconds(p.Run.Seconds), true)
                 : p.Job.ExpectedDurationSec.HasValue ? JobTimelineChart.FormatDuration(TimeSpan.FromSeconds(p.Run.Seconds), true) + " expected" : "Unknown");
-            yield return ("Overlaps", p.OverlapsWith.Count == 0 ? "None" : string.Join(", ", p.OverlapsWith));
+            var runOverlaps = _shown.Overlaps.Detail(p.JobIndex, p.RunIndex, p.RunIndex + 1);
+            var overlapsWith = runOverlaps.With[0]?.Distinct().ToList();
+            yield return ("Overlaps", overlapsWith == null ? "None" : string.Join(", ", overlapsWith));
+            if (runOverlaps.Unavoidable[0] != null) yield return ("Unavoidable", "Some of it is with jobs no start times can keep it apart from - shown faintly");
             var shift = p.Run.MovedBySec;
             if (p.Run.Predicted && PreviewActual) yield return ("Predicted", "Its schedules have changed since the runs then - this is when they'd run it now.  The dotted outlines are the runs that happened.");
             if (!PreviewActual || p.Run.Predicted)

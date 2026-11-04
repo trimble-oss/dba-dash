@@ -156,7 +156,7 @@ namespace DBADash.JobSchedules
                     Enabled = jobs[i].Enabled,
                     ExpectedDurationSec = jobs[i].ExpectedDurationSec,
                     // Candidates only offers moves every movable schedule can make
-                    Schedules = jobs[i].Schedules.Select(s => AgentScheduleShifter.IsMovable(s) && AgentScheduleShifter.TryShift(s, shift, out var shifted, out _) ? shifted : s).ToList()
+                    Schedules = jobs[i].Schedules.Select(s => AgentScheduleShifter.IsMovable(s) && AgentScheduleShifter.TryShift(s, shift, out var shifted, out _, changeDays: false) ? shifted : s).ToList()
                 };
                 return reprojected[(i, shift)] = Slide(WithGap(JobOverlapAnalyzer.ProjectRuns(moved, from - pad, to + pad, out _)), 0, from, to);
             }
@@ -255,7 +255,7 @@ namespace DBADash.JobSchedules
                     foreach (var i in group.Where(i => current[i] != keeper))
                     {
                         if (pinned.Contains(jobs[i].JobId) && keeper != 0) continue;
-                        if (!jobs[i].Schedules.Where(AgentScheduleShifter.IsMovable).All(s => AgentScheduleShifter.TryShift(s, keeper, out _, out _))) continue;
+                        if (!jobs[i].Schedules.Where(AgentScheduleShifter.IsMovable).All(s => AgentScheduleShifter.TryShift(s, keeper, out _, out _, changeDays: false))) continue;
                         var joined = UnitConflict(unitOf[i], keeper);
                         if (joined - UnitConflict(unitOf[i], current[i]) < MinGain(joined)) Move(unitOf[i], keeper);
                     }
@@ -333,16 +333,35 @@ namespace DBADash.JobSchedules
             // A move of a whole cycle or more is the same as a smaller one - when they all repeat at the same interval
             var cycles = jobs.Select(JobOverlapAnalyzer.GetCycle).ToList();
             long? cyclePeriod = cycles.All(c => c.HasValue) && cycles.Select(c => c!.Value.PeriodSec).Distinct().Count() == 1 ? cycles[0]!.Value.PeriodSec : null;
+            if (cycles.All(c => c.HasValue))
+            {
+                step = FineStep(step, cycles.Select(c => c!.Value.PeriodSec).Aggregate(ScheduleMath.Gcd));
+            }
             var limit = cyclePeriod is { } p ? Math.Min(maxShift, (int)Math.Min(int.MaxValue, p / 2)) : maxShift;
             for (var shift = step; shift <= limit; shift += step)
             {
                 foreach (var s in new[] { shift, -shift })
                 {
                     if (cyclePeriod is { } cp && s == -shift && shift * 2 == cp) continue;
-                    if (enabled.All(schedule => AgentScheduleShifter.TryShift(schedule, s, out _, out _))) list.Add(s);
+                    if (enabled.All(schedule => AgentScheduleShifter.TryShift(schedule, s, out _, out _, changeDays: false))) list.Add(s);
                 }
             }
             return list;
+        }
+
+        /// <summary>
+        /// The step to move jobs that repeat every <paramref name="periodSec"/> by.  Moves of a whole step can't change where
+        /// a job runs in a cycle of a step or two - every minute, it's where it was after any whole-minute move - so within
+        /// a cycle of less than 4 steps, a round number of seconds that gives at least 12 places in it.
+        /// </summary>
+        private static int FineStep(int step, long periodSec)
+        {
+            if (periodSec >= 4L * step) return step;
+            foreach (var s in new[] { 30, 20, 15, 10, 5, 2 })
+            {
+                if (s < step && periodSec % s == 0 && periodSec / s >= 12) return s;
+            }
+            return 1;
         }
 
         /// <summary>The runs moved by <paramref name="shift"/> seconds, keeping those that touch the period</summary>

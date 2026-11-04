@@ -45,6 +45,28 @@ namespace DBADash.Test
         }
 
         [TestMethod]
+        public void MostOverlapping_IgnoresPairsNoMoveCanHelp_AndTakesOnlyEligibleJobs()
+        {
+            var (plan, a, b, c, _) = Setup();
+            plan.Included.Clear();
+            var report = new JobOverlapReport
+            {
+                Pairs = new[]
+                {
+                    // Thousands of overlaps no start times could avoid, and a few that could be
+                    new JobPairOverlap { A = a, B = b, ActualOverlaps = 5000, Verdict = CycleVerdict.CannotSeparate },
+                    new JobPairOverlap { A = b, B = c, ActualOverlaps = 3, Verdict = CycleVerdict.Collides }
+                }
+            };
+            plan.IncludeMostOverlapping(report, 1);
+            Assert.AreEqual(1, plan.Included.Count);
+            Assert.IsTrue(plan.Included.Contains(b.JobId) || plan.Included.Contains(c.JobId), "B and C overlap in a way a move could help; A only in a way it couldn't");
+            plan.Included.Clear();
+            plan.IncludeMostOverlapping(report, 2, j => j != b);
+            Assert.AreEqual(0, plan.Included.Count, "Without B no pair is left that a move could help");
+        }
+
+        [TestMethod]
         public void OnlyJobsThatRan_ButAllCountForSharing()
         {
             var (plan, a, _, c, d) = Setup();
@@ -168,13 +190,41 @@ namespace DBADash.Test
             var b = new List<JobRun> { new(Monday.AddMinutes(5), Monday.AddMinutes(20)), new(Monday.AddMinutes(30), Monday.AddMinutes(40)) };
             var overlaps = SchedulePlan.FindOverlaps(new List<List<JobRun>> { a, b }, new[] { "A", "B" });
             Assert.AreEqual(1, overlaps.Count);
-            Assert.AreEqual("B", overlaps.With[0][0].Single());
-            Assert.IsNull(overlaps.With[1][1]);
-            Assert.AreEqual((Monday.AddMinutes(5), Monday.AddMinutes(10)), overlaps.Segments[1][0].Single());
+            CollectionAssert.AreEqual(new byte[] { PlanOverlaps.Avoidable, 0 }, overlaps.Flags[1]);
+            Assert.AreEqual("B", overlaps.Detail(0, 0, 1).With[0].Single());
+            var bDetail = overlaps.Detail(1, 0, 2);
+            Assert.IsNull(bDetail.With[1]);
+            Assert.AreEqual((Monday.AddMinutes(5), Monday.AddMinutes(10)), bDetail.Segments[0].Single());
+            Assert.AreEqual((Monday.AddMinutes(5), Monday.AddMinutes(10)), overlaps.Detail(1, 0, 1).Segments[0].Single(), "Asked about one run of several");
 
             var (edges, peaks) = SchedulePlan.Concurrency(a.Concat(b), Monday, Monday.AddHours(1), slices: 6);
             Assert.AreEqual(7, edges.Length);
             CollectionAssert.AreEqual(new[] { 2, 1, 0, 1, 0, 0 }, peaks);
+        }
+
+        [TestMethod]
+        public void Overlaps_UnavoidableKeptApart()
+        {
+            var a = new List<JobRun> { new(Monday, Monday.AddMinutes(10)) };
+            var b = new List<JobRun> { new(Monday.AddMinutes(5), Monday.AddMinutes(20)) };
+            var c = new List<JobRun> { new(Monday.AddMinutes(8), Monday.AddMinutes(9)) };
+            // A and C can't be kept apart; the rest can
+            var overlaps = SchedulePlan.FindOverlaps(new List<List<JobRun>> { a, b, c }, new[] { "A", "B", "C" }, (i, j) => i == 0 && j == 2);
+            Assert.AreEqual(3, overlaps.Count);
+            Assert.AreEqual(2, overlaps.AvoidableCount);
+            Assert.AreEqual((byte)(PlanOverlaps.Avoidable | PlanOverlaps.Unavoidable), overlaps.Flags[0][0]);
+            Assert.AreEqual(PlanOverlaps.Avoidable, overlaps.Flags[1][0]);
+            var aDetail = overlaps.Detail(0, 0, 1);
+            CollectionAssert.AreEquivalent(new[] { "B", "C" }, aDetail.With[0]);
+            Assert.AreEqual(1, aDetail.Segments[0].Count, "A's overlap with B");
+            Assert.AreEqual((Monday.AddMinutes(8), Monday.AddMinutes(9)), aDetail.Unavoidable[0].Single());
+            var cDetail = overlaps.Detail(2, 0, 1);
+            Assert.AreEqual((Monday.AddMinutes(8), Monday.AddMinutes(9)), cDetail.Unavoidable[0].Single());
+            Assert.AreEqual(1, cDetail.Segments[0].Count, "C's overlap with B");
+
+            var all = SchedulePlan.FindOverlaps(new List<List<JobRun>> { a, b, c }, new[] { "A", "B", "C" });
+            Assert.AreEqual(3, all.AvoidableCount);
+            Assert.IsNull(all.Detail(0, 0, 1).Unavoidable[0]);
         }
 
         [TestMethod]

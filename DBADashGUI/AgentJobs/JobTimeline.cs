@@ -450,9 +450,13 @@ namespace DBADashGUI.AgentJobs
         /// The job name filter only goes to the server across instances - for one instance every job is loaded and the
         /// chart filters them - but the concurrency band always counts just the jobs that match.
         /// </summary>
-        private RunFilters CurrentFilters => new(selectedCategory, MultiInstance ? tsFilter.Text.Trim() : null, minDurationSec, problemsOnly);
+        private RunFilters CurrentFilters => new(selectedCategory, MultiInstance ? tsFilter.Text.Trim() : null, minDurationSec ?? 0, problemsOnly);
 
-        private int minDurationSec;
+        /// <summary>
+        /// Runs shorter than this are left out of the timeline, and in plan mode jobs expected to take less are left off the
+        /// plan.  Null for Auto: any duration on the timeline; in plan mode, as suits the range (see <see cref="SchedulePlanEditor.MinDurationSec"/>).
+        /// </summary>
+        private int? minDurationSec;
         private bool problemsOnly;
 
         // The concurrency band's data: the window and slice it was fetched for
@@ -537,18 +541,22 @@ namespace DBADashGUI.AgentJobs
         /// </summary>
         private void AddRunFilterItems()
         {
-            tsRuns = new ToolStripDropDownButton("All runs", Properties.Resources.Filter_16x) { ToolTipText = "Leave out short runs, or show only the runs with a problem" };
-            (int Seconds, string Text)[] durations =
+            tsRuns = new ToolStripDropDownButton("All runs", Properties.Resources.Filter_16x)
             {
-                (0, "Any duration"), (10, "10 seconds or longer"), (60, "1 minute or longer"), (300, "5 minutes or longer"),
+                ToolTipText = "Leave out short runs, or show only the runs with a problem.  In plan mode, leave off the jobs expected to take less than the duration chosen.  " +
+                              "Auto shows runs of any duration on the timeline; in plan mode it goes by the range: jobs of 5 minutes or longer for a week, 30 seconds or longer for a day."
+            };
+            (int? Seconds, string Text)[] durations =
+            {
+                (null, "Auto"), (0, "Any duration"), (10, "10 seconds or longer"), (30, "30 seconds or longer"), (60, "1 minute or longer"), (300, "5 minutes or longer"),
                 (900, "15 minutes or longer"), (3600, "1 hour or longer")
             };
             foreach (var (seconds, text) in durations)
             {
-                var item = new ToolStripMenuItem(text) { Tag = seconds, Checked = seconds == 0 };
+                var item = new ToolStripMenuItem(text) { Tag = new DurationChoice(seconds), Checked = seconds == null };
                 item.Click += (_, _) =>
                 {
-                    foreach (var other in tsRuns.DropDownItems.OfType<ToolStripMenuItem>().Where(i => i.Tag is int)) other.Checked = other == item;
+                    foreach (var other in tsRuns.DropDownItems.OfType<ToolStripMenuItem>().Where(i => i.Tag is DurationChoice)) other.Checked = other == item;
                     minDurationSec = seconds;
                     RunFiltersChanged();
                 };
@@ -582,17 +590,45 @@ namespace DBADashGUI.AgentJobs
             AddCpuItems(at + 2);
         }
 
+        /// <summary>A duration on the runs filter's menu - null seconds for Auto</summary>
+        private sealed record DurationChoice(int? Seconds);
+
         private void RunFiltersChanged()
         {
+            if (PlanMode)
+            {
+                // The plan lists jobs by how long they're expected to take, without loading again
+                planEditor.MinDurationSec = minDurationSec;
+                ShowRunFilters();
+                return;
+            }
+            ShowRunFilters();
+            RefreshData();
+        }
+
+        /// <summary>The runs filter's button says what it leaves out - in plan mode, which jobs</summary>
+        private void ShowRunFilters()
+        {
             var parts = new List<string>();
-            if (minDurationSec > 0) parts.Add("≥ " + JobTimelineChart.FormatDuration(TimeSpan.FromSeconds(minDurationSec)));
-            if (problemsOnly) parts.Add("problems");
-            tsRuns.Text = parts.Count == 0 ? "All runs" : string.Join(", ", parts);
+            var planFiltering = PlanMode && planEditor != null;
+            if (planFiltering)
+            {
+                if (planEditor.DurationFilterText != "All jobs") parts.Add(planEditor.DurationFilterText);
+            }
+            else
+            {
+                if (minDurationSec > 0) parts.Add("≥ " + JobTimelineChart.FormatDuration(TimeSpan.FromSeconds(minDurationSec.Value)));
+                if (problemsOnly) parts.Add("problems");
+            }
+            tsRuns.Text = parts.Count == 0 ? planFiltering ? "All jobs" : "All runs" : string.Join(", ", parts);
             runsBoldFont ??= new Font(toolStrip1.Font, FontStyle.Bold);
             tsRuns.Font = parts.Count == 0 ? toolStrip1.Font : runsBoldFont;
             // A drop-down takes its font from the button that owns it - keep the menu regular
             tsRuns.DropDown.Font = toolStrip1.Font;
-            RefreshData();
+            if (planFiltering) tsRuns.ToolTipText = "Leave off the jobs expected to take less than the duration chosen.  " + planEditor.DurationFilterDetail +
+                                                    "  Auto goes by the range: jobs of 5 minutes or longer for a week, 30 seconds or longer for a day.";
+            else tsRuns.ToolTipText = "Leave out short runs, or show only the runs with a problem.  In plan mode, leave off the jobs expected to take less than the duration chosen.  " +
+                                      "Auto shows runs of any duration on the timeline; in plan mode it goes by the range: jobs of 5 minutes or longer for a week, 30 seconds or longer for a day.";
         }
 
         private static DataTable GetJobCategories(int instanceId, IEnumerable<int> instanceIds)

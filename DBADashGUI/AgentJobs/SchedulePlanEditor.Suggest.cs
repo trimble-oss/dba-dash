@@ -60,7 +60,7 @@ namespace DBADashGUI.AgentJobs
         {
             _suggest = new ToolStripSplitButton(SuggestText, Properties.Resources.Lightbulb_16x)
             {
-                ToolTipText = "Move the previewed jobs so their runs overlap as little as possible, moving them as little as possible, in whole minutes.  " +
+                ToolTipText = "Move the previewed jobs so their runs overlap as little as possible, moving them as little as possible, in whole minutes (seconds for jobs that run every few minutes or more often).  " +
                               "Jobs ticked Keep stay where they are.  Click again to stop.  The arrow has how far jobs may move and the gap to leave between them."
             };
             _suggest.ButtonClick += async (_, _) => await SuggestAsync();

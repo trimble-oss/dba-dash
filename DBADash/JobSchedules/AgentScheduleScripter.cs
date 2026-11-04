@@ -341,10 +341,16 @@ namespace DBADash.JobSchedules
                 sb.AppendLine();
                 sb.AppendLine($"/* {Comment(c.Original.Name)} */");
                 AppendLookup(sb, "@schedule_id", c.Original.Uid.Value, c.Original.Name);
-                sb.AppendLine($"EXEC @rc = msdb.dbo.sp_update_schedule @schedule_id = @schedule_id, @active_start_time = {to.ActiveStartTime}, @active_end_time = {to.ActiveEndTime}");
+                // A move past midnight changes its days too
+                var days = SameDays(c.Original, c.Proposed) ? string.Empty
+                    : $", @freq_interval = {to.FrequencyInterval}, @active_start_date = {to.ActiveStartDate}, @active_end_date = {to.ActiveEndDate}";
+                sb.AppendLine($"EXEC @rc = msdb.dbo.sp_update_schedule @schedule_id = @schedule_id, @active_start_time = {to.ActiveStartTime}, @active_end_time = {to.ActiveEndTime}{days}");
                 sb.AppendLine("IF @rc <> 0 GOTO Failed");
             }
         }
+
+        private static bool SameDays(AgentSchedule a, AgentSchedule b) =>
+            a.FrequencyInterval == b.FrequencyInterval && a.ActiveStartDate == b.ActiveStartDate && a.ActiveEndDate == b.ActiveEndDate;
 
         private static void AppendSplit(StringBuilder sb, ScheduleSplit s, bool rollback)
         {
@@ -367,9 +373,9 @@ namespace DBADash.JobSchedules
             var o = s.Original;
             sb.AppendLine("SET @new_schedule_id = NULL");
             sb.AppendLine($"EXEC @rc = msdb.dbo.sp_add_schedule @schedule_name = N'{Literal(s.NewName)}', @enabled = {(o.Enabled ? 1 : 0)}, " +
-                          $"@freq_type = {o.FrequencyType}, @freq_interval = {o.FrequencyInterval}, @freq_subday_type = {o.FrequencySubdayType}, @freq_subday_interval = {o.FrequencySubdayInterval}, " +
+                          $"@freq_type = {o.FrequencyType}, @freq_interval = {s.Proposed.FrequencyInterval}, @freq_subday_type = {o.FrequencySubdayType}, @freq_subday_interval = {o.FrequencySubdayInterval}, " +
                           $"@freq_relative_interval = {o.FrequencyRelativeInterval}, @freq_recurrence_factor = {o.FrequencyRecurrenceFactor}, " +
-                          $"@active_start_date = {o.ActiveStartDate}, @active_end_date = {o.ActiveEndDate}, " +
+                          $"@active_start_date = {s.Proposed.ActiveStartDate}, @active_end_date = {s.Proposed.ActiveEndDate}, " +
                           $"@active_start_time = {s.Proposed.ActiveStartTime}, @active_end_time = {s.Proposed.ActiveEndTime}, " +
                           $"@owner_login_name = @owner, @schedule_uid = '{s.NewScheduleUid}', @schedule_id = @new_schedule_id OUTPUT");
             sb.AppendLine("IF @rc <> 0 GOTO Failed");

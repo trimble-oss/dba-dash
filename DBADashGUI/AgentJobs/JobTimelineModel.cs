@@ -83,6 +83,23 @@ namespace DBADashGUI.AgentJobs
         /// </summary>
         public static Color HighlightColor => DBADashUser.IsDarkTheme ? Color.FromArgb(0xC0, 0x8C, 0xF0) : Color.FromArgb(0x7B, 0x3F, 0xB5);
 
+        /// <summary>
+        /// Parts of the run picked out faintly: overlaps no move could avoid (the plan's jobs that can't be kept apart by start
+        /// times), so they don't draw the eye from the ones a move could.  Null for none.
+        /// </summary>
+        public IReadOnlyList<(DateTime Start, DateTime End)> FaintHighlights { get; set; }
+
+        /// <summary>The colour <see cref="FaintHighlights"/> are drawn in</summary>
+        public static Color FaintHighlightColor => Color.FromArgb(DBADashUser.IsDarkTheme ? 90 : 70, HighlightColor);
+
+        /// <summary>
+        /// A band standing for many runs of the job too close together to draw apart at the zoom it was made for (<see
+        /// cref="Executions"/> of them), drawn hatched with this text - e.g. "every 10s, 1s each".  Null for a run's own bar.
+        /// </summary>
+        public string DenseLabel { get; init; }
+
+        public bool IsDense => DenseLabel != null;
+
         /// <summary>Which of its row's stacked lanes the bar is drawn in, so overlapping runs don't hide each other.</summary>
         public int Lane { get; set; }
 
@@ -466,6 +483,26 @@ namespace DBADashGUI.AgentJobs
         /// (the full period with a zoomed in window in place) - the full period load alone counts every run once.
         /// </summary>
         public JobTimelineModel CountsFrom { get; set; }
+
+        /// <summary>
+        /// A row per job from bars made by the caller, in their order - as <see cref="Build"/> makes them from a table, for one
+        /// with too many runs to go through a DataTable quickly (the plan's preview of a busy week is hundreds of thousands)
+        /// </summary>
+        public static JobTimelineModel FromBars(IEnumerable<TimelineBar> bars, int instanceId)
+        {
+            var model = new JobTimelineModel();
+            var jobs = new Dictionary<string, TimelineRowModel>();
+            foreach (var bar in bars)
+            {
+                if (bar.End <= bar.Start) bar.End = bar.Start.AddSeconds(1);
+                model.Bars.Add(bar);
+                var row = GetOrAdd(jobs, bar.JobName, () => new TimelineRowModel { Label = bar.JobName, JobId = bar.JobId, JobName = bar.JobName, InstanceId = instanceId }, model.Roots);
+                bar.Row = row;
+                row.Bars.Add(bar);
+            }
+            foreach (var root in model.Roots) root.BarsChanged();
+            return model;
+        }
 
         private static TimelineRowModel GetOrAdd<TKey>(Dictionary<TKey, TimelineRowModel> lookup, TKey key, Func<TimelineRowModel> create, List<TimelineRowModel> addTo)
         {

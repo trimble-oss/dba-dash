@@ -1,17 +1,121 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace DBADash.JobSchedules
 {
-    /// <summary>Where runs of previewed jobs overlap: per job and run, the other jobs it overlaps and when, and the pairs in all</summary>
-    /// <param name="With">Per job, per run: the names of the jobs it overlaps.  Null for a run that overlaps none.</param>
-    /// <param name="Segments">Per job, per run: when it overlaps another job.  Null for a run that overlaps none.</param>
-    /// <param name="Count">Pairs of runs that overlap</param>
-    public sealed record PlanOverlaps(List<List<string>[]> With, List<List<(DateTime Start, DateTime End)>[]> Segments, int Count);
+    /// <summary>
+    /// Where runs of previewed jobs overlap: the pairs in all, and per job and run whether it overlaps another job.  Which
+    /// jobs it overlaps and when are worked out only for the runs asked about (<see cref="Detail"/>) - a busy week can have
+    /// millions of overlapping pairs, and keeping each one's details took seconds.
+    /// </summary>
+    public sealed class PlanOverlaps
+    {
+        /// <summary>A run overlaps a job a move could keep it apart from</summary>
+        public const byte Avoidable = 1;
+
+        /// <summary>A run overlaps a job no move can keep it apart from (see <see cref="SchedulePlan.FindOverlaps"/>)</summary>
+        public const byte Unavoidable = 2;
+
+        private readonly IReadOnlyList<IReadOnlyList<JobRun>> _runs;
+        private readonly IReadOnlyList<string> _names;
+        private readonly Func<int, int, bool> _unavoidable;
+
+        internal PlanOverlaps(IReadOnlyList<IReadOnlyList<JobRun>> runs, IReadOnlyList<string> names, Func<int, int, bool> unavoidable, List<byte[]> flags, int count, int avoidableCount)
+        {
+            _runs = runs;
+            _names = names;
+            _unavoidable = unavoidable;
+            Flags = flags;
+            Count = count;
+            AvoidableCount = avoidableCount;
+        }
+
+        /// <summary>Pairs of runs that overlap</summary>
+        public int Count { get; }
+
+        /// <summary>Pairs of runs that overlap where a move could keep them apart</summary>
+        public int AvoidableCount { get; }
+
+        /// <summary>Per job, per run: <see cref="Avoidable"/> and <see cref="Unavoidable"/> for what it overlaps, 0 for none</summary>
+        public List<byte[]> Flags { get; }
+
+        /// <summary>
+        /// For runs <paramref name="first"/> up to <paramref name="last"/> of job <paramref name="job"/>, from the first: the
+        /// names of the jobs each overlaps (once for each of their runs), and when - apart where no move could avoid it.  Null
+        /// in each for a run with none.  Swept against only the other jobs' runs at the same time.
+        /// </summary>
+        public (List<string>[] With, List<(DateTime Start, DateTime End)>[] Segments, List<(DateTime Start, DateTime End)>[] Unavoidable) Detail(int job, int first, int last)
+        {
+            var count = Math.Max(0, last - first);
+            var sink = new DetailSink
+            {
+                With = new List<string>[count],
+                Segments = new List<(DateTime, DateTime)>[count],
+                Unavoidable = new List<(DateTime, DateTime)>[count]
+            };
+            if (count == 0) return (sink.With, sink.Segments, sink.Unavoidable);
+            var mine = new RunSlice(_runs[job], first, last);
+            var from = mine[0].Start;
+            var to = mine[count - 1].End;
+            for (var j = 0; j < _runs.Count; j++)
+            {
+                if (j == job) continue;
+                var (otherFirst, otherLast) = SchedulePlan.RunsBetween(_runs[j], from, to);
+                if (otherFirst >= otherLast) continue;
+                sink.Name = _names[j];
+                sink.PairUnavoidable = _unavoidable?.Invoke(Math.Min(job, j), Math.Max(job, j)) ?? false;
+                JobOverlapAnalyzer.Sweep(mine, new RunSlice(_runs[j], otherFirst, otherLast), ref sink);
+            }
+            return (sink.With, sink.Segments, sink.Unavoidable);
+        }
+
+        /// <summary>Notes each overlap against the run asked about</summary>
+        private struct DetailSink : JobOverlapAnalyzer.IOverlapSink
+        {
+            public List<string>[] With;
+            public List<(DateTime Start, DateTime End)>[] Segments;
+            public List<(DateTime Start, DateTime End)>[] Unavoidable;
+            public string Name;
+            public bool PairUnavoidable;
+
+            public void Add(int a, int b, DateTime start, DateTime end)
+            {
+                (With[a] ??= new List<string>()).Add(Name);
+                var segments = PairUnavoidable ? Unavoidable : Segments;
+                (segments[a] ??= new List<(DateTime, DateTime)>()).Add((start, end));
+            }
+        }
+
+        /// <summary>Some of a list of runs, without copying them</summary>
+        private sealed class RunSlice : IReadOnlyList<JobRun>
+        {
+            private readonly IReadOnlyList<JobRun> _runs;
+            private readonly int _first;
+
+            public RunSlice(IReadOnlyList<JobRun> runs, int first, int last)
+            {
+                _runs = runs;
+                _first = first;
+                Count = last - first;
+            }
+
+            public int Count { get; }
+
+            public JobRun this[int index] => _runs[_first + index];
+
+            public IEnumerator<JobRun> GetEnumerator()
+            {
+                for (var i = 0; i < Count; i++) yield return this[i];
+            }
+
+            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+        }
+    }
 
     /// <summary>Suggested start times for the included jobs, before they're applied to the plan</summary>
     /// <param name="Included">The jobs the suggestion is for</param>
@@ -145,6 +249,18 @@ namespace DBADash.JobSchedules
 
         private const int MaxCachedRunLists = 5000;
 
+        /// <summary>How much two run lists from <see cref="_runCache"/> overlap, by the lists themselves</summary>
+        private readonly Dictionary<(IReadOnlyList<JobRun>, IReadOnlyList<JobRun>), OverlapAmount> _amountCache = new(new ListPairComparer());
+
+        private sealed class ListPairComparer : IEqualityComparer<(IReadOnlyList<JobRun> A, IReadOnlyList<JobRun> B)>
+        {
+            public bool Equals((IReadOnlyList<JobRun> A, IReadOnlyList<JobRun> B) x, (IReadOnlyList<JobRun> A, IReadOnlyList<JobRun> B) y) =>
+                ReferenceEquals(x.A, y.A) && ReferenceEquals(x.B, y.B);
+
+            public int GetHashCode((IReadOnlyList<JobRun> A, IReadOnlyList<JobRun> B) pair) =>
+                HashCode.Combine(RuntimeHelpers.GetHashCode(pair.A), RuntimeHelpers.GetHashCode(pair.B));
+        }
+
         private HashSet<Guid> _ownSchedule = new();
 
         /// <summary>Jobs given their own copy only to make a manual move - dropped again if the job goes back to the shared schedule's time</summary>
@@ -191,6 +307,7 @@ namespace DBADash.JobSchedules
             AllJobs = allJobs;
             // Expected durations, and so predictions, may have changed
             _runCache.Clear();
+            _amountCache.Clear();
             // Which schedule started each run, and when schedules changed, don't depend on how long jobs take: given the same
             // runs and history again (another duration basis), keep what was worked out - matching every run is the costly part
             if (!ReferenceEquals(actualRuns, _givenRuns) || !ReferenceEquals(history, _givenHistory))
@@ -220,11 +337,16 @@ namespace DBADash.JobSchedules
         }
 
         /// <summary>Preview the jobs most involved in overlaps, up to <paramref name="max"/></summary>
-        public void IncludeMostOverlapping(JobOverlapReport report, int max)
+        /// <param name="eligible">The jobs that may be picked - e.g. those long enough to see at the range.  Null for any.</param>
+        public void IncludeMostOverlapping(JobOverlapReport report, int max, Func<JobScheduleInput, bool> eligible = null)
         {
             var score = new Dictionary<Guid, int>();
-            var inRange = Jobs.Select(j => j.JobId).ToHashSet();
-            foreach (var p in report.Pairs.Where(p => inRange.Contains(p.A.JobId) && inRange.Contains(p.B.JobId) && (p.PredictedOverlaps > 0 || p.ActualOverlaps > 0 || p.Verdict is CycleVerdict.Collides or CycleVerdict.CannotSeparate)))
+            var inRange = Jobs.Where(j => eligible?.Invoke(j) ?? true).Select(j => j.JobId).ToHashSet();
+            // Pairs no start times can keep apart don't count: moving either can't help, and a job that runs every few
+            // seconds beside long jobs has thousands of those overlaps, which picked it over the jobs a move could help
+            foreach (var p in report.Pairs.Where(p => inRange.Contains(p.A.JobId) && inRange.Contains(p.B.JobId)
+                                                      && p.Verdict is not (CycleVerdict.CannotSeparate or CycleVerdict.AlwaysRunning)
+                                                      && (p.PredictedOverlaps > 0 || p.ActualOverlaps > 0 || p.Verdict is CycleVerdict.Collides)))
             {
                 var weight = p.PredictedOverlaps + p.ActualOverlaps + 1;
                 score[p.A.JobId] = score.GetValueOrDefault(p.A.JobId) + weight;
@@ -541,7 +663,12 @@ namespace DBADash.JobSchedules
             var moves = moved ? string.Join(",", job.Schedules.Select(s => s.Enabled ? _shifts.GetValueOrDefault(KeyOf(job.JobId, s)) : 0)) : "";
             var key = (job.JobId, actual, from, to, moves);
             if (_runCache.TryGetValue(key, out var runs)) return runs;
-            if (_runCache.Count >= MaxCachedRunLists) _runCache.Clear();
+            if (_runCache.Count >= MaxCachedRunLists)
+            {
+                _runCache.Clear();
+                // It holds lists that are gone from the run cache, which would never match again
+                _amountCache.Clear();
+            }
             return _runCache[key] = workOut();
         }
 
@@ -757,10 +884,14 @@ namespace DBADash.JobSchedules
             var predicted = jobs.Select(j => j.ExpectedDurationSec.HasValue ? PredictedRuns(j, moved: true, from, to) : null).ToList();
             var predictedBefore = jobs.Select(j => j.ExpectedDurationSec.HasValue ? PredictedRuns(j, moved: false, from, to) : null).ToList();
 
-            static OverlapAmount Amount(IReadOnlyList<JobRun> a, IReadOnlyList<JobRun> b)
+            OverlapAmount Amount(IReadOnlyList<JobRun> a, IReadOnlyList<JobRun> b)
             {
+                // The run lists are cached and shared (see Cached), so the same two lists overlap the same - a drag only
+                // changes the pairs with the job being moved, and counting every pair took most of a second on a busy week
+                if (_amountCache.TryGetValue((a, b), out var amount)) return amount;
+                if (_amountCache.Count >= MaxCachedRunLists) _amountCache.Clear();
                 var (count, seconds) = JobOverlapAnalyzer.CountOverlaps(a, b);
-                return new OverlapAmount(count, seconds);
+                return _amountCache[(a, b)] = new OverlapAmount(count, seconds);
             }
 
             var pairs = new List<PlanPairOverlap>();
@@ -780,39 +911,65 @@ namespace DBADash.JobSchedules
         }
 
         /// <summary>Where runs overlap.  Each job's runs are in start order and don't overlap each other.</summary>
-        public static PlanOverlaps FindOverlaps(IReadOnlyList<IReadOnlyList<JobRun>> runs, IReadOnlyList<string> names)
+        /// <param name="unavoidable">
+        /// Whether jobs i and j (i before j) overlap whatever their start times - one always running, or both too long for
+        /// their common cycle.  Their overlaps are flagged <see cref="PlanOverlaps.Unavoidable"/> rather than <see
+        /// cref="PlanOverlaps.Avoidable"/>, so what's picked out is what a move could change.  Null for every pair to count
+        /// as avoidable.
+        /// </param>
+        public static PlanOverlaps FindOverlaps(IReadOnlyList<IReadOnlyList<JobRun>> runs, IReadOnlyList<string> names, Func<int, int, bool> unavoidable = null)
         {
-            var sink = new FindSink
-            {
-                With = runs.Select(r => new List<string>[r.Count]).ToList(),
-                Segments = runs.Select(r => new List<(DateTime, DateTime)>[r.Count]).ToList(),
-                Names = names
-            };
+            var sink = new FlagSink { Flags = runs.Select(r => new byte[r.Count]).ToList() };
+            var avoidable = 0;
             for (sink.I = 0; sink.I < runs.Count; sink.I++)
             {
-                for (sink.J = sink.I + 1; sink.J < runs.Count; sink.J++) JobOverlapAnalyzer.Sweep(runs[sink.I], runs[sink.J], ref sink);
+                for (sink.J = sink.I + 1; sink.J < runs.Count; sink.J++)
+                {
+                    sink.Flag = unavoidable?.Invoke(sink.I, sink.J) ?? false ? PlanOverlaps.Unavoidable : PlanOverlaps.Avoidable;
+                    var before = sink.Total;
+                    JobOverlapAnalyzer.Sweep(runs[sink.I], runs[sink.J], ref sink);
+                    if (sink.Flag == PlanOverlaps.Avoidable) avoidable += sink.Total - before;
+                }
             }
-            return new PlanOverlaps(sink.With, sink.Segments, sink.Total);
+            return new PlanOverlaps(runs, names, unavoidable, sink.Flags, sink.Total, avoidable);
         }
 
-        /// <summary>Notes each overlap between jobs I and J against both runs</summary>
-        private struct FindSink : JobOverlapAnalyzer.IOverlapSink
+        /// <summary>Counts each overlap between jobs I and J, and flags both runs</summary>
+        private struct FlagSink : JobOverlapAnalyzer.IOverlapSink
         {
-            public List<List<string>[]> With;
-            public List<List<(DateTime Start, DateTime End)>[]> Segments;
-            public IReadOnlyList<string> Names;
+            public List<byte[]> Flags;
             public int I;
             public int J;
             public int Total;
+            public byte Flag;
 
             public void Add(int a, int b, DateTime start, DateTime end)
             {
                 Total++;
-                (With[I][a] ??= new List<string>()).Add(Names[J]);
-                (With[J][b] ??= new List<string>()).Add(Names[I]);
-                (Segments[I][a] ??= new List<(DateTime, DateTime)>()).Add((start, end));
-                (Segments[J][b] ??= new List<(DateTime, DateTime)>()).Add((start, end));
+                Flags[I][a] |= Flag;
+                Flags[J][b] |= Flag;
             }
+        }
+
+        /// <summary>The runs that overlap <paramref name="from"/> to <paramref name="to"/>, as a range of indexes - a job's runs are in order and don't overlap, so their ends are in order too</summary>
+        public static (int First, int Last) RunsBetween(IReadOnlyList<JobRun> runs, DateTime from, DateTime to)
+        {
+            int lo = 0, hi = runs.Count;
+            while (lo < hi)
+            {
+                var mid = (lo + hi) / 2;
+                if (runs[mid].End <= from) lo = mid + 1;
+                else hi = mid;
+            }
+            var first = lo;
+            hi = runs.Count;
+            while (lo < hi)
+            {
+                var mid = (lo + hi) / 2;
+                if (runs[mid].Start < to) lo = mid + 1;
+                else hi = mid;
+            }
+            return (first, lo);
         }
 
         /// <summary>The most runs going at once in each of <paramref name="slices"/> slices of the period</summary>
@@ -822,18 +979,28 @@ namespace DBADash.JobSchedules
             var count = (int)Math.Ceiling((double)(to - from).Ticks / sliceTicks);
             var edges = Enumerable.Range(0, count + 1).Select(i => i == count ? to : from.AddTicks(i * sliceTicks)).ToArray();
             var peaks = new int[count];
-            // Ends before starts at the same moment: one run ending as another starts isn't two at once
-            var events = runs.SelectMany(r => new[] { (Time: r.Start, Delta: 1), (Time: r.End, Delta: -1) }).OrderBy(e => e.Time).ThenBy(e => e.Delta).ToList();
+            // Each start and end as one number to sort - ticks doubled, plus one for a start, so ends come before starts at the
+            // same moment: one run ending as another starts isn't two at once.  Sorting tuples took most of a second for a
+            // busy week's runs.
+            var events = new List<long>();
+            foreach (var r in runs)
+            {
+                events.Add(r.Start.Ticks * 2 + 1);
+                events.Add(r.End.Ticks * 2);
+            }
+            events.Sort();
+            static long TimeOf(long e) => e >> 1;
+            static int DeltaOf(long e) => (e & 1) == 1 ? 1 : -1;
             var k = 0;
             var running = 0;
             for (var s = 0; s < count; s++)
             {
                 // Where things stand at the slice's start - a run ending right on it doesn't count in it
-                while (k < events.Count && events[k].Time <= edges[s]) running += events[k++].Delta;
+                while (k < events.Count && TimeOf(events[k]) <= edges[s].Ticks) running += DeltaOf(events[k++]);
                 var peak = running;
-                while (k < events.Count && events[k].Time < edges[s + 1])
+                while (k < events.Count && TimeOf(events[k]) < edges[s + 1].Ticks)
                 {
-                    running += events[k++].Delta;
+                    running += DeltaOf(events[k++]);
                     peak = Math.Max(peak, running);
                 }
                 peaks[s] = peak;

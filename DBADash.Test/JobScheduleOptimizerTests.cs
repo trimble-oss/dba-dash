@@ -279,7 +279,7 @@ namespace DBADash.Test
         {
             // Two jobs on one 5 minute schedule, beside one that runs 30 minutes every minute (nearly always running) and two
             // short frequent ones.  Only one of the pair needs to move; the always-running job's brief projected gaps used to
-            // draw a second move for ~30 seconds a day.
+            // draw a second move for ~30 seconds a day.  Retry and BlitzWho start together every minute: one of them moves seconds.
             var pair = Sharing("Deadlock1", "Deadlock2");
             var longWait = Every("Long Wait", 1, 1801);
             var jobs = pair.Append(longWait).Append(Every("Retry", 1, 1)).Append(new JobScheduleInput
@@ -292,9 +292,12 @@ namespace DBADash.Test
             var result = Split(jobs);
             Assert.AreEqual(longWait.JobId, result.Ignored.Single());
             StringAssert.Contains(result.Notes[longWait.JobId].Single(), "left out");
-            Assert.AreEqual(1, result.Shifts.Count, "One of the pair moves");
+            var pairMoved = result.Shifts.Keys.Where(id => pair.Any(p => p.JobId == id)).ToList();
+            Assert.AreEqual(1, pairMoved.Count, "One of the pair moves");
+            Assert.AreEqual(2, result.Shifts.Count, "And one of Retry and BlitzWho");
+            Assert.IsTrue(result.Shifts.Keys.Except(pairMoved).All(id => jobs.Single(j => j.JobId == id).Name is "Retry" or "BlitzWho"));
             Assert.AreEqual(1, result.OwnSchedule.Count);
-            Assert.AreEqual(result.Shifts.Keys.Single(), result.OwnSchedule.Single());
+            Assert.AreEqual(pairMoved.Single(), result.OwnSchedule.Single());
             Assert.IsTrue(result.HasBenefit);
         }
 
@@ -320,6 +323,50 @@ namespace DBADash.Test
             var result = Optimize(jobs, maxShift: 900);
             Assert.AreEqual(0, result.ConflictSecAfter);
             Assert.AreEqual(0, OverlapsAfter(jobs, result));
+        }
+
+        private static JobScheduleInput EverySeconds(string name, int seconds, int durationSec)
+        {
+            var job = Every(name, 1, durationSec);
+            return new JobScheduleInput
+            {
+                JobId = job.JobId,
+                Name = name,
+                ExpectedDurationSec = durationSec,
+                Schedules = new[] { job.Schedules[0] with { FrequencySubdayType = AgentSchedule.SubdaySeconds, FrequencySubdayInterval = seconds } }
+            };
+        }
+
+        [TestMethod]
+        public void EveryMinuteJobs_MoveInSeconds()
+        {
+            // Whole-minute moves leave a job that runs every minute where it was
+            var jobs = new[] { Every("A", 1, 5), Every("B", 1, 5), Every("C", 1, 5), Every("D", 1, 5) };
+            var result = Optimize(jobs);
+            Assert.IsTrue(result.ConflictSecBefore > 0);
+            Assert.AreEqual(0, result.ConflictSecAfter);
+            Assert.AreEqual(3, result.Shifts.Count, "One stays where it is");
+            Assert.IsTrue(result.Shifts.Values.All(s => s % 60 != 0 && Math.Abs(s) <= 30), "Moves are within the minute");
+            Assert.AreEqual(0, OverlapsAfter(jobs, result));
+        }
+
+        [TestMethod]
+        public void SecondsCycles_MixedWithMinutes_MostlyCleared()
+        {
+            var jobs = new[] { Every("A", 1, 5), Every("B", 1, 5), Every("C", 2, 10), EverySeconds("D", 30, 3), EverySeconds("E", 10, 1) };
+            var result = Optimize(jobs);
+            Assert.IsTrue(result.ConflictSecBefore > 0);
+            Assert.IsTrue(result.HasBenefit);
+            Assert.IsTrue(result.ConflictSecAfter <= result.ConflictSecBefore * 0.1, $"{result.ConflictSecAfter} of {result.ConflictSecBefore} left");
+        }
+
+        [TestMethod]
+        public void LongerCycles_StillMoveInWholeMinutes()
+        {
+            var jobs = new[] { Every("A", 5, 60), Every("B", 5, 60), Every("C", 5, 60) };
+            var result = Optimize(jobs);
+            Assert.AreEqual(0, result.ConflictSecAfter);
+            Assert.IsTrue(result.Shifts.Values.All(s => s % 60 == 0));
         }
     }
 }

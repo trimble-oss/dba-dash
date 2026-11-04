@@ -34,7 +34,7 @@ namespace DBADashGUI.AgentJobs
         private bool PlanMode => tsPlan?.Checked == true;
 
         /// <summary>Toolbar items that don't apply to plan mode</summary>
-        private ToolStripItem[] NotInPlanMode => new ToolStripItem[] { tsIncludeSteps, tsDateGroup, tsRuns, tsConcurrency, tsCopyDropDown };
+        private ToolStripItem[] NotInPlanMode => new ToolStripItem[] { tsIncludeSteps, tsDateGroup, tsConcurrency, tsCopyDropDown, tsProblemsOnly };
 
         /// <summary>The Plan button, at <paramref name="index"/> on the toolbar</summary>
         private void AddPlanItems(int index)
@@ -96,6 +96,8 @@ namespace DBADashGUI.AgentJobs
                     ShowBasisChoice = true
                 };
                 planEditor.BasisChanged += (_, _) => AnalyzePlan();
+                // The runs filter on the toolbar says which jobs the plan lists
+                planEditor.DurationFilterChanged += (_, _) => ShowRunFilters();
                 planSplitter = new Splitter { Dock = DockStyle.Bottom, Height = LogicalToDeviceUnits(5) };
                 // Docked last, so it docks first: the editor at the very bottom, the splitter above it
                 Controls.Add(planSplitter);
@@ -105,6 +107,8 @@ namespace DBADashGUI.AgentJobs
             planEditor.Visible = true;
             planSplitter.Visible = true;
             foreach (var item in NotInPlanMode) item.Enabled = false;
+            planEditor.MinDurationSec = minDurationSec;
+            ShowRunFilters();
             // A concurrency band still loading for the timeline would replace the plan's
             bandGeneration++;
             chart.Banner = null;
@@ -130,6 +134,7 @@ namespace DBADashGUI.AgentJobs
                 planSplitter.Visible = false;
             }
             foreach (var item in NotInPlanMode) item.Enabled = true;
+            ShowRunFilters();
             chart.ShowConcurrency = tsConcurrency.Checked && context?.JobID == Guid.Empty;
             if (reload && context != null)
             {
@@ -184,10 +189,16 @@ namespace DBADashGUI.AgentJobs
             chart.Banner = "Loading the plan...";
             try
             {
-                var data = await Task.Run(() => ScheduleOverlapData.Load(instanceId, fromUtc, toUtc, category));
+                // Analysed there too: a busy week is hundreds of thousands of runs, seconds of work that froze the window
+                var basis = planEditor.Basis;
+                var (data, analysis) = await Task.Run(() =>
+                {
+                    var loaded = ScheduleOverlapData.Load(instanceId, fromUtc, toUtc, category);
+                    return (loaded, loaded.Analyze(basis));
+                });
                 if (generation != planGeneration || !PlanMode) return;
                 planData = data;
-                AnalyzePlan();
+                AnalyzePlan(analysis);
             }
             catch (Exception ex)
             {
@@ -197,11 +208,12 @@ namespace DBADashGUI.AgentJobs
             }
         }
 
-        private void AnalyzePlan()
+        /// <param name="analysis">The data analysed already, with the editor's duration basis - analysed here when null</param>
+        private void AnalyzePlan(ScheduleAnalysis analysis = null)
         {
             if (planData == null || !PlanMode) return;
             chart.Banner = null;
-            planEditor.SetData(planData.Analyze(planEditor.Basis), InstanceId, context.InstanceName);
+            planEditor.SetData(analysis ?? planData.Analyze(planEditor.Basis), InstanceId, context.InstanceName);
             // The plan's period, and the CPU across it
             FetchCpuForView(true);
         }
