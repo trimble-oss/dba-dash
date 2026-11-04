@@ -27,7 +27,10 @@ namespace DBADashGUI.AgentJobs
         [Browsable(false)]
         public int? BusyPeriodID { get; set; }
 
-        /// <summary>The instance the editor was opened for - what <see cref="BusyPeriodScope.ThisInstance"/> means</summary>
+        /// <summary>
+        /// The instance <see cref="BusyPeriodScope.ThisInstance"/> means: the one the editor was opened for, or for a period
+        /// of another instance listed with Show all, that instance - so editing it doesn't move it
+        /// </summary>
         [Browsable(false)]
         public int InstanceID { get; set; }
 
@@ -80,7 +83,7 @@ namespace DBADashGUI.AgentJobs
         public static BusyPeriod FromRow(DataRow row, int instanceId) => new()
         {
             BusyPeriodID = row.Field<int>("BusyPeriodID"),
-            InstanceID = instanceId,
+            InstanceID = row.Field<int>("ApplyToInstanceID") > 0 ? row.Field<int>("ApplyToInstanceID") : instanceId,
             ApplyTo = row.Field<int>("ApplyToInstanceID") > 0 ? BusyPeriodScope.ThisInstance
                 : row.Field<int>("ApplyToTagID") > 0 ? BusyPeriodScope.Tag
                 : BusyPeriodScope.AllInstances,
