@@ -1,4 +1,4 @@
-using SkiaSharp;
+﻿using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -50,12 +50,16 @@ namespace DBADashGUI.AgentJobs
         private void DisposeFonts()
         {
             _overviewImage?.Dispose();
+            _runsImage?.Dispose();
             _font?.Dispose();
             _boldFont?.Dispose();
             _smallFont?.Dispose();
             _fill.Dispose();
             _stroke.Dispose();
             _text.Dispose();
+            _dashed.Dispose();
+            foreach (var effect in _dashEffects.Values) effect.Dispose();
+            _dashEffects.Clear();
             // SKTypeface.Default is shared and the bold lookup can return the regular face, so dispose each at most once.
             if (_typeface != null && !ReferenceEquals(_typeface, SKTypeface.Default)) _typeface.Dispose();
             if (_boldTypeface != null && !ReferenceEquals(_boldTypeface, _typeface) && !ReferenceEquals(_boldTypeface, SKTypeface.Default)) _boldTypeface.Dispose();
@@ -149,32 +153,18 @@ namespace DBADashGUI.AgentJobs
 
             canvas.Save();
             canvas.ClipRect(new SKRect(ChartLeft, RowsTop, ChartRight, RowsBottom));
-            // Runs shown only in outline - where they happened - under the bars
-            foreach (var row in visibleRows.Where(r => r.Outlines.Count > 0))
+            if (interactive)
             {
-                foreach (var (start, end, status) in row.Outlines)
+                canvas.DrawImage(RunsImage(p, width, height, visibleRows), 0, 0);
+                // The bar under the pointer over them - the image is drawn without it, so moving the pointer only draws it
+                if (_hoverBar != null && visibleRows.Contains(_hoverBar.Row) && _hoverBar.End >= _viewFrom && _hoverBar.Start <= _viewTo && IsVisible(_hoverBar))
                 {
-                    if (end > _viewFrom && start < _viewTo) DrawOutline(canvas, row, start, end, status);
+                    DrawBar(canvas, p, _hoverBar, BarRect(_hoverBar), BarColor(_hoverBar));
                 }
             }
-            // Where moved runs were, under the bars
-            if (_ghostReach > TimeSpan.Zero)
+            else
             {
-                foreach (var row in visibleRows)
-                {
-                    foreach (var bar in row.BarsBetween(_viewFrom - _ghostReach, _viewTo + _ghostReach))
-                    {
-                        if (bar.GhostStart.HasValue && IsVisible(bar)) DrawGhost(canvas, p, bar);
-                    }
-                }
-            }
-            // And of those, only the bars in the time in view
-            foreach (var row in visibleRows)
-            {
-                foreach (var bar in row.BarsBetween(_viewFrom, _viewTo))
-                {
-                    if (IsVisible(bar)) DrawBar(canvas, p, bar);
-                }
+                DrawRuns(canvas, p, visibleRows);
             }
             canvas.Restore();
 
@@ -247,6 +237,91 @@ namespace DBADashGUI.AgentJobs
             step >= TimeSpan.FromDays(1) ? t.ToString("dd MMM")
             : step < TimeSpan.FromMinutes(1) ? t.ToString("HH:mm:ss")
             : t.ToString("HH:mm");
+
+        /// <summary>The runs: in outline where they happened, where moved runs were, then the bars in the time in view</summary>
+        private void DrawRuns(SKCanvas canvas, Palette p, List<TimelineRowModel> visibleRows)
+        {
+            // Runs shown only in outline - where they happened - under the bars
+            foreach (var row in visibleRows.Where(r => r.Outlines.Count > 0))
+            {
+                // In start order, an outline no more than a pixel past the one drawn before it in the same colour is skipped
+                (float Left, float Right, RunStatus Status)? drawn = null;
+                foreach (var (start, end, status) in row.Outlines)
+                {
+                    if (end <= _viewFrom || start >= _viewTo) continue;
+                    var left = TimeToX(start);
+                    var right = Math.Max(left + 3 * Dpi, TimeToX(end));
+                    if (drawn is { } d && d.Status == status && left >= d.Left && right <= d.Right + 1) continue;
+                    drawn = (left, right, status);
+                    DrawOutline(canvas, row, start, end, status);
+                }
+            }
+            // Where moved runs were, under the bars
+            if (_ghostReach > TimeSpan.Zero)
+            {
+                foreach (var row in visibleRows)
+                {
+                    // Like the bars, a ghost no more than a pixel past the one drawn before it in its lane isn't drawn again
+                    var drawn = new Dictionary<int, (float Left, float Right)>();
+                    foreach (var bar in row.BarsBetween(_viewFrom - _ghostReach, _viewTo + _ghostReach))
+                    {
+                        if (!bar.GhostStart.HasValue || !IsVisible(bar)) continue;
+                        var left = TimeToX(bar.GhostStart.Value);
+                        var right = Math.Max(left + 3 * Dpi, TimeToX(bar.End + (bar.GhostStart.Value - bar.Start)));
+                        if (drawn.TryGetValue(bar.Lane, out var d) && left >= d.Left && right <= d.Right + 1) continue;
+                        drawn[bar.Lane] = (left, right);
+                        DrawGhost(canvas, p, bar);
+                    }
+                }
+            }
+            // And of those, only the bars in the time in view
+            foreach (var row in visibleRows)
+            {
+                // What the bar drawn last covers, in each of the row's lanes
+                var covers = new LaneCover[Math.Max(1, row.LaneCount)];
+                foreach (var bar in row.BarsBetween(_viewFrom, _viewTo))
+                {
+                    if ((uint)bar.Lane >= (uint)covers.Length) Array.Resize(ref covers, bar.Lane + 1);
+                    ref var cover = ref covers[bar.Lane];
+                    if (IsCoveredQuick(bar, cover) || !IsVisible(bar)) continue;
+                    var rect = BarRect(bar);
+                    var color = BarColor(bar);
+                    if (!IsCovered(bar, rect, color, ref cover)) DrawBar(canvas, p, bar, rect, color);
+                }
+            }
+        }
+
+        private SKImage _runsImage;
+        private object _runsImageKey;
+
+        /// <summary>
+        /// The runs drawn without the bar under the pointer, kept while nothing they're drawn from changes - so moving the
+        /// pointer over a busy week, hundreds of thousands of bars, draws one bar rather than all of them each time
+        /// </summary>
+        private SKImage RunsImage(Palette p, int width, int height, List<TimelineRowModel> visibleRows)
+        {
+            var key = (_layoutVersion, width, height, Dpi, _viewFrom, _viewTo, _scrollY, ChartLeft, RowsTop, RowsBottom, _periodFrom, _periodTo,
+                _selectedBar, HiddenStatusKey, _drag == DragMode.ShiftRow ? (_shiftRow, _shiftBar, _shiftDelta) : default, _ghostReach, (p.Back, p.Fore, p.Dim));
+            if (_runsImage != null && Equals(key, _runsImageKey)) return _runsImage;
+            _runsImage?.Dispose();
+            using var surface = SKSurface.Create(new SKImageInfo(width, height));
+            var canvas = surface.Canvas;
+            canvas.Clear(SKColors.Transparent);
+            canvas.ClipRect(new SKRect(ChartLeft, RowsTop, ChartRight, RowsBottom));
+            var hover = _hoverBar;
+            _hoverBar = null;
+            try
+            {
+                DrawRuns(canvas, p, visibleRows);
+            }
+            finally
+            {
+                _hoverBar = hover;
+            }
+            _runsImage = surface.Snapshot();
+            _runsImageKey = key;
+            return _runsImage;
+        }
 
         private void DrawGrid(SKCanvas canvas, Palette p, TimeSpan step, List<DateTime> ticks)
         {
@@ -415,38 +490,78 @@ namespace DBADashGUI.AgentJobs
 
         #region Rows
 
-        private void DrawBar(SKCanvas canvas, Palette p, TimelineBar bar)
+        private SKColor BarColor(TimelineBar bar)
         {
-            var rect = BarRect(bar);
+            var color = TimelineBar.StatusColor(ShownStatus(bar)).ToSKColor();
+            if (_selectedBar != null && !SameJob(bar, _selectedBar)) color = color.WithAlpha(90);
+            if (bar == _hoverBar) color = Blend(color, SKColors.White, 0.2f);
+            return color;
+        }
+
+        /// <summary>
+        /// Whether a bar would look just like the bar drawn before it in its lane covers it: no more than a pixel past it, the
+        /// same colour, picked out and striped the same way, and nothing that's drawn only on it (selected, hovered, being
+        /// dragged, a faded end, a duration label).  Zoomed out on a busy row, many runs share each pixel - a week of a job
+        /// that runs every minute is ten thousand bars - and drawing each one made the chart slow to pan, zoom and hover.
+        /// </summary>
+        private bool IsCovered(TimelineBar bar, SKRect rect, SKColor color, ref LaneCover cover)
+        {
+            var plain = bar != _selectedBar && bar != _hoverBar && !bar.IsRunning && !bar.IsDense && !IsShifting(bar)
+                        && bar.Start >= _periodFrom && bar.End <= _periodTo && rect.Width <= 3 * Dpi + 0.01f;
+            var highlighted = HighlightKind(bar);
+            var striped = bar.GhostStart.HasValue;
+            if (plain && cover.Valid && rect.Left >= cover.Left && rect.Right <= cover.Right + 1 && color == cover.Color
+                && highlighted == cover.Highlighted && striped == cover.Striped)
+            {
+                return true;
+            }
+            cover = plain
+                ? new LaneCover(true, rect.Left, rect.Right, color, highlighted, striped, bar,
+                    bar.Start.Ticks, XToTicks(rect.Right + 1 - 3 * Dpi), XToTicks(rect.Right + 1))
+                : default;
+            return false;
+        }
+
+        /// <summary>
+        /// <see cref="IsCovered"/> from the bar's own fields alone, without working out where it's drawn or its colour - the
+        /// same answer for a bar like the one that covers the lane (same job and status, picked out and striped alike), but
+        /// a few comparisons each for the hundreds of thousands of bars of a busy week.  False when it can't tell.
+        /// </summary>
+        private bool IsCoveredQuick(TimelineBar bar, in LaneCover cover) =>
+            cover.Valid && bar.StatusRuns == null && bar.Status == cover.By.Status
+            && bar.Start.Ticks >= cover.FromTicks && bar.Start.Ticks <= cover.StartLimitTicks && bar.End.Ticks <= cover.EndLimitTicks
+            && bar.InstanceId == cover.By.InstanceId && bar.JobId == cover.By.JobId && (bar.JobId != Guid.Empty || bar.JobName == cover.By.JobName)
+            && HighlightKind(bar) == cover.Highlighted && bar.GhostStart.HasValue == cover.Striped && !bar.IsDense
+            && bar != _selectedBar && bar != _hoverBar && bar.Start >= _periodFrom && bar.End <= _periodTo && !IsShifting(bar);
+
+        /// <summary>How a bar's overlaps are picked out: 0 none, 1 only faintly, 2 strongly, 3 both</summary>
+        private static int HighlightKind(TimelineBar bar) =>
+            (bar.Highlights is { Count: > 0 } ? 2 : 0) | (bar.FaintHighlights is { Count: > 0 } ? 1 : 0);
+
+        private long XToTicks(float x) => _viewFrom.Ticks + (long)((x - ChartLeft) / ChartWidth * ViewTicks);
+
+        /// <param name="By">The bar that covers it</param>
+        /// <param name="StartLimitTicks">The latest start of a bar at the least width that it covers</param>
+        /// <param name="EndLimitTicks">The latest end of a bar it covers</param>
+        private readonly record struct LaneCover(bool Valid, float Left, float Right, SKColor Color, int Highlighted, bool Striped,
+            TimelineBar By, long FromTicks, long StartLimitTicks, long EndLimitTicks);
+
+        private void DrawBar(SKCanvas canvas, Palette p, TimelineBar bar, SKRect rect, SKColor color)
+        {
             if (rect.Right < ChartLeft || rect.Left > ChartRight) return;
 
-            var color = TimelineBar.StatusColor(ShownStatus(bar)).ToSKColor();
             var selectionActive = _selectedBar != null;
             var sameJob = selectionActive && SameJob(bar, _selectedBar);
-            if (selectionActive && !sameJob) color = color.WithAlpha(90);
-            if (bar == _hoverBar) color = Blend(color, SKColors.White, 0.2f);
 
             var radius = 3 * Dpi;
-            _fill.Color = color;
+            // A band of runs too close together to show apart is paler and hatched, so it isn't taken for one long run
+            _fill.Color = bar.IsDense ? color.WithAlpha((byte)(color.Alpha * 0.55f)) : color;
             canvas.DrawRoundRect(rect, radius, radius, _fill);
+            if (bar.IsDense) DrawHatch(canvas, rect, radius, color);
 
-            if (bar.Highlights is { Count: > 0 })
-            {
-                // Just the parts picked out, so a run that touches another for a moment isn't all marked.  The lower part
-                // of the bar, so the top still shows how the run ended.
-                canvas.Save();
-                canvas.ClipRoundRect(new SKRoundRect(rect, radius), antialias: true);
-                var offset = IsShifting(bar) ? _shiftDelta : TimeSpan.Zero;
-                _fill.Color = TimelineBar.HighlightColor.ToSKColor().WithAlpha(color.Alpha);
-                var top = rect.Height < 8 * Dpi ? rect.Top : rect.Top + rect.Height * 0.4f;
-                foreach (var (start, end) in bar.Highlights)
-                {
-                    var x1 = TimeToX(start + offset);
-                    var x2 = Math.Max(x1 + 1.5f * Dpi, TimeToX(end + offset));
-                    canvas.DrawRect(new SKRect(x1, top, x2, rect.Bottom), _fill);
-                }
-                canvas.Restore();
-            }
+            // Overlaps no move could avoid faintly, then the ones a move could change over them
+            DrawHighlights(canvas, bar, bar.FaintHighlights, TimelineBar.FaintHighlightColor.ToSKColor(), rect, radius, color.Alpha);
+            DrawHighlights(canvas, bar, bar.Highlights, TimelineBar.HighlightColor.ToSKColor(), rect, radius, color.Alpha);
 
             if (bar.IsRunning || bar.GhostStart.HasValue)
             {
@@ -481,17 +596,66 @@ namespace DBADashGUI.AgentJobs
                 canvas.DrawRoundRect(outline, radius + 1, radius + 1, _stroke);
             }
 
-            // Duration inside the bar when there's room
-            var label = bar.IsRunning ? "Running " + FormatDuration(TimeSpan.FromSeconds(bar.DurationSec))
-                : FormatDuration(TimeSpan.FromSeconds(bar.DurationSec)) + (bar.Executions > 1 ? $" ×{bar.Executions:N0}" : "");
+            // Duration inside the bar when there's room - for a band, how often its runs are and to zoom in, as much as fits
             var visibleLeft = Math.Max(rect.Left, ChartLeft);
             var visibleRight = Math.Min(rect.Right, ChartRight);
-            var textWidth = _smallFont.MeasureText(label, (SKPaint)null);
+            var label = bar.IsDense
+                ? new[] { bar.DenseLabel + " - zoom in to see runs", bar.DenseLabel, "zoom in" }.FirstOrDefault(l => visibleRight - visibleLeft >= _smallFont.MeasureText(l, (SKPaint)null) + 8 * Dpi)
+                : bar.IsRunning ? "Running " + FormatDuration(TimeSpan.FromSeconds(bar.DurationSec))
+                : FormatDuration(TimeSpan.FromSeconds(bar.DurationSec)) + (bar.Executions > 1 ? $" ×{bar.Executions:N0}" : "");
+            var textWidth = label == null ? float.MaxValue : _smallFont.MeasureText(label, (SKPaint)null);
             if (visibleRight - visibleLeft >= textWidth + 8 * Dpi)
             {
                 _text.Color = selectionActive && !sameJob ? SKColors.White.WithAlpha(150) : SKColors.White;
                 canvas.DrawText(label, visibleLeft + 4 * Dpi, CenterBaseline(rect, _smallFont), _smallFont, _text);
             }
+        }
+
+        /// <summary>
+        /// Parts of a bar picked out in <paramref name="colour"/>: just those parts, so a run that touches another for a moment
+        /// isn't all marked, across the lower part of the bar so the top still shows how the run ended
+        /// </summary>
+        private void DrawHighlights(SKCanvas canvas, TimelineBar bar, IReadOnlyList<(DateTime Start, DateTime End)> highlights, SKColor colour, SKRect rect, float radius, byte alpha)
+        {
+            if (highlights is not { Count: > 0 }) return;
+            var offset = IsShifting(bar) ? _shiftDelta : TimeSpan.Zero;
+            _fill.Color = colour.WithAlpha((byte)(colour.Alpha * alpha / 255));
+            var top = rect.Height < 8 * Dpi ? rect.Top : rect.Top + rect.Height * 0.4f;
+            // A bar at its least width is all picked out: clipping each to its rounded corners was most of the time to
+            // draw a busy week, thousands of them, for nothing that shows at that size
+            if (rect.Width <= 3 * Dpi + 0.01f)
+            {
+                canvas.DrawRect(new SKRect(rect.Left, top, rect.Right, rect.Bottom - radius / 2), _fill);
+                return;
+            }
+            canvas.Save();
+            canvas.ClipRoundRect(new SKRoundRect(rect, radius), antialias: true);
+            foreach (var (start, end) in highlights)
+            {
+                var x1 = TimeToX(start + offset);
+                var x2 = Math.Max(x1 + 1.5f * Dpi, TimeToX(end + offset));
+                if (x2 < ChartLeft || x1 > ChartRight) continue;
+                canvas.DrawRect(new SKRect(x1, top, x2, rect.Bottom), _fill);
+            }
+            canvas.Restore();
+        }
+
+        /// <summary>Thin stripes the other way to a moved run's, across the part of a band in view</summary>
+        private void DrawHatch(SKCanvas canvas, SKRect rect, float radius, SKColor color)
+        {
+            canvas.Save();
+            canvas.ClipRoundRect(new SKRoundRect(rect, radius), antialias: true);
+            _stroke.Color = color;
+            _stroke.StrokeWidth = 1.2f * Dpi;
+            var gap = 5 * Dpi;
+            var from = Math.Max(rect.Left, ChartLeft - rect.Height);
+            var hatchFrom = rect.Left - rect.Height + (float)Math.Floor((from - rect.Left) / gap) * gap;
+            var hatchTo = Math.Min(rect.Right, ChartRight) + rect.Height;
+            for (var x = hatchFrom; x < hatchTo; x += gap)
+            {
+                canvas.DrawLine(x, rect.Top, x + rect.Height, rect.Bottom, _stroke);
+            }
+            canvas.Restore();
         }
 
         /// <summary>A dotted outline where a moved run was before the move, in its lane</summary>
@@ -504,9 +668,20 @@ namespace DBADashGUI.AgentJobs
             if (right < ChartLeft || left > ChartRight) return;
             var rect = new SKRect(left, top, right, top + LaneHeight - 4 * Dpi);
             rect.Inflate(-0.5f * Dpi, -0.5f * Dpi);
-            using var dash = SKPathEffect.CreateDash(new[] { 2 * Dpi, 2 * Dpi }, 0);
-            using var paint = new SKPaint { IsAntialias = true, Style = SKPaintStyle.Stroke, StrokeWidth = 1.2f * Dpi, Color = TimelineBar.StatusColor(status).ToSKColor(), PathEffect = dash };
-            canvas.DrawRoundRect(rect, 3 * Dpi, 3 * Dpi, paint);
+            _dashed.PathEffect = DashEffect(2 * Dpi, 2 * Dpi);
+            _dashed.Color = TimelineBar.StatusColor(status).ToSKColor();
+            canvas.DrawRoundRect(rect, 3 * Dpi, 3 * Dpi, _dashed);
+        }
+
+        // One paint and dash effect for every outline and ghost - made new for each, a busy what-if made thousands a frame
+        private readonly SKPaint _dashed = new() { IsAntialias = true, Style = SKPaintStyle.Stroke };
+        private readonly Dictionary<(float, float), SKPathEffect> _dashEffects = new();
+
+        private SKPathEffect DashEffect(float on, float off)
+        {
+            _dashed.StrokeWidth = 1.2f * Dpi;
+            if (!_dashEffects.TryGetValue((on, off), out var effect)) _dashEffects[(on, off)] = effect = SKPathEffect.CreateDash(new[] { on, off }, 0);
+            return effect;
         }
 
         private void DrawGhost(SKCanvas canvas, Palette p, TimelineBar bar)
@@ -518,9 +693,9 @@ namespace DBADashGUI.AgentJobs
             if (right < ChartLeft || left > ChartRight) return;
             var rect = new SKRect(left, moved.Top, right, moved.Bottom);
             rect.Inflate(-0.5f * Dpi, -0.5f * Dpi);
-            using var dash = SKPathEffect.CreateDash(new[] { 3 * Dpi, 2 * Dpi }, 0);
-            using var paint = new SKPaint { IsAntialias = true, Style = SKPaintStyle.Stroke, StrokeWidth = 1.2f * Dpi, Color = p.Dim, PathEffect = dash };
-            canvas.DrawRoundRect(rect, 3 * Dpi, 3 * Dpi, paint);
+            _dashed.PathEffect = DashEffect(3 * Dpi, 2 * Dpi);
+            _dashed.Color = p.Dim;
+            canvas.DrawRoundRect(rect, 3 * Dpi, 3 * Dpi, _dashed);
         }
 
         private static void FadeEdge(SKCanvas canvas, Palette p, SKRect rect, float width, bool left)

@@ -539,6 +539,9 @@ namespace DBADashGUI.AgentJobs
 
         public DateTime ViewTo => _viewTo;
 
+        /// <summary>The width the time in view is drawn across, in pixels - for a host to judge how much detail shows</summary>
+        public float ChartPixelWidth => ChartWidth;
+
         /// <summary>The whole period the data is for, in the app time zone.</summary>
         public DateTime PeriodFrom => _periodFrom;
 

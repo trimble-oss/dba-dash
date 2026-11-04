@@ -189,6 +189,9 @@ namespace DBADashGUI.AgentJobs
             {
                 if (_actualRuns != null) return _actualRuns;
                 var utcOffset = UtcOffset;
+                // A busy week is hundreds of thousands of runs, nearly all saying the same few things about what started them
+                var texts = new Dictionary<string, string>();
+                string Shared(object value) => value is string s ? texts.TryAdd(s, s) ? s : texts[s] : null;
                 var converted = Data.Tables[2].Rows.Cast<DataRow>()
                     .GroupBy(r => (Guid)r["job_id"])
                     .ToDictionary(g => g.Key, g => (IReadOnlyList<JobRun>)g
@@ -196,7 +199,7 @@ namespace DBADashGUI.AgentJobs
                         {
                             // How the run ended, so the plan colours it as the timeline does, and what started it
                             Status = r["run_status"] == DBNull.Value ? null : Convert.ToInt32(r["run_status"]),
-                            InvokedBy = r["InvokedBy"] as string
+                            InvokedBy = Shared(r["InvokedBy"])
                         })
                         .OrderBy(r => r.Start)
                         .ToList());

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DBADash.JobSchedules
 {
@@ -10,8 +11,10 @@ namespace DBADash.JobSchedules
     /// <para>A schedule that repeats all day at an interval that divides a day keeps the same runs whatever its start time
     /// within one interval, so it's moved by setting the start time to the earliest equivalent one and the end to 23:59:59.
     /// A shift of 25 minutes on an every-10-minutes schedule is the same as 5.</para>
-    /// <para>Moves that would take runs past midnight are refused where that would change the days the schedule runs on
-    /// (every n days, weekly on some days, monthly) or the run window's shape.</para>
+    /// <para>Moves that take runs past midnight move the days too: every n days moves its start date, weekly moves its days
+    /// of the week (Sunday at 00:00 three hours earlier is Saturday at 21:00).  They're refused for monthly schedules,
+    /// whose days can't always move with them, for every n weeks when only some days would cross into another week, and
+    /// where they would change the run window's shape.</para>
     /// </summary>
     public static class AgentScheduleShifter
     {
@@ -29,7 +32,8 @@ namespace DBADash.JobSchedules
         /// <param name="seconds">How far to move its runs: positive is later</param>
         /// <param name="shifted">The schedule with its new start and end time - the original when it can't be moved</param>
         /// <param name="reason">Why it can't be moved.  Null when it can.</param>
-        public static bool TryShift(AgentSchedule schedule, int seconds, out AgentSchedule shifted, out string reason)
+        /// <param name="changeDays">Whether it may change the days the schedule runs on - for a move someone makes, not one suggested</param>
+        public static bool TryShift(AgentSchedule schedule, int seconds, out AgentSchedule shifted, out string reason, bool changeDays = true)
         {
             shifted = schedule;
             reason = null;
@@ -55,31 +59,98 @@ namespace DBADash.JobSchedules
                     shifted = schedule with { ActiveStartTime = ToInt(ScheduleMath.Mod(start + seconds, step)), ActiveEndTime = ToInt(LastSecond) };
                     return true;
                 }
-                var newStart = start + seconds;
-                var newEndRaw = endRaw + seconds;
+                var days = FloorDiv(start + seconds, SecondsPerDay);
+                var newStart = start + seconds - days * SecondsPerDay;
+                var newEndRaw = endRaw + seconds - days * SecondsPerDay;
                 var endLimit = wraps ? 2 * SecondsPerDay : SecondsPerDay;
-                if (newStart < 0 || newStart >= SecondsPerDay || newEndRaw >= endLimit || (wraps && newEndRaw < SecondsPerDay))
+                if (newEndRaw >= endLimit || (wraps && newEndRaw < SecondsPerDay) || (days != 0 && !everyDay && !changeDays))
                 {
                     reason = "It would move the run window past midnight";
                     return false;
                 }
-                shifted = schedule with { ActiveStartTime = ToInt(newStart), ActiveEndTime = ToInt(newEndRaw % SecondsPerDay) };
-                return true;
+                var timed = schedule with { ActiveStartTime = ToInt(newStart), ActiveEndTime = ToInt(newEndRaw % SecondsPerDay) };
+                if (everyDay)
+                {
+                    shifted = timed;
+                    return true;
+                }
+                return TryMoveDays(timed, days, out shifted, out reason);
             }
 
-            var newTime = start + seconds;
-            if (newTime is < 0 or >= SecondsPerDay)
+            var dayMove = FloorDiv(start + seconds, SecondsPerDay);
+            if (dayMove != 0 && !everyDay && !changeDays)
             {
-                if (!everyDay)
-                {
-                    reason = "Moving it past midnight would change the day it runs on";
-                    return false;
-                }
-                newTime = ScheduleMath.Mod(newTime, SecondsPerDay);
+                reason = "Moving it past midnight would change the day it runs on";
+                return false;
             }
-            shifted = schedule with { ActiveStartTime = ToInt(newTime) };
-            return true;
+            var moved = schedule with { ActiveStartTime = ToInt(ScheduleMath.Mod(start + seconds, SecondsPerDay)) };
+            if (everyDay)
+            {
+                shifted = moved;
+                return true;
+            }
+            return TryMoveDays(moved, dayMove, out shifted, out reason);
         }
+
+        /// <summary>
+        /// Moves the days <paramref name="schedule"/> runs on by <paramref name="days"/>: every n days by its start (and end)
+        /// date, weekly by its days of the week.  Every n weeks counts weeks from the week of its start date, so a day that
+        /// crosses into another week moves that week too - which only works when all its days cross: Sunday only, a day
+        /// earlier, is Saturday of the week before.
+        /// </summary>
+        private static bool TryMoveDays(AgentSchedule schedule, int days, out AgentSchedule shifted, out string reason)
+        {
+            shifted = schedule;
+            reason = null;
+            if (days == 0) return true;
+            var startDate = schedule.StartDate.AddDays(days);
+            var endDate = schedule.ActiveEndDate == NoEndDate ? NoEndDate : ToDateInt(schedule.EndDate.AddDays(days));
+            switch (schedule.FrequencyType)
+            {
+                case AgentSchedule.Daily:
+                    shifted = schedule with { ActiveStartDate = ToDateInt(startDate), ActiveEndDate = endDate };
+                    return true;
+
+                case AgentSchedule.Weekly:
+                    if (Math.Abs(days) >= 7)
+                    {
+                        reason = "It would move it a week or more";
+                        return false;
+                    }
+                    var rotated = 0;
+                    var weeks = new HashSet<int>();
+                    for (var d = 0; d < 7; d++)
+                    {
+                        if ((schedule.FrequencyInterval & (1 << d)) == 0) continue;
+                        rotated |= 1 << ScheduleMath.Mod(d + days, 7);
+                        weeks.Add(FloorDiv(d + days, 7));
+                    }
+                    if (schedule.RecurrenceFactor > 1)
+                    {
+                        if (weeks.Count > 1)
+                        {
+                            reason = $"Only some of its days would move into another week, and it runs every {schedule.RecurrenceFactor} weeks";
+                            return false;
+                        }
+                        var week = WeekStart(schedule.StartDate).AddDays(7 * weeks.Single());
+                        if (WeekStart(startDate) != week) startDate = days < 0 ? week.AddDays(6) : week;
+                    }
+                    shifted = schedule with { FrequencyInterval = rotated, ActiveStartDate = ToDateInt(startDate), ActiveEndDate = endDate };
+                    return true;
+
+                default:
+                    reason = "Moving it past midnight would change the day of the month it runs on";
+                    return false;
+            }
+        }
+
+        private const int NoEndDate = 99991231;
+
+        private static DateTime WeekStart(DateTime day) => day.Date.AddDays(-(int)day.DayOfWeek);
+
+        private static int FloorDiv(int value, int divisor) => value >= 0 ? value / divisor : -((-value + divisor - 1) / divisor);
+
+        private static int ToDateInt(DateTime date) => date.Year * 10000 + date.Month * 100 + date.Day;
 
         /// <summary>
         /// The interval, in seconds, of a schedule that repeats all day every day at an interval that divides a day - whose
