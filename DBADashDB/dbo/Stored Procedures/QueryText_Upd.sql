@@ -25,7 +25,7 @@ SELECT sql_handle,
     @InstanceID
 FROM @QueryText t
 WHERE NOT EXISTS(SELECT 1 
-			FROM dbo.QueryText QT
+			FROM dbo.QueryText QT WITH (UPDLOCK, HOLDLOCK)
 			WHERE QT.sql_handle = t.sql_handle
 			)
 

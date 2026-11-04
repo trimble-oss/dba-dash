@@ -332,7 +332,7 @@ JOIN dbo.QueryStatements s WITH (FORCESEEK (PK_QueryStatements (StatementID)))
     AND s.sql_handle = t.sql_handle
 WHERE t.ExampleBatchText IS NOT NULL
 AND NOT EXISTS (SELECT 1
-                FROM dbo.QueryText QT
+                FROM dbo.QueryText QT WITH (UPDLOCK, HOLDLOCK)
                 WHERE QT.sql_handle = t.sql_handle)
 GROUP BY t.sql_handle;
 
