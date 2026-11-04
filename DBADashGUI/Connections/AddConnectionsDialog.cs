@@ -39,8 +39,8 @@ namespace DBADashGUI.Connections
         private readonly Button bttnAdd = new() { Text = "Check && Add...", Location = new Point(844, 302), Size = new Size(130, 36), Anchor = AnchorStyles.Top | AnchorStyles.Right };
         private readonly Button bttnCancel = new() { Text = "Cancel", DialogResult = DialogResult.Cancel, Location = new Point(982, 302), Size = new Size(110, 36), Anchor = AnchorStyles.Top | AnchorStyles.Right };
 
-        /// <summary>The account the selected service runs as, from its last check (null until then, or from an older service)</summary>
-        private string serviceAccount;
+        /// <summary>The account each service runs as (by CollectAgentID), from its last check.  Missing until then, or for an older service.</summary>
+        private readonly Dictionary<int, string> serviceAccounts = new();
 
         /// <summary>Something was added or updated - the tree needs refreshing</summary>
         public bool ConnectionsChanged { get; private set; }
@@ -69,7 +69,17 @@ namespace DBADashGUI.Connections
             bttnBuild.Click += (_, _) => BuildConnectionString();
             var lnkPermissions = new LinkLabel { Text = "Permissions...", Location = new Point(914, 80), AutoSize = true, Anchor = AnchorStyles.Top | AnchorStyles.Right };
             new ToolTip().SetToolTip(lnkPermissions, "Grant the service account the permissions it needs on these instances, connecting from this computer as you");
-            lnkPermissions.LinkClicked += (_, _) => ShowPermissionsHelper(ConnectionLines);
+            lnkPermissions.LinkClicked += (_, _) =>
+            {
+                if (cboService.SelectedItem is AgentItem agent)
+                {
+                    ShowPermissionsHelper(agent, ConnectionLines);
+                }
+                else
+                {
+                    SetStatus("Select the service that will collect the connections", null, DashColors.Warning);
+                }
+            };
             tabConnections.Controls.AddRange(new Control[] { lblConnections, txtConnections, bttnBuild, lnkPermissions });
             tabs.TabPages.Insert(0, tabConnections);
             tabs.SelectedTab = tabConnections;
@@ -99,7 +109,6 @@ namespace DBADashGUI.Connections
                 // Default to the service that collects the most instances
                 cboService.SelectedItem = agents.MaxBy(a => a.InstanceCount);
                 cboService.Enabled = agents.Count > 1;
-                cboService.SelectedIndexChanged += (_, _) => serviceAccount = null;
             }
             catch (Exception ex)
             {
@@ -136,13 +145,8 @@ namespace DBADashGUI.Connections
         /// this computer as the current user (Windows authentication for instance names), so the user needs rights to grant
         /// permissions on the instances.  Returns true if it was shown.
         /// </summary>
-        private bool ShowPermissionsHelper(IReadOnlyCollection<string> lines)
+        private bool ShowPermissionsHelper(AgentItem agent, IReadOnlyCollection<string> lines)
         {
-            if (cboService.SelectedItem is not AgentItem agent)
-            {
-                SetStatus("Select the service that will collect the connections", null, DashColors.Warning);
-                return false;
-            }
             if (lines.Count == 0)
             {
                 tabs.SelectedIndex = 0;
@@ -152,16 +156,14 @@ namespace DBADashGUI.Connections
             try
             {
                 var options = tabs.Options;
-                var sources = new List<DBADashSource>();
-                foreach (var line in lines)
-                {
-                    var src = options.CreateSource(line);
-                    if (src.SourceConnection.Type == DBADashConnection.ConnectionType.SQL)
-                    {
-                        src.SetConnectionIDFromBuilderIfNotSet();
-                        sources.Add(src);
-                    }
-                }
+                // No ConnectionID, so each is listed by its connection string - entries for the same instance (e.g. a different
+                // initial catalog) would share one, and the helper keys its grid on it.
+                var sources = lines
+                    .Select(line => options.CreateSource(line))
+                    .Where(src => src.SourceConnection.Type == DBADashConnection.ConnectionType.SQL)
+                    .Select(src => ResolveLocalNames(src, agent.HostName))
+                    .DistinctBy(src => src.SourceConnection.ConnectionString, StringComparer.Ordinal)
+                    .ToList();
                 if (sources.Count == 0)
                 {
                     SetStatus("None of the connections are SQL Server connections", null, DashColors.Warning);
@@ -178,7 +180,7 @@ namespace DBADashGUI.Connections
                     AllowedCustomProcs = collectAgent.AllowedCustomProcsCSV
                 };
                 // Not a service on this computer, so the helper mustn't look it up.  Unknown until a check reports it - typed in then.
-                using var frm = new PermissionsHelper { Connections = sources, Config = config, ServiceAccount = serviceAccount ?? string.Empty };
+                using var frm = new PermissionsHelper { Connections = sources, Config = config, ServiceAccount = serviceAccounts.GetValueOrDefault(agent.CollectAgentID) ?? string.Empty };
                 frm.ShowDialog(this);
                 return true;
             }
@@ -187,6 +189,35 @@ namespace DBADashGUI.Connections
                 CommonShared.ShowExceptionDialog(ex, "Error loading Permissions Helper");
                 return false;
             }
+        }
+
+        private static readonly HashSet<string> LocalServerNames = new(StringComparer.OrdinalIgnoreCase) { ".", "(local)", "localhost", "127.0.0.1", "::1" };
+
+        /// <summary>
+        /// Instance names like "." or "localhost\INSTANCE" are relative to the service, which might be on another computer:
+        /// the helper connects from this one, so they're changed to the service's host.  Otherwise access would be granted
+        /// on a different instance from the one collected.
+        /// </summary>
+        private static DBADashSource ResolveLocalNames(DBADashSource src, string serviceHost)
+        {
+            if (string.IsNullOrEmpty(serviceHost) || string.Equals(serviceHost, Environment.MachineName, StringComparison.OrdinalIgnoreCase)) return src;
+            var builder = new SqlConnectionStringBuilder(src.SourceConnection.ConnectionString);
+            var dataSource = builder.DataSource.Trim();
+            var protocol = string.Empty;
+            var colon = dataSource.IndexOf(':');
+            if (colon is 2 or 3 && !dataSource.StartsWith("::")) // tcp:, np:, lpc:
+            {
+                protocol = dataSource[..(colon + 1)];
+                dataSource = dataSource[(colon + 1)..];
+            }
+            var hostLength = dataSource.IndexOfAny(new[] { '\\', ',' });
+            var host = hostLength < 0 ? dataSource : dataSource[..hostLength];
+            if (!LocalServerNames.Contains(host)) return src;
+            // Shared memory only works locally
+            if (protocol.Equals("lpc:", StringComparison.OrdinalIgnoreCase)) protocol = string.Empty;
+            builder.DataSource = protocol + serviceHost + (hostLength < 0 ? string.Empty : dataSource[hostLength..]);
+            src.ConnectionString = builder.ConnectionString;
+            return src;
         }
 
         private void SetStatus(string message, string details, Color color)
@@ -281,11 +312,13 @@ namespace DBADashGUI.Connections
                 return;
             }
             AddRepositoryStatus(checks, agent.CollectAgentID);
-            serviceAccount = checks.Select(c => c.ServiceAccount).FirstOrDefault(a => !string.IsNullOrEmpty(a)) ?? serviceAccount;
+            // Kept for the service checked - the selection could have changed while waiting
+            var serviceAccount = checks.Select(c => c.ServiceAccount).FirstOrDefault(a => !string.IsNullOrEmpty(a));
+            if (serviceAccount != null) serviceAccounts[agent.CollectAgentID] = serviceAccount;
             SetStatus($"Checked {checks.Count} connection(s)", null, DashColors.Success);
 
             using var review = new AddConnectionsReviewDialog(checks, agent.DisplayName + (string.IsNullOrEmpty(serviceAccount) ? "" : $" as {serviceAccount}"),
-                failed => ShowPermissionsHelper(failed.Select(i => lines[i]).ToList()));
+                failed => ShowPermissionsHelper(agent, failed.Select(i => lines[i]).ToList()));
             var reviewResult = review.ShowDialog(this);
             if (reviewResult == DialogResult.Retry)
             {
