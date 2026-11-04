@@ -25,7 +25,7 @@ namespace DBADashGUI.AgentJobs
         {
             tsBusy = new ToolStripDropDownButton("Busy Hours")
             {
-                ToolTipText = "When the instance is busy - e.g. weekdays 08:00 to 18:00 - shaded behind the runs.  Set for the instance, a tag or all instances."
+                ToolTipText = "When the instance is busy - e.g. weekdays 08:00 to 18:00 - shaded behind the runs.  Set for the instance, a tag or all instances.  In plan mode, jobs that could run outside them are kept out of them."
             };
             tsShowBusy = new ToolStripMenuItem("Show Busy Hours") { CheckOnClick = true, Checked = true };
             tsShowBusy.CheckedChanged += (_, _) => chart.ShowBusyPeriods = tsShowBusy.Checked;

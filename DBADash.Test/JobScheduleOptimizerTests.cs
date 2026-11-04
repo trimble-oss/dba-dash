@@ -368,5 +368,81 @@ namespace DBADash.Test
             Assert.AreEqual(0, result.ConflictSecAfter);
             Assert.IsTrue(result.Shifts.Values.All(s => s % 60 == 0));
         }
+
+        /// <summary>Busy hours on the given days around <see cref="Monday"/>, as dbo.BusyPeriods_Get expands them</summary>
+        private static BusyPeriods Busy(TimeSpan fromTime, TimeSpan toTime, params DayOfWeek[] days) => BusyPeriodsTests.Busy(Monday, fromTime, toTime, days);
+
+        private static readonly DayOfWeek[] Weekdays = { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday };
+
+        private static ScheduleOptimizerResult OptimizeBusy(IReadOnlyList<JobScheduleInput> jobs, BusyPeriods busy, int maxShift = 12 * 3600, int step = 3600) =>
+            JobScheduleOptimizer.Optimize(jobs, new HashSet<Guid>(), new ScheduleOptimizerOptions { From = Monday, MaxShiftSec = maxShift, StepSec = step, Busy = busy });
+
+        /// <summary>A job that runs once a week at <paramref name="time"/> on the days in <paramref name="dayMask"/> (Sunday = 1 ... Saturday = 64)</summary>
+        private static JobScheduleInput WeeklyAt(string name, int dayMask, int time, int durationSec) => new()
+        {
+            JobId = Guid.NewGuid(),
+            Name = name,
+            ExpectedDurationSec = durationSec,
+            Schedules = new[]
+            {
+                new AgentSchedule { FrequencyType = AgentSchedule.Weekly, FrequencyInterval = dayMask, FrequencyRecurrenceFactor = 1, FrequencySubdayType = AgentSchedule.SubdayAtTime, ActiveStartDate = 20260101, ActiveStartTime = time }
+            }
+        };
+
+        [TestMethod]
+        public void BusyHours_DailyJobMovedOutOfThem()
+        {
+            var job = DailyAt("Index maintenance", 90000, 1800);
+            var result = OptimizeBusy(new[] { job }, Busy(TimeSpan.FromHours(8), TimeSpan.FromHours(18), Weekdays));
+            Assert.IsTrue(result.BusySecBefore > 0);
+            Assert.AreEqual(0, result.BusySecAfter);
+            Assert.IsTrue(result.HasBenefit);
+            Assert.AreEqual(-7200, result.Shifts[job.JobId], "07:00 is the nearest start that finishes before 08:00");
+        }
+
+        [TestMethod]
+        public void BusyHours_Off_DailyJobLeftAlone()
+        {
+            var job = DailyAt("Index maintenance", 90000, 1800);
+            var result = JobScheduleOptimizer.Optimize(new[] { job }, new HashSet<Guid>(),
+                new ScheduleOptimizerOptions { From = Monday, MaxShiftSec = 12 * 3600, StepSec = 3600, Busy = Busy(TimeSpan.FromHours(8), TimeSpan.FromHours(18)), BusyWeight = 0 });
+            Assert.AreEqual(0, result.Shifts.Count);
+            Assert.AreEqual(0, result.BusySecBefore);
+        }
+
+        [TestMethod]
+        public void BusyHours_EveryMinuteJobNotPenalised()
+        {
+            var job = Every("Log shipping", 1, 30);
+            var busy = Busy(TimeSpan.FromHours(8), TimeSpan.FromHours(18), Weekdays);
+            Assert.IsFalse(busy.CanAvoid(job));
+            var result = OptimizeBusy(new[] { job }, busy, maxShift: 3600, step: 60);
+            Assert.AreEqual(0, result.Shifts.Count);
+            Assert.AreEqual(0, result.BusySecBefore, "It can't keep out of busy hours, so isn't counted against them");
+            Assert.AreEqual(0, result.BusyAvoiding.Count);
+        }
+
+        [TestMethod]
+        public void BusyHours_CrossingMidnight()
+        {
+            var job = DailyAt("Nightly ETL", 230000, 1800);
+            var busy = Busy(TimeSpan.FromHours(22), TimeSpan.FromHours(6));
+            Assert.AreEqual(8 * 3600, busy.LongestStretchSec);
+            var result = OptimizeBusy(new[] { job }, busy);
+            Assert.AreEqual(0, result.BusySecAfter);
+            Assert.AreEqual(-7200, result.Shifts[job.JobId], "21:00 finishes before 22:00 - nearer than 06:00");
+        }
+
+        [TestMethod]
+        public void BusyHours_WeekdaysOnly()
+        {
+            var busy = Busy(TimeSpan.FromHours(8), TimeSpan.FromHours(18), Weekdays);
+            var saturday = WeeklyAt("Saturday checkdb", 64, 90000, 1800);
+            var monday = WeeklyAt("Monday checkdb", 2, 90000, 1800);
+            var result = OptimizeBusy(new[] { saturday, monday }, busy);
+            Assert.IsFalse(result.Shifts.ContainsKey(saturday.JobId), "Saturday isn't busy");
+            Assert.AreEqual(-7200, result.Shifts[monday.JobId]);
+            Assert.AreEqual(0, result.BusySecAfter);
+        }
     }
 }

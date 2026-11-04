@@ -25,6 +25,9 @@ namespace DBADashGUI.AgentJobs
         /// <summary>For each job previewed, which of its runs are in busy hours - null for a job not held to them</summary>
         private List<bool[]> _busyRunFlags = new();
 
+        /// <summary>Let Suggest Start Times steer jobs that could out of busy hours</summary>
+        private bool _suggestAvoidsBusy = true;
+
         /// <summary>The Busy Hours button was clicked: the host opens the busy periods editor, and sets <see cref="BusyPeriodsUtc"/> again after</summary>
         public event EventHandler EditBusyHoursRequested;
 
@@ -52,9 +55,22 @@ namespace DBADashGUI.AgentJobs
         private ToolStripItem CreateBusyItem() =>
             new ToolStripButton("Busy Hours...", null, (_, _) => EditBusyHoursRequested?.Invoke(this, EventArgs.Empty))
             {
-                ToolTipText = "When the instance is busy - e.g. weekdays 08:00 to 18:00.  Shaded on the chart; runs of jobs that could run outside them (daily, weekly, or repeating less often than the busy stretch) are outlined in amber when they're in them.  " +
-                              "Jobs that run too often to keep clear aren't counted."
+                ToolTipText = "When the instance is busy - e.g. weekdays 08:00 to 18:00.  Shaded on the chart; runs of jobs that could run outside them (daily, weekly, or repeating less often than the busy stretch) are outlined in amber when they're in them, " +
+                              "and Suggest Start Times moves those jobs out of them.  Jobs that run too often to keep clear aren't counted."
             };
+
+        /// <summary>The menu item on Suggest Start Times' arrow that turns busy hours on or off for the suggestion</summary>
+        private ToolStripMenuItem CreateSuggestBusyItem()
+        {
+            var item = new ToolStripMenuItem("Keep Out of Busy Hours")
+            {
+                CheckOnClick = true,
+                Checked = _suggestAvoidsBusy,
+                ToolTipText = "Move jobs that could run outside busy hours out of them, as well as apart from each other - a second in busy hours costs the same as a second of overlap.  Jobs that run too often to keep clear aren't held to them."
+            };
+            item.CheckedChanged += (_, _) => _suggestAvoidsBusy = item.Checked;
+            return item;
+        }
 
         /// <summary>The Busy Hours column's runs, and the change from before the moves - for a job held to busy hours</summary>
         private void SetBusyCells(DataRow r, JobScheduleInput job, bool included, bool anyMoves)

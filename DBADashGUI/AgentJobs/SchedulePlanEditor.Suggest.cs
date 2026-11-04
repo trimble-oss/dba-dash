@@ -70,7 +70,7 @@ namespace DBADashGUI.AgentJobs
             var gapItem = new ToolStripMenuItem { ToolTipText = "Time to leave after a run before another job starts" };
             FillChoices(gapItem, "Gap", _gapSec, v => _gapSec = v,
                 (0, "None"), (30, "30 seconds"), (60, "1 minute"), (300, "5 minutes"));
-            _suggest.DropDownItems.AddRange(new ToolStripItem[] { maxItem, gapItem });
+            _suggest.DropDownItems.AddRange(new ToolStripItem[] { maxItem, gapItem, CreateSuggestBusyItem() });
             var sharedButton = new ToolStripDropDownButton
             {
                 ToolTipText = "Jobs that share a schedule start together, and moving the schedule moves them all.  " +
@@ -115,9 +115,11 @@ namespace DBADashGUI.AgentJobs
                 _suggestCancel.Cancel();
                 return;
             }
-            if (_plan.IncludedJobs.Count < 2)
+            // One job can still be moved out of busy hours
+            var busy = _suggestAvoidsBusy ? Busy : BusyPeriods.None;
+            if (_plan.IncludedJobs.Count < (busy.IsEmpty ? 2 : 1))
             {
-                _whatIfWarning = "Tick at least two jobs to preview, then suggest start times for them.";
+                _whatIfWarning = busy.IsEmpty ? "Tick at least two jobs to preview, then suggest start times for them." : "Tick jobs to preview, then suggest start times for them.";
                 RefreshWhatIf();
                 return;
             }
@@ -127,7 +129,8 @@ namespace DBADashGUI.AgentJobs
                 MaxShiftSec = _maxShiftSec,
                 StepSec = SuggestStepSec,
                 MinGapSec = _gapSec,
-                SplitSharedSchedules = _splitShared
+                SplitSharedSchedules = _splitShared,
+                Busy = busy
             };
 
             using var cancel = new CancellationTokenSource();
@@ -179,13 +182,16 @@ namespace DBADashGUI.AgentJobs
             var notes = result.Notes.ToDictionary(n => n.Key, n => n.Value.ToList());
             var text = new StringBuilder();
 
-            if (result.ConflictSecBefore == 0)
+            var busyText = result.BusyAvoiding.Count == 0 ? "" : " or busy hours";
+            if (result.CostBefore == 0)
             {
-                text.Append($"These jobs aren't expected to run into each other over {period}{gap}.  Nothing to move.");
+                text.Append($"These jobs aren't expected to run into each other{busyText} over {period}{gap}.  Nothing to move.");
             }
             else if (!result.HasBenefit)
             {
-                text.Append($"No moves found that reduce the {Format(result.ConflictSecBefore)} these jobs run into each other over {period}{gap}, so nothing was moved.");
+                text.Append($"No moves found that reduce the {Format(result.ConflictSecBefore)} these jobs run into each other" +
+                            (result.BusySecBefore > 0 ? $", or the {Format(result.BusySecBefore)} they run in busy hours," : "") +
+                            $" over {period}{gap}, so nothing was moved.");
             }
             else
             {
@@ -201,9 +207,11 @@ namespace DBADashGUI.AgentJobs
                     list.Insert(0, note);
                 }
                 var copies = applied.OwnSchedule.Count;
-                var less = (result.ConflictSecBefore - result.ConflictSecAfter) / result.ConflictSecBefore;
+                var less = result.ConflictSecBefore == 0 ? 0 : (result.ConflictSecBefore - result.ConflictSecAfter) / result.ConflictSecBefore;
                 text.Append($"Suggested changes for {Jobs(applied.Changed.Count)}" + (copies > 0 ? $" (giving {OwnCopy(copies)} of a shared schedule)" : "") +
-                            $": over {period} they'd run into each other for {Format(result.ConflictSecAfter)} instead of {Format(result.ConflictSecBefore)}, {less:P0} less{gap}.");
+                            $": over {period} they'd run into each other for {Format(result.ConflictSecAfter)} instead of {Format(result.ConflictSecBefore)}" +
+                            (result.ConflictSecBefore > 0 ? $", {less:P0} less" : "") + gap +
+                            (result.BusySecBefore > 0 ? $", and run in busy hours for {Format(result.BusySecAfter)} instead of {Format(result.BusySecBefore)}" : "") + ".");
                 if (applied.Refused.Count > 0) text.Append($"  Not moved: {string.Join(", ", applied.Refused)}.");
             }
 
