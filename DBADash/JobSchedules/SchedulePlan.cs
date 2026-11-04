@@ -641,6 +641,26 @@ namespace DBADash.JobSchedules
         public IReadOnlyList<JobRun> ActualRuns(JobScheduleInput job, bool moved, DateTime from, DateTime to) =>
             Cached(job, true, moved, from, to, () => WorkOutActualRuns(job, moved, from, to));
 
+        /// <summary>
+        /// The job's runs (<see cref="ActualRuns"/>) that fall in busy hours, moved as planned or as they are.  Nothing for a
+        /// job that couldn't keep clear of them whatever its start time (<see cref="BusyPeriods.CanAvoid"/>), so a job that
+        /// runs every minute isn't counted against them.
+        /// </summary>
+        public BusyAmount InBusyHours(JobScheduleInput job, BusyPeriods busy, bool moved, DateTime from, DateTime to) =>
+            busy.CanAvoid(job) ? busy.Measure(ActualRuns(job, moved, from, to)) : default;
+
+        /// <summary>
+        /// Included jobs that could keep clear of busy hours, which the planned moves put more runs or time into them - for
+        /// the plan to caution about
+        /// </summary>
+        public List<JobScheduleInput> MovedIntoBusyHours(BusyPeriods busy, DateTime from, DateTime to) =>
+            IncludedJobs.Where(j => IsMoved(j) && busy.CanAvoid(j)).Where(j =>
+            {
+                var before = busy.Measure(ActualRuns(j, false, from, to));
+                var after = busy.Measure(ActualRuns(j, true, from, to));
+                return after.Runs > before.Runs || after.Seconds > before.Seconds + ScheduleOptimizerResult.Tolerance;
+            }).ToList();
+
         /// <summary>The runs the job's schedules predict, with its planned moves (<paramref name="moved"/>) or as they are.  Shared, like <see cref="ActualRuns"/>.</summary>
         public IReadOnlyList<JobRun> PredictedRuns(JobScheduleInput job, bool moved, DateTime from, DateTime to) =>
             Cached(job, false, moved, from, to, () => Predict(job, moved, from, to));
