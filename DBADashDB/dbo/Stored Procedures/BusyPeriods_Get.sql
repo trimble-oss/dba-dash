@@ -83,15 +83,18 @@ AND C.EndUtc > @FromDate
 ORDER BY C.StartUtc
 OPTION (MAXRECURSION 0);
 
-/* The periods themselves, for the editor: the instance's own, its tags' and all instances', with whether each applies.
-   Periods at a less specific level than @Level are listed so they can still be edited, but don't apply to this instance. */
+/* Every configured period, for the editor.  Relevant: it's the instance's own, for one of its tags or for all instances (Source says which).
+   Applies: it's at the level the instance uses - periods at a less specific level are overridden.  Periods for other instances or tags are
+   listed so they can be seen and edited from here too. */
 SELECT BP.BusyPeriodID,
 	BP.ApplyToInstanceID,
 	BP.ApplyToTagID,
 	T.TagName,
 	T.TagValue,
+	I.InstanceDisplayName,
 	CHOOSE(L.SourceLevel, 'Instance', 'Tag', 'All') AS Source,
 	CAST(CASE WHEN L.SourceLevel = @Level THEN 1 ELSE 0 END AS BIT) AS Applies,
+	CAST(CASE WHEN L.SourceLevel IS NULL THEN 0 ELSE 1 END AS BIT) AS Relevant,
 	BP.Monday, BP.Tuesday, BP.Wednesday, BP.Thursday, BP.Friday, BP.Saturday, BP.Sunday,
 	BP.TimeFrom,
 	BP.TimeTo,
@@ -103,5 +106,5 @@ CROSS APPLY(SELECT CASE WHEN BP.ApplyToInstanceID = @InstanceID THEN 1
 						WHEN BP.ApplyToInstanceID = -1 AND BP.ApplyToTagID = -1 THEN 3
 					END AS SourceLevel) L
 LEFT JOIN dbo.Tags T ON T.TagID = BP.ApplyToTagID
-WHERE L.SourceLevel IS NOT NULL
-ORDER BY L.SourceLevel, BP.TimeFrom, BP.BusyPeriodID;
+LEFT JOIN dbo.Instances I ON I.InstanceID = BP.ApplyToInstanceID
+ORDER BY CASE WHEN L.SourceLevel IS NULL THEN 4 ELSE L.SourceLevel END, BP.TimeFrom, BP.BusyPeriodID;

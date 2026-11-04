@@ -32,6 +32,7 @@ namespace DBADashGUI.AgentJobs
         };
         private readonly Button _edit = new() { Text = "Edit...", AutoSize = true };
         private readonly Button _delete = new() { Text = "Delete", AutoSize = true };
+        private readonly CheckBox _showAll = new() { Text = "Show all configured periods, including other instances' and tags'", AutoSize = true, Dock = DockStyle.Top, Padding = new Padding(8, 0, 8, 4) };
         private DataTable _periods;
 
         /// <summary>Periods were added, changed, deleted or copied - the host loads them again</summary>
@@ -70,7 +71,9 @@ namespace DBADashGUI.AgentJobs
 
             var buttons = new FlowLayoutPanel { Dock = DockStyle.Bottom, AutoSize = true, FlowDirection = FlowDirection.LeftToRight, Padding = new Padding(4) };
             buttons.Controls.AddRange(new Control[] { add, _edit, _delete, copy, close });
+            _showAll.CheckedChanged += (_, _) => ShowPeriods();
             Controls.Add(_grid);
+            Controls.Add(_showAll);
             Controls.Add(_applies);
             Controls.Add(buttons);
             AcceptButton = close;
@@ -91,40 +94,48 @@ namespace DBADashGUI.AgentJobs
                 var now = DateTime.UtcNow;
                 var (_, periods) = await Task.Run(() => BusyPeriodsData.Get(_instanceId, now, now));
                 _periods = periods;
-                var shown = new DataTable();
-                shown.Columns.Add("BusyPeriodID", typeof(int));
-                shown.Columns.Add("Applies To", typeof(string));
-                shown.Columns.Add("In Use", typeof(bool));
-                shown.Columns.Add("Days", typeof(string));
-                shown.Columns.Add("From", typeof(string));
-                shown.Columns.Add("To", typeof(string));
-                shown.Columns.Add("Time Zone", typeof(string));
-                shown.Columns.Add("Description", typeof(string));
-                foreach (DataRow r in periods.Rows)
-                {
-                    var period = BusyPeriod.FromRow(r, _instanceId);
-                    var appliesTo = period.ApplyTo switch
-                    {
-                        BusyPeriodScope.ThisInstance => _instanceName,
-                        BusyPeriodScope.Tag => "Tag " + period.ApplyToTag,
-                        _ => "All instances"
-                    };
-                    var crossesMidnight = period.TimeTo < period.TimeFrom ? " (next day)" : "";
-                    shown.Rows.Add(period.BusyPeriodID, appliesTo, r.Field<bool>("Applies"), Days(period),
-                        period.TimeFrom?.ToString("t", CultureInfo.CurrentCulture), period.TimeTo?.ToString("t", CultureInfo.CurrentCulture) + crossesMidnight,
-                        period.TimeZone.Id, period.Description);
-                }
-                _grid.DataSource = shown;
-                _grid.Columns["BusyPeriodID"]!.Visible = false;
-                _grid.Columns["Description"]!.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+                ShowPeriods();
                 _applies.Text = AppliesText(periods);
-                _edit.Enabled = _delete.Enabled = Selected != null;
             }
             catch (Exception ex)
             {
                 _applies.Text = "Couldn't load the busy periods: " + ex.Message;
                 _applies.ForeColor = DashColors.Fail;
             }
+        }
+
+        /// <summary>The periods in the grid: those relevant to the instance, or all of them with Show all</summary>
+        private void ShowPeriods()
+        {
+            if (_periods == null) return;
+            var shown = new DataTable();
+            shown.Columns.Add("BusyPeriodID", typeof(int));
+            shown.Columns.Add("Applies To", typeof(string));
+            shown.Columns.Add("In Use", typeof(bool));
+            shown.Columns.Add("Days", typeof(string));
+            shown.Columns.Add("From", typeof(string));
+            shown.Columns.Add("To", typeof(string));
+            shown.Columns.Add("Time Zone", typeof(string));
+            shown.Columns.Add("Description", typeof(string));
+            foreach (DataRow r in _periods.Rows.Cast<DataRow>().Where(r => _showAll.Checked || r.Field<bool>("Relevant")))
+            {
+                var period = BusyPeriod.FromRow(r, _instanceId);
+                var appliesTo = period.ApplyTo switch
+                {
+                    BusyPeriodScope.ThisInstance => r["InstanceDisplayName"] as string ?? _instanceName,
+                    BusyPeriodScope.Tag => "Tag " + period.ApplyToTag,
+                    _ => "All instances"
+                };
+                var crossesMidnight = period.TimeTo < period.TimeFrom ? " (next day)" : "";
+                shown.Rows.Add(period.BusyPeriodID, appliesTo, r.Field<bool>("Applies"), Days(period),
+                    period.TimeFrom?.ToString("t", CultureInfo.CurrentCulture), period.TimeTo?.ToString("t", CultureInfo.CurrentCulture) + crossesMidnight,
+                    period.TimeZone.Id, period.Description);
+            }
+            _grid.DataSource = shown;
+            _grid.Columns["BusyPeriodID"]!.Visible = false;
+            _grid.Columns["Description"]!.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            _grid.Columns["In Use"]!.ToolTipText = $"Used for {_instanceName}.  Unticked: overridden by a more specific level, or for another instance or tag.";
+            _edit.Enabled = _delete.Enabled = Selected != null;
         }
 
         /// <summary>Which level's periods the instance uses, and that the others are listed only to edit</summary>
@@ -138,7 +149,7 @@ namespace DBADashGUI.AgentJobs
                 "All" => $"{_instanceName} has no periods of its own or for its tags, so it uses those for all instances.",
                 _ => $"No busy periods apply to {_instanceName}.  Add one - e.g. weekdays 08:00 to 18:00 - to shade it on the timeline and keep jobs out of it in plan mode."
             };
-            if (periods.Rows.Cast<DataRow>().Any(r => !r.Field<bool>("Applies")))
+            if (periods.Rows.Cast<DataRow>().Any(r => r.Field<bool>("Relevant") && !r.Field<bool>("Applies")))
             {
                 text += "  Periods not In Use are overridden by a more specific level: an instance's own periods replace its tags', which replace all instances'.";
             }
@@ -169,6 +180,11 @@ namespace DBADashGUI.AgentJobs
                 await period.Save();
                 Changed = true;
                 await LoadPeriods();
+                // A period for another instance or tag is saved, but isn't listed for this one: show all, so it's seen
+                if (!_showAll.Checked && _periods?.Rows.Cast<DataRow>().Any(r => r.Field<int>("BusyPeriodID") == period.BusyPeriodID && !r.Field<bool>("Relevant")) == true)
+                {
+                    _showAll.Checked = true;
+                }
             }
             catch (Exception ex)
             {
