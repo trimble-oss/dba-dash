@@ -90,10 +90,13 @@ namespace DBADashGUI.AgentJobs
         private async void LoadPlanBusy()
         {
             if (planEditor == null) return;
+            // Dropped if the plan loads again (it fetches its own), leaves plan mode or moves to another instance meanwhile
+            var (generation, editor, instanceId) = (planGeneration, planEditor, InstanceId);
             var (fromUtc, toUtc, _) = PlanPeriodUtc();
             var (busyFrom, busyTo) = PlanBusyRange(fromUtc, toUtc);
-            var busy = await FetchBusyUtc(InstanceId, busyFrom, busyTo);
-            if (planEditor != null) planEditor.BusyPeriodsUtc = busy;
+            var busy = await FetchBusyUtc(instanceId, busyFrom, busyTo);
+            if (generation != planGeneration || !PlanMode || !ReferenceEquals(editor, planEditor) || instanceId != InstanceId) return;
+            planEditor.BusyPeriodsUtc = busy;
         }
     }
 }

@@ -16,8 +16,13 @@ namespace DBADashGUI.AgentJobs
     {
         private IReadOnlyList<(DateTime Start, DateTime End)> _busyUtc = Array.Empty<(DateTime Start, DateTime End)>();
 
-        /// <summary>The busy intervals in server time, like the schedules and runs - made again when the server's UTC offset changes</summary>
-        private BusyPeriods _busy;
+        /// <summary>
+        /// The busy intervals in server time, like the schedules and runs - for the runs that happened (by the server's clock
+        /// then) and for predicted runs (by its clock now).  Made again when the offset, clock change or periods change.
+        /// </summary>
+        private BusyPeriods _busyRan;
+
+        private BusyPeriods _busyNow;
 
         /// <summary>Jobs that could keep clear of busy hours that the moves put into them, for the caution and their notes</summary>
         private HashSet<Guid> _movedIntoBusy = new();
@@ -42,15 +47,36 @@ namespace DBADashGUI.AgentJobs
             set
             {
                 _busyUtc = value ?? Array.Empty<(DateTime Start, DateTime End)>();
-                _busy = null;
+                ResetBusy();
                 RefreshWhatIf();
             }
         }
 
-        /// <summary>The busy intervals in server time: UTC less the server's offset, as <see cref="ToUtc"/> adds it</summary>
-        private BusyPeriods Busy => _busy ??= _busyUtc.Count == 0
+        private void ResetBusy() => (_busyRan, _busyNow) = (null, null);
+
+        /// <summary>
+        /// A UTC time in server time - the inverse of <see cref="ToUtc"/>.  For the runs that happened (<paramref name="ran"/>),
+        /// a time before a clock change is by the server's clock then, so it's moved by the change as their runs are.
+        /// </summary>
+        private DateTime ToServer(DateTime utc, bool ran)
+        {
+            var server = utc.AddMinutes(-_whatIfUtcOffset);
+            if (ran && _clockChange is { } c && server.AddMinutes(c.Minutes) < c.Until) server = server.AddMinutes(c.Minutes);
+            return server;
+        }
+
+        private BusyPeriods MakeBusy(bool ran) => _busyUtc.Count == 0
             ? BusyPeriods.None
-            : new BusyPeriods(_busyUtc.Select(b => new BusyInterval(b.Start.AddMinutes(-_whatIfUtcOffset), b.End.AddMinutes(-_whatIfUtcOffset))));
+            : new BusyPeriods(_busyUtc.Select(b => new BusyInterval(ToServer(b.Start, ran), ToServer(b.End, ran))));
+
+        /// <summary>Busy hours for the runs that happened over the selected range - the grid, the cautions and the notes count those</summary>
+        private BusyPeriods Busy => _busyRan ??= MakeBusy(true);
+
+        /// <summary>Busy hours for predicted runs, by the server's clock now - the predicted preview and Suggest Start Times</summary>
+        private BusyPeriods BusyNow => _busyNow ??= MakeBusy(false);
+
+        /// <summary>Busy hours for the runs previewed: those that happened, or those predicted</summary>
+        private BusyPeriods PreviewBusy => PreviewActual ? Busy : BusyNow;
 
         private ToolStripItem CreateBusyItem() =>
             new ToolStripButton("Busy Hours...", null, (_, _) => EditBusyHoursRequested?.Invoke(this, EventArgs.Empty))
@@ -97,13 +123,13 @@ namespace DBADashGUI.AgentJobs
             var count = 0;
             for (var i = 0; i < runs.Count; i++)
             {
-                if (!Busy.CanAvoid(included[i]))
+                if (!PreviewBusy.CanAvoid(included[i]))
                 {
                     _busyRunFlags.Add(null);
                     continue;
                 }
                 var flags = new bool[runs[i].Count];
-                count += Busy.Measure(runs[i], flags).Runs;
+                count += PreviewBusy.Measure(runs[i], flags).Runs;
                 _busyRunFlags.Add(flags);
             }
             return count;
@@ -124,17 +150,22 @@ namespace DBADashGUI.AgentJobs
         private void ShowBusyOnChart()
         {
             if (_preview == null) return;
-            _preview.BusyPeriods = Busy.Intervals.Select(b => (Display(b.Start), Display(b.End))).ToList();
+            // Display takes them back by the same clock as the runs previewed
+            _preview.BusyPeriods = PreviewBusy.Intervals.Select(b => (Display(b.Start), Display(b.End))).ToList();
         }
 
-        /// <summary>Runs in busy hours for the summary: "3 runs of jobs that could avoid them in busy hours (was 5)."</summary>
-        private string BusySummary(List<JobScheduleInput> included, bool anyMoves)
+        /// <summary>
+        /// Runs in busy hours for the summary, among the runs previewed - like the legend: "3 runs of jobs that could avoid
+        /// them in busy hours (was 5)."
+        /// </summary>
+        private string BusySummary(List<JobScheduleInput> included, DateTime from, DateTime to, bool anyMoves)
         {
-            if (Busy.IsEmpty) return "";
-            var holding = included.Where(Busy.CanAvoid).ToList();
+            var busy = PreviewBusy;
+            if (busy.IsEmpty) return "";
+            var holding = included.Where(busy.CanAvoid).ToList();
             if (holding.Count == 0) return "No previewed job could keep clear of busy hours, so none are held to them.  ";
-            var after = holding.Sum(j => _plan.InBusyHours(j, Busy, true, _rangeFrom, _rangeTo).Runs);
-            var before = anyMoves ? holding.Sum(j => _plan.InBusyHours(j, Busy, false, _rangeFrom, _rangeTo).Runs) : after;
+            var after = holding.Sum(j => busy.Measure(PreviewRunsOf(j, true, from, to)).Runs);
+            var before = anyMoves ? holding.Sum(j => busy.Measure(PreviewRunsOf(j, false, from, to)).Runs) : after;
             return $"{after:N0} runs of jobs that could avoid them in busy hours" + (anyMoves && before != after ? $" (was {before:N0})" : "") + ".  ";
         }
 

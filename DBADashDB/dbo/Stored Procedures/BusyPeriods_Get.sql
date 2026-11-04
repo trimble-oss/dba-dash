@@ -44,9 +44,10 @@ DECLARE @Level TINYINT = CASE WHEN EXISTS(SELECT 1 FROM dbo.BusyPeriod BP WHERE 
 	AND BP.ApplyToInstanceID = -1
 	AND BP.ApplyToTagID = -1
 ),
-/* One row per calendar date, from the day before the range to the day after it, so periods that start or end across the range edges are kept */
+/* One row per local calendar date that could reach the range.  A local date is up to 12 hours behind UTC, and a period crossing midnight
+   runs into the next day, so a period from 3 days before the range's UTC date can still end in it.  Ahead of UTC, a day after is enough. */
 Days AS(
-	SELECT CAST(DATEADD(DAY, -1, CAST(@FromDate AS DATE)) AS DATE) AS BusyDate
+	SELECT CAST(DATEADD(DAY, -3, CAST(@FromDate AS DATE)) AS DATE) AS BusyDate
 	UNION ALL
 	SELECT DATEADD(DAY, 1, BusyDate)
 	FROM Days
