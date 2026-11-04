@@ -32,7 +32,7 @@ namespace DBADash.Test
         public void Apply_ChecksThenUpdates()
         {
             var script = AgentScheduleScripter.Build(new[] { Moved(Every15, 120, "ETL load") }, "SQL01", new DateTime(2026, 11, 1, 12, 0, 0)).Script;
-            StringAssert.Contains(script, $"INSERT INTO @Schedules VALUES('{Uid}', N'Every 15 min', 4, 1, 4, 15, 0, 0, {Every15.ActiveStartDate}, {Every15.ActiveEndDate}, 1, 0, 235959, 200, 235959)");
+            StringAssert.Contains(script, $"INSERT INTO @Schedules VALUES('{Uid}', N'Every 15 min', 4, 1, 4, 15, 0, 0, {Every15.ActiveStartDate}, {Every15.ActiveEndDate}, 1, 0, 235959, 200, 235959, 1, {Every15.ActiveStartDate}, {Every15.ActiveEndDate})");
             // How often and when it runs must be as collected too, not just its times
             foreach (var column in new[] { "freq_type", "freq_interval", "freq_subday_type", "freq_subday_interval", "freq_relative_interval", "freq_recurrence_factor", "active_start_date", "active_end_date", "enabled" })
             {
@@ -62,6 +62,20 @@ namespace DBADash.Test
 
             var script = AgentScheduleScripter.Build(new[] { Moved(Every15, 120, "ETL load") }, "SQL01", new DateTime(2026, 11, 1, 12, 0, 0)).Script;
             Assert.IsFalse(script.Contains("@freq_interval = "), "A move within the day leaves its days alone");
+        }
+
+        [TestMethod]
+        public void WholeDayMove_IsScripted()
+        {
+            // Every 2 days moved a day on: the times are the same, the start date isn't
+            var everyOther = new AgentSchedule
+            {
+                Name = "Every other day", FrequencyType = AgentSchedule.Daily, FrequencyInterval = 2,
+                FrequencySubdayType = AgentSchedule.SubdayAtTime, ActiveStartDate = 20260104, ActiveStartTime = 10000, ScheduleUid = Uid
+            };
+            var build = AgentScheduleScripter.Build(new[] { Moved(everyOther, 86400, "Purge") }, "SQL01", new DateTime(2026, 11, 1, 12, 0, 0));
+            Assert.AreEqual(1, build.Changes);
+            StringAssert.Contains(build.Script, "@active_start_time = 10000, @active_end_time = 235959, @freq_interval = 2, @active_start_date = 20260105");
         }
 
         [TestMethod]
@@ -134,7 +148,7 @@ namespace DBADash.Test
             StringAssert.Contains(undo, $"EXEC @rc = msdb.dbo.sp_detach_schedule @job_id = '{jobId}', @schedule_id = @new_schedule_id, @delete_unused_schedule = 1");
             StringAssert.Contains(script, "not found - have the changes been made?");
             // The copy is deleted on rolling back, so it must be just as the changes left it
-            StringAssert.Contains(script, $"\t\tOR SS.active_end_date <> SP.active_end_date{Environment.NewLine}\t\tOR SS.enabled <> SP.enabled)");
+            StringAssert.Contains(script, $"\t\tOR SS.active_end_date <> SP.new_active_end_date{Environment.NewLine}\t\tOR SS.enabled <> SP.enabled)");
             Assert.IsFalse(undo.Contains("sp_add_schedule"));
         }
 
@@ -145,12 +159,13 @@ namespace DBADash.Test
             var split = new ScheduleSplit(Every15 with { ActiveStartDate = 20260101 }, copy, Guid.NewGuid(), "ETL load", Guid.NewGuid());
             var script = AgentScheduleScripter.Build(Array.Empty<ScheduleChange>(), new[] { split }, "SQL01", DateTime.UtcNow).Script;
             // The copy is made from these, so a change to any of them since stops the script
-            StringAssert.Contains(script, ", 4, 1, 4, 15, 0, 0, 20260101, 99991231, 1, 0, 235959, 500, 235959)");
+            StringAssert.Contains(script, ", 4, 1, 4, 15, 0, 0, 20260101, 99991231, 1, 0, 235959, 500, 235959, 1, ");
             foreach (var column in new[] { "freq_relative_interval", "freq_recurrence_factor", "active_start_date", "active_end_date", "enabled" })
             {
                 StringAssert.Contains(script, $"OR SS.{column} <> SP.{column}");
             }
-            StringAssert.Contains(script, "AND (SS.active_start_time <> SP.expected_start_time OR SS.active_end_time <> SP.expected_end_time))");
+            StringAssert.Contains(script, "AND (SS.active_start_time <> SP.expected_start_time OR SS.active_end_time <> SP.expected_end_time");
+            StringAssert.Contains(script, "OR SS.freq_interval <> SP.freq_interval OR SS.active_start_date <> SP.active_start_date OR SS.active_end_date <> SP.active_end_date))");
         }
 
         [TestMethod]

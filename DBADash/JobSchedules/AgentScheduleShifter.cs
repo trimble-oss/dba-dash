@@ -132,8 +132,13 @@ namespace DBADash.JobSchedules
                             reason = $"Only some of its days would move into another week, and it runs every {schedule.RecurrenceFactor} weeks";
                             return false;
                         }
-                        var week = WeekStart(schedule.StartDate).AddDays(7 * weeks.Single());
-                        if (WeekStart(startDate) != week) startDate = days < 0 ? week.AddDays(6) : week;
+                        // Weeks are counted from the week of the start date, so it becomes the day of the first run, moved:
+                        // the first run is a whole number of cycles from the start week, and every run moves into the
+                        // same week as it - so the weeks it runs in stay in step, and no run is gained or lost around the
+                        // start.  Every 2 weeks on Mon/Wed from Sunday the 4th, an hour earlier, starts on Sunday the 4th
+                        // (Monday's run at 23:00 the day before); every 2 weeks on Sunday from Monday the 5th first runs
+                        // on the 18th, so a day earlier it starts on Saturday the 17th, not the 3rd.
+                        if (FirstRunDay(schedule) is { } firstRun) startDate = firstRun.AddDays(days);
                     }
                     shifted = schedule with { FrequencyInterval = rotated, ActiveStartDate = ToDateInt(startDate), ActiveEndDate = endDate };
                     return true;
@@ -147,6 +152,17 @@ namespace DBADash.JobSchedules
         private const int NoEndDate = 99991231;
 
         private static DateTime WeekStart(DateTime day) => day.Date.AddDays(-(int)day.DayOfWeek);
+
+        /// <summary>The first day a weekly schedule runs on, from its start date - null when it has no days</summary>
+        private static DateTime? FirstRunDay(AgentSchedule schedule)
+        {
+            var startWeek = WeekStart(schedule.StartDate);
+            for (var day = schedule.StartDate.Date; day < schedule.StartDate.Date.AddDays(7 * schedule.RecurrenceFactor); day = day.AddDays(1))
+            {
+                if ((schedule.FrequencyInterval & (1 << (int)day.DayOfWeek)) != 0 && (WeekStart(day) - startWeek).Days / 7 % schedule.RecurrenceFactor == 0) return day;
+            }
+            return null;
+        }
 
         private static int FloorDiv(int value, int divisor) => value >= 0 ? value / divisor : -((-value + divisor - 1) / divisor);
 

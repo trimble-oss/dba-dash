@@ -63,7 +63,8 @@ namespace DBADash.JobSchedules
             var list = new List<ScheduleChange>();
             foreach (var c in changes)
             {
-                if (c.Original.ActiveStartTime == c.Proposed.ActiveStartTime && c.Original.ActiveEndTime == c.Proposed.ActiveEndTime) continue;
+                // A move of whole days changes only the days or dates
+                if (c.Original.ActiveStartTime == c.Proposed.ActiveStartTime && c.Original.ActiveEndTime == c.Proposed.ActiveEndTime && SameDays(c.Original, c.Proposed)) continue;
                 if (c.Original.Uid is null)
                 {
                     skipped.Add($"{c.Original.Name} ({string.Join(", ", c.JobNames)}): no schedule_uid to find it by");
@@ -131,7 +132,10 @@ namespace DBADash.JobSchedules
             sb.AppendLine("\texpected_start_time INT NOT NULL,");
             sb.AppendLine("\texpected_end_time INT NOT NULL,");
             sb.AppendLine("\tnew_start_time INT NOT NULL,");
-            sb.AppendLine("\tnew_end_time INT NOT NULL");
+            sb.AppendLine("\tnew_end_time INT NOT NULL,");
+            sb.AppendLine("\tnew_freq_interval INT NOT NULL,");
+            sb.AppendLine("\tnew_active_start_date INT NOT NULL,");
+            sb.AppendLine("\tnew_active_end_date INT NOT NULL");
             sb.AppendLine(")");
             sb.AppendLine("DECLARE @ScheduleJobs TABLE(schedule_uid UNIQUEIDENTIFIER NOT NULL, job_id UNIQUEIDENTIFIER NOT NULL, PRIMARY KEY(schedule_uid, job_id))");
             sb.AppendLine("DECLARE @Splits TABLE(");
@@ -153,7 +157,10 @@ namespace DBADash.JobSchedules
             sb.AppendLine("\texpected_start_time INT NOT NULL,");
             sb.AppendLine("\texpected_end_time INT NOT NULL,");
             sb.AppendLine("\tnew_start_time INT NOT NULL,");
-            sb.AppendLine("\tnew_end_time INT NOT NULL");
+            sb.AppendLine("\tnew_end_time INT NOT NULL,");
+            sb.AppendLine("\tnew_freq_interval INT NOT NULL,");
+            sb.AppendLine("\tnew_active_start_date INT NOT NULL,");
+            sb.AppendLine("\tnew_active_end_date INT NOT NULL");
             sb.AppendLine(")");
             sb.AppendLine();
             foreach (var c in changes)
@@ -164,7 +171,8 @@ namespace DBADash.JobSchedules
                               $"'{uid}', N'{Literal(c.Original.Name)}', {c.Original.FrequencyType}, {c.Original.FrequencyInterval}, " +
                               $"{c.Original.FrequencySubdayType}, {c.Original.FrequencySubdayInterval}, " +
                               $"{c.Original.FrequencyRelativeInterval}, {c.Original.FrequencyRecurrenceFactor}, {c.Original.ActiveStartDate}, {c.Original.ActiveEndDate}, {(c.Original.Enabled ? 1 : 0)}, " +
-                              $"{c.Original.ActiveStartTime}, {c.Original.ActiveEndTime}, {c.Proposed.ActiveStartTime}, {c.Proposed.ActiveEndTime})");
+                              $"{c.Original.ActiveStartTime}, {c.Original.ActiveEndTime}, {c.Proposed.ActiveStartTime}, {c.Proposed.ActiveEndTime}, " +
+                              $"{c.Proposed.FrequencyInterval}, {c.Proposed.ActiveStartDate}, {c.Proposed.ActiveEndDate})");
                 foreach (var jobId in c.JobIds.Distinct()) sb.AppendLine($"INSERT INTO @ScheduleJobs VALUES('{uid}', '{jobId}')");
             }
             foreach (var s in splits)
@@ -174,14 +182,17 @@ namespace DBADash.JobSchedules
                               $"'{s.JobId}', N'{Literal(s.JobName)}', '{s.Original.Uid.Value}', N'{Literal(s.Original.Name)}', '{s.NewScheduleUid}', N'{Literal(s.NewName)}', " +
                               $"{s.Original.FrequencyType}, {s.Original.FrequencyInterval}, {s.Original.FrequencySubdayType}, {s.Original.FrequencySubdayInterval}, " +
                               $"{s.Original.FrequencyRelativeInterval}, {s.Original.FrequencyRecurrenceFactor}, {s.Original.ActiveStartDate}, {s.Original.ActiveEndDate}, {(s.Original.Enabled ? 1 : 0)}, " +
-                              $"{s.Original.ActiveStartTime}, {s.Original.ActiveEndTime}, {s.Proposed.ActiveStartTime}, {s.Proposed.ActiveEndTime})");
+                              $"{s.Original.ActiveStartTime}, {s.Original.ActiveEndTime}, {s.Proposed.ActiveStartTime}, {s.Proposed.ActiveEndTime}, " +
+                              $"{s.Proposed.FrequencyInterval}, {s.Proposed.ActiveStartDate}, {s.Proposed.ActiveEndDate})");
             }
             if (changes.Count > 0)
             {
                 sb.AppendLine();
-                sb.AppendLine("/* Rolling back: the schedules should be at the new times, and go back to the original ones */");
+                sb.AppendLine("/* Rolling back: the schedules should be at the new times and days, and go back to the original ones */");
                 sb.AppendLine("IF @Rollback = 1");
-                sb.AppendLine("\tUPDATE @Schedules SET expected_start_time = new_start_time, expected_end_time = new_end_time, new_start_time = expected_start_time, new_end_time = expected_end_time");
+                sb.AppendLine("\tUPDATE @Schedules SET expected_start_time = new_start_time, expected_end_time = new_end_time, new_start_time = expected_start_time, new_end_time = expected_end_time,");
+                sb.AppendLine("\t\tfreq_interval = new_freq_interval, active_start_date = new_active_start_date, active_end_date = new_active_end_date,");
+                sb.AppendLine("\t\tnew_freq_interval = freq_interval, new_active_start_date = active_start_date, new_active_end_date = active_end_date");
             }
             sb.AppendLine();
 
@@ -234,17 +245,15 @@ namespace DBADash.JobSchedules
                 sb.AppendLine("\tFROM @Splits SP");
                 sb.AppendLine("\tJOIN msdb.dbo.sysschedules SS ON SS.schedule_uid = SP.schedule_uid");
                 sb.AppendLine("\tWHERE SS.freq_type <> SP.freq_type");
-                sb.AppendLine("\tOR SS.freq_interval <> SP.freq_interval");
                 sb.AppendLine("\tOR SS.freq_subday_type <> SP.freq_subday_type");
                 sb.AppendLine("\tOR SS.freq_subday_interval <> SP.freq_subday_interval");
                 sb.AppendLine("\tOR SS.freq_relative_interval <> SP.freq_relative_interval");
                 sb.AppendLine("\tOR SS.freq_recurrence_factor <> SP.freq_recurrence_factor");
-                sb.AppendLine("\tOR SS.active_start_date <> SP.active_start_date");
-                sb.AppendLine("\tOR SS.active_end_date <> SP.active_end_date");
                 sb.AppendLine("\tOR SS.enabled <> SP.enabled");
-                sb.AppendLine("\t/* Its times too - unless this script moves it, when they're checked with the moves */");
+                sb.AppendLine("\t/* Its times, days and dates too - unless this script moves it, when they're checked with the moves */");
                 sb.AppendLine("\tOR (NOT EXISTS(SELECT 1 FROM @Schedules S WHERE S.schedule_uid = SP.schedule_uid)");
-                sb.AppendLine("\t\tAND (SS.active_start_time <> SP.expected_start_time OR SS.active_end_time <> SP.expected_end_time))");
+                sb.AppendLine("\t\tAND (SS.active_start_time <> SP.expected_start_time OR SS.active_end_time <> SP.expected_end_time");
+                sb.AppendLine("\t\t\tOR SS.freq_interval <> SP.freq_interval OR SS.active_start_date <> SP.active_start_date OR SS.active_end_date <> SP.active_end_date))");
                 sb.AppendLine("\tUNION ALL");
                 sb.AppendLine("\t/* The job uses the shared schedule before the changes, and not after */");
                 sb.AppendLine("\tSELECT SP.job_name + CASE WHEN @Rollback = 1 THEN N': already uses ' ELSE N': no longer uses ' END + SP.schedule_name");
@@ -267,13 +276,13 @@ namespace DBADash.JobSchedules
                 sb.AppendLine("\t\tOR SS.active_start_time <> SP.new_start_time");
                 sb.AppendLine("\t\tOR SS.active_end_time <> SP.new_end_time");
                 sb.AppendLine("\t\tOR SS.freq_type <> SP.freq_type");
-                sb.AppendLine("\t\tOR SS.freq_interval <> SP.freq_interval");
+                sb.AppendLine("\t\tOR SS.freq_interval <> SP.new_freq_interval /* the copy was made with the moved days and dates */");
                 sb.AppendLine("\t\tOR SS.freq_subday_type <> SP.freq_subday_type");
                 sb.AppendLine("\t\tOR SS.freq_subday_interval <> SP.freq_subday_interval");
                 sb.AppendLine("\t\tOR SS.freq_relative_interval <> SP.freq_relative_interval");
                 sb.AppendLine("\t\tOR SS.freq_recurrence_factor <> SP.freq_recurrence_factor");
-                sb.AppendLine("\t\tOR SS.active_start_date <> SP.active_start_date");
-                sb.AppendLine("\t\tOR SS.active_end_date <> SP.active_end_date");
+                sb.AppendLine("\t\tOR SS.active_start_date <> SP.new_active_start_date");
+                sb.AppendLine("\t\tOR SS.active_end_date <> SP.new_active_end_date");
                 sb.AppendLine("\t\tOR SS.enabled <> SP.enabled)");
                 sb.AppendLine("\tUNION ALL");
                 sb.AppendLine("\tSELECT SP.job_name + N': no longer uses ' + SP.new_name");

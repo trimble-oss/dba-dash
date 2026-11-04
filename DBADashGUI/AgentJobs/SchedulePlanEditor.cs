@@ -730,7 +730,7 @@ namespace DBADashGUI.AgentJobs
                 var movable = SchedulePlan.MovableSchedules(job);
                 if (analysis.ParseErrors.TryGetValue(job.JobId, out var parseError)) notes.Add(parseError);
                 else if (movable.Count == 0) notes.Add("Can't be moved: " + (summary?.NotProjectableReason ?? "none of its schedules run at a time of day"));
-                else if (job.ExpectedDurationSec == null) notes.Add($"No successful runs{(PartRuns(analysis.Stats.GetValueOrDefault(job.JobId)) > 0 ? " of the whole job" : "")} in the last 14 days - shown as 1 second, and its overlap is judged by the runs that happened");
+                else if (job.ExpectedDurationSec == null) notes.Add("No successful runs in the last 14 days - shown as 1 second, and its overlap is judged by the runs that happened");
                 if (summary is { ProjectionTruncated: true }) notes.Add($"Runs so often that only the first {JobOverlapAnalyzer.MaxRunsPerJob:N0} are predicted");
                 if (movable.Count > 1) notes.Add($"{movable.Count} schedules ({string.Join(", ", movable.Select(s => s.Name))}): dragging a run moves the schedule that started it (Moving a Run: Whole Job to move them all), and Move By moves them all");
                 foreach (var schedule in job.Schedules.Where(s => s.Enabled && !AgentScheduleShifter.IsMovable(s)))
@@ -804,20 +804,22 @@ namespace DBADashGUI.AgentJobs
             return text.ToString();
         }
 
-        /// <summary>The Duration cell's tooltip: average, 95th percentile and longest of the job's successful runs, and how busy that keeps it</summary>
+        /// <summary>
+        /// The Duration cell's tooltip: average, 95th percentile and longest of the job's successful runs - those a schedule
+        /// started, or every run for a job no schedule started - and how busy that keeps it
+        /// </summary>
         private static string DurationDetail(DataRow stats, double? busy)
         {
             if (stats == null) return "No successful runs in the last 14 days";
             string Time(object seconds) => seconds is DBNull or null ? "-" : JobTimelineChart.FormatDuration(TimeSpan.FromSeconds(Convert.ToDouble(seconds)));
             var runs = Convert.ToInt32(stats["Runs"]);
-            var text = runs == 0 ? "No successful runs of the whole job in the last 14 days"
-                : $"{runs:N0} successful runs over the last 14 days: average {Time(stats["AvgSec"])}, 95th percentile {Time(stats["P95Sec"])}, longest {Time(stats["MaxSec"])}";
-            if (PartRuns(stats) is > 0 and var part) text += Environment.NewLine + $"Left out: {part:N0} {(part == 1 ? "run" : "runs")} started at a step other than the job's start step";
+            var scheduled = stats["FromScheduled"] is true;
+            var other = stats["OtherRuns"] is int o ? o : 0;
+            var text = $"{runs:N0} successful {(scheduled ? "scheduled " : "")}{(runs == 1 ? "run" : "runs")} over the last 14 days: average {Time(stats["AvgSec"])}, 95th percentile {Time(stats["P95Sec"])}, longest {Time(stats["MaxSec"])}";
+            if (scheduled && other > 0) text += Environment.NewLine + $"Left out: {other:N0} {(other == 1 ? "run" : "runs")} not started by a schedule - by hand, an alert or agent start";
+            if (!scheduled) text += Environment.NewLine + "No runs started by a schedule, so these are the runs started otherwise - by hand, an alert or agent start";
             return busy is { } b ? text + Environment.NewLine + $"Expected to be running {b:P1} of the time" : text;
         }
-
-        /// <summary>The successful runs left out of the job's durations as they started at a step other than its start step</summary>
-        private static int PartRuns(DataRow stats) => stats?["PartRuns"] is int part ? part : 0;
 
         private void WhatIfGrid_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
@@ -896,8 +898,9 @@ namespace DBADashGUI.AgentJobs
             var shifted = included.Select(_plan.ShiftedJob).ToList();
             var cycles = shifted.Select(JobOverlapAnalyzer.GetCycle).ToList();
             // Overlaps between jobs no start times can keep apart are drawn faintly: what's picked out is what a move could change
+            // Only for jobs that run all day: two hourly jobs running 08:00-10:00 could be kept apart by moving one's window
             bool Unavoidable(int a, int b) =>
-                cycles[a] is { } ca && cycles[b] is { } cb && shifted[a].ExpectedDurationSec is { } da && shifted[b].ExpectedDurationSec is { } db
+                cycles[a] is { AllDay: true } ca && cycles[b] is { AllDay: true } cb && shifted[a].ExpectedDurationSec is { } da && shifted[b].ExpectedDurationSec is { } db
                 && JobOverlapAnalyzer.CompareCycles(ca, da, cb, db, out _) is CycleVerdict.CannotSeparate or CycleVerdict.AlwaysRunning;
             var overlaps = SchedulePlan.FindOverlaps(runs, names, Unavoidable);
             var anyMoves = included.Any(_plan.IsMoved);
@@ -1055,19 +1058,30 @@ namespace DBADashGUI.AgentJobs
             var shownFrom = Display(from);
             var viewFrom = _preview.ViewFrom;
             var viewTo = _preview.ViewTo;
-            // The view is in the time shown; the runs in server time.  The difference at the start of the range is close
-            // enough, with the margin either side - a clock change in the range is an hour at most.
             if (_resetPreviewView || viewTo <= viewFrom || viewTo <= shownFrom || viewFrom >= Display(to))
             {
                 viewFrom = shownFrom;
                 viewTo = Display(to);
             }
             var span = viewTo - viewFrom;
-            var offset = shownFrom - from;
-            var windowFrom = viewFrom - offset - span;
-            var windowTo = viewTo - offset + span;
+            // The view is in the time shown; the runs in server time - each end mapped with its own offset, which a clock
+            // change in the range makes differ by an hour, more than the margin at a close zoom
+            var windowFrom = ServerTime(viewFrom) - span;
+            var windowTo = ServerTime(viewTo) + span;
             var secondsPerPixel = span.TotalSeconds / Math.Max(200, _preview.ChartPixelWidth);
             return (windowFrom < from ? from : windowFrom, windowTo > to ? to : windowTo, secondsPerPixel);
+        }
+
+        /// <summary>
+        /// The server time shown at <paramref name="shown"/> - the reverse of <see cref="Display"/>, found by applying the
+        /// offset at the time it gives until it settles: the offset at the range's start, then at the time that gives, which
+        /// is past any clock change between the two.  In the hour a clock change repeats or skips, a time either side.
+        /// </summary>
+        private DateTime ServerTime(DateTime shown)
+        {
+            var server = shown - (Display(_shown.From) - _shown.From);
+            for (var i = 0; i < 2; i++) server = shown - (Display(server) - server);
+            return server;
         }
 
         /// <summary>Makes the bars for the part of the range in view again, when the view has moved past them or the zoom has changed much</summary>
@@ -1080,7 +1094,8 @@ namespace DBADashGUI.AgentJobs
             var shownFrom = Display(_barsFor.From);
             var shownTo = Display(_barsFor.To);
             var zoomChanged = window.SecondsPerPixel > _barsFor.SecondsPerPixel * 1.5 || window.SecondsPerPixel < _barsFor.SecondsPerPixel / 1.5;
-            var covered = view.From >= shownFrom - TimeSpan.FromHours(1) && view.To <= shownTo + TimeSpan.FromHours(1)
+            // The bars made cover the view: the part they were made for (the view then, and its width either side) holds it
+            var covered = view.From >= shownFrom && view.To <= shownTo
                           || (_barsFor.From <= _shown.From && _barsFor.To >= _shown.To);
             if (covered && !zoomChanged) return;
             _preview.SetData(BuildPreviewModel(), Display(_shown.From), Display(_shown.To));
@@ -1168,10 +1183,14 @@ namespace DBADashGUI.AgentJobs
                 var movedBy = run.MovedBySec;
                 var status = ShownStatus(run);
                 var end = k + 1;
-                // A band runs on while the runs are close, end the same way and moved the same - a failure among them is its own short band, so it shows
+                // A band runs on while the runs are close, end the same way and moved the same - a failure among them is its own
+                // short band, so it shows.  When dragging a run moves only the schedule that started it, a band keeps to one
+                // schedule too: it's dragged as its first run.
                 if (dense)
                 {
-                    while (end < last && jobRuns[end].Start - jobRuns[end - 1].End < denseGap && ShownStatus(jobRuns[end]) == status && jobRuns[end].MovedBySec == movedBy) end++;
+                    var bySchedule = !MovesWholeJob(job);
+                    while (end < last && jobRuns[end].Start - jobRuns[end - 1].End < denseGap && ShownStatus(jobRuns[end]) == status && jobRuns[end].MovedBySec == movedBy
+                           && (!bySchedule || ReferenceEquals(jobRuns[end].Schedule, run.Schedule))) end++;
                 }
                 var index = previewRuns.Count;
                 previewRuns.Add(new PreviewRun(job, run, i, k));

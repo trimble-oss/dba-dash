@@ -377,15 +377,48 @@ namespace DBADash.Test
         };
 
         /// <summary>Asserts the moved schedule runs at each of the original's run times moved by <paramref name="seconds"/></summary>
-        private static void AssertRunsMoved(AgentSchedule schedule, int seconds)
+        /// <param name="from">Where to compare from - before the schedule's start date to check the first runs too</param>
+        private static void AssertRunsMoved(AgentSchedule schedule, int seconds, DateTime? from = null)
         {
             Assert.IsTrue(AgentScheduleShifter.TryShift(schedule, seconds, out var shifted, out var reason), reason);
-            DateTime from = new(2026, 11, 1), to = new(2027, 3, 1);
-            List<DateTime> Starts(AgentSchedule s, int offset) => JobOverlapAnalyzer.ProjectRuns(new JobScheduleInput { Schedules = new[] { s }, ExpectedDurationSec = 1 }, from, to, out _)
-                .Select(r => r.Start.AddSeconds(offset)).Where(t => t >= from.AddDays(2) && t < to.AddDays(-2)).ToList();
+            AssertSameRuns(schedule, shifted, seconds, from ?? new DateTime(2026, 11, 1));
+        }
+
+        private static void AssertSameRuns(AgentSchedule schedule, AgentSchedule shifted, int seconds, DateTime from, string what = "")
+        {
+            var to = from.AddMonths(4);
+            List<DateTime> Starts(AgentSchedule s, int offset) => JobOverlapAnalyzer.ProjectRuns(new JobScheduleInput { Schedules = new[] { s }, ExpectedDurationSec = 1 }, from.AddDays(-2), to.AddDays(2), out _)
+                .Select(r => r.Start.AddSeconds(offset)).Where(t => t >= from && t < to).ToList();
             var expected = Starts(schedule, seconds);
-            Assert.IsTrue(expected.Count > 0);
-            CollectionAssert.AreEqual(expected, Starts(shifted, 0));
+            Assert.IsTrue(expected.Count > 0, what);
+            CollectionAssert.AreEqual(expected, Starts(shifted, 0), what);
+        }
+
+        [TestMethod]
+        public void Shift_PastMidnight_RunsFromTheStartDate()
+        {
+            // Every start weekday, days and direction: when a move is allowed, each run moves - the first ones after the
+            // start date too (every 2 weeks Mon/Wed from Sunday the 4th, an hour earlier, still runs on the 4th and 6th)
+            var masks = new[] { 1, 2, 64, 2 | 8, 1 | 64, 2 | 8 | 32, 127 };
+            for (var start = 0; start < 7; start++)
+            {
+                var startDate = new DateTime(2026, 1, 4).AddDays(start);
+                foreach (var weeks in new[] { 1, 2, 3 })
+                foreach (var mask in masks)
+                foreach (var (time, seconds) in new[] { (0, -3600), (0, -3 * 3600), (230000, 3600), (220000, 3 * 3600), (120000, 13 * 3600), (120000, -13 * 3600) })
+                {
+                    var schedule = Weekly(mask, weeks, time, startDate: startDate.Year * 10000 + startDate.Month * 100 + startDate.Day);
+                    // A schedule that runs every day keeps its start date: only the run on the day before it is lost
+                    if (AgentScheduleShifter.IsEveryDay(schedule) || !AgentScheduleShifter.TryShift(schedule, seconds, out var shifted, out _)) continue;
+                    AssertSameRuns(schedule, shifted, seconds, startDate.AddDays(-7), $"from {startDate:ddd d}, every {weeks} weeks, days {mask}, {seconds / 3600}h");
+                }
+                foreach (var every in new[] { 2, 3 })
+                {
+                    var daily = DailyAt(0, every, startDate.Year * 10000 + startDate.Month * 100 + startDate.Day);
+                    Assert.IsTrue(AgentScheduleShifter.TryShift(daily, -3600, out var shifted, out _));
+                    AssertSameRuns(daily, shifted, -3600, startDate.AddDays(-7), $"from {startDate:ddd d}, every {every} days");
+                }
+            }
         }
 
         [TestMethod]
