@@ -42,6 +42,16 @@ namespace DBADashGUI.Connections
         /// <summary>The account each service runs as (by CollectAgentID), from its last check.  Missing until then, or for an older service.</summary>
         private readonly Dictionary<int, string> serviceAccounts = new();
 
+        /// <summary>
+        /// Passwords in the connections text box are replaced by a placeholder (the key) so they aren't on screen, and put
+        /// back by <see cref="ConnectionLines"/>.
+        /// </summary>
+        private readonly Dictionary<string, string> maskedPasswords = new(StringComparer.Ordinal);
+
+        private const string PasswordPlaceholderPrefix = "********";
+        private bool isMasking;
+        private int lastTextLength;
+
         /// <summary>Something was added or updated - the tree needs refreshing</summary>
         public bool ConnectionsChanged { get; private set; }
 
@@ -81,6 +91,13 @@ namespace DBADashGUI.Connections
                 }
             };
             tabConnections.Controls.AddRange(new Control[] { lblConnections, txtConnections, bttnBuild, lnkPermissions });
+            txtConnections.Leave += (_, _) => MaskPasswords();
+            txtConnections.TextChanged += (_, _) =>
+            {
+                // Pasted or built rather than typed - a password being typed is masked when the box is left
+                if (txtConnections.TextLength - lastTextLength > 1) MaskPasswords();
+                lastTextLength = txtConnections.TextLength;
+            };
             tabs.TabPages.Insert(0, tabConnections);
             tabs.SelectedTab = tabConnections;
 
@@ -227,10 +244,74 @@ namespace DBADashGUI.Connections
             lblStatus.Tag = details;
         }
 
+        /// <summary>Replaces any password on screen with a placeholder</summary>
+        private void MaskPasswords()
+        {
+            if (isMasking) return;
+            var lines = txtConnections.Lines;
+            var changed = false;
+            for (var i = 0; i < lines.Length; i++)
+            {
+                var masked = MaskPassword(lines[i]);
+                if (masked == lines[i]) continue;
+                lines[i] = masked;
+                changed = true;
+            }
+            if (!changed) return;
+
+            isMasking = true;
+            try
+            {
+                var caretLine = txtConnections.GetLineFromCharIndex(txtConnections.SelectionStart);
+                txtConnections.Lines = lines;
+                txtConnections.SelectionStart = lines.Take(caretLine + 1).Sum(l => l.Length + Environment.NewLine.Length) - Environment.NewLine.Length;
+                // Undo would bring the password back
+                txtConnections.ClearUndo();
+                lastTextLength = txtConnections.TextLength;
+            }
+            finally
+            {
+                isMasking = false;
+            }
+        }
+
+        private string MaskPassword(string line)
+        {
+            var builder = TryParseConnectionString(line);
+            if (builder == null || string.IsNullOrEmpty(builder.Password) || maskedPasswords.ContainsKey(builder.Password)) return line;
+            var placeholder = PasswordPlaceholderPrefix + (maskedPasswords.Count + 1);
+            maskedPasswords[placeholder] = builder.Password;
+            builder.Password = placeholder;
+            return builder.ConnectionString;
+        }
+
+        private string UnmaskPassword(string line)
+        {
+            var builder = TryParseConnectionString(line);
+            if (builder == null || !maskedPasswords.TryGetValue(builder.Password, out var password)) return line;
+            builder.Password = password;
+            return builder.ConnectionString;
+        }
+
+        /// <summary>Null for an instance name, or anything else that isn't a SQL connection string</summary>
+        private static SqlConnectionStringBuilder TryParseConnectionString(string line)
+        {
+            if (!line.Contains(';')) return null;
+            try
+            {
+                return new SqlConnectionStringBuilder(line);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
         private List<string> ConnectionLines =>
             txtConnections.Text.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None)
                 .Select(l => l.Trim())
                 .Where(l => l.Length > 0)
+                .Select(UnmaskPassword)
                 // Exact matches only - passwords are case sensitive.  The service reconciles entries for the same instance.
                 .Distinct(StringComparer.Ordinal)
                 .ToList();
