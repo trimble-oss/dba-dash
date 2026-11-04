@@ -96,7 +96,9 @@ namespace DBADashGUI
         private void LoadConnections()
         {
             InstancesDT = new DataTable();
-            InstancesDT.PrimaryKey = new[] { InstancesDT.Columns.Add("Connection", typeof(string)) };
+            // Keyed on the connection string for connections without a ConnectionID - hidden, as it can contain a password
+            InstancesDT.PrimaryKey = new[] { InstancesDT.Columns.Add("ID", typeof(string)) };
+            InstancesDT.Columns.Add("Connection", typeof(string));
             InstancesDT.Columns.Add("Windows Auth", typeof(bool));
             InstancesDT.Columns.Add("WMI", typeof(bool));
             InstancesDT.Columns.Add("Result", typeof(string));
@@ -104,9 +106,10 @@ namespace DBADashGUI
 
             foreach (var src in Connections)
             {
-                InstancesDT.Rows.Add(new object[] { GetSourceID(src), src.SourceConnection.IsIntegratedSecurity, !src.NoWMI, ReadyResult });
+                InstancesDT.Rows.Add(new object[] { GetSourceID(src), GetDisplayName(src), src.SourceConnection.IsIntegratedSecurity, !src.NoWMI, ReadyResult });
             }
             dgvInstances.DataSource = InstancesDT;
+            dgvInstances.Columns["ID"]!.Visible = false;
             dgvInstances.AutoResizeColumnsWithMaxColumnWidth(DataGridViewAutoSizeColumnsMode.AllCells, 0.6f);
             bttnGrant.Enabled = Connections.Count != 0;
             bttnLocalAdmin.Enabled = Connections.Count != 0;
@@ -380,7 +383,7 @@ namespace DBADashGUI
                 var connectionDialog = new DBConnection() { ConnectionString = Connections[0].SourceConnection.ConnectionString };
                 connectionDialog.ShowDialog();
                 if (connectionDialog.DialogResult != DialogResult.OK) return;
-                connectAsSrc = new DBADashSource(connectionDialog.ConnectionString) { ConnectionID = Connections[0].ConnectionID };
+                connectAsSrc = new DBADashSource(connectionDialog.ConnectionString);
                 ApplyToSQLAuth = true;
             }
             else if (!IsDomainAccount(ServiceAccountName))
@@ -391,7 +394,7 @@ namespace DBADashGUI
             }
 
             StartProgress(Connections.Count);
-            var tasks = Connections.Select(src => ExecuteSQL(GetScript(GetServiceAccountName(src.SourceConnection)), connectAsSrc ?? src)).ToList();
+            var tasks = Connections.Select(src => ExecuteSQL(GetScript(GetServiceAccountName(src.SourceConnection)), connectAsSrc ?? src, GetSourceID(src))).ToList();
             try
             {
                 await Task.WhenAll(tasks);
@@ -421,9 +424,16 @@ namespace DBADashGUI
             return string.IsNullOrEmpty(src.ConnectionID) ? src.SourceConnection.EncryptedConnectionString : src.ConnectionID;
         }
 
-        private async Task ExecuteSQL(string sql, DBADashSource src)
+        /// <param name="rowID">The connection's row - <paramref name="src"/> can be a different login connecting to provision it</param>
+        private static string GetDisplayName(DBADashSource src)
         {
-            var row = InstancesDT.Rows.Find(GetSourceID(src));
+            var name = string.IsNullOrEmpty(src.ConnectionID) ? src.SourceConnection.ConnectionForPrint : src.ConnectionID;
+            return string.IsNullOrEmpty(src.SourceConnection.UserName) ? name : $"{name} ({src.SourceConnection.UserName})";
+        }
+
+        private async Task ExecuteSQL(string sql, DBADashSource src, string rowID)
+        {
+            var row = InstancesDT.Rows.Find(rowID);
             if (row == null)
             {
                 Interlocked.Increment(ref CompletedTasks);
