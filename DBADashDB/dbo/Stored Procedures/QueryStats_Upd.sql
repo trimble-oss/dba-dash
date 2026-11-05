@@ -214,6 +214,11 @@ CREATE TABLE #StoredCollection (
     IsSkipped BIT NOT NULL
 );
 
+CREATE TABLE #ExampleBatch (
+    sql_handle VARBINARY(64) NOT NULL PRIMARY KEY,
+    text NVARCHAR(MAX) COLLATE DATABASE_DEFAULT NULL
+);
+
 BEGIN TRAN;
 
 /*
@@ -314,48 +319,24 @@ WHERE s.StatementTemplate IS NULL;
 
 /*
     The example's batch, for the shapes whose template was taken above or with the statement - which is what
-    their handle now matching the row's says.  Stored here rather than collected as text so a template that was
-    ignored leaves no batch behind.  Into dbo.QueryText, where every other batch is, so the batch link and the
-    purge treat it like any other: kept while the statement points at it.
+    their handle now matching the row's says.  Only noted here: it is written to dbo.QueryText after the
+    commit - see below.  A batch already stored, the usual case, is left out with a plain read, which takes no
+    locks that outlast it, so most imports never need the locking insert at all.
 */
-INSERT INTO dbo.QueryText (sql_handle, dbid, object_id, encrypted, text, SnapshotDate, CollectInstanceID)
+INSERT INTO #ExampleBatch (sql_handle, text)
 SELECT t.sql_handle,
-       NULL,
-       NULL,
-       NULL,
-       MAX(t.ExampleBatchText),
-       @SnapshotDate,
-       @InstanceID
+       MAX(t.ExampleBatchText)
 FROM #QueryStats t
 JOIN dbo.QueryStatements s WITH (FORCESEEK (PK_QueryStatements (StatementID)))
     ON s.StatementID = t.StatementID
     AND s.sql_handle = t.sql_handle
 WHERE t.ExampleBatchText IS NOT NULL
 AND NOT EXISTS (SELECT 1
-                FROM dbo.QueryText QT WITH (UPDLOCK, HOLDLOCK)
+                FROM dbo.QueryText QT
                 WHERE QT.sql_handle = t.sql_handle)
 GROUP BY t.sql_handle;
 
-/*
-    The label the reports show a statement by, for the statements in this collection that have none yet: new
-    ones, a module whose handle just moved, a shape whose template just arrived, and any whose text has only
-    now been collected.  Worked out here, once, rather than by every report that shows it - see
-    dbo.QueryStatements.StatementLabel.  Limited to what this collection touched, so the cost is per new
-    statement, not per stored one; a statement with no text yet is looked at again each time it is seen
-    until its text arrives.
-*/
-UPDATE s
-    SET s.StatementLabel = ST.Label
-FROM dbo.QueryStatements s WITH (FORCESEEK (PK_QueryStatements (StatementID)))
-JOIN (SELECT DISTINCT StatementID
-      FROM #QueryStats
-      WHERE StatementID IS NOT NULL) t
-    ON t.StatementID = s.StatementID
-CROSS APPLY dbo.QueryStatementText(s.sql_handle, s.statement_start_offset, s.statement_end_offset,
-                                   s.StatementType, s.StatementTemplate) ST
-WHERE s.StatementLabel IS NULL
-AND s.StatementType NOT IN (2, 3, 4)
-AND ST.Label IS NOT NULL;
+DECLARE @HasExampleBatch BIT = CASE WHEN @@ROWCOUNT > 0 THEN 1 ELSE 0 END;
 
 /*
     The plans the collector fetched, each for the statement and plan shape of the row it came on.  Only where there
@@ -631,3 +612,65 @@ EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,
                              @SnapshotDate = @SnapshotDate;
 
 COMMIT;
+
+/*
+    The example batches noted above.  Stored here rather than collected as text so a template that was
+    ignored leaves no batch behind.  Into dbo.QueryText, where every other batch is, so the batch link and the
+    purge treat it like any other: kept while the statement points at it.
+
+    Outside the transaction on purpose.  dbo.QueryText is keyed on sql_handle alone, shared by every instance,
+    so parallel imports often hold the same batch.  The UPDLOCK, HOLDLOCK that stops two of them inserting it
+    twice would otherwise be held until the commit above, while each import goes on to lock its other handles
+    in no particular order - and two imports wait on each other.  On its own the statement holds those locks
+    only for as long as it runs.  The check is repeated with the locks because another import may have stored
+    the batch since it was noted.  A deadlock is still possible in that window, so it is retried: the batch is
+    the only copy of the example's text.
+*/
+DECLARE @Retry INT = 0;
+WHILE @HasExampleBatch = 1
+BEGIN
+    BEGIN TRY
+        INSERT INTO dbo.QueryText (sql_handle, dbid, object_id, encrypted, text, SnapshotDate, CollectInstanceID)
+        SELECT EB.sql_handle,
+               NULL,
+               NULL,
+               NULL,
+               EB.text,
+               @SnapshotDate,
+               @InstanceID
+        FROM #ExampleBatch EB
+        WHERE NOT EXISTS (SELECT 1
+                          FROM dbo.QueryText QT WITH (UPDLOCK, HOLDLOCK)
+                          WHERE QT.sql_handle = EB.sql_handle);
+        BREAK;
+    END TRY
+    BEGIN CATCH
+        /* 1205 deadlock victim, 2627 a text import inserting the same handle without the same locks. */
+        IF ERROR_NUMBER() NOT IN (1205, 2627) OR @Retry >= 3
+            THROW;
+        SET @Retry += 1;
+        WAITFOR DELAY '00:00:00.100';
+    END CATCH;
+END;
+
+/*
+    The label the reports show a statement by, for the statements in this collection that have none yet: new
+    ones, a module whose handle just moved, a shape whose template just arrived, and any whose text has only
+    now been collected.  Worked out here, once, rather than by every report that shows it - see
+    dbo.QueryStatements.StatementLabel.  Limited to what this collection touched, so the cost is per new
+    statement, not per stored one; a statement with no text yet is looked at again each time it is seen
+    until its text arrives.  After the example batches are stored, so a shape's label comes from its batch at
+    once.  Not part of the transaction: a label is derived, and one not set is set the next time it is seen.
+*/
+UPDATE s
+    SET s.StatementLabel = ST.Label
+FROM dbo.QueryStatements s WITH (FORCESEEK (PK_QueryStatements (StatementID)))
+JOIN (SELECT DISTINCT StatementID
+      FROM #QueryStats
+      WHERE StatementID IS NOT NULL) t
+    ON t.StatementID = s.StatementID
+CROSS APPLY dbo.QueryStatementText(s.sql_handle, s.statement_start_offset, s.statement_end_offset,
+                                   s.StatementType, s.StatementTemplate) ST
+WHERE s.StatementLabel IS NULL
+AND s.StatementType NOT IN (2, 3, 4)
+AND ST.Label IS NOT NULL;
