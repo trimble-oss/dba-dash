@@ -62,6 +62,9 @@ namespace DBADashAI.Mcp
                 .ToList();
         }
 
+        // Roots is deprecated as of MCP spec 2026-07-28 (SEP-2577) with no replacement yet, and clients such as
+        // VS Code still offer it, so keep using it until the SDK removes it.
+#pragma warning disable MCP9005
         /// <summary>The client's roots as local folders; null when it doesn't offer roots.  One that offers none usable gets none.</summary>
         private static async Task<IReadOnlyList<string>?> ClientRootsAsync(McpServer? client, CancellationToken cancellationToken)
         {
@@ -83,6 +86,7 @@ namespace DBADashAI.Mcp
                 return [];
             }
         }
+#pragma warning restore MCP9005
 
         /// <summary>The file: URIs among <paramref name="uris"/>, as local paths.  VS Code escapes the drive's colon (file:///c%3A/...).</summary>
         internal static IReadOnlyList<string> Local(IEnumerable<string?> uris) =>
