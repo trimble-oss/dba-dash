@@ -16,6 +16,7 @@ permissions: {}
 jobs:
   test:
     name: Update and test manifest
+    if: github.repository == 'trimble-oss/dba-dash'
     runs-on: windows-latest
     permissions:
       contents: read
