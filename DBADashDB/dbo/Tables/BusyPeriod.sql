@@ -18,6 +18,6 @@ CREATE TABLE dbo.BusyPeriod(
 	CONSTRAINT CK_BusyPeriod_ApplyTo CHECK(NOT (ApplyToInstanceID > 0 AND ApplyToTagID > 0)),
 	/* TimeTo earlier than TimeFrom means the period crosses midnight. Equal times would be an empty period. */
 	CONSTRAINT CK_BusyPeriod_Times CHECK(TimeFrom <> TimeTo),
-	/* No foreign key to dbo.Tags, like Alert.BlackoutPeriod: a tag is deleted once no instance has it (dbo.InstanceTags_Del), and a period left for it then matches nothing */
+	/* No foreign key to dbo.Tags, like Alert.BlackoutPeriod: -1 means all tags.  Instance_Del and InstanceTags_Del remove a tag's periods when they delete the tag. */
 	CONSTRAINT FK_BusyPeriod_Instances FOREIGN KEY (ApplyToInstanceIDRef) REFERENCES dbo.Instances(InstanceID)
 )
