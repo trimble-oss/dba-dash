@@ -33,5 +33,9 @@ BEGIN
 	BEGIN
 		DELETE dbo.Tags
 		WHERE TagID = @TagID
+
+		/* Busy periods for the tag would never match again */
+		DELETE dbo.BusyPeriod
+		WHERE ApplyToTagID = @TagID
 	END
 END

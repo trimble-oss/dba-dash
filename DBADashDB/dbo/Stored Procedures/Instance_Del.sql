@@ -384,6 +384,18 @@ BEGIN
 				FROM dbo.InstanceIDsTags I
 				WHERE I.TagID = T.TagID
 				)
+
+	/* Busy periods for the tags just deleted would never match again */
+	DELETE BP
+	FROM dbo.BusyPeriod BP
+	WHERE EXISTS(SELECT 1
+				FROM @DeletedTags D
+				WHERE D.TagID = BP.ApplyToTagID
+				)
+	AND NOT EXISTS(SELECT 1
+				FROM dbo.Tags T
+				WHERE T.TagID = BP.ApplyToTagID
+				)
 	COMMIT
 
 	DELETE dbo.InstanceUptimeThresholds
