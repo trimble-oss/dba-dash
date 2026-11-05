@@ -2585,6 +2585,48 @@ BEGIN
 END
 
 /*
+	Remove tags with a blank name. Empty values are kept: system tags store '' when the source value is null.
+	Clear ApplyToTagID references first. Those columns have no foreign key to dbo.Tags.
+*/
+DECLARE @BlankTagIDs TABLE(TagID INT PRIMARY KEY);
+
+INSERT INTO @BlankTagIDs(TagID)
+SELECT T.TagID
+FROM dbo.Tags T
+WHERE NULLIF(LTRIM(RTRIM(T.TagName)),'') IS NULL;
+
+IF EXISTS(SELECT 1 FROM @BlankTagIDs)
+BEGIN
+	DELETE IT
+	FROM dbo.InstanceTags IT
+	WHERE EXISTS(SELECT 1 FROM @BlankTagIDs B WHERE B.TagID = IT.TagID);
+
+	DELETE IT
+	FROM dbo.InstanceIDsTags IT
+	WHERE EXISTS(SELECT 1 FROM @BlankTagIDs B WHERE B.TagID = IT.TagID);
+
+	DELETE BP
+	FROM dbo.BusyPeriod BP
+	WHERE EXISTS(SELECT 1 FROM @BlankTagIDs B WHERE B.TagID = BP.ApplyToTagID);
+
+	DELETE BP
+	FROM Alert.BlackoutPeriod BP
+	WHERE EXISTS(SELECT 1 FROM @BlankTagIDs B WHERE B.TagID = BP.ApplyToTagID);
+
+	DELETE R
+	FROM Alert.Rules R
+	WHERE EXISTS(SELECT 1 FROM @BlankTagIDs B WHERE B.TagID = R.ApplyToTagID);
+
+	DELETE NCS
+	FROM Alert.NotificationChannelSchedule NCS
+	WHERE EXISTS(SELECT 1 FROM @BlankTagIDs B WHERE B.TagID = NCS.ApplyToTagID);
+
+	DELETE T
+	FROM dbo.Tags T
+	WHERE EXISTS(SELECT 1 FROM @BlankTagIDs B WHERE B.TagID = T.TagID);
+END
+
+/*
 	Update extended property to indicate that a DB deployment is no longer in progress, allowing the GUI to continue loading.
 */
 EXECUTE sp_updateextendedproperty

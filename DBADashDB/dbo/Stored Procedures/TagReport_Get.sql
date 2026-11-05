@@ -10,11 +10,21 @@ DECLARE @SQL NVARCHAR(MAX)
 
 DECLARE @ColList NVARCHAR(MAX) 
 
+/* QUOTENAME('') is [], which is an invalid column alias (error 1038). Skip blank names. */
 SET @ColList= STUFF((SELECT ', ' + QUOTENAME(TagName) 
 FROM Tags
+WHERE NULLIF(LTRIM(RTRIM(TagName)),'') IS NOT NULL
 GROUP BY TagName
 ORDER BY CASE WHEN TagName LIKE '{%' THEN 2 ELSE 1 END,TagName
 FOR XML PATH(''),TYPE).value('.','NVARCHAR(MAX)'),1,2,'');
+
+IF @ColList IS NULL
+BEGIN
+	SELECT CAST(NULL AS NVARCHAR(128)) AS Instance,
+		   CAST(NULL AS INT) AS InstanceID
+	WHERE 1=0
+	RETURN
+END
 
 SET @SQL = N'
 WITH T AS (

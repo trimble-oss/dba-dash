@@ -6,6 +6,16 @@
 	@TagID INT OUT
 )
 AS
+IF NULLIF(LTRIM(RTRIM(@TagName)),'') IS NULL OR NULLIF(LTRIM(RTRIM(@TagValue)),'') IS NULL
+BEGIN
+	THROW 50000, 'Tag name and value are required.', 1;
+END
+
+IF LEFT(LTRIM(@TagName),1) = '{'
+BEGIN
+	THROW 50000, 'Tag names starting with { are system reserved.', 1;
+END
+
 SELECT @TagID = TagID
 FROM dbo.Tags
 WHERE TagName = @TagName

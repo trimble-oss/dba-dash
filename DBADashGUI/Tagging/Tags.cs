@@ -65,13 +65,20 @@ namespace DBADashGUI.Tagging
 
         private void BttnAdd_Click(object sender, EventArgs e)
         {
-            if (cboTagName.Text.StartsWith('{'))
+            var tagName = cboTagName.Text.Trim();
+            var tagValue = cboTagValue.Text.Trim();
+            if (tagName.Length == 0 || tagValue.Length == 0)
+            {
+                MessageBox.Show("Tag name and value are required.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+            if (tagName.StartsWith('{'))
             {
                 MessageBox.Show("Invalid TagName.  TagNames starting with { are system reserved.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
             }
 
-            InstanceTag newTag = new() { Instance = InstanceName, TagName = cboTagName.Text, TagValue = cboTagValue.Text, InstanceID = InstanceID };
+            InstanceTag newTag = new() { Instance = InstanceName, TagName = tagName, TagValue = tagValue, InstanceID = InstanceID };
             newTag.Save();
             RefreshData();
             TagsChanged?.Invoke(this, EventArgs.Empty);
