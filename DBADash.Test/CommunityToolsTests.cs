@@ -26,11 +26,11 @@ namespace DBADash.Test
         [TestMethod]
         public void Manifest_CoversEveryCommunityProcTheGuiCanRun()
         {
-            // Tools the GUI doesn't run (the Maintenance Solution) are deploy-only.
+            // Tools the GUI doesn't run (the Maintenance Solution, plus FRK procs sp_Blitz depends on or checks the version of) are deploy-only.
             var manifestNames = Manifest.Tools.Where(t => t.RunFromGui).Select(t => t.Name).OrderBy(n => n).ToList();
             var procNames = Enum.GetNames<ProcedureExecutionMessage.CommunityProcs>().OrderBy(n => n).ToList();
             CollectionAssert.AreEqual(procNames, manifestNames);
-            CollectionAssert.AreEquivalent(new[] { "CommandExecute", "DatabaseBackup", "DatabaseIntegrityCheck", "IndexOptimize" },
+            CollectionAssert.AreEquivalent(new[] { "CommandExecute", "DatabaseBackup", "DatabaseIntegrityCheck", "IndexOptimize", "sp_ineachdb", "sp_DatabaseRestore" },
                 Manifest.Tools.Where(t => !t.RunFromGui).Select(t => t.Name).ToList());
         }
 
@@ -61,7 +61,7 @@ namespace DBADash.Test
         public void WithRequired_AddsRequiredToolsFirst()
         {
             var tools = CommunityTool.WithRequired(new[] { Manifest.GetTool("IndexOptimize"), Manifest.GetTool("DatabaseBackup"), Manifest.GetTool("sp_Blitz") });
-            CollectionAssert.AreEqual(new[] { "CommandExecute", "IndexOptimize", "DatabaseBackup", "sp_Blitz" }, tools.Select(t => t.Name).ToList());
+            CollectionAssert.AreEqual(new[] { "CommandExecute", "IndexOptimize", "DatabaseBackup", "sp_ineachdb", "sp_Blitz" }, tools.Select(t => t.Name).ToList());
         }
 
         [TestMethod]

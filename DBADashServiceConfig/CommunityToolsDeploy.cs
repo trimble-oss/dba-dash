@@ -292,6 +292,14 @@ namespace DBADashServiceConfig
                 }
             };
             CommitCheckBoxEdits(dgvTools);
+            // Ticking a tool ticks the tools it calls (e.g. sp_Blitz -> sp_ineachdb) - they're deployed and version checked with it.
+            dgvTools.CellValueChanged += (_, e) =>
+            {
+                if (e.RowIndex >= 0 && dgvTools.Columns[e.ColumnIndex].Name == "Selected" && dgvTools.Rows[e.RowIndex].Cells[e.ColumnIndex].Value is true)
+                {
+                    SelectRequiredTools();
+                }
+            };
             tlp.Controls.Add(dgvTools, 0, 1);
             return tlp;
         }
@@ -391,7 +399,18 @@ namespace DBADashServiceConfig
                     row.Cells["Selected"].Value = selected.Value;
                 }
             }
+            SelectRequiredTools();
             UpdateButtons();
+        }
+
+        /// <summary>Ticks the tools the selected tools require, which are always deployed alongside them.</summary>
+        private void SelectRequiredTools()
+        {
+            var required = CommunityTool.WithRequired(SelectedTools);
+            foreach (var row in dgvTools.Rows.Cast<DataGridViewRow>().Where(r => r.Cells["Selected"].Value is not true && required.Contains((CommunityTool)r.Tag)))
+            {
+                row.Cells["Selected"].Value = true;
+            }
         }
 
         private void SetInstanceSelection(bool selected)
