@@ -225,6 +225,7 @@ namespace DBADash.CommunityTools
                 return new CommunityToolInstanceDeployResult { Instance = result.Instance, Database = database, Error = ex.Message };
             }
 
+            var toolDatabases = installed == null ? null : GetToolDatabases(tools, info, database, lookupOrder, installed);
             foreach (var tool in tools)
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -242,7 +243,7 @@ namespace DBADash.CommunityTools
                     });
                     continue;
                 }
-                var toolDatabase = installed == null || tool.Family.ExactDatabase ? database : CommunityToolLocator.Locate(null, lookupOrder, installed[tool.Name]).Database;
+                var toolDatabase = toolDatabases?[tool] ?? database;
                 var toolResult = await DeployToolAsync(cn, info, toolDatabase, tool, result.Instance, setupErrors, rollback, checks, cancellationToken);
                 result.Tools.Add(toolResult);
                 if (toolResult.Status == CommunityToolDeployStatus.Failed && tool.Family.GuardCustomizations && !toolResult.IsConflict)
@@ -255,6 +256,28 @@ namespace DBADash.CommunityTools
             {
                 result.RollbackScript = rollback.Value.Path;
                 Log.Information("Rollback script for {instance}: {path}", result.Instance, result.RollbackScript);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Where each tool is updated when no database was requested: the copy DBA Dash runs.  A required tool must also be
+        /// found from the database its caller is deployed to - e.g. sp_Blitz in master can't call an sp_ineachdb that's only
+        /// in the user database - so it goes alongside the caller when it isn't installed anywhere the caller can see.
+        /// </summary>
+        private static Dictionary<CommunityTool, string> GetToolDatabases(IReadOnlyCollection<CommunityTool> tools, ConnectionInfo info, string database,
+            IReadOnlyList<string> lookupOrder, Dictionary<string, List<string>> installed)
+        {
+            var result = tools.ToDictionary(t => t, t => t.Family.ExactDatabase ? database : CommunityToolLocator.Locate(null, lookupOrder, installed[t.Name]).Database);
+            // Required tools come before their callers, so callers are placed first working backwards
+            foreach (var caller in tools.Reverse())
+            {
+                var callerLookup = CommunityToolLocator.LookupOrder(info, result[caller]);
+                foreach (var required in tools.Where(t => caller.Requires.Contains(t.Name, StringComparer.OrdinalIgnoreCase) && !t.Family.ExactDatabase))
+                {
+                    if (callerLookup.Contains(result[required], StringComparer.OrdinalIgnoreCase)) continue;
+                    result[required] = callerLookup.FirstOrDefault(db => installed[required.Name].Contains(db, StringComparer.OrdinalIgnoreCase)) ?? result[caller];
+                }
             }
             return result;
         }
