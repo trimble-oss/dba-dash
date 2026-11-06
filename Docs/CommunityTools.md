@@ -8,11 +8,13 @@ DBA Dash can run popular community tools such as sp_WhoIsActive, the First Respo
 
 | Family | Tools | License |
 |--------|-------|---------|
-| [First Responder Kit](https://github.com/BrentOzarULTD/SQL-Server-First-Responder-Kit) | sp_Blitz, sp_BlitzFirst, sp_BlitzIndex, sp_BlitzCache, sp_BlitzWho, sp_BlitzLock, sp_BlitzBackups | MIT |
+| [First Responder Kit](https://github.com/BrentOzarULTD/SQL-Server-First-Responder-Kit) | sp_Blitz, sp_BlitzFirst, sp_BlitzIndex, sp_BlitzCache, sp_BlitzWho, sp_BlitzLock, sp_BlitzBackups, sp_ineachdb, sp_DatabaseRestore | MIT |
 | [DarlingData](https://github.com/erikdarlingdata/DarlingData) | sp_HealthParser, sp_HumanEvents, sp_HumanEventsBlockViewer, sp_IndexCleanup, sp_LogHunter, sp_PressureDetector, sp_QuickieStore | MIT |
 | [WhoIsActive](https://github.com/amachanic/sp_whoisactive) | sp_WhoIsActive | GPL-3.0 |
 | [SQLStudies](https://github.com/sqlstudent144/SQL-Server-Scripts) | sp_SrvPermissions, sp_DBPermissions | MIT |
 | [Maintenance Solution](https://github.com/olahallengren/sql-server-maintenance-solution) (Ola Hallengren) | CommandExecute, DatabaseBackup, DatabaseIntegrityCheck, IndexOptimize | MIT |
+
+sp_ineachdb and sp_DatabaseRestore aren't run from the GUI, but they're deployed with the First Responder Kit: sp_Blitz calls sp_ineachdb, so selecting sp_Blitz also deploys it, and flags any FRK procedure (including sp_DatabaseRestore) that is older than itself.
 
 Run `DBADashConfig -a ListCommunityTools` for the version of each tool this build of DBA Dash is pinned to.
 
