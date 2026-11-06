@@ -100,9 +100,10 @@ namespace DBADash.Test
         public async Task CheckAndDeployFollowTheSpLookupOrder()
         {
             var info = await ConnectionInfo.GetConnectionInfoAsync(LookupConnectionString);
-            // A supported tool that isn't in master already, so nothing installed there is changed
+            // A supported tool that isn't in master already, so nothing installed there is changed.  One that doesn't require
+            // another, so the deploy only touches that tool.
             var installed = await GetInstalledInMasterAsync();
-            var tool = CommunityToolsManifest.Default.Tools.FirstOrDefault(t => !t.Family.ExactDatabase && t.GetFile(info, out _) != null && !installed.Contains(t.Name));
+            var tool = CommunityToolsManifest.Default.Tools.FirstOrDefault(t => !t.Family.ExactDatabase && t.Requires.Count == 0 && t.GetFile(info, out _) != null && !installed.Contains(t.Name));
             if (tool == null)
             {
                 Assert.Inconclusive("Every supported community tool is already in master on this instance");
@@ -138,6 +139,58 @@ namespace DBADash.Test
             finally
             {
                 Execute("master", $"DROP PROCEDURE IF EXISTS dbo.{Quote(tool.Name)}");
+            }
+        }
+
+        [TestMethod]
+        public async Task RequiredToolIsDeployedWhereItsCallerCanFindIt()
+        {
+            var info = await ConnectionInfo.GetConnectionInfoAsync(LookupConnectionString);
+            if (info.IsAzureDB)
+            {
+                Assert.Inconclusive("Azure SQL Database has no lookup in master");
+            }
+            var caller = CommunityToolsManifest.Default.Tools.FirstOrDefault(t => !t.Family.ExactDatabase && t.Requires.Count > 0 && t.GetFile(info, out _) != null);
+            if (caller == null)
+            {
+                Assert.Inconclusive("No supported community tool requires another on this instance");
+            }
+            var tools = CommunityTool.WithRequired(new[] { caller });
+            var installed = await GetInstalledInMasterAsync();
+            if (tools.Any(t => installed.Contains(t.Name)))
+            {
+                Assert.Inconclusive($"{string.Join(", ", tools.Select(t => t.Name))} must not already be in master on this instance");
+            }
+            var source = new PinnedGitHubScriptSource();
+            try
+            {
+                // Set up the caller in master only, without what it requires
+                var callerOnly = await new CommunityToolDeployer(source) { Database = "master" }.DeployAsync(LookupConnectionString, new[] { caller });
+                Assert.IsNull(callerOnly.Error);
+                foreach (var t in tools.Where(t => t != caller))
+                {
+                    Execute("master", $"DROP PROCEDURE IF EXISTS dbo.{Quote(t.Name)}");
+                }
+
+                // A default deploy updates the caller in master, so what it requires must go in master too, where the caller can call it
+                var result = await new CommunityToolDeployer(source).DeployAsync(LookupConnectionString, new[] { caller });
+                Assert.IsNull(result.Error);
+                foreach (var t in result.Tools)
+                {
+                    Assert.IsTrue(t.Status is CommunityToolDeployStatus.Deployed or CommunityToolDeployStatus.UpToDate, $"{t.Tool.Name}: {t.Message}");
+                    Assert.AreEqual("master", t.Database, t.Tool.Name);
+                }
+                foreach (var t in tools.Where(t => t != caller))
+                {
+                    Assert.IsFalse(await ExistsAsync(LookupDatabase, t), $"{t.Name} was deployed to the user database, where {caller.Name} in master can't call it");
+                }
+            }
+            finally
+            {
+                foreach (var t in tools)
+                {
+                    Execute("master", $"DROP PROCEDURE IF EXISTS dbo.{Quote(t.Name)}");
+                }
             }
         }
 
