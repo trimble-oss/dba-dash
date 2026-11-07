@@ -151,8 +151,18 @@ namespace DBADashGUI
                         var db = (string)row["AzureDBName"];
                         if (AzureNode == null || AzureNode.InstanceName != instance)
                         {
+                            // The server's databases in this folder.  Grouping by a tag that varies by database
+                            // (e.g. {CPUCount}) splits a server across folders, so each node covers only its own.
+                            var azureServerRows = instances.Rows.Cast<DataRow>()
+                                .Where(r => (bool)r["IsAzure"] && (string)r["Instance"] == instance
+                                            && Enumerable.Range(0, levels).All(l => Convert.ToString(r[groupColumns[l]]) == currentPath[l]))
+                                .ToList();
+                            var azureServerInstanceIDs = azureServerRows.Select(r => (int)r["InstanceID"]).ToHashSet();
                             AzureNode = new SQLTreeItem(instance, SQLTreeItem.TreeType.AzureInstance)
-                            { EngineEdition = edition };
+                            {
+                                EngineEdition = edition,
+                                AzureInstanceIDsScope = levels > 0 ? azureServerInstanceIDs : null
+                            };
                             parentNode.Nodes.Add(AzureNode);
                             AzureNode.Nodes.AddRange(new TreeNode[] {
                                 new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration),
@@ -165,16 +175,19 @@ namespace DBADashGUI
                             // taken out of the flat Reports list so nothing is listed twice.  At this level
                             // it covers every database on the logical server.
                             AzureNode.AddDeadlocksFolder(reports?.InstanceLevelReports);
-                            // Reports that don't apply to any database on the logical server are hidden
-                            var azureServerInstanceIDs = instances.Rows.Cast<DataRow>()
-                                .Where(r => (bool)r["IsAzure"] && (string)r["Instance"] == instance)
-                                .Select(r => (int)r["InstanceID"]).ToList();
+                            // Reports that don't apply to any database under this node are hidden
                             AzureNode.AddReportsFolder(
                                 SQLTreeItem.ExcludeDeadlockReports(reports?.InstanceLevelReports ?? Enumerable.Empty<CustomReport>()),
                                 azureServerInstanceIDs);
+                            // When grouped, only the pools with a database in this folder - otherwise every pool
+                            // on the server, including any that are empty.
+                            var poolsInScope = azureServerRows.Select(r => r["elastic_pool_name"].DBNullToNull() as string)
+                                .Where(p => p != null).ToHashSet(StringComparer.InvariantCultureIgnoreCase);
                             var poolNodes = poolTable.Rows.Cast<DataRow>()
                                 .Where(r => (string)r["InstanceGroupName"] == instance && r["elastic_pool_name"] != DBNull.Value)
-                                .Select(r => (string)r["elastic_pool_name"]).Distinct().OrderBy(r => r)
+                                .Select(r => (string)r["elastic_pool_name"])
+                                .Where(p => levels == 0 || poolsInScope.Contains(p))
+                                .Distinct().OrderBy(r => r)
                                 .Select(poolName => (TreeNode)new SQLTreeItem(poolName, SQLTreeItem.TreeType.ElasticPool) { ElasticPoolName = poolName }).ToArray();
                             AzureNode.Nodes.AddRange(poolNodes);
                         }
