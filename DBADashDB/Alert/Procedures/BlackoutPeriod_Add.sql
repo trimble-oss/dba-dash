@@ -16,10 +16,21 @@
 	@Saturday BIT=1,
 	@Sunday BIT=1,
 	@Notes NVARCHAR(MAX)=NULL,
-	@BlackoutPeriodID INT OUT
+	@BlackoutPeriodID INT OUT,
+	@ApplyToTagIDs VARCHAR(MAX)=NULL /* Comma-separated TagIDs.  Takes precedence over @ApplyToTagID when not empty */
 )
 AS
+IF EXISTS(SELECT 1 FROM Alert.TagScope_Normalize(@ApplyToTagID,@ApplyToTagIDs) N WHERE LEN(N.ApplyToTagIDs) > 800)
+BEGIN
+	THROW 50000, 'Too many tags selected.  The list of TagIDs is limited to 800 characters.', 1;
+END
 SET XACT_ABORT ON
+DECLARE @NormalizedTagIDs VARCHAR(MAX)
+
+SELECT @ApplyToTagID = N.ApplyToTagID,
+	@NormalizedTagIDs = N.ApplyToTagIDs
+FROM Alert.TagScope_Normalize(@ApplyToTagID, @ApplyToTagIDs) N
+
 IF @ConnectionID IS NOT NULL AND @ApplyToInstanceID=-1
 BEGIN
 	SELECT @ApplyToInstanceID = InstanceID 
@@ -43,6 +54,7 @@ BEGIN
 	UPDATE Alert.BlackoutPeriod
 	SET ApplyToInstanceID = @ApplyToInstanceID,
 		ApplyToTagID = @ApplyToTagID,
+		ApplyToTagIDs = @NormalizedTagIDs,
 		StartDate = @StartDate,
 		EndDate = @EndDate,
 		AlertKey = @AlertKey,
@@ -61,8 +73,8 @@ BEGIN
 END
 ELSE
 BEGIN
-	INSERT INTO Alert.BlackoutPeriod(ApplyToInstanceID,ApplyToTagID,StartDate,EndDate,AlertKey,TimeZone,TimeFrom,TimeTo,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday,Notes)
-	VALUES(@ApplyToInstanceID,@ApplyToTagID,@StartDate,@EndDate,@AlertKey,@TimeZone,@TimeFrom,@TimeTo,@Monday,@Tuesday,@Wednesday,@Thursday,@Friday,@Saturday,@Sunday,@Notes)
+	INSERT INTO Alert.BlackoutPeriod(ApplyToInstanceID,ApplyToTagID,ApplyToTagIDs,StartDate,EndDate,AlertKey,TimeZone,TimeFrom,TimeTo,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday,Notes)
+	VALUES(@ApplyToInstanceID,@ApplyToTagID,@NormalizedTagIDs,@StartDate,@EndDate,@AlertKey,@TimeZone,@TimeFrom,@TimeTo,@Monday,@Tuesday,@Wednesday,@Thursday,@Friday,@Saturday,@Sunday,@Notes)
 
 	SET @BlackoutPeriodID = SCOPE_IDENTITY()
 END

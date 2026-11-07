@@ -33,6 +33,7 @@ BEGIN
 	RETURN;
 END
 PRINT CONCAT('Processing alerts of type ', @Type)
+EXEC Alert.ApplicableInstances_Ensure;
 
 DECLARE @AlertDetails Alert.AlertDetails;
 
@@ -97,7 +98,7 @@ BEGIN
 					@RuleID,
 					@GroupID
 			FROM #ProcOutput PO
-			JOIN Alert.ApplicableInstances_Get(@ApplyToTagID, @ApplyToInstanceID, '%', @ApplyToHidden) AI
+			JOIN Alert.ApplicableInstances_Get(@RuleID, @ApplyToTagID, @ApplyToInstanceID, '%', @ApplyToHidden) AI
 				ON AI.InstanceID = PO.InstanceID
 		END TRY
 		BEGIN CATCH

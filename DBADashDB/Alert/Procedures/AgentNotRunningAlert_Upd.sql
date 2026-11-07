@@ -12,6 +12,7 @@ BEGIN
 	RETURN;
 END
 PRINT CONCAT('Processing alerts of type ',@Type);
+EXEC Alert.ApplicableInstances_Ensure;
 
 DECLARE @AlertDetails Alert.AlertDetails;
 
@@ -30,7 +31,7 @@ SELECT I.InstanceID,
 		R.RuleID,
 		R.GroupID
 FROM Alert.Rules R
-CROSS APPLY Alert.ApplicableInstances_Get(R.ApplyToTagID,R.ApplyToInstanceID,R.AlertKey,R.ApplyToHidden) AI
+CROSS APPLY Alert.ApplicableInstances_Get(R.RuleID,R.ApplyToTagID,R.ApplyToInstanceID,R.AlertKey,R.ApplyToHidden) AI
 JOIN dbo.Instances I ON AI.InstanceID = I.InstanceID
 WHERE R.Type = @Type
 AND R.IsActive=1

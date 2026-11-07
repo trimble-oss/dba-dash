@@ -90,9 +90,10 @@ namespace DBADashGUI.DBADashAlerts.Rules
         public Alert.Priorities Priority { get; set; } = Alert.Priorities.Medium1;
 
         [JsonIgnore]
-        [Description("Filter the list of instances this rule applies to using Tags")]
-        [DisplayName("Apply To (Tag)"), Category("Instance Filtering")]
-        public DBADashTag ApplyToTag { get; set; } = DBADashTag.AllInstancesTag();
+        [Description("Filter the list of instances this rule applies to using Tags.  Instances must have a selected tag for every tag name (AND).  Selecting more than one value of the same tag name matches any of them (OR).  e.g. (Role:Production OR Role:UAT) AND Region:APAC")]
+        [DisplayName("Apply To (Tags)"), Category("Instance Filtering")]
+        [Editor(typeof(TagSetSelect), typeof(UITypeEditor))]
+        public DBADashTagSet ApplyToTag { get; set; } = DBADashTagSet.AllInstances();
 
         [JsonIgnore]
         [Browsable(false)]
@@ -123,7 +124,7 @@ namespace DBADashGUI.DBADashAlerts.Rules
                         throw new ArgumentException("InstanceID not found", nameof(ApplyToInstance));
                     }
 
-                    ApplyToTag = DBADashTag.AllInstancesTag();
+                    ApplyToTag = DBADashTagSet.AllInstances();
                 }
                 else
                 {
@@ -176,7 +177,7 @@ namespace DBADashGUI.DBADashAlerts.Rules
 
             if (ApplyToInstanceID != null)
             {
-                ApplyToTag = DBADashTag.AllInstancesTag();
+                ApplyToTag = DBADashTagSet.AllInstances();
             }
 
             using var cn = new SqlConnection(Common.ConnectionString);
@@ -187,7 +188,8 @@ namespace DBADashGUI.DBADashAlerts.Rules
             }
             cmd.Parameters.AddWithValue("@Type", RuleType.ToString());
             cmd.Parameters.AddWithValue("@Priority", Priority);
-            cmd.Parameters.AddWithValue("@ApplyToTagID", ApplyToTag?.TagID ?? -1);
+            cmd.Parameters.AddWithValue("@ApplyToTagID", ApplyToTag?.ApplyToTagID ?? -1);
+            cmd.Parameters.AddWithValue("@ApplyToTagIDs", ApplyToTag == null || ApplyToTag.IsAllInstances ? DBNull.Value : ApplyToTag.TagIDs);
             cmd.Parameters.AddWithValue("@ApplyToInstanceID", ApplyToInstanceID == null ? DBNull.Value : ApplyToInstanceID);
             cmd.Parameters.AddWithValue("@Threshold", Threshold == null ? DBNull.Value : Threshold);
             cmd.Parameters.AddWithValue("@EvaluationPeriodMins", EvaluationPeriodMins == null ? DBNull.Value : EvaluationPeriodMins);
@@ -206,7 +208,7 @@ namespace DBADashGUI.DBADashAlerts.Rules
             return new BlackoutPeriod()
             {
                 AlertKey = AlertKey,
-                ApplyToTag = ApplyToTag,
+                ApplyToTag = ApplyToTag ?? DBADashTagSet.AllInstances(),
                 ApplyToInstance = ApplyToInstance,
                 ApplyToInstanceID = ApplyToInstanceID,
             };
@@ -234,7 +236,8 @@ namespace DBADashGUI.DBADashAlerts.Rules
                     rdr.IsDBNull("ApplyToInstanceID") ? null : Convert.ToString(rdr["ApplyToInstance"]),
                 (string)rdr["Notes"].DBNullToNull(),
                      (bool)rdr["ApplyToHidden"],
-                rdr.IsDBNull("GroupID") ? 0 : rdr.GetInt32("GroupID"));
+                rdr.IsDBNull("GroupID") ? 0 : rdr.GetInt32("GroupID"),
+                rdr.IsDBNull("ApplyToTagIDs") ? null : rdr.GetString("ApplyToTagIDs"));
             }
             else
             {
@@ -244,7 +247,7 @@ namespace DBADashGUI.DBADashAlerts.Rules
 
         public static AlertRuleBase GetRule(int ruleID, RuleTypes ruleType, short priority, int applyToTagID, decimal? threshold,
             int? evaluationPeriodMins, bool isActive, string details, string applyToTag, int? applyToInstanceId,
-            string applyToInstance, string notes, bool applyToHidden, int groupID = 0)
+            string applyToInstance, string notes, bool applyToHidden, int groupID = 0, string applyToTagIDs = null)
         {
             AlertRuleBase rule = ruleType switch
             {
@@ -271,8 +274,12 @@ namespace DBADashGUI.DBADashAlerts.Rules
             };
             rule.RuleID = ruleID;
             rule.Priority = (Alert.Priorities)priority;
-            rule.ApplyToTag = applyToTagID <= 0 ? DBADashTag.AllInstancesTag() : new DBADashTag()
-            { TagID = applyToTagID, TagName = applyToTag.Split(":")[0], TagValue = applyToTag.Split(":")[1] };
+            rule.ApplyToTag = applyToTagID switch
+            {
+                DBADashTagSet.MultipleTagsID => DBADashTagSet.FromTagIDs(DBADashTagSet.ParseTagIDs(applyToTagIDs), DBADashTag.GetTags(Common.ConnectionString)),
+                <= 0 => DBADashTagSet.AllInstances(),
+                _ => DBADashTagSet.FromTag(new DBADashTag { TagID = applyToTagID, TagName = applyToTag.Split(":")[0], TagValue = applyToTag.Split(":")[1] })
+            };
             rule.EvaluationPeriodMins = evaluationPeriodMins;
             rule.IsActive = isActive;
             rule.Threshold = threshold;

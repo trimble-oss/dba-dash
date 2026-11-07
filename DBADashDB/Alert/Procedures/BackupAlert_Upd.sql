@@ -18,6 +18,7 @@ BEGIN
 END
 
 PRINT CONCAT('Processing alerts of type ', @Type);
+EXEC Alert.ApplicableInstances_Ensure;
 
 DECLARE @AlertDetails Alert.AlertDetails;
 
@@ -70,7 +71,7 @@ OUTER APPLY(
 		UPPER(ISNULL(NULLIF(JSON_VALUE(R.Details, '$.AlertMode'), ''), 'AgeSinceLastBackup')) AS AlertMode,
 		UPPER(ISNULL(NULLIF(JSON_VALUE(R.Details, '$.MinimumAlertStatus'), ''), 'Critical')) AS MinimumAlertStatus
 ) Calc
-CROSS APPLY Alert.ApplicableInstances_Get(R.ApplyToTagID, R.ApplyToInstanceID, R.AlertKey, R.ApplyToHidden) I
+CROSS APPLY Alert.ApplicableInstances_Get(R.RuleID,R.ApplyToTagID, R.ApplyToInstanceID, R.AlertKey, R.ApplyToHidden) I
 JOIN dbo.Databases D ON D.InstanceID = I.InstanceID
 WHERE R.Type = @Type
 	AND R.IsActive = 1

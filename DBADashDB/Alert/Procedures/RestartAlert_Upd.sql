@@ -14,6 +14,7 @@ BEGIN
 	RETURN;
 END
 PRINT CONCAT('Processing alerts of type ',@Type)
+EXEC Alert.ApplicableInstances_Ensure;
 
 DECLARE @AlertDetails Alert.AlertDetails;
 
@@ -37,7 +38,7 @@ WITH DeDupe AS (
 			R.GroupID,
 			ROW_NUMBER() OVER(PARTITION BY I.InstanceID,R.GroupID ORDER BY R.Priority, R.RuleID) rnum
 	FROM Alert.Rules R
-	CROSS APPLY Alert.ApplicableInstances_Get(R.ApplyToTagID,R.ApplyToInstanceID,R.AlertKey,R.ApplyToHidden) I
+	CROSS APPLY Alert.ApplicableInstances_Get(R.RuleID,R.ApplyToTagID,R.ApplyToInstanceID,R.AlertKey,R.ApplyToHidden) I
 	WHERE R.Type = @Type
 	AND R.IsActive=1
 )

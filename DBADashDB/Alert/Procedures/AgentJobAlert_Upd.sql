@@ -13,6 +13,7 @@ BEGIN
 	RETURN;
 END
 PRINT CONCAT('Processing alerts of type ',@Type)
+EXEC Alert.ApplicableInstances_Ensure;
 
 CREATE TABLE #RecentJobs(
 	InstanceID INT NOT NULL,
@@ -81,7 +82,7 @@ WITH (
 	ExcludeCategory NVARCHAR(MAX) '$.ExcludeCategory',
 	ExcludeJobName NVARCHAR(MAX) '$.ExcludeJobName'
 ) D
-CROSS APPLY Alert.ApplicableInstances_Get(R.ApplyToTagID,R.ApplyToInstanceID,R.AlertKey,R.ApplyToHidden) I
+CROSS APPLY Alert.ApplicableInstances_Get(R.RuleID,R.ApplyToTagID,R.ApplyToInstanceID,R.AlertKey,R.ApplyToHidden) I
 WHERE R.Type = @Type
 AND R.IsActive=1
 

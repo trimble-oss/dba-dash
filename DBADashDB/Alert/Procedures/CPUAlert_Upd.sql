@@ -16,6 +16,7 @@ BEGIN
 	RETURN;
 END
 PRINT CONCAT('Processing alerts of type ',@Type)
+EXEC Alert.ApplicableInstances_Ensure;
 
 CREATE TABLE #EffectiveThresholds(
 	RuleID INT NOT NULL,
@@ -43,7 +44,7 @@ WITH T AS (
 		R.GroupID,
 		ROW_NUMBER() OVER(PARTITION BY I.InstanceID,R.GroupID,R.EvaluationPeriodMins,R.Priority ORDER BY R.Threshold,R.RuleID) rnum
 	FROM Alert.Rules R
-	CROSS APPLY Alert.ApplicableInstances_Get(R.ApplyToTagID,R.ApplyToInstanceID,R.AlertKey,R.ApplyToHidden) I
+	CROSS APPLY Alert.ApplicableInstances_Get(R.RuleID,R.ApplyToTagID,R.ApplyToInstanceID,R.AlertKey,R.ApplyToHidden) I
 	WHERE R.Type = @Type
 	AND R.Threshold<=100
 	AND R.IsActive=1
