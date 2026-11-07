@@ -59,7 +59,7 @@ namespace DBADashGUI
         }
 
         // Extracted helper to build the instance tree from instance/pool DataTables
-        private SQLTreeItem BuildInstanceTree(DataTable instances, DataTable pools, CustomReports.CustomReports reports, string groupByTag)
+        private SQLTreeItem BuildInstanceTree(DataTable instances, DataTable pools, CustomReports.CustomReports reports, IReadOnlyList<string> groupByTags)
         {
             var root = new SQLTreeItem(Common.RepositoryDBConnection.Name, SQLTreeItem.TreeType.DBADashRoot);
             AddRootRefreshContextMenu(root);
@@ -79,7 +79,40 @@ namespace DBADashGUI
             var poolTable = pools ?? new DataTable();
 
             SQLTreeItem AzureNode = null;
-            var currentTagGroup = string.Empty;
+
+            // One folder level per group-by tag (e.g. Role, then Region).  The rows come back sorted by
+            // TagGroup, TagGroup2, TagGroup3 so each folder's instances are together.  An instance with more
+            // than one value for a tag comes back once per value, so it's listed under each of them.
+            var groupColumns = new[] { "TagGroup", "TagGroup2", "TagGroup3" };
+            var levels = instances == null || groupByTags == null
+                ? 0
+                : groupByTags.TakeWhile(t => !string.IsNullOrEmpty(t))
+                    .Take(groupColumns.Length)
+                    .Select((_, i) => groupColumns[i])
+                    .TakeWhile(c => instances.Columns.Contains(c))
+                    .Count();
+            var currentPath = new string[levels];
+            var folders = new SQLTreeItem[levels];
+
+            SQLTreeItem NewGroupFolder(int level, string tagValue)
+            {
+                var tagName = groupByTags[level];
+                var folder = new SQLTreeItem(tagName + ": " + tagValue, SQLTreeItem.TreeType.InstanceFolder);
+                var changesGrp = new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration);
+                var hadrGrp = new SQLTreeItem("HA/DR", SQLTreeItem.TreeType.HADR);
+                var checksGrp = new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks);
+                var storageGrp = new SQLTreeItem("Storage", SQLTreeItem.TreeType.Storage);
+                var jobsGrp = new SQLTreeItem("Jobs", SQLTreeItem.TreeType.AgentJobs);
+                folder.Nodes.AddRange(new TreeNode[] { changesGrp, checksGrp, hadrGrp, storageGrp, jobsGrp });
+                if (IsAzureOnly)
+                {
+                    folder.Nodes.Remove(hadrGrp);
+                }
+                AddMultiInstanceXENode(folder);
+                folder.AddReportsFolder(reports?.InstanceGroupReports);
+                return folder;
+            }
+
             if (instances != null)
             {
                 foreach (DataRow row in instances.Rows)
@@ -88,29 +121,26 @@ namespace DBADashGUI
                     var displayName = (string)row["InstanceDisplayName"];
                     var instanceID = (int)row["InstanceID"];
                     var showInSummary = (bool)row["ShowInSummary"];
-                    var tagGroup = Convert.ToString(row["TagGroup"]);
                     var isReadOnlyReplica = row.Table.Columns.Contains("IsReadOnlyReplica") && row["IsReadOnlyReplica"] != DBNull.Value && (bool)row["IsReadOnlyReplica"];
                     var collectionsPausedUntil = row.Table.Columns.Contains("CollectionsPausedUntil") ? (DateTime?)row["CollectionsPausedUntil"].DBNullToNull() : null;
 
-                    if (currentTagGroup != tagGroup && !string.IsNullOrEmpty(tagGroup))
+                    // Find the first level whose value differs from the previous row - that folder and every
+                    // folder below it are new.
+                    for (var level = 0; level < levels; level++)
                     {
-                        var folderText = string.IsNullOrEmpty(groupByTag) ? tagGroup : groupByTag + ": " + tagGroup;
-                        parentNode = new SQLTreeItem(folderText, SQLTreeItem.TreeType.InstanceFolder);
-                        var changesGrp = new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration);
-                        var hadrGrp = new SQLTreeItem("HA/DR", SQLTreeItem.TreeType.HADR);
-                        var checksGrp = new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks);
-                        var storageGrp = new SQLTreeItem("Storage", SQLTreeItem.TreeType.Storage);
-                        var jobsGrp = new SQLTreeItem("Jobs", SQLTreeItem.TreeType.AgentJobs);
-                        parentNode.Nodes.AddRange(new TreeNode[] { changesGrp, checksGrp, hadrGrp, storageGrp, jobsGrp });
-                        if (IsAzureOnly)
+                        var tagValue = Convert.ToString(row[groupColumns[level]]);
+                        if (folders[level] != null && currentPath[level] == tagValue) continue;
+
+                        for (var newLevel = level; newLevel < levels; newLevel++)
                         {
-                            parentNode.Nodes.Remove(hadrGrp);
+                            var newValue = Convert.ToString(row[groupColumns[newLevel]]);
+                            folders[newLevel] = NewGroupFolder(newLevel, newValue);
+                            (newLevel == 0 ? root : folders[newLevel - 1]).Nodes.Add(folders[newLevel]);
+                            currentPath[newLevel] = newValue;
                         }
-                        AddMultiInstanceXENode(parentNode);
-                        parentNode.AddReportsFolder(reports?.InstanceGroupReports);
-                        root.Nodes.Add(parentNode);
-                        currentTagGroup = tagGroup;
+                        parentNode = folders[levels - 1];
                         AzureNode = null;
+                        break;
                     }
 
                     DatabaseEngineEdition edition;
@@ -199,10 +229,7 @@ namespace DBADashGUI
 
             if (ShowCounts)
             {
-                foreach (var n in root.Nodes.Cast<SQLTreeItem>().Where(t => t.Type == SQLTreeItem.TreeType.InstanceFolder))
-                {
-                    n.Text += "    {" + n.Nodes.Cast<SQLTreeItem>().Count(child => child.Type is SQLTreeItem.TreeType.Instance or SQLTreeItem.TreeType.AzureInstance) + "}";
-                }
+                AddGroupFolderCounts(root);
             }
 
             IsAzureOnly = root.InstanceIDs.Count == root.AzureInstanceIDs.Count;
@@ -210,6 +237,38 @@ namespace DBADashGUI
             if (DBADashUser.IsAdmin) root.Nodes.Add(new SQLTreeItem("Recycle Bin", SQLTreeItem.TreeType.RecycleBin));
 
             return root;
+        }
+
+        /// <summary>
+        /// Appends the number of instances to each group folder, at every level of grouping.  Counts are distinct, so
+        /// an instance listed under two sub-folders (it has two values for the tag) counts once in the folder above.
+        /// </summary>
+        private static void AddGroupFolderCounts(SQLTreeItem parent)
+        {
+            foreach (var folder in parent.Nodes.Cast<SQLTreeItem>().Where(t => t.Type == SQLTreeItem.TreeType.InstanceFolder))
+            {
+                AddGroupFolderCounts(folder);
+                folder.Text += "    {" + GroupFolderInstances(folder).Distinct().Count() + "}";
+            }
+        }
+
+        private static IEnumerable<string> GroupFolderInstances(SQLTreeItem folder)
+        {
+            foreach (SQLTreeItem child in folder.Nodes)
+            {
+                switch (child.Type)
+                {
+                    case SQLTreeItem.TreeType.Instance:
+                        yield return "I:" + child.InstanceID;
+                        break;
+                    case SQLTreeItem.TreeType.AzureInstance:
+                        yield return "A:" + child.InstanceName;
+                        break;
+                    case SQLTreeItem.TreeType.InstanceFolder:
+                        foreach (var key in GroupFolderInstances(child)) yield return key;
+                        break;
+                }
+            }
         }
 
         public enum Tabs
@@ -676,7 +735,8 @@ namespace DBADashGUI
 
         private bool IsAzureOnly;
         private bool ShowCounts;
-        private string GroupByTag = string.Empty;
+        /// <summary>Tag names the tree is grouped by, outermost first.  e.g. Role, then Region.  Empty for no grouping.</summary>
+        private List<string> GroupByTags = new();
         private readonly List<TreeContext> VisitedNodes = new();
         private bool suppressSaveContext;
         private Font tvBoldFont;
@@ -1112,7 +1172,7 @@ namespace DBADashGUI
 
                 // Capture UI-dependent values before going to background thread
                 var searchStringLocal = SearchString;
-                var groupByTagLocal = GroupByTag;
+                var groupByTagsLocal = GroupByTags.ToList();
 
                 // Offload data reads to background thread and capture snapshots.
                 // We populate CommonData.Instances in the background and capture
@@ -1132,7 +1192,7 @@ namespace DBADashGUI
                     commandLineTagIDs = string.Join(",", tags.Select(t => t.TagID));
                 }
 
-                await CommonData.UpdateInstancesListAsync(tagIDs: commandLineTagIDs, searchString: searchStringLocal, groupByTag: groupByTagLocal, token: token);
+                await CommonData.UpdateInstancesListAsync(tagIDs: commandLineTagIDs, searchString: searchStringLocal, groupByTags: groupByTagsLocal, token: token);
                 poolsSnapshot = await CommonData.GetElasticPoolsAsync(token);
 
                 // Apply UI updates on UI thread in one atomic block
@@ -1166,7 +1226,7 @@ namespace DBADashGUI
                             VisitedNodes.Clear();
                             tsBack.Enabled = false;
                             tv1.Nodes.Clear();
-                            var root = BuildInstanceTree(CommonData.Instances, poolsSnapshot, customReports, groupByTagLocal);
+                            var root = BuildInstanceTree(CommonData.Instances, poolsSnapshot, customReports, groupByTagsLocal);
                             tv1.Nodes.Add(root);
                             root.Expand();
 
@@ -1580,9 +1640,9 @@ namespace DBADashGUI
             }
 
             // Build tree using shared helper
-            await CommonData.UpdateInstancesListAsync(tagIDs: string.Join(",", SelectedTags()), searchString: SearchString, groupByTag: GroupByTag, token: token);
+            await CommonData.UpdateInstancesListAsync(tagIDs: string.Join(",", SelectedTags()), searchString: SearchString, groupByTags: GroupByTags, token: token);
             var pools = await CommonData.GetElasticPoolsAsync(token);
-            var root = BuildInstanceTree(CommonData.Instances, pools, customReports, GroupByTag);
+            var root = BuildInstanceTree(CommonData.Instances, pools, customReports, GroupByTags);
 
             tv1.Nodes.Add(root);
             root.Expand();
@@ -2449,50 +2509,100 @@ namespace DBADashGUI
             BuildGroupByTagMenu(ref tags);
         }
 
+        /// <summary>Tag names offered on the Group menu - kept so the menu can be rebuilt when the grouping changes</summary>
+        private List<string> groupByTagNames = new();
+
         private void BuildGroupByTagMenu(ref List<DBADashTag> tags)
         {
+            groupByTagNames = tags.Select(t => t.TagName).Distinct().ToList();
+            BuildGroupByTagMenu();
+        }
+
+        /// <summary>
+        /// Group menu: picking a tag groups by that tag alone.  Once grouped, "Then by" adds a further level within it
+        /// (e.g. Role, then Region), up to <see cref="CommonData.MaxGroupByTagLevels"/>.
+        /// </summary>
+        private void BuildGroupByTagMenu()
+        {
             groupToolStripMenuItem.DropDownItems.Clear();
-            var tagNames = tags.Select(t => t.TagName).Distinct();
-            ToolStripMenuItem mSystemTags = new("System Tags")
-            { Font = new Font(groupToolStripMenuItem.Font, FontStyle.Italic) };
-            ToolStripMenuItem mNone = new("[None]") { Tag = string.Empty };
+            ToolStripMenuItem mNone = new("[None]") { Checked = GroupByTags.Count == 0 };
             ToolStripMenuItem mShowCounts = new("Show Counts") { CheckOnClick = true, Checked = ShowCounts };
             ToolStripMenuItem mSave = new("Save") { Image = Properties.Resources.Save_16x };
-            mNone.Click += GroupByTag_Click;
+            mNone.Click += async (_, _) => await SetGroupByTagsAsync(new List<string>());
             mShowCounts.Click += ShowCounts_Click;
             mSave.Click += SaveTreeLayout;
-            foreach (var tag in tagNames)
+
+            var firstLevel = GroupByTags.FirstOrDefault();
+            AddGroupByTagItems(groupToolStripMenuItem, groupByTagNames, tag => tag == firstLevel,
+                tag => new List<string> { tag });
+            groupToolStripMenuItem.DropDownItems.Add(mNone);
+
+            if (GroupByTags.Count > 0)
             {
-                ToolStripMenuItem mnu = new(tag) { Tag = tag };
-                mnu.Click += GroupByTag_Click;
-                if (tag.StartsWith('{'))
+                groupToolStripMenuItem.DropDownItems.Add(new ToolStripSeparator());
+                groupToolStripMenuItem.DropDownItems.Add(new ToolStripMenuItem("Grouped by: " + string.Join(" › ", GroupByTags)) { Enabled = false });
+
+                var available = groupByTagNames.Except(GroupByTags).ToList();
+                if (GroupByTags.Count < CommonData.MaxGroupByTagLevels && available.Count > 0)
                 {
-                    mSystemTags.DropDownItems.Add(mnu);
+                    ToolStripMenuItem mThenBy = new("Then by");
+                    AddGroupByTagItems(mThenBy, available, _ => false, tag => GroupByTags.Append(tag).ToList());
+                    groupToolStripMenuItem.DropDownItems.Add(mThenBy);
                 }
-                else
+
+                if (GroupByTags.Count > 1)
                 {
-                    groupToolStripMenuItem.DropDownItems.Add(mnu);
+                    ToolStripMenuItem mRemoveLevel = new("Remove " + GroupByTags[^1]);
+                    mRemoveLevel.Click += async (_, _) => await SetGroupByTagsAsync(GroupByTags.Take(GroupByTags.Count - 1).ToList());
+                    groupToolStripMenuItem.DropDownItems.Add(mRemoveLevel);
                 }
             }
 
-            groupToolStripMenuItem.DropDownItems.Add(mSystemTags);
-            groupToolStripMenuItem.DropDownItems.Add(mNone);
             groupToolStripMenuItem.DropDownItems.Add(new ToolStripSeparator());
             groupToolStripMenuItem.DropDownItems.Add(mShowCounts);
             groupToolStripMenuItem.DropDownItems.Add(mSave);
         }
 
+        /// <summary>Adds an item per tag to <paramref name="parent"/>, with system tags in their own sub-menu</summary>
+        private void AddGroupByTagItems(ToolStripDropDownItem parent,IEnumerable<string> tagNames, Func<string, bool> isChecked, Func<string, List<string>> grouping)
+        {
+            ToolStripMenuItem mSystemTags = new("System Tags")
+            { Font = new Font(groupToolStripMenuItem.Font, FontStyle.Italic) };
+            foreach (var tag in tagNames)
+            {
+                ToolStripMenuItem mnu = new(tag) { Checked = isChecked(tag) };
+                mnu.Click += async (_, _) => await SetGroupByTagsAsync(grouping(tag));
+                (tag.StartsWith('{') ? mSystemTags : parent).DropDownItems.Add(mnu);
+            }
+            if (mSystemTags.DropDownItems.Count > 0)
+            {
+                parent.DropDownItems.Add(mSystemTags);
+            }
+        }
+
+        private async Task SetGroupByTagsAsync(List<string> groupByTags)
+        {
+            GroupByTags = groupByTags;
+            BuildGroupByTagMenu();
+            await AddInstancesAsync();
+        }
+
         private void SaveTreeLayout(object sender, EventArgs e)
         {
             TreeSavedView treeView = new()
-            { GroupByTag = GroupByTag, ShowCounts = ShowCounts, Name = SavedView.DefaultViewName };
+            {
+                GroupByTags = GroupByTags.ToList(),
+                GroupByTag = GroupByTags.FirstOrDefault() ?? string.Empty,
+                ShowCounts = ShowCounts,
+                Name = SavedView.DefaultViewName
+            };
             treeView.Save();
             MessageBox.Show("Tree layout saved", "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void GetTreeLayout()
         {
-            GroupByTag = string.Empty;
+            GroupByTags = new List<string>();
             try
             {
                 var savedView = SavedView.GetSavedViews(SavedView.ViewTypes.Tree, DBADashUser.UserID)
@@ -2500,7 +2610,7 @@ namespace DBADashGUI
                 if (savedView.Count() == 1)
                 {
                     var treeView = TreeSavedView.Deserialize(savedView.First().Value);
-                    GroupByTag = treeView.GroupByTag;
+                    GroupByTags = treeView.GetGroupByTags().Take(CommonData.MaxGroupByTagLevels).ToList();
                     ShowCounts = treeView.ShowCounts;
                 }
             }
@@ -2513,12 +2623,6 @@ namespace DBADashGUI
         private async void ShowCounts_Click(object sender, EventArgs e)
         {
             ShowCounts = ((ToolStripMenuItem)sender).Checked;
-            await AddInstancesAsync();
-        }
-
-        private async void GroupByTag_Click(object sender, EventArgs e)
-        {
-            GroupByTag = (string)((ToolStripMenuItem)sender).Tag;
             await AddInstancesAsync();
         }
 

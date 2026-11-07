@@ -24,9 +24,12 @@ namespace DBADashGUI
         private static readonly MemoryCache cache = MemoryCache.Default;
         internal static readonly string[] databaseNameParams = new string[] { "@DB", "@DBName", "@DatabaseName", "@Database", "@database_name", "db_name" };
 
-        public static async Task UpdateInstancesListAsync(string tagIDs = "", bool? Active = true, bool? azureDB = null, string searchString = "", string groupByTag = "", CancellationToken token = default)
+        /// <summary>Most levels of tag grouping dbo.Instances_Get supports (@GroupByTag, @GroupByTag2, @GroupByTag3)</summary>
+        public const int MaxGroupByTagLevels = 3;
+
+        public static async Task UpdateInstancesListAsync(string tagIDs = "", bool? Active = true, bool? azureDB = null, string searchString = "", IReadOnlyList<string> groupByTags = null, CancellationToken token = default)
         {
-            Instances = await GetInstancesAsync(tagIDs, Active, azureDB, searchString, groupByTag, token);
+            Instances = await GetInstancesAsync(tagIDs, Active, azureDB, searchString, groupByTags, token);
             DBADashContext.HiddenInstanceIDs = Instances.Rows.Cast<DataRow>().Where(r => !r.Field<bool>("ShowInSummary")).Select(r => r.Field<int>("InstanceID")).ToHashSet();
             HasInstanceMetadata = Instances.Rows.Cast<DataRow>().Where(r => r.Field<bool>("HasInstanceMetadata")).Select(r => r.Field<int>("InstanceID")).ToHashSet();
         }
@@ -42,7 +45,7 @@ namespace DBADashGUI
             return dt;
         }
 
-        public static async Task<DataTable> GetInstancesAsync(string tagIDs = "", bool? Active = true, bool? azureDB = null, string searchString = "", string groupByTag = "", CancellationToken token = default)
+        public static async Task<DataTable> GetInstancesAsync(string tagIDs = "", bool? Active = true, bool? azureDB = null, string searchString = "", IReadOnlyList<string> groupByTags = null, CancellationToken token = default)
         {
             await using var cn = new SqlConnection(Common.ConnectionString);
             await using var cmd = new SqlCommand(@"dbo.Instances_Get", cn) { CommandType = CommandType.StoredProcedure };
@@ -50,7 +53,13 @@ namespace DBADashGUI
             cmd.Parameters.AddWithNullableValue("IsActive", Active);
             cmd.Parameters.AddWithNullableValue("IsAzure", azureDB);
             cmd.Parameters.AddStringIfNotNullOrEmpty("SearchString", searchString);
-            cmd.Parameters.AddStringIfNotNullOrEmpty("GroupByTag", groupByTag);
+            if (groupByTags != null)
+            {
+                for (var i = 0; i < groupByTags.Count && i < MaxGroupByTagLevels; i++)
+                {
+                    cmd.Parameters.AddStringIfNotNullOrEmpty(i == 0 ? "GroupByTag" : "GroupByTag" + (i + 1), groupByTags[i]);
+                }
+            }
             await cn.OpenAsync(token);
             await using var rdr = await cmd.ExecuteReaderAsync(token);
             DataTable dt = new();
