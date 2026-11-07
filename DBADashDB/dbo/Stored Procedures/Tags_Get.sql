@@ -1,6 +1,7 @@
 ﻿CREATE PROC dbo.Tags_Get(
 	@TagFilters NVARCHAR(MAX)=NULL,
-	@TagID INT=NULL
+	@TagID INT=NULL,
+	@TagIDs VARCHAR(MAX)=NULL /* Comma-separated TagIDs - returned whether or not they are assigned to active instances */
 )
 AS
 
@@ -11,6 +12,7 @@ SELECT	TagID,
 		TagValue 
 FROM dbo.Tags T 
 WHERE ' + CASE WHEN @TagID IS NOT NULL THEN 'T.TagID = @TagID'
+WHEN @TagIDs IS NOT NULL THEN 'T.TagID IN(SELECT TRY_CAST(ss.value AS INT) FROM STRING_SPLIT(@TagIDs,'','') ss)'
 ELSE 'EXISTS(SELECT 1 
 			FROM dbo.InstanceTags IT 
 			JOIN dbo.Instances I ON IT.Instance = I.Instance
@@ -31,4 +33,4 @@ ELSE 'EXISTS(SELECT 1
 		)' END + '
 ORDER BY TagName,TagValue'
 
-EXEC sp_executesql @SQL,N'@TagFilters NVARCHAR(MAX),@TagID INT',@TagFilters,@TagID
+EXEC sp_executesql @SQL,N'@TagFilters NVARCHAR(MAX),@TagID INT,@TagIDs VARCHAR(MAX)',@TagFilters,@TagID,@TagIDs

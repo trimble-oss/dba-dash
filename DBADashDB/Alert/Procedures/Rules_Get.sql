@@ -1,4 +1,4 @@
-﻿CREATE PROC Alert.Rules_Get(
+CREATE PROC Alert.Rules_Get(
     @RuleID INT = NULL
 )
 AS
@@ -18,16 +18,21 @@ SELECT R.RuleID,
        R.EvaluationPeriodMins,
        R.IsActive,
        R.Details,
-	   CASE WHEN R.ApplyToTagID = -1 THEN '{ALL}' ELSE CONCAT(T.TagName,':',T.TagValue) END AS ApplyToTag,
+	   CASE WHEN R.ApplyToTagID = -1 THEN '{ALL}' 
+			WHEN R.ApplyToTagID = -2 THEN MT.TagText
+			ELSE CONCAT(T.TagName,':',T.TagValue) END AS ApplyToTag,
        R.ApplyToInstanceID,
        I.InstanceDisplayName AS ApplyToInstance,
        R.ApplyToHidden,
        R.Notes,
        R.GroupID,
-       G.GroupName
+       G.GroupName,
+       R.ApplyToTagIDs
 FROM Alert.Rules R
 LEFT JOIN dbo.Tags T ON R.ApplyToTagID = T.TagID
 LEFT JOIN dbo.Instances I ON R.ApplyToInstanceID = I.InstanceID
 LEFT JOIN Alert.NotificationChannelGroup G ON R.GroupID = G.GroupID
+/* Multiple tags: (Role:Production OR Role:UAT) AND Region:APAC */
+OUTER APPLY Alert.TagScope_Describe(R.ApplyToTagIDs) MT
 WHERE (R.RuleID = @RuleID OR @RuleID IS NULL)
 OPTION(RECOMPILE)

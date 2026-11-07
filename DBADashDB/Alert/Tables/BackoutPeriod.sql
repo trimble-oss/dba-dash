@@ -16,8 +16,12 @@
 	Sunday BIT NOT NULL CONSTRAINT DF_Alert_BlackoutPeriod_Sunday DEFAULT(CONVERT(BIT,1)),
 	TimeZone NVARCHAR(128) NOT NULL CONSTRAINT DF_Alert_BlackoutPeriod_TimeZone DEFAULT('UTC'),
 	Notes NVARCHAR(MAX) NULL,
-	CONSTRAINT CK_Alert_BlackoutPeriod_ApplyTo CHECK(NOT (ApplyToInstanceID>0 AND ApplyToTagID>0))	
+	/* Sorted, comma-separated TagIDs when the blackout applies to more than 1 tag (ApplyToTagID = -2).  Same matching as alert rules:
+	   tags with different names must all match (AND), tags with the same name are alternatives (OR).  A deleted tag can't be matched. */
+	ApplyToTagIDs VARCHAR(800) NULL,
+	CONSTRAINT CK_Alert_BlackoutPeriod_ApplyTo CHECK(NOT (ApplyToInstanceID>0 AND (ApplyToTagID>0 OR ApplyToTagID = -2))),
+	CONSTRAINT CK_Alert_BlackoutPeriod_ApplyToTagIDs CHECK((ApplyToTagID = -2 AND ApplyToTagIDs IS NOT NULL) OR (ApplyToTagID <> -2 AND ApplyToTagIDs IS NULL))
 )
 GO
 CREATE UNIQUE NONCLUSTERED INDEX IX_Alert_BlackoutPeriod_InstanceID_StartDate_EndDate_AlertKey 
-	ON Alert.BlackoutPeriod(ApplyToInstanceID,ApplyToTagID,StartDate,EndDate,AlertKey,TimeFrom,TimeTo,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday,TimeZone)
+	ON Alert.BlackoutPeriod(ApplyToInstanceID,ApplyToTagID,StartDate,EndDate,AlertKey,TimeFrom,TimeTo,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday,TimeZone,ApplyToTagIDs)

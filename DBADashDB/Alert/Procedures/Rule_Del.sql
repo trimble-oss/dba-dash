@@ -1,4 +1,4 @@
-﻿CREATE PROC Alert.Rule_Del(
+CREATE PROC Alert.Rule_Del(
 	@RuleID INT
 )
 AS
@@ -18,6 +18,9 @@ IF @@ROWCOUNT>0 /* Close any existing alerts that reference the rule */
 BEGIN
 	EXEC Alert.ClosedAlerts_Add @AlertIDs=@AlertIDs
 END
+
+DELETE Alert.RuleInstanceMatch
+WHERE RuleID = @RuleID
 
 DELETE Alert.Rules 
 WHERE RuleID = @RuleID

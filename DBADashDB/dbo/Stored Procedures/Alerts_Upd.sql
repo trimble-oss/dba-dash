@@ -69,7 +69,10 @@ BEGIN
 					R.RuleID,
 					R.GroupID
 			FROM Alert.Rules R
-			CROSS APPLY Alert.ApplicableInstances_Get(R.ApplyToTagID,R.ApplyToInstanceID,R.AlertKey,R.ApplyToHidden) I
+			/* Evaluated as alerts are imported for 1 instance, so check the rule scope directly rather than using the per alert run tables read by Alert.ApplicableInstances_Get */
+			JOIN dbo.Instances I ON I.InstanceID = @InstanceID
+			OUTER APPLY Alert.TagScopeMatchesInstance(R.ApplyToTagID,R.ApplyToTagIDs,I.InstanceID) TM
+			OUTER APPLY Alert.IsBlackoutPeriod(I.InstanceID,R.AlertKey) BP
 			OUTER APPLY(SELECT 	TRY_CAST(JSON_VALUE(R.Details,'$.SeverityFrom') AS INT) AS SeverityFrom,
 								TRY_CAST(JSON_VALUE(R.Details,'$.SeverityTo') AS INT) AS SeverityTo,
 								ISNULL(JSON_VALUE(R.Details,'$.AlertName'),'%') AS AlertName
@@ -77,7 +80,13 @@ BEGIN
 			CROSS APPLY #NewAlerts T
 			WHERE R.Type = @Type
 			AND R.IsActive=1
-			AND I.InstanceID = @InstanceID
+			AND I.IsActive = 1
+			AND (I.ShowInSummary = 1 OR R.ApplyToHidden = 1)
+			AND BP.IsBlackout = 0
+			AND (
+					(R.ApplyToTagID = -1 AND (R.ApplyToInstanceID IS NULL OR R.ApplyToInstanceID = @InstanceID))
+					OR (R.ApplyToTagID <> -1 AND R.ApplyToInstanceID IS NULL AND TM.IsMatch = 1)
+				)
 			AND (T.severity>=calc.SeverityFrom OR calc.SeverityFrom IS NULL)
 			AND (T.severity<=calc.SeverityTo OR calc.SeverityTo IS NULL)
 			AND (T.name LIKE calc.AlertName)
