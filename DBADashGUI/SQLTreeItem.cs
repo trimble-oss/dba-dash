@@ -117,6 +117,13 @@ namespace DBADashGUI
 
         public string ElasticPoolName { get; set; }
 
+        /// <summary>
+        /// Databases an Azure server node covers, where that's not every database on the server.  When the tree is
+        /// grouped by a tag that varies by database, the server appears in several folders, each with only its own
+        /// databases.  Null for all databases on the server.
+        /// </summary>
+        public HashSet<int> AzureInstanceIDsScope { get; set; }
+
         public CustomReport Report;
 
         /// <summary>
@@ -160,7 +167,8 @@ namespace DBADashGUI
                 switch (Type)
                 {
                     case TreeType.AzureInstance:
-                        InternalContext.AzureInstanceIDsWithHidden = CommonData.Instances.Rows.Cast<DataRow>().Where(r => (string)r["Instance"] == ObjectName && (int)r["EngineEdition"] == 5)
+                        InternalContext.AzureInstanceIDsWithHidden = AzureInstanceIDsScope?.ToHashSet() ??
+                            CommonData.Instances.Rows.Cast<DataRow>().Where(r => (string)r["Instance"] == ObjectName && (int)r["EngineEdition"] == 5)
                          .Select(r => (int)r["InstanceID"]).ToHashSet();
 
                         break;

@@ -4,11 +4,11 @@ CREATE PROC dbo.Instances_Get(
 	@IsAzure BIT=NULL,
 	@SearchString NVARCHAR(128)=NULL,
 	@GroupByTag NVARCHAR(50)=NULL,
-	/* Further levels of grouping within @GroupByTag.  e.g. Group by Role, then Region */
-	@GroupByTag2 NVARCHAR(50)=NULL,
-	@GroupByTag3 NVARCHAR(50)=NULL,
 	@ConnectionID NVARCHAR(128)=NULL,
-	@Debug BIT =0
+	@Debug BIT =0,
+	/* Further levels of grouping within @GroupByTag.  e.g. Group by Role, then Region.  Added last to keep the position of existing parameters. */
+	@GroupByTag2 NVARCHAR(50)=NULL,
+	@GroupByTag3 NVARCHAR(50)=NULL
 )
 AS
 /* A level of grouping only applies when the level above it does */
