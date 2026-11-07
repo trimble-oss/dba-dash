@@ -351,9 +351,14 @@ namespace DBADashAI.Services
                     return AiChatResult.Failed(AiChatFailure.Provider,
                         "The model declined to answer this request" + (string.IsNullOrWhiteSpace(explanation) ? "." : ": " + explanation));
 
+                case "max_tokens" when text is null && maxTokens >= MaxAnthropicMaxTokens:
+                    // Already at the cap, so raising the setting would change nothing.
+                    return AiChatResult.Failed(AiChatFailure.Provider,
+                        $"The model used its whole token limit ({maxTokens}, the most the service allows) before it started its answer. Try a different model, or ask about less at once.");
+
                 case "max_tokens" when text is null:
                     return AiChatResult.Failed(AiChatFailure.Provider,
-                        $"The model reached Anthropic:MaxTokens ({maxTokens}) before it started its answer. Its thinking counts against that limit - raise Anthropic:MaxTokens.");
+                        $"The model reached Anthropic:MaxTokens ({maxTokens}) before it started its answer. Its thinking counts against that limit - raise Anthropic:MaxTokens (up to {MaxAnthropicMaxTokens}).");
 
                 case "max_tokens":
                     return AiChatResult.Answer(text + $"\n\n(Answer cut short: the model reached Anthropic:MaxTokens ({maxTokens}).)");
@@ -1039,12 +1044,25 @@ namespace DBADashAI.Services
             return code is 429 or 500 or 502 or 503 or 504;
         }
 
-        private static async Task<HttpResponseMessage> PostWithRetryAsync(
+        /// <summary>
+        /// Sends the request, retrying transient failures.  The client's timeout is the budget for the
+        /// whole call, retries and backoff included, not for each attempt: HttpClient applies it per
+        /// send, and a slow failure followed by a slow answer would otherwise run past the GUI's wait
+        /// (AIServiceTimeouts), which then abandons the request rather than hearing it timed out.
+        /// Running out of budget surfaces as a cancellation the caller did not ask for, which
+        /// <see cref="ChatAsync"/> reports as a timeout.
+        /// </summary>
+        internal static async Task<HttpResponseMessage> PostWithRetryAsync(
             HttpClient client,
             Uri requestUri,
             Func<HttpRequestMessage> requestFactory,
             CancellationToken cancellationToken)
         {
+            using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            if (client.Timeout != Timeout.InfiniteTimeSpan)
+                deadline.CancelAfter(client.Timeout);
+            var token = deadline.Token;
+
             HttpResponseMessage? response = null;
 
             for (var attempt = 0; attempt <= MaxRetries; attempt++)
@@ -1053,12 +1071,13 @@ namespace DBADashAI.Services
                 {
                     // Exponential backoff: 1s, 2s, 4s
                     var delay = TimeSpan.FromSeconds(Math.Pow(2, attempt - 1));
-                    await Task.Delay(delay, cancellationToken);
+                    await Task.Delay(delay, token);
                 }
 
-                // Each attempt gets a fresh HttpRequestMessage and HttpContent from the factory
+                // Each attempt gets a fresh HttpRequestMessage and HttpContent from the factory.
+                // The default completion option buffers the body, so the deadline covers reading it too.
                 using var request = requestFactory();
-                response = await client.SendAsync(request, cancellationToken);
+                response = await client.SendAsync(request, token);
 
                 if (!IsTransient(response) || attempt == MaxRetries)
                     break;

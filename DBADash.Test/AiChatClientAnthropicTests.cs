@@ -127,6 +127,39 @@ namespace DBADash.Test
         }
 
         [TestMethod]
+        public async Task StoppedWhileThinking_AtTheCap_DoesNotSayToRaiseMaxTokens()
+        {
+            const string thinkingOnly = """{"content":[{"type":"thinking","thinking":""}],"stop_reason":"max_tokens"}""";
+            // Over the cap is clamped to it, so this is the same as setting the cap.
+            var (client, _) = Create(Config(new() { ["Anthropic:MaxTokens"] = "50000" }), HttpStatusCode.OK, thinkingOnly);
+
+            var result = await client.ChatAsync(Question, CancellationToken.None);
+
+            Assert.AreEqual(AiChatFailure.Provider, result.Failure);
+            StringAssert.Contains(result.Text, AiChatClient.MaxAnthropicMaxTokens.ToString());
+            Assert.IsFalse(result.Text.Contains("raise", StringComparison.OrdinalIgnoreCase));
+        }
+
+        [TestMethod]
+        public async Task Retries_StayInsideTheClientTimeout_RatherThanGettingItEachTime()
+        {
+            // A transient failure, then a backoff of 1s: with half a second for the whole call, the retry
+            // is never sent.  Per attempt, it would have been - and the total could pass the GUI's wait.
+            var handler = new FakeHandler(HttpStatusCode.ServiceUnavailable, "{}");
+            using var http = new HttpClient(handler) { Timeout = TimeSpan.FromMilliseconds(500) };
+            var started = DateTime.UtcNow;
+
+            await Assert.ThrowsExactlyAsync<TaskCanceledException>(() => AiChatClient.PostWithRetryAsync(
+                http,
+                new Uri("https://api.anthropic.com/v1/messages"),
+                () => new HttpRequestMessage(HttpMethod.Post, "https://api.anthropic.com/v1/messages"),
+                CancellationToken.None));
+
+            Assert.AreEqual(1, handler.Requests.Count);
+            Assert.IsTrue(DateTime.UtcNow - started < TimeSpan.FromSeconds(3));
+        }
+
+        [TestMethod]
         public async Task StoppedMidAnswer_KeepsTheAnswer_AndSaysItWasCutShort()
         {
             const string cut = """{"content":[{"type":"text","text":"Lock order, because"}],"stop_reason":"max_tokens"}""";
