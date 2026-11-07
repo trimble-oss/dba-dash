@@ -56,7 +56,7 @@ namespace DBADashGUI.DBADashAlerts
                     if (found.HasValue)
                     {
                         ApplyToInstanceID = found;
-                        ApplyToTag = DBADashTag.AllInstancesTag();
+                        ApplyToTag = DBADashTagSet.AllInstances();
                         _instanceLookupFailed = false;
                     }
                     else
@@ -75,8 +75,10 @@ namespace DBADashGUI.DBADashAlerts
             }
         }
 
-        [Category("Filters"), DisplayName("Apply To (Tag)")]
-        public DBADashTag ApplyToTag { get; set; } = DBADashTag.AllInstancesTag();
+        [Category("Filters"), DisplayName("Apply To (Tags)")]
+        [Description("Option to apply the blackout period to instances with specific tags.  Instances must have a selected tag for every tag name (AND).  Selecting more than one value of the same tag name matches any of them (OR).  Can't be used in combination with Apply To Instance.")]
+        [Editor(typeof(TagSetSelect), typeof(System.Drawing.Design.UITypeEditor))]
+        public DBADashTagSet ApplyToTag { get; set; } = DBADashTagSet.AllInstances();
 
         [Category("Filters")]
         [DisplayName("Alert Key")]
@@ -120,14 +122,15 @@ namespace DBADashGUI.DBADashAlerts
             { CommandType = CommandType.StoredProcedure };
             if (ApplyToInstanceID > 0)
             {
-                ApplyToTag = DBADashTag.AllInstancesTag();
+                ApplyToTag = DBADashTagSet.AllInstances();
             }
             await cn.OpenAsync();
             var pBlackoutPeriodID = new SqlParameter("BlackoutPeriodID", SqlDbType.Int)
             { Direction = ParameterDirection.InputOutput, Value = BlackoutPeriodID.HasValue ? BlackoutPeriodID : DBNull.Value };
             cmd.Parameters.Add(pBlackoutPeriodID);
             cmd.Parameters.AddWithValue("ApplyToInstanceID", ApplyToInstanceID);
-            cmd.Parameters.AddWithValue("ApplyToTagID", ApplyToTag.TagID);
+            cmd.Parameters.AddWithValue("ApplyToTagID", ApplyToTag?.ApplyToTagID ?? -1);
+            cmd.Parameters.AddWithValue("ApplyToTagIDs", ApplyToTag == null || ApplyToTag.IsAllInstances ? DBNull.Value : ApplyToTag.TagIDs);
             cmd.Parameters.AddWithValue("AlertKey", string.IsNullOrEmpty(AlertKey) ? "%" : AlertKey);
             cmd.Parameters.AddWithValue("StartDate", StartDate.HasValue ? StartDate : DBNull.Value);
             cmd.Parameters.AddWithValue("EndDate", EndDate.HasValue ? EndDate : DBNull.Value);

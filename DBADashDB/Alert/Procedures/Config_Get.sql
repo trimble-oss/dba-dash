@@ -8,7 +8,7 @@ SELECT BP.BlackoutPeriodID,
 		BP.ApplyToInstanceID,
 		CASE WHEN BP.ApplyToInstanceID = -1 THEN '{All}' ELSE I.InstanceDisplayName END AS ApplyToInstance,
 		BP.ApplyToTagID,
-		T.TagName + ':' + T.TagValue AS ApplyToTag,
+		CASE WHEN BP.ApplyToTagID = -2 THEN MT.TagText ELSE T.TagName + ':' + T.TagValue END AS ApplyToTag,
 		I.ConnectionID,
 		BP.AlertKey,
 		BP.StartDate,
@@ -43,11 +43,13 @@ SELECT BP.BlackoutPeriodID,
 		ELSE 'Active' + IIF(DATEDIFF(d,GETUTCDATE(),BP.EndDate)>365 OR BP.EndDate IS NULL,'',' (Ends in ' + HDEndsIn.HumanDuration + ')')  END AS CurrentStatus,
 		HDStartsIn.HumanDuration AS StartsIn,
 		HDEndsIn.HumanDuration AS EndsIn,
-		BP.Notes
+		BP.Notes,
+		BP.ApplyToTagIDs
 FROM Alert.BlackoutPeriod BP
 OUTER APPLY(SELECT SYSDATETIMEOFFSET() AT TIME ZONE TimeZone AS CurrentTime) AS TZ
 LEFT JOIN dbo.Instances I ON I.InstanceID = BP.ApplyToInstanceID
 LEFT JOIN dbo.Tags T ON T.TagID = BP.ApplyToTagID
+OUTER APPLY Alert.TagScope_Describe(BP.ApplyToTagIDs) MT
 OUTER APPLY dbo.SecondsToHumanDuration(DATEDIFF_BIG(s,GETUTCDATE(),BP.EndDate)) HDEndsIn
 OUTER APPLY dbo.SecondsToHumanDuration(DATEDIFF_BIG(s,GETUTCDATE(),BP.StartDate)) HDStartsIn
 ORDER BY BP.EndDate DESC

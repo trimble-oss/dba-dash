@@ -43,6 +43,7 @@ BEGIN
 	RETURN;
 END
 PRINT CONCAT('Processing alerts of type ', @Type)
+EXEC Alert.ApplicableInstances_Ensure;
 
 /* The worst status to alert at for each check: 0 = Off, 1 = Critical, 2 = Warning or critical */
 CREATE TABLE #ServiceBrokerApplicable(
@@ -99,7 +100,7 @@ SELECT I.InstanceID,
 	R.RuleID,
 	R.GroupID
 FROM Alert.Rules R
-CROSS APPLY Alert.ApplicableInstances_Get(R.ApplyToTagID, R.ApplyToInstanceID, R.AlertKey, R.ApplyToHidden) I
+CROSS APPLY Alert.ApplicableInstances_Get(R.RuleID,R.ApplyToTagID, R.ApplyToInstanceID, R.AlertKey, R.ApplyToHidden) I
 /* The level for each check from Details, or its default.  OPENJSON rather than JSON_VALUE as a JSON path from a column needs SQL 2017. */
 CROSS APPLY(SELECT	MAX(CASE WHEN D.CheckName = 'QueueDisabled' THEN L.Level END) AS QueueDisabled,
 					MAX(CASE WHEN D.CheckName = 'QueueActivation' THEN L.Level END) AS QueueActivation,

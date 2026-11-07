@@ -1012,6 +1012,15 @@
     <Build Include="Alert\Procedures\BlackoutPeriod_Add.sql" />
     <Build Include="Alert\Procedures\BlackoutPeriod_Del.sql" />
     <Build Include="Alert\Functions\ApplicableInstances_Get.sql" />
+    <Build Include="Alert\Functions\TagScope_Normalize.sql" />
+    <Build Include="Alert\Functions\TagScope_Describe.sql" />
+    <Build Include="Alert\Functions\BlackoutPeriodsInEffect_Get.sql" />
+    <Build Include="Alert\Functions\TagScopeMatchesInstance.sql" />
+    <Build Include="Alert\Tables\RuleInstanceMatch.sql" />
+    <Build Include="Alert\Tables\ActiveBlackout.sql" />
+    <Build Include="Alert\Procedures\ApplicableInstances_Upd.sql" />
+    <Build Include="Alert\Procedures\ApplicableInstances_Ensure.sql" />
+    <Build Include="Alert\Procedures\TagScopeMatchingInstanceCount_Get.sql" />
     <Build Include="Alert\Procedures\AGAlert_Upd.sql" />
     <Build Include="Alert\Procedures\ActiveAlerts_Get.sql" />
     <Build Include="Alert\Procedures\ActiveAlertsAck_Upd.sql" />
