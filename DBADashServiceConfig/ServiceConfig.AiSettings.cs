@@ -377,6 +377,7 @@ public partial class ServiceConfig
             "Model ID or inference profile ID to use by default, e.g. us.anthropic.claude-sonnet-4-6.\n" +
             "Most current models must be called through an inference profile (the ID with a region prefix such as us. or eu.).\n" +
             "The GUI's model picker lists the models available to the key in the region.");
+        _aiToolTip.SetToolTip(txtAiAnthropicMaxTokens, "Limit on the length of the answer, including the model's thinking. Leave blank for the default (16000, maximum 32000).");
         _aiToolTip.SetToolTip(txtAiBedrockMaxTokens, "Optional limit on the length of the answer. Leave blank for the model's default.");
 
         pnlOllama = new Panel

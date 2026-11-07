@@ -220,9 +220,9 @@ namespace DBADash.Test
         }
 
         [TestMethod]
-        public void TooLargeDetail_TakesAPlainStringError()
+        public void ProviderErrorDetail_TakesAPlainStringError()
         {
-            Assert.AreEqual("prompt too long", AiChatClient.TooLargeDetail("""{"error":"prompt too long"}"""));
+            Assert.AreEqual("prompt too long", AiChatClient.ProviderErrorDetail("""{"error":"prompt too long"}"""));
         }
 
         [TestMethod]

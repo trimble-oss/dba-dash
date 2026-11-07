@@ -81,7 +81,7 @@ namespace DBADashAI.Services
             var anthropicApiKey = _configuration["Anthropic:ApiKey"];
             var anthropicModel = modelOverride ?? _configuration["Anthropic:Model"];
             var anthropicVersion = _configuration["Anthropic:Version"] ?? "2023-06-01";
-            var anthropicMaxTokens = ParseInt(_configuration["Anthropic:MaxTokens"], 1024, 128, 4096);
+            var anthropicMaxTokens = ParseInt(_configuration["Anthropic:MaxTokens"], DefaultAnthropicMaxTokens, 128, MaxAnthropicMaxTokens);
 
             try
             {
@@ -271,10 +271,10 @@ namespace DBADashAI.Services
         {
             var requestUrl = new Uri(baseUrl.TrimEnd('/') + "/v1/messages");
 
-            // Models like claude-opus-4-7 deprecate temperature and require adaptive thinking
-            var isThinkingModel = model.Contains("opus-4-7", StringComparison.OrdinalIgnoreCase)
-                               || model.Contains("mythos", StringComparison.OrdinalIgnoreCase);
-
+            // No temperature and no thinking setting.  Newer models refuse temperature outright, and
+            // later API versions refuse it for every model, so it cannot be decided by model name - on
+            // Azure Foundry the model is a deployment name anyway.  Left unset, each model thinks or not
+            // as it does by default, which is something every model accepts.
             var payloadDict = new Dictionary<string, object>
             {
                 ["model"] = model,
@@ -285,12 +285,9 @@ namespace DBADashAI.Services
                     .ToArray()
             };
 
-            if (isThinkingModel)
-                payloadDict["thinking"] = new { type = "adaptive" };
-            else
-                payloadDict["temperature"] = 0.1;
-
+            // A model that thinks before answering can take longer than HttpClient's default of 100s.
             var client = _httpClientFactory.CreateClient();
+            client.Timeout = TimeSpan.FromSeconds(AnthropicTimeoutSeconds);
             using var response = await PostWithRetryAsync(
                 client,
                 requestUrl,
@@ -316,7 +313,54 @@ namespace DBADashAI.Services
             using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
             using var document = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken);
 
-            return AiChatResult.Answer(ExtractAnthropicSummary(document.RootElement, "No summary returned by Anthropic."));
+            return AnthropicResult(document.RootElement, maxTokens);
+        }
+
+        /// <summary>
+        /// The limit includes the model's thinking, which newer models do by default and which can run
+        /// to thousands of tokens before the answer starts - so it is set well above the length of any
+        /// answer.  The cap keeps a non-streaming request short enough to finish inside the timeout.
+        /// </summary>
+        internal const int DefaultAnthropicMaxTokens = 16000;
+        internal const int MaxAnthropicMaxTokens = 32000;
+
+        /// <summary>Inside the GUI's wait for the service, as for Ollama.</summary>
+        internal const int AnthropicTimeoutSeconds = 240;
+
+        /// <summary>
+        /// The answer, or why there is not one.  A model stopped by Anthropic:MaxTokens while still
+        /// thinking returns no text at all, and a model that declines returns none either - both are
+        /// reported as what they are rather than as an empty summary.
+        /// </summary>
+        internal static AiChatResult AnthropicResult(JsonElement root, int maxTokens)
+        {
+            var text = ExtractAnthropicText(root);
+            var stopReason = root.TryGetProperty("stop_reason", out var stop) && stop.ValueKind == JsonValueKind.String
+                ? stop.GetString()
+                : null;
+
+            switch (stopReason)
+            {
+                case "refusal":
+                    var explanation = root.TryGetProperty("stop_details", out var details)
+                                      && details.ValueKind == JsonValueKind.Object
+                                      && details.TryGetProperty("explanation", out var e)
+                                      && e.ValueKind == JsonValueKind.String
+                        ? LogSanitizer.TruncateAndSanitizeForLog(e.GetString(), 300)
+                        : null;
+                    return AiChatResult.Failed(AiChatFailure.Provider,
+                        "The model declined to answer this request" + (string.IsNullOrWhiteSpace(explanation) ? "." : ": " + explanation));
+
+                case "max_tokens" when text is null:
+                    return AiChatResult.Failed(AiChatFailure.Provider,
+                        $"The model reached Anthropic:MaxTokens ({maxTokens}) before it started its answer. Its thinking counts against that limit - raise Anthropic:MaxTokens.");
+
+                case "max_tokens":
+                    return AiChatResult.Answer(text + $"\n\n(Answer cut short: the model reached Anthropic:MaxTokens ({maxTokens}).)");
+
+                default:
+                    return AiChatResult.Answer(text ?? "No summary returned by Anthropic.");
+            }
         }
 
         internal const string DefaultOllamaBaseUrl = "http://localhost:11434";
@@ -801,11 +845,12 @@ namespace DBADashAI.Services
         }
 
 
-        private static string ExtractAnthropicSummary(JsonElement root, string fallbackMessage)
+        /// <summary>The text blocks of the answer - not the thinking blocks - or null when there are none.</summary>
+        private static string? ExtractAnthropicText(JsonElement root)
         {
             if (!root.TryGetProperty("content", out var content) || content.ValueKind != JsonValueKind.Array)
             {
-                return fallbackMessage;
+                return null;
             }
 
             var textParts = content.EnumerateArray()
@@ -817,7 +862,7 @@ namespace DBADashAI.Services
                 .Where(s => !string.IsNullOrWhiteSpace(s));
 
             var text = string.Join("\n", textParts);
-            return string.IsNullOrWhiteSpace(text) ? fallbackMessage : text;
+            return string.IsNullOrWhiteSpace(text) ? null : text;
         }
 
         private static string ExtractOpenAiStyleSummary(JsonElement root, string fallbackMessage)
@@ -862,14 +907,18 @@ namespace DBADashAI.Services
         {
             if (!IsTooLarge(status, body))
             {
+                // A refused request is the one case where the provider's own words say what to change -
+                // "`temperature` is deprecated for this model", "model: x not found".  Not for the other
+                // statuses, whose messages are about keys and resources rather than the request.
+                var reason = status is 400 or 404 or 422 ? ProviderErrorDetail(body) : null;
                 return AiChatResult.Failed(
                     AiChatFailure.Provider,
-                    $"{provider} summary call failed: {status} {StatusHint(status)} (ErrorId={errorId}). Check the service logs for details.",
+                    $"{provider} summary call failed: {status} {StatusHint(status)}{(reason is null ? string.Empty : ": " + reason)} (ErrorId={errorId}). Check the service logs for details.",
                     errorId,
                     status);
             }
 
-            var detail = TooLargeDetail(body);
+            var detail = ProviderErrorDetail(body);
 
             return AiChatResult.Failed(
                 AiChatFailure.TooLarge,
@@ -906,7 +955,7 @@ namespace DBADashAI.Services
         }
 
         /// <summary>
-        /// The provider's own words for it, which are the useful part: "prompt is too long: 250000
+        /// The provider's own words for why it refused, which are the useful part: "prompt is too long: 250000
         /// tokens > 200000 maximum" tells the reader how much to cut, and anything written here
         /// could only guess at it.  Truncated and stripped of control characters like anything else
         /// that crosses back to a caller, and left out altogether when the body is not the shape
@@ -916,7 +965,7 @@ namespace DBADashAI.Services
         /// string rather than an object, and when it comes from the model runner
         /// that string is itself the documented shape, serialized a second time.
         /// </summary>
-        internal static string? TooLargeDetail(string body, int depth = 0)
+        internal static string? ProviderErrorDetail(string body, int depth = 0)
         {
             try
             {
@@ -941,7 +990,7 @@ namespace DBADashAI.Services
                 {
                     message = error.GetString();
                     if (depth == 0 && message is not null && message.TrimStart().StartsWith('{'))
-                        return TooLargeDetail(message, depth + 1) ?? Clean(message);
+                        return ProviderErrorDetail(message, depth + 1) ?? Clean(message);
                 }
 
                 return Clean(message);
@@ -963,7 +1012,7 @@ namespace DBADashAI.Services
 
         private static string StatusHint(int statusCode) => statusCode switch
         {
-            400 => "(bad request — check model/deployment name)",
+            400 => "(bad request — the provider rejected the request)",
             401 => "(unauthorized — API key may be invalid or expired)",
             403 => "(forbidden — check permissions on the AI resource)",
             404 => "(not found — check endpoint URL and deployment name)",

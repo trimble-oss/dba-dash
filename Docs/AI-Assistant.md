@@ -118,7 +118,7 @@ Where there's a choice, the GUI's **Model** picker shows each model's name with 
     "ApiKey": "<key>",
     "Model": "claude-sonnet-4-6",
     "Version": "2023-06-01",
-    "MaxTokens": 1024
+    "MaxTokens": 16000
   }
 }
 ```
@@ -134,6 +134,9 @@ For Anthropic via **Azure Foundry**, set `BaseUrl` to the base Foundry URL (endi
   }
 }
 ```
+
+- `MaxTokens` caps the length of the answer, including the model's thinking. Newer models think before answering by default, so keep it well above the length of the answer you expect: the default is 16000, and the maximum is 32000. If it's too low, the service says that the model reached `Anthropic:MaxTokens` instead of returning an empty summary.
+- Any Claude model works, including models that don't accept a `temperature` setting. The service doesn't send one.
 
 #### Amazon Bedrock
 
