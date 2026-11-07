@@ -4,10 +4,17 @@ CREATE PROC dbo.Instances_Get(
 	@IsAzure BIT=NULL,
 	@SearchString NVARCHAR(128)=NULL,
 	@GroupByTag NVARCHAR(50)=NULL,
+	/* Further levels of grouping within @GroupByTag.  e.g. Group by Role, then Region */
+	@GroupByTag2 NVARCHAR(50)=NULL,
+	@GroupByTag3 NVARCHAR(50)=NULL,
 	@ConnectionID NVARCHAR(128)=NULL,
 	@Debug BIT =0
 )
 AS
+/* A level of grouping only applies when the level above it does */
+IF @GroupByTag IS NULL SET @GroupByTag2 = NULL
+IF @GroupByTag2 IS NULL SET @GroupByTag3 = NULL
+
 DECLARE @SQL NVARCHAR(MAX)
 SET @SQL = N'
 SELECT  I.InstanceID,
@@ -23,6 +30,8 @@ SELECT  I.InstanceID,
 	I.ShowInSummary,
 	~I.ShowInSummary AS IsHidden,
 	' + CASE WHEN @GroupByTag IS NULL THEN 'CAST(NULL AS NVARCHAR(128)) as TagGroup' ELSE 'ISNULL(T.TagValue,''[N/A]'') AS TagGroup' END + ',
+	' + CASE WHEN @GroupByTag2 IS NULL THEN 'CAST(NULL AS NVARCHAR(128)) as TagGroup2' ELSE 'ISNULL(T2.TagValue,''[N/A]'') AS TagGroup2' END + ',
+	' + CASE WHEN @GroupByTag3 IS NULL THEN 'CAST(NULL AS NVARCHAR(128)) as TagGroup3' ELSE 'ISNULL(T3.TagValue,''[N/A]'') AS TagGroup3' END + ',
 	SO.elastic_pool_name,
 	I.CollectAgentID,
 	I.ImportAgentID,
@@ -57,17 +66,19 @@ LEFT JOIN dbo.DBADashAgent IA ON I.ImportAgentID = IA.DBADashAgentID
 LEFT JOIN dbo.DBADashAgent CA ON I.CollectAgentID = CA.DBADashAgentID
 LEFT JOIN dbo.InstanceMetadata M ON I.InstanceID = M.InstanceID
 ' + CASE WHEN @GroupByTag IS NULL THEN '' ELSE 'OUTER APPLY dbo.TagValue(I.InstanceID,@GroupByTag,I.EngineEdition) T' END + '
+' + CASE WHEN @GroupByTag2 IS NULL THEN '' ELSE 'OUTER APPLY dbo.TagValue(I.InstanceID,@GroupByTag2,I.EngineEdition) T2' END + '
+' + CASE WHEN @GroupByTag3 IS NULL THEN '' ELSE 'OUTER APPLY dbo.TagValue(I.InstanceID,@GroupByTag3,I.EngineEdition) T3' END + '
 WHERE (D.InstanceID IS NOT NULL OR I.EngineEdition <> 5 OR I.EngineEdition IS NULL)
 ' + CASE WHEN @IsActive IS NULL THEN '' ELSE 'AND I.IsActive=@IsActive' END + '
 ' + CASE WHEN @IsAzure=1 THEN 'AND I.EngineEdition = 5' WHEN @IsAzure=0 THEN 'AND I.EngineEdition <> 5' ELSE '' END + '
 ' + CASE WHEN @SearchString IS NULL THEN '' ELSE 'AND (I.ConnectionID LIKE @SearchString OR I.Alias LIKE @SearchString OR I.Instance LIKE @SearchString)' END + '
 ' + CASE WHEN @ConnectionID IS NULL THEN '' ELSE 'AND I.ConnectionID = @ConnectionID' END + '
-ORDER BY TagGroup,I.InstanceDisplayName'
+ORDER BY TagGroup,TagGroup2,TagGroup3,I.InstanceDisplayName'
 
 IF @Debug=1
 BEGIN
 	EXEC dbo.PrintMax @SQL
 END
 
-EXEC sp_executesql @SQL,N'@TagIDs VARCHAR(MAX),@IsActive BIT,@SearchString NVARCHAR(128),@GroupByTag NVARCHAR(50),@ConnectionID NVARCHAR(128)',@TagIDs,@IsActive,@SearchString,@GroupByTag,@ConnectionID
+EXEC sp_executesql @SQL,N'@TagIDs VARCHAR(MAX),@IsActive BIT,@SearchString NVARCHAR(128),@GroupByTag NVARCHAR(50),@GroupByTag2 NVARCHAR(50),@GroupByTag3 NVARCHAR(50),@ConnectionID NVARCHAR(128)',@TagIDs,@IsActive,@SearchString,@GroupByTag,@GroupByTag2,@GroupByTag3,@ConnectionID
 
