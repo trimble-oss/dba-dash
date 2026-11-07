@@ -16,6 +16,7 @@ BEGIN
 	RETURN;
 END
 PRINT CONCAT('Processing alerts of type ',@Type)
+EXEC Alert.ApplicableInstances_Ensure;
 
 CREATE TABLE #EffectiveThresholds (
 	InstanceID INT NOT NULL,
@@ -66,7 +67,7 @@ OUTER APPLY(SELECT TRY_CAST(JSON_VALUE(R.Details,'$.Counter.ObjectName') AS NVAR
 JOIN dbo.Counters C ON C.object_name = Calc.ObjectName 
 					AND C.counter_name = Calc.CounterName 
 					AND (C.instance_name = Calc.InstanceName OR Calc.ApplyToAllInstances=CAST(1 AS BIT))
-CROSS APPLY Alert.ApplicableInstances_Get(R.ApplyToTagID,R.ApplyToInstanceID,R.AlertKey,R.ApplyToHidden) I
+CROSS APPLY Alert.ApplicableInstances_Get(R.RuleID,R.ApplyToTagID,R.ApplyToInstanceID,R.AlertKey,R.ApplyToHidden) I
 WHERE R.Type = @Type
 AND R.IsActive=1
 AND Calc.Aggregation IN('MAX','AVG','SUM','MIN')

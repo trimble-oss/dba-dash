@@ -20,15 +20,27 @@ OUTER APPLY Alert.IsBlackoutPeriod(AA.InstanceID,AA.AlertKey) BP
 WHERE AA.IsResolved=0
 AND AA.IsBlackout <> BP.IsBlackout
 
+/* All instances & all alerts blacked out - active alerts were marked as blackout above, so there's nothing for the alert procs to do */
 IF EXISTS(
-		SELECT 1 
-		FROM Alert.IsBlackoutPeriod(DEFAULT,DEFAULT) BP
-		WHERE BP.IsBlackout=1
+		SELECT 1
+		FROM Alert.BlackoutPeriodsInEffect_Get() BP
+		WHERE BP.ApplyToInstanceID = -1
+		AND BP.ApplyToTagID = -1
+		AND BP.AlertKey = N'%'
 	)
 BEGIN
 	PRINT 'Blackout period in effect for all instances. No alerts will be processed.'
-	RETURN;
 END
+ELSE
+BEGIN
+
+/*
+	Resolve tag-scoped rules & blackout periods once for all the alert procs below.
+	The run is flagged in session context with its start time - see Alert.ApplicableInstances_Ensure.
+*/
+EXEC Alert.ApplicableInstances_Upd
+DECLARE @RunStarted DATETIME2 = SYSUTCDATETIME()
+EXEC sp_set_session_context @key = N'DBADash.AlertRun', @value = @RunStarted
 
 EXEC Alert.CPUAlert_Upd
 EXEC Alert.WaitAlert_Upd
@@ -48,6 +60,10 @@ EXEC Alert.DatabaseMailAlert_Upd
 EXEC Alert.AzureDBSpaceAlert_Upd
 EXEC Alert.ElasticPoolSpaceAlert_Upd
 EXEC Alert.ServiceBrokerAlert_Upd
+
+EXEC sp_set_session_context @key = N'DBADash.AlertRun', @value = NULL
+
+END
 
 /* Close Alerts that have been resolved for a period of time */
 

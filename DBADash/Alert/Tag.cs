@@ -44,6 +44,24 @@ namespace DBADashGUI
             return tags;
         }
 
+        /// <summary>Tags by ID, whether or not they're assigned to active instances (GetTags only returns tags in use).  Missing tags are left out.</summary>
+        public static List<DBADashTag> GetTagsByID(string connectionString, IEnumerable<int> tagIDs)
+        {
+            var tags = new List<DBADashTag>();
+            var ids = string.Join(",", tagIDs.Where(id => id > 0).Distinct());
+            if (ids.Length == 0) return tags;
+            using SqlConnection cn = new(connectionString);
+            using SqlCommand cmd = new("Tags_Get", cn) { CommandType = CommandType.StoredProcedure };
+            cmd.Parameters.AddWithValue("TagIDs", ids);
+            cn.Open();
+            using var rdr = cmd.ExecuteReader();
+            while (rdr.Read())
+            {
+                tags.Add(new DBADashTag { TagID = (int)rdr[0], TagName = (string)rdr[1], TagValue = (string)rdr[2] });
+            }
+            return tags;
+        }
+
         public static DBADashTag GetTag(string connectionString, int tagId)
         {
             var tags = GetTags(connectionString, default, tagId);
