@@ -420,6 +420,7 @@ namespace DBADash.XE
                 cursor.HasValue ? cursor.Offset : (object)DBNull.Value;
 
             await cn.OpenAsync(cancellationToken);
+            await using var runUsage = await SessionUsageMeasurement.StartForRunAsync(cn);
             await using var registration = cancellationToken.Register(() => cmd.Cancel());
             await using var rdr = await cmd.ExecuteReaderAsync(cancellationToken);
             while (await rdr.ReadAsync(cancellationToken))
@@ -485,6 +486,7 @@ namespace DBADash.XE
             await using var cmd = new SqlCommand(sql, cn) { CommandType = CommandType.Text };
             cmd.Parameters.Add("@name", SqlDbType.NVarChar, 128).Value = _sessionName;
             await cn.OpenAsync(cancellationToken);
+            await using var runUsage = await SessionUsageMeasurement.StartForRunAsync(cn);
             await using var registration = cancellationToken.Register(() => cmd.Cancel());
             var result = await cmd.ExecuteScalarAsync(cancellationToken);
             return result == null || result == DBNull.Value ? null : (string)result;
@@ -500,6 +502,7 @@ namespace DBADash.XE
             await using var cn = new SqlConnection(_connectionString);
             await using var cmd = new SqlCommand(sql, cn) { CommandType = CommandType.Text };
             await cn.OpenAsync(cancellationToken);
+            await using var runUsage = await SessionUsageMeasurement.StartForRunAsync(cn);
             await cmd.ExecuteNonQueryAsync(cancellationToken);
         }
 
@@ -605,6 +608,7 @@ namespace DBADash.XE
             await using var cmd = new SqlCommand(sql, cn) { CommandType = CommandType.Text };
             cmd.Parameters.Add("@name", SqlDbType.NVarChar, 128).Value = _sessionName;
             await cn.OpenAsync(cancellationToken);
+            await using var runUsage = await SessionUsageMeasurement.StartForRunAsync(cn);
             await using var registration = cancellationToken.Register(() => cmd.Cancel());
             var result = await cmd.ExecuteScalarAsync(cancellationToken);
             return result == null || result == DBNull.Value ? null : (string)result;

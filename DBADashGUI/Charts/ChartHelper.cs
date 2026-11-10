@@ -1205,6 +1205,7 @@ namespace DBADashGUI.Charts
             }
 
             var yAxes = CreateYAxes(config, labelPaint);
+            ApplyYAxisMinimumMax(yAxes, dt, config);
 
             // An overlay with an axis of its own gets it after the chart's axes, so the chart's axis indexes
             // are the same with or without overlays.
@@ -1817,6 +1818,28 @@ namespace DBADashGUI.Charts
                     Name = label
                 }
             };
+        }
+
+        /// <summary>
+        /// Takes the Y-axis up to <see cref="ChartConfiguration.YAxisMinimumMax"/> while every value is below it.  A value above
+        /// it leaves the axis to scale itself.
+        /// </summary>
+        private static void ApplyYAxisMinimumMax(Axis[] yAxes, DataTable dt, ChartConfiguration config)
+        {
+            if (config.YAxisMinimumMax is not { } minimumMax || config.YAxisMax.HasValue || config.YAxes is { Length: > 0 } || yAxes.Length != 1) return;
+            var columns = (config.MetricColumns is { Length: > 0 } ? config.MetricColumns : new[] { config.MetricColumn })
+                .Where(c => !string.IsNullOrWhiteSpace(c) && dt.Columns.Contains(c))
+                .ToList();
+            var max = dt.Rows.Cast<DataRow>()
+                .SelectMany(r => columns.Select(c => r[c]))
+                .Where(v => v is not (DBNull or string))
+                .Select(Convert.ToDouble)
+                .DefaultIfEmpty(0)
+                .Max();
+            if (max < minimumMax)
+            {
+                yAxes[0].MaxLimit = minimumMax;
+            }
         }
 
         private static Axis[] CreateYAxes(ChartConfiguration config, SolidColorPaint labelPaint)

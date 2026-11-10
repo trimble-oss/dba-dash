@@ -181,6 +181,16 @@ namespace DBADashGUI.CustomReports
         [JsonIgnore]
         public bool ShowInfoMessages { get; set; }
 
+        /// <summary>
+        /// Show a result set with just InsightSeverity (Info, Warning or Critical) and Insight columns as cards above the
+        /// results, one for each row, rather than as a grid - advice about the results as a whole that would otherwise repeat
+        /// on every row it's about.  Insight is markdown: [text](url) is a link.  No rows, no cards.  The result set is taken
+        /// out of the results, so return it last to keep the other result sets' indexes.  System reports only, set in code
+        /// like <see cref="ShowInfoMessages"/>.
+        /// </summary>
+        [JsonIgnore]
+        public bool ShowInsights { get; set; }
+
         public string CancellationMessageWarning { get; set; }
 
         public bool ChartVisible { get; set; } = true;

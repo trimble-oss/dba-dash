@@ -88,7 +88,7 @@ namespace DBADashService
                     return;
                 }
 
-                var collector = await DBCollector.CreateAsync(Source, config.ServiceName);
+                var collector = await DBCollector.CreateAsync(Source, config.ServiceName, logInternalPerformanceCounters: config.LogInternalPerformanceCounters);
                 collector.DeadlockBackfillTimeLimitSeconds = config.GetDeadlockBackfillTimeLimitSeconds();
 
                 // Checked again here: it may have waited in the queue behind a service restart, or been completed by

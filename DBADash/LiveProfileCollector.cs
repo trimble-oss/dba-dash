@@ -39,7 +39,7 @@ namespace DBADash
         /// a <see cref="TableName"/> table.  One that has finished or moved on to another statement since is left out:
         /// its counters would belong to a different plan.
         /// </summary>
-        public static async Task<DataTable> CollectAsync(IReadOnlyList<LiveProfileRequest> requests, string connectionString)
+        public static async Task<DataTable> CollectAsync(IReadOnlyList<LiveProfileRequest> requests, string connectionString, CollectionRunMeter meter = null)
         {
             var result = NewTable();
             if (requests.Count == 0) return result;
@@ -48,6 +48,7 @@ namespace DBADash
             await using var cmd = new SqlCommand(SqlStrings.GetSqlString("LiveProfiles"), cn);
             cmd.Parameters.Add("@Requests", SqlDbType.Xml).Value = RequestsXml(requests);
             await cn.OpenAsync();
+            await using var usage = await SessionUsageMeasurement.StartAsync(cn, meter);
 
             var captured = new DataTable();
             var profiles = new DataTable();

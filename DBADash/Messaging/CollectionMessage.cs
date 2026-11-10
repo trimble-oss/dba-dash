@@ -137,7 +137,7 @@ namespace DBADash.Messaging
                 Log.Warning("Message {Id}: skipping unknown collection type(s) {unknown} for {instance}", Id, unknownCollections, connectionID);
             }
 
-            var collector = await DBCollector.CreateAsync(src, cfg.ServiceName, true);
+            var collector = await DBCollector.CreateAsync(src, cfg.ServiceName, true, cfg.LogInternalPerformanceCounters);
             collector.FailedLoginsBackfillMinutes = cfg.FailedLoginsBackfillMinutes ?? CollectionConfig.DefaultFailedLoginsBackfillMinutes;
             collector.DeadlockXERingBufferKB = cfg.GetDeadlockXERingBufferKB();
             collector.ServiceBrokerMaxDatabases = cfg.GetServiceBrokerMaxDatabases();

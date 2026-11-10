@@ -508,7 +508,7 @@ namespace DBADashServiceConfig
             chkLogInternalPerfCounters.Size = new System.Drawing.Size(259, 24);
             chkLogInternalPerfCounters.TabIndex = 0;
             chkLogInternalPerfCounters.Text = "Log Internal Performance Counters";
-            toolTip1.SetToolTip(chkLogInternalPerfCounters, "Internal performance counters are available on the Metrics tab in the GUI.  They track things like how long each collection took to run.");
+            toolTip1.SetToolTip(chkLogInternalPerfCounters, "Every collection run is tracked on the Collection Health tab either way (hourly).  With this on, each run is kept as well, the CPU and logical reads each collection uses on the monitored instance (and its import in the repository) are measured, and DBA Dash diagnostic counters are logged.  Shown on the Metrics tab under DBADash.");
             chkLogInternalPerfCounters.UseVisualStyleBackColor = true;
             chkLogInternalPerfCounters.CheckedChanged += ChkLogInternalPerfCounters_CheckedChanged;
             // 

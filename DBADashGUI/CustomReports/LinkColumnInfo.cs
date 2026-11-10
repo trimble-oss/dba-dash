@@ -45,7 +45,8 @@ namespace DBADashGUI.CustomReports
 
         public override void Navigate(DBADashContext context, DataGridViewRow row, int selectedTableIndex, ContainerControl sender)
         {
-            var url = row.Cells[TargetColumn].Value.DBNullToNull().ToString() ?? string.Empty;
+            var url = row.Cells[TargetColumn].Value.DBNullToNull()?.ToString();
+            if (string.IsNullOrEmpty(url)) return; // Nothing to open - a row the link doesn't apply to
             try
             {
                 if (url.StartsWith("smb:")) // Convert to UNC path
@@ -508,6 +509,21 @@ namespace DBADashGUI.CustomReports
         /// </summary>
         public bool CarryUserParameters { get; set; }
 
+        /// <summary>
+        /// With <see cref="CarryUserParameters"/>, also carries a date range the source report was opened on by a drill-down
+        /// (@FromDate and @ToDate set rather than taken from the date range picker).  For a report that narrows itself in
+        /// place: the errors for a collection's last failure, opened on the dates of that failure, would otherwise go back to
+        /// the picker's range on the next click - and a failure at the weekend has nothing in the last hour.  A report still
+        /// on the picker has nothing to carry, so it stays on the picker.
+        /// </summary>
+        public bool CarryDrillDownDates { get; set; }
+
+        /// <summary>
+        /// Parameters the drill-down sets to a fixed value rather than from a column - a count of one kind of row
+        /// listing that kind, say.  Set after the carried filters and before <see cref="ColumnToParameterMap"/>.
+        /// </summary>
+        public Dictionary<string, object> ParameterValues { get; set; }
+
         protected abstract CustomReport GetReport(DBADashContext context);
 
         public override void Navigate(DBADashContext context, DataGridViewRow row, int selectedTableIndex, ContainerControl sender) =>
@@ -528,7 +544,14 @@ namespace DBADashGUI.CustomReports
             var customParams = report.GetCustomSqlParameters();
             if (CarryUserParameters && sender is CustomReportView sourceView)
             {
-                CarryFilters(sourceView.CurrentParameters, customParams);
+                CarryFilters(sourceView.CurrentParameters, customParams, CarryDrillDownDates);
+            }
+            foreach (var (name, value) in ParameterValues ?? new Dictionary<string, object>())
+            {
+                var param = customParams.FirstOrDefault(p => p.Param.ParameterName.Equals(name, StringComparison.OrdinalIgnoreCase));
+                if (param == null) continue;
+                param.Param.Value = value;
+                param.UseDefaultValue = false;
             }
             foreach (var mapping in ColumnToParameterMap)
             {
@@ -578,7 +601,7 @@ namespace DBADashGUI.CustomReports
             }
             else
             {
-                CustomReportViewer customReportViewer = new() { Context = newContext, CustomParams = customParams, GridFilters = filters };
+                CustomReportViewer customReportViewer = new() { Context = newContext, CustomParams = customParams, GridFilters = filters, OpenedFrom = sender as CustomReportView };
                 customReportViewer.ShowSingleInstance();
             }
         }
@@ -590,14 +613,16 @@ namespace DBADashGUI.CustomReports
         /// the user actually set - a parameter still on its default says nothing to carry.  System
         /// parameters are skipped: the instances and the date range are set from context by the view that
         /// is about to run the report, and pinning them here would take the date range picker out of use.
+        /// <paramref name="includeDates"/> carries the dates where a drill-down set them - see <see cref="CarryDrillDownDates"/>.
         /// </summary>
-        internal static void CarryFilters(IEnumerable<CustomSqlParameter> sourceParams, List<CustomSqlParameter> targetParams)
+        internal static void CarryFilters(IEnumerable<CustomSqlParameter> sourceParams, List<CustomSqlParameter> targetParams, bool includeDates = false)
         {
             foreach (var source in sourceParams ?? Enumerable.Empty<CustomSqlParameter>())
             {
                 if (source.UseDefaultValue) continue;
-                var name = source.Param.ParameterName;
-                if (CustomReport.SystemParamNames.Contains(name.ToUpper())) continue;
+                var name = source.Param.ParameterName.ToUpper();
+                var isDate = name is "@FROMDATE" or "@TODATE";
+                if (CustomReport.SystemParamNames.Contains(name) && !(includeDates && isDate)) continue;
                 var target = targetParams.FirstOrDefault(p => p.Param.ParameterName.Equals(name, StringComparison.OrdinalIgnoreCase));
                 if (target == null) continue;
                 target.Param.Value = source.Param.Value;

@@ -63,7 +63,7 @@ namespace DBADashGUI
         private bool WasRefreshed;
 
         private readonly Dictionary<string, Tabs?> tabMapping = new() { { "FullBackupStatus",Tabs.Backups }, { "LogShippingStatus", Tabs.LogShipping}, { "DiffBackupStatus", Tabs.Backups }, { "LogBackupStatus", Tabs.Backups }, { "DriveStatus", Tabs.Drives },
-                                                            { "JobStatus", Tabs.Jobs }, { "CollectionErrorStatus", Tabs.DBADashErrorLog}, { "AGStatus", Tabs.AG }, {"LastGoodCheckDBStatus", Tabs.LastGood}, {"SnapshotAgeStatus",Tabs.CollectionDates  },
+                                                            { "JobStatus", Tabs.Jobs }, { "CollectionErrorStatus", Tabs.CollectionHealth}, { "AGStatus", Tabs.AG }, {"LastGoodCheckDBStatus", Tabs.LastGood}, {"SnapshotAgeStatus",Tabs.CollectionDates  },
                                                             {"MemoryDumpStatus", null}, {"UptimeStatus",null}, {"CorruptionStatus",null }, {"AlertStatus",Tabs.SQLAgentAlerts }, {"FileFreeSpaceStatus", Tabs.Files },
                                                             {"CustomCheckStatus",Tabs.CustomChecks  }, {"MirroringStatus",Tabs.Mirroring },{"ElasticPoolStorageStatus",Tabs.AzureSummary},{"PctMaxSizeStatus",Tabs.Files}, {"QueryStoreStatus",Tabs.QS },
                                                             {"LogFreeSpaceStatus",Tabs.Files},{"DBMailStatus",null },{"IdentityStatus",Tabs.IdentityColumns }, {"IsAgentRunningStatus",null },{"DatabaseStateStatus",Tabs.DBOptions }, {"ServiceBrokerStatus",Tabs.ServiceBroker }};

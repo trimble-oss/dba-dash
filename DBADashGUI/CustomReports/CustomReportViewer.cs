@@ -36,10 +36,24 @@ namespace DBADashGUI.CustomReports
 
         public DataSet DataSet;
 
+        /// <summary>The view the window was opened from - its date range is where this window's starts (<see cref="CustomReportView.UseOwnDateRange"/>)</summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public CustomReportView OpenedFrom { get; set; }
+
+        /// <summary>A report that takes a date range gets one of its own in a window of its own</summary>
+        private static bool HasDateRange(CustomReport report) =>
+            report?.Params?.ParamList is { } list
+            && list.Any(p => p.ParamName.Equals("@FromDate", StringComparison.OrdinalIgnoreCase))
+            && list.Any(p => p.ParamName.Equals("@ToDate", StringComparison.OrdinalIgnoreCase));
+
         private async void CustomReportViewer_Load(object sender, EventArgs e)
         {
             ReplaceViewType();
             Text = Context.Report.ReportName;
+            if (HasDateRange(Context.Report))
+            {
+                customReportView1.UseOwnDateRange(OpenedFrom);
+            }
             if (GridFilters is { Count: > 0 })
             {
                 customReportView1.PostGridRefresh += ApplyGridFilters;

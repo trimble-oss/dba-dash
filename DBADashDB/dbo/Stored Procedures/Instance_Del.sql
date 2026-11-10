@@ -123,8 +123,13 @@ BEGIN
 	DELETE dbo.CollectionDatesThresholds
 	WHERE InstanceID = @InstanceID
 
+	DELETE dbo.CollectionHealthThresholds
+	WHERE InstanceID = @InstanceID
+
 	DELETE dbo.CollectionErrorLog
 	WHERE InstanceID= @InstanceID
+
+	EXEC dbo.CollectionRuns_Del @InstanceID=@InstanceID,@DaysToKeep=0
 
 	DELETE C 
 	FROM dbo.Corruption C

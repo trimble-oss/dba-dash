@@ -39,6 +39,7 @@ namespace DBADash.XE
             if (commandTimeout is >= 0) cmd.CommandTimeout = commandTimeout.Value;
             cmd.Parameters.Add("@name", SqlDbType.NVarChar, 128).Value = sessionName;
             await cn.OpenAsync(ct);
+            await using var runUsage = await SessionUsageMeasurement.StartForRunAsync(cn);
             await using var rdr = await cmd.ExecuteReaderAsync(ct);
             while (await rdr.ReadAsync(ct))
             {

@@ -1,0 +1,3 @@
+CREATE PARTITION SCHEME [PS_CollectionRuns_60MIN]
+    AS PARTITION [PF_CollectionRuns_60MIN]
+    ALL TO ([PRIMARY]);

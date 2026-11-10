@@ -1326,7 +1326,12 @@ FROM (VALUES('dbo','ObjectExecutionStats',120),
 				('dbo','SpinlockStats_60MIN',730),
 				('dbo','ServiceBrokerQueueHistory',90),
 				('dbo','ServiceBrokerStats',180),
-				('dbo','ServiceBrokerDatabaseStats',90)
+				('dbo','ServiceBrokerDatabaseStats',90),
+				/* Each run - only kept with LogInternalPerformanceCounters on.  The hourly rollup is always kept. */
+				('dbo','CollectionRuns',30),
+				('dbo','CollectionRuns_60MIN',365),
+				/* Only needs to outlive a file being imported again */
+				('dbo','CollectionRunsBatch',14)
 				) AS t(SchemaName,TableName,RetentionDays)
 WHERE NOT EXISTS(SELECT 1
 				FROM dbo.DataRetention DR
@@ -2305,6 +2310,16 @@ WHERE NOT EXISTS(
 				AND C.object_name = VirtualCounters.object_name
 				AND C.instance_name = VirtualCounters.instance_name
 				)
+
+/*	The DBADash Collection Duration (ms) counters are read from the collection runs now (CounterType 5 - see
+	dbo.CollectionRuns_Upd).  Same CounterIDs, so alert rules and saved metrics on them carry on.  The durations already
+	logged as ordinary performance counters are still read for type 5 (dbo.PerformanceCountersBetweenDates) until they age out.  DBADash's other diagnostic counters
+	(plans to collect, text from cache...) are still ordinary performance counters. */
+UPDATE dbo.Counters
+	SET CounterType = 5
+WHERE object_name = N'DBADash'
+AND counter_name = N'Collection Duration (ms)'
+AND CounterType = 1
 
 INSERT INTO dbo.RepositoryMetricsConfig(
 	InstanceID,

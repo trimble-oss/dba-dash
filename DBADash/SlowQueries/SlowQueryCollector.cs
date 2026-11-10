@@ -80,6 +80,7 @@ namespace DBADash.SlowQueries
             await using var cn = new SqlConnection(GetXEConnectionString(connectionString));
             await using var cmd = new SqlCommand(slowQueriesSQL, cn) { CommandTimeout = CommandTimeout };
             await cn.OpenAsync();
+            await using var runUsage = await SessionUsageMeasurement.StartForRunAsync(cn);
             cmd.Parameters.AddWithValue("SlowQueryThreshold", thresholdMs * 1000);
             cmd.Parameters.AddWithValue("MaxMemory", sessionMaxMemoryKB);
             cmd.Parameters.AddWithValue("UseDualSession", useDualSession);
@@ -176,6 +177,7 @@ namespace DBADash.SlowQueries
                 await using var cmd = new SqlCommand("SELECT CAST(SERVERPROPERTY('ErrorLogFileName') AS NVARCHAR(260))", cn)
                 { CommandType = CommandType.Text, CommandTimeout = CommandTimeout };
                 await cn.OpenAsync(cancellationToken);
+                await using var runUsage = await SessionUsageMeasurement.StartForRunAsync(cn);
                 var errorLog = await cmd.ExecuteScalarAsync(cancellationToken) as string;
                 directory = string.IsNullOrEmpty(errorLog) ? null : System.IO.Path.GetDirectoryName(errorLog);
             }
@@ -255,6 +257,7 @@ namespace DBADash.SlowQueries
             cmd.Parameters.Add("@StartupState", SqlDbType.Bit).Value = startupState;
             cmd.Parameters.Add("@CollectGroupIDAndPoolID", SqlDbType.Bit).Value = collectGroupIDAndPoolID;
             await cn.OpenAsync(cancellationToken);
+            await using var runUsage = await SessionUsageMeasurement.StartForRunAsync(cn);
             SqlDataReader rdr;
             try
             {
@@ -314,6 +317,7 @@ namespace DBADash.SlowQueries
                 await using var cmd = new SqlCommand(sql, cn)
                 { CommandType = CommandType.Text, CommandTimeout = CommandTimeout };
                 await cn.OpenAsync();
+                await using var runUsage = await SessionUsageMeasurement.StartForRunAsync(cn);
                 await cmd.ExecuteNonQueryAsync();
             }
             catch (Exception ex)
@@ -512,6 +516,7 @@ namespace DBADash.SlowQueries
                 { CommandType = CommandType.Text, CommandTimeout = CommandTimeout };
                 cmd.Parameters.Add("@name", SqlDbType.NVarChar, 128).Value = sessionName;
                 await cn.OpenAsync(cancellationToken);
+                await using var runUsage = await SessionUsageMeasurement.StartForRunAsync(cn);
                 var value = await cmd.ExecuteScalarAsync(cancellationToken);
                 if (value == null || value == DBNull.Value) return 0;
                 current = Convert.ToInt64(value);

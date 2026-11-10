@@ -15,6 +15,8 @@ SELECT @ErrorsFrom=CONVERT(DATETIME,SettingValue)
 FROM dbo.Settings 
 WHERE SettingName = 'ErrorAckDate';
 
+DECLARE @ErrorAckDate DATETIME2(2) = @ErrorsFrom
+
 EXEC dbo.MemoryDumpThresholds_Get @MemoryDumpWarningThresholdHrs=@MemoryDumpWarningThresholdHrs OUT,
 									@MemoryDumpCriticalThresholdHrs =@MemoryDumpCriticalThresholdHrs OUT,
 									@MemoryDumpAckDate=@MemoryDumpAckDate OUT
@@ -101,6 +103,65 @@ CROSS APPLY(SELECT COUNT(*) SucceedAfterErrorCount
 			AND CD.SnapshotDate>err.LastError
 			) x
 GROUP BY err.InstanceID
+
+/*
+	Collection health from the runs the service records - see dbo.CollectionHealthStatus.  Used instead of the errors above
+	for instances whose service records runs, which is all of them from the version that added it.
+	- Failures in a row count while there has been a failure since the errors were acknowledged.
+	- The failure rate is over the same window as the errors - the last 24hrs, or since they were acknowledged - from the
+	  hourly rollup, so from the start of the next hour.  Only read for collections that failed or partly failed in the window:
+	  the rest are OK on the rate without reading anything.
+	- Paused instances and collections whose schedule is disabled don't count.
+*/
+DECLARE @RateFrom DATETIME2(2)
+SELECT @RateFrom = RateFrom
+FROM dbo.CollectionHealthRateFrom()
+
+SELECT	S.InstanceID,
+		S.ReferenceID,
+		R.Reference,
+		CASE WHEN S.LastFailureDate >= @ErrorAckDate OR @ErrorAckDate IS NULL THEN S.ConsecutiveFailures ELSE 0 END AS ConsecutiveFailures,
+		S.LastStatus,
+		S.LastRunDate,
+		S.LastSuccessDate,
+		CASE	WHEN I.CollectionsPausedUntil > GETUTCDATE() THEN CAST(1 AS BIT)
+				WHEN EXISTS(SELECT 1
+							FROM dbo.ScheduleInfo SI
+							WHERE SI.InstanceID = S.InstanceID
+							AND SI.Reference = R.Reference
+							AND SI.IsEnabled = 0
+							) THEN CAST(1 AS BIT)
+				ELSE CAST(0 AS BIT) END AS IsIgnored,
+		CASE WHEN S.LastFailureDate >= @RateFrom OR S.LastPartialDate >= @RateFrom THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS HasRecentProblems
+INTO #RunStatus
+FROM dbo.CollectionRunStatus S
+JOIN dbo.CollectionRunReferences R ON R.ReferenceID = S.ReferenceID
+JOIN dbo.Instances I ON I.InstanceID = S.InstanceID
+WHERE I.IsActive = 1
+
+SELECT	RS.InstanceID,
+		RS.ReferenceID,
+		SUM(H.SucceededCount + H.WarningCount + H.RetriedCount + H.PartialCount + H.FailedCount + H.ImportFailedCount) AS KnownCount,
+		SUM(H.FailedCount + H.ImportFailedCount) AS FailedCount,
+		SUM(H.PartialCount) AS PartialCount
+INTO #RunRates
+FROM #RunStatus RS
+JOIN dbo.CollectionRuns_60MIN H ON H.InstanceID = RS.InstanceID AND H.ReferenceID = RS.ReferenceID
+WHERE RS.HasRecentProblems = 1
+AND H.SnapshotDate >= @RateFrom
+GROUP BY RS.InstanceID, RS.ReferenceID
+
+SELECT	RS.InstanceID,
+		/* N/A when every collection is - a paused instance, say */
+		ISNULL(MIN(NULLIF(CASE WHEN RS.IsIgnored = 1 THEN 3 ELSE HS.Status END,3)),3) AS CollectionHealthStatus,
+		/* Collections at warning or critical - the number shown in the summary, so it goes with the status */
+		COUNT(CASE WHEN RS.IsIgnored = 0 AND HS.Status IN(1,2) THEN 1 END) AS ProblemCollectionCount
+INTO #CollectionHealth
+FROM #RunStatus RS
+LEFT JOIN #RunRates RR ON RR.InstanceID = RS.InstanceID AND RR.ReferenceID = RS.ReferenceID
+CROSS APPLY dbo.CollectionHealthStatus(RS.InstanceID,RS.Reference,RS.ConsecutiveFailures,RS.LastStatus,RS.LastRunDate,RS.LastSuccessDate,
+										ISNULL(RR.KnownCount,0),ISNULL(RR.FailedCount,0),ISNULL(RR.PartialCount,0)) HS
+GROUP BY RS.InstanceID
 
 SELECT InstanceID,
 	MIN(Status) AS CollectionDatesStatus,
@@ -215,8 +276,8 @@ SELECT I.InstanceID,
 	CASE ag.synchronization_health WHEN 0 THEN 1 WHEN 1 THEN 2 WHEN 2 THEN 4 ELSE 3 END AS AGStatus,
 	dc.DetectedCorruptionDateUtc,
 	ISNULL(CorruptionStatus,4) AS CorruptionStatus,
-	CASE WHEN  errSummary.SucceedAfterErrorCount=0 THEN 1 WHEN errSummary.CollectionErrorCount>0 THEN 2 ELSE 4 END AS CollectionErrorStatus,
-	ISNULL(errSummary.CollectionErrorCount,0) AS CollectionErrorCount, 
+	CASE WHEN CH.InstanceID IS NOT NULL THEN CH.CollectionHealthStatus WHEN errSummary.SucceedAfterErrorCount=0 THEN 1 WHEN errSummary.CollectionErrorCount>0 THEN 2 ELSE 4 END AS CollectionErrorStatus,
+	CASE WHEN CH.InstanceID IS NOT NULL THEN CH.ProblemCollectionCount ELSE ISNULL(errSummary.CollectionErrorCount,0) END AS CollectionErrorCount, /* Collections at warning or critical where the status is collection health, otherwise errors */
 	SSD.SnapshotAgeMin,
 	SSD.SnapshotAgeMax,
 	ISNULL(SSD.CollectionDatesStatus,3) AS SnapshotAgeStatus,
@@ -305,6 +366,7 @@ LEFT JOIN #JobStatus J ON I.InstanceID = J.InstanceID
 LEFT JOIN #AGStatus ag ON I.InstanceID= ag.InstanceID
 LEFT JOIN #CorruptionStatus dc ON I.InstanceID = dc.InstanceID
 LEFT JOIN #CollectionErrorStatus errSummary ON I.InstanceID = errSummary.InstanceID
+LEFT JOIN #CollectionHealth CH ON I.InstanceID = CH.InstanceID
 LEFT JOIN #CollectionStatus SSD ON I.InstanceID = SSD.InstanceID
 LEFT JOIN #DBCCStatus dbc ON I.InstanceID = dbc.InstanceID
 LEFT JOIN #AlertStatus a ON I.InstanceID = a.InstanceID 
@@ -347,8 +409,8 @@ SELECT I.InstanceID,
 	3 AS AGStatus,
 	NULL AS DetectedCorruptionDateUtc,
 	3 AS CorruptionStatus,
-	CASE WHEN  errSummary.SucceedAfterErrorCount=0 THEN 1 WHEN errSummary.CollectionErrorCount>0 THEN 2 ELSE 4 END AS CollectionErrorStatus,
-	ISNULL(errSummary.CollectionErrorCount,0) AS CollectionErrorCount,
+	CASE WHEN CH.InstanceID IS NOT NULL THEN CH.CollectionHealthStatus WHEN errSummary.SucceedAfterErrorCount=0 THEN 1 WHEN errSummary.CollectionErrorCount>0 THEN 2 ELSE 4 END AS CollectionErrorStatus,
+	CASE WHEN CH.InstanceID IS NOT NULL THEN CH.ProblemCollectionCount ELSE ISNULL(errSummary.CollectionErrorCount,0) END AS CollectionErrorCount, /* Collections at warning or critical where the status is collection health, otherwise errors */
 	SSD.SnapshotAgeMin AS SnapshotAgeMin,
 	SSD.SnapshotAgeMax AS SnapshotAgeMax,
 	ISNULL(SSD.CollectionDatesStatus,3) AS SnapshotAgeStatus,
@@ -402,6 +464,7 @@ SELECT I.InstanceID,
 	NULL AS ServiceBrokerStatusDescription
 FROM dbo.Instances I
 LEFT JOIN #CollectionErrorStatus errSummary  ON I.InstanceID = errSummary.InstanceID
+LEFT JOIN #CollectionHealth CH ON I.InstanceID = CH.InstanceID
 LEFT JOIN #FileGroupStatus F ON I.InstanceID = F.InstanceID
 LEFT JOIN #CollectionStatus SSD ON I.InstanceID = SSD.InstanceID
 LEFT JOIN #CustomChecksStatus cus ON cus.InstanceID = I.InstanceID

@@ -38,6 +38,8 @@ VALUES -- Daily Partitions
 	('dbo','ServiceBrokerQueueHistory','d',14,CAST(1 AS BIT)),
 	('dbo','ServiceBrokerStats','d',14,CAST(1 AS BIT)),
 	('dbo','ServiceBrokerDatabaseStats','d',14,CAST(1 AS BIT)),
+	('dbo','CollectionRuns','d',14,CAST(1 AS BIT)),
+	('dbo','CollectionRunsBatch','d',14,CAST(1 AS BIT)),
 	-- Monthly Partitions
 	('dbo','AzureDBElasticPoolResourceStats_60MIN','m',3,CAST(1 AS BIT)),
 	('dbo','AzureDBResourceStats_60MIN','m',3,CAST(1 AS BIT)),
@@ -55,7 +57,8 @@ VALUES -- Daily Partitions
 	('dbo','QueryStatsCollection_60MIN','m',3,CAST(1 AS BIT)),
 	('dbo','IdentityColumnsHistory','m',3,CAST(1 AS BIT)),
 	('dbo','TableSize','m',3,CAST(1 AS BIT)),
-	('dbo','AvailabilityGroupHealthEvents','m',3,CAST(1 AS BIT))
+	('dbo','AvailabilityGroupHealthEvents','m',3,CAST(1 AS BIT)),
+	('dbo','CollectionRuns_60MIN','m',3,CAST(1 AS BIT))
 	) T(SchemaName,TableName,PeriodType,PeriodCount,IsSystem)
 UNION ALL
 SELECT	SchemaName,

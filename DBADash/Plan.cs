@@ -58,7 +58,7 @@ namespace DBADash
             return obj.Key.GetHashCode();
         }
 
-        public static async Task<DataTable> GetPlansAsync(List<Plan> plansToCollect, string ConnectionString)
+        public static async Task<DataTable> GetPlansAsync(List<Plan> plansToCollect, string ConnectionString, CollectionRunMeter meter = null)
         {
             var plansSQL = GetPlansSQL(plansToCollect);
             if (string.IsNullOrEmpty(plansSQL)) throw new Exception("Plan collection SQL was null/empty");
@@ -67,6 +67,7 @@ namespace DBADash
             await using var cmd = new SqlCommand(plansSQL, cn);
             var dt = new DataTable("QueryPlans");
             await cn.OpenAsync();
+            await using var usage = await SessionUsageMeasurement.StartAsync(cn, meter);
             await using var rdr = await cmd.ExecuteReaderAsync();
             dt.Load(rdr);
             if (dt is not { Rows.Count: > 0 }) return dt;
