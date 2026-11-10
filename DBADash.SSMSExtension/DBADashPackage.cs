@@ -24,6 +24,8 @@ namespace DBADash.SSMSExtension
             await OpenCommand.InitializeAsync(this);
             await OpenAllResultsCommand.InitializeAsync(this);
             await LivePlanCommand.InitializeAsync(this);
+            await ExecutedQueryTracker.InitializeAsync(this);
+            await OpenMessagesCommand.InitializeAsync(this);
             LastClickTracker.Install();
             await DeadlockContextMenuHook.InitializeAsync(this);
         }

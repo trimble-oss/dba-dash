@@ -47,37 +47,48 @@ namespace DBADashGUI.Grids
         private static string PathFor(DataTable table) => Path.Combine(Folder, Signature(table) + Extension);
 
         /// <summary>The data bars remembered for result sets shaped like <paramref name="table"/>, or none.</summary>
-        public static IReadOnlyDictionary<string, DataBarSettings> Recall(DataTable table)
+        public static IReadOnlyDictionary<string, DataBarSettings> Recall(DataTable table) =>
+            TryRecall(table, out var dataBars) ? dataBars : new Dictionary<string, DataBarSettings>();
+
+        /// <summary>
+        /// The data bars remembered for result sets shaped like <paramref name="table"/> - which can be none, where the
+        /// bars a table starts with were all removed.  False where nothing is remembered for the shape.
+        /// </summary>
+        public static bool TryRecall(DataTable table, out IReadOnlyDictionary<string, DataBarSettings> dataBars)
         {
             var path = PathFor(table);
+            dataBars = null;
             try
             {
-                if (!File.Exists(path)) return new Dictionary<string, DataBarSettings>();
+                if (!File.Exists(path)) return false;
 
-                var dataBars = JsonConvert.DeserializeObject<Dictionary<string, DataBarSettings>>(File.ReadAllText(path));
+                dataBars = JsonConvert.DeserializeObject<Dictionary<string, DataBarSettings>>(File.ReadAllText(path))
+                           ?? new Dictionary<string, DataBarSettings>();
 
                 // Used now, so it's the last to be pruned.
                 File.SetLastWriteTimeUtc(path, DateTime.UtcNow);
-                return dataBars ?? new Dictionary<string, DataBarSettings>();
+                return true;
             }
             catch (Exception ex)
             {
                 // A file that can't be read loses the remembered bars, not the grid.
                 Log.Warning(ex, "Unable to read the remembered grid data bars from {path}", path);
-                return new Dictionary<string, DataBarSettings>();
+                dataBars = null;
+                return false;
             }
         }
 
         /// <summary>
         /// Remember <paramref name="dataBars"/> for result sets shaped like <paramref name="table"/> - or, where there
-        /// are none, forget the shape.
+        /// are none, forget the shape, unless <paramref name="keepEmpty"/>: then that there are none is remembered, for a
+        /// table whose own bars would otherwise come back.
         /// </summary>
-        public static void Remember(DataTable table, IReadOnlyDictionary<string, DataBarSettings> dataBars)
+        public static void Remember(DataTable table, IReadOnlyDictionary<string, DataBarSettings> dataBars, bool keepEmpty = false)
         {
             var path = PathFor(table);
             try
             {
-                if (dataBars.Count == 0)
+                if (dataBars.Count == 0 && !keepEmpty)
                 {
                     // Checked first, as File.Delete throws where the folder isn't there either.
                     if (File.Exists(path)) File.Delete(path);
@@ -97,6 +108,20 @@ namespace DBADashGUI.Grids
             catch (Exception ex)
             {
                 Log.Warning(ex, "Unable to save the remembered grid data bars to {path}", path);
+            }
+        }
+
+        /// <summary>Forget the bars remembered for result sets shaped like <paramref name="table"/>, if any.</summary>
+        public static void Forget(DataTable table)
+        {
+            var path = PathFor(table);
+            try
+            {
+                if (File.Exists(path)) File.Delete(path);
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Unable to forget the remembered grid data bars at {path}", path);
             }
         }
 

@@ -1,4 +1,5 @@
 using System;
+using System.Data;
 using System.ComponentModel.Design;
 using System.Windows.Forms;
 using Microsoft.VisualStudio.Shell;
@@ -128,6 +129,7 @@ namespace DBADash.SSMSExtension
 
             var title = ResultSetTitle(resultSet);
             var totalRows = resultSet.RowCount;
+            var messages = MessagesReader.ReadFocused();
 
             var tempFile = ThreadHelper.JoinableTaskFactory.Run(
                 "DBA Dash Visualizer",
@@ -140,7 +142,13 @@ namespace DBADash.SSMSExtension
                         cancellationToken);
 
                     progress.Report(new ThreadedWaitDialogProgressData("Writing results...", isCancelable: true));
-                    return VisualizerLauncher.SaveGridToTemp(table, cancellationToken);
+                    // With the Messages tab, as a DataSet of the two - the app shows the messages, and any STATISTICS IO
+                    // / TIME output read from them, on tabs beside the result set.
+                    using var dataSet = new DataSet("Results");
+                    dataSet.ExtendedProperties["Title"] = title;
+                    dataSet.Tables.Add(table);
+                    dataSet.Tables.Add(messages);
+                    return VisualizerLauncher.SaveGridToTemp(dataSet, cancellationToken);
                 });
 
             VisualizerLauncher.OpenFile(tempFile);

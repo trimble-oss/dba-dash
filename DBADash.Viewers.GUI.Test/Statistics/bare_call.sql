@@ -1,0 +1,3 @@
+SET STATISTICS IO, TIME ON;
+GO
+dbo.StatsOuter

@@ -1,0 +1,23 @@
+SQL Server parse and compile time: 
+   CPU time = 0 ms, elapsed time = 0 ms.
+Table 'StatsT'. Scan count 0, logical reads 1, physical reads 1, page server reads 0, read-ahead reads 0, page server read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob page server reads 0, lob read-ahead reads 0, lob page server read-ahead reads 0.
+SQL Server parse and compile time: 
+   CPU time = 18 ms, elapsed time = 18 ms.
+
+ SQL Server Execution Times:
+   CPU time = 0 ms,  elapsed time = 0 ms.
+                    
+--------------------
+              500000
+Table 'syscolpars'. Scan count 1, logical reads 562, physical reads 0, page server reads 0, read-ahead reads 0, page server read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob page server reads 0, lob read-ahead reads 0, lob page server read-ahead reads 0.
+Table 'sysobjvalues'. Scan count 2, logical reads 6, physical reads 0, page server reads 0, read-ahead reads 0, page server read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob page server reads 0, lob read-ahead reads 0, lob page server read-ahead reads 0.
+Table 'syscolpars'. Scan count 2, logical reads 29, physical reads 0, page server reads 0, read-ahead reads 0, page server read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob page server reads 0, lob read-ahead reads 0, lob page server read-ahead reads 0.
+Table 'Worktable'. Scan count 0, logical reads 0, physical reads 0, page server reads 0, read-ahead reads 0, page server read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob page server reads 0, lob read-ahead reads 0, lob page server read-ahead reads 0.
+
+ SQL Server Execution Times:
+   CPU time = 0 ms,  elapsed time = 13 ms.
+
+ SQL Server Execution Times:
+   CPU time = 31 ms,  elapsed time = 32 ms.
+
+(1 rows affected)

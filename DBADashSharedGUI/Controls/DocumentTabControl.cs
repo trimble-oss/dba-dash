@@ -37,6 +37,9 @@ namespace DBADashGUI.Controls
         /// <summary>A tab asked to close, by its ×, a middle click or the right click menu.</summary>
         public event EventHandler<TabPage> CloseRequested;
 
+        /// <summary>A tab's right click menu is about to show, after its Close items - for the owner to add its own.</summary>
+        public event EventHandler<TabMenuEventArgs> TabMenuOpening;
+
         private const int TCM_ADJUSTRECT = 0x1328;
 
         private bool _showTabStrip = true;
@@ -131,6 +134,7 @@ namespace DBADashGUI.Controls
             menu.Items.Add(new ToolStripMenuItem("Close", null, (_, _) => CloseRequested?.Invoke(this, page)) { ShortcutKeyDisplayString = "Ctrl+W" });
             menu.Items.Add(new ToolStripMenuItem("Close Others", null, (_, _) => CloseAll(except: page)) { Enabled = TabCount > 1 });
             menu.Items.Add(new ToolStripMenuItem("Close All", null, (_, _) => CloseAll(except: null)));
+            TabMenuOpening?.Invoke(this, new TabMenuEventArgs(page, menu));
             menu.ApplyTheme(ThemeExtensions.CurrentTheme);
 
             // Disposed once it has closed and its click has been handled.
@@ -160,6 +164,13 @@ namespace DBADashGUI.Controls
         {
             base.OnMouseLeave(e);
             SetHoveredClose(-1);
+        }
+
+        /// <summary>The tab right clicked, and its menu - see <see cref="TabMenuOpening"/>.</summary>
+        public sealed class TabMenuEventArgs(TabPage page, ContextMenuStrip menu) : EventArgs
+        {
+            public TabPage Page { get; } = page;
+            public ContextMenuStrip Menu { get; } = menu;
         }
 
         /// <summary>Repaint just the × buttons whose hover state changed, rather than the whole control.</summary>

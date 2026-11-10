@@ -26,4 +26,12 @@
     <ProjectReference Include="..\DBADash.Viewers.GUI\DBADash.Viewers.GUI.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!--
+      STATISTICS IO / TIME output for StatisticsMessagesTests - name.txt, from SSMS or sqlcmd against SQL Server 2025, and
+      the query that printed it in name.sql.
+    -->
+    <None Update="Statistics\*.txt;Statistics\*.sql" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

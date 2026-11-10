@@ -1,0 +1,43 @@
+SQL Server parse and compile time: 
+   CPU time = 0 ms, elapsed time = 3 ms.
+
+ SQL Server Execution Times:
+   CPU time = 0 ms,  elapsed time = 0 ms.
+
+ SQL Server Execution Times:
+   CPU time = 0 ms,  elapsed time = 0 ms.
+SQL Server parse and compile time: 
+   CPU time = 15 ms, elapsed time = 16 ms.
+Table 'syscolpars'. Scan count 1, logical reads 562, physical reads 0, page server reads 0, read-ahead reads 0, page server read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob page server reads 0, lob read-ahead reads 0, lob page server read-ahead reads 0.
+Table 'sysobjvalues'. Scan count 2, logical reads 5, physical reads 0, page server reads 0, read-ahead reads 0, page server read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob page server reads 0, lob read-ahead reads 0, lob page server read-ahead reads 0.
+Table 'syscolpars'. Scan count 2, logical reads 29, physical reads 0, page server reads 0, read-ahead reads 0, page server read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob page server reads 0, lob read-ahead reads 0, lob page server read-ahead reads 0.
+Table 'Worktable'. Scan count 0, logical reads 0, physical reads 0, page server reads 0, read-ahead reads 0, page server read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob page server reads 0, lob read-ahead reads 0, lob page server read-ahead reads 0.
+
+ SQL Server Execution Times:
+   CPU time = 31 ms,  elapsed time = 30 ms.
+SQL Server parse and compile time: 
+   CPU time = 94 ms, elapsed time = 111 ms.
+           
+-----------
+     200000
+Table 'syscolpars'. Scan count 0, logical reads 48, physical reads 0, page server reads 0, read-ahead reads 0, page server read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob page server reads 0, lob read-ahead reads 0, lob page server read-ahead reads 0.
+Table 'sysobjvalues'. Scan count 16, logical reads 32, physical reads 0, page server reads 0, read-ahead reads 0, page server read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob page server reads 0, lob read-ahead reads 0, lob page server read-ahead reads 0.
+Table 'syscolpars'. Scan count 0, logical reads 32, physical reads 0, page server reads 0, read-ahead reads 0, page server read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob page server reads 0, lob read-ahead reads 0, lob page server read-ahead reads 0.
+Table 'Worktable'. Scan count 0, logical reads 0, physical reads 0, page server reads 0, read-ahead reads 0, page server read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob page server reads 0, lob read-ahead reads 0, lob page server read-ahead reads 0.
+Table 'Workfile'. Scan count 0, logical reads 0, physical reads 0, page server reads 0, read-ahead reads 0, page server read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob page server reads 0, lob read-ahead reads 0, lob page server read-ahead reads 0.
+Table '#t__________________________________________________________________________________________________________________000000000003'. Scan count 1, logical reads 421, physical reads 0, page server reads 0, read-ahead reads 0, page server read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob page server reads 0, lob read-ahead reads 0, lob page server read-ahead reads 0.
+
+ SQL Server Execution Times:
+   CPU time = 31 ms,  elapsed time = 30 ms.
+SQL Server parse and compile time: 
+   CPU time = 0 ms, elapsed time = 0 ms.
+           
+-----------
+     140789
+Table '#t__________________________________________________________________________________________________________________000000000003'. Scan count 1, logical reads 421, physical reads 0, page server reads 0, read-ahead reads 0, page server read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob page server reads 0, lob read-ahead reads 0, lob page server read-ahead reads 0.
+
+ SQL Server Execution Times:
+   CPU time = 16 ms,  elapsed time = 10 ms.
+
+ SQL Server Execution Times:
+   CPU time = 187 ms,  elapsed time = 204 ms.

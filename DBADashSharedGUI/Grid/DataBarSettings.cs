@@ -67,9 +67,10 @@ namespace DBADashGUI.CustomReports
 
         /// <summary>
         /// For <see cref="DataBarColorMode.TrafficLight"/>: blue rather than green below the warning threshold, where
-        /// a low figure is unremarkable rather than good - the plan viewer's cost bars.  Not saved.
+        /// a low figure is unremarkable rather than good - the plan viewer's cost bars.  Saved only where set, so a bar
+        /// that starts this way and is saved as it is - with another bar on the grid changed - keeps its blue.
         /// </summary>
-        [JsonIgnore]
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
         internal bool NeutralBelowWarning { get; set; }
 
         /// <summary>The value an empty bar stands for.  Null takes the smaller of zero and the lowest value in the column.</summary>

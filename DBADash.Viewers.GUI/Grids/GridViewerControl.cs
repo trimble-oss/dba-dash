@@ -89,6 +89,13 @@ namespace DBADashGUI.Grids
                     continue;
                 }
 
+                // A number format the table asks for - the statistics tables' counts, say, with thousands separators.
+                if (_table.Columns[column.DataPropertyName]?.ExtendedProperties["Format"] is string format)
+                {
+                    column.DefaultCellStyle.Format = format;
+                    column.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+                }
+
                 // The column's SQL type, where the SSMS extension recorded it - the grid only knows the .NET one.
                 if (SqlType(column) is not { } sqlType) continue;
 
@@ -101,10 +108,39 @@ namespace DBADashGUI.Grids
             // Link columns are added after the grid was themed, so they need their link colours now.
             _grid.ApplyTheme();
 
-            // The bars added the last time a result set of this shape was open - and from here on, the ones added now.
-            _grid.SetDataBars(GridDataBarMemory.Recall(_table));
-            _grid.DataBarChanged += (_, _) => GridDataBarMemory.Remember(_table, _grid.DataBars);
+            // The bars the table starts with, unless others - or none - were chosen the last time a result set of this
+            // shape was open.  And from here on, the ones chosen now: an empty set too, where removing every bar would
+            // otherwise bring the table's own back next time.
+            var defaults = DefaultDataBars(_table);
+            var remember = _table.ExtendedProperties[RememberDataBarsProperty] is not false;
+            _grid.SetDataBars(remember && GridDataBarMemory.TryRecall(_table, out var remembered) ? remembered : defaults);
+            // Reset Data Bars puts them back - and forgets what was chosen, so the next of this shape starts with them too.
+            _grid.DefaultDataBars = defaults;
+            if (remember)
+            {
+                _grid.DataBarChanged += (_, _) => GridDataBarMemory.Remember(_table, _grid.DataBars, keepEmpty: defaults.Count > 0);
+                _grid.DataBarsReset += (_, _) => GridDataBarMemory.Forget(_table);
+            }
         }
+
+        /// <summary>
+        /// A column extended property holding the <see cref="DataBarSettings"/> it starts with - the statistics tables'
+        /// time and I/O, say.  The user can change or remove them as any other.
+        /// </summary>
+        public const string DataBarProperty = "DataBar";
+
+        /// <summary>
+        /// A table extended property: false where bars chosen on it shouldn't come back for the next table of the same
+        /// columns - a comparison, whose columns are numbered for runs that won't be the same next time.
+        /// </summary>
+        public const string RememberDataBarsProperty = "RememberDataBars";
+
+        /// <summary>The bars <paramref name="table"/>'s columns start with - see <see cref="DataBarProperty"/>.</summary>
+        public static Dictionary<string, DataBarSettings> DefaultDataBars(DataTable table) =>
+            table.Columns.Cast<DataColumn>()
+                .Where(c => c.ExtendedProperties[DataBarProperty] is DataBarSettings)
+                .ToDictionary(c => c.ColumnName, c => ((DataBarSettings)c.ExtendedProperties[DataBarProperty]).Clone(),
+                    StringComparer.OrdinalIgnoreCase);
 
         private string SqlType(DataGridViewColumn column) =>
             _table.Columns[column.DataPropertyName]?.ExtendedProperties["SqlType"] as string;
@@ -162,13 +198,33 @@ namespace DBADashGUI.Grids
             });
             toolbar.Items.Add(new ToolStripSeparator());
             // The grid's own copy, export, transpose, Group By and filter actions - the same as its context menus.
-            toolbar.Items.AddRange(_grid.CreateToolbarItems());
+            var items = _grid.CreateToolbarItems();
+            _exportMenu = items.OfType<ToolStripDropDownButton>().FirstOrDefault(i => i.Text == "Export");
+            toolbar.Items.AddRange(items);
             toolbar.Items.Add(new ToolStripSeparator());
             toolbar.Items.Add(BuildSettingsMenu());
             toolbar.Items.Add(_rowCount);
 
             return toolbar;
         }
+
+        // The toolbar's Export drop-down, for a host to add its own ways of saving to.
+        private ToolStripDropDownButton _exportMenu;
+
+        /// <summary>
+        /// Adds <paramref name="item"/> to the toolbar's Export menu, after a separator - e.g. saving the grid with the
+        /// query's messages, where it's a query's results.
+        /// </summary>
+        internal void AddExportItem(ToolStripItem item)
+        {
+            if (_exportMenu == null) return;
+            _exportMenu.DropDownItems.Add(new ToolStripSeparator());
+            _exportMenu.DropDownItems.Add(item);
+        }
+
+        /// <summary>The text of the Export menu's items, separators aside.</summary>
+        public string[] ExportItemNames => _exportMenu?.DropDownItems.Cast<ToolStripItem>()
+            .Where(i => i is not ToolStripSeparator).Select(i => i.Text).ToArray() ?? [];
 
         private static ToolStripDropDownButton BuildSettingsMenu()
         {
