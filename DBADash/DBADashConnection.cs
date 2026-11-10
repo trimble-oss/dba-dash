@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.ApplicationInsights;
 
@@ -149,6 +150,42 @@ namespace DBADash
         public static bool IsXESupported(string productVersion)
         {
             return ConnectionInfo.GetXESupported(productVersion);
+        }
+
+        /// <summary>Host name suffixes of Azure SQL endpoints (Azure SQL Database and Managed Instance), by cloud</summary>
+        private static readonly string[] AzureSQLHostSuffixes =
+        {
+            ".database.windows.net",
+            ".database.chinacloudapi.cn",
+            ".database.usgovcloudapi.net",
+            ".database.cloudapi.de",
+            ".database.fabric.microsoft.com"
+        };
+
+        /// <summary>
+        /// False if <paramref name="connectionString"/>'s server can't be Azure SQL Database because its host name isn't an
+        /// Azure SQL endpoint - so the platform is known without connecting.  True means it might be (Managed Instance shares
+        /// the suffix), and it takes a connection to tell.  A DNS alias for an Azure SQL Database isn't recognised.
+        /// </summary>
+        public static bool IsPossiblyAzureSQLHost(string connectionString)
+        {
+            string dataSource;
+            try
+            {
+                dataSource = new SqlConnectionStringBuilder(connectionString).DataSource ?? string.Empty;
+            }
+            catch
+            {
+                return true;
+            }
+
+            var host = dataSource.Trim();
+            var protocol = host.IndexOf(':');
+            if (protocol >= 0) host = host[(protocol + 1)..]; // tcp:server.database.windows.net
+            var port = host.IndexOf(',');
+            if (port >= 0) host = host[..port];
+            host = host.Trim().TrimEnd('.');
+            return AzureSQLHostSuffixes.Any(suffix => host.EndsWith(suffix, StringComparison.OrdinalIgnoreCase));
         }
 
         public bool IsAzureDB()

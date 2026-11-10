@@ -20,7 +20,8 @@ namespace DBADash
     {
         /// <summary>Checks <paramref name="src"/> before it's added to <paramref name="cfg"/>.  Sets its ConnectionID.</summary>
         /// <param name="validate">Connect to the instance.  False to skip the connection - the ConnectionID is then taken from the connection string.</param>
-        public static async Task<SourceConnectionCheck> CheckAsync(CollectionConfig cfg, DBADashSource src, bool validate = true)
+        /// <param name="skipDeadlocksOnAzureDB">See <see cref="SourceConnectionOptions.SkipDeadlocksOnAzureDB"/></param>
+        public static async Task<SourceConnectionCheck> CheckAsync(CollectionConfig cfg, DBADashSource src, bool validate = true, bool skipDeadlocksOnAzureDB = false)
         {
             var check = new SourceConnectionCheck
             {
@@ -81,7 +82,9 @@ namespace DBADash
             check.ConnectionID = src.ConnectionID;
 
             await RefreshExistingAsync(cfg, src, check);
-            check.DeadlockScheduleMissing = src.IsDeadlockCollectionEnabled &&
+            check.DeadlocksSkippedOnAzureDB = skipDeadlocksOnAzureDB && check.IsAzureDB && src.IsDeadlockCollectionEnabled &&
+                                              check.Existing != ExistingConnectionStates.Configured;
+            check.DeadlockScheduleMissing = !check.DeadlocksSkippedOnAzureDB && src.IsDeadlockCollectionEnabled &&
                                             !IsDeadlockCollectionScheduled(cfg, src, check.ExistingSource?.CollectionSchedules ?? src.CollectionSchedules);
             return check;
         }
@@ -142,6 +145,12 @@ namespace DBADash
             {
                 src.SlowQueryThresholdMs = -1;
                 src.PersistXESessions = false;
+            }
+
+            // Added, not updated - an existing connection keeps the deadlock session it's given
+            if (check.DeadlocksSkippedOnAzureDB && check.Existing != ExistingConnectionStates.Configured)
+            {
+                src.DeadlockXESessionName = string.Empty;
             }
 
             var outcome = SourceConnectionAddOutcomes.Added;
@@ -284,6 +293,9 @@ namespace DBADash
 
         /// <summary>Slow query capture needs an extended events session, which the instance doesn't support</summary>
         public bool SlowQueryWillBeDisabled { get; set; }
+
+        /// <summary>Deadlocks won't be collected - it's Azure SQL Database and <see cref="SourceConnectionOptions.SkipDeadlocksOnAzureDB"/> is set</summary>
+        public bool DeadlocksSkippedOnAzureDB { get; set; }
 
         public ExistingConnectionStates Existing { get; set; }
         public string ExistingConnectionID { get; set; }

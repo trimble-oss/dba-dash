@@ -167,6 +167,41 @@ namespace DBADash.Test
         }
 
         [TestMethod]
+        public async Task Apply_SkipsDeadlocksOnAzureDB_WhenAdded()
+        {
+            var cfg = NewConfig();
+            var src = new SourceConnectionOptions { DeadlockXESessionName = DBADashSource.ManagedDeadlockXESessionName }.CreateSource("SQL1");
+            var check = await SourceConnectionAdder.CheckAsync(cfg, src, validate: false, skipDeadlocksOnAzureDB: true);
+            Assert.IsFalse(check.DeadlocksSkippedOnAzureDB, "Not known to be Azure DB without connecting");
+
+            // As the check sets it after connecting to an Azure SQL Database
+            check.IsAzureDB = true;
+            check.DeadlocksSkippedOnAzureDB = true;
+            var result = SourceConnectionAdder.Apply(cfg, src, check, new SourceConnectionDecisions { AddUnvalidated = true, UseDefaultDeadlockSchedule = true });
+            Assert.AreEqual(SourceConnectionAddOutcomes.Added, result.Outcome);
+            Assert.AreEqual(string.Empty, result.Source.DeadlockXESessionName);
+            Assert.IsFalse(result.Source.IsDeadlockCollectionEnabled);
+            Assert.IsFalse(result.Source.CollectionSchedules?.ContainsKey(CollectionType.Deadlocks) == true);
+        }
+
+        [TestMethod]
+        public async Task Apply_SkipDeadlocksOnAzureDB_DoesntChangeExistingConnection()
+        {
+            var cfg = NewConfig();
+            var existing = new SourceConnectionOptions { DeadlockXESessionName = DBADashSource.ManagedDeadlockXESessionName }.CreateSource("SQL1");
+            existing.ConnectionID = "SQL1";
+            cfg.SourceConnections.Add(existing);
+
+            var src = new SourceConnectionOptions { DeadlockXESessionName = DBADashSource.ManagedDeadlockXESessionName }.CreateSource("SQL1");
+            var check = await SourceConnectionAdder.CheckAsync(cfg, src, validate: false, skipDeadlocksOnAzureDB: true);
+            check.IsAzureDB = true;
+            check.DeadlocksSkippedOnAzureDB = true;
+            var result = SourceConnectionAdder.Apply(cfg, src, check, new SourceConnectionDecisions { AddUnvalidated = true, UpdateExisting = true });
+            Assert.AreEqual(SourceConnectionAddOutcomes.Updated, result.Outcome);
+            Assert.AreEqual(DBADashSource.ManagedDeadlockXESessionName, result.Source.DeadlockXESessionName);
+        }
+
+        [TestMethod]
         public async Task Check_InvalidConnection()
         {
             var cfg = NewConfig();

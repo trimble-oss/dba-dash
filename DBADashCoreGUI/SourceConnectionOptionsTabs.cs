@@ -23,6 +23,11 @@ namespace DBADashGUI
             $"Leave the {DBADashSource.ManagedSlowQueryXESessionName} session running when the service stops, and start it with the instance, so slow queries are captured while the service is down and collected when it starts.\r\n" +
             "EventFile mode only.  Without it, the session is stopped or removed on service stop like the other DBA Dash sessions.";
 
+        private const string SkipDeadlocksOnAzureDBToolTip =
+            "Don't collect deadlocks for new connections that turn out to be Azure SQL Database.\r\n" +
+            "Each database there is a connection with its own database scoped session, and the Azure DB scan copies the master connection's settings to every database it finds.\r\n" +
+            "Applies when connections are added, and to \"Apply deadlock configuration to all existing connections\".  An existing connection that's updated keeps its deadlock session.";
+
         private const string QueryStatsTopNToolTip =
             "The number of query families kept per ranking measure each collection.  Seven measures are ranked and the results combined, so the number of queries stored is usually close to this but can reach seven times it, plus any query kept for one slow execution.\r\n" +
             "Everything below the cut is rolled up rather than discarded, so the totals for an interval stay correct whatever this is set to.  Raising it buys detail, not accuracy.  50 suits most instances.";
@@ -95,6 +100,7 @@ namespace DBADashGUI
         private readonly RadioButton optCustomDeadlockSession = Option("Use existing session:", 23, 106);
         private readonly TextBox txtDeadlockSessionName = new() { Location = new Point(321, 106), Size = new Size(207, 27) };
         private readonly CheckBox chkBackfillDeadlocks = Check("Backfill history from system health", 23, 142, true);
+        private readonly CheckBox chkSkipDeadlocksOnAzureDB = Check("Skip on Azure SQL DB", 321, 142, true);
         private readonly LinkLabel lnkApplyDeadlockConfigurationToAll = Link("Apply deadlock configuration to all existing connections", 650, 17);
 
         // Query stats
@@ -147,7 +153,7 @@ namespace DBADashGUI
 
             lnkApplyDeadlockConfigurationToAll.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             lnkApplyDeadlockConfigurationToAll.Visible = false;
-            TabDeadlocks.Controls.AddRange(new Control[] { optDisableDeadlock, optSystemManagedDeadlock, optSystemHealthDeadlock, optCustomDeadlockSession, txtDeadlockSessionName, chkBackfillDeadlocks, lnkApplyDeadlockConfigurationToAll });
+            TabDeadlocks.Controls.AddRange(new Control[] { optDisableDeadlock, optSystemManagedDeadlock, optSystemHealthDeadlock, optCustomDeadlockSession, txtDeadlockSessionName, chkBackfillDeadlocks, chkSkipDeadlocksOnAzureDB, lnkApplyDeadlockConfigurationToAll });
 
             lnkApplyQueryStatsConfigurationToAll.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             lnkApplyQueryStatsConfigurationToAll.Visible = false;
@@ -158,7 +164,7 @@ namespace DBADashGUI
                 lnkApplyQueryStatsConfigurationToAll
             });
 
-            TabPages.AddRange(new[] { TabSlowQueries, TabRunningQueries, TabOther, TabDeadlocks, TabQueryStats });
+            TabPages.AddRange(new[] { TabSlowQueries, TabRunningQueries, TabDeadlocks, TabQueryStats, TabOther });
 
             // Items rather than DataSource: a bound combo ignores SelectedItem until it has a binding context, and then
             // resets to the first item - so the defaults set below, before the form is shown, would be lost.
@@ -195,13 +201,15 @@ namespace DBADashGUI
                 "On by default for new connections.  Reading the plan cache costs in proportion to the size of the cache, so consider turning it off for instances with a very large plan cache.");
             toolTip.SetToolTip(numQueryStatsTopN, QueryStatsTopNToolTip);
             toolTip.SetToolTip(numQueryStatsPlans, QueryStatsPlansToolTip);
+            toolTip.SetToolTip(chkSkipDeadlocksOnAzureDB, SkipDeadlocksOnAzureDBToolTip);
             toolTip.SetToolTip(lnkSaveDefaults, "Start new connections with the options chosen on these tabs, in the service configuration tool and the GUI's Add Connections dialog.\r\nSaved for you on this computer.  Custom collections aren't saved.  Existing connections aren't changed.");
             toolTip.SetToolTip(lnkResetDefaults, "Remove your saved defaults and set these tabs to the app defaults.  Existing connections aren't changed.");
         }
 
         /// <summary>
         /// Show the links that save the options as the user's defaults for new connections, or reset them to the app
-        /// defaults.  For forms that add connections - not ones that edit an existing connection.
+        /// defaults, and the options that only apply when a connection is added ("Skip on Azure SQL DB").  For forms that
+        /// add connections - not ones that edit an existing connection.
         /// </summary>
         [DefaultValue(false)]
         public bool ShowDefaultsLinks
@@ -213,6 +221,7 @@ namespace DBADashGUI
                 lblDefaults.Visible = value;
                 lnkSaveDefaults.Visible = value;
                 lnkResetDefaults.Visible = value;
+                chkSkipDeadlocksOnAzureDB.Visible = value;
             }
         }
 
@@ -403,6 +412,10 @@ namespace DBADashGUI
         [Browsable(false)]
         public bool BackfillDeadlocksFromSystemHealth => chkBackfillDeadlocks.Checked;
 
+        /// <summary>Skip Azure SQL Database connections - read without the other options, like <see cref="BackfillDeadlocksFromSystemHealth"/>.</summary>
+        [Browsable(false)]
+        public bool SkipDeadlocksOnAzureDB => chkSkipDeadlocksOnAzureDB.Checked && ShowDefaultsLinks;
+
         /// <summary>The query stats top N - zero when query stats aren't collected.  Read without the other options.</summary>
         [Browsable(false)]
         public int QueryStatsTopN => chkCollectQueryStats.Checked ? (int)numQueryStatsTopN.Value : 0;
@@ -426,6 +439,7 @@ namespace DBADashGUI
                 KeepSlowQueryXESessionRunning = chkKeepSlowQuerySessionRunning.Checked,
                 DeadlockXESessionName = DeadlockXESessionName,
                 BackfillDeadlocksFromSystemHealth = chkBackfillDeadlocks.Checked,
+                SkipDeadlocksOnAzureDB = chkSkipDeadlocksOnAzureDB.Checked && ShowDefaultsLinks,
                 QueryStatsTopN = QueryStatsTopN,
                 QueryStatsPlansPerCollection = QueryStatsPlansPerCollection,
                 RunningQueryPlanThreshold = chkCollectPlans.Checked
@@ -470,6 +484,7 @@ namespace DBADashGUI
                     chkKeepSlowQuerySessionRunning.Checked = value.KeepSlowQueryXESessionRunning;
                     DeadlockXESessionName = value.DeadlockXESessionName;
                     chkBackfillDeadlocks.Checked = value.BackfillDeadlocksFromSystemHealth;
+                    chkSkipDeadlocksOnAzureDB.Checked = value.SkipDeadlocksOnAzureDB;
                     chkCollectQueryStats.Checked = value.QueryStatsTopN > 0;
                     numQueryStatsTopN.Value = value.QueryStatsTopN > 0
                         ? Math.Clamp(value.QueryStatsTopN, (int)numQueryStatsTopN.Minimum, (int)numQueryStatsTopN.Maximum)
@@ -501,7 +516,13 @@ namespace DBADashGUI
         }
 
         /// <summary>Load the options of an existing connection - e.g. to edit it.</summary>
-        public void LoadFromSource(DBADashSource src) => Options = SourceConnectionOptions.FromSource(src);
+        public void LoadFromSource(DBADashSource src)
+        {
+            // Not a setting of the connection - it only applies when connections are added, so keep what was chosen
+            var skipDeadlocksOnAzureDB = chkSkipDeadlocksOnAzureDB.Checked;
+            Options = SourceConnectionOptions.FromSource(src);
+            chkSkipDeadlocksOnAzureDB.Checked = skipDeadlocksOnAzureDB;
+        }
 
         /// <summary>Most options only apply to a SQL connection - not a folder or S3 path.</summary>
         public void SetSqlOptionsEnabled(bool isSql)
@@ -627,6 +648,7 @@ namespace DBADashGUI
             txtDeadlockSessionName.Enabled = optCustomDeadlockSession.Checked;
             // Only a dedicated session has anything to backfill - system_health is the backfill source itself
             chkBackfillDeadlocks.Enabled = optSystemManagedDeadlock.Checked || optCustomDeadlockSession.Checked;
+            chkSkipDeadlocksOnAzureDB.Enabled = !optDisableDeadlock.Checked;
             if (!optCustomDeadlockSession.Checked)
             {
                 errorProvider.SetError(txtDeadlockSessionName, null);

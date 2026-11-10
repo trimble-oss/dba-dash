@@ -188,6 +188,7 @@ namespace DBADashServiceConfig
         {
             var sources = GetNewSourceConnections();
             if (sources.Count == 0) return;
+            var skipDeadlocksOnAzureDB = tabSrcOptions.Options.SkipDeadlocksOnAzureDB;
 
             var checks = new List<SourceConnectionCheck>();
             UseWaitCursor = true;
@@ -202,7 +203,7 @@ namespace DBADashServiceConfig
                     await throttle.WaitAsync();
                     try
                     {
-                        var check = await SourceConnectionAdder.CheckAsync(collectionConfig, src);
+                        var check = await SourceConnectionAdder.CheckAsync(collectionConfig, src, skipDeadlocksOnAzureDB: skipDeadlocksOnAzureDB);
                         if (checkRepository && !check.IsInvalid)
                         {
                             check.IsDeletedInRepository = await IsInstanceDeletedAsync(check.RepositoryConnectionID);
@@ -3523,9 +3524,12 @@ namespace DBADashServiceConfig
             // system_health doesn't exist on Azure SQL Database, so that mode can't be applied there
             var isSystemHealth = string.Equals(sessionName, DBADashSource.SystemHealthXESessionName,
                 StringComparison.OrdinalIgnoreCase);
+            // "Skip on Azure SQL DB" - only matters when deadlocks are being turned on
+            var skipAzure = !isSystemHealth && tabSrcOptions.SkipDeadlocksOnAzureDB && !string.IsNullOrEmpty(sessionName);
 
             if (MessageBox.Show(
-                    "Apply the deadlock configuration shown on the Deadlocks tab to all existing source connections?\r\n\r\n",
+                    "Apply the deadlock configuration shown on the Deadlocks tab to all existing source connections?" +
+                    (skipAzure ? "\r\n\r\nAzure SQL Database connections will be skipped (\"Skip on Azure SQL DB\" is checked)." : string.Empty),
                     "Apply Deadlock Configuration", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
             {
                 return;
@@ -3538,13 +3542,19 @@ namespace DBADashServiceConfig
             // system_health mode requires knowing whether each instance is Azure SQL Database (where the
             // session doesn't exist).  Detect the platform up front, off the UI thread and with bounded
             // concurrency, so an unreachable instance can't block the config window one timeout at a time.
+            // To skip Azure SQL Database, only connections whose host could be an Azure SQL endpoint are connected to - the
+            // rest aren't Azure SQL Database, so there's no need to wait on them.
             Dictionary<DBADashSource, bool?> azureStatus = null;
-            if (isSystemHealth)
+            if (isSystemHealth || skipAzure)
             {
+                var toDetect = isSystemHealth
+                    ? sqlSources
+                    : sqlSources.Where(src => src.SourceConnection.IsConnectionInfoKnown ||
+                                              DBADashConnection.IsPossiblyAzureSQLHost(src.SourceConnection.ConnectionString)).ToList();
                 Cursor.Current = Cursors.WaitCursor;
                 try
                 {
-                    azureStatus = await DetectAzureStatusAsync(sqlSources);
+                    azureStatus = await DetectAzureStatusAsync(toDetect);
                 }
                 finally
                 {
@@ -3559,12 +3569,13 @@ namespace DBADashServiceConfig
 
             foreach (var src in sqlSources)
             {
-                if (isSystemHealth)
+                if (isSystemHealth || skipAzure)
                 {
                     // null => platform couldn't be determined.  Don't assume non-Azure, otherwise an Azure
                     // SQL Database with a transient/auth/timeout failure would be assigned a session that
-                    // doesn't exist there.  Skip and report it instead.
-                    var isAzure = azureStatus != null && azureStatus.TryGetValue(src, out var status) ? status : null;
+                    // doesn't exist there (or that it was meant to skip).  Skip and report it instead.
+                    // Not detected at all => its host isn't an Azure SQL endpoint, so it isn't Azure SQL Database.
+                    var isAzure = azureStatus != null && azureStatus.TryGetValue(src, out var status) ? status : skipAzure ? false : null;
 
                     if (isAzure == null)
                     {
@@ -3609,7 +3620,9 @@ namespace DBADashServiceConfig
             if (skippedAzure.Count > 0)
             {
                 MessageBox.Show(
-                    $"{DBADashSource.SystemHealthXESessionName} doesn't exist on Azure SQL Database.  " +
+                    (isSystemHealth
+                        ? $"{DBADashSource.SystemHealthXESessionName} doesn't exist on Azure SQL Database.  "
+                        : "\"Skip on Azure SQL DB\" is checked on the Deadlocks tab.  Uncheck it to include them.  ") +
                     $"The following Azure SQL Database connection(s) were skipped:\r\n\r\n" +
                     string.Join("\r\n", skippedAzure),
                     "Apply Deadlock Configuration", MessageBoxButtons.OK, MessageBoxIcon.Warning);

@@ -42,6 +42,14 @@ namespace DBADash
 
         public bool BackfillDeadlocksFromSystemHealth { get; set; } = true;
 
+        /// <summary>
+        /// Don't collect deadlocks for connections that turn out to be Azure SQL Database when they're added.  Each database
+        /// is a connection there, with its own database scoped session - and the Azure DB scan copies the master
+        /// connection's settings to every database it finds.  Only applies when a connection is added, not to one that's
+        /// updated, so it isn't part of <see cref="ApplyTo"/> or <see cref="FromSource"/>.
+        /// </summary>
+        public bool SkipDeadlocksOnAzureDB { get; set; }
+
         /// <summary>Zero switches query stats collection off - see <see cref="DBADashSource.QueryStatsTopN"/>.</summary>
         public int QueryStatsTopN { get; set; }
 
@@ -203,7 +211,7 @@ namespace DBADash
         /// (<see cref="NewConnectionDefaults"/>).  More is on here than in the property initializers above, which are kept as
         /// they were: a message or file that leaves an option out gets them, and existing connections mustn't change.  Slow
         /// queries (EventFile), the cheap running query extras, plans for running queries and the managed deadlock session are
-        /// on, with live plan capture for long running queries and query stats.
+        /// on (except on Azure SQL Database), with live plan capture for long running queries and query stats.
         /// </summary>
         public static SourceConnectionOptions AppDefaults => new()
         {
@@ -211,6 +219,7 @@ namespace DBADash
             SlowQueryCaptureMode = DBADashSource.SlowQueryCaptureModes.EventFile,
             DeadlockXESessionName = DBADashSource.ManagedDeadlockXESessionName,
             BackfillDeadlocksFromSystemHealth = true,
+            SkipDeadlocksOnAzureDB = true,
             RunningQueryPlanThreshold = PlanCollectionThreshold.DefaultThreshold,
             RunningQueryLiveProfileThreshold = LiveProfileThreshold.DefaultThreshold,
             QueryStatsTopN = DefaultQueryStatsTopN,

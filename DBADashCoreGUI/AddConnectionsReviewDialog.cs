@@ -235,6 +235,11 @@ namespace DBADashGUI
                 notes.Add("@@SERVERNAME returned NULL.  Consider fixing this using sp_addserver.");
             }
 
+            if (check.DeadlocksSkippedOnAzureDB)
+            {
+                notes.Add("Deadlocks won't be collected - it's Azure SQL Database and \"Skip on Azure SQL DB\" is checked on the Deadlocks tab.");
+            }
+
             if (check.SlowQueryWillBeDisabled)
             {
                 notes.Add("Slow query capture will be disabled - it needs an extended events session, which isn't supported (SQL 2012 or later, Standard or Enterprise edition on Amazon RDS).");
