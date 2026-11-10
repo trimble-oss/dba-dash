@@ -645,9 +645,11 @@ namespace DBADashGUI.HA
         private DBADashContext CurrentContext;
         private DBADashContext ReportContext;
 
-        public void SetContext(DBADashContext _context)
+        public void SetContext(DBADashContext _context) => SetContext(_context, false);
+
+        public void SetContext(DBADashContext _context, bool forceRefresh)
         {
-            if (_context == CurrentContext) return;
+            if (!forceRefresh && _context == CurrentContext) return;
             CurrentContext = _context;
             // Metrics config visible to App role and admin users.  Not visible to AppReadOnly role.
             metricsConfigMenuItem.Visible = DBADashUser.IsAdmin || DBADashUser.Roles.Contains("App");

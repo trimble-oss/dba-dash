@@ -9,10 +9,12 @@ namespace DBADashGUI.CustomReports
             InitializeComponent();
         }
 
-        public void SetContext(DBADashContext _context)
+        public void SetContext(DBADashContext _context) => SetContext(_context, false);
+
+        public void SetContext(DBADashContext _context, bool forceRefresh)
         {
             _context.Report = ServerServicesReport.Instance;
-            customReportView1.SetContext(_context);
+            customReportView1.SetContext(_context, forceRefresh);
         }
     }
 }

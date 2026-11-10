@@ -649,9 +649,11 @@ namespace DBADashGUI.Performance
                 { HeaderText = "Help", Text = "help", UseColumnTextForLinkValue = true, Name = "colHelp" }
         };
 
-        public void SetContext(DBADashContext _context)
+        public void SetContext(DBADashContext _context) => SetContext(_context, false);
+
+        public void SetContext(DBADashContext _context, bool forceRefresh)
         {
-            if (CurrentContext == _context) return; // Context hasn't changed, don't refresh
+            if (!forceRefresh && CurrentContext == _context) return; // Context hasn't changed, don't refresh
             ShowLatestOnNextExecution = false;
             CurrentContext = _context;
             currentSnapshotDate = DateTime.MinValue;
