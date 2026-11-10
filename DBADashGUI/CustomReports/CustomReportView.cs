@@ -2771,6 +2771,20 @@ namespace DBADashGUI.CustomReports
             _ = SetContext(_context, null);
         }
 
+        /// <summary>
+        /// With <paramref name="forceRefresh"/>, reload the data if this view is already showing <paramref name="_context"/>.
+        /// A drill-down replaces the view's context, so a drilled-in view is reset to <paramref name="_context"/> instead.
+        /// </summary>
+        public void SetContext(DBADashContext _context, bool forceRefresh)
+        {
+            if (forceRefresh && _context == this.context && AutoLoad)
+            {
+                RefreshData();
+                return;
+            }
+            SetContext(_context);
+        }
+
         public async Task SetContext(DBADashContext _context, List<CustomSqlParameter> sqlParams)
         {
             try

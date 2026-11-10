@@ -117,9 +117,11 @@ namespace DBADashGUI.CollectionDates
 
         private DBADashContext CurrentContext;
 
-        public void SetContext(DBADashContext _context)
+        public void SetContext(DBADashContext _context) => SetContext(_context, false);
+
+        public void SetContext(DBADashContext _context, bool forceRefresh)
         {
-            if (CurrentContext == _context) return;
+            if (!forceRefresh && CurrentContext == _context) return;
             CurrentContext = _context;
             if (InstanceIDs == _context.InstanceIDs.ToList()) return;
             InstanceIDs = _context.InstanceIDs.ToList();

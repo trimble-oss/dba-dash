@@ -174,9 +174,11 @@ namespace DBADashGUI.Performance
             }
         };
 
-        public void SetContext(DBADashContext _context)
+        public void SetContext(DBADashContext _context) => SetContext(_context, false);
+
+        public void SetContext(DBADashContext _context, bool forceRefresh)
         {
-            if (_context == CurrentContext) return;
+            if (!forceRefresh && _context == CurrentContext) return;
             dgv.DataSource = null;
             dgvLog.DataSource = null;
             dgvLog.Columns.Clear();

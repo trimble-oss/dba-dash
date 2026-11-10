@@ -1527,7 +1527,12 @@ namespace DBADashGUI
             }
         }
 
-        private async Task LoadSelectedTabAsync()
+        /// <param name="forceRefresh">
+        /// When true, controls already showing the selected context reload their data rather than keeping what they
+        /// show. Set when following a link (e.g. from the Summary tab), where the user expects current data. Tab
+        /// switches and back navigation leave it false so the user's view, filters and customizations are kept.
+        /// </param>
+        private async Task LoadSelectedTabAsync(bool forceRefresh = false)
         {
             DisableAutoRefresh();
             setAutoRefreshToolStripMenuItem.Enabled = IsAutoRefreshApplicable;
@@ -1584,7 +1589,7 @@ namespace DBADashGUI
                 }
                 foreach (var ctrl in tabs.SelectedTab?.Controls.OfType<ISetContext>() ?? Enumerable.Empty<ISetContext>())
                 {
-                    ctrl.SetContext(context);
+                    ctrl.SetContext(context, forceRefresh);
                 }
             }
 
@@ -2897,7 +2902,8 @@ namespace DBADashGUI
                     suppressLoadTab = false;
                 }
 
-                await LoadSelectedTabAsync();
+                // Following a link - show current data even if the target tab was previously loaded for this context.
+                await LoadSelectedTabAsync(forceRefresh: true);
             }
         }
 
