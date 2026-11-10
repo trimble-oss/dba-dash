@@ -33,6 +33,7 @@ namespace DBADash.Test
             Assert.AreEqual(SourceConnectionOptions.DefaultSlowQueryThresholdMs, d.SlowQueryThresholdMs);
             Assert.AreEqual(DBADashSource.SlowQueryCaptureModes.EventFile, d.SlowQueryCaptureMode);
             Assert.AreEqual(DBADashSource.ManagedDeadlockXESessionName, d.DeadlockXESessionName);
+            Assert.IsTrue(d.SkipDeadlocksOnAzureDB);
             Assert.IsTrue(d.RunningQueryPlanThreshold.PlanCollectionEnabled);
             Assert.IsTrue(d.CollectSessionWaits && d.CollectTaskWaits && d.CollectTempDB && d.CollectCursors);
             Assert.IsTrue(d.RunningQueryLiveProfileThreshold.Enabled);
@@ -48,6 +49,7 @@ namespace DBADash.Test
             Assert.AreEqual(-1, o!.SlowQueryThresholdMs);
             Assert.AreEqual(DBADashSource.SlowQueryCaptureModes.RingBuffer, o.SlowQueryCaptureMode);
             Assert.AreEqual(string.Empty, o.DeadlockXESessionName);
+            Assert.IsFalse(o.SkipDeadlocksOnAzureDB, "An older GUI's message keeps its old behaviour");
             Assert.IsNull(o.RunningQueryPlanThreshold);
             Assert.IsNull(o.RunningQueryLiveProfileThreshold);
             Assert.AreEqual(0, o.QueryStatsTopN);
@@ -99,6 +101,18 @@ namespace DBADash.Test
             Assert.IsTrue(loaded.CollectTaskWaits);
             Assert.AreEqual(DBADashSource.SlowQueryCaptureModes.EventFile, loaded.SlowQueryCaptureMode);
         }
+
+        [TestMethod]
+        [DataRow("Data Source=myserver.database.windows.net;Initial Catalog=DB1", true)]
+        [DataRow("Data Source=tcp:myserver.database.windows.net,1433", true)]
+        [DataRow("Data Source=mi.abc123.database.windows.net", true)]
+        [DataRow("Data Source=MYSERVER.DATABASE.USGOVCLOUDAPI.NET", true)]
+        [DataRow("Data Source=SQL1;Integrated Security=True", false)]
+        [DataRow(@"Data Source=SQL1\INST,1433", false)]
+        [DataRow("Data Source=mydb.abc.eu-west-1.rds.amazonaws.com", false)]
+        [DataRow("Data Source=database.windows.net.example.com", false)]
+        public void IsPossiblyAzureSQLHost(string connectionString, bool expected) =>
+            Assert.AreEqual(expected, DBADashConnection.IsPossiblyAzureSQLHost(connectionString));
 
         [TestMethod]
         public void Load_UnreadableFile_ReturnsAppDefaults()

@@ -56,7 +56,7 @@ namespace DBADash.Messaging
                 {
                     return new SourceConnectionCheck { IsInvalid = true, ValidationError = ex.Message };
                 }
-                return await SourceConnectionAdder.CheckAsync(fileConfig, src);
+                return await SourceConnectionAdder.CheckAsync(fileConfig, src, skipDeadlocksOnAzureDB: Options.SkipDeadlocksOnAzureDB);
             }, cancellationToken);
 
             var serviceAccount = OperatingSystem.IsWindows() ? System.Security.Principal.WindowsIdentity.GetCurrent().Name : null;

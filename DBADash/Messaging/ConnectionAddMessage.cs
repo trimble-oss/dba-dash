@@ -73,7 +73,7 @@ namespace DBADash.Messaging
             {
                 var fileConfig = ConnectionChanges.LoadFileConfig();
                 var checks = await ConnectionChanges.ForEachThrottledAsync(sources,
-                    async s => s.Source == null ? null : await SourceConnectionAdder.CheckAsync(fileConfig, s.Source), cancellationToken);
+                    async s => s.Source == null ? null : await SourceConnectionAdder.CheckAsync(fileConfig, s.Source, skipDeadlocksOnAzureDB: Options.SkipDeadlocksOnAzureDB), cancellationToken);
 
                 // Applied one at a time - two requests for the same instance must see each other
                 for (var i = 0; i < sources.Count; i++)
