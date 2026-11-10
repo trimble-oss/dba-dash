@@ -95,6 +95,7 @@ namespace DBADashServiceConfig
             tabSrcOptions.SelectedTab = tabGeneral;
             tabSrcOptions.ShowCustomCollections = true;
             tabSrcOptions.ShowApplyToAll = true;
+            tabSrcOptions.ShowDefaultsLinks = true;
             tabSrcOptions.CustomCollectionsClick += BttnCustomCollectionsNew_Click;
             tabSrcOptions.ApplyDeadlockConfigurationToAll += ApplyDeadlockConfigToAll;
             tabSrcOptions.ApplyQueryStatsConfigurationToAll += ApplyQueryStatsConfigToAll;
