@@ -1,4 +1,4 @@
-using DBADash;
+﻿using DBADash;
 using DBADashGUI.Theme;
 using System.ComponentModel;
 using System.Runtime.Versioning;
@@ -15,8 +15,8 @@ namespace DBADashGUI
     public class SourceConnectionOptionsTabs : ThemedTabControl
     {
         public const string SlowQueryCaptureModeToolTip =
-            "RingBuffer (default) - DBADash_1/DBADash_2 sessions with a ring buffer, read and then emptied by stopping and starting the session.\r\n" +
-            $"EventFile - a {DBADashSource.ManagedSlowQueryXESessionName} session with an event file, read from a saved position.  Never stopped to be emptied, so nothing is lost while it is.  Not available on Azure SQL Database or Managed Instance, which use RingBuffer.\r\n" +
+            "RingBuffer - DBADash_1/DBADash_2 sessions with a ring buffer, read and then emptied by stopping and starting the session.\r\n" +
+            $"EventFile (the app default for new connections) - a {DBADashSource.ManagedSlowQueryXESessionName} session with an event file, read from a saved position.  Never stopped to be emptied, so nothing is lost while it is.  Not available on Azure SQL Database or Managed Instance, which use RingBuffer.\r\n" +
             "ExistingSession - a session you create and manage.  DBA Dash reads it and never alters it.";
 
         public const string KeepSlowQuerySessionToolTip =
@@ -84,6 +84,9 @@ namespace DBADashGUI
         private readonly LinkLabel lnkNone = Link("None", 565, 115);
         private readonly LinkLabel lnkExample = Link("Example", 613, 115);
         private readonly Button bttnCustomCollections = new() { Text = "Custom Collections", Location = new Point(859, 8), Size = new Size(193, 37), Visible = false };
+        private readonly Label lblDefaults = Caption("New connection defaults:", 9, 148);
+        private readonly LinkLabel lnkSaveDefaults = Link("Save as my defaults", 224, 148);
+        private readonly LinkLabel lnkResetDefaults = Link("Reset to app defaults", 384, 148);
 
         // Deadlocks
         private readonly RadioButton optDisableDeadlock = Option("Disable Capture", 23, 16);
@@ -139,7 +142,8 @@ namespace DBADashGUI
                 Size = new Size(16, 16),
                 SizeMode = PictureBoxSizeMode.Zoom
             };
-            TabOther.Controls.AddRange(new Control[] { chkNoWMI, chkScriptJobs, chkWriteToSecondaryDestinations, lblIOCollectionLevel, cboIOLevel, lblSchemaSnapshotDBs, txtSnapshotDBs, picSnapshotWarning, lnkALL, lnkNone, lnkExample, bttnCustomCollections });
+            TabOther.Controls.AddRange(new Control[] { chkNoWMI, chkScriptJobs, chkWriteToSecondaryDestinations, lblIOCollectionLevel, cboIOLevel, lblSchemaSnapshotDBs, txtSnapshotDBs, picSnapshotWarning, lnkALL, lnkNone, lnkExample, bttnCustomCollections, lblDefaults, lnkSaveDefaults, lnkResetDefaults });
+            ShowDefaultsLinks = false;
 
             lnkApplyDeadlockConfigurationToAll.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             lnkApplyDeadlockConfigurationToAll.Visible = false;
@@ -156,14 +160,20 @@ namespace DBADashGUI
 
             TabPages.AddRange(new[] { TabSlowQueries, TabRunningQueries, TabOther, TabDeadlocks, TabQueryStats });
 
-            cboIOLevel.DataSource = Enum.GetValues(typeof(DBADashSource.IOCollectionLevels));
-            cboSlowQueryCaptureMode.DataSource = Enum.GetValues(typeof(DBADashSource.SlowQueryCaptureModes));
+            // Items rather than DataSource: a bound combo ignores SelectedItem until it has a binding context, and then
+            // resets to the first item - so the defaults set below, before the form is shown, would be lost.
+            cboIOLevel.Items.AddRange(Enum.GetValues<DBADashSource.IOCollectionLevels>().Cast<object>().ToArray());
+            cboSlowQueryCaptureMode.Items.AddRange(Enum.GetValues<DBADashSource.SlowQueryCaptureModes>().Cast<object>().ToArray());
 
             SetToolTips();
             WireEvents();
             // Not on the tab pages - the error icon is shown beside the control
             errorProvider.BlinkStyle = ErrorBlinkStyle.NeverBlink;
-            Options = new SourceConnectionOptions();
+            // The user's own defaults if they saved some, otherwise the app defaults.  A host editing an existing connection
+            // replaces these with the connection's own options, so existing connections are never changed by them.
+            Options = LicenseManager.UsageMode == LicenseUsageMode.Designtime
+                ? SourceConnectionOptions.AppDefaults
+                : NewConnectionDefaults.User.Load();
         }
 
         private void SetToolTips()
@@ -182,9 +192,68 @@ namespace DBADashGUI
             toolTip.SetToolTip(chkBackfillDeadlocks, "After the first collection, read the system_health session once in the background for the deadlocks from before the dedicated session started.  Later collections use the dedicated session only.");
             toolTip.SetToolTip(chkCollectQueryStats,
                 "Statement level resource usage, read from sys.dm_exec_query_stats every collection and diffed against the previous read.\r\n" +
-                "Off by default: reading the plan cache costs in proportion to the size of the cache, so it's a decision to make per connection.");
+                "On by default for new connections.  Reading the plan cache costs in proportion to the size of the cache, so consider turning it off for instances with a very large plan cache.");
             toolTip.SetToolTip(numQueryStatsTopN, QueryStatsTopNToolTip);
             toolTip.SetToolTip(numQueryStatsPlans, QueryStatsPlansToolTip);
+            toolTip.SetToolTip(lnkSaveDefaults, "Start new connections with the options chosen on these tabs, in the service configuration tool and the GUI's Add Connections dialog.\r\nSaved for you on this computer.  Custom collections aren't saved.  Existing connections aren't changed.");
+            toolTip.SetToolTip(lnkResetDefaults, "Remove your saved defaults and set these tabs to the app defaults.  Existing connections aren't changed.");
+        }
+
+        /// <summary>
+        /// Show the links that save the options as the user's defaults for new connections, or reset them to the app
+        /// defaults.  For forms that add connections - not ones that edit an existing connection.
+        /// </summary>
+        [DefaultValue(false)]
+        public bool ShowDefaultsLinks
+        {
+            get => showDefaultsLinks;
+            set
+            {
+                showDefaultsLinks = value;
+                lblDefaults.Visible = value;
+                lnkSaveDefaults.Visible = value;
+                lnkResetDefaults.Visible = value;
+            }
+        }
+
+        private bool showDefaultsLinks;
+
+        private void SaveDefaults()
+        {
+            if (!ValidateOptions()) return;
+            try
+            {
+                NewConnectionDefaults.User.Save(Options);
+                MessageBox.Show(FindForm(), "New connections will start with these options.\r\nExisting connections haven't been changed.", "Defaults saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(FindForm(), "Error saving defaults: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void ResetDefaults()
+        {
+            if (NewConnectionDefaults.User.IsCustomized &&
+                MessageBox.Show(FindForm(), "Remove your saved defaults and use the app defaults for new connections?\r\nExisting connections won't be changed.", "Reset to app defaults", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+            {
+                return;
+            }
+
+            try
+            {
+                NewConnectionDefaults.User.Reset();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(FindForm(), "Error removing saved defaults: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            // Custom collections aren't part of the defaults - keep any chosen for these connections
+            var collections = CustomCollections;
+            Options = SourceConnectionOptions.AppDefaults;
+            CustomCollections = collections;
         }
 
         private void WireEvents()
@@ -230,6 +299,8 @@ namespace DBADashGUI
             lnkNone.LinkClicked += (_, _) => txtSnapshotDBs.Text = string.Empty;
             lnkExample.LinkClicked += (_, _) => txtSnapshotDBs.Text = "Database1,Database2,Database3";
             bttnCustomCollections.Click += (_, _) => CustomCollectionsClick?.Invoke(this, EventArgs.Empty);
+            lnkSaveDefaults.LinkClicked += (_, _) => SaveDefaults();
+            lnkResetDefaults.LinkClicked += (_, _) => ResetDefaults();
 
             foreach (var opt in new[] { optDisableDeadlock, optSystemManagedDeadlock, optSystemHealthDeadlock, optCustomDeadlockSession })
             {

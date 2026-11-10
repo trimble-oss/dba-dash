@@ -17,7 +17,8 @@ namespace DBADash
     /// as a message's options would send everything - including the connection string, whose password is only
     /// obfuscated - unencrypted in the queue.</item>
     /// <item>The defaults differ: these are the add form's (e.g. <see cref="UseDualEventSession"/> off), while
-    /// DBADashSource's [DefaultValue]s are part of the ServiceConfig.json format.</item>
+    /// DBADashSource's [DefaultValue]s are part of the ServiceConfig.json format.  The add forms start from
+    /// <see cref="AppDefaults"/> or the user's own saved defaults (<see cref="NewConnectionDefaults"/>), not from these.</item>
     /// <item>DBADashSource's getters return "off" for folder and S3 sources, which a base class has no connection to check.</item>
     /// </list>
     /// <para>The cost is that a new option has to be added here, in <see cref="ApplyTo"/> and <see cref="FromSource"/>,
@@ -190,5 +191,34 @@ namespace DBADash
         }
 
         public string Serialize() => JsonConvert.SerializeObject(this);
+
+        /// <summary>The slow query threshold new connections start with</summary>
+        public const int DefaultSlowQueryThresholdMs = 1000;
+
+        /// <summary>The query stats top N new connections start with - 50 suits most instances</summary>
+        public const int DefaultQueryStatsTopN = 50;
+
+        /// <summary>
+        /// The options the Add New Connection forms start with unless the user has saved their own defaults
+        /// (<see cref="NewConnectionDefaults"/>).  More is on here than in the property initializers above, which are kept as
+        /// they were: a message or file that leaves an option out gets them, and existing connections mustn't change.  Slow
+        /// queries (EventFile), the cheap running query extras, plans for running queries and the managed deadlock session are
+        /// on, with live plan capture for long running queries and query stats.
+        /// </summary>
+        public static SourceConnectionOptions AppDefaults => new()
+        {
+            SlowQueryThresholdMs = DefaultSlowQueryThresholdMs,
+            SlowQueryCaptureMode = DBADashSource.SlowQueryCaptureModes.EventFile,
+            DeadlockXESessionName = DBADashSource.ManagedDeadlockXESessionName,
+            BackfillDeadlocksFromSystemHealth = true,
+            RunningQueryPlanThreshold = PlanCollectionThreshold.DefaultThreshold,
+            RunningQueryLiveProfileThreshold = LiveProfileThreshold.DefaultThreshold,
+            QueryStatsTopN = DefaultQueryStatsTopN,
+            QueryStatsPlansPerCollection = 50,
+            CollectSessionWaits = true,
+            CollectTaskWaits = true,
+            CollectTempDB = true,
+            CollectCursors = true
+        };
     }
 }

@@ -33,7 +33,7 @@ namespace DBADashGUI.Connections
         }
 
         private readonly ComboBox cboService = new() { DropDownStyle = ComboBoxStyle.DropDownList, Location = new Point(90, 12), Size = new Size(640, 28) };
-        private readonly SourceConnectionOptionsTabs tabs = new() { Location = new Point(12, 52), Size = new Size(1080, 240), Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right };
+        private readonly SourceConnectionOptionsTabs tabs = new() { Location = new Point(12, 52), Size = new Size(1080, 240), Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right, ShowDefaultsLinks = true };
         private readonly TextBox txtConnections = new() { Multiline = true, ScrollBars = ScrollBars.Both, WordWrap = false, Location = new Point(6, 36), Size = new Size(900, 130), Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right };
         private readonly Label lblStatus = new() { Location = new Point(12, 302), Size = new Size(820, 40), Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right };
         private readonly Button bttnAdd = new() { Text = "Check && Add...", Location = new Point(844, 302), Size = new Size(130, 36), Anchor = AnchorStyles.Top | AnchorStyles.Right };
