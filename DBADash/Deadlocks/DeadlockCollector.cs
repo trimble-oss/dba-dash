@@ -279,6 +279,7 @@ namespace DBADash.Deadlocks
             { CommandType = CommandType.Text, CommandTimeout = timeLimitSeconds };
             cmd.Parameters.Add("@name", SqlDbType.NVarChar, 128).Value = sessionName;
             await cn.OpenAsync(cancellationToken);
+            await using var runUsage = await SessionUsageMeasurement.StartForRunAsync(cn);
             var value = await cmd.ExecuteScalarAsync(cancellationToken);
             return value is DateTime start ? DateTime.SpecifyKind(start, DateTimeKind.Unspecified) : null;
         }
@@ -425,6 +426,7 @@ namespace DBADash.Deadlocks
                     XELiteEventFileReader.BuildEventStreamSource(currentFile);
 
                 await cn.OpenAsync(cancellationToken);
+                await using var runUsage = await SessionUsageMeasurement.StartForRunAsync(cn);
                 await using var registration = cancellationToken.Register(() => cmd.Cancel());
                 await using var rdr = await cmd.ExecuteReaderAsync(CommandBehavior.SequentialAccess, cancellationToken);
                 while (await rdr.ReadAsync(cancellationToken))
@@ -499,6 +501,7 @@ namespace DBADash.Deadlocks
                 // ignores the size everywhere else, where the session writes to an event file.
                 cmd.Parameters.Add("@RingBufferKB", SqlDbType.Int).Value = ringBufferKB;
                 await cn.OpenAsync(cancellationToken);
+                await using var runUsage = await SessionUsageMeasurement.StartForRunAsync(cn);
                 await cmd.ExecuteNonQueryAsync(cancellationToken);
             }
             catch (Exception ex)
@@ -565,6 +568,7 @@ namespace DBADash.Deadlocks
                 { CommandType = CommandType.Text, CommandTimeout = CommandTimeout };
                 cmd.Parameters.Add("@name", SqlDbType.NVarChar, 128).Value = sessionName;
                 await cn.OpenAsync(cancellationToken);
+                await using var runUsage = await SessionUsageMeasurement.StartForRunAsync(cn);
                 await using var registration = cancellationToken.Register(() => cmd.Cancel());
                 await cmd.ExecuteNonQueryAsync(cancellationToken);
 
@@ -695,6 +699,7 @@ namespace DBADash.Deadlocks
             }
 
             await cn.OpenAsync(cancellationToken);
+            await using var runUsage = await SessionUsageMeasurement.StartForRunAsync(cn);
             await using var registration = cancellationToken.Register(() => cmd.Cancel());
             await using var rdr = await cmd.ExecuteReaderAsync(cancellationToken);
             while (await rdr.ReadAsync(cancellationToken))

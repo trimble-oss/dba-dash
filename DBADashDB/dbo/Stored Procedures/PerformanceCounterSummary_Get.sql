@@ -11,7 +11,8 @@
 	@DaysOfWeek IDs READONLY, /* e.g. exclude weekends:  Monday,Tuesday,Wednesday,Thursday,Friday. Filter applied in local timezone (@UTCOffset) */
 	@Hours IDs READONLY, /* e.g. 9 to 5 :  9,10,11,12,13,14,15,16. Filter applied in local timezone (@UTCOffset)  */
 	@UTCOffset INT=0, /* Used for filtering on hours & weekday in current timezone */
-	@ShowHidden BIT=1
+	@ShowHidden BIT=1,
+	@ShowCollectionMetrics BIT=1 /* 0 leaves out the DBADash collection run counters (CounterType 5) - 8 per collection, and in Collection Health already */
 )
 AS
 SET DATEFIRST 1 /* Start week on Monday */
@@ -77,6 +78,7 @@ WITH T AS (
 	' + CASE WHEN @DaysOfWeekCsv IS NULL THEN N'' ELSE 'AND DATEPART(dw,DATEADD(mi, @UTCOffset, PC.SnapshotDate)) IN (' + @DaysOfWeekCsv + ')' END + '
 	' + CASE WHEN @HoursCsv IS NULL THEN N'' ELSE 'AND DATEPART(hh,DATEADD(mi, @UTCOffset, PC.SnapshotDate)) IN(' + @HoursCsv + ')' END + '
 	' + CASE WHEN @ShowHidden=1 THEN '' ELSE 'AND I.ShowInSummary=1' END + '
+	' + CASE WHEN @ShowCollectionMetrics=1 THEN '' ELSE 'AND C.CounterType <> 5' END + '
 GROUP BY	C.CounterID,
 			C.object_name,
 			C.counter_name,

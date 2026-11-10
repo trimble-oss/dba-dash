@@ -8,6 +8,7 @@ using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading;
@@ -24,6 +25,17 @@ namespace DBADash
         private DateTime snapshotDate;
         private readonly int CommandTimeout;
         private readonly DBADashAgent importAgent;
+        /// <summary>Tables that couldn't be imported - the runs of those collections are recorded as import failures</summary>
+        private readonly HashSet<string> failedImports = new(StringComparer.OrdinalIgnoreCase);
+        /// <summary>How long each table took to import and what it cost the repository - added to the collection runs</summary>
+        private readonly List<ImportTableStats> importStats = new();
+        /// <summary>
+        /// Where the repository connections opened for the table being imported add their CPU and reads.  Null when not
+        /// measuring - only with LogInternalPerformanceCounters on for the service that collected the data, as for collections.
+        /// </summary>
+        private CollectionRunMeter activeMeter;
+        private bool measureImport;
+        private DateTime importStartUtc;
 
         private static ResiliencePipeline CreatePipeline()
         {
@@ -45,6 +57,12 @@ namespace DBADash
                 })
                 .Build();
         }
+
+        /// <summary>
+        /// The collection runs as sent to this repository - with how the import of each went and what it cost.  A copy of the
+        /// batch's table, which is shared with the other destinations.  Null until the runs have been sent.
+        /// </summary>
+        public DataTable ImportedCollectionRuns { get; private set; }
 
         public DBImporter(DataSet data, string connectionString, DBADashAgent importAgent, int commandTimeout = 60)
         {
@@ -90,11 +108,30 @@ namespace DBADash
             }
 
             Log.Error(ex, "Error from {ErrorContext} {ErrorSource}", errorContext, errorSource);
+            var source = ImportErrorSource(errorSource);
             var rError = dtErrors.NewRow();
-            rError["ErrorSource"] = errorSource;
-            rError["ErrorMessage"] = ex.ToString();
+            rError["ErrorSource"] = source;
+            rError["ErrorMessage"] = source == errorSource ? ex.ToString() : $"Importing {errorSource}: {ex}";
             rError["ErrorContext"] = errorContext;
             dtErrors.Rows.Add(rError);
+        }
+
+        /// <summary>
+        /// The source an import error is logged against: the collection whose run the table belongs to
+        /// (<see cref="CollectionRunsTable.GetImportTarget"/>) - JobSteps against Jobs, say - so the errors for a collection,
+        /// and the Import Failed and Last Failure links from Collection Health, include its tables'.  Steps log against their
+        /// collection, as the collector's do.  The table name otherwise, as for a batch without runs (an older service).
+        /// </summary>
+        private string ImportErrorSource(string tableName)
+        {
+            if (data.Tables[CollectionRunsTable.TableName] is not { Rows.Count: > 0 } runs) return tableName;
+            var keys = runs.Rows.Cast<DataRow>()
+                .Select(r => (Reference: r["Reference"] as string ?? "", Step: r["Step"] as string ?? ""))
+                .ToList();
+            bool HasRun((string Reference, string Step) run) => keys.Any(k =>
+                k.Reference.Equals(run.Reference, StringComparison.OrdinalIgnoreCase) && k.Step.Equals(run.Step, StringComparison.OrdinalIgnoreCase));
+            var target = CollectionRunsTable.GetImportTarget(tableName, HasRun);
+            return HasRun(target) ? target.Reference : tableName;
         }
 
         private void UpdatePreviousImportErrors()
@@ -498,8 +535,12 @@ namespace DBADash
             List<Exception> exceptions = new();
             var rInstance = data.Tables["DBADash"]?.Rows[0];
             snapshotDate = (DateTime)rInstance!["SnapshotDateUTC"];
+            importStartUtc = DateTime.UtcNow;
+            measureImport = data.Tables[CollectionRunsTable.TableName] is { } runs && CollectionRunsTable.GetStoreDetail(runs);
 
             // we need to get the instanceID to continue further.  retry based on policy then exception will be thrown to catch higher up
+            var instanceTimer = Stopwatch.StartNew();
+            activeMeter = measureImport ? new CollectionRunMeter() : null;
             instanceID = await pipeline.ExecuteAsync(async token =>
             {
                 try
@@ -512,6 +553,8 @@ namespace DBADash
                     throw;
                 }
             });
+            importStats.Add(new ImportTableStats("DBADash", instanceTimer.Elapsed.TotalMilliseconds, activeMeter?.CpuMs, activeMeter?.LogicalReads));
+            activeMeter = null;
 
             var tablesInDataSet = new HashSet<string>(data.Tables
                 .Cast<DataTable>()
@@ -552,6 +595,12 @@ namespace DBADash
                 await TryUpdateAsync(async _ => await UpdateServiceBrokerAsync(), CollectionType.ServiceBroker.ToString(), exceptions);
             }
 
+            // After everything else, so the runs of a collection whose data couldn't be imported are recorded as failures
+            if (tablesInDataSet.Contains(CollectionRunsTable.TableName))
+            {
+                await TryUpdateAsync(async _ => await UpdateCollectionRunsAsync(), CollectionRunsTable.TableName, exceptions);
+            }
+
             // retry based on policy then let caller handle the exception
 
             await TryUpdateAsync(async _ => await InsertErrorsAsync(), "InsertErrors", exceptions);
@@ -560,6 +609,30 @@ namespace DBADash
             {
                 throw new AggregateException(exceptions);
             }
+        }
+
+        private async Task UpdateCollectionRunsAsync()
+        {
+            var shared = data.Tables[CollectionRunsTable.TableName];
+            if (shared == null || shared.Rows.Count == 0) return;
+            // A copy for this destination: the batch is imported into every destination, in parallel, from the same
+            // DataSet - an import that failed here mustn't be recorded as failed in another repository, or the cost of
+            // importing into this one overwrite another's while it's being sent.  Copy keeps the extended properties.
+            var dt = shared.Copy();
+            CollectionRunsTable.ApplyImport(dt, importStats, failedImports);
+            ImportedCollectionRuns = dt;
+            await using var cn = new SqlConnection(connectionString);
+            await using var cmd = new SqlCommand("dbo.CollectionRuns_Upd", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = CommandTimeout };
+            await cn.OpenAsync();
+            cmd.Parameters.AddWithValue("InstanceID", instanceID);
+            cmd.Parameters.AddWithValue("SnapshotDate", snapshotDate);
+            cmd.Parameters.AddWithValue("CollectionRuns", dt);
+            cmd.Parameters.AddWithValue("StoreDetail", CollectionRunsTable.GetStoreDetail(dt));
+            // The lag recorded against each run: from the batch being handed to a destination to its import starting
+            cmd.Parameters.AddWithValue("ImportStartDate", importStartUtc);
+            cmd.Parameters.AddWithValue("SentDate", (object)CollectionRunsTable.GetSent(dt) ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("BatchID", (object)CollectionRunsTable.GetBatchId(dt) ?? DBNull.Value);
+            await cmd.ExecuteNonQueryAsync();
         }
 
         private async Task UpdateInstanceMetadata_Async()
@@ -573,6 +646,7 @@ namespace DBADash
             await using var cn = new SqlConnection(connectionString);
             await using var cmd = new SqlCommand("dbo.InstanceMetadata_Upd", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = CommandTimeout };
             await cn.OpenAsync();
+            await using var usage = await SessionUsageMeasurement.StartAsync(cn, activeMeter);
             cmd.Parameters.AddWithValue("InstanceID", instanceID);
             cmd.Parameters.AddWithValue("SnapshotDate", snapshotDate);
             cmd.Parameters.AddWithValue("Metadata", metadata);
@@ -588,6 +662,7 @@ namespace DBADash
                 await using var cn = new SqlConnection(connectionString);
                 await using var cmd = new SqlCommand("DDLSnapshot_Add", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = CommandTimeout };
                 await cn.OpenAsync();
+                await using var usage = await SessionUsageMeasurement.StartAsync(cn, activeMeter);
                 DateTime StartTime;
                 DateTime EndTime;
                 if (dtSS!.ExtendedProperties.ContainsKey("StartTime"))
@@ -642,6 +717,7 @@ namespace DBADash
             await using var cn = new SqlConnection(connectionString);
             await using var cmd = new SqlCommand("dbo.Deadlocks_Upd", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = CommandTimeout };
             await cn.OpenAsync();
+            await using var usage = await SessionUsageMeasurement.StartAsync(cn, activeMeter);
 
             // A table-valued parameter that isn't supplied defaults to an empty table, so only send what we have.
             if (dtDeadlocks.Rows.Count > 0)
@@ -692,6 +768,7 @@ namespace DBADash
             await using var cn = new SqlConnection(connectionString);
             await using var cmd = new SqlCommand("dbo.QueryStats_Upd", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = CommandTimeout };
             await cn.OpenAsync();
+            await using var usage = await SessionUsageMeasurement.StartAsync(cn, activeMeter);
 
             // A table-valued parameter that isn't supplied defaults to an empty table, so only send what we have.
             if (dtCollection.Rows.Count > 0)
@@ -725,6 +802,7 @@ namespace DBADash
             await using var cn = new SqlConnection(connectionString);
             await using var cmd = new SqlCommand("dbo.ServiceBroker_Upd", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = CommandTimeout };
             await cn.OpenAsync();
+            await using var usage = await SessionUsageMeasurement.StartAsync(cn, activeMeter);
 
             // A table-valued parameter that isn't supplied defaults to an empty table, so only send what we have.
             foreach (var tableName in ServiceBrokerTables.TableNames)
@@ -750,6 +828,7 @@ namespace DBADash
                 await using var cmd = new SqlCommand("ServerExtraProperties_Upd", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = CommandTimeout };
 
                 await cn.OpenAsync();
+                await using var usage = await SessionUsageMeasurement.StartAsync(cn, activeMeter);
                 cmd.Parameters.AddWithValue("InstanceID", instanceID);
                 cmd.Parameters.AddWithValue("SnapshotDate", snapshotDate);
                 cmd.Parameters.AddWithValue("ActivePowerPlanGUID", r["ActivePowerPlanGUID"]);
@@ -795,6 +874,26 @@ namespace DBADash
         /// <param name="exceptions">Exception list to append to</param>
         /// <returns></returns>
         private async Task TryUpdateAsync(Func<CancellationToken, ValueTask> action, string tableName, ICollection<Exception> exceptions)
+        {
+            var exceptionCount = exceptions.Count;
+            var timer = Stopwatch.StartNew();
+            activeMeter = measureImport ? new CollectionRunMeter() : null;
+            try
+            {
+                await TryUpdateCoreAsync(action, tableName, exceptions);
+            }
+            finally
+            {
+                importStats.Add(new ImportTableStats(tableName, timer.Elapsed.TotalMilliseconds, activeMeter?.CpuMs, activeMeter?.LogicalReads));
+                activeMeter = null;
+                if (exceptions.Count > exceptionCount)
+                {
+                    failedImports.Add(tableName);
+                }
+            }
+        }
+
+        private async Task TryUpdateCoreAsync(Func<CancellationToken, ValueTask> action, string tableName, ICollection<Exception> exceptions)
         {
             List<Exception> retryErrors = new();
             try
@@ -865,10 +964,10 @@ namespace DBADash
         {
             var dt = data.Tables[tableName];
             if (dt == null) return;
-            await UpdateCollectionAsync(dt, instanceID, snapshotDate, connectionString, CommandTimeout);
+            await UpdateCollectionAsync(dt, instanceID, snapshotDate, connectionString, CommandTimeout, activeMeter);
         }
 
-        public static async Task UpdateCollectionAsync(DataTable dt, int? instanceID, DateTime snapshotDate, string connectionString, int timeOut = 30)
+        public static async Task UpdateCollectionAsync(DataTable dt, int? instanceID, DateTime snapshotDate, string connectionString, int timeOut = 30, CollectionRunMeter meter = null)
         {
             var tableName = dt.TableName;
             var procName = (tableName.StartsWith("UserData.") ? "" : "dbo.") + tableName + "_Upd";
@@ -876,6 +975,7 @@ namespace DBADash
             await using var cn = new SqlConnection(connectionString);
             await using var cmd = new SqlCommand(procName, cn) { CommandTimeout = timeOut, CommandType = CommandType.StoredProcedure };
             await cn.OpenAsync();
+            await using var usage = await SessionUsageMeasurement.StartAsync(cn, meter);
             if (dt.Rows.Count > 0)
             {
                 cmd.Parameters.AddWithValue(paramName, dt);
@@ -959,6 +1059,7 @@ namespace DBADash
             await using var cmd = new SqlCommand("Instance_Upd", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = CommandTimeout };
 
             await cn.OpenAsync();
+            await using var usage = await SessionUsageMeasurement.StartAsync(cn, activeMeter);
             var connectionID = (string)rInstance["ConnectionID"];
             cmd.Parameters.AddWithValue("ConnectionID", connectionID);
             cmd.Parameters.AddWithValue("Instance", (string)rInstance["Instance"]);

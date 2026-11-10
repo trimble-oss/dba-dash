@@ -51,7 +51,71 @@ namespace DBADashGUI.CustomReports
         {
             [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
             public string InfoMessages { get; set; }
+
+            /// <summary>The cards for the results, taken out of the result sets - see <see cref="CustomReport.ShowInsights"/></summary>
+            [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+            public List<Insight> Insights { get; set; }
         }
+
+        #region Insights
+
+        internal const string InsightSeverityColumn = "InsightSeverity";
+        internal const string InsightColumn = "Insight";
+
+        /// <summary>The cards above the results - see <see cref="CustomReport.ShowInsights"/></summary>
+        private readonly InsightsPanel insightsPanel = new() { Visible = false, AutoScroll = true };
+
+        /// <summary>
+        /// Above the charts and grids, which fill the rest.  Added after them, so it docks first.  Its height is capped so the
+        /// results always get most of the space - the cards scroll if there are more.
+        /// </summary>
+        private void AddInsightsPanel()
+        {
+            splitResultsAndParams.Panel1.Controls.Add(insightsPanel);
+            splitResultsAndParams.Panel1.SizeChanged += (_, _) => LimitInsightsHeight();
+            LimitInsightsHeight();
+        }
+
+        private void LimitInsightsHeight() =>
+            insightsPanel.MaximumSize = new Size(0, Math.Max(100, splitResultsAndParams.Panel1.Height * 2 / 5));
+
+        /// <summary>A card for each insight, or none</summary>
+        private void ShowInsights(List<Insight> insights)
+        {
+            if (insights is not { Count: > 0 })
+            {
+                insightsPanel.Visible = false;
+                insightsPanel.ClearInsights();
+                return;
+            }
+            insightsPanel.SetInsights(insights);
+            insightsPanel.Visible = true;
+        }
+
+        /// <summary>
+        /// Take the result sets with just <see cref="InsightSeverityColumn"/> and <see cref="InsightColumn"/> out of
+        /// <paramref name="ds"/>, as an insight for each row.  Taken out wherever they come, so the other result sets have
+        /// the same index in the data set as in the procedure's results only when they're last.
+        /// </summary>
+        private static List<Insight> TakeInsights(DataSet ds)
+        {
+            var insights = new List<Insight>();
+            foreach (var table in ds.Tables.Cast<DataTable>().Where(IsInsights).ToList())
+            {
+                insights.AddRange(table.Rows.Cast<DataRow>()
+                    .Where(row => row[InsightColumn] is string { Length: > 0 })
+                    .Select(row => new Insight(
+                        Enum.TryParse<InsightSeverity>(row[InsightSeverityColumn] as string, true, out var severity) ? severity : InsightSeverity.Info,
+                        (string)row[InsightColumn])));
+                ds.Tables.Remove(table);
+            }
+            return insights;
+        }
+
+        private static bool IsInsights(DataTable table) =>
+            table.Columns.Count == 2 && table.Columns.Contains(InsightSeverityColumn) && table.Columns.Contains(InsightColumn);
+
+        #endregion Insights
 
         /// <summary>
         /// The parameter values this report is currently showing, including whatever the pickers and the
@@ -109,7 +173,10 @@ namespace DBADashGUI.CustomReports
         /// the checkbox state is a separate source of truth from <see cref="Params"/> and would otherwise be
         /// re-applied stale over the restored parameters by <see cref="ApplyStatusFilterParams"/>.
         /// </summary>
-        private sealed record NavigationState(CustomReport Report, DBADashContext Context, List<CustomSqlParameter> Params, Dictionary<int, string> GridFilters, StatusFilterSelection StatusFilter);
+        private sealed record NavigationState(CustomReport Report, DBADashContext Context, List<CustomSqlParameter> Params, Dictionary<int, string> GridFilters, StatusFilterSelection StatusFilter, DateRangeSelection DateRange);
+
+        /// <summary>The view's own date range (<see cref="UseOwnDateRange"/>) as it was - relative, or from and to</summary>
+        private sealed record DateRangeSelection(TimeSpan? TimeSpan, DateTime? From, DateTime? To);
 
         /// <summary>
         /// Snapshot of the status filter selection for back-navigation.
@@ -138,11 +205,24 @@ namespace DBADashGUI.CustomReports
             // Restore the status filter selection before refreshing: the refresh re-applies the checkbox state into
             // the @Include* parameters, so it must reflect the saved state rather than whatever the drill-down left.
             RestoreStatusFilter(state.StatusFilter);
+            // And the date range: a drill-down into a time bucket shows its dates in it, and the page Back goes to reads it
+            if (tsDateRange != null && state.DateRange != null)
+            {
+                if (state.DateRange.TimeSpan is { } span)
+                {
+                    tsDateRange.SetTimeSpan(span);
+                }
+                else if (state.DateRange.From is { } from && state.DateRange.To is { } to)
+                {
+                    tsDateRange.SetDateRange(from, to);
+                }
+            }
             if (state.Context == context)
             {
                 // Context reference unchanged (e.g., switching between summary/detail on same tree node).
                 // Restore params and refresh directly since SetContext would short-circuit.
                 customParams = state.Params;
+                ShowDrillDownDatesInDateRange();
                 RefreshData();
             }
             else
@@ -161,7 +241,9 @@ namespace DBADashGUI.CustomReports
         /// </summary>
         public void PushNavigationState()
         {
-            navigationStack.Push(new NavigationState(Report, context, new List<CustomSqlParameter>(customParams), DrillDownGridFilters, CaptureStatusFilter()));
+            // Copies of the parameters: choosing a date range changes the current ones, which mustn't change what Back goes to
+            navigationStack.Push(new NavigationState(Report, context, CloneParameters(customParams), DrillDownGridFilters, CaptureStatusFilter(),
+                tsDateRange == null ? null : new DateRangeSelection(tsDateRange.SelectedTimeSpan, tsDateRange.SelectedDateFrom, tsDateRange.SelectedDateTo)));
             UpdateBackButtonVisibility();
         }
 
@@ -441,6 +523,7 @@ namespace DBADashGUI.CustomReports
         {
             Grids = new();
             InitializeComponent();
+            AddInsightsPanel();
             AddBackButton();
             AddSwitchReportButton();
             // Re-flow stacked result sets when the available area changes (window resize / splitter move).
@@ -1092,6 +1175,7 @@ namespace DBADashGUI.CustomReports
                     if (!ReferenceEquals(cts, cancellationTokenSource)) return;
                     ShowParamPrompt(false); // Show grid
                     LoadResultsCombo();
+                    ShowInsights((reportDS as ReportDataSet)?.Insights);
                     if (reportDS.Tables.Count > 0)
                     {
                         ShowTable();
@@ -1154,6 +1238,7 @@ namespace DBADashGUI.CustomReports
         public void ShowData(DataSet ds)
         {
             reportDS = ds;
+            ShowInsights((reportDS as ReportDataSet)?.Insights); // New Window passes the data it already has
             ShowTable();
             LoadResultsCombo();
         }
@@ -2596,13 +2681,13 @@ namespace DBADashGUI.CustomReports
             var pFromDate = customParams.FirstOrDefault(p => p.Param.ParameterName.Equals("@FromDate", StringComparison.InvariantCultureIgnoreCase) && p.UseDefaultValue);
             if (pFromDate != null)
             {
-                pFromDate.Param.Value = DateRange.FromUTC;
+                pFromDate.Param.Value = tsDateRange != null ? tsDateRange.DateFromUtc : DateRange.FromUTC;
             }
 
             var pToDate = customParams.FirstOrDefault(p => p.Param.ParameterName.Equals("@ToDate", StringComparison.InvariantCultureIgnoreCase) && p.UseDefaultValue);
             if (pToDate != null)
             {
-                pToDate.Param.Value = DateRange.ToUTC;
+                pToDate.Param.Value = tsDateRange != null ? tsDateRange.DateToUtc : DateRange.ToUTC;
             }
 
             var pObjectID = customParams.FirstOrDefault(p => p.Param.ParameterName.Equals("@ObjectID", StringComparison.InvariantCultureIgnoreCase) && p.UseDefaultValue);
@@ -2656,6 +2741,10 @@ namespace DBADashGUI.CustomReports
             try
             {
                 da.Fill(ds);
+                if (Report.ShowInsights)
+                {
+                    ds.Insights = TakeInsights(ds);
+                }
                 ConvertDateTimeColsToLocalTimeZone(ds);
             }
             finally
@@ -2729,6 +2818,7 @@ namespace DBADashGUI.CustomReports
                 }
                 OnContextChanged(isDrillDown: sqlParams != null);
                 customParams = sqlParams ?? Report.GetCustomSqlParameters();
+                ShowDrillDownDatesInDateRange();
                 SetContextParametersForDirectExecutionReport();
                 EnsureStatusFilter();
                 // Reset the filter on tree navigation only; drill-downs supply their own parameter state.
@@ -3174,7 +3264,8 @@ namespace DBADashGUI.CustomReports
                     };
                     if (picker.MenuBar)
                     {
-                        var lbl = new ToolStripLabel(picker.Name + ":") { Tag = pickerTag };
+                        var lbl = new ToolStripLabel(picker.Name + ":") { Tag = pickerTag, ToolTipText = picker.Description };
+                        txtItem.ToolTipText = picker.Description;
                         if (picker.Image != null)
                         {
                             lbl.Image = picker.Image;
@@ -3192,7 +3283,7 @@ namespace DBADashGUI.CustomReports
                 }
                 else if (picker.MultiSelect)
                 {
-                    var pickerMenu = new ToolStripDropDownButton(picker.Name) { Tag = pickerTag, DisplayStyle = ToolStripItemDisplayStyle.Text };
+                    var pickerMenu = new ToolStripDropDownButton(picker.Name) { Tag = pickerTag, DisplayStyle = ToolStripItemDisplayStyle.Text, ToolTipText = picker.Description };
                     if (picker.Image != null)
                     {
                         pickerMenu.Image = picker.Image;
@@ -3229,7 +3320,7 @@ namespace DBADashGUI.CustomReports
                 }
                 else
                 {
-                    var pickerMenu = new ToolStripMenuItem(picker.Name) { Tag = pickerTag };
+                    var pickerMenu = new ToolStripMenuItem(picker.Name) { Tag = pickerTag, ToolTipText = picker.Description };
                     if (picker.Image != null)
                     {
                         pickerMenu.Image = picker.Image;
@@ -3806,6 +3897,72 @@ namespace DBADashGUI.CustomReports
             }
         }
 
+        #region Date range of its own
+
+        private DateRangeToolStripMenuItem tsDateRange;
+
+        /// <summary>
+        /// Gives the view a date range of its own, on its toolbar, in place of the app's - for a report in a window of its own
+        /// (<see cref="CustomReportViewer"/>), so it can look further back without moving every other view.  It starts on the
+        /// date range of the window it was opened from where that has one of its own, and the app's otherwise.  A drill-down
+        /// that sets the dates (the errors for a collection's last failure, say) shows them in it, and choosing a range
+        /// replaces them.
+        /// </summary>
+        public void UseOwnDateRange(CustomReportView openedFrom = null)
+        {
+            if (tsDateRange != null) return;
+            tsDateRange = new DateRangeToolStripMenuItem { ToolTipText = "Date range for this window.  Starts on the app's - changing it here leaves the app's as it is." };
+            var source = openedFrom?.tsDateRange;
+            if (source?.SelectedTimeSpan is { } span)
+            {
+                tsDateRange.SetTimeSpan(span);
+            }
+            else if (source != null)
+            {
+                tsDateRange.SetDateRange(source.DateFrom, source.DateTo);
+            }
+            else if (DateRange.SelectedTimeSpan is { } appSpan)
+            {
+                tsDateRange.SetTimeSpan(appSpan);
+            }
+            else
+            {
+                tsDateRange.SetDateRangeUtc(DateRange.FromUTC, DateRange.ToUTC);
+            }
+            tsDateRange.DateRangeChanged += (_, _) =>
+            {
+                // The range chosen replaces dates a drill-down set
+                foreach (var p in customParams.Where(p => IsDateParam(p.Param.ParameterName)))
+                {
+                    p.UseDefaultValue = true;
+                }
+                RefreshData();
+            };
+            toolStrip1.Items.Insert(toolStrip1.Items.IndexOf(tsRefresh) + 1, tsDateRange);
+            ShowDrillDownDatesInDateRange();
+        }
+
+        /// <summary>Copies of the parameters and their SqlParameters, so changing one set leaves the other as it was</summary>
+        internal static List<CustomSqlParameter> CloneParameters(IEnumerable<CustomSqlParameter> parameters) =>
+            parameters?.Select(p => new CustomSqlParameter { Param = (SqlParameter)((ICloneable)p.Param).Clone(), UseDefaultValue = p.UseDefaultValue }).ToList()
+            ?? new List<CustomSqlParameter>();
+
+        private static bool IsDateParam(string name) =>
+            name.Equals("@FromDate", StringComparison.OrdinalIgnoreCase) || name.Equals("@ToDate", StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>Shows dates a drill-down set in the view's own date range, so it says what the report is showing</summary>
+        private void ShowDrillDownDatesInDateRange()
+        {
+            if (tsDateRange == null || customParams == null) return;
+            DateTime? Explicit(string name) => customParams.FirstOrDefault(p => !p.UseDefaultValue && p.Param.ParameterName.Equals(name, StringComparison.OrdinalIgnoreCase))?.Param.Value as DateTime?;
+            if (Explicit("@FromDate") is { } fromUtc && Explicit("@ToDate") is { } toUtc)
+            {
+                tsDateRange.SetDateRangeUtc(fromUtc, toUtc);
+            }
+        }
+
+        #endregion Date range of its own
+
         private void TsNewWindow_Click(object sender, EventArgs e)
         {
             var frm = new CustomReportViewer();
@@ -3814,7 +3971,8 @@ namespace DBADashGUI.CustomReports
             ctx.Report = Report;
             frm.Context = ctx;
             frm.DataSet = reportDS;
-            frm.CustomParams = customParams;
+            frm.CustomParams = CloneParameters(customParams); // Its own - changing its date range mustn't change this view's
+            frm.OpenedFrom = this;
             frm.Show();
         }
 

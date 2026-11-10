@@ -344,7 +344,8 @@ namespace DBADashGUI
             QueryStats,
             Latches,
             Spinlocks,
-            ServiceBroker
+            ServiceBroker,
+            CollectionHealth
         }
 
         private static readonly List<Main.Tabs> InstanceOnlyTabs = new() { Main.Tabs.PerformanceSummary, Tabs.Metrics, Tabs.Waits, Tabs.Memory, Tabs.RunningQueries };
@@ -413,6 +414,13 @@ namespace DBADashGUI
         /// so at instance level the tab is only shown where it's enabled or has data (see <see cref="DBADashContext.HasServiceBroker"/>).
         /// </summary>
         private TabPage tabServiceBroker;
+
+        /// <summary>
+        /// Success rate, failures in a row and cost of each collection over the selected period - next to Collection Dates,
+        /// which only shows when each collection last worked.
+        /// </summary>
+        private TabPage tabCollectionHealth;
+        private CollectionDates.ErrorLogView errorLogView;
 
         /// <summary>The node context the query stats tab was last given - see <see cref="GetQueryStatsTabContext"/>.</summary>
         private DBADashContext queryStatsSourceContext;
@@ -601,6 +609,12 @@ namespace DBADashGUI
 
             tabServiceBroker = new TabPage("Service Broker") { Name = Tabs.ServiceBroker.TabName() };
             tabServiceBroker.Controls.Add(new ServiceBrokerView { Dock = DockStyle.Fill });
+
+            tabCollectionHealth = new TabPage("Collection Health") { Name = Tabs.CollectionHealth.TabName() };
+            tabCollectionHealth.Controls.Add(new CollectionDates.CollectionHealthView { Dock = DockStyle.Fill });
+
+            errorLogView = new CollectionDates.ErrorLogView { Dock = DockStyle.Fill };
+            tabDBADashErrorLog.Controls.Add(errorLogView);
         }
 
         /// <summary>
@@ -744,7 +758,9 @@ namespace DBADashGUI
             // The Deadlocks folder's tabs run reports too, and both of them are over a date range.
             || SelectedDeadlockTabReport(tv1.SelectedNode as SQLTreeItem)?.TimeFilterSupported == true
             || tabs.SelectedTab == tabQueryStats
-            || tabs.SelectedTab == tabServiceBroker;
+            || tabs.SelectedTab == tabServiceBroker
+            || tabs.SelectedTab == tabCollectionHealth
+            || tabs.SelectedTab == tabDBADashErrorLog;
 
         private bool IsAzureOnly;
         private bool ShowCounts;
@@ -1540,7 +1556,7 @@ namespace DBADashGUI
 
             if (tabs.SelectedTab == tabDBADashErrorLog)
             {
-                collectionErrors1.AckErrors = SelectedTags().Count == 0 &&
+                errorLogView.AckErrors = SelectedTags().Count == 0 &&
                                               n.SQLTreeItemParent.Type == SQLTreeItem.TreeType.DBADashRoot;
             }
 
@@ -2048,7 +2064,7 @@ namespace DBADashGUI
 
                 allowedTabs.AddRange(new[]
                 {
-                    tabDBADashErrorLog, tabCollectionDates, tabCustomChecks, tabSnapshotSummary,
+                    tabDBADashErrorLog, tabCollectionDates, tabCollectionHealth, tabCustomChecks, tabSnapshotSummary,
                     tabIdentityColumns
                 });
                 // Service Broker collection is off by default - only show the tab where it's enabled or has data

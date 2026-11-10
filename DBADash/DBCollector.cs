@@ -111,8 +111,28 @@ namespace DBADash
         public DataSet Data;
         private string ConnectionString => Source.SourceConnection.ConnectionString;
         private DataTable dtErrors;
-        public bool LogInternalPerformanceCounters = false;
+        /// <summary>
+        /// Every collection run is reported either way (<see cref="CollectionRunsTable"/>).  With this on, the repository keeps
+        /// each run as well as the hourly rollup, and the CPU and logical reads of each run are measured.
+        /// Pass it to <see cref="CreateAsync"/>, so the Instance collection that runs there is measured too.  Set afterwards, the
+        /// batch is still marked to keep each run - an hour with only some of its runs kept is read from the rollup, so a
+        /// batch marked from the setting at creation alone would stop the runs being used at all.
+        /// </summary>
+        public bool LogInternalPerformanceCounters
+        {
+            get => logInternalPerformanceCounters;
+            set
+            {
+                logInternalPerformanceCounters = value;
+                if (dtCollectionRuns != null) CollectionRunsTable.SetStoreDetail(dtCollectionRuns, value);
+            }
+        }
+        private bool logInternalPerformanceCounters;
+        private DataTable dtCollectionRuns;
+        /// <summary>Diagnostic counts (plans to collect, text from cache...) - collection durations are in <see cref="dtCollectionRuns"/></summary>
         private DataTable dtInternalPerfCounters;
+        /// <summary>Where the connections measured for the run in progress add their CPU and reads.  Null when not measuring.</summary>
+        private CollectionRunMeter activeMeter;
         public int PerformanceCollectionPeriodMins = 60;
         public List<PerfmonCounter> PerfmonCounters { get; set; }
 
@@ -477,22 +497,86 @@ namespace DBADash
             dt.Rows.Add(rError);
         }
 
-        private void CreateInternalPerformanceCountersDataTable()
+        /// <summary>
+        /// A collection run in progress - see <see cref="BeginRun"/>.
+        /// </summary>
+        private sealed class CollectionRunState
         {
-            dtInternalPerfCounters = new("InternalPerformanceCounters")
-            {
-                Columns =
-                {
-                    new DataColumn("SnapshotDate", typeof(DateTime)),
-                    new DataColumn("object_name"),
-                    new DataColumn("counter_name"),
-                    new DataColumn("instance_name"),
-                    new DataColumn("cntr_value", typeof(decimal)),
-                    new DataColumn("cntr_type", typeof(int))
-                }
-            };
-            Data.Tables.Add(dtInternalPerfCounters);
+            public string Reference { get; init; }
+            public string Step { get; init; }
+            public DateTime StartUtc { get; init; }
+            /// <summary>Errors logged before the run started - the ones after are the run's</summary>
+            public int ErrorBaseline { get; init; }
+            /// <summary>Tables already collected when the run started - a table added after is data the run collected</summary>
+            public HashSet<string> TablesBefore { get; init; }
+            public CollectionRunMeter Meter { get; init; }
+            public int Attempts { get; set; } = 1;
+            public bool Failed { get; set; }
         }
+
+        /// <summary>
+        /// Starts recording a collection run.  Runs are sequential within a collector, so the meter for this run is the
+        /// one the connections opened from now on add to.
+        /// </summary>
+        private CollectionRunState BeginRun(string reference, string step = "")
+        {
+            activeMeter = LogInternalPerformanceCounters ? new CollectionRunMeter() : null;
+            return new CollectionRunState
+            {
+                Reference = reference,
+                Step = step,
+                StartUtc = DateTime.UtcNow,
+                ErrorBaseline = dtErrors.Rows.Count,
+                TablesBefore = Data.Tables.Cast<DataTable>().Select(t => t.TableName).ToHashSet(StringComparer.OrdinalIgnoreCase),
+                Meter = activeMeter
+            };
+        }
+
+        /// <summary>Tables that are about the collector rather than data collected</summary>
+        private static readonly HashSet<string> NotCollectedData = new(StringComparer.OrdinalIgnoreCase) { "Errors", CollectionRunsTable.TableName, "InternalPerformanceCounters" };
+
+        /// <summary>
+        /// Records how the run went in <see cref="CollectionRunsTable"/>.  <paramref name="durationMs"/> is the last attempt, as the
+        /// Collection Duration (ms) counter always was - the CPU and reads are all attempts, which is what the run cost.
+        /// Null for a run that never got as far as collecting, so it doesn't pull the average duration down.
+        /// </summary>
+        private void EndRun(CollectionRunState run, double? durationMs)
+        {
+            if (ReferenceEquals(activeMeter, run.Meter))
+            {
+                activeMeter = null;
+            }
+            if (dtCollectionRuns == null) return;
+            var row = dtCollectionRuns.NewRow();
+            row["Reference"] = run.Reference;
+            row["Step"] = run.Step;
+            row["SnapshotDate"] = run.StartUtc;
+            row["Status"] = (byte)GetRunStatus(run);
+            row["Attempts"] = (byte)Math.Clamp(run.Attempts, 1, byte.MaxValue);
+            row["DurationMs"] = durationMs is { } ms ? (int)Math.Clamp(Math.Round(ms), 0, int.MaxValue) : DBNull.Value;
+            row["CpuMs"] = run.Meter?.CpuMs is { } cpu ? (int)Math.Clamp(cpu, 0, int.MaxValue) : DBNull.Value;
+            row["LogicalReads"] = run.Meter?.LogicalReads is { } reads ? reads : DBNull.Value;
+            dtCollectionRuns.Rows.Add(row);
+        }
+
+        /// <summary>The run's status - see <see cref="CollectionRunsTable.GetStatus"/></summary>
+        private CollectionRunStatus GetRunStatus(CollectionRunState run)
+        {
+            var errors = dtErrors.Rows.Cast<DataRow>()
+                .Skip(Math.Min(run.ErrorBaseline, dtErrors.Rows.Count))
+                .Select(r => new RunError(r["ErrorSource"] as string ?? string.Empty, r["ErrorContext"] as string ?? string.Empty, r["ErrorMessage"] as string ?? string.Empty));
+            var collectedData = Data.Tables.Cast<DataTable>()
+                .Any(t => !run.TablesBefore.Contains(t.TableName) && !NotCollectedData.Contains(t.TableName));
+            return CollectionRunsTable.GetStatus(run.Reference, run.Failed, run.Attempts, collectedData, errors);
+        }
+
+        /// <summary>
+        /// Measures the CPU and logical reads of an open connection for the run in progress - dispose it once the
+        /// connection's work is done, before closing it.  Null (no queries run) when not measuring.
+        /// </summary>
+        private Task<SessionUsageMeasurement> MeasureAsync(SqlConnection cn) => SessionUsageMeasurement.StartAsync(cn, activeMeter);
+
+        private SessionUsageMeasurement Measure(SqlConnection cn) => SessionUsageMeasurement.Start(cn, activeMeter);
 
         private bool IsResourceGovernorApplicable()
         {
@@ -555,6 +639,23 @@ namespace DBADash
             return (bool)cmd.ExecuteScalar();
         }
 
+        private void CreateInternalPerformanceCountersDataTable()
+        {
+            dtInternalPerfCounters = new("InternalPerformanceCounters")
+            {
+                Columns =
+                {
+                    new DataColumn("SnapshotDate", typeof(DateTime)),
+                    new DataColumn("object_name"),
+                    new DataColumn("counter_name"),
+                    new DataColumn("instance_name"),
+                    new DataColumn("cntr_value", typeof(decimal)),
+                    new DataColumn("cntr_type", typeof(int))
+                }
+            };
+            Data.Tables.Add(dtInternalPerfCounters);
+        }
+
         private void LogInternalPerformanceCounter(string objectName, string counterName, string instance, decimal counterValue)
         {
             if (!LogInternalPerformanceCounters) return;
@@ -584,7 +685,6 @@ namespace DBADash
             if (!swatch.IsRunning) return;
             swatch.Stop();
             Log.Debug("Collect {0} on {1} completed in {2}ms", currentCollection, instanceName, swatch.ElapsedMilliseconds);
-            LogInternalPerformanceCounter("DBADash", "Collection Duration (ms)", currentCollection, Convert.ToDecimal(swatch.Elapsed.TotalMilliseconds));
         }
 
         private async Task StartupAsync()
@@ -594,8 +694,16 @@ namespace DBADash
             dtErrors = GetErrorDataTableSchema();
 
             Data.Tables.Add(dtErrors);
+            dtCollectionRuns = CollectionRunsTable.Create();
+            CollectionRunsTable.SetStoreDetail(dtCollectionRuns, LogInternalPerformanceCounters);
+            CollectionRunsTable.SetBatchId(dtCollectionRuns, Guid.NewGuid());
+            Data.Tables.Add(dtCollectionRuns);
 
-            await TryCollectAsync(async _ => await GetInstanceAsync(), "Instance");
+            // A failure here means nothing is sent (the instance is offline) - so only a run that worked is recorded
+            swatch.Reset();
+            var run = BeginRun(CollectionType.Instance.ToString());
+            await TryCollectAsync(async _ => await GetInstanceAsync(), "Instance", run);
+            EndRun(run, swatch.Elapsed.TotalMilliseconds);
         }
 
         /// <summary>
@@ -605,7 +713,7 @@ namespace DBADash
         /// <param name="collection"></param>
         /// <returns></returns>
         /// <exception cref="AggregateException"></exception>
-        private async Task TryCollectAsync(Func<CancellationToken, ValueTask> action, string collection)
+        private async Task TryCollectAsync(Func<CancellationToken, ValueTask> action, string collection, CollectionRunState run = null)
         {
             var errors = new List<Exception>();
             try
@@ -624,9 +732,17 @@ namespace DBADash
                         }
 
                         errors.Add(ex);
+                        if (run != null)
+                        {
+                            run.Attempts = errors.Count;
+                        }
                         throw;
                     }
                 });
+                if (run != null)
+                {
+                    run.Attempts = errors.Count + 1;
+                }
                 if (errors.Count > 0)
                 {
                     LogError(new AggregateException($"{collection} succeeded after {errors.Count} attempts", errors),
@@ -924,6 +1040,8 @@ namespace DBADash
             foreach (var customCollection in customCollections)
             {
                 var collectionReference = "UserData." + customCollection.Key;
+                swatch.Reset();
+                var run = BeginRun(collectionReference);
                 try
                 {
                     await TryCollectAsync(async _ =>
@@ -931,10 +1049,12 @@ namespace DBADash
                         StartCollection(collectionReference);
                         await CollectAsync(customCollection);
                         StopCollection();
-                    }, collectionReference);
+                    }, collectionReference, run);
                 }
                 catch (SqlException ex) when (ex.Number == 2812)
                 {
+                    StopCollection();
+                    run.Failed = true;
                     var message = $"Warning: Custom collection stored procedure {customCollection.Value.ProcedureName} doesn't exist";
                     LogDBError(collectionReference, message);
                     Log.Error(ex, message);
@@ -942,8 +1062,10 @@ namespace DBADash
                 catch (Exception ex)
                 {
                     StopCollection();
+                    run.Failed = true;
                     LogError(ex, collectionReference);
                 }
+                EndRun(run, swatch.Elapsed.TotalMilliseconds);
             }
         }
 
@@ -953,6 +1075,7 @@ namespace DBADash
             await using var cmd = new SqlCommand(customCollection.Value.ProcedureName, cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = customCollection.Value.CommandTimeout ?? CollectionCommandTimeout.GetDefaultCommandTimeout() };
             using var da = new SqlDataAdapter(cmd);
             await cn.OpenAsync();
+            await using var usage = await MeasureAsync(cn);
             var dt = new DataTable("UserData." + customCollection.Key);
             da.Fill(dt);
             Data.Tables.Add(dt);
@@ -1067,8 +1190,13 @@ namespace DBADash
                 // The collection query uses STRING_SPLIT, which requires compatibility level 130, so it would fail
                 // with "Invalid object name 'STRING_SPLIT'".  Skip the collection and log a clear, actionable error
                 // rather than letting the query fail cryptically every cycle.  See issue #1196.
+                // Recorded as a failed run, so Collection Health shows the collection failing rather than leaving it out
+                // as a collection that doesn't apply here - the error says what to change.
+                var run = BeginRun(collectionTypeString);
+                run.Failed = true;
                 var (database, resolveDatabase) = GetConnectionDatabasePhrasing();
                 LogDBError(collectionTypeString, $"Table size collection was skipped.  {database} is at compatibility level {compatLevel}.  Table size collection requires compatibility level {TableSizeMinCompatibilityLevel} (SQL Server 2016) or higher because it uses the STRING_SPLIT function.  To resolve, increase the compatibility level of {resolveDatabase}, or change the initial catalog of the source connection to a database with a supported compatibility level.");
+                EndRun(run, null);
                 return false;
             }
             else if (collectionType == CollectionType.ServerServices && SQLVersion.Major < 11)
@@ -1115,6 +1243,10 @@ namespace DBADash
                 return;
             }
 
+            swatch.Reset();
+            var run = BeginRun(collectionTypeString);
+            // For collectors that open their own connections - slow queries, deadlocks - see SessionUsageMeasurement.ForRun
+            using var runMeter = SessionUsageMeasurement.ForRun(run.Meter);
             try
             {
                 await TryCollectAsync(async _ =>
@@ -1123,14 +1255,17 @@ namespace DBADash
                         await ExecuteCollectionAsync(collectionType);
                         StopCollection();
                     },
-                    collectionTypeString
+                    collectionTypeString,
+                    run
                 );
             }
             catch (Exception ex)
             {
+                run.Failed = true;
                 LogError(ex, collectionTypeString);
                 StopCollection();
             }
+            EndRun(run, swatch.Elapsed.TotalMilliseconds);
             // Text is shared between the two collections that need it, and fetched once per handle.  Query
             // stats keeps only the statements it stored, so a row in that grid has text to show; running
             // queries keeps everything it sampled.
@@ -1171,6 +1306,8 @@ namespace DBADash
         /// </summary>
         private async Task CollectStepAsync(CollectionType collectionType, string step, string errorMessage, Func<Task> collectStep)
         {
+            var run = BeginRun(EnumToString(collectionType), step);
+            using var runMeter = SessionUsageMeasurement.ForRun(run.Meter);
             var timer = Stopwatch.StartNew();
             try
             {
@@ -1178,10 +1315,10 @@ namespace DBADash
             }
             catch (Exception ex)
             {
+                run.Failed = true;
                 LogError(new Exception(errorMessage, ex), EnumToString(collectionType));
             }
-            LogInternalPerformanceCounter("DBADash", "Collection Duration (ms)", $"{collectionType} {step}",
-                Convert.ToDecimal(timer.Elapsed.TotalMilliseconds));
+            EndRun(run, timer.Elapsed.TotalMilliseconds);
         }
 
         private async Task CollectPlansAsync()
@@ -1191,7 +1328,7 @@ namespace DBADash
             DataTable dt = null;
             if (plans.Count > 0)
             {
-                dt = await Plan.GetPlansAsync(plans, ConnectionString);
+                dt = await Plan.GetPlansAsync(plans, ConnectionString, activeMeter);
                 if (dt is { Rows.Count: > 0 })
                 {
                     Data.Tables.Add(dt);
@@ -1233,7 +1370,7 @@ namespace DBADash
 
             var requests = LiveProfileCollector.SelectRequests(Data.Tables["RunningQueries"], planKeys, threshold);
 
-            var dt = await LiveProfileCollector.CollectAsync(requests, ConnectionString);
+            var dt = await LiveProfileCollector.CollectAsync(requests, ConnectionString, activeMeter);
             if (dt.Rows.Count > 0)
             {
                 Data.Tables.Add(dt);
@@ -1285,6 +1422,8 @@ namespace DBADash
             if (string.IsNullOrEmpty(handlesSQL)) return;
             using var cn = new SqlConnection(ConnectionString);
             using var da = new SqlDataAdapter(handlesSQL, cn);
+            cn.Open();
+            using var usage = Measure(cn);
             var dt = new DataTable("QueryText");
             da.Fill(dt);
             if (dt.Rows.Count > 0)
@@ -1338,6 +1477,7 @@ namespace DBADash
             using (var cmd = new SqlCommand(GetBatchTextSQL(needed.Select(s => s.SqlHandle.ToHexString()).Distinct(StringComparer.OrdinalIgnoreCase)), cn))
             {
                 cn.Open();
+                using var usage = Measure(cn);
                 using var rdr = cmd.ExecuteReader();
                 while (rdr.Read())
                 {
@@ -1397,7 +1537,7 @@ namespace DBADash
             {
                 var plans = await Plan.GetPlansAsync(
                     batch.Select(p => new Plan(p.PlanHandle, p.PlanHash, p.StartOffset, p.EndOffset)).ToList(),
-                    ConnectionString);
+                    ConnectionString, activeMeter);
                 foreach (DataRow r in plans.Rows)
                 {
                     fetched[PlanEntryKey((byte[])r["plan_handle"], (int)r["statement_start_offset"], (int)r["statement_end_offset"])] = r;
@@ -1891,6 +2031,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             await using var cmd = new SqlCommand("msdb.dbo.sp_help_job", cn) { CommandType = CommandType.StoredProcedure };
             cmd.Parameters.AddWithValue("@execution_status", 0);
             await cn.OpenAsync();
+            await using var usage = await MeasureAsync(cn);
             await using var rdr = await cmd.ExecuteReaderAsync();
             var dtRunningJobs = GetRunningJobsSchema();
             var snapshotDate = DateTime.UtcNow;
@@ -1922,6 +2063,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             await using var cmd = new SqlCommand(SqlStrings.RunningJobs, cn);
             using var da = new SqlDataAdapter(cmd);
             await cn.OpenAsync();
+            await using var usage = await MeasureAsync(cn);
             await using var rdr = await cmd.ExecuteReaderAsync();
             var dtRunningJobs = GetRunningJobsSchema();
             dtRunningJobs.Load(rdr);
@@ -1978,6 +2120,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             cmd.Parameters.AddWithValue("CollectTaskWaits", Source.CollectTaskWaits);
             cmd.Parameters.AddWithValue("CollectCursors", Source.CollectCursors);
             await cn.OpenAsync();
+            await using var usage = await MeasureAsync(cn);
             var ds = new DataSet();
             da.Fill(ds);
             var dtRunningQueries = ds.Tables[0];
@@ -2078,6 +2221,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
                 { CommandTimeout = CollectionType.QueryStats.GetCommandTimeout() };
                 cmd.Parameters.AddWithValue("LastExecutionTimeFromUTC", periodStart);
                 await cn.OpenAsync();
+                await using var usage = await MeasureAsync(cn);
                 var readStarted = Stopwatch.GetTimestamp();
                 await using var rdr = await cmd.ExecuteReaderAsync();
                 // Diffed as the rows arrive rather than loaded into a table first - see QueryStatsProcessor.Process
@@ -2124,13 +2268,14 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             return sql;
         }
 
-        private static async Task<DataSet> GetPerformanceCountersAsync(string connectionString, string productVersion, string countersXML)
+        private static async Task<DataSet> GetPerformanceCountersAsync(string connectionString, string productVersion, string countersXML, CollectionRunMeter meter = null)
         {
             var sql = PerformanceCountersSQL(productVersion);
             if (sql == string.Empty) return null;
             await using var cn = new SqlConnection(connectionString);
             using var da = new SqlDataAdapter(SetArithAbortOn + sql, cn);
             await cn.OpenAsync();
+            await using var usage = await SessionUsageMeasurement.StartAsync(cn, meter);
             var ds = new DataSet();
             SqlParameter pCountersXML = new("CountersXML", countersXML)
             {
@@ -2171,7 +2316,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
         {
             try
             {
-                var dt = await GetPerformanceCountersDataTableAsync(ConnectionString, productVersion, PerformanceCounters.PerformanceCountersXML);
+                var dt = await GetPerformanceCountersDataTableAsync(ConnectionString, productVersion, PerformanceCounters.PerformanceCountersXML, activeMeter);
                 if (dt == null) return;
                 Data.Tables.Add(dt);
             }
@@ -2181,9 +2326,9 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             }
         }
 
-        public static async Task<DataTable> GetPerformanceCountersDataTableAsync(string connectionString, string productVersion, string countersXML)
+        public static async Task<DataTable> GetPerformanceCountersDataTableAsync(string connectionString, string productVersion, string countersXML, CollectionRunMeter meter = null)
         {
-            var ds = await GetPerformanceCountersAsync(connectionString, productVersion, countersXML);
+            var ds = await GetPerformanceCountersAsync(connectionString, productVersion, countersXML, meter);
             if (ds == null) return null;
             var dt = ds.Tables[0];
             if (ds.Tables.Count == 2)
@@ -2251,6 +2396,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             cmd.Parameters.AddWithValue("MaxDatabases", ServiceBrokerMaxDatabases);
             using var da = new SqlDataAdapter(cmd);
             await cn.OpenAsync();
+            await using var usage = await MeasureAsync(cn);
             var ds = new DataSet();
             da.Fill(ds);
             if (ds.Tables.Count != ServiceBrokerTables.TableNames.Length)
@@ -2471,6 +2617,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
                 Log.Error(ex, $"Unable to connect to the SQL instance. {builder.DataSource}");
                 throw new DatabaseConnectionException("Unable to connect to the SQL instance.", ex);
             }
+            await using var usage = await MeasureAsync(cn);
 
             DataTable dt = new();
             if (param != null)

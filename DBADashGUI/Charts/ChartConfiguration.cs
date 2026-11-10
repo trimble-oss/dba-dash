@@ -35,6 +35,13 @@ namespace DBADashGUI.Charts
         public double? YAxisMax { get; init; }
 
         /// <summary>
+        /// The Y-axis goes up to at least this, and further for a value above it - unlike <see cref="YAxisMax"/>, which cuts
+        /// the chart off.  For a measure that is near zero in normal use, so a tiny change isn't drawn as a spike to the top.
+        /// Ignored when <see cref="YAxisMax"/> or <see cref="YAxes"/> is set.
+        /// </summary>
+        public double? YAxisMinimumMax { get; init; }
+
+        /// <summary>
         /// Minimum value for the Y-axis. If not specified, defaults to 0.
         /// </summary>
         public double? YAxisMin { get; init; }

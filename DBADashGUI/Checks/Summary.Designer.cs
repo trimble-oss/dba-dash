@@ -423,14 +423,14 @@ namespace DBADashGUI
             CollectionErrorStatus.DataPropertyName = "CollectionErrorCount";
             dataGridViewCellStyle5.NullValue = "View";
             CollectionErrorStatus.DefaultCellStyle = dataGridViewCellStyle5;
-            CollectionErrorStatus.HeaderText = "DBA Dash Errors (24hrs)";
+            CollectionErrorStatus.HeaderText = "Collection Health";
             CollectionErrorStatus.LinkColor = System.Drawing.Color.FromArgb(0, 79, 131);
             CollectionErrorStatus.MinimumWidth = 6;
             CollectionErrorStatus.Name = "CollectionErrorStatus";
             CollectionErrorStatus.ReadOnly = true;
             CollectionErrorStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
             CollectionErrorStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
-            CollectionErrorStatus.ToolTipText = "Count of errors encountered by the DBA Dash service during data collection or import for the instance.  Retries are highlighted as warning, failures are critical.";
+            CollectionErrorStatus.ToolTipText = "Collections at warning or critical: failing in a row for long enough, or a high failure rate since errors were acknowledged (24hrs at most) - thresholds configured in the Collection Health tab.  For an instance whose DBA Dash service predates collection health, the count of collection and import errors in the last 24hrs.  Click to see collection health.";
             CollectionErrorStatus.Width = 70;
             // 
             // SnapshotAgeStatus

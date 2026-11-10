@@ -22,6 +22,13 @@ namespace DBADashGUI.Performance
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public List<int> Counters { get; set; }
 
+        /// <summary>
+        /// Include the DBADash collection run counters - duration, cost and failures for each collection (CounterType 5).
+        /// Eight per collection, so they can outnumber everything else.
+        /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool ShowCollectionMetrics { get; set; } = true;
+
         public event EventHandler<CounterSelectedEventArgs> CounterSelected;
 
         public event EventHandler<TextSelectedEventArgs> TextSelected;
@@ -100,6 +107,7 @@ namespace DBADashGUI.Performance
                 cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
             }
             cmd.Parameters.AddWithValue("UTCOffset", DateHelper.UtcOffset);
+            cmd.Parameters.AddWithValue("ShowCollectionMetrics", ShowCollectionMetrics);
             DataTable dt = new();
             da.Fill(dt);
             AutoGenerateColumns = false;

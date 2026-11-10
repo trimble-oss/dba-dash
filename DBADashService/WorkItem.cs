@@ -104,7 +104,7 @@ namespace DBADashService
             {
                 if (types.Length > 0 || CustomCollections?.Count > 0)
                 {
-                    var collector = await DBCollector.CreateAsync(Source, config.ServiceName);
+                    var collector = await DBCollector.CreateAsync(Source, config.ServiceName, logInternalPerformanceCounters: config.LogInternalPerformanceCounters);
                     collector.Job_instance_id = State.JobInstanceId;
                     collector.IsExtendedEventsNotSupportedException = State.IsExtendedEventsNotSupportedException;
                     collector.FailedLoginsBackfillMinutes = config.FailedLoginsBackfillMinutes ??
@@ -129,8 +129,6 @@ namespace DBADashService
                     {
                         collector.PerformanceCollectionPeriodMins = 30;
                     }
-
-                    collector.LogInternalPerformanceCounters = config.LogInternalPerformanceCounters;
 
                     // Tri-state: a non-null per-instance list wins (empty => disabled for this instance);
                     // null inherits the global list.  Empty overall => nothing collected (no auto-defaults).

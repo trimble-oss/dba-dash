@@ -113,9 +113,6 @@
     <Compile Update="CollectionDates\CollectionDates.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Update="CollectionDates\CollectionErrors.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
     <Compile Update="Changes\ConfigurationHistory.cs">
       <SubType>UserControl</SubType>
     </Compile>

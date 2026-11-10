@@ -10,9 +10,23 @@ namespace DBADashGUI.Performance
 {
     public partial class PerformanceCounterSummary : UserControl, ISetContext, IRefreshData
     {
+        /// <summary>
+        /// The DBADash collection run counters - eight per collection, so they can outnumber everything else.  Collection Health
+        /// is where to look at them, so they're left out of the grid until asked for.  Still metrics: they can be charted and
+        /// alerted on like any other.
+        /// </summary>
+        private readonly ToolStripButton tsCollectionMetrics = new("Collection Metrics")
+        {
+            CheckOnClick = true,
+            DisplayStyle = ToolStripItemDisplayStyle.Text,
+            ToolTipText = "Show the DBA Dash collection metrics - the duration, cost and failures of each collection.\nHidden by default: Collection Health shows them.  They can still be charted and used in alerts."
+        };
+
         public PerformanceCounterSummary()
         {
             InitializeComponent();
+            toolStrip1.Items.Insert(toolStrip1.Items.IndexOf(tsClear) + 1, tsCollectionMetrics);
+            tsCollectionMetrics.CheckedChanged += (_, _) => RefreshSummary();
         }
 
         private int InstanceID { get; set; }
@@ -36,6 +50,7 @@ namespace DBADashGUI.Performance
             {
                 performanceCounterSummaryGrid1.SearchText = txtSearch.Text;
                 performanceCounterSummaryGrid1.InstanceID = InstanceID;
+                performanceCounterSummaryGrid1.ShowCollectionMetrics = tsCollectionMetrics.Checked;
                 performanceCounterSummaryGrid1.RefreshData();
             }
         }

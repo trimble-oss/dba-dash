@@ -131,7 +131,6 @@ namespace DBADashGUI
             tabLastGood = new System.Windows.Forms.TabPage();
             lastGoodCheckDBControl1 = new DBADashGUI.LastGoodCheckDB.LastGoodCheckDBView();
             tabDBADashErrorLog = new System.Windows.Forms.TabPage();
-            collectionErrors1 = new DBADashGUI.CollectionDates.CollectionErrors();
             tabCollectionDates = new System.Windows.Forms.TabPage();
             collectionDates1 = new DBADashGUI.CollectionDates.CollectionDates();
             tabPerformanceSummary = new System.Windows.Forms.TabPage();
@@ -1400,7 +1399,6 @@ namespace DBADashGUI
             // 
             // tabDBADashErrorLog
             // 
-            tabDBADashErrorLog.Controls.Add(collectionErrors1);
             tabDBADashErrorLog.Location = new System.Drawing.Point(4, 39);
             tabDBADashErrorLog.Margin = new System.Windows.Forms.Padding(1, 2, 1, 2);
             tabDBADashErrorLog.Name = "tabDBADashErrorLog";
@@ -1409,16 +1407,6 @@ namespace DBADashGUI
             tabDBADashErrorLog.TabIndex = 11;
             tabDBADashErrorLog.Text = "DBA Dash ErrorLog";
             tabDBADashErrorLog.UseVisualStyleBackColor = true;
-            // 
-            // collectionErrors1
-            // 
-            collectionErrors1.Days = 0;
-            collectionErrors1.Dock = System.Windows.Forms.DockStyle.Fill;
-            collectionErrors1.Location = new System.Drawing.Point(1, 2);
-            collectionErrors1.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
-            collectionErrors1.Name = "collectionErrors1";
-            collectionErrors1.Size = new System.Drawing.Size(1576, 951);
-            collectionErrors1.TabIndex = 0;
             // 
             // tabCollectionDates
             // 
@@ -2925,7 +2913,6 @@ namespace DBADashGUI
         private Checks.CustomChecks customChecks1;
         private System.Windows.Forms.TabPage tabMetrics;
         private Performance.PerformanceCounterSummary performanceCounterSummary1;
-        private CollectionDates.CollectionErrors collectionErrors1;
         private System.Windows.Forms.TabPage tabObjectExecutionSummary;
         private Performance.ObjectExecutionSummary objectExecutionSummary1;
         private Changes.SchemaSnapshots schemaSnapshots1;

@@ -20,6 +20,13 @@ namespace DBADashGUI.CustomReports
         [JsonIgnore]
         public Image Image { get; set; }
 
+        /// <summary>
+        /// Optional tooltip for the picker - what it changes.  Not persisted - intended for code-defined pickers on system
+        /// reports, as <see cref="Image"/>.
+        /// </summary>
+        [JsonIgnore]
+        public string Description { get; set; }
+
         public virtual Dictionary<object, string> PickerItems { get; set; }
 
         public object DefaultValue { get; set; }

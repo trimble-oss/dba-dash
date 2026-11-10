@@ -26,7 +26,7 @@ namespace DBADashGUI.CustomReports
                 foreach (var rules in this)
                 {
                     object value;
-                    if (!dgv.Columns.Contains(rules.Key)) break; // Skip if column is not in the grid
+                    if (!dgv.Columns.Contains(rules.Key)) continue; // Skip if column is not in the grid - the rules for the columns after it still apply
 
                     if (rules.Value.EvaluateConditionAgainstDataSource)
                     {

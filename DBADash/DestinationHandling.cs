@@ -67,6 +67,7 @@ namespace DBADash
 
         public static async Task WriteAllDestinationsAsync(DataSet ds, string fileName, CollectionConfig cfg)
         {
+            CollectionRunsTable.MarkSent(ds); // Before the destinations are written in parallel, so they only read it
             List<Exception> exceptions = new();
             var tasks = cfg.AllDestinations.Select(d => Task.Run(async () =>
                 {
@@ -110,6 +111,7 @@ namespace DBADash
 
         public static async Task WriteS3Async(DataSet ds, string destination, string fileName, CollectionConfig cfg)
         {
+            CollectionRunsTable.MarkSent(ds);
             if (ds.Tables.Contains("DBADash") && ds.Tables["DBADash"]!.Columns.Contains("S3Path"))
             {
                 ds.Tables["DBADash"].Rows[0]["S3Path"] = destination;
@@ -157,6 +159,7 @@ namespace DBADash
 
         public static async Task WriteFolderAsync(DataSet ds, string destination, string fileName, CollectionConfig cfg)
         {
+            CollectionRunsTable.MarkSent(ds);
             if (Directory.Exists(destination))
             {
                 var filePath = Path.Combine(destination, fileName);
@@ -212,6 +215,9 @@ namespace DBADash
 
         public static async Task WriteDBAsync(DataSet ds, string destination, CollectionConfig cfg)
         {
+            // Straight after collecting for a SQL destination - so its lag is near zero.  Kept from the first write for a file
+            // imported from S3 or a folder, where the lag is the time it waited there.
+            CollectionRunsTable.MarkSent(ds);
             var importAgent = DBADashAgent.GetCurrent();
             var importer = new DBImporter(ds, destination, importAgent, cfg.ImportCommandTimeout ?? CollectionConfig.DefaultImportCommandTimeout);
             // Wait until we can connect to the repository DB.  If it's down, wait for it to become available.
