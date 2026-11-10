@@ -78,9 +78,9 @@ namespace DBADashGUI.SchemaCompare
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string Code
         {
-            // Read from txtCode rather than the editor's Text: that's only what was last set, while txtCode holds any
+            // CurrentText rather than the editor's Text: that's only what was last set, while CurrentText holds any
             // edits made since, and the formatting XML mode applied.
-            get => codeEditor1.txtCode.Text;
+            get => codeEditor1.CurrentText;
             set
             {
                 // Through the editor's Text rather than straight into txtCode: XML mode formats the editor's own copy

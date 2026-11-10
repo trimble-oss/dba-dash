@@ -230,6 +230,9 @@ namespace DBADashGUI.SchemaCompare
 
         private string _text;
 
+        /// <summary>What the editor holds now, edits included - Text only returns what was last set.</summary>
+        public string CurrentText => txtCode.Text;
+
         public string Text
         {
             get => _text;
