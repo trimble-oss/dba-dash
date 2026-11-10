@@ -193,53 +193,67 @@ AND database_id > 4 ";
             }
         }
 
-        private void Deploy()
+        private bool isDeploying;
+
+        // DacFx raises its progress/message events on a worker thread - marshal each one onto the UI thread and append
+        // it so progress is visible while the deployment runs, rather than only once it has finished.
+        private void AppendMessage(string message)
+        {
+            if (IsDisposed || !IsHandleCreated) return;
+            try
+            {
+                BeginInvoke(() =>
+                {
+                    if (txtDeployScript.IsDisposed) return;
+                    txtDeployScript.AppendText(message + Environment.NewLine);
+                });
+            }
+            // The dialog can be closed between the check above and BeginInvoke - just drop the UI output, the
+            // deployment itself must carry on.
+            catch (Exception ex) when (ex is InvalidOperationException or ObjectDisposedException)
+            {
+            }
+        }
+
+        private async Task DeployAsync()
         {
             isCancel = false;
             DacpacUtility.DacpacService dac = new();
+            dac.MessageAdded += AppendMessage;
             string _db = DB;
             string _connectionString = ConnectionString;
-            var t = Task.Run(() => dac.ProcessDacPac(_connectionString, _db, DBValidations.DACPackPath, dbVersionStatus.VersionStatus));
+            var status = dbVersionStatus.VersionStatus; // Can throw if validation hasn't completed - set isDeploying after this so it can't get stuck
+            isDeploying = true;
+            DeployScript = string.Empty;
+            lblNotice.Text = "Please Wait";
             lblNotice.Visible = true;
             bttnGenerate.Enabled = false;
             bttnDeploy.Enabled = false;
-            while (!t.IsCompleted)
+            var t = Task.Run(() => dac.ProcessDacPac(_connectionString, _db, DBValidations.DACPackPath, status));
+            try
             {
-                if (lblNotice.Text.Length > 50)
+                while (!t.IsCompleted && !isCancel)
                 {
-                    lblNotice.Text = "Please Wait";
+                    lblNotice.Text = lblNotice.Text.Length > 50 ? "Please Wait" : lblNotice.Text + ".";
+                    await Task.WhenAny(t, Task.Delay(500));
                 }
-                else
-                {
-                    lblNotice.Text += ".";
-                }
-                Application.DoEvents();
-                if (isCancel)
-                {
-                    break;
-                }
-                System.Threading.Thread.Sleep(500);
             }
-            lblNotice.Visible = false;
-            bttnGenerate.Enabled = false;
-            if (t.IsCompleted)
+            finally
             {
-                if (!t.IsFaulted)
-                {
-                    MessageBox.Show("Deploy succeeded", "Deploy", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    DialogResult = DialogResult.OK;
-                    Close();
-                }
-                else
-                {
-                    var sb = new StringBuilder();
-                    foreach (var item in dac.MessageList)
-                    {
-                        sb.AppendLine(item);
-                    }
-                    CommonShared.ShowExceptionDialog("Deploy failed", string.Empty, sb.ToString());
-                    DeployScript = sb.ToString();
-                }
+                isDeploying = false;
+                lblNotice.Visible = false;
+            }
+            if (!t.IsCompleted) return;
+            if (!t.IsFaulted)
+            {
+                MessageBox.Show("Deploy succeeded", "Deploy", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                DialogResult = DialogResult.OK;
+                Close();
+            }
+            else
+            {
+                // The messages are already in the textbox - streamed as the deployment ran
+                CommonShared.ShowExceptionDialog("Deploy failed", string.Empty, string.Join(Environment.NewLine, dac.MessageList));
             }
         }
 
@@ -298,6 +312,9 @@ AND database_id > 4 ";
             try
             {
                 dbVersionStatus = await DBValidations.VersionStatusAsync(ConnectionString);
+                // Clicking Deploy validates the database combo, so this can complete after the deployment has started -
+                // don't re-enable the buttons (or show a mid-upgrade version) while it's running.
+                if (isDeploying) return;
                 bttnGenerate.Enabled = true;
                 bttnDeploy.Enabled = true;
                 if (dbVersionStatus.VersionStatus == DBValidations.DBVersionStatusEnum.CreateDB)
@@ -338,9 +355,16 @@ AND database_id > 4 ";
             await DbChangedAsync();
         }
 
-        private void BttnDeploy_Click(object sender, EventArgs e)
+        private async void BttnDeploy_Click(object sender, EventArgs e)
         {
-            Deploy();
+            try
+            {
+                await DeployAsync();
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex);
+            }
         }
     }
 }

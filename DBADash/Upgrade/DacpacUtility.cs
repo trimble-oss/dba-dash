@@ -14,6 +14,31 @@ namespace DacpacUtility
     {
         public List<string> MessageList { get; set; }
 
+        /// <summary>
+        /// Raised as each message is added so callers can show deployment progress live, rather than only reading
+        /// MessageList once the deployment has finished.  Raised on the DacFx worker thread.
+        /// </summary>
+        public event Action<string> MessageAdded;
+
+        private readonly object _messageLock = new();
+
+        private void AddMessage(string message)
+        {
+            lock (_messageLock)
+            {
+                MessageList.Add(message);
+            }
+            try
+            {
+                MessageAdded?.Invoke(message);
+            }
+            catch (Exception ex)
+            {
+                // Progress reporting is a convenience - a failing subscriber must never interrupt the deployment
+                Log.Warning(ex, "Error raising MessageAdded");
+            }
+        }
+
         public DacpacService()
         {
             MessageList = new List<string>();
@@ -67,7 +92,7 @@ EXECUTE sp_updateextendedproperty
             catch (Exception ex)
             {
                 Log.Error(ex, "Error setting deploy in progress flag");
-                MessageList.Add("Error setting deploy in progress flag: " + ex.Message);
+                AddMessage("Error setting deploy in progress flag: " + ex.Message);
             }
         }
 
@@ -78,26 +103,26 @@ EXECUTE sp_updateextendedproperty
                                     int retryCount = 0)
         {
 
-            MessageList.Add("*** Start of processing for " +
+            AddMessage("*** Start of processing for " +
                              databaseName);
             // For an existing DB we want to skip this option.  Some users might prefer to use SIMPLE recovery model and this option would set it back to FULL each time the dacpac is deployed
             _dacDeployOptions.ScriptDatabaseOptions = status == DBVersionStatusEnum.CreateDB;
             if (!_dacDeployOptions.ScriptDatabaseOptions)
             {
-                MessageList.Add("Skipping deployment of Database Options for existing database");
+                AddMessage("Skipping deployment of Database Options for existing database");
             }
 
             var dacServiceInstance = new DacServices(connectionString);
             dacServiceInstance.ProgressChanged +=
               (s, e) =>
               {
-                  MessageList.Add(e.Message);
+                  AddMessage(e.Message);
                   Log.Information(e.Message);
               };
             dacServiceInstance.Message +=
               (s, e) =>
               {
-                  MessageList.Add(e.Message.Message);
+                  AddMessage(e.Message.Message);
                   Log.Information(e.Message.Message);
               };
 
@@ -123,7 +148,7 @@ EXECUTE sp_updateextendedproperty
             catch (DacServicesException ex) when (ex.Message.Contains("IX_Instances_InstanceDisplayName") && retryCount == 0)
             {
                 var msg = "Encountered a known issue processing dacpac.Applying fix & re - running dacpac. ";
-                MessageList.Add(msg);
+                AddMessage(msg);
                 Log.Warning(ex, msg);
                 DropIndexFix_1040(connectionString, databaseName);
                 retryCount++;
@@ -141,7 +166,7 @@ EXECUTE sp_updateextendedproperty
             catch (DacServicesException ex) when (retryCount == 0 && ex.Messages.Any(m => m.Number == 72032))
             {
                 var msg = "Encountered view(s)/function(s) outside of the DBA Dash schema that must be dropped to apply this update. Attempting to remove and recreate them automatically.";
-                MessageList.Add(msg);
+                AddMessage(msg);
                 Log.Warning(ex, msg);
                 var removedObjects = RemoveObjectsBlockingDeployment(ex, connectionString, databaseName);
                 if (removedObjects != null)
@@ -161,14 +186,14 @@ EXECUTE sp_updateextendedproperty
                 }
                 else
                 {
-                    MessageList.Add("Unable to safely remove the blocking object(s) automatically.  Please review the error below, drop the object(s) manually and retry the upgrade.");
+                    AddMessage("Unable to safely remove the blocking object(s) automatically.  Please review the error below, drop the object(s) manually and retry the upgrade.");
                     throw;
                 }
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error processing dacpac");
-                MessageList.Add(ex.Message);
+                AddMessage(ex.Message);
                 throw;
             }
             finally
@@ -284,7 +309,7 @@ WHERE o.schema_id = SCHEMA_ID(@Schema) AND o.name = @Name";
                 var msg = savedPath != null
                     ? $"Dropping [{schema}].[{name}] to allow deployment to proceed.  Will attempt to recreate it once the deployment completes.  Definition saved to {savedPath}"
                     : $"Dropping [{schema}].[{name}] to allow deployment to proceed.  Will attempt to recreate it once the deployment completes.";
-                MessageList.Add(msg);
+                AddMessage(msg);
                 Log.Warning("Dropping {Schema}.{Name} to allow dacpac deployment to proceed. Definition saved to {SavedPath}", schema, name, savedPath);
                 using var dropCmd = new SqlCommand($"DROP {dropKeyword} [{schema}].[{name}]", cn);
                 dropCmd.ExecuteNonQuery();
@@ -314,13 +339,13 @@ WHERE o.schema_id = SCHEMA_ID(@Schema) AND o.name = @Name";
                     using var cmd = new SqlCommand(definition, cn);
                     cmd.ExecuteNonQuery();
                     var msg = $"Recreated [{schema}].[{name}] after the upgrade completed.";
-                    MessageList.Add(msg);
+                    AddMessage(msg);
                     Log.Information(msg);
                 }
                 catch (Exception ex)
                 {
                     var msg = $"Could not automatically recreate [{schema}].[{name}] after the upgrade - please recreate it manually using the definition saved to the Logs folder. Error: {ex.Message}";
-                    MessageList.Add(msg);
+                    AddMessage(msg);
                     Log.Warning(ex, msg);
                 }
             }
@@ -346,16 +371,16 @@ WHERE o.schema_id = SCHEMA_ID(@Schema) AND o.name = @Name";
                                 string databaseName,
                                 string dacpacName)
         {
-            MessageList.Add("*** Start of processing for " +
+            AddMessage("*** Start of processing for " +
                              databaseName);
 
             var dacServiceInstance = new DacServices(connectionString);
             dacServiceInstance.ProgressChanged +=
               (s, e) =>
-                  MessageList.Add(e.Message);
+                  AddMessage(e.Message);
             dacServiceInstance.Message +=
               (s, e) =>
-                  MessageList.Add(e.Message.Message);
+                  AddMessage(e.Message.Message);
 
             try
             {
@@ -372,7 +397,7 @@ WHERE o.schema_id = SCHEMA_ID(@Schema) AND o.name = @Name";
             }
             catch (Exception ex)
             {
-                MessageList.Add(ex.Message);
+                AddMessage(ex.Message);
                 return null;
             }
         }
