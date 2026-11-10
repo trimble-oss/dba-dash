@@ -499,7 +499,7 @@ namespace DBADashServiceConfig
                 ApplyAiSettingsToConfig();
                 SetJson();
                 collectionConfig.Save();
-                originalJson = txtJson.Text;
+                originalJson = txtJson.CurrentText;
                 UpdateSaveButton();
                 MessageBox.Show("Config saved.  Restart service to apply changes.", "Save", MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
@@ -820,7 +820,10 @@ namespace DBADashServiceConfig
                 LinkColor = DashColors.LinkColor
             });
 
-            txtJson.MaxLength = 0;
+            // A code editor rather than a text box: JSON highlighting, and Ctrl+F (or the right click menu) to find in a long config.
+            txtJson.Mode = DBADashGUI.SchemaCompare.CodeEditor.CodeEditorModes.Json;
+            txtJson.ShowLineNumbers = true;
+            txtJson.TextChanged += TxtJson_TextChanged;
 
             if (BasicConfig.ConfigExists)
             {
@@ -1341,7 +1344,7 @@ namespace DBADashServiceConfig
         {
             errorProvider1.SetError(txtSource, null);
             DBADashConnection source = new(txtSource.Text);
-            if (string.IsNullOrEmpty(txtJson.Text))
+            if (string.IsNullOrEmpty(txtJson.CurrentText))
             {
                 collectionConfig = new CollectionConfig();
                 return;
@@ -1349,11 +1352,11 @@ namespace DBADashServiceConfig
 
             try
             {
-                SetFromJson(txtJson.Text);
+                SetFromJson(txtJson.CurrentText);
             }
             catch (Exception ex)
             {
-                errorProvider1.SetError(txtJson, ex.Message);
+                errorProvider1.SetError(jsonHost, ex.Message);
                 CommonShared.ShowExceptionDialog(ex, "SetFromJson error");
             }
         }
@@ -1365,7 +1368,7 @@ namespace DBADashServiceConfig
 
         private bool PromptSaveChanges()
         {
-            if (originalJson == txtJson.Text) return true;
+            if (originalJson == txtJson.CurrentText) return true;
             if (MessageBox.Show("Save Changes?", "Save", MessageBoxButtons.YesNo, MessageBoxIcon.Question) !=
                 DialogResult.Yes) return true;
             return SaveChanges();
@@ -2229,7 +2232,7 @@ namespace DBADashServiceConfig
 
         private void UpdateSaveButton()
         {
-            bttnSave.Font = txtJson.Text != originalJson
+            bttnSave.Font = txtJson.CurrentText != originalJson
                 ? new Font(bttnSave.Font, FontStyle.Bold)
                 : new Font(bttnSave.Font, FontStyle.Regular);
         }
@@ -2258,7 +2261,7 @@ namespace DBADashServiceConfig
             }
             else
             {
-                if (txtJson.Text != originalJson)
+                if (txtJson.CurrentText != originalJson)
                 {
                     if (MessageBox.Show("Save changes to config", "Save", MessageBoxButtons.YesNo,
                             MessageBoxIcon.Question) == DialogResult.Yes)

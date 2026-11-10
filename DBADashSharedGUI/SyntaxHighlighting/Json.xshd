@@ -2,15 +2,18 @@
 <!-- syntax definition for Json by alek kowalczyk -->
 <!-- update by zuijin in 2019.12.20 -->
 <SyntaxDefinition name="Json" extensions=".json" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
-	<Color name="Bool" foreground="Blue" exampleText="true | false" />
-	<Color name="Number" foreground="Red" exampleText="3.14" />
-	<Color name="String" foreground="Green" exampleText="" />
-	<Color name="Null" foreground="Olive" exampleText="" />
-	<Color name="FieldName" foreground="DarkMagenta" />
-	<Color name="Punctuation" foreground="Black" />
+	<!-- Colours in the families most editors use for JSON (blue keys, red-brown strings, teal numbers, blue keywords)
+	     rather than green strings, which read as comments.  Dark enough for contrast on the light background JSON is shown on. -->
+	<Color name="Bool" foreground="#FF1C36C4" exampleText="true | false" />
+	<Color name="Number" foreground="#FF0B7461" exampleText="3.14" />
+	<Color name="String" foreground="#FF9E2A1E" exampleText="" />
+	<Color name="Escape" foreground="#FFB0560A" exampleText="\n" />
+	<Color name="Null" foreground="#FF1C36C4" exampleText="" />
+	<Color name="FieldName" foreground="#FF17508A" />
+	<Color name="Punctuation" foreground="#FF505050" />
 
 	<RuleSet name="String">
-		<Span begin="\\" end="."/>
+		<Span color="Escape" begin="\\" end="."/>
 	</RuleSet>
 
 	<RuleSet name="Object">

@@ -94,7 +94,8 @@ namespace DBADashServiceConfig
             pnlBottom = new System.Windows.Forms.Panel();
             pnlConfigFileAccessWarning = new System.Windows.Forms.Panel();
             tabJson = new System.Windows.Forms.TabPage();
-            txtJson = new System.Windows.Forms.TextBox();
+            jsonHost = new System.Windows.Forms.Integration.ElementHost();
+            txtJson = new DBADashGUI.SchemaCompare.CodeEditor();
             tabOther = new System.Windows.Forms.TabPage();
             groupBox5 = new System.Windows.Forms.GroupBox();
             lnkCustomCountersHelp = new System.Windows.Forms.LinkLabel();
@@ -864,7 +865,7 @@ namespace DBADashServiceConfig
             // 
             // tabJson
             // 
-            tabJson.Controls.Add(txtJson);
+            tabJson.Controls.Add(jsonHost);
             tabJson.Location = new System.Drawing.Point(4, 39);
             tabJson.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             tabJson.Name = "tabJson";
@@ -874,17 +875,16 @@ namespace DBADashServiceConfig
             tabJson.Text = "JSON";
             tabJson.UseVisualStyleBackColor = true;
             // 
-            // txtJson
+            // jsonHost
             // 
-            txtJson.Dock = System.Windows.Forms.DockStyle.Fill;
-            txtJson.Location = new System.Drawing.Point(3, 4);
-            txtJson.Multiline = true;
-            txtJson.Name = "txtJson";
-            txtJson.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            txtJson.Size = new System.Drawing.Size(1123, 714);
-            txtJson.TabIndex = 13;
-            txtJson.TextChanged += TxtJson_TextChanged;
-            txtJson.Validating += TxtJson_Validating;
+            jsonHost.Dock = System.Windows.Forms.DockStyle.Fill;
+            jsonHost.Location = new System.Drawing.Point(3, 4);
+            jsonHost.Name = "jsonHost";
+            jsonHost.Size = new System.Drawing.Size(1123, 714);
+            jsonHost.TabIndex = 13;
+            jsonHost.Text = "jsonHost";
+            jsonHost.Validating += TxtJson_Validating;
+            jsonHost.Child = txtJson;
             // 
             // tabOther
             // 
@@ -2080,7 +2080,8 @@ namespace DBADashServiceConfig
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.CheckBox chkScanEvery;
         private System.Windows.Forms.TabPage tabJson;
-        private System.Windows.Forms.TextBox txtJson;
+        private System.Windows.Forms.Integration.ElementHost jsonHost;
+        private DBADashGUI.SchemaCompare.CodeEditor txtJson;
         private System.Windows.Forms.Label lblEncryptionStatus;
         private System.Windows.Forms.NumericUpDown numBackupRetention;
         private System.Windows.Forms.LinkLabel lnkDeleteConfigBackups;
