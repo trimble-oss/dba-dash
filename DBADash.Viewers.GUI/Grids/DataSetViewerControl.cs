@@ -106,6 +106,20 @@ namespace DBADashGUI.Grids
             this.ApplyTheme();
         }
 
+        /// <summary>
+        /// A table Save All writes along with the DataSet's own, made fresh for each save - a query's messages, which
+        /// were taken out of the DataSet to be shown on a tab of their own.  Null for none.
+        /// </summary>
+        [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+        internal Func<DataTable> AlsoSave { get; set; }
+
+        /// <summary>Runs <paramref name="save"/> with the <see cref="AlsoSave"/> table in the DataSet, if there is one.</summary>
+        private void WithAlsoSave(Action save)
+        {
+            if (AlsoSave?.Invoke() is { } table) QueryResultsViewerControl.WithTable(_dataSet, table, save);
+            else save();
+        }
+
         /// <summary>What the tab is called: the file the DataSet came from.</summary>
         public string Title { get; }
 
@@ -153,7 +167,8 @@ namespace DBADashGUI.Grids
 
         /// <summary>
         /// Saves the whole DataSet - every table, whatever the list is filtered to - as one file that opens back on a tab
-        /// like this one.
+        /// like this one: with a query's messages too, where it has them (<see cref="AlsoSave"/>).  The XML keeps them
+        /// marked as messages; JSON can't, so they come back as a table of their own.
         /// </summary>
         private void SaveAs()
         {
@@ -166,7 +181,7 @@ namespace DBADashGUI.Grids
 
             try
             {
-                GridSerializer.SaveDataSet(_dataSet, dialog.FileName);
+                WithAlsoSave(() => GridSerializer.SaveDataSet(_dataSet, dialog.FileName));
             }
             catch (Exception ex)
             {
@@ -179,7 +194,7 @@ namespace DBADashGUI.Grids
         {
             try
             {
-                CommonShared.PromptSaveDataSetToXLSX(_dataSet, DefaultFileName());
+                WithAlsoSave(() => CommonShared.PromptSaveDataSetToXLSX(_dataSet, DefaultFileName()));
             }
             catch (Exception ex)
             {

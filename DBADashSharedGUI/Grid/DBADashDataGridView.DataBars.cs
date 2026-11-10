@@ -46,6 +46,27 @@ namespace DBADashGUI.CustomReports
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public Action SaveDataBars { get; set; }
 
+        /// <summary>
+        /// The bars the grid starts with, where its host gives it some - the statistics tables', say.  When set, the Data
+        /// Bar menu offers Reset Data Bars, which puts them back in place of whatever the user changed.
+        /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public IReadOnlyDictionary<string, DataBarSettings> DefaultDataBars { get; set; }
+
+        /// <summary>
+        /// Raised when the user resets the grid to its <see cref="DefaultDataBars"/> - so a host that keeps the user's
+        /// bars can forget them, rather than keep the defaults as if chosen.
+        /// </summary>
+        public event EventHandler DataBarsReset;
+
+        /// <summary>Put the <see cref="DefaultDataBars"/> back, each a copy so changing one later leaves them as they were.</summary>
+        public void ResetDataBars()
+        {
+            SetDataBars((DefaultDataBars ?? new Dictionary<string, DataBarSettings>())
+                .Select(kv => new KeyValuePair<string, DataBarSettings>(kv.Key, kv.Value.Clone())));
+            DataBarsReset?.Invoke(this, EventArgs.Empty);
+        }
+
         /// <summary>A column the Data Bar menu is offered on: a number, and not one with a bar its owner paints.</summary>
         private bool CanHaveDataBar(DataGridViewColumn column) =>
             column.ValueType?.IsNumericType() == true && !ColumnsWithOwnDataBars.Contains(DataBarKey(column));
@@ -240,6 +261,11 @@ namespace DBADashGUI.CustomReports
                 DataBarChanged?.Invoke(this, null);
             });
 
+            var reset = new ToolStripMenuItem("Reset Data Bars", null, (_, _) => ResetDataBars())
+            {
+                ToolTipText = "Put back the data bars the grid started with, undoing any changes"
+            };
+
             var saveSeparator = new ToolStripSeparator();
             var save = new ToolStripMenuItem("Save Data Bars", null, (_, _) => SaveDataBars?.Invoke())
             {
@@ -250,7 +276,7 @@ namespace DBADashGUI.CustomReports
             {
                 underline, fill, new ToolStripSeparator(),
                 solid, worse, better, gradient, positiveGood, positiveBad, new ToolStripSeparator(),
-                options, copyToAll, remove, removeAll, saveSeparator, save
+                options, copyToAll, remove, removeAll, reset, saveSeparator, save
             });
 
             menuItem.DropDownOpening += (_, _) =>
@@ -269,6 +295,7 @@ namespace DBADashGUI.CustomReports
                     .Any(c => c.Index != ClickedColumnIndex && c.Visible && CanHaveDataBar(c));
                 removeAll.Visible = _dataBars.Count > 1 || (_dataBars.Count == 1 && current == null);
                 saveSeparator.Visible = save.Visible = SaveDataBars != null;
+                reset.Visible = DefaultDataBars is { Count: > 0 };
             };
 
             void UpdateVisibility(object sender, DataGridViewCellEventArgs e)

@@ -109,6 +109,7 @@ namespace DBADash.SSMSExtension
 
             var title = OpenCommand.WithDocumentName("All results");
             if (resultSets.Any(r => !r.IsComplete)) title += " (partial)";
+            var messages = MessagesReader.ReadFocused();
 
             var tempFile = ThreadHelper.JoinableTaskFactory.Run(
                 "DBA Dash Visualizer",
@@ -129,6 +130,9 @@ namespace DBADash.SSMSExtension
                                 new ThreadedWaitDialogProgressData(caption, $"{rows:N0} of {totalRows:N0} rows", isCancelable: true)),
                             cancellationToken, name));
                     }
+
+                    // The Messages tab too - with any STATISTICS IO / TIME output, which the app reads into tables.
+                    dataSet.Tables.Add(messages);
 
                     progress.Report(new ThreadedWaitDialogProgressData("Writing results...", isCancelable: true));
                     return VisualizerLauncher.SaveGridToTemp(dataSet, cancellationToken);

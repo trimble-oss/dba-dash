@@ -57,6 +57,7 @@ namespace DBADashGUI.Viewers
 
             _documents.CloseRequested += (_, page) => CloseTab(page);
             _documents.SelectedIndexChanged += (_, _) => ShowTitle();
+            _documents.TabMenuOpening += (_, e) => AddCompareStatisticsMenu(e.Page, e.Menu);
 
             // Plans and graphs dropped on the window open in it, the quickest way to compare a few saved ones -
             // including while the placeholder tab is showing, since neither it nor the tab strip registers as
@@ -370,9 +371,20 @@ namespace DBADashGUI.Viewers
                     return;
                 }
 
+                // The query's messages, where the SSMS extension sent them - shown on a tab of their own beside the
+                // results, not listed as one of them.
+                var messages = QueryResultsViewerControl.TakeMessages(dataSet);
+
                 Control viewer;
                 string title, tooltip;
-                if (dataSet.Tables.Count == 1)
+                if (messages != null && dataSet.Tables.Count == 0)
+                {
+                    // The Messages tab opened on its own - a query with no results, opened for its statistics.
+                    var dataSetTitle = dataSet.ExtendedProperties["Title"] as string;
+                    viewer = null;
+                    title = tooltip = string.IsNullOrWhiteSpace(dataSetTitle) ? fileName : dataSetTitle;
+                }
+                else if (dataSet.Tables.Count == 1)
                 {
                     // The SSMS extension names the tab in the table's extended properties, rather than leaving it
                     // named after its temp file.
@@ -394,6 +406,11 @@ namespace DBADashGUI.Viewers
                         Dock = DockStyle.Fill
                     };
                     (viewer, title, tooltip) = (dataSetViewer, dataSetViewer.Title, dataSetViewer.TabToolTip);
+                }
+
+                if (messages != null)
+                {
+                    viewer = new QueryResultsViewerControl(viewer, title, tooltip, messages, dataSet) { Dock = DockStyle.Fill };
                 }
 
                 var loading = page.Controls[0];
@@ -475,6 +492,55 @@ namespace DBADashGUI.Viewers
             return windows.Select(w => Content(w._documents.SelectedTab)).FirstOrDefault(c => c is not null)
                    ?? windows.SelectMany(w => w._documents.TabPages.Cast<TabPage>().Reverse()).Select(Content)
                        .FirstOrDefault(c => c is not null);
+        }
+
+        private static QueryResultsViewerControl QueryResults(TabPage page) =>
+            page?.Controls.Count > 0 ? page.Controls[0] as QueryResultsViewerControl : null;
+
+        /// <summary>
+        /// Compare Statistics With, on the right click menu of a tab with statistics: each run on every other tab with
+        /// them - the whole query, or each part of one split at PRINT 'DBADash-Compare'.
+        /// </summary>
+        private void AddCompareStatisticsMenu(TabPage page, ContextMenuStrip menu)
+        {
+            if (CompareStatisticsMenu(page) is not { } compare) return;
+            menu.Items.Add(new ToolStripSeparator());
+            menu.Items.Add(compare);
+        }
+
+        /// <summary>The Compare Statistics With item for <paramref name="page"/>'s menu, or null for a tab without statistics.</summary>
+        public ToolStripMenuItem CompareStatisticsMenu(TabPage page)
+        {
+            if (QueryResults(page) is not { Runs.Count: > 0 } from) return null;
+
+            var compare = new ToolStripMenuItem("Compare Statistics With");
+            foreach (var other in _documents.TabPages.Cast<TabPage>().Where(p => !ReferenceEquals(p, page)))
+            {
+                if (QueryResults(other) is not { Runs.Count: > 0 } target) continue;
+                foreach (var run in target.Runs)
+                {
+                    var text = target.IsSplit ? $"{other.Text} - {run.Label}" : other.Text;
+                    compare.DropDownItems.Add(new ToolStripMenuItem(text, null, (_, _) => CompareStatistics([.. from.Runs, run]))
+                    {
+                        ToolTipText = other.ToolTipText
+                    });
+                }
+            }
+
+            if (compare.DropDownItems.Count == 0)
+            {
+                compare.DropDownItems.Add(new ToolStripMenuItem("No other tab has statistics to compare with") { Enabled = false });
+            }
+            return compare;
+        }
+
+        /// <summary>Opens the runs' statistics compared, on a tab of their own.</summary>
+        public void CompareStatistics(IEnumerable<StatisticsRun> runs)
+        {
+            var unique = StatisticsMessages.UniqueLabels(runs);
+            const string title = "Statistics Comparison";
+            var control = new StatisticsCompareControl(unique, title) { Dock = DockStyle.Fill };
+            AddTab(control, title, string.Join(" vs ", unique.Select(r => r.Label)));
         }
 
         /// <summary>The plan viewers open in this window, in tab order.</summary>
@@ -708,7 +774,7 @@ namespace DBADashGUI.Viewers
             {
                 DeadlockViewerControl => Resources.DeadlockIcon,
                 QueryPlanCompareControl => Resources.PlanCompareIcon,
-                GridViewerControl or DataSetViewerControl => Resources.GridIcon,
+                GridViewerControl or DataSetViewerControl or QueryResultsViewerControl or StatisticsCompareControl => Resources.GridIcon,
                 _ => Resources.PlanViewerIcon
             };
             Text = content switch
@@ -717,7 +783,11 @@ namespace DBADashGUI.Viewers
                 QueryPlanCompareControl => "Plan Comparison - " + _documents.SelectedTab.Text,
                 DeadlockViewerControl => "Deadlock - " + _documents.SelectedTab.Text,
                 GridViewerControl => "Grid - " + _documents.SelectedTab.Text,
-                DataSetViewerControl => "Data Set - " + _documents.SelectedTab.Text,
+                // The Messages tab on its own: already named for it - "SQLQuery1.sql - Messages".
+                QueryResultsViewerControl { Results: null } => _documents.SelectedTab.Text,
+                StatisticsCompareControl compare => _documents.SelectedTab.Text + " - " + compare.Caption,
+                DataSetViewerControl or QueryResultsViewerControl { Results: DataSetViewerControl } => "Data Set - " + _documents.SelectedTab.Text,
+                QueryResultsViewerControl => "Grid - " + _documents.SelectedTab.Text,
                 _ => ViewerApp.Identity.DisplayName
             };
         }

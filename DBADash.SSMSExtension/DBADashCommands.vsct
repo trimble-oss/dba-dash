@@ -17,6 +17,11 @@
         <Parent guid="guidShowPlanContextMenu" id="ResultsGridContextMenuId"/>
       </Group>
 
+      <!-- Parented to SSMS's Messages tab right-click context menu (and Results to Text's - the same menu). -->
+      <Group guid="guidDBADashCmdSet" id="MessagesContextMenuGroupId" priority="0x0600">
+        <Parent guid="guidShowPlanContextMenu" id="MessagesContextMenuId"/>
+      </Group>
+
       <!--
         The same command also lives on the Tools menu, since the deadlock graph has no native context
         menu to rely on at all (see DeadlockContextMenuHook). OpenCommand's own BeforeQueryStatus hides it here whenever nothing it
@@ -63,6 +68,20 @@
           <ButtonText>Open Live Plan in DBA Dash Visualizer</ButtonText>
         </Strings>
       </Button>
+
+      <!--
+        The Messages tab on its own (OpenMessagesCommand) - for the STATISTICS IO / TIME tables when there are no
+        results to open it with.  Only appears while a Messages or Results to Text page has focus.
+      -->
+      <Button guid="guidDBADashCmdSet" id="OpenMessagesCommandId" priority="0x0103" type="Button">
+        <Parent guid="guidDBADashCmdSet" id="MessagesContextMenuGroupId"/>
+        <Icon guid="guidDBADashImages" id="bmpDBADash"/>
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <CommandFlag>DefaultInvisible</CommandFlag>
+        <Strings>
+          <ButtonText>Open Messages in DBA Dash Visualizer</ButtonText>
+        </Strings>
+      </Button>
     </Buttons>
 
     <Bitmaps>
@@ -81,6 +100,10 @@
     </CommandPlacement>
     <!-- Open All Results on the Tools menu too, just below Open. -->
     <CommandPlacement guid="guidDBADashCmdSet" id="OpenAllResultsCommandId" priority="0x0111">
+      <Parent guid="guidDBADashCmdSet" id="ToolsGroupId"/>
+    </CommandPlacement>
+    <!-- Open Messages on the Tools menu too, in case the Messages tab's menu placement doesn't render. -->
+    <CommandPlacement guid="guidDBADashCmdSet" id="OpenMessagesCommandId" priority="0x0112">
       <Parent guid="guidDBADashCmdSet" id="ToolsGroupId"/>
     </CommandPlacement>
   </CommandPlacements>
@@ -117,6 +140,8 @@
       <IDSymbol name="LivePlanCommandId" value="0x0102"/>
       <IDSymbol name="ToolsGroupId" value="0x1030"/>
       <IDSymbol name="ResultsGridContextMenuGroupId" value="0x1040"/>
+      <IDSymbol name="OpenMessagesCommandId" value="0x0103"/>
+      <IDSymbol name="MessagesContextMenuGroupId" value="0x1050"/>
     </GuidSymbol>
 
     <!--
@@ -127,11 +152,13 @@
       The results grid's right-click menu is in the same group: SQLEditors.dll's SQLWorkbenchCommands
       names this GUID GUID_SQLEditorGroup, with IDM_SQLWB_EXECPLAN_CONTEXT = 0x0080 and
       IDM_SQLWB_SQLRESGRID_CONTEXT = 0x0070 - the ID DisplaySqlResultsTabControl.WndProc shows on
-      WM_CONTEXTMENU over a grid (confirmed against the SSMS 22 install).
+      WM_CONTEXTMENU over a grid (confirmed against the SSMS 22 install).  The Messages tab's is
+      IDM_SQLWB_SQLRESMSG_CONTEXT = 0x0060, which VSTextEditorTabPage.OnShowPopupMenu shows for its text pages.
     -->
     <GuidSymbol name="guidShowPlanContextMenu" value="{33F13AC3-80BB-4ECB-85BC-225435603A5E}">
       <IDSymbol name="ShowPlanContextMenuId" value="0x0080"/>
       <IDSymbol name="ResultsGridContextMenuId" value="0x0070"/>
+      <IDSymbol name="MessagesContextMenuId" value="0x0060"/>
     </GuidSymbol>
 
     <!-- The DBA Dash app icon, extracted 16x16 from Assets/DBADash.ico. -->

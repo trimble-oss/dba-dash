@@ -486,6 +486,296 @@ namespace DBADash.Viewers.GUI.Test
             CollectionAssert.AreEqual(new[] { "Results", "results (2)", new string('x', 31), new string('x', 27) + " (2)" }, names);
         }
 
+        /// <summary>
+        /// One result set with the query's messages, as the SSMS extension sends them (OpenCommand): the result set opens
+        /// on a Results tab, with the messages and the statistics read from them on tabs beside it - not as a second
+        /// table of a data set.
+        /// </summary>
+        [STATestMethod]
+        public void OpenGridFile_WithMessages_ShowsResultsMessagesAndStatisticsTabs()
+        {
+            var path = Path.Combine(_folder, "ssms_messages.xml.gz");
+            var dataSet = new DataSet("Results");
+            dataSet.ExtendedProperties["Title"] = "SQLQuery1.sql - Result 1";
+            dataSet.Tables.Add(SsmsStyleTable());
+            var messages = dataSet.Tables.Add("Messages");
+            messages.ExtendedProperties["Kind"] = "Messages";
+            messages.Columns.Add("Message", typeof(string));
+            foreach (var line in new[]
+                     {
+                         "SQL Server parse and compile time: ", "   CPU time = 0 ms, elapsed time = 4 ms.", "",
+                         "(2 rows affected)",
+                         "Table 'Orders'. Scan count 1, logical reads 120, physical reads 3, read-ahead reads 0.", "",
+                         " SQL Server Execution Times:", "   CPU time = 16 ms,  elapsed time = 40 ms."
+                     })
+            {
+                messages.Rows.Add(line);
+            }
+
+            using (var stream = File.Create(path))
+            using (var gzip = new GZipStream(stream, CompressionLevel.Fastest))
+            {
+                dataSet.WriteXml(gzip, XmlWriteMode.WriteSchema);
+            }
+
+            ViewerForm.OpenGridFile(path);
+            var window = Application.OpenForms.OfType<ViewerForm>().Single();
+            try
+            {
+                var page = FindAll<TabPage>(window).First();
+                var deadline = DateTime.UtcNow.AddSeconds(10);
+                while (page.Controls[0] is Label && DateTime.UtcNow < deadline)
+                {
+                    Application.DoEvents();
+                    Thread.Sleep(10);
+                }
+
+                var viewer = (QueryResultsViewerControl)page.Controls[0];
+                Assert.AreEqual("SQLQuery1.sql - Result 1", page.Text);
+                CollectionAssert.AreEqual(new[] { "Results", "Messages", "Statistics" }, viewer.TabNames);
+                Assert.IsInstanceOfType<GridViewerControl>(viewer.Results, "one result set is a grid, not a data set");
+                Assert.AreEqual(120L, viewer.Statistics.Counter(StatisticsMessages.LogicalReads));
+                Assert.AreEqual(16L, viewer.Statistics.CpuMs);
+
+                Assert.IsTrue(viewer.SelectTab("Statistics"));
+                Application.DoEvents();
+                Assert.AreEqual(4, FindAll<GridViewerControl>(viewer).Count(), "the result set, table I/O by table and by statement, and statements");
+            }
+            finally
+            {
+                window.Close();
+            }
+        }
+
+        /// <summary>
+        /// The Messages tab opened on its own (OpenMessagesCommand), for a query with no results: no Results tab, and it opens
+        /// on the statistics it was opened for, named for the messages rather than as a grid.
+        /// </summary>
+        [STATestMethod]
+        public void OpenGridFile_MessagesOnly_OpensOnStatistics()
+        {
+            var path = Path.Combine(_folder, "ssms_messages_only.xml.gz");
+            var dataSet = new DataSet("Results");
+            dataSet.ExtendedProperties["Title"] = "SQLQuery1.sql - Messages";
+            var messages = dataSet.Tables.Add("Messages");
+            messages.ExtendedProperties["Kind"] = "Messages";
+            messages.ExtendedProperties["QueryText"] = "SET STATISTICS IO, TIME ON;\r\nUPDATE dbo.T SET a = 1;";
+            messages.Columns.Add("Message", typeof(string));
+            foreach (var line in new[]
+                     {
+                         "Table 'T'. Scan count 1, logical reads 30, physical reads 0, read-ahead reads 0.", "",
+                         " SQL Server Execution Times:", "   CPU time = 15 ms,  elapsed time = 12 ms.", "",
+                         "(4 rows affected)"
+                     })
+            {
+                messages.Rows.Add(line);
+            }
+
+            using (var stream = File.Create(path))
+            using (var gzip = new GZipStream(stream, CompressionLevel.Fastest))
+            {
+                dataSet.WriteXml(gzip, XmlWriteMode.WriteSchema);
+            }
+
+            ViewerForm.OpenGridFile(path);
+            var window = Application.OpenForms.OfType<ViewerForm>().Single();
+            try
+            {
+                var page = FindAll<TabPage>(window).First();
+                var deadline = DateTime.UtcNow.AddSeconds(10);
+                while (page.Controls[0] is Label && DateTime.UtcNow < deadline)
+                {
+                    Application.DoEvents();
+                    Thread.Sleep(10);
+                }
+
+                var viewer = (QueryResultsViewerControl)page.Controls[0];
+                Assert.AreEqual("SQLQuery1.sql - Messages", page.Text);
+                Assert.AreEqual("SQLQuery1.sql - Messages", window.Text, "not called a grid");
+                Assert.IsNull(viewer.Results);
+                CollectionAssert.AreEqual(new[] { "Messages", "Statistics" }, viewer.TabNames);
+                Assert.AreEqual("Statistics", viewer.SelectedTabName);
+
+                // In the code editor, for its find bar - which Ctrl+F opens on the Messages tab.
+                StringAssert.Contains(viewer.MessagesText, "Table 'T'. Scan count 1, logical reads 30");
+                viewer.FindInMessages();
+                Assert.AreEqual("Messages", viewer.SelectedTabName);
+                Assert.AreEqual(15L, viewer.Statistics.CpuMs);
+                Assert.AreEqual("UPDATE dbo.T SET a = 1;", viewer.Statistics.SingleStatement);
+            }
+            finally
+            {
+                window.Close();
+            }
+        }
+
+        /// <summary>
+        /// The Messages tab of a query split at PRINT 'DBADash-Compare' opens on its parts compared; and any tab with
+        /// statistics offers the others' runs to compare with, opening the comparison on a tab of its own.
+        /// </summary>
+        [STATestMethod]
+        public void OpenGridFile_SplitMessages_ComparesTheParts_AndTabsCompareWithEachOther()
+        {
+            string Write(string name, string fixture)
+            {
+                var path = Path.Combine(_folder, name + ".xml.gz");
+                var dataSet = new DataSet("Results");
+                dataSet.ExtendedProperties["Title"] = name;
+                var messages = dataSet.Tables.Add("Messages");
+                messages.ExtendedProperties["Kind"] = "Messages";
+                messages.ExtendedProperties["QueryText"] = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Statistics", fixture + ".sql"));
+                messages.Columns.Add("Message", typeof(string));
+                foreach (var line in File.ReadAllLines(Path.Combine(AppContext.BaseDirectory, "Statistics", fixture + ".txt")))
+                {
+                    messages.Rows.Add(line);
+                }
+
+                using var stream = File.Create(path);
+                using var gzip = new GZipStream(stream, CompressionLevel.Fastest);
+                dataSet.WriteXml(gzip, XmlWriteMode.WriteSchema);
+                return path;
+            }
+
+            QueryResultsViewerControl Loaded(TabPage page)
+            {
+                var deadline = DateTime.UtcNow.AddSeconds(10);
+                while (page.Controls[0] is Label && DateTime.UtcNow < deadline)
+                {
+                    Application.DoEvents();
+                    Thread.Sleep(10);
+                }
+                return (QueryResultsViewerControl)page.Controls[0];
+            }
+
+            ViewerForm.OpenGridFile(Write("Split", "compare_calls"));
+            var window = Application.OpenForms.OfType<ViewerForm>().Single();
+            try
+            {
+                ViewerForm.OpenGridFile(Write("Single", "sp_WhoIsActive"));
+                var pages = FindAll<TabPage>(window).Where(p => p.Parent is DBADashGUI.Controls.DocumentTabControl).ToList();
+                var split = Loaded(pages[0]);
+                var single = Loaded(pages[1]);
+
+                Assert.IsTrue(split.IsSplit);
+                Assert.AreEqual("Statistics", split.SelectedTabName);
+                var compare = FindAll<StatisticsCompareControl>(split).Single();
+                CollectionAssert.AreEqual(new[] { "Comparison", "(1) EXEC dbo.StatsInner;", "(2) EXEC dbo.StatsOuter;" }, compare.TabNames);
+
+                Assert.IsFalse(single.IsSplit);
+                Assert.AreEqual(1, single.Runs.Count);
+
+                // The single query's tab offers each part of the split one.
+                var menu = window.CompareStatisticsMenu(pages[1]);
+                CollectionAssert.AreEqual(new[] { "Split - EXEC dbo.StatsInner;", "Split - EXEC dbo.StatsOuter;" },
+                    menu.DropDownItems.Cast<ToolStripItem>().Select(i => i.Text).ToArray());
+
+                menu.DropDownItems[1].PerformClick();
+                var comparison = (StatisticsCompareControl)FindAll<TabPage>(window)
+                    .Where(p => p.Parent is DBADashGUI.Controls.DocumentTabControl).Last().Controls[0];
+                Assert.AreEqual(2, comparison.Runs.Count);
+                Assert.AreEqual(188L, comparison.Runs[0].Report.CpuMs, "sp_WhoIsActive's own time");
+                Assert.AreEqual("EXEC dbo.StatsOuter;", comparison.Runs[1].Label);
+                StringAssert.StartsWith(window.Text, "Statistics Comparison");
+
+                // The comparison's own tab isn't one to compare from.
+                Assert.IsNull(window.CompareStatisticsMenu(FindAll<TabPage>(window)
+                    .Where(p => p.Parent is DBADashGUI.Controls.DocumentTabControl).Last()));
+            }
+            finally
+            {
+                window.Close();
+            }
+        }
+
+        /// <summary>
+        /// Results and messages saved from the tab come back as they were opened - a grid, its messages, and the statistics
+        /// read again from them - and saving leaves the DataSet on show as it was.
+        /// </summary>
+        [STATestMethod]
+        public void SaveResultsAndMessages_OpensBackWithStatistics()
+        {
+            var path = Path.Combine(_folder, "with_messages.xml.gz");
+            var dataSet = new DataSet("Results");
+            dataSet.ExtendedProperties["Title"] = "SQLQuery1.sql - Result 1";
+            var results = SsmsStyleTable();
+            results.TableName = "Result 1";
+            results.ExtendedProperties["Title"] = "SQLQuery1.sql - Result 1";
+            dataSet.Tables.Add(results);
+            var messages = dataSet.Tables.Add("Messages");
+            messages.ExtendedProperties["Kind"] = "Messages";
+            messages.ExtendedProperties["QueryText"] = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Statistics", "sp_WhoIsActive.sql"));
+            messages.ExtendedProperties["QueryTextSource"] = "Executed";
+            messages.Columns.Add("Message", typeof(string));
+            foreach (var line in File.ReadAllLines(Path.Combine(AppContext.BaseDirectory, "Statistics", "sp_WhoIsActive.txt"))) messages.Rows.Add(line);
+            using (var stream = File.Create(path))
+            using (var gzip = new GZipStream(stream, CompressionLevel.Fastest))
+            {
+                dataSet.WriteXml(gzip, XmlWriteMode.WriteSchema);
+            }
+
+            QueryResultsViewerControl Loaded(ViewerForm window, int index)
+            {
+                var page = FindAll<TabPage>(window).Where(p => p.Parent is DBADashGUI.Controls.DocumentTabControl).ElementAt(index);
+                var deadline = DateTime.UtcNow.AddSeconds(10);
+                while (page.Controls[0] is Label && DateTime.UtcNow < deadline)
+                {
+                    Application.DoEvents();
+                    Thread.Sleep(10);
+                }
+                return (QueryResultsViewerControl)page.Controls[0];
+            }
+
+            ViewerForm.OpenGridFile(path);
+            var window = Application.OpenForms.OfType<ViewerForm>().Single();
+            try
+            {
+                var original = Loaded(window, 0);
+                // On the Results tab's Export menu too, after the grid's own.
+                var exports = ((GridViewerControl)original.Results).ExportItemNames;
+                Assert.AreEqual("Save Results and Messages...", exports[^1], string.Join(", ", exports));
+                CollectionAssert.Contains(exports, "Export File");
+
+                var saved = Path.Combine(_folder, "saved.xml.gz");
+                original.Save(saved);
+                // Again: the messages were taken back out after the first, or the second would add them twice.
+                original.Save(saved);
+
+                var reloaded = DBADashGUI.CustomReports.GridSerializer.LoadDataSet(saved);
+                Assert.AreEqual(2, reloaded.Tables.Count, "the result set and the messages");
+                var reread = QueryResultsViewerControl.TakeMessages(reloaded);
+                Assert.IsTrue(reread.QueryTextExecuted);
+                StringAssert.Contains(reread.QueryText, "sp_WhoIsActive");
+
+                ViewerForm.OpenGridFile(saved);
+                var reopened = Loaded(window, 1);
+                CollectionAssert.AreEqual(new[] { "Results", "Messages", "Statistics" }, reopened.TabNames);
+                Assert.AreEqual(original.Statistics.CpuMs, reopened.Statistics.CpuMs);
+                Assert.AreEqual(188L, reopened.Statistics.CpuMs, "sp_WhoIsActive's own time, as the text came back too");
+                Assert.IsFalse(reopened.Statistics.QueryMayHaveChanged);
+            }
+            finally
+            {
+                window.Close();
+            }
+        }
+
+        /// <summary>The messages table written for a save reads back as the messages it was made from.</summary>
+        [TestMethod]
+        public void MessagesTable_RoundTripsThroughTakeMessages()
+        {
+            foreach (var messages in new[]
+                     {
+                         new SsmsMessages("line 1\nline 2\n\n", QueryText: "EXEC dbo.P", QueryTextExecuted: true),
+                         new SsmsMessages("only\n", QueryText: "SELECT 1"),
+                         new SsmsMessages("", Error: "The Messages tab wasn't found")
+                     })
+            {
+                var dataSet = new DataSet();
+                dataSet.Tables.Add(QueryResultsViewerControl.MessagesTable(messages));
+                Assert.AreEqual(messages, QueryResultsViewerControl.TakeMessages(dataSet));
+            }
+        }
+
         private static DataSet SsmsStyleDataSet()
         {
             var ds = new DataSet("Results");

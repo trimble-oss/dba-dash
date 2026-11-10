@@ -1,0 +1,1 @@
+INSERT dbo.StatsT VALUES (3);

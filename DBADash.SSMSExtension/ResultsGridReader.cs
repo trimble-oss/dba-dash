@@ -378,6 +378,17 @@ namespace DBADash.SSMSExtension
             return null;
         }
 
+        /// <summary>The nearest control of the named type at or above the focused control, or null.</summary>
+        public static Control FocusedAncestor(string fullTypeName)
+        {
+            for (var control = Control.FromHandle(GetFocus()); control != null; control = control.Parent)
+            {
+                if (IsOfType(control, fullTypeName)) return control;
+            }
+
+            return null;
+        }
+
         /// <summary>True if focus is in a results grid. Cheap enough for BeforeQueryStatus.</summary>
         public static bool IsFocused() => FocusedGrid() != null;
 
@@ -407,7 +418,7 @@ namespace DBADash.SSMSExtension
         /// <summary>True if focus is in a results grid - keys typed go to it.  For <see cref="LastClickTracker"/>.</summary>
         internal static bool IsGridFocused() => FocusedGrid() != null;
 
-        private static bool IsOfType(Control control, string fullTypeName)
+        internal static bool IsOfType(Control control, string fullTypeName)
         {
             for (var type = control.GetType(); type != null; type = type.BaseType)
             {
@@ -500,7 +511,7 @@ namespace DBADash.SSMSExtension
         /// A string DataTable.WriteXml can write: data can hold characters XML 1.0 can't (e.g. a stray \0),
         /// which would otherwise fail the whole export for one cell.
         /// </summary>
-        private static string ValidXmlText(string text)
+        internal static string ValidXmlText(string text)
         {
             if (text == null) return null;
 
@@ -586,6 +597,6 @@ namespace DBADash.SSMSExtension
         }
 
         [DllImport("user32.dll")]
-        private static extern IntPtr GetFocus();
+        internal static extern IntPtr GetFocus();
     }
 }

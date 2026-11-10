@@ -215,6 +215,8 @@ namespace DBADashGUI.SchemaCompare
             {
                 mode = value;
                 SetHighlighting();
+                // The colours go with the highlighting, so a mode set after the text gets the right ones too.
+                if (_text != null) ApplyColours();
             }
         }
 
@@ -240,16 +242,29 @@ namespace DBADashGUI.SchemaCompare
             {
                 _text = value;
                 txtCode.Text = value;
-                var theme = ThemeExtensions.CurrentTheme;
                 SetHighlighting();
-                if (theme is DarkTheme && Mode != CodeEditorModes.SQL)
-                {
-                    theme = new BaseTheme();
-                }
-                txtCode.Background = new SolidColorBrush(theme.CodeEditorBackColor.ToMediaColor());
-                txtCode.Foreground = new SolidColorBrush(theme.CodeEditorForeColor.ToMediaColor());
+                ApplyColours();
             }
         }
+
+        /// <summary>
+        /// The theme's editor colours - except in dark mode for highlighting made for a light background (XML, JSON,
+        /// PowerShell, Markdown), which keeps the light ones.  SQL has highlighting of its own for dark, and plain text
+        /// (<see cref="CodeEditorModes.None"/>) has none to clash, so both follow the theme.
+        /// </summary>
+        private void ApplyColours()
+        {
+            var theme = ThemeExtensions.CurrentTheme;
+            if (theme is DarkTheme && UsesLightHighlighting(Mode))
+            {
+                theme = new BaseTheme();
+            }
+            txtCode.Background = new SolidColorBrush(theme.CodeEditorBackColor.ToMediaColor());
+            txtCode.Foreground = new SolidColorBrush(theme.CodeEditorForeColor.ToMediaColor());
+        }
+
+        /// <summary>True for a mode whose highlighting is only made for a light background.</summary>
+        public static bool UsesLightHighlighting(CodeEditorModes mode) => mode is not (CodeEditorModes.SQL or CodeEditorModes.None);
 
         public void ApplyTheme(BaseTheme theme)
         {

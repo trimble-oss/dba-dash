@@ -33,6 +33,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" />
+    <PackageReference Include="Microsoft.SqlServer.TransactSql.ScriptDom" />
     <PackageReference Include="Serilog" />
     <PackageReference Include="SkiaSharp.Views.WindowsForms" />
     <PackageReference Include="Velopack" />

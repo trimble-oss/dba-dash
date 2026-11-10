@@ -52,7 +52,8 @@ $forbidden = @(
     "Microsoft.SqlServer.Smo*",
     "Microsoft.SqlServer.Management.*",
     "Microsoft.SqlServer.Dac*",
-    "Microsoft.SqlServer.TransactSql.ScriptDom*",
+    # Not ScriptDom: the statistics tab reads the query text with it, to tell a single call's own time from the times
+    # of what it ran.  It comes on its own, without the rest of DacFx.
     "AWSSDK.*",
     "Quartz*",
     "MailKit*",

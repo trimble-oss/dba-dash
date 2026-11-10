@@ -1,0 +1,1 @@
+EXEC('SELECT COUNT_BIG(*) FROM (SELECT TOP (1000000) a.object_id FROM sys.all_columns a CROSS JOIN sys.all_columns b) x; SELECT COUNT(*) FROM sys.objects;');

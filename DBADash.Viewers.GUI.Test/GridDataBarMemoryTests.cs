@@ -167,5 +167,114 @@ namespace DBADash.Viewers.GUI.Test
             var grid = viewer.Controls.OfType<DBADashDataGridView>().Single();
             Assert.AreEqual(DataBarStyle.Fill, grid.DataBars["wait_time_ms"].Style);
         }
+
+        private static DBADashDataGridView OpenGrid(DataTable table, Form form)
+        {
+            var viewer = new GridViewerControl(table, "Grid") { Dock = DockStyle.Fill };
+            form.Controls.Add(viewer);
+            form.Show();
+            Application.DoEvents();
+            return viewer.Controls.OfType<DBADashDataGridView>().Single();
+        }
+
+        private static DataTable WaitsTableWithDefaultBar()
+        {
+            var table = WaitsTable();
+            table.Columns["wait_time_ms"].ExtendedProperties[GridViewerControl.DataBarProperty] = DataBarSettings.MoreIsWorse();
+            table.Rows.Add("CXPACKET", 100L);
+            return table;
+        }
+
+        /// <summary>A table's own bars show where nothing is remembered for its shape, and are not saved until changed.</summary>
+        [TestMethod]
+        public void ResultGrid_OpensWithTheTablesOwnBars()
+        {
+            using var form = new Form { ShowInTaskbar = false, StartPosition = FormStartPosition.Manual, Left = -3000 };
+            var grid = OpenGrid(WaitsTableWithDefaultBar(), form);
+
+            Assert.AreEqual(DataBarColorMode.TrafficLight, grid.DataBars["wait_time_ms"].ColorMode);
+            Assert.AreEqual(0, CacheFiles().Length);
+        }
+
+        /// <summary>Removing a table's own bars is remembered, so they don't come back for the next of its shape.</summary>
+        [TestMethod]
+        public void RemovingATablesOwnBars_IsRemembered()
+        {
+            GridDataBarMemory.Remember(WaitsTable(), new Dictionary<string, DataBarSettings>(), keepEmpty: true);
+            Assert.IsTrue(GridDataBarMemory.TryRecall(WaitsTable(), out var none));
+            Assert.AreEqual(0, none.Count);
+
+            using var form = new Form { ShowInTaskbar = false, StartPosition = FormStartPosition.Manual, Left = -3000 };
+            var grid = OpenGrid(WaitsTableWithDefaultBar(), form);
+            Assert.AreEqual(0, grid.DataBars.Count);
+        }
+
+        /// <summary>
+        /// Reset Data Bars puts the table's own bars back in place of the changed ones, and forgets the changes - so the
+        /// next of its shape starts with the table's own bars too.  A change after it is the table's copy, not the default.
+        /// </summary>
+        [TestMethod]
+        public void ResetDataBars_PutsTheTablesOwnBack_AndForgetsTheChanges()
+        {
+            using var form = new Form { ShowInTaskbar = false, StartPosition = FormStartPosition.Manual, Left = -3000 };
+            var grid = OpenGrid(WaitsTableWithDefaultBar(), form);
+
+            grid.SetDataBar("wait_time_ms", new DataBarSettings { Style = DataBarStyle.Fill });
+            GridDataBarMemory.Remember(WaitsTable(), grid.DataBars);
+            Assert.AreEqual(1, CacheFiles().Length);
+
+            grid.ResetDataBars();
+
+            Assert.AreEqual(DataBarStyle.Underline, grid.DataBars["wait_time_ms"].Style);
+            Assert.AreEqual(DataBarColorMode.TrafficLight, grid.DataBars["wait_time_ms"].ColorMode);
+            Assert.AreEqual(0, CacheFiles().Length, "forgotten");
+
+            grid.DataBars["wait_time_ms"].Style = DataBarStyle.Fill;
+            Assert.AreEqual(DataBarStyle.Underline, grid.DefaultDataBars["wait_time_ms"].Style, "the defaults are left as they were");
+        }
+
+        [TestMethod]
+        public void ResetDataBars_IsOfferedOnlyWhereTheTableHasItsOwn()
+        {
+            using var form = new Form { ShowInTaskbar = false, StartPosition = FormStartPosition.Manual, Left = -3000 };
+            var table = WaitsTable();
+            table.Rows.Add("CXPACKET", 100L);
+            Assert.AreEqual(0, OpenGrid(table, form).DefaultDataBars.Count);
+        }
+
+        /// <summary>
+        /// Remembering every bar when one changes keeps the others as they started - a more-is-worse bar's blue below
+        /// the warning threshold too, not green.
+        /// </summary>
+        [TestMethod]
+        public void RememberedMoreIsWorseBar_KeepsItsBlue()
+        {
+            GridDataBarMemory.Remember(WaitsTable(), new Dictionary<string, DataBarSettings> { ["wait_time_ms"] = DataBarSettings.MoreIsWorse() });
+
+            Assert.IsTrue(GridDataBarMemory.TryRecall(WaitsTable(), out var recalled));
+            Assert.AreEqual(DataBarSettings.MoreIsWorse().ColorFor(0.1), recalled["wait_time_ms"].ColorFor(0.1));
+            Assert.AreNotEqual(new DataBarSettings { ColorMode = DataBarColorMode.TrafficLight }.ColorFor(0.1),
+                recalled["wait_time_ms"].ColorFor(0.1), "not a plain traffic light's green");
+        }
+
+        [TestMethod]
+        public void TryRecall_IsFalseForAShapeNeverSeen()
+        {
+            Assert.IsFalse(GridDataBarMemory.TryRecall(WaitsTable(), out _));
+        }
+
+        /// <summary>A table that asks not to be remembered gets its own bars, whatever was remembered for its shape.</summary>
+        [TestMethod]
+        public void ATableNotRemembered_IgnoresTheMemory()
+        {
+            GridDataBarMemory.Remember(WaitsTable(), new Dictionary<string, DataBarSettings> { ["wait_time_ms"] = new() { Style = DataBarStyle.Fill } });
+
+            var table = WaitsTableWithDefaultBar();
+            table.ExtendedProperties[GridViewerControl.RememberDataBarsProperty] = false;
+            using var form = new Form { ShowInTaskbar = false, StartPosition = FormStartPosition.Manual, Left = -3000 };
+            var grid = OpenGrid(table, form);
+
+            Assert.AreEqual(DataBarStyle.Underline, grid.DataBars["wait_time_ms"].Style);
+        }
     }
 }

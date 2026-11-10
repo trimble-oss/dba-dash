@@ -1,0 +1,1 @@
+EXEC sys.sp_executesql N'SELECT COUNT_BIG(*) FROM (SELECT TOP (@n) a.object_id FROM sys.all_columns a CROSS JOIN sys.all_columns b) x; SELECT COUNT(*) FROM sys.objects;', N'@n int', @n = 1000000;
