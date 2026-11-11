@@ -128,8 +128,8 @@ jobs:
           ./dbadashconfig -c "Data Source=localhost;UID=sa;pwd=dbatools.I0;Encrypt=True;TrustServerCertificate=True;" -a Add --PlanCollectionEnabled --SlowQueryThresholdMs 1000 --SlowQueryCaptureMode ${{ matrix.slow-query-capture-mode }} --SchemaSnapshotDBs "*" --CaptureDeadlocks
           "Enable OS-level (perfmon) counter collection"
           ./dbadashconfig -a SetPerfmonCounters --PerfmonDefaults
-          "Collect deadlocks every minute - the workflow does not run long enough to wait out the shipped five minute schedule, and the session DBA Dash manages is not created until the first collection has run"
-          ./dbadashconfig -a SetSchedule --CollectionType Deadlocks --Schedule "0 0/1 * * * ?" --RunOnServiceStart true
+          "Collect deadlocks every 30 seconds - the workflow does not run long enough to wait out the shipped five minute schedule, and the session DBA Dash manages is not created until the first collection has run.  Not on service start, as shipped: a deadlock imported before the Databases collection keeps a NULL DatabaseID.  Cron rather than an interval in seconds, which would also fire at start"
+          ./dbadashconfig -a SetSchedule --CollectionType Deadlocks --Schedule "0/30 * * * * ?" --RunOnServiceStart false
           "Collect Service Broker every minute - it's off by default, and the counters are only diffed from the second collection"
           ./dbadashconfig -a SetSchedule --CollectionType ServiceBroker --Schedule "0 0/1 * * * ?" --RunOnServiceStart true
           "Install Service"
