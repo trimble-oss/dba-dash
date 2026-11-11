@@ -122,8 +122,8 @@ jobs:
           "Configure"
           ./dbadashconfig -c "Data Source=localhost;UID=DBADashService;pwd=Use_A_Str0ng_Passw0rd;Initial Catalog=DBADashDB_GitHubAction;Encrypt=True;TrustServerCertificate=True;" -a SetDestination
           ./dbadashconfig -c "Data Source=localhost;UID=DBADashService;pwd=Use_A_Str0ng_Passw0rd;Encrypt=True;TrustServerCertificate=True;" -a Add --PlanCollectionEnabled --SlowQueryThresholdMs 1000 --SchemaSnapshotDBs "*" --NoWMI --DeadlockXESessionName system_health
-          "Collect deadlocks every minute - the workflow does not run long enough to wait out the shipped five minute schedule.  Set on the connection rather than the service so the per-connection override is covered too"
-          ./dbadashconfig -c "Data Source=localhost;UID=DBADashService;pwd=Use_A_Str0ng_Passw0rd;Encrypt=True;TrustServerCertificate=True;" -a SetSchedule --CollectionType Deadlocks --Schedule "0 0/1 * * * ?" --RunOnServiceStart true
+          "Collect deadlocks every 30 seconds - the workflow does not run long enough to wait out the shipped five minute schedule.  Set on the connection rather than the service so the per-connection override is covered too.  Not on service start, as shipped: a deadlock imported before the Databases collection keeps a NULL DatabaseID.  Cron rather than an interval in seconds, which would also fire at start"
+          ./dbadashconfig -c "Data Source=localhost;UID=DBADashService;pwd=Use_A_Str0ng_Passw0rd;Encrypt=True;TrustServerCertificate=True;" -a SetSchedule --CollectionType Deadlocks --Schedule "0/30 * * * * ?" --RunOnServiceStart false
           "Install Service"
           ./DBADashService install --localservice
           "Start Service"
