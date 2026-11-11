@@ -115,6 +115,32 @@ namespace DBADash.Test
             Assert.AreEqual(expected, DBADashConnection.IsPossiblyAzureSQLHost(connectionString));
 
         [TestMethod]
+        public void Load_PartialThreshold_KeepsAppDefaultsForFieldsLeftOut()
+        {
+            Directory.CreateDirectory(folder);
+            File.WriteAllText(store.FilePath, "{\"RunningQueryPlanThreshold\":{\"CPUThreshold\":500},\"RunningQueryLiveProfileThreshold\":{\"MaxPerCollection\":3}}");
+            var loaded = store.Load();
+            var plans = PlanCollectionThreshold.DefaultThreshold;
+            Assert.AreEqual(500, loaded.RunningQueryPlanThreshold.CPUThreshold);
+            Assert.AreEqual(plans.DurationThreshold, loaded.RunningQueryPlanThreshold.DurationThreshold);
+            Assert.AreEqual(plans.MemoryGrantThreshold, loaded.RunningQueryPlanThreshold.MemoryGrantThreshold);
+            Assert.AreEqual(plans.CountThreshold, loaded.RunningQueryPlanThreshold.CountThreshold);
+            Assert.AreEqual(3, loaded.RunningQueryLiveProfileThreshold.MaxPerCollection);
+            Assert.AreEqual(LiveProfileThreshold.DefaultThreshold.CPUThreshold, loaded.RunningQueryLiveProfileThreshold.CPUThreshold);
+            Assert.AreEqual(LiveProfileThreshold.DefaultThreshold.DurationThreshold, loaded.RunningQueryLiveProfileThreshold.DurationThreshold);
+        }
+
+        [TestMethod]
+        public void Load_NullThreshold_SwitchesTheOptionOff()
+        {
+            Directory.CreateDirectory(folder);
+            File.WriteAllText(store.FilePath, "{\"RunningQueryPlanThreshold\":null,\"RunningQueryLiveProfileThreshold\":null}");
+            var loaded = store.Load();
+            Assert.IsNull(loaded.RunningQueryPlanThreshold);
+            Assert.IsNull(loaded.RunningQueryLiveProfileThreshold);
+        }
+
+        [TestMethod]
         public void Load_UnreadableFile_ReturnsAppDefaults()
         {
             Directory.CreateDirectory(folder);

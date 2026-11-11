@@ -68,6 +68,8 @@ namespace DBADash
                         check.XESupported = info.IsXESupported;
                         check.LoginName = await GetLoginNameAsync(src.SourceConnection.ConnectionString);
                         check.SlowQueryWillBeDisabled = !info.IsXESupported && src.SlowQueryThresholdMs >= 0;
+                        check.SlowQueryUsesRingBuffer = !check.SlowQueryWillBeDisabled && IsSlowQueryEventFileUnavailable(
+                            src, info.IsAzureDB, info.EngineEdition == Microsoft.SqlServer.Management.Common.DatabaseEngineEdition.SqlManagedInstance);
                     }
 
                     check.Validated = true;
@@ -82,8 +84,8 @@ namespace DBADash
             check.ConnectionID = src.ConnectionID;
 
             await RefreshExistingAsync(cfg, src, check);
-            check.DeadlocksSkippedOnAzureDB = skipDeadlocksOnAzureDB && check.IsAzureDB && src.IsDeadlockCollectionEnabled &&
-                                              check.Existing != ExistingConnectionStates.Configured;
+            check.DeadlocksSkippedOnAzureDB = IsDeadlockCollectionSkipped(skipDeadlocksOnAzureDB, check.IsAzureDB,
+                src.IsDeadlockCollectionEnabled, check.Existing);
             check.DeadlockScheduleMissing = !check.DeadlocksSkippedOnAzureDB && src.IsDeadlockCollectionEnabled &&
                                             !IsDeadlockCollectionScheduled(cfg, src, check.ExistingSource?.CollectionSchedules ?? src.CollectionSchedules);
             return check;
@@ -147,6 +149,14 @@ namespace DBADash
                 src.PersistXESessions = false;
             }
 
+            // Saved as the mode that will actually run, so the config says so and the collector doesn't warn about falling
+            // back on every service start - for every database the Azure DB scan adds from the master connection.
+            if (check.SlowQueryUsesRingBuffer)
+            {
+                src.SlowQueryCaptureMode = DBADashSource.SlowQueryCaptureModes.RingBuffer;
+                src.KeepSlowQueryXESessionRunning = false;
+            }
+
             // Added, not updated - an existing connection keeps the deadlock session it's given
             if (check.DeadlocksSkippedOnAzureDB && check.Existing != ExistingConnectionStates.Configured)
             {
@@ -201,6 +211,25 @@ namespace DBADash
         /// overrides into account.  The collection is disabled in the default schedule, so setting a session name alone
         /// leaves it collecting nothing.
         /// </summary>
+        /// <summary>
+        /// True if a connection is added without deadlock collection because it's Azure SQL Database and
+        /// <see cref="SourceConnectionOptions.SkipDeadlocksOnAzureDB"/> is set.  Only when it's added - a configured
+        /// connection that's updated keeps the deadlock session it's given.  One found by the Azure DB scan is added.
+        /// </summary>
+        public static bool IsDeadlockCollectionSkipped(bool skipDeadlocksOnAzureDB, bool isAzureDB, bool isDeadlockCollectionEnabled,
+            ExistingConnectionStates existing) =>
+            skipDeadlocksOnAzureDB && isAzureDB && isDeadlockCollectionEnabled && existing != ExistingConnectionStates.Configured;
+
+        /// <summary>
+        /// True if <paramref name="src"/> captures slow queries in EventFile mode on a platform without a local event file
+        /// (Azure SQL Database or Managed Instance), where the ring buffer is used instead - see
+        /// <see cref="DBADashSource.GetEffectiveSlowQueryCaptureMode"/>.
+        /// </summary>
+        public static bool IsSlowQueryEventFileUnavailable(DBADashSource src, bool isAzureDB, bool isManagedInstance) =>
+            src.IsSlowQueryCollectionEnabled &&
+            src.SlowQueryCaptureMode == DBADashSource.SlowQueryCaptureModes.EventFile &&
+            src.GetEffectiveSlowQueryCaptureMode(isAzureDB, isManagedInstance) == DBADashSource.SlowQueryCaptureModes.RingBuffer;
+
         public static bool IsDeadlockCollectionScheduled(CollectionConfig cfg, DBADashSource src) =>
             IsDeadlockCollectionScheduled(cfg, src, src.CollectionSchedules);
 
@@ -293,6 +322,9 @@ namespace DBADash
 
         /// <summary>Slow query capture needs an extended events session, which the instance doesn't support</summary>
         public bool SlowQueryWillBeDisabled { get; set; }
+
+        /// <summary>EventFile slow query capture was chosen, but it's Azure SQL Database or Managed Instance - saved as RingBuffer</summary>
+        public bool SlowQueryUsesRingBuffer { get; set; }
 
         /// <summary>Deadlocks won't be collected - it's Azure SQL Database and <see cref="SourceConnectionOptions.SkipDeadlocksOnAzureDB"/> is set</summary>
         public bool DeadlocksSkippedOnAzureDB { get; set; }
