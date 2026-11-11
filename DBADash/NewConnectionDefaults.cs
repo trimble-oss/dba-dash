@@ -29,7 +29,9 @@ namespace DBADash
 
         /// <summary>
         /// The user's saved defaults, or the app defaults if none are saved or the file can't be read.  The saved options are
-        /// applied over the app defaults, so an option added in a later version starts at its app default.
+        /// applied over the app defaults, so an option added in a later version starts at its app default.  That goes for
+        /// the fields of the thresholds too: they're populated rather than replaced, so a field left out keeps its app
+        /// default.  An explicit null still switches the option off.
         /// </summary>
         public SourceConnectionOptions Load()
         {
@@ -37,7 +39,7 @@ namespace DBADash
             try
             {
                 if (!File.Exists(FilePath)) return options;
-                JsonConvert.PopulateObject(File.ReadAllText(FilePath), options, new JsonSerializerSettings { ObjectCreationHandling = ObjectCreationHandling.Replace });
+                JsonConvert.PopulateObject(File.ReadAllText(FilePath), options, new JsonSerializerSettings { ObjectCreationHandling = ObjectCreationHandling.Reuse });
                 options.CustomCollections = null;
                 return options.Validate() == null ? options : SourceConnectionOptions.AppDefaults;
             }

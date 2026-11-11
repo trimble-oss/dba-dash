@@ -235,6 +235,11 @@ namespace DBADashGUI
                 notes.Add("@@SERVERNAME returned NULL.  Consider fixing this using sp_addserver.");
             }
 
+            if (check.SlowQueryUsesRingBuffer)
+            {
+                notes.Add("Slow queries will be captured with RingBuffer - EventFile needs a local event file, which isn't available on Azure SQL Database or Managed Instance.");
+            }
+
             if (check.DeadlocksSkippedOnAzureDB)
             {
                 notes.Add("Deadlocks won't be collected - it's Azure SQL Database and \"Skip on Azure SQL DB\" is checked on the Deadlocks tab.");

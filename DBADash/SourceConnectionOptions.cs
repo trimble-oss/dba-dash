@@ -200,8 +200,12 @@ namespace DBADash
 
         public string Serialize() => JsonConvert.SerializeObject(this);
 
-        /// <summary>The slow query threshold new connections start with</summary>
-        public const int DefaultSlowQueryThresholdMs = 1000;
+        /// <summary>
+        /// The slow query threshold new connections start with.  Higher than the 1000ms filled in when capture is checked by
+        /// hand: it's on by default, and storage grows with every execution over the threshold on a busy instance.  Query
+        /// stats (also on by default) covers the statements below it.
+        /// </summary>
+        public const int DefaultSlowQueryThresholdMs = 10000;
 
         /// <summary>The query stats top N new connections start with - 50 suits most instances</summary>
         public const int DefaultQueryStatsTopN = 50;

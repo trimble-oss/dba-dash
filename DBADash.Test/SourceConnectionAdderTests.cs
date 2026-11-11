@@ -167,6 +167,62 @@ namespace DBADash.Test
         }
 
         [TestMethod]
+        [DataRow(true, true, true, ExistingConnectionStates.None, true, DisplayName = "New Azure DB - skipped")]
+        [DataRow(true, true, true, ExistingConnectionStates.Discovered, true, DisplayName = "Found by the Azure DB scan - skipped")]
+        [DataRow(true, true, true, ExistingConnectionStates.Configured, false, DisplayName = "Configured Azure DB updated - kept")]
+        [DataRow(false, true, true, ExistingConnectionStates.None, false, DisplayName = "Option unchecked - kept")]
+        [DataRow(true, false, true, ExistingConnectionStates.None, false, DisplayName = "Not Azure DB - kept")]
+        [DataRow(true, true, false, ExistingConnectionStates.None, false, DisplayName = "Deadlocks off - nothing to skip")]
+        public void IsDeadlockCollectionSkipped(bool skipOption, bool isAzureDB, bool deadlocksEnabled, ExistingConnectionStates existing, bool expected) =>
+            Assert.AreEqual(expected, SourceConnectionAdder.IsDeadlockCollectionSkipped(skipOption, isAzureDB, deadlocksEnabled, existing));
+
+        [TestMethod]
+        [DataRow(true, false, true, DisplayName = "Azure SQL DB - RingBuffer")]
+        [DataRow(false, true, true, DisplayName = "Managed Instance - RingBuffer")]
+        [DataRow(false, false, false, DisplayName = "SQL Server - EventFile kept")]
+        public void IsSlowQueryEventFileUnavailable(bool isAzureDB, bool isManagedInstance, bool expected)
+        {
+            var src = SourceConnectionOptions.AppDefaults.CreateSource("SQL1");
+            Assert.AreEqual(expected, SourceConnectionAdder.IsSlowQueryEventFileUnavailable(src, isAzureDB, isManagedInstance));
+
+            // Only EventFile mode with capture on falls back
+            src.SlowQueryCaptureMode = DBADashSource.SlowQueryCaptureModes.ExistingSession;
+            Assert.IsFalse(SourceConnectionAdder.IsSlowQueryEventFileUnavailable(src, isAzureDB, isManagedInstance));
+            src.SlowQueryCaptureMode = DBADashSource.SlowQueryCaptureModes.EventFile;
+            src.SlowQueryThresholdMs = -1;
+            Assert.IsFalse(SourceConnectionAdder.IsSlowQueryEventFileUnavailable(src, isAzureDB, isManagedInstance));
+        }
+
+        [TestMethod]
+        public async Task Apply_StoresRingBuffer_WhenEventFileIsUnavailable()
+        {
+            var cfg = NewConfig();
+            var src = SourceConnectionOptions.AppDefaults.CreateSource("SQL1");
+            src.KeepSlowQueryXESessionRunning = true;
+            var check = await SourceConnectionAdder.CheckAsync(cfg, src, validate: false);
+            Assert.IsFalse(check.SlowQueryUsesRingBuffer, "Not known without connecting");
+
+            // As the check sets it after connecting to Azure SQL DB or Managed Instance
+            check.SlowQueryUsesRingBuffer = true;
+            var result = SourceConnectionAdder.Apply(cfg, src, check, new SourceConnectionDecisions { AddUnvalidated = true });
+            Assert.AreEqual(DBADashSource.SlowQueryCaptureModes.RingBuffer, result.Source.SlowQueryCaptureMode);
+            Assert.IsFalse(result.Source.KeepSlowQueryXESessionRunning);
+            Assert.AreEqual(SourceConnectionOptions.DefaultSlowQueryThresholdMs, result.Source.SlowQueryThresholdMs);
+        }
+
+        [TestMethod]
+        public async Task Check_UnvalidatedConnection_IsntKnownToBeAzureDB()
+        {
+            // Without connecting the platform isn't known, so nothing is skipped and the deadlock schedule is still offered
+            var cfg = NewConfig();
+            cfg.CollectionSchedules = new CollectionSchedules { { CollectionType.Deadlocks, new CollectionSchedule { Schedule = string.Empty } } };
+            var src = new SourceConnectionOptions { DeadlockXESessionName = DBADashSource.ManagedDeadlockXESessionName }.CreateSource("SQL1");
+            var check = await SourceConnectionAdder.CheckAsync(cfg, src, validate: false, skipDeadlocksOnAzureDB: true);
+            Assert.IsFalse(check.DeadlocksSkippedOnAzureDB);
+            Assert.IsTrue(check.DeadlockScheduleMissing);
+        }
+
+        [TestMethod]
         public async Task Apply_SkipsDeadlocksOnAzureDB_WhenAdded()
         {
             var cfg = NewConfig();
