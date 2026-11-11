@@ -1216,23 +1216,18 @@ namespace DBADashService
                 return;
             }
 
+            // Collected here and enqueued at the end, so the item carrying Databases can go first - see EnqueueDatabasesFirstAsync
+            var items = new List<IWorkItem>();
+
             // SchemaSnapshot as a separate low-priority work item
             if (onStartTypes.Contains(CollectionType.SchemaSnapshot) && src.SchemaSnapshotDBs is { Length: > 0 })
             {
-                var snapshotWorkItem = new SchemaSnapshotWorkItem
+                items.Add(new SchemaSnapshotWorkItem
                 {
                     Source = src,
                     Schedule = "OnStartup"
-                };
-
-                await workQueue.EnqueueAsync(snapshotWorkItem);
+                });
                 onStartTypes = onStartTypes.Where(t => t != CollectionType.SchemaSnapshot).ToArray();
-
-                var anyCustomOnStart = customCollections.Any(c => c.Value.RunOnServiceStart);
-                if (onStartTypes.Length == 0 && !anyCustomOnStart)
-                {
-                    return; // only schema snapshot on start
-                }
             }
 
             var typeGroups = onStartTypes
@@ -1261,9 +1256,7 @@ namespace DBADashService
                     Schedule = "OnStartup",
                     Priority = kvp.Key
                 };
-                Log.Information("Enqueue on-start work item for {source} with types {types} at priority {priority}", src.SourceConnection.ConnectionForPrint, workItem.AllTypes, kvp.Key);
-
-                await workQueue.EnqueueAsync(workItem);
+                items.Add(workItem);
             }
 
             // Custom-only groups (no core types in the same priority)
@@ -1271,17 +1264,96 @@ namespace DBADashService
             {
                 if (typeGroups.ContainsKey(kvp.Key)) continue;
 
-                var workItem = new WorkItem
+                items.Add(new WorkItem
                 {
                     Source = src,
                     Types = Array.Empty<CollectionType>(),
                     CustomCollections = kvp.Value,
                     Schedule = "OnStartup",
                     Priority = kvp.Key
-                };
-
-                await workQueue.EnqueueAsync(workItem);
+                });
             }
+
+            await EnqueueDatabasesFirstAsync(src, items);
+        }
+
+        /// <summary>
+        /// How long the rest of an instance's on-start collections wait for the one that carries Databases before
+        /// they are enqueued anyway.  Only a backstop: the wait ends as soon as that item finishes, successful or
+        /// not, so this is reached only by a collection that is still running.
+        /// </summary>
+        private static readonly TimeSpan OnStartDatabasesWaitTimeout = TimeSpan.FromMinutes(5);
+
+        /// <summary>
+        /// Enqueues an instance's on-start work, holding the rest back until the item that collects Databases has
+        /// finished.
+        ///
+        /// Imports map the source's database_id to DBA Dash's DatabaseID through dbo.Databases, and anything
+        /// imported before its database is there keeps a NULL DatabaseID.  On-start items are split by schedule
+        /// priority, so frequent collections (Deadlocks, CPU, waits...) sit in a High item while Databases is in a
+        /// slower one, and nothing stopped them landing first - most visibly for a new instance, or a database
+        /// created while the service was stopped.  The Databases item is raised to High so the wait is short, and
+        /// writing to the destination is part of the work item, so finishing means imported for a SQL destination.
+        ///
+        /// The wait runs in the background so one slow instance doesn't hold up enqueuing for the others.
+        /// </summary>
+        private async Task EnqueueDatabasesFirstAsync(DBADashSource src, List<IWorkItem> items)
+        {
+            var first = items.OfType<WorkItem>().FirstOrDefault(i => i.Types.Contains(CollectionType.Databases));
+            var rest = items.Where(i => i != first).ToList();
+
+            if (first == null || rest.Count == 0)
+            {
+                await EnqueueOnStartItemsAsync(src, items);
+                return;
+            }
+
+            first.Priority = WorkItemPriority.High;
+            if (!await EnqueueOnStartItemsAsync(src, [first]))
+            {
+                // Not queued (a duplicate still pending, or the queue is closing), so there is nothing to wait for
+                await EnqueueOnStartItemsAsync(src, rest);
+                return;
+            }
+
+            var token = backgroundTasksCts?.Token ?? CancellationToken.None;
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    var finished = await Task.WhenAny(first.Completion, Task.Delay(OnStartDatabasesWaitTimeout, token)) == first.Completion;
+                    if (token.IsCancellationRequested) return;
+                    if (!finished)
+                    {
+                        Log.Warning("On-start collection of Databases for {source} hasn't finished after {timeout}.  Enqueuing the remaining on-start collections anyway",
+                            src.SourceConnection.ConnectionForPrint, OnStartDatabasesWaitTimeout);
+                    }
+                    await EnqueueOnStartItemsAsync(src, rest);
+                }
+                catch (OperationCanceledException) when (token.IsCancellationRequested)
+                {
+                    // Service stopping
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Error enqueuing on-start collections for {source}", src.SourceConnection.ConnectionForPrint);
+                }
+            }, token);
+        }
+
+        /// <summary>Returns true if every item was queued.</summary>
+        private async Task<bool> EnqueueOnStartItemsAsync(DBADashSource src, IEnumerable<IWorkItem> items)
+        {
+            var allQueued = true;
+            foreach (var item in items)
+            {
+                if (item is WorkItem workItem)
+                {
+                    Log.Information("Enqueue on-start work item for {source} with types {types} at priority {priority}", src.SourceConnection.ConnectionForPrint, workItem.AllTypes, workItem.Priority);
+                }
+                allQueued &= await workQueue.EnqueueAsync(item);
+            }
+            return allQueued;
         }
 
         private static string BuildScheduleGroupKey(string scheduleKey, CollectionType[] types, IEnumerable<string> customNames)

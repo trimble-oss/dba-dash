@@ -43,6 +43,16 @@ namespace DBADashService
 
         public WorkItemPriority Priority { get; set; } = WorkItemPriority.Normal;
 
+        /// <summary>
+        /// Completes once a worker has finished with this item, whether the collection succeeded or not.  Set by
+        /// CollectionWorkQueue rather than ExecuteAsync so an item that throws still completes.
+        /// </summary>
+        public Task Completion => _completion.Task;
+
+        private readonly TaskCompletionSource _completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        internal void MarkCompleted() => _completion.TrySetResult();
+
         // Stable unique identifier for deduplication across queue runs
         public string DedupKey => $"{Source.ConnectionID ?? Source.ConnectionString}::{string.Join("|", Types)}{string.Join("|", CustomCollections.Keys.OrderBy(k => k))}";
 

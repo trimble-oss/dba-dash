@@ -342,6 +342,8 @@ namespace DBADashService
                         _pendingKeys.TryRemove(item.DedupKey, out _);
                     }
 
+                    (item as WorkItem)?.MarkCompleted();
+
                     if (isLow)
                     {
                         Interlocked.Decrement(ref _lowInProgress);
