@@ -33,8 +33,12 @@ namespace DBADash
     /// <summary>
     /// Measures the CPU and logical reads used on one open connection between <see cref="StartAsync"/> and dispose, from the
     /// session's own counters in sys.dm_exec_sessions - a session can always see its own row, so no extra permission is
-    /// needed.  Two small queries per connection.  Only made when there is a meter to add to (LogInternalPerformanceCounters),
-    /// otherwise no query is run at all.
+    /// needed.  One small query per connection, at the end.  Only made when there is a meter to add to
+    /// (LogInternalPerformanceCounters), otherwise no query is run at all.
+    /// <para>The counters start at zero on a connection that has just been opened: a new session starts at zero (the login
+    /// isn't counted), and a pooled one is zeroed by sp_reset_connection, which runs ahead of the first command on reuse.  So
+    /// the end reading is the connection's whole usage, and there's no start reading to take.  That only holds if nothing
+    /// has run on the connection yet - start it straight after opening, never on a connection that's already been used.</para>
     /// <para>Declare it straight after opening the connection and before any reader, so it's disposed after the reader is
     /// closed - the end reading needs the connection free.  A reading that fails (a connection broken by the collection's own
     /// error, say) is skipped rather than failing the collection.</para>
@@ -46,22 +50,17 @@ namespace DBADash
 
         private readonly SqlConnection connection;
         private readonly CollectionRunMeter meter;
-        private readonly (long Cpu, long Reads) start;
         private bool disposed;
 
-        private SessionUsageMeasurement(SqlConnection connection, CollectionRunMeter meter, (long Cpu, long Reads) start)
+        private SessionUsageMeasurement(SqlConnection connection, CollectionRunMeter meter)
         {
             this.connection = connection;
             this.meter = meter;
-            this.start = start;
         }
 
-        public static async Task<SessionUsageMeasurement> StartAsync(SqlConnection connection, CollectionRunMeter meter)
-        {
-            if (meter == null || connection.State != ConnectionState.Open) return null;
-            var usage = await ReadAsync(connection);
-            return usage == null ? null : new SessionUsageMeasurement(connection, meter, usage.Value);
-        }
+        /// <summary>Starts measuring <paramref name="connection"/>, which must have just been opened - see the class remarks.  Runs no query.</summary>
+        public static Task<SessionUsageMeasurement> StartAsync(SqlConnection connection, CollectionRunMeter meter) =>
+            Task.FromResult(Start(connection, meter));
 
         private static readonly AsyncLocal<CollectionRunMeter> RunMeter = new();
 
@@ -86,12 +85,9 @@ namespace DBADash
         /// <summary>Measures <paramref name="connection"/> for the collection run in progress, if any - see <see cref="ForRun"/></summary>
         public static Task<SessionUsageMeasurement> StartForRunAsync(SqlConnection connection) => StartAsync(connection, RunMeter.Value);
 
-        public static SessionUsageMeasurement Start(SqlConnection connection, CollectionRunMeter meter)
-        {
-            if (meter == null || connection.State != ConnectionState.Open) return null;
-            var usage = Read(connection);
-            return usage == null ? null : new SessionUsageMeasurement(connection, meter, usage.Value);
-        }
+        /// <summary>Starts measuring <paramref name="connection"/>, which must have just been opened - see the class remarks.  Runs no query.</summary>
+        public static SessionUsageMeasurement Start(SqlConnection connection, CollectionRunMeter meter) =>
+            meter == null || connection.State != ConnectionState.Open ? null : new SessionUsageMeasurement(connection, meter);
 
         public async ValueTask DisposeAsync()
         {
@@ -109,13 +105,10 @@ namespace DBADash
             Record(Read(connection));
         }
 
-        private void Record((long Cpu, long Reads)? end)
+        private void Record((long Cpu, long Reads)? usage)
         {
-            if (end == null) return;
-            var cpu = end.Value.Cpu - start.Cpu;
-            var reads = end.Value.Reads - start.Reads;
-            if (cpu < 0 || reads < 0) return; // The session was reset under us - nothing to say about this connection
-            meter.Add(cpu, reads);
+            if (usage == null) return;
+            meter.Add(usage.Value.Cpu, usage.Value.Reads);
         }
 
         private static async Task<(long Cpu, long Reads)?> ReadAsync(SqlConnection connection)
