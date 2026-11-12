@@ -40,6 +40,7 @@ VALUES -- Daily Partitions
 	('dbo','ServiceBrokerDatabaseStats','d',14,CAST(1 AS BIT)),
 	('dbo','CollectionRuns','d',14,CAST(1 AS BIT)),
 	('dbo','CollectionRunsBatch','d',14,CAST(1 AS BIT)),
+	('dbo','ServiceStats','d',14,CAST(1 AS BIT)),
 	-- Monthly Partitions
 	('dbo','AzureDBElasticPoolResourceStats_60MIN','m',3,CAST(1 AS BIT)),
 	('dbo','AzureDBResourceStats_60MIN','m',3,CAST(1 AS BIT)),

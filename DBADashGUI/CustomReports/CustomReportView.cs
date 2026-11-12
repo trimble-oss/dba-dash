@@ -2465,13 +2465,14 @@ namespace DBADashGUI.CustomReports
                 if (value.ColumnLayout.All(col => col.Value.Width == 0))
                 {
                     dgv.ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing();
-                    dgv.AutoResizeColumnsWithMaxColumnWidth();
+                    dgv.AutoResizeColumnsWithMaxColumnWidthWhenDisplayed();
                 }
             }
             else
             {
                 dgv.ReplaceSpaceWithNewLineInHeaderTextToImproveColumnAutoSizing();
-                dgv.AutoResizeColumnsWithMaxColumnWidth();
+                // Bound before its rows are displayed when the report first loads, so sized again once they are
+                dgv.AutoResizeColumnsWithMaxColumnWidthWhenDisplayed();
             }
         }
 

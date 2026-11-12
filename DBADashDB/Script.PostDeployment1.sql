@@ -1331,7 +1331,9 @@ FROM (VALUES('dbo','ObjectExecutionStats',120),
 				('dbo','CollectionRuns',30),
 				('dbo','CollectionRuns_60MIN',365),
 				/* Only needs to outlive a file being imported again */
-				('dbo','CollectionRunsBatch',14)
+				('dbo','CollectionRunsBatch',14),
+				/* The service's own resource usage - one row a minute per service */
+				('dbo','ServiceStats',90)
 				) AS t(SchemaName,TableName,RetentionDays)
 WHERE NOT EXISTS(SELECT 1
 				FROM dbo.DataRetention DR

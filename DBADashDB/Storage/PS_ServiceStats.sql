@@ -1,0 +1,3 @@
+CREATE PARTITION SCHEME [PS_ServiceStats]
+    AS PARTITION [PF_ServiceStats]
+    ALL TO ([PRIMARY]);

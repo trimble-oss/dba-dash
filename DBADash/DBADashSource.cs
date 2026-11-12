@@ -70,6 +70,14 @@ namespace DBADash
             set => schemaSnapshotDBs = value;
         }
 
+        /// <summary>
+        /// Added by the service's scan for Azure DBs or read replicas rather than read from the config - the config only
+        /// has the Azure master or the primary.  Not saved: a scan in the config tool that writes them to the config makes
+        /// them configured sources.
+        /// </summary>
+        [JsonIgnore]
+        public bool IsDiscovered { get; set; }
+
         [JsonIgnore]
         public bool HasCustomSchedule => !(CollectionSchedules == null || CollectionSchedules.Count == 0);
 
