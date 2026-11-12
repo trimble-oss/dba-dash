@@ -3,6 +3,7 @@ using DBADash;
 using Serilog;
 using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
@@ -14,9 +15,12 @@ namespace DBADashService
     /// </summary>
     public class CollectionWorkQueue
     {
-        private readonly Channel<IWorkItem> _highChannel;
-        private readonly Channel<IWorkItem> _normalChannel;
-        private readonly Channel<IWorkItem> _lowChannel;
+        /// <summary>A work item and when it was enqueued (<see cref="Stopwatch.GetTimestamp"/>) - for how long it waits for a worker</summary>
+        private readonly record struct QueuedItem(IWorkItem Item, long EnqueuedTimestamp);
+
+        private readonly Channel<QueuedItem> _highChannel;
+        private readonly Channel<QueuedItem> _normalChannel;
+        private readonly Channel<QueuedItem> _lowChannel;
         private readonly ConcurrentDictionary<string, WorkItemState> _instanceStates;
         private readonly AsyncKeyedLocker<string> _instanceLocker;
         private readonly CollectionConfig _config;
@@ -55,6 +59,20 @@ namespace DBADashService
         // Tracking item count in low priority queue (waiting in channels or pending write)
         private int _queuedLow;
 
+        // For the service stats (TakeStats).  Workers processing an item now, and since the last TakeStats: the most at once,
+        // items queued, enqueues skipped as a duplicate, items started and the time they waited for a worker.
+        private int _busyWorkers;
+        private int _maxBusyWorkers;
+        private int _queued;
+        private int _skipped;
+
+        // Items started and their wait, updated and reset together under _startedLock, so an item's count and its wait are
+        // never split across two samples
+        private readonly object _startedLock = new();
+        private int _started;
+        private long _waitTotalMs;
+        private long _waitMaxMs;
+
         public CollectionWorkQueue(CollectionConfig config, int? maxConcurrentCollectionsPerInstance = null)
         {
             _config = config;
@@ -77,9 +95,9 @@ namespace DBADashService
                 SingleReader = false,
                 SingleWriter = false
             };
-            _highChannel = Channel.CreateBounded<IWorkItem>(options);
-            _normalChannel = Channel.CreateBounded<IWorkItem>(options);
-            _lowChannel = Channel.CreateBounded<IWorkItem>(options);
+            _highChannel = Channel.CreateBounded<QueuedItem>(options);
+            _normalChannel = Channel.CreateBounded<QueuedItem>(options);
+            _lowChannel = Channel.CreateBounded<QueuedItem>(options);
 
             Log.Information("CollectionWorkQueue initialized with {workerCount} workers, channel capacity {capacity} ({default}) per priority, max {maxConcurrency} concurrent collections per instance",
                 _workerCount, capacity, config.ChannelCapacity.HasValue ? "User configured" : "Default", config.SourceConnections.Count, _maxConcurrentCollectionsPerInstance);
@@ -150,6 +168,7 @@ namespace DBADashService
                 {
                     if (!_pendingKeys.TryAdd(item.DedupKey, 0))
                     {
+                        Interlocked.Increment(ref _skipped);
                         Log.Warning("Skipping enqueue of {item}.  The previous scheduled collection is still enqueued or in progress.",
                             item.Description);
                         return false;
@@ -161,14 +180,16 @@ namespace DBADashService
                 // Count as queued before write so we include backpressured writes
                 IncrementPriorityQueued(item.Priority);
 
-                // Fast-path: if there is capacity, write synchronously
-                if (writer.TryWrite(item))
-                {
-                    return true;
-                }
+                // Timed from here, so a wait for space in the channel (backpressure) counts as waiting
+                var queued = new QueuedItem(item, Stopwatch.GetTimestamp());
 
-                // Fall back to async path (backpressure or racing with readers/writer completion)
-                await writer.WriteAsync(item, cancellationToken);
+                // Fast-path: if there is capacity, write synchronously
+                if (!writer.TryWrite(queued))
+                {
+                    // Fall back to async path (backpressure or racing with readers/writer completion)
+                    await writer.WriteAsync(queued, cancellationToken);
+                }
+                Interlocked.Increment(ref _queued);
                 return true;
             }
             catch (ChannelClosedException)
@@ -197,7 +218,7 @@ namespace DBADashService
             return _instanceStates.GetOrAdd(connectionString, static _ => new WorkItemState());
         }
 
-        private ChannelWriter<IWorkItem> GetWriter(WorkItemPriority priority)
+        private ChannelWriter<QueuedItem> GetWriter(WorkItemPriority priority)
         {
             return priority switch
             {
@@ -214,6 +235,66 @@ namespace DBADashService
         public int NormalQueueDepth => Volatile.Read(ref _queuedNormal);
         public int LowQueueDepth => Volatile.Read(ref _queuedLow);
 
+        /// <summary>
+        /// The queue's state for the service stats: the queue lengths and busy workers now, and since the previous call - the
+        /// most workers busy at once, items queued, duplicates skipped, items started and the time they waited for a worker.
+        /// Those reset with each call, so there must be only one caller (the service stats reporter).
+        /// </summary>
+        public WorkQueueStats TakeStats()
+        {
+            var busy = Volatile.Read(ref _busyWorkers);
+            int started;
+            long waitTotalMs, waitMaxMs;
+            lock (_startedLock)
+            {
+                started = _started;
+                waitTotalMs = _waitTotalMs;
+                waitMaxMs = _waitMaxMs;
+                _started = 0;
+                _waitTotalMs = 0;
+                _waitMaxMs = 0;
+            }
+            return new WorkQueueStats
+            {
+                QueueLengthHigh = HighQueueDepth,
+                QueueLengthNormal = NormalQueueDepth,
+                QueueLengthLow = LowQueueDepth,
+                Workers = _workerCount,
+                BusyWorkers = busy,
+                // Reset to the workers busy now, the starting point for the next interval's most
+                MaxBusyWorkers = Math.Max(Interlocked.Exchange(ref _maxBusyWorkers, busy), busy),
+                Queued = Interlocked.Exchange(ref _queued, 0),
+                Skipped = Interlocked.Exchange(ref _skipped, 0),
+                Started = started,
+                WaitTotalMs = waitTotalMs,
+                WaitMaxMs = waitMaxMs
+            };
+        }
+
+        /// <summary>An item has been taken off the queue - <paramref name="queued"/>'s wait is added to the stats</summary>
+        private IWorkItem Dequeued(QueuedItem queued)
+        {
+            var waitMs = (long)Stopwatch.GetElapsedTime(queued.EnqueuedTimestamp).TotalMilliseconds;
+            lock (_startedLock)
+            {
+                _started++;
+                _waitTotalMs += waitMs;
+                if (waitMs > _waitMaxMs) _waitMaxMs = waitMs;
+            }
+            return queued.Item;
+        }
+
+        private static void InterlockedMax(ref int location, int value)
+        {
+            var current = Volatile.Read(ref location);
+            while (value > current)
+            {
+                var previous = Interlocked.CompareExchange(ref location, value, current);
+                if (previous == current) return;
+                current = previous;
+            }
+        }
+
         // Centralized dequeue by priority with proper low gating and counters
         private bool TryDequeue(WorkItemPriority priority, out IWorkItem item)
         {
@@ -223,7 +304,7 @@ namespace DBADashService
                     if (_highChannel.Reader.TryRead(out var high))
                     {
                         DecrementPriorityQueued(WorkItemPriority.High);
-                        item = high;
+                        item = Dequeued(high);
                         return true;
                     }
                     break;
@@ -232,7 +313,7 @@ namespace DBADashService
                     if (_normalChannel.Reader.TryRead(out var normal))
                     {
                         DecrementPriorityQueued(WorkItemPriority.Normal);
-                        item = normal;
+                        item = Dequeued(normal);
                         return true;
                     }
                     break;
@@ -244,7 +325,7 @@ namespace DBADashService
                         {
                             Interlocked.Increment(ref _lowInProgress);
                             DecrementPriorityQueued(WorkItemPriority.Low);
-                            item = low;
+                            item = Dequeued(low);
                             return true;
                         }
                         _lowGate.Release();
@@ -326,6 +407,7 @@ namespace DBADashService
 
                 var isLow = item.Priority == WorkItemPriority.Low;
 
+                InterlockedMax(ref _maxBusyWorkers, Interlocked.Increment(ref _busyWorkers));
                 try
                 {
                     await ProcessWorkItemAsync(item, cancellationToken);
@@ -337,6 +419,7 @@ namespace DBADashService
                 }
                 finally
                 {
+                    Interlocked.Decrement(ref _busyWorkers);
                     if (!string.IsNullOrEmpty(item.DedupKey))
                     {
                         _pendingKeys.TryRemove(item.DedupKey, out _);

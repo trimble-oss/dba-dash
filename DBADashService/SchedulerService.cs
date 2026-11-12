@@ -268,6 +268,8 @@ namespace DBADashService
             {
                 Log.Error(ex, "CheckConnectionsAsync error");
             }
+            // The service's own CPU, memory and threads, against its DBADashAgentID.  After the repository upgrade, so its table is there.
+            backgroundTasks.Add(Task.Run(() => ServiceStatsReporter.RunAsync(config, () => config.IsUseQueueBasedScheduling() ? workQueue?.TakeStats() : null, backgroundTasksCts.Token), CancellationToken.None));
             try
             {
                 await ScheduleJobsAsync(stoppingToken).WaitAsync(stoppingToken);

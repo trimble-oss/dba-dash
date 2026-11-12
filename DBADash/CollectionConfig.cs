@@ -58,6 +58,39 @@ namespace DBADash
         /// </summary>
         public int OfflineInstancesReportInterval { get; set; } = 60;
 
+        /// <summary>
+        /// How often (seconds) the service samples its own resource usage - CPU, memory, garbage collection, threads - and
+        /// sends it to the destinations (dbo.ServiceStats, against this service's DBADashAgentID).  The process reads its own
+        /// counters, so a sample runs no queries.  As with <see cref="OfflineInstancesReportInterval"/>, a folder or S3
+        /// destination gets a file for the importing service to process.  Null for the default
+        /// (<see cref="DefaultServiceStatsFrequencySeconds"/>), 0 = off.  Only sampled with
+        /// <see cref="LogInternalPerformanceCounters"/> on - see <see cref="GetServiceStatsFrequencySeconds"/>.
+        /// </summary>
+        public int? ServiceStatsFrequencySeconds { get; set; }
+
+        /// <summary>
+        /// How often (seconds) the samples taken every <see cref="ServiceStatsFrequencySeconds"/> are sent to a folder or S3
+        /// destination - batched so it gets one file per interval rather than one per sample (#2042).  Never more often than
+        /// they're taken.  A SQL destination gets each sample as it's taken.  Null for the default
+        /// (<see cref="DefaultServiceStatsReportInterval"/>).
+        /// </summary>
+        public int? ServiceStatsReportInterval { get; set; }
+
+        public const int DefaultServiceStatsFrequencySeconds = 60;
+        public const int DefaultServiceStatsReportInterval = 300;
+
+        /// <summary>
+        /// How often (seconds) service stats are sampled - 0 when they're off.  Off unless
+        /// <see cref="LogInternalPerformanceCounters"/> is on, for now: the service's own resource usage is diagnostic data
+        /// like the internal performance counters, and can be on by default once it's shown its value.
+        /// </summary>
+        public int GetServiceStatsFrequencySeconds() =>
+            LogInternalPerformanceCounters ? Math.Max(ServiceStatsFrequencySeconds ?? DefaultServiceStatsFrequencySeconds, 0) : 0;
+
+        /// <summary>How often (seconds) service stats are sent to a folder or S3 destination - never more often than they're sampled</summary>
+        public int GetServiceStatsReportInterval() =>
+            Math.Max(GetServiceStatsFrequencySeconds(), ServiceStatsReportInterval ?? DefaultServiceStatsReportInterval);
+
         public string ServiceName { get; set; } = "DBADashService";
 
         public bool AutoUpdateDatabase { get; set; } = true;
@@ -953,6 +986,7 @@ namespace DBADash
                     var dbCn = masterConnection.DeepCopy();
                     dbCn.SourceConnection.ConnectionString = builder.ConnectionString;
                     dbCn.ConnectionID = rdr.GetString(1);
+                    dbCn.IsDiscovered = true;
 
                     if (!SourceExists(dbCn.SourceConnection.ConnectionString, true))
                     {
@@ -1090,6 +1124,7 @@ namespace DBADash
             // Set the ConnectionID to match what the collector would generate (<@@SERVERNAME>|<db>|ReadOnly) so the
             // replica resolves correctly for on-demand collection and stays distinct from the primary instance.
             replica.ConnectionID = $"{primary.SourceConnection.ConnectionInfo.ServerName}|{initialCatalog}|ReadOnly";
+            replica.IsDiscovered = true;
             Log.Information("Add read replica connection for {ConnectionID}", replica.ConnectionID);
             return replica;
         }

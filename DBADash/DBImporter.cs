@@ -515,6 +515,25 @@ namespace DBADash
             await cmd.ExecuteNonQueryAsync();
         }
 
+        /// <summary>
+        /// The service's own resource usage (see ServiceStatsReporter) - recorded against the service that took the samples,
+        /// which for a file from S3 or a folder isn't the one importing it.
+        /// </summary>
+        private async Task UpdateServiceStatsAsync()
+        {
+            var dt = data.Tables[ServiceStatsSampler.TableName];
+            if (dt == null || dt.Rows.Count == 0) return;
+            var collectAgent = GetAgent(data.Tables["DBADash"]!.Rows[0]);
+            // As UpdateInstanceAsync - the import agent's own registration when it's the same service
+            var agentID = collectAgent.Equals(importAgent) ? importAgent.GetDBADashAgentID(connectionString) : collectAgent.GetDBADashAgentID(connectionString);
+            await using var cn = new SqlConnection(connectionString);
+            await using var cmd = new SqlCommand("dbo.ServiceStats_Upd", cn) { CommandTimeout = CommandTimeout, CommandType = CommandType.StoredProcedure };
+            await cn.OpenAsync();
+            cmd.Parameters.AddWithValue("DBADashAgentID", agentID);
+            cmd.Parameters.AddWithValue("ServiceStats", dt);
+            await cmd.ExecuteNonQueryAsync();
+        }
+
         public async Task UpdateAsync()
         {
             if (data.DataSetName == "OfflineInstances")
@@ -530,6 +549,11 @@ namespace DBADash
             if (data.DataSetName == "CollectionDatesHeartbeat")
             {
                 await UpdateCollectionDatesHeartbeatAsync();
+                return;
+            }
+            if (data.DataSetName == ServiceStatsSampler.DataSetName)
+            {
+                await UpdateServiceStatsAsync();
                 return;
             }
             List<Exception> exceptions = new();

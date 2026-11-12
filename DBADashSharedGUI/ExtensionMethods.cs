@@ -112,6 +112,38 @@ namespace DBADashSharedGUI
             }
         }
 
+        /// <summary>
+        /// <see cref="AutoResizeColumnsWithMaxColumnWidth"/>, sized again once the grid's rows are first displayed if they aren't
+        /// yet.  Sizing to the displayed cells of a grid that's bound before it's shown or laid out measures the headers alone,
+        /// so a column whose values are wider than its header is cut off until it's resized by hand.
+        /// </summary>
+        public static void AutoResizeColumnsWithMaxColumnWidthWhenDisplayed(this DataGridView dgv, DataGridViewAutoSizeColumnsMode mode = DataGridViewAutoSizeColumnsMode.DisplayedCells, float? columnWidthCapRatio = null)
+        {
+            dgv.AutoResizeColumnsWithMaxColumnWidth(mode, columnWidthCapRatio);
+            var displayedOnly = mode is DataGridViewAutoSizeColumnsMode.DisplayedCells or DataGridViewAutoSizeColumnsMode.DisplayedCellsExceptHeader;
+            if (!displayedOnly || dgv.RowCount == 0 || dgv.DisplayedRowCount(false) > 0) return;
+
+            // Checked after each layout or visibility change has been processed - the grid works out which rows it displays as
+            // part of its own layout
+            var checkPending = false;
+            void Check()
+            {
+                checkPending = false;
+                if (dgv.IsDisposed || dgv.DisplayedRowCount(false) == 0) return;
+                dgv.Layout -= OnChange;
+                dgv.VisibleChanged -= OnChange;
+                dgv.AutoResizeColumnsWithMaxColumnWidth(mode, columnWidthCapRatio);
+            }
+            void OnChange(object sender, EventArgs e)
+            {
+                if (checkPending || !dgv.IsHandleCreated) return;
+                checkPending = true;
+                dgv.BeginInvoke(Check);
+            }
+            dgv.Layout += OnChange;
+            dgv.VisibleChanged += OnChange;
+        }
+
         public static Task InvokeAsync(this Control control, Func<Task> func)
         {
             var tcs = new TaskCompletionSource<object>();

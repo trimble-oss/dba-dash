@@ -20,6 +20,7 @@ namespace DBADashGUI.CustomReports
             Add(UserActionsReport.Instance);
             Add(ServerRoleMembersReport.Instance);
             Add(ServerServicesReport.Instance);
+            Add(ServiceStatsReport.Instance);
             Add(SQLLoginPasswordAgeReport.Instance);
             Add(TableSizeHistoryReport.Instance);
             Add(TableSizeReport.Instance);
