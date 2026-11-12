@@ -1,0 +1,20 @@
+<Project>
+
+  <!--
+	Stops any processes running from the shared build output folder (e.g. DBADashMCP) that would otherwise
+	lock files and cause the build to fail. Local Windows builds only - skipped on CI.
+	Set StopBuildFolderProcesses=false to disable.
+  -->
+  <Target Name="StopProcessesInBuildFolder"
+		  BeforeTargets="BeforeBuild"
+		  Condition="'$(OS)' == 'Windows_NT' And '$(StopBuildFolderProcesses)' != 'false' And '$(CI)' != 'true' And '$(GITHUB_ACTIONS)' != 'true' And '$(TF_BUILD)' != 'True' And $(BaseOutputPath.Contains('DBADashBuild'))">
+	<PropertyGroup>
+	  <_BuildFolderToCheck>$([System.IO.Path]::GetFullPath('$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '$(BaseOutputPath)'))'))</_BuildFolderToCheck>
+	</PropertyGroup>
+	<Exec Command="powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command &quot;Get-Process -Name 'DBADash*' -ErrorAction SilentlyContinue | Where-Object { $_.Path -and $_.Path.StartsWith($env:DBADASH_BUILD_FOLDER, [StringComparison]::OrdinalIgnoreCase) } | ForEach-Object { Write-Host ('Stopping ' + $_.ProcessName + ' (' + $_.Id + ') running from build folder'); Stop-Process -Id $_.Id -Force -ErrorAction SilentlyContinue }&quot;"
+		  EnvironmentVariables="DBADASH_BUILD_FOLDER=$(_BuildFolderToCheck)"
+		  ContinueOnError="true"
+		  StandardOutputImportance="high" />
+  </Target>
+
+</Project>
