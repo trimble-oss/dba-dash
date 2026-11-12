@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace DBADashConfig.Test
 {
@@ -37,6 +38,56 @@ namespace DBADashConfig.Test
             var json = Helper.GetConfigJson();
             var cfg = CollectionConfig.Deserialize(json);
             Assert.AreEqual(RetentionDays, cfg.ConfigBackupRetentionDays);
+        }
+
+        [TestMethod]
+        [DataRow("NoCompression")]
+        [DataRow("Optimal")]
+        [DataRow("Fastest")]
+        [DataRow("SmallestSize")]
+        public void SetCompressionLevelTest(string level)
+        {
+            var psi = new ProcessStartInfo("DBADashConfig", $"-a SetCompressionLevel --CompressionLevel {level}");
+            Helper.RunProcess(psi);
+
+            var cfg = CollectionConfig.Deserialize(Helper.GetConfigJson());
+            Assert.AreEqual(Enum.Parse<System.IO.Compression.CompressionLevel>(level), cfg.CompressionLevel);
+        }
+
+        [TestMethod]
+        public void SetCompressionLevelDefaultsToNoCompression()
+        {
+            // Without --CompressionLevel the value is NoCompression.  The enum's own zero value is Optimal, so
+            // this fails if the option's default is ever dropped.
+            Helper.RunProcess(new ProcessStartInfo("DBADashConfig", "-a SetCompressionLevel"));
+
+            var cfg = CollectionConfig.Deserialize(Helper.GetConfigJson());
+            Assert.AreEqual(System.IO.Compression.CompressionLevel.NoCompression, cfg.CompressionLevel);
+        }
+
+        [TestMethod]
+        public void SetCompressionLevelRejectsUnknownLevel()
+        {
+            // Not Helper.RunProcess: it waits for the process to exit before reading its output.  The parser's
+            // help text is far larger than the pipe buffer, so the process blocks writing it and never exits.
+            // Both streams are read before waiting, so the process can finish.
+            var psi = new ProcessStartInfo("DBADashConfig", "-a SetCompressionLevel --CompressionLevel Gzip")
+            {
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                RedirectStandardInput = true,
+                CreateNoWindow = true
+            };
+            using var p = Process.Start(psi) ?? throw new Exception("Process is NULL");
+            p.StandardInput.Close();
+            var stdOut = p.StandardOutput.ReadToEndAsync();
+            var stdErr = p.StandardError.ReadToEndAsync();
+            Assert.IsTrue(p.WaitForExit(TimeSpan.FromMinutes(1)), "DBADashConfig did not exit");
+            Task.WaitAll(stdOut, stdErr);
+
+            Assert.AreNotEqual(0, p.ExitCode);
+            StringAssert.Contains(stdErr.Result, "CompressionLevel");
         }
 
         [TestMethod]

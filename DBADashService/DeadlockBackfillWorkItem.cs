@@ -113,9 +113,10 @@ namespace DBADashService
                 {
                     Log.Error(ex, "Error writing {filename} to destination. File will be copied to {folder}",
                         fileName, SchedulerServiceConfig.FailedMessageFolder);
+                    string failedPath = null;
                     try
                     {
-                        await DestinationHandling.WriteFolderAsync(collector.Data,
+                        failedPath = await FailedMessageFolder.WriteAsync(collector.Data,
                             SchedulerServiceConfig.FailedMessageFolder, fileName, config);
                     }
                     catch (Exception folderEx)
@@ -128,7 +129,7 @@ namespace DBADashService
                     // WriteFolderAsync only logs when the folder is missing - FailedMessageFolder is blank if it
                     // couldn't be created - so check the file is really there.
                     if (string.IsNullOrEmpty(SchedulerServiceConfig.FailedMessageFolder) ||
-                        !File.Exists(Path.Combine(SchedulerServiceConfig.FailedMessageFolder, fileName)))
+                        failedPath == null || !File.Exists(failedPath))
                     {
                         Log.Error("Deadlock backfill for {instance} could not be written to a destination or to the " +
                                   "failed message folder.  Its {count} deadlock(s) are discarded, and the backfill is " +

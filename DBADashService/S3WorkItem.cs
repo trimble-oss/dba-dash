@@ -74,7 +74,7 @@ namespace DBADashService
                         if (resp is { S3Objects: not null })
                         {
                             var fileList = resp.S3Objects
-                                .Where(f => f.Key.EndsWith(DestinationHandling.FileExtension))
+                                .Where(f => DestinationHandling.IsCompletedFileName(f.Key))
                                 .Select(f => f.Key)
                                 .ToList();
 
@@ -121,8 +121,7 @@ namespace DBADashService
                 using var response = await s3Cli.GetObjectAsync(bucket, s3Path);
                 await using var responseStream = response.ResponseStream;
 
-                var ds = new DataSet();
-                ds.ReadXml(responseStream);
+                var ds = DataSetSerialization.ReadFromStream(responseStream, DestinationHandling.IsCompressedFileName(s3Path));
                 var id = DirectoryWorkItem.GetID(ds);
                 using (await Locker.AsyncLocker.LockAsync(id))
                 {
@@ -136,7 +135,7 @@ namespace DBADashService
                         Log.Error(ex,
                             "Error importing file {filename}.  Writing file to failed message folder {folder}",
                             fileName, SchedulerServiceConfig.FailedMessageFolder);
-                        await DestinationHandling.WriteFolderAsync(ds, SchedulerServiceConfig.FailedMessageFolder,
+                        await FailedMessageFolder.WriteAsync(ds, SchedulerServiceConfig.FailedMessageFolder,
                             fileName, config);
                     }
                     finally

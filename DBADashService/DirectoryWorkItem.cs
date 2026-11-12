@@ -74,7 +74,7 @@ namespace DBADashService
                 DeleteStaleTempFiles(allFiles);
                 var lockedFilesFirstSeen = LockedFilesFirstSeenByFolder.GetOrAdd(folder, _ => new ConcurrentDictionary<string, DateTime>(StringComparer.OrdinalIgnoreCase));
                 PruneLockTracking(lockedFilesFirstSeen, allFiles);
-                var files = allFiles.Where(f => f.EndsWith(DestinationHandling.FileExtension)).ToList();
+                var files = allFiles.Where(DestinationHandling.IsCompletedFileName).ToList();
 
                 var filesByInstance = GetFilesToProcessByInstance(files);
                 var tasks = filesByInstance.Select(kv => ProcessInstanceFilesAsync(kv.Value, Source, config, lockedFilesFirstSeen, cancellationToken)).ToList();
@@ -251,7 +251,7 @@ namespace DBADashService
                 // second argument unchanged, which would make this a copy of the file over itself.
                 // Copy rather than move: the source folder is often a file share and the failed message folder
                 // is always local to the service, and File.Move has volume restrictions that a copy doesn't.
-                File.Copy(filePath, Path.Combine(SchedulerServiceConfig.FailedMessageFolder, fileName), true);
+                FailedMessageFolder.Copy(filePath, SchedulerServiceConfig.FailedMessageFolder, fileName);
                 if (!TryDeleteFile(filePath))
                 {
                     Log.Warning("{FileName} has been copied to the failed message folder but couldn't be removed from the source folder.  The import will be attempted again on the next iteration", fileName);

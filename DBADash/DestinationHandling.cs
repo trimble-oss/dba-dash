@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,10 +19,51 @@ namespace DBADash
         public const string FileNamePrefix = "DBADash_";
         public const string FileExtension = ".xml";
 
-        /// <summary>Extension used while a file is being written to a folder destination.  Renamed to <see cref="FileExtension"/> once the write completes.</summary>
+        /// <summary>
+        /// Extension of a gzip-compressed DataSet file.  Written when <see cref="CollectionConfig.CompressionLevel"/> is not NoCompression,
+        /// and read by the importer alongside <see cref="FileExtension"/>.
+        /// </summary>
+        public const string CompressedFileExtension = ".xml.gz";
+
+        /// <summary>Extension used while a file is being written to a folder destination.  Renamed to the final extension once the write completes.</summary>
         public const string TempFileExtension = ".tmp";
 
         public const string FileSearchPattern = FileNamePrefix + "*";
+
+        /// <summary>Whether the file name is a completed DataSet file the importer should read, compressed or not.</summary>
+        public static bool IsCompletedFileName(string fileName) =>
+            fileName.EndsWith(FileExtension, StringComparison.Ordinal) || IsCompressedFileName(fileName);
+
+        /// <summary>Whether the file name is a gzip-compressed DataSet file.</summary>
+        public static bool IsCompressedFileName(string fileName) =>
+            fileName.EndsWith(CompressedFileExtension, StringComparison.Ordinal);
+
+        /// <summary>
+        /// The file name in the requested format.  Callers name files with <see cref="FileExtension"/>; this
+        /// adds or drops the gzip extension to match <paramref name="compressed"/>.  Names that aren't DataSet
+        /// files (see <see cref="IsCompletedFileName"/>) are returned unchanged.
+        /// </summary>
+        public static string ToFileFormat(string fileName, bool compressed)
+        {
+            if (!IsCompletedFileName(fileName))
+            {
+                return fileName;
+            }
+            var plainName = IsCompressedFileName(fileName) ? fileName[..^".gz".Length] : fileName;
+            return compressed ? plainName + ".gz" : plainName;
+        }
+
+        /// <summary>Whether files written at this level are gzip-compressed.  <c>NoCompression</c> means plain XML.</summary>
+        public static bool IsCompressed(CompressionLevel level) => level != CompressionLevel.NoCompression;
+
+        /// <summary>
+        /// The compression level to write <paramref name="fileName"/> at.  Only DataSet files (see <see cref="IsCompletedFileName"/>)
+        /// are compressed.  Other files, such as the <c>.message</c> payloads an SQS reply points to, are always plain XML:
+        /// the reply carries their exact path, and the agent that reads them (ResponseMessage.DownloadData) may be an
+        /// older version that expects XML.
+        /// </summary>
+        internal static CompressionLevel CompressionLevelFor(string fileName, CompressionLevel level) =>
+            IsCompletedFileName(fileName) ? level : CompressionLevel.NoCompression;
 
         private static readonly ResiliencePipeline pipeline = new ResiliencePipelineBuilder()
             .AddRetry(new RetryStrategyOptions
@@ -143,57 +185,84 @@ namespace DBADash
 
             using var s3Cli = await AWSTools.GetS3ClientForEndpointAsync(cfg.AWSProfile, cfg.AccessKey, cfg.GetSecretKey(), destination);
 
+            var level = CompressionLevelFor(fileName, cfg.CompressionLevel);
+            var objectName = ToFileFormat(fileName, IsCompressed(level));
             var r = new Amazon.S3.Model.PutObjectRequest()
             {
                 BucketName = bucket,
                 Key = string.IsNullOrEmpty(keyPrefix)
-                    ? fileName
-                    : string.Join('/', new[] { keyPrefix.TrimEnd('/'), fileName })
+                    ? objectName
+                    : string.Join('/', new[] { keyPrefix.TrimEnd('/'), objectName })
             };
 
             using var ms = new MemoryStream();
-            ds.WriteXml(ms, XmlWriteMode.WriteSchema);
+            WriteDataSet(ds, ms, level);
+            ms.Position = 0;
             r.InputStream = ms;
             await s3Cli.PutObjectAsync(r);
         }
 
-        public static async Task WriteFolderAsync(DataSet ds, string destination, string fileName, CollectionConfig cfg)
+        /// <summary>
+        /// Writes a DataSet to a file in a folder, as XML or gzip-compressed XML according to
+        /// <see cref="CollectionConfig.CompressionLevel"/>.  <paramref name="fileName"/> is named with
+        /// <see cref="FileExtension"/>; the extension written is adjusted to match the setting.
+        /// </summary>
+        /// <returns>The path of the file written, or null if the folder doesn't exist.</returns>
+        public static async Task<string> WriteFolderAsync(DataSet ds, string destination, string fileName, CollectionConfig cfg)
         {
             CollectionRunsTable.MarkSent(ds);
             if (Directory.Exists(destination))
             {
-                var filePath = Path.Combine(destination, fileName);
-                var extension = Path.GetExtension(fileName);
-                if (extension == FileExtension)
-                {
-                    // Write to a temp file and rename it once the write is complete.  The service importing
-                    // from this folder ignores anything that doesn't have the .xml extension, so it can't read
-                    // a partially written file, and a service killed mid-write leaves an inert temp file behind
-                    // instead of a truncated .xml file that could never be imported.
-                    var tempPath = filePath + TempFileExtension;
-                    DataSetSerialization.SetDateTimeKind(ds); // Required to prevent timezone conversion
-                    try
-                    {
-                        await using (FileStream fs = new(tempPath, FileMode.Create, FileAccess.Write))
-                        {
-                            await Task.Run(() => ds.WriteXml(fs, XmlWriteMode.WriteSchema));
-                        }
-                        File.Move(tempPath, filePath, true);
-                    }
-                    catch
-                    {
-                        TryDeleteTempFile(tempPath);
-                        throw;
-                    }
-                }
-                else
+                var outputName = ToFileFormat(fileName, IsCompressed(cfg.CompressionLevel));
+                if (!IsCompletedFileName(outputName))
                 {
                     throw new Exception("Invalid extension");
                 }
+                var filePath = Path.Combine(destination, outputName);
+
+                // Write to a temp file and rename it once the write is complete.  The service importing
+                // from this folder ignores anything that isn't a completed .xml or .xml.gz file, so it can't read
+                // a partially written file, and a service killed mid-write leaves an inert temp file behind
+                // instead of a truncated file that could never be imported.
+                var tempPath = filePath + TempFileExtension;
+                DataSetSerialization.SetDateTimeKind(ds); // Required to prevent timezone conversion
+                try
+                {
+                    await using (FileStream fs = new(tempPath, FileMode.Create, FileAccess.Write))
+                    {
+                        await Task.Run(() => WriteDataSet(ds, fs, cfg.CompressionLevel));
+                    }
+                    File.Move(tempPath, filePath, true);
+                }
+                catch
+                {
+                    TryDeleteTempFile(tempPath);
+                    throw;
+                }
+                return filePath;
             }
             else
             {
                 Log.Error("Destination Folder doesn't exist {folder}", destination);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Writes the DataSet as XML to <paramref name="stream"/>, gzip-compressed at <paramref name="level"/> unless the
+        /// level is NoCompression, which writes plain XML.  The gzip footer is written before this returns, so the
+        /// stream is complete once it does.  The stream is left open for the caller to dispose.
+        /// </summary>
+        internal static void WriteDataSet(DataSet ds, Stream stream, CompressionLevel level)
+        {
+            if (IsCompressed(level))
+            {
+                using var gz = new GZipStream(stream, level, leaveOpen: true);
+                ds.WriteXml(gz, XmlWriteMode.WriteSchema);
+            }
+            else
+            {
+                ds.WriteXml(stream, XmlWriteMode.WriteSchema);
             }
         }
 

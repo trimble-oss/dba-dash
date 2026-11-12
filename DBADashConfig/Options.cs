@@ -27,6 +27,7 @@ SetServiceName - Change the name of the DBA Dash service
 Encrypt - Encrypt the config file with a password (--EncryptionPassword)
 Decrypt - Decrypt the config file. --DecryptionPassword can be used if required.
 SetConfigFileBackupRetention - Specify how long to keep config file backups. --RetentionDays
+SetCompressionLevel - Set how files written to folder destinations, S3 and the failed message folder are compressed. --CompressionLevel (NoCompression, Optimal, Fastest or SmallestSize)
 PopulateConnectionID - Add ConnectionID to source connections without a ConnectionID
 PopulateConnectionID2 - Add ConnectionID to source connections without a ConnectionID.  If connection fails, set ConnectionID based on Data Source in connection string.
 SetAWS - Set AWS Credentials
@@ -187,6 +188,10 @@ AddCommunityToolKnownVersions - For DBA Dash maintainers.  Adds every release of
             HelpText = "Use with action SetConfigFileBackupRetention.")]
         public int RetentionDays { get; set; }
 
+        [Option("CompressionLevel", Default = System.IO.Compression.CompressionLevel.NoCompression, Required = false,
+            HelpText = "Use with action SetCompressionLevel.  NoCompression (the default) writes plain XML (.xml).  Optimal, Fastest or SmallestSize write gzip-compressed XML (.xml.gz) at that level.")]
+        public System.IO.Compression.CompressionLevel CompressionLevel { get; set; }
+
         [Option("CollectTranBeginTime", Default = true, Required = false, HelpText = "Running Queries - Collect transaction begin time")]
         public bool? CollectTranBeginTime { get; set; }
 
@@ -299,6 +304,7 @@ AddCommunityToolKnownVersions - For DBA Dash maintainers.  Adds every release of
             Encrypt,
             Decrypt,
             SetConfigFileBackupRetention,
+            SetCompressionLevel,
             AddDestination,
             RemoveDestination,
             RemoveAndDelete,

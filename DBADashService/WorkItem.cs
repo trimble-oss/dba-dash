@@ -183,7 +183,7 @@ namespace DBADashService
                     {
                         Log.Error(ex, "Error writing {filename} to destination. File will be copied to {folder}",
                             fileName, SchedulerServiceConfig.FailedMessageFolder);
-                        await DestinationHandling.WriteFolderAsync(collector.Data,
+                        await FailedMessageFolder.WriteAsync(collector.Data,
                             SchedulerServiceConfig.FailedMessageFolder, fileName, config);
                     }
 
@@ -262,7 +262,7 @@ namespace DBADashService
                 {
                     Log.Error(ex, "Error writing {filename} to destination. File will be copied to {folder}",
                         fileName, SchedulerServiceConfig.FailedMessageFolder);
-                    await DestinationHandling.WriteFolderAsync(collector.Data,
+                    await FailedMessageFolder.WriteAsync(collector.Data,
                         SchedulerServiceConfig.FailedMessageFolder, fileName, config);
                 }
             }
