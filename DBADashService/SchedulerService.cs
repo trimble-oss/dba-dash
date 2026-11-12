@@ -1452,14 +1452,6 @@ namespace DBADashService
             }
         }
 
-        /// <summary>
-        /// Extensions removed from the failed message folder.  The temp extension is included because a
-        /// service killed part way through writing one of these files leaves a temp file behind that nothing
-        /// else removes - DirectoryWorkItem only sweeps folders that are configured as an import source, and
-        /// this folder never is.
-        /// </summary>
-        private static readonly string[] FailedMessageExtensions = { ".xml", ".json", ".bin", DestinationHandling.TempFileExtension };
-
         private static void FolderCleanup(object sender, ElapsedEventArgs e)
         {
             FolderCleanup();
@@ -1474,8 +1466,7 @@ namespace DBADashService
                     Log.Information("Maintenance: Failed Message Folder cleanup");
                     (from f in new DirectoryInfo(SchedulerServiceConfig.FailedMessageFolder).GetFiles()
                      where f.LastWriteTime < DateTime.Now.Subtract(TimeSpan.FromDays(7))
-                     && FailedMessageExtensions.Contains(f.Extension, StringComparer.CurrentCultureIgnoreCase)
-                     && f.Name.StartsWith("dbadash", StringComparison.CurrentCultureIgnoreCase)
+                     && FailedMessageFolder.IsManagedFile(f)
                      select f
                     ).ToList()
                         .ForEach(f => f.Delete());

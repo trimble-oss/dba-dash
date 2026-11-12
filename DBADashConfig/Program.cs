@@ -131,6 +131,11 @@ public class Program
                 Helper.SaveConfig(config, o);
                 break;
 
+            case CommandLineActionOption.SetCompressionLevel:
+                config.CompressionLevel = o.CompressionLevel;
+                Helper.SaveConfig(config, o);
+                break;
+
             case CommandLineActionOption.Delete:
                 Helper.MarkInstanceDeleted(config, o.ConnectionID);
                 break;

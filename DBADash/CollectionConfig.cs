@@ -119,6 +119,14 @@ namespace DBADash
 
         public bool? UseQueueBasedScheduling { get; set; }
 
+        /// <summary>
+        /// Compression for files written to folder destinations, S3 and the failed message folder.  <c>NoCompression</c>
+        /// (the default) writes plain XML (.xml).  Any other level writes gzip-compressed XML (.xml.gz) at that level:
+        /// <c>Optimal</c> gives the smallest file for a reasonable CPU cost, <c>Fastest</c> uses less CPU for a larger
+        /// file, and <c>SmallestSize</c> the reverse.  The importer reads both formats whatever this is set to.
+        /// </summary>
+        public System.IO.Compression.CompressionLevel CompressionLevel { get; set; } = System.IO.Compression.CompressionLevel.NoCompression;
+
         public const int DefaultImportCommandTimeout = 60;
         public const int DefaultPurgeDataCommandTimeout = 1200;
         public const int DefaultAddPartitionsCommandTimeout = 300;
