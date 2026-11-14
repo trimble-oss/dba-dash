@@ -63,6 +63,16 @@ namespace DBADashGUI.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap _077_AddFile_16x16_72 {
+            get {
+                object obj = ResourceManager.GetObject("077_AddFile_16x16_72", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap _112_RefreshArrow_Green_16x16_72 {
             get {
                 object obj = ResourceManager.GetObject("112_RefreshArrow_Green_16x16_72", resourceCulture);
@@ -866,6 +876,16 @@ namespace DBADashGUI.Properties {
         internal static System.Drawing.Bitmap Save_16x {
             get {
                 object obj = ResourceManager.GetObject("Save_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap SendEmail_16x {
+            get {
+                object obj = ResourceManager.GetObject("SendEmail_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

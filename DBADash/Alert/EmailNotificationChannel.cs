@@ -3,6 +3,7 @@ using DBADash;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -129,6 +130,35 @@ namespace DBADash.Alert
                 Text = ReplacePlaceholders(alert, GetEmailMessageTemplate())
             };
 
+            await SendMessageAsync(message);
+        }
+
+        /// <summary>
+        /// Sends a daily report (HTML with a plain text alternative) to this channel's To Email.
+        /// Uses the same SMTP settings as alerts.  Channel schedules and the alert templates don't apply to reports.
+        /// </summary>
+        /// <param name="inlineImages">PNGs the HTML references as cid:ContentId, sent as linked resources so they show in the body rather than as attachments</param>
+        /// <returns>The mail server's reply, e.g. "2.0.0 OK queued as 1A2B3C" - accepted by the server, which isn't the same as delivered</returns>
+        public async Task<string> SendDailyReportAsync(string subject, string htmlBody, string textBody, IEnumerable<(string ContentId, byte[] Png)> inlineImages = null)
+        {
+            using var message = new MimeMessage();
+            message.From.Add(new MailboxAddress(From, FromEmail));
+            message.To.Add(new MailboxAddress(string.IsNullOrWhiteSpace(To) ? ChannelName : To, ToEmail));
+            message.Subject = subject;
+            var builder = new BodyBuilder { TextBody = textBody, HtmlBody = htmlBody };
+            var n = 0;
+            foreach (var (contentId, png) in inlineImages ?? Enumerable.Empty<(string, byte[])>())
+            {
+                var resource = builder.LinkedResources.Add($"chart{++n}.png", png, new ContentType("image", "png"));
+                resource.ContentId = contentId;
+            }
+            message.Body = builder.ToMessageBody();
+            return await SendMessageAsync(message);
+        }
+
+        /// <returns>The server's reply to the message</returns>
+        private async Task<string> SendMessageAsync(MimeMessage message)
+        {
             using var client = new SmtpClient();
             try
             {
@@ -138,8 +168,17 @@ namespace DBADash.Alert
                     await client.AuthenticateAsync(UserName, Password);
                 }
 
-                await client.SendAsync(message);
-                await client.DisconnectAsync(true);
+                var reply = await client.SendAsync(message);
+                // The server has accepted the message: a failure saying goodbye doesn't unsend it, and reporting it as a failure would send it again
+                try
+                {
+                    await client.DisconnectAsync(true);
+                }
+                catch (Exception ex)
+                {
+                    Log.Warning(ex, "Email accepted by {Host}:{Port} but the disconnect failed", Host, Port);
+                }
+                return reply;
             }
             catch (AuthenticationException ex)
             {
