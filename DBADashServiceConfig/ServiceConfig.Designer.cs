@@ -1036,6 +1036,7 @@ namespace DBADashServiceConfig
             chkProcessAlerts.Size = new System.Drawing.Size(122, 24);
             chkProcessAlerts.TabIndex = 47;
             chkProcessAlerts.Text = "Process Alerts";
+            toolTip1.SetToolTip(chkProcessAlerts, "Process alerts and send notifications, including daily reports.  Untick on a service that shouldn't send notifications, e.g. one that can't reach the mail server.  It can be on for several services: one at a time processes alerts, and each daily report is still sent once.");
             chkProcessAlerts.UseVisualStyleBackColor = true;
             chkProcessAlerts.CheckedChanged += ChkProcessNotifications_CheckedChanged;
             // 

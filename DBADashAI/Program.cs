@@ -1206,6 +1206,72 @@ ApplyAuthAndRateLimit(app.MapPost("/api/ai/analyse-performance", async (
     }
 }));
 
+// A few sentences for the top of a daily health report.  One call, no lookups: the report is the evidence.
+ApplyAuthAndRateLimit(app.MapPost("/api/ai/summarise-daily-report", async (
+    AiDailyReportSummaryRequest request,
+    AiChatClient aiChat,
+    AiRequestTelemetryService telemetry,
+    AiDataDetailSetting dataDetail,
+    IConfiguration config,
+    CancellationToken cancellationToken) =>
+{
+    var validationError = request.Validate() ?? dataDetail.Refusal(request.DataDetail);
+    if (!string.IsNullOrWhiteSpace(validationError))
+    {
+        return Results.BadRequest(new { error = validationError });
+    }
+
+    var requestId = Guid.NewGuid().ToString("N");
+    var sw = telemetry.Start(requestId, "Daily report summary", "daily-report-summary");
+    try
+    {
+        var prompt = $"""
+            You are summarising a SQL Server daily health report for the DBAs who receive it by email.
+
+            The readers skim it, so keep it short and in exactly this shape:
+            - First, one sentence of at most 20 words on how today looks overall.
+            - Then 2 to 5 bullet points, most urgent first, one topic each.  Start each with "- **Topic:** " (for example "- **Missing backups:** ")
+              and keep it under 30 words.  Name at most 3 instances in a point, then "and N others".  Issues marked new matter more than
+              ongoing ones; say "new" where it applies.
+            - Mention performance only where the report shows a problem or a change from usual, and say what's behind it when the report says.
+            - If nothing needs attention, write only the first sentence, saying so.
+            - No headings, no other markdown, no closing remarks.
+            - Use only what is in the report.  Don't guess at causes it doesn't show, and don't recommend anything it doesn't support.
+
+            Report: {request.ReportName}
+
+            {request.Report}
+            """;
+
+        var result = await aiChat.ChatAsync(
+            new[] { new AiConversationTurn { Role = AiConversationTurn.User, Content = prompt } },
+            cancellationToken, null, AiDataMask.Metadata);
+        if (!result.Success)
+        {
+            return AnalysisFailure(telemetry, requestId, "Daily report summary failed", result, null);
+        }
+
+        sw.Stop();
+        telemetry.Complete(requestId, "daily-report-summary", 1, 0, sw.ElapsedMilliseconds, 0, "n/a");
+        return Results.Ok(new AiDailyReportSummaryResponse
+        {
+            RequestId = requestId,
+            Summary = result.Text.Trim(),
+            Model = AiChatClient.ConfiguredModel(config)
+        });
+    }
+    catch (OperationCanceledException)
+    {
+        telemetry.Fail(requestId, new TimeoutException("AI request cancelled or timed out."));
+        return Results.StatusCode(StatusCodes.Status499ClientClosedRequest);
+    }
+    catch (Exception ex)
+    {
+        telemetry.Fail(requestId, ex);
+        return Results.Problem(title: "Daily report summary failed", detail: $"RequestId={requestId}. {ex.Message}", statusCode: StatusCodes.Status500InternalServerError);
+    }
+}));
+
 ApplyAuthAndRateLimit(app.MapPost("/api/ai/proactive-digest", async (
     IEnumerable<IAiTool> tools,
     AiRiskForecastService forecastService,

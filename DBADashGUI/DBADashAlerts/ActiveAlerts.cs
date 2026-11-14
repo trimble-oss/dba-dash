@@ -37,6 +37,9 @@ namespace DBADashGUI.DBADashAlerts
             var tsConfigure = new ToolStripButton("Configure", Properties.Resources.SettingsOutline_16x);
             tsConfigure.Click += Configure_Click;
             customReportView1.ToolStrip.Items.Add(tsConfigure);
+            var tsDailyReports = new ToolStripButton("Daily Reports", Properties.Resources.VBReport_16x) { ToolTipText = "Scheduled daily health reports emailed to Email notification channels" };
+            tsDailyReports.Click += DailyReports_Click;
+            customReportView1.ToolStrip.Items.Add(tsDailyReports);
             var tsHistory = new ToolStripMenuItem("History", Properties.Resources.Time_16x);
             tsHistory.Click += TsHistory_Click;
             customReportView1.ToolStrip.Items.Add(tsHistory);
@@ -163,6 +166,14 @@ namespace DBADashGUI.DBADashAlerts
                 Context = context
             };
             historyViewer.ShowDialog();
+        }
+
+        private void DailyReports_Click(object sender, EventArgs e)
+        {
+            using var frm = new Form() { Width = this.Width / 2, Height = this.Height / 2, Text = @"Daily Reports", StartPosition = FormStartPosition.CenterParent, Icon = DailyReports.DailyReportIcons.FormIcon };
+            frm.Controls.Add(new DailyReports.DailyReportsControl());
+            frm.ApplyTheme();
+            frm.ShowDialog(this);
         }
 
         private void Configure_Click(object sender, EventArgs e)

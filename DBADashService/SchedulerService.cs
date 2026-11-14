@@ -445,6 +445,32 @@ namespace DBADashService
         }
 
         /// <summary>
+        /// Checks every few minutes for daily reports that are due.  Reports are read from the repository on each check, so
+        /// adding, changing or removing a report in the GUI needs no service restart.
+        /// </summary>
+        private void ScheduleDailyReports()
+        {
+            // Daily reports go out through the notification channels, so a service that doesn't process alerts (e.g. it can't reach the mail server) doesn't send them either
+            if (!config.ProcessAlerts)
+            {
+                Log.Information("Daily reports are disabled because alert processing is disabled");
+                return;
+            }
+            var i = 0;
+            foreach (var d in config.AllDestinations.Where(cn => cn.Type == ConnectionType.SQL))
+            {
+                i += 1;
+                var job = JobBuilder.Create<DailyReportJob>()
+                    .WithIdentity("DailyReportJob" + i)
+                    .UsingJobData("ConnectionString", d.ConnectionString)
+                    .Build();
+                ScheduleJob(DailyReportIntervalSeconds.ToString(), job);
+            }
+        }
+
+        private const int DailyReportIntervalSeconds = 300;
+
+        /// <summary>
         /// Recomputes deadlock signatures stored under an older signature version.  The job removes itself once a run
         /// finds nothing left to do, so on an up to date repository it costs one short query per service start.
         /// </summary>
@@ -795,6 +821,7 @@ namespace DBADashService
 
             await ScheduleAndRunMaintenanceJobAsync();
             ScheduleSummaryRefresh();
+            ScheduleDailyReports();
             ScheduleDeadlockSignatureRecompute();
             ScheduleUpgradeCheck();
 

@@ -160,6 +160,8 @@
     <PackageReference Include="Microsoft.SqlServer.XEvent.XELite" />
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="Octokit" />
+    <!-- Daily report charts (DailyReport/PerformanceChart.cs) -->
+    <PackageReference Include="SkiaSharp" />
     <PackageReference Include="Polly.Core" />
     <PackageReference Include="Quartz" />
     <PackageReference Include="Serilog" />
