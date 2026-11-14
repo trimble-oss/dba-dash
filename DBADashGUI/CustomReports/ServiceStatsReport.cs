@@ -1,4 +1,5 @@
 using DBADashGUI.Charts;
+using LiveChartsCore.Measure;
 using System.Collections.Generic;
 
 namespace DBADashGUI.CustomReports
@@ -64,7 +65,9 @@ namespace DBADashGUI.CustomReports
                         YAxisLabel = "Items",
                         YAxisFormat = "N0",
                         // Usually empty or close to it - a floor keeps a queue of one or two from looking like a backlog
-                        YAxisMinimumMax = 10
+                        YAxisMinimumMax = 10,
+                        // Priorities x services - a legend with a few services crowds out the chart.  The tooltip names the series.
+                        LegendPosition = LegendPosition.Hidden
                     }
                 },
                 Line("Work Queue Wait (avg)", "QueueWaitAvgMs", "ms", "N0", minimumMax: 1000),
@@ -220,7 +223,10 @@ namespace DBADashGUI.CustomReports
                 YAxisLabel = yAxisLabel,
                 YAxisFormat = yAxisFormat,
                 YAxisMinimumMax = minimumMax,
-                GeometrySize = 0
+                GeometrySize = 0,
+                // A line per service: redundant with one service (the usual case) and crowding the chart with several.
+                // The tooltip names the service.
+                LegendPosition = LegendPosition.Hidden
             }
         };
     }
