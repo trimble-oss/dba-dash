@@ -26,7 +26,7 @@ using DataTable = System.Data.DataTable;
 
 namespace DBADashGUI.CustomReports
 {
-    public partial class CustomReportView : UserControl, ISetContext, IRefreshData, ISetStatus, INavigation
+    public partial class CustomReportView : UserControl, ISetContext, IRefreshData, ISetStatus, INavigation, IChartLegendScope
     {
         public event EventHandler ReportNameChanged;
 
@@ -1426,6 +1426,7 @@ namespace DBADashGUI.CustomReports
                         {
                             var newChart = ChartHelper.GetChartControlFromDataTable(dt, chartConfig, GetChartOverlays(chartWrapper));
                             newChart.Tag = chartWrapper;
+                            ChartLegends.SetKey(newChart, LegendKey(chartWrapper));
                             AttachChartDrillDown(newChart, chartWrapper);
 
                             // Replace in the panel's controls keeping the ToolStrip in place
@@ -1501,6 +1502,16 @@ namespace DBADashGUI.CustomReports
         /// configuration is left alone: a copy carries the bounds, so the report is not rewritten with the
         /// dates of whichever range happened to be selected when it was last viewed.
         /// </summary>
+        /// <summary>
+        /// What the Legend menu knows a chart by across a reload: its place in the report and its title.  The definition
+        /// object can be recreated when the report loads again, and two charts can share a title.
+        /// </summary>
+        private string LegendKey(CustomReportChart chartWrapper)
+        {
+            var index = Report?.Charts.FindIndex(c => ReferenceEquals(c, chartWrapper)) ?? -1;
+            return $"report-chart:{index}:{chartWrapper?.Title ?? chartWrapper?.Config?.ChartTitle}";
+        }
+
         private ChartConfigurationBase ResolveChartConfig(CustomReportChart chartWrapper)
         {
             if (chartWrapper.Config is not ChartConfiguration config) return chartWrapper.Config;
@@ -1750,6 +1761,8 @@ namespace DBADashGUI.CustomReports
                     if (chartControl != null)
                     {
                         chartControl.Tag = chartWrapper;
+                        // On the metric control - the chart inside it looks for the key up its parents
+                        ChartLegends.SetKey(chartControl, LegendKey(chartWrapper));
                         pnl = chartLayoutHelper.CreateResizablePanel(chartControl, chartId, enableResize, string.Empty, panelName: $"chart_{chartId}");
                     }
                     else
@@ -1784,6 +1797,7 @@ namespace DBADashGUI.CustomReports
                         continue;
                     }
                     chartControl.Tag = chartWrapper;
+                    ChartLegends.SetKey(chartControl, LegendKey(chartWrapper));
                     pnl = chartLayoutHelper.CreateResizablePanel(chartControl, chartId, enableResize, chartConfig.ChartTitle, panelName: $"chart_{chartId}");
                     // After the panel, so the drill-down's cursor handler runs after the one the panel's
                     // resize helper adds and can show the hand over a clickable point.

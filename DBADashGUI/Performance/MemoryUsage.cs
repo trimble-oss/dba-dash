@@ -273,7 +273,7 @@ namespace DBADashGUI.Performance
 
             pieChart1.Series = series;
             pieChart1.LegendTextPaint = new SolidColorPaint(DBADashUser.SelectedTheme.ForegroundColor.ToSKColor());
-            pieChart1.LegendPosition = LiveChartsCore.Measure.LegendPosition.Bottom;
+            DBADashGUI.Charts.ChartLegends.SetConfigured(pieChart1, LiveChartsCore.Measure.LegendPosition.Bottom);
         }
 
         public DataTable GetMemoryUsage()

@@ -792,7 +792,8 @@ namespace DBADashGUI.Performance
             {
                 menuItem.Checked = menuItem == item;
             }
-            chart1.LegendPosition = legendPosition;
+            // Through ChartLegends, so the position picked here wins over the chart menu's Legend choice
+            DBADashGUI.Charts.ChartLegends.SetPosition(chart1, legendPosition);
             _metric.LegendPosition = legendPosition;
         }
 

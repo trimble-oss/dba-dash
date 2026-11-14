@@ -547,7 +547,8 @@ namespace DBADashGUI.Performance
             {
                 menuItem.Checked = menuItem == item;
             }
-            chartIO.LegendPosition = legendPosition;
+            // Through ChartLegends, so the position picked here wins over the chart menu's Legend choice
+            DBADashGUI.Charts.ChartLegends.SetPosition(chartIO, legendPosition);
         }
 
         private void LineSmoothness_Click(object sender, EventArgs e)

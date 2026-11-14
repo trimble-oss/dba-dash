@@ -223,6 +223,8 @@ namespace DBADashGUI.Performance
                         }
                      );
                     chart.ApplyTheme();
+                    // The charts are rebuilt on refresh - the metric is how the Legend menu knows them again
+                    ChartLegends.SetKey(chart, metric);
 
                     var chartPanel = chartLayoutHelper.CreateResizablePanel(chart, metric, rowCount > 1);
                     chartPanel.ApplyTheme();
@@ -570,6 +572,8 @@ namespace DBADashGUI.Performance
             {
                 menuItem.Checked = menuItem == item;
             }
+            // The position picked is the latest choice for every chart here, over the chart menu's Legend
+            ChartLegends.ClearChoices(this);
             RefreshData();
         }
     }
