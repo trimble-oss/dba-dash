@@ -389,7 +389,7 @@ namespace DBADashGUI.Charts
                 _ = new PieDonutManager(chart, series, config.InnerRadius.Value);
             }
 
-            chart.LegendPosition = config.LegendPosition;
+            ChartLegends.SetConfigured(chart, config.LegendPosition);
             chart.LegendTextPaint = labelPaint;
 
             // Context menu for chart actions (copy/save)
@@ -589,6 +589,8 @@ namespace DBADashGUI.Charts
                 {
                     Debug.WriteLine($"AddChartContextMenu: failed to attach Opening/Closed handlers: {ex}");
                 }
+
+                ChartLegends.AddMenuItem(chart, cms);
 
                 chart.ContextMenuStrip = cms;
             }
@@ -1238,7 +1240,7 @@ namespace DBADashGUI.Charts
                 AssignSeriesToYAxes(series, config);
             }
 
-            chart.LegendPosition = config.LegendPosition;
+            ChartLegends.SetConfigured(chart, config.LegendPosition);
             chart.LegendTextPaint = labelPaint;
             chart.LegendTextSize = DBADashUser.ChartAxisLabelFontSize;
         }
