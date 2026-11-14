@@ -337,7 +337,8 @@ namespace DBADashGUI.Performance
             {
                 menuItem.Checked = menuItem == item;
             }
-            waitChart.LegendPosition = legendPosition;
+            // Through ChartLegends, so the position picked here wins over the chart menu's Legend choice
+            DBADashGUI.Charts.ChartLegends.SetPosition(waitChart, legendPosition);
         }
 
         public void ApplyTheme(BaseTheme theme)

@@ -226,7 +226,7 @@ namespace DBADashGUI.Performance
                     MinLimit = 0, 
                 }
             };
-            planChart.LegendPosition = LegendPosition.Right;
+            DBADashGUI.Charts.ChartLegends.SetConfigured(planChart, LegendPosition.Right);
             planChart.LegendTextPaint = labelPaint;
             planChart.LegendTextSize = labelFontSize;
             // Disable default tooltip - we'll use our custom one
