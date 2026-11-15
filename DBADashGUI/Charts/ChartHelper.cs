@@ -1043,6 +1043,60 @@ namespace DBADashGUI.Charts
         }
 
         /// <summary>
+        /// Measures the chart again once its drawing surface has painted a frame.
+        /// <para>
+        /// LiveCharts 2 (CartesianChartEngine.Measure) returns early unless the canvas has drawn a frame since the
+        /// last measure (Chart.IsRendering compares the canvas's last frame timestamp with the last measure
+        /// timestamp), and a skipped measure is never retried.  The Performance report rebuilds its charts on each
+        /// instance switch: a new chart is measured empty when it loads, and if its data arrives before the next
+        /// paint, that measure is skipped and the chart is left showing its empty default axes (0 to 10) until the
+        /// window is resized.  Forcing an unthrottled update alone doesn't help - a frame must be drawn first.
+        /// </para>
+        /// <para>
+        /// SKControl.OnPaint raises Paint before PaintSurface/DrawFrame, so an update posted with BeginInvoke from
+        /// the Paint handler runs after the new frame has been drawn, and its measure is not skipped.
+        /// Don't remove this without checking that charts still draw when switching instances on the Performance tab.
+        /// </para>
+        /// </summary>
+        private static void RedrawAfterLayout(CartesianChart chart)
+        {
+            if (chart.IsDisposed) return;
+            if (!chart.IsHandleCreated)
+            {
+                void OnHandleCreated(object sender, EventArgs e)
+                {
+                    chart.HandleCreated -= OnHandleCreated;
+                    RedrawAfterLayout(chart);
+                }
+                chart.HandleCreated += OnHandleCreated;
+                return;
+            }
+
+            Control surface;
+            try
+            {
+                surface = chart.GetDrawnControl();
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                return;
+            }
+
+            void OnPaint(object sender, PaintEventArgs e)
+            {
+                surface.Paint -= OnPaint;
+                chart.BeginInvoke(() =>
+                {
+                    if (chart.IsDisposed) return;
+                    FitDrawingSurface(chart);
+                    chart.CoreChart.Update(new ChartUpdateParams { IsAutomaticUpdate = false, Throttling = false });
+                });
+            }
+            surface.Paint += OnPaint;
+            surface.Invalidate();
+        }
+
+        /// <summary>
         /// Updates an existing CartesianChart with new data from a DataTable
         /// </summary>
         /// <param name="chart">The existing CartesianChart to update</param>
@@ -1072,6 +1126,7 @@ namespace DBADashGUI.Charts
             ConfigureChart(chart, dt, config, overlays);
 
             FitDrawingSurface(chart);
+            RedrawAfterLayout(chart);
 
             // Ensure custom tooltips are enabled
             chart.EnableCustomTooltips();
