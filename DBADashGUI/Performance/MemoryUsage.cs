@@ -29,7 +29,9 @@ namespace DBADashGUI.Performance
             {
                 tsStacked.DropDownItems.Add(new ToolStripMenuItem(alias, null, TsStackedMeasure_Click) { Tag = measure });
             }
-            ChartView = ChartViews.Pie; // Update control visibility
+            // Stacked column is the default view.  Max/Min per clerk summed into a stack doesn't represent total memory at any point in time - Avg does
+            SetAggregation(avgToolStripMenuItem);
+            ChartView = ChartViews.Stacked; // Update control visibility.  Date grouping is applied for the stacked view on first RefreshData
         }
 
         private static readonly (string Measure, string Alias)[] StackedMeasures =
@@ -622,7 +624,16 @@ namespace DBADashGUI.Performance
         private void TsPieChart_Click(object sender, EventArgs e)
         {
             ChartView = ChartViews.Pie;
-            RefreshCurrentTab();
+            // The pie is only drawn by RefreshClerks when it's the current view.  If clerks were already loaded while another view was active, draw it from the grid's data
+            if (isClerksRefreshed && dgv.DataSource is DataView { Table: not null } dv)
+            {
+                var dt = dv.Table;
+                ShowPie(ref dt);
+            }
+            else
+            {
+                RefreshCurrentTab();
+            }
         }
     }
 }
