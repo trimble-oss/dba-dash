@@ -5,6 +5,7 @@ using DBADashGUI.Theme;
 using System.Threading.Tasks;
 using LiveChartsCore;
 using LiveChartsCore.Defaults;
+using LiveChartsCore.Kernel;
 using LiveChartsCore.Measure;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Drawing.Geometries;
@@ -37,11 +38,177 @@ namespace DBADashGUI.Performance
             chartBlocking.Visible = !show;
         }
 
+        private readonly ToolStripMenuItem lockWaitsToolStripMenuItem = new("Lock Waits")
+        {
+            Checked = true,
+            CheckOnClick = true,
+            ToolTipText = "Shade lock waits (LCK_* wait time in ms/sec) behind blocking and deadlocks.\nWait stats are instance wide."
+        };
+
+        // Lock waits are a backdrop to the blocking markers rather than a metric in their own right, so the area is
+        // drawn in a muted grey on a hidden axis of its own - its shape lines up with the blocking without its scale
+        // competing with the blocked session count.  The tooltip gives the value.
+        private static readonly SkiaSharp.SKColor LockWaitColor = new(128, 128, 128);
+
+        private AreaHitLineSeries _lockWaitSeries;
+
+        private LineSeries<ObservablePoint> _lockWaitBaselineSeries;
+
+        /// <summary>
+        /// The least the lock wait axis goes up to.  1,000 ms/sec is one session waiting on locks the whole time, on average - a level
+        /// worth the full height of the chart.  Without a floor the axis scales to the peak, so a quiet instance's 3 ms/sec blip would
+        /// look as alarming as sustained blocking.  As the blocked session (100) and deadlock (10) axes.
+        /// </summary>
+        private const double LockWaitAxisFloorMsPerSec = 1000;
+
+        /// <summary>The lock waits baseline - the median of the same hours in the previous weeks, from the shared baseline data</summary>
+        private readonly BaselineLines baseline;
+
+        /// <summary>
+        /// A line series whose hit test is the shaded area rather than the points.  LiveCharts matches a line
+        /// series' points by their geometry, which for an area drawn without markers means the tooltip only shows
+        /// with the pointer right on a data point.  Here anywhere between the axis and the line counts, and the
+        /// point returned is the one nearest the pointer's X.
+        /// </summary>
+        private sealed class AreaHitLineSeries : LineSeries<ObservablePoint>
+        {
+            private const float HitTolerancePixels = 8;
+
+            /// <summary>The MaxLimit of this series' axis (MinLimit is 0) - set alongside it</summary>
+            public double AxisMax { get; set; }
+
+            /// <summary>Neighbouring points further apart than this have a gap (a null point) between them, so nothing there to hover</summary>
+            public long MaxGapTicks { get; set; }
+
+            protected override IEnumerable<ChartPoint> FindPointsInPosition(Chart chart, LiveChartsCore.Drawing.LvcPoint pointerPosition, FindingStrategy strategy, FindPointFor findPointFor)
+            {
+                if (chart is not CartesianChartEngine cartesian) return Enumerable.Empty<ChartPoint>();
+
+                // The engine takes the chart's axes when it next measures - a mouse move before the first one has no date axis to scale by
+                if (cartesian.XAxes == null || ScalesXAt >= cartesian.XAxes.Length || cartesian.YAxes == null || cartesian.YAxes.Length == 0)
+                {
+                    return Enumerable.Empty<ChartPoint>();
+                }
+
+                var margin = cartesian.DrawMarginLocation;
+                var size = cartesian.DrawMarginSize;
+                if (pointerPosition.X < margin.X || pointerPosition.X > margin.X + size.Width ||
+                    pointerPosition.Y < margin.Y || pointerPosition.Y > margin.Y + size.Height)
+                {
+                    return Enumerable.Empty<ChartPoint>();
+                }
+
+                var points = Fetch(chart)
+                    .Where(p => !p.IsEmpty)
+                    .OrderBy(p => p.Coordinate.SecondaryValue)
+                    .ToList();
+                if (points.Count == 0) return Enumerable.Empty<ChartPoint>();
+
+                // Pointer in data units.  X in ticks from the shared date axis.  Y worked out from this series' own axis limits rather
+                // than by ScaleUIPoint, which would need the engine to have taken up the hidden lock wait axis already
+                if (AxisMax <= 0 || size.Height <= 0) return Enumerable.Empty<ChartPoint>();
+                double x = cartesian.ScaleUIPoint(pointerPosition, ScalesXAt, 0)[0];
+                double PixelToValue(float pixelY) => (margin.Y + size.Height - pixelY) / size.Height * AxisMax;
+                var y = PixelToValue(pointerPosition.Y);
+                if (x < points[0].Coordinate.SecondaryValue || x > points[^1].Coordinate.SecondaryValue) return Enumerable.Empty<ChartPoint>();
+
+                // The points either side of the pointer, and the line's height between them
+                var after = points.FindIndex(p => p.Coordinate.SecondaryValue >= x);
+                var right = points[after];
+                var left = after > 0 ? points[after - 1] : right;
+                var x0 = left.Coordinate.SecondaryValue;
+                var x1 = right.Coordinate.SecondaryValue;
+                // The null points are left out above, so the neighbours can be either side of a gap the area isn't drawn across
+                if (MaxGapTicks > 0 && x1 - x0 > MaxGapTicks) return Enumerable.Empty<ChartPoint>();
+                var lineY = x1 > x0
+                    ? left.Coordinate.PrimaryValue + (right.Coordinate.PrimaryValue - left.Coordinate.PrimaryValue) * (x - x0) / (x1 - x0)
+                    : right.Coordinate.PrimaryValue;
+                // A few pixels above the line count too - the axis has a floor, so a small wait can be an area only a pixel or two high
+                var tolerance = HitTolerancePixels / size.Height * AxisMax;
+                if (y < 0 || y > lineY + tolerance) return Enumerable.Empty<ChartPoint>();
+
+                var nearest = x - x0 <= x1 - x ? left : right;
+                return new[] { nearest };
+            }
+        }
+
         public Blocking()
         {
             InitializeComponent();
             Controls.Add(lblError);
             lblError.BringToFront();
+            lockWaitsToolStripMenuItem.Click += LockWaits_Click;
+            tsView.DropDownItems.Insert(tsView.DropDownItems.IndexOf(deadlocksToolStripMenuItem) + 1, lockWaitsToolStripMenuItem);
+            // Wait stats are instance wide, so the baseline is the instance's at database level too - as the lock waits themselves
+            baseline = new BaselineLines(this, RenderFromLastData, () => Metric.LockWaits,
+                ("LockWaits", h => DBADash.DailyReport.PerformanceAnalyzer.HourlyValue("LockWaits", h, 0)));
+            toolStrip1.Items.Insert(toolStrip1.Items.IndexOf(tsView) + 1, baseline.Button);
+        }
+
+        private string LockWaitSeriesName => DatabaseID > 0 ? "Lock Waits (Instance)" : "Lock Waits";
+
+        /// <summary>
+        /// LCK_* wait time per bucket, in ms/sec, summed across the lock wait types.  The proc returns every collected bucket, zero where
+        /// there were no lock waits, so a quiet period draws as zero.  Buckets that weren't collected (or that the hours/days filters
+        /// leave out) have no row: a gap of more than one step between buckets gets a null point, which breaks the area there rather
+        /// than drawing it across a period nothing is known about.
+        /// </summary>
+        private (ObservablePoint[] Points, long MaxGapTicks) GetLockWaitPoints(int dateGroupingMin)
+        {
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.Waits_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            cn.Open();
+            cmd.Parameters.AddWithValue("@InstanceID", InstanceID);
+            cmd.Parameters.AddWithValue("@FromDate", DateRange.FromUTC);
+            cmd.Parameters.AddWithValue("@ToDate", DateRange.ToUTC);
+            cmd.Parameters.AddWithValue("@DateGroupingMin", dateGroupingMin);
+            cmd.Parameters.AddWithValue("@WaitType", "LCK%");
+            cmd.Parameters.AddWithValue("@TotalOnly", true);
+            cmd.Parameters.AddWithValue("@UTCOffset", DateHelper.UtcOffset);
+            if (DateRange.HasTimeOfDayFilter)
+            {
+                cmd.Parameters.AddWithValue("@Hours", DateRange.TimeOfDay.AsDataTable());
+            }
+            if (DateRange.HasDayOfWeekFilter)
+            {
+                cmd.Parameters.AddWithValue("@DaysOfWeek", DateRange.DayOfWeek.AsDataTable());
+            }
+            cmd.CommandTimeout = Config.DefaultCommandTimeout;
+            var dt = new DataTable();
+            da.Fill(dt);
+
+            var buckets = dt.Rows.Cast<DataRow>()
+                .Where(r => r["WaitTimeMsPerSec"] != DBNull.Value)
+                .Select(r => (Time: ((DateTime)r["Time"]).ToAppTimeZone(), Value: Convert.ToDouble(r["WaitTimeMsPerSec"])))
+                .OrderBy(b => b.Time)
+                .ToList();
+            if (buckets.Count == 0) return (Array.Empty<ObservablePoint>(), 0);
+
+            // Every collected bucket is present, so the smallest step between them is the bucket size (or the collection interval
+            // where that's larger).  The grouping is the fallback for a single bucket.
+            var step = TimeSpan.Zero;
+            for (var i = 1; i < buckets.Count; i++)
+            {
+                var gap = buckets[i].Time - buckets[i - 1].Time;
+                if (gap > TimeSpan.Zero && (step == TimeSpan.Zero || gap < step)) step = gap;
+            }
+            if (step == TimeSpan.Zero) step = TimeSpan.FromMinutes(Math.Max(1, dateGroupingMin));
+            // Over 1.5 steps is a bucket missing.  Allows for jitter in the collection time where the buckets are raw snapshots.
+            var maxGap = TimeSpan.FromTicks(step.Ticks * 3 / 2);
+
+            var points = new List<ObservablePoint>(buckets.Count + 8);
+            for (var i = 0; i < buckets.Count; i++)
+            {
+                if (i > 0 && buckets[i].Time - buckets[i - 1].Time > maxGap)
+                {
+                    // Null breaks the line and area here
+                    var mid = buckets[i - 1].Time + TimeSpan.FromTicks((buckets[i].Time - buckets[i - 1].Time).Ticks / 2);
+                    points.Add(new ObservablePoint(mid.Ticks, null));
+                }
+                points.Add(new ObservablePoint(buckets[i].Time.Ticks, buckets[i].Value));
+            }
+            return (points.ToArray(), maxGap.Ticks);
         }
 
         private int InstanceID => CurrentContext?.InstanceID ?? 0;
@@ -224,6 +391,7 @@ namespace DBADashGUI.Performance
                 field = value;
                 blockingSnapshotsToolStripMenuItem.Checked = value.BlockingSnapshots;
                 deadlocksToolStripMenuItem.Checked = value.Deadlocks;
+                lockWaitsToolStripMenuItem.Checked = value.LockWaits;
                 deadlockCountsCollectionToolStripMenuItem.Checked = !value.DeadlockCountsFromCounter;
                 deadlockCountsCounterToolStripMenuItem.Checked = value.DeadlockCountsFromCounter;
             }
@@ -240,7 +408,7 @@ namespace DBADashGUI.Performance
                     ToggleError(true, "No instance selected");
                     return;
                 }
-                if (!Metric.Deadlocks && !Metric.BlockingSnapshots)
+                if (!Metric.Deadlocks && !Metric.BlockingSnapshots && !Metric.LockWaits)
                 {
                     ToggleError(true, "No metrics selected");
                     return;
@@ -265,6 +433,66 @@ namespace DBADashGUI.Performance
                     deadlockDt = new DataTable();
                     _deadlockDateGroupingMin = 0;
                 }
+
+                var (lockWaitPoints, lockWaitMaxGapTicks) = Metric.LockWaits
+                    ? GetLockWaitPoints(DateHelper.DateGrouping(DateRange.DurationMins, 200))
+                    : (Array.Empty<ObservablePoint>(), 0L);
+                _lockWaitMaxGapTicks = lockWaitMaxGapTicks;
+
+                _lastDt = dt;
+                _lastDeadlockDt = deadlockDt;
+                _lastLockWaitPoints = lockWaitPoints;
+                baseline.Reset();
+                BuildChart(dt, deadlockDt, lockWaitPoints);
+                // Redraws the chart from the data above when the line arrives, rather than reading it all again
+                baseline.Load(InstanceID);
+            }
+            catch (Exception ex)
+            {
+                ToggleError(true, $"Error loading data: {ex.Message}");
+            }
+        }
+
+        // The data the chart was last drawn from, so the baseline line can be added when it arrives without reading it again
+        private DataTable _lastDt;
+        private DataTable _lastDeadlockDt;
+        private ObservablePoint[] _lastLockWaitPoints = Array.Empty<ObservablePoint>();
+
+        /// <summary>Points further apart than this have a gap between them (a null point) - see GetLockWaitPoints</summary>
+        private long _lockWaitMaxGapTicks;
+
+        private void RenderFromLastData()
+        {
+            if (_lastDt == null || _lastDeadlockDt == null) return;
+            BuildChart(_lastDt, _lastDeadlockDt, _lastLockWaitPoints);
+        }
+
+        /// <summary>The lock waits baseline as points on the lock wait axis, flat across each hour - empty when off, not loaded or not available</summary>
+        private ObservablePoint[] GetLockWaitBaselinePoints()
+        {
+            var overlay = Metric.LockWaits ? baseline.For("LockWaits")?.FirstOrDefault() : null;
+            if (overlay == null) return Array.Empty<ObservablePoint>();
+            return overlay.Table.Rows.Cast<DataRow>()
+                .Where(r => r["Baseline"] != DBNull.Value)
+                .Select(r => new ObservablePoint(((DateTime)r["Time"]).Ticks, Convert.ToDouble(r["Baseline"])))
+                .ToArray();
+        }
+
+        /// <summary>The baseline at a time on the chart, or null where there isn't one.  The line is pairs of points, the start and end of each hour.</summary>
+        private static double? BaselineAt(ObservablePoint[] baselinePoints, double ticks)
+        {
+            for (var i = 0; i + 1 < baselinePoints.Length; i += 2)
+            {
+                if (ticks >= baselinePoints[i].X && ticks <= baselinePoints[i + 1].X) return baselinePoints[i].Y;
+            }
+            return null;
+        }
+
+        private void BuildChart(DataTable dt, DataTable deadlockDt, ObservablePoint[] lockWaitPoints)
+        {
+            try
+            {
+                var lockWaitBaselinePoints = GetLockWaitBaselinePoints();
 
                 // Create theme-aware paint for labels
                 var labelPaint = CreateLabelPaint();
@@ -305,8 +533,10 @@ namespace DBADashGUI.Performance
                     }
                 };
 
-                if (dt.Rows.Count == 0 && deadlockDt.Rows.Count == 0)
+                if (dt.Rows.Count == 0 && deadlockDt.Rows.Count == 0 && lockWaitPoints.Length == 0 && lockWaitBaselinePoints.Length == 0)
                 {
+                    _lockWaitSeries = null;
+                    _lockWaitBaselineSeries = null;
                     // Clear series and any retained state from previous refreshes to avoid
                     // holding onto DataRow references via tooltip closures and to keep
                     // click/tooltip mapping consistent with the empty chart.
@@ -345,6 +575,56 @@ namespace DBADashGUI.Performance
                 _lastMousePosition = Point.Empty; // Reset mouse throttling state on data refresh
 
                 var seriesList = new List<ISeries>();
+
+                // ZIndex puts the area behind the blocking and deadlock markers, and the baseline over the area.  Series order is
+                // set separately, when the series are given to the chart - see there.
+                if (lockWaitPoints.Length > 0)
+                {
+                    _lockWaitSeries = new AreaHitLineSeries
+                    {
+                        Values = lockWaitPoints,
+                        Name = LockWaitSeriesName,
+                        GeometrySize = 0,
+                        GeometryFill = null,
+                        GeometryStroke = null,
+                        LineSmoothness = 0,
+                        Fill = new SolidColorPaint(LockWaitColor.WithAlpha(45)),
+                        Stroke = new SolidColorPaint(LockWaitColor.WithAlpha(110)) { StrokeThickness = 1 },
+                        ZIndex = -2,
+                        MaxGapTicks = _lockWaitMaxGapTicks
+                    };
+                    seriesList.Add(_lockWaitSeries);
+                }
+                else
+                {
+                    _lockWaitSeries = null;
+                }
+
+                if (lockWaitBaselinePoints.Length > 0)
+                {
+                    // Dashed grey, as the baseline lines on the other Performance tab charts
+                    var stroke = new SolidColorPaint(DashColors.Gray4.ToSKColor()) { StrokeThickness = 2 };
+                    stroke.PathEffect = new LiveChartsCore.SkiaSharpView.Painting.Effects.DashEffect(new float[] { 6, 4 });
+                    _lockWaitBaselineSeries = new LineSeries<ObservablePoint>
+                    {
+                        Values = lockWaitBaselinePoints,
+                        Name = LockWaitSeriesName + " Baseline",
+                        GeometrySize = 0,
+                        GeometryFill = null,
+                        GeometryStroke = null,
+                        LineSmoothness = 0,
+                        Fill = null,
+                        Stroke = stroke,
+                        // The lock waits tooltip gives the baseline, so the line needn't answer the hit test itself
+                        IsHoverable = false,
+                        ZIndex = -1
+                    };
+                    seriesList.Add(_lockWaitBaselineSeries);
+                }
+                else
+                {
+                    _lockWaitBaselineSeries = null;
+                }
 
                 if (rows.Count > 0)
                 {
@@ -449,10 +729,35 @@ namespace DBADashGUI.Performance
                     });
                 }
 
+                if (_lockWaitSeries != null || _lockWaitBaselineSeries != null)
+                {
+                    // A hidden axis of its own, shared by the area and its baseline, taking no space for labels - the
+                    // tooltip gives the values.  Scaled to whichever peaks higher, the waits or the baseline, but never
+                    // below the floor, so a spike of a few ms/sec stays a sliver rather than filling the chart.
+                    var lockAxisIndex = yAxesList.Count;
+                    if (_lockWaitSeries != null) _lockWaitSeries.ScalesYAt = lockAxisIndex;
+                    if (_lockWaitBaselineSeries != null) _lockWaitBaselineSeries.ScalesYAt = lockAxisIndex;
+                    var lockMax = lockWaitPoints.Concat(lockWaitBaselinePoints).Select(p => p.Y ?? 0).DefaultIfEmpty(0).Max();
+                    var lockAxisMax = Math.Max(LockWaitAxisFloorMsPerSec, lockMax * 1.05);
+                    if (_lockWaitSeries != null) _lockWaitSeries.AxisMax = lockAxisMax;
+                    yAxesList.Add(new Axis
+                    {
+                        MinLimit = 0,
+                        MaxLimit = lockAxisMax,
+                        IsVisible = false,
+                        SeparatorsPaint = null
+                    });
+                }
+
                 chartBlocking.YAxes = yAxesList.ToArray();
 
                 // Set series after Y axes are configured so ScalesYAt = 1 resolves correctly.
-                chartBlocking.Series = seriesList;
+                // Markers first: the chart's hit test returns points in series order, and the tooltip takes its timestamp from the
+                // first point and notices a move to another point by the first point alone.  With the area first, a marker's tooltip
+                // would show the lock wait bucket's time and could keep an old marker's values.  ZIndex still draws the area behind.
+                chartBlocking.Series = seriesList
+                    .OrderBy(series => series == _lockWaitSeries || series == _lockWaitBaselineSeries)
+                    .ToArray();
 
                 // Update the Show Deadlocks button text with the total deadlock count
                 if (_totalDeadlockCount > 0)
@@ -467,7 +772,9 @@ namespace DBADashGUI.Performance
                    ? "Blocking && Deadlocks"
                    : Metric.Deadlocks
                        ? "Deadlocks"
-                       : "Blocking";
+                       : Metric.BlockingSnapshots
+                           ? "Blocking"
+                           : "Lock Waits";
                 lblBlocking.Text = DatabaseID > 0 ? $"{metricLabel}: Database" : $"{metricLabel}: Instance";
                 toolStrip1.Tag = DatabaseID > 0 ? "ALT" : null; // set tag to ALT to use the alternate menu renderer
                 toolStrip1.ApplyTheme(DBADashUser.SelectedTheme);
@@ -482,6 +789,15 @@ namespace DBADashGUI.Performance
                         {
                             var y = point.Coordinate.PrimaryValue;
                             return !double.IsNaN(y) ? $"Deadlocks: {y:N0}" : string.Empty;
+                        }
+
+                        if (point.Context?.Series == _lockWaitSeries)
+                        {
+                            var y = point.Coordinate.PrimaryValue;
+                            // The tooltip already names the series
+                            if (double.IsNaN(y)) return string.Empty;
+                            var usual = BaselineAt(lockWaitBaselinePoints, point.Coordinate.SecondaryValue);
+                            return usual.HasValue ? $"{y:N1} ms/sec (baseline {usual.Value:N1})" : $"{y:N1} ms/sec";
                         }
 
                         // If the tooltip is for the scatter series we created, use point.Index directly (avoids reflection)
@@ -577,14 +893,28 @@ namespace DBADashGUI.Performance
 
             _lastMousePosition = e.Location;
 
-            var foundPoints = chartBlocking.GetPointsAt(
-                new LiveChartsCore.Drawing.LvcPointD(e.Location.X, e.Location.Y));
-
-            var firstPoint = foundPoints.FirstOrDefault();
+            var firstPoint = GetClickablePointAt(e.Location);
 
             // Show hand cursor for clickable blocking points and for deadlock squares. Deadlock squares
             // are clickable even without report access - clicking then explains the missing prerequisites.
             chartBlocking.Cursor = firstPoint is not null ? Cursors.Hand : Cursors.Default;
+        }
+
+        /// <summary>
+        /// The blocking or deadlock point under the mouse.  The lock wait area is a backdrop with nothing to drill
+        /// into, and as a line series it answers the hit test along its whole length - left in, it would take the
+        /// click and the hand cursor from the markers drawn over it.
+        /// </summary>
+        private ChartPoint GetClickablePointAt(Point location)
+        {
+            return chartBlocking.GetPointsAt(new LiveChartsCore.Drawing.LvcPointD(location.X, location.Y))
+                .FirstOrDefault(p => p.Context?.Series != null && p.Context.Series != _lockWaitSeries && p.Context.Series != _lockWaitBaselineSeries);
+        }
+
+        private void LockWaits_Click(object sender, EventArgs e)
+        {
+            Metric.LockWaits = lockWaitsToolStripMenuItem.Checked;
+            RefreshData();
         }
 
         private void TsClose_Click(object sender, EventArgs e)
@@ -604,11 +934,7 @@ namespace DBADashGUI.Performance
                 return;
             }
 
-            // Ask LiveCharts which points are under the mouse
-            var foundPoints = chartBlocking.GetPointsAt(
-                new LiveChartsCore.Drawing.LvcPointD(e.Location.X, e.Location.Y));
-
-            var firstPoint = foundPoints.FirstOrDefault();
+            var firstPoint = GetClickablePointAt(e.Location);
             if (firstPoint is null)
             {
                 return;

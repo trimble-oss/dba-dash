@@ -17,6 +17,20 @@ namespace DBADashGUI
 
         public bool IncludeOther { get; set; } = true;
 
+        public enum ExecutionStatsSources
+        {
+            /// <summary>Object execution stats - procedures, functions and triggers (dbo.ObjectExecutionStats_Get)</summary>
+            Objects,
+
+            /// <summary>Statement level query stats (dbo.QueryStatsCharts_Get)</summary>
+            Queries
+        }
+
+        public ExecutionStatsSources Source { get; set; } = ExecutionStatsSources.Objects;
+
+        /// <summary>The measure used when <see cref="Source"/> is Queries - a key of ObjectExecution's query measures.  Kept apart from <see cref="Measure"/> as the two sources measure different things.</summary>
+        public string QueryMeasure { get; set; } = "CPU_PerSecond";
+
         public IMetricChart GetChart()
         {
             return new ObjectExecution() { Metric = this };
