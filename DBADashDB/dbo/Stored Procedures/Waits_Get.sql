@@ -10,7 +10,8 @@
 	@WaitTypeID INT=NULL,
 	@UTCOffset INT=0, /* Used for Hours filter */
 	@DaysOfWeek IDs READONLY, /* e.g. 1=Monday. exclude weekends:  1,2,3,4,5.  Filter applied in local timezone (@UTCOffset) */
-	@Hours IDs READONLY/* e.g. 9 to 5 :  9,10,11,12,13,14,15,16. Filter applied in local timezone (@UTCOffset)*/
+	@Hours IDs READONLY,/* e.g. 9 to 5 :  9,10,11,12,13,14,15,16. Filter applied in local timezone (@UTCOffset)*/
+	@TotalOnly BIT=0 /* One row per collected time period with the wait types matched summed - zero where none of them waited.  Used for the blocking chart's lock waits (@WaitType='LCK%') */
 )
 AS
 SET DATEFIRST 1 /* Start week on Monday */
@@ -160,7 +161,21 @@ EXEC sp_executesql @SQL,
 					@WaitTypeID,
 					@UTCOffset;
 
-IF @WaitTypeID IS NOT NULL -- Filtering for a specific wait type
+IF @TotalOnly = 1
+BEGIN
+	/*	Every collected time period, including those where none of the matched wait types waited - they aren't stored, so without
+		#Time a quiet period between two with waits would look like waits carried on through it.  Periods that weren't collected
+		(or are excluded by the hours/days filters) have no row, so the caller can tell them apart from zero.
+	*/
+	SELECT	T.Time,
+			ISNULL(SUM(W.TotalWaitMs),0) / NULLIF(T.SampleDurationMs/1000.0,0) AS WaitTimeMsPerSec,
+			T.SampleDurationMs
+	FROM #Time T
+	LEFT JOIN #WaitGrp W ON W.Time = T.Time
+	GROUP BY T.Time, T.SampleDurationMs
+	ORDER BY T.Time
+END
+ELSE IF @WaitTypeID IS NOT NULL -- Filtering for a specific wait type
 BEGIN
 	/*	If a wait doesn't accumulate for a time period it won't be present.  
 		This query will fill in the blanks with zeros when we are filtering for a specific wait type - otherwise the charts can look misleading.
