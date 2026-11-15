@@ -73,23 +73,145 @@ namespace DBADashGUI.CustomReports
         {
             splitResultsAndParams.Panel1.Controls.Add(insightsPanel);
             splitResultsAndParams.Panel1.SizeChanged += (_, _) => LimitInsightsHeight();
+            insightsPanel.SizeChanged += (_, _) => UpdateMinimumChartHeight();
+            insightsPanel.VisibleChanged += (_, _) => UpdateMinimumChartHeight();
+            tsInsights.Click += (_, _) => ToggleInsightsCollapsed();
+            // The charts follow the shared setting themselves, so there's nothing more to do here when it changes
+            tsBaseline = PerformanceBaselineCache.CreateBaselineButton(() => { });
+            tsBaseline.DisplayStyle = ToolStripItemDisplayStyle.ImageAndText;
+            tsBaseline.Margin = new Padding(8, 1, 0, 2);
+            tsBaseline.Visible = false;
+            toolStrip1.Items.Add(tsBaseline);
+            toolStrip1.Items.Add(tsInsights);
             LimitInsightsHeight();
         }
 
+        /// <summary>The cards' height is capped so the results get most of the space - the cards scroll if there are more</summary>
         private void LimitInsightsHeight() =>
-            insightsPanel.MaximumSize = new Size(0, Math.Max(100, splitResultsAndParams.Panel1.Height * 2 / 5));
+            insightsPanel.MaximumSize = new Size(0, Math.Max(LogicalToDeviceUnits(100), splitResultsAndParams.Panel1.ClientSize.Height * 2 / 5));
 
-        /// <summary>A card for each insight, or none</summary>
+        /// <summary>
+        /// Shows and hides the cards, with how many there are of each severity - so hidden cards take no space, and a critical one is still
+        /// seen.  Checked while the cards are shown
+        /// </summary>
+        private readonly ToolStripButton tsInsights = new()
+        {
+            Visible = false,
+            // The Running Queries tab's Insights button has the same icon
+            Image = Properties.Resources.Lightbulb_16x,
+            DisplayStyle = ToolStripItemDisplayStyle.ImageAndText,
+            Margin = new Padding(8, 1, 0, 2)
+        };
+
+        /// <summary>Baseline lines on or off for all the report's charts - see <see cref="CustomReport.ShowBaselineToggle"/></summary>
+        private ToolStripButton tsBaseline;
+
+        /// <summary>The insights shown, kept so Show can put the cards back without running anything</summary>
+        private List<Insight> currentInsights;
+
+        /// <summary>"Insights: 1 critical, 3 warnings, 2 notes" - every card counts, so the numbers match what's shown</summary>
+        private void SetInsightsButton(List<Insight> insights, bool collapsed)
+        {
+            var critical = insights.Count(i => i.Severity == InsightSeverity.Critical);
+            var warning = insights.Count(i => i.Severity == InsightSeverity.Warning);
+            var info = insights.Count(i => i.Severity == InsightSeverity.Info);
+            var parts = new List<string>();
+            if (critical > 0) parts.Add($"{critical} critical");
+            if (warning > 0) parts.Add(warning == 1 ? "1 warning" : $"{warning} warnings");
+            if (info > 0) parts.Add(info == 1 ? "1 note" : $"{info} notes");
+            tsInsights.Text = "Insights: " + string.Join(", ", parts);
+            tsInsights.Checked = !collapsed;
+            tsInsights.ToolTipText = (collapsed ? "Show" : "Hide") + " the insight cards.  Remembered for this report.";
+            // The worst severity's colour, so a critical insight stands out while the cards are hidden
+            tsInsights.ForeColor = critical > 0 ? DashColors.Fail : warning > 0 ? DashColors.Warning : toolStrip1.ForeColor;
+            tsInsights.Font = critical > 0 || warning > 0 ? insightsBoldFont ??= new Font(toolStrip1.Font, FontStyle.Bold) : toolStrip1.Font;
+        }
+
+        private Font insightsBoldFont;
+
+        /// <summary>A card for each insight, or none.  Only the toolbar button when the user has hidden this report's cards</summary>
         private void ShowInsights(List<Insight> insights)
         {
+            currentInsights = insights;
             if (insights is not { Count: > 0 })
             {
+                tsInsights.Visible = false;
                 insightsPanel.Visible = false;
                 insightsPanel.ClearInsights();
                 return;
             }
-            insightsPanel.SetInsights(insights);
-            insightsPanel.Visible = true;
+            var collapsed = IsInsightsCollapsed();
+            SetInsightsButton(insights, collapsed);
+            tsInsights.Visible = true;
+            if (collapsed)
+            {
+                insightsPanel.Visible = false;
+                insightsPanel.ClearInsights();
+            }
+            else
+            {
+                insightsPanel.SetInsights(insights);
+                insightsPanel.Visible = true;
+            }
+        }
+
+        private void ToggleInsightsCollapsed()
+        {
+            SetInsightsCollapsed(!IsInsightsCollapsed());
+            ShowInsights(currentInsights);
+        }
+
+        private const char CollapsedInsightsSeparator = '\n';
+
+        /// <summary>Reports whose cards the user has hidden - by report name, so it's remembered for the report wherever it's opened</summary>
+        private static HashSet<string> CollapsedInsightsReports() =>
+            (Properties.Settings.Default.CollapsedInsightsReports ?? string.Empty)
+            .Split(CollapsedInsightsSeparator, StringSplitOptions.RemoveEmptyEntries)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        private string InsightsReportKey => Report?.ReportName ?? string.Empty;
+
+        private bool IsInsightsCollapsed() => CollapsedInsightsReports().Contains(InsightsReportKey);
+
+        private void SetInsightsCollapsed(bool collapsed)
+        {
+            var reports = CollapsedInsightsReports();
+            if (collapsed) reports.Add(InsightsReportKey);
+            else reports.Remove(InsightsReportKey);
+            Properties.Settings.Default.CollapsedInsightsReports = string.Join(CollapsedInsightsSeparator, reports.OrderBy(r => r, StringComparer.OrdinalIgnoreCase));
+            Properties.Settings.Default.Save();
+        }
+
+        /// <summary>
+        /// Charts are kept at least this tall (at 96 DPI).  When the cards and the charts don't fit at that height, the area above the parameters
+        /// scrolls - the cards scroll away with it - rather than squashing the charts.
+        /// </summary>
+        internal const int MinimumChartHeight = 200;
+
+        /// <summary>
+        /// Let the results scroll when the charts would be shorter than <see cref="MinimumChartHeight"/> a row.  Only when the charts are all
+        /// that's shown: a report with grids as well has its own splitter to share the space.
+        /// </summary>
+        private void UpdateMinimumChartHeight()
+        {
+            var panel = splitResultsAndParams.Panel1;
+            var rows = ShownChartRows();
+            if (Report == null || rows == 0 || IsChartPanelCollapsed() || !IsTablePanelCollapsed())
+            {
+                panel.AutoScrollMinSize = Size.Empty;
+                panel.AutoScroll = false;
+                return;
+            }
+            var above = insightsPanel.Visible ? insightsPanel.Height : 0;
+            // Setting a minimum size turns AutoScroll on.  The docked charts fill the scrolled area, so they're laid out at its height
+            panel.AutoScrollMinSize = new Size(0, above + rows * LogicalToDeviceUnits(MinimumChartHeight));
+        }
+
+        /// <summary>Rows of the chart layout with something in - not the ones a maximized chart has shrunk to nothing</summary>
+        private int ShownChartRows()
+        {
+            if (chartLayout.Parent == null || chartLayout.Controls.Count == 0) return 0;
+            return chartLayout.RowStyles.Cast<RowStyle>().Count(r => !(r.SizeType == SizeType.Absolute && r.Height <= 0));
         }
 
         /// <summary>
@@ -114,6 +236,50 @@ namespace DBADashGUI.CustomReports
 
         private static bool IsInsights(DataTable table) =>
             table.Columns.Count == 2 && table.Columns.Contains(InsightSeverityColumn) && table.Columns.Contains(InsightColumn);
+
+        /// <summary>The run of <see cref="CustomReport.InsightsProvider"/> in progress - cancelled when another starts</summary>
+        private CancellationTokenSource insightsCts;
+
+        /// <summary>
+        /// Run the report's <see cref="CustomReport.InsightsProvider"/>, if it has one, and show its cards when they're ready.  Started with the
+        /// refresh, on the UI thread, so whatever the provider starts before its first await - the Performance tab's detailed read - is under
+        /// way before the charts ask for the same figures.  Its queries run in the background, so the charts never wait for it.  A newer run (a
+        /// refresh, or another instance) supersedes it.
+        /// </summary>
+        private async void LoadProviderInsights()
+        {
+            var old = Interlocked.Exchange(ref insightsCts, null);
+            try { old?.Cancel(); }
+            catch (ObjectDisposedException) { }
+            var provider = Report?.InsightsProvider;
+            var ctx = context;
+            if (provider == null || ctx == null) return;
+            // Not the last instance's cards while this one's load
+            ShowInsights(null);
+
+            using var cts = new CancellationTokenSource();
+            insightsCts = cts;
+            List<Insight> insights;
+            try
+            {
+                insights = await provider(ctx, cts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+            catch (Exception ex)
+            {
+                insights = new List<Insight> { new(InsightSeverity.Warning, "Insights couldn't be loaded: " + ex.Message) };
+            }
+            finally
+            {
+                // Before the CTS is disposed, so a newer run doesn't cancel a disposed one
+                Interlocked.CompareExchange(ref insightsCts, null, cts);
+            }
+            if (cts.IsCancellationRequested || IsDisposed) return;
+            ShowInsights(insights);
+        }
 
         #endregion Insights
 
@@ -501,12 +667,14 @@ namespace DBADashGUI.CustomReports
         {
             if (splitTablesCharts.Panel1 == ChartPanel) splitTablesCharts.Panel1Collapsed = collapsed;
             else splitTablesCharts.Panel2Collapsed = collapsed;
+            UpdateMinimumChartHeight();
         }
 
         private void SetTablePanelCollapsed(bool collapsed)
         {
             if (splitTablesCharts.Panel1 == TablePanel) splitTablesCharts.Panel1Collapsed = collapsed;
             else splitTablesCharts.Panel2Collapsed = collapsed;
+            UpdateMinimumChartHeight();
         }
 
         private bool IsChartPanelCollapsed()
@@ -662,6 +830,8 @@ namespace DBADashGUI.CustomReports
             }
 
             SetTablePanelCollapsed(e.IsMaximized || wasTableCollapsedBeforeMaximize);
+            // A maximized chart has the whole height - one row's minimum, not every row's
+            UpdateMinimumChartHeight();
         }
 
         // Cleanup helper for grids
@@ -1110,6 +1280,7 @@ namespace DBADashGUI.CustomReports
             // derived views to apply any further view-specific parameters into customParams before the query runs.
             // Called for every refresh path, including the initial auto-load from SetContext.
             ApplyStatusFilterParams();
+            tsBaseline.Visible = Report?.ShowBaselineToggle == true;
             OnBeforeRefresh();
             BeforeRefresh?.Invoke(this, EventArgs.Empty);
 
@@ -1132,6 +1303,8 @@ namespace DBADashGUI.CustomReports
                     Debug.WriteLine($"RefreshData: error cancelling previous CTS: {ex}");
                 }
                 IsMessageInProgress = true;
+                // Before the report's own load, so anything the provider reads that the charts also need is already under way
+                LoadProviderInsights();
                 // Pass the CTS instance so the repository runner can dispose the exact CTS it used when it completes
                 Task.Run(() => { _ = RefreshDataRepository(newCts); });
             }
@@ -1175,7 +1348,8 @@ namespace DBADashGUI.CustomReports
                     if (!ReferenceEquals(cts, cancellationTokenSource)) return;
                     ShowParamPrompt(false); // Show grid
                     LoadResultsCombo();
-                    ShowInsights((reportDS as ReportDataSet)?.Insights);
+                    // A report with a provider shows its cards when they're ready - started with the refresh
+                    if (Report?.InsightsProvider == null) ShowInsights((reportDS as ReportDataSet)?.Insights);
                     if (reportDS.Tables.Count > 0)
                     {
                         ShowTable();
@@ -1190,6 +1364,7 @@ namespace DBADashGUI.CustomReports
                         MessageBox.Show("Report didn't return a result set", "Warning", MessageBoxButtons.OK,
                             MessageBoxIcon.Warning);
                     }
+                    UpdateMinimumChartHeight();
                 });
                 if (ReferenceEquals(cts, cancellationTokenSource))
                 {
@@ -1981,6 +2156,7 @@ namespace DBADashGUI.CustomReports
             ClearResults();
             List<Panel> panels = new();
             GetChartPanels();
+            UpdateMinimumChartHeight();
             // Show toggle controls only when charts exist AND there is dataset/table data to toggle
             var showToggles = Charts.Count > 0 && hasData;
             tsToggleGrids.Visible = showToggles;
@@ -4019,6 +4195,7 @@ namespace DBADashGUI.CustomReports
             if (!newCollapsed)
             {
                 GetChartPanels();
+                UpdateMinimumChartHeight();
             }
         }
 

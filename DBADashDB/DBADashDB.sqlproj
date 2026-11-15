@@ -626,6 +626,7 @@
     <Build Include="dbo\Tables\Counters.sql" />
     <Build Include="dbo\Tables\CounterMapping.sql" />
     <Build Include="dbo\Stored Procedures\PerformanceCounterSummary_Get.sql" />
+    <Build Include="dbo\Stored Procedures\PerformanceInsights_Get.sql" />
     <Build Include="dbo\Stored Procedures\PerformanceCounters_Upd.sql" />
     <Build Include="dbo\Stored Procedures\PerfmonCounters_Upd.sql" />
     <Build Include="dbo\Stored Procedures\PerformanceCounter_Get.sql" />

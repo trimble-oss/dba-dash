@@ -30,7 +30,17 @@ namespace DBADashGUI.Performance
             InitializeComponent();
             this.Controls.Add(lblError);
             lblError.BringToFront();
+            // Only when the chart is in the lines' units - total wait ms/sec for all waits or the critical waits.  Not for one wait type, as
+            // the baseline is for all of them
+            baseline = new BaselineLines(this, RefreshChart,
+                () => (string)tsMetric.Tag == "WaitTimeMsPerSec" && string.IsNullOrEmpty(Metric.WaitType),
+                ("Waits", h => DBADash.DailyReport.PerformanceAnalyzer.HourlyValue("Waits", h, 0)),
+                ("CriticalWaits", h => DBADash.DailyReport.PerformanceAnalyzer.HourlyValue("CriticalWaits", h, 0)));
+            toolStrip1.Items.Insert(toolStrip1.Items.IndexOf(tsFilter) + 1, baseline.Button);
         }
+
+        /// <summary>Baseline lines for total and critical waits (ms/sec) - the median of the same hours in the previous weeks</summary>
+        private readonly BaselineLines baseline;
 
         public class DateModel
         {
@@ -196,9 +206,11 @@ namespace DBADashGUI.Performance
                     return;
                 }
                 ToggleError(false);
+                baseline.Reset();
                 dt = GetWaitsDT();
                 CalcTopWaits(ref dt);
                 RefreshChart();
+                baseline.Load(instanceID);
             }
             catch (Exception ex)
             {
@@ -235,7 +247,7 @@ namespace DBADashGUI.Performance
                 DateUnit = TimeSpan.FromMinutes(dateGrouping)
             };
 
-            ChartHelper.UpdateChart(waitChart, dt, config);
+            ChartHelper.UpdateChart(waitChart, dt, config, baseline.For(criticalWaitsOnlyToolStripMenuItem.Checked ? "CriticalWaits" : "Waits"));
         }
 
         private string Units
@@ -320,6 +332,8 @@ namespace DBADashGUI.Performance
             tsMetric.Text = item.Text;
             tsMetric.Tag = item.Tag;
             RefreshChart();
+            // The baseline lines are only read for ms/sec - switching to it from another measure reads them now
+            baseline.EnsureLoaded();
         }
 
         private async void TsTopWaits_Click(object sender, EventArgs e)

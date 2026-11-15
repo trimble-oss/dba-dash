@@ -356,7 +356,7 @@ namespace DBADash.DailyReport
                 AppendAlerts(alerts, history, generatedUtc, extras.ForAi, html, text);
             }
 
-            // Performance: over the thresholds and/or worse than usual
+            // Performance: over the thresholds and/or above baseline
             if (performance != null)
             {
                 AppendPerformance(performance, history, extras, settings.PlainTextOnly, images, html, text);
@@ -1001,7 +1001,7 @@ namespace DBADash.DailyReport
             return Regex.Replace(name, "(?<=[a-z0-9])(?=[A-Z])", " ");
         }
 
-        /// <param name="performanceInstances">Instances listed in the performance section (over a threshold or worse than usual)</param>
+        /// <param name="performanceInstances">Instances listed in the performance section (over a threshold or above baseline)</param>
         /// <param name="newIssues">Issues that weren't in the last report</param>
         public static string BuildSubject(string reportName, int critical, int warning, int performanceInstances, int newIssues = 0, int alerts = 0)
         {
@@ -1016,12 +1016,12 @@ namespace DBADash.DailyReport
         }
 
         /// <summary>
-        /// Exception based: a fleet line, then a card for each instance over a threshold or worse than usual, e.g.
+        /// Exception based: a fleet line, then a card for each instance over a threshold or above baseline, e.g.
         ///   SQL01 [Critical]
-        ///     - CPU: 94% in the busiest hour (14:00) (3h 10m at 80%+, day average 45%) - usual 60% (+57%) - new
-        ///     - Critical waits: 310 ms/s (RESOURCE_SEMAPHORE +280 ms/s) - usual 20 ms/s (+1450%) - for 3 days
-        ///     Behind it (CPU, most above usual):
-        ///     - Sales.dbo.usp_Orders - CPU 1h 10m (usual 5m), 12,040 executions (usual 11,900)
+        ///     - CPU: 94% in the busiest hour (14:00) (3h 10m at 80%+, day average 45%) - baseline 60% (+57%) - new
+        ///     - Critical waits: 310 ms/s (RESOURCE_SEMAPHORE +280 ms/s) - baseline 20 ms/s (+1450%) - for 3 days
+        ///     Behind it (CPU, most above baseline):
+        ///     - Sales.dbo.usp_Orders - CPU 1h 10m (baseline 5m), 12,040 executions (baseline 11,900)
         /// then, in the HTML, a chart of the instance's first finding by hour.  Instances with nothing to report are counted, not listed.
         /// </summary>
         private static void AppendPerformance(PerformanceAnalysis p, IssueHistory history, DailyReportExtras extras, bool plainTextOnly, List<DailyReportImage> images,
@@ -1053,12 +1053,12 @@ namespace DBADash.DailyReport
             var overview = new List<string>();
             if (p.CriticalInstances > 0) overview.Add($"{p.CriticalInstances} critical");
             if (p.WarningInstances > 0) overview.Add($"{p.WarningInstances} warning");
-            if (p.WorseThanUsualInstances > 0) overview.Add($"{p.WorseThanUsualInstances} worse than usual");
+            if (p.WorseThanUsualInstances > 0) overview.Add($"{p.WorseThanUsualInstances} above baseline");
             var overviewLine = overview.Count == 0
                 ? $"No performance issues on {Plural(p.OkCount, "instance")}."
-                : $"{string.Join(", ", overview)}. {Plural(p.OkCount, "other instance")} within thresholds{(p.ComparedWithBaseline ? " and usual levels" : string.Empty)}.";
-            if (p.BetterThanUsualCount > 0) overviewLine += $" {Plural(p.BetterThanUsualCount, "instance")} better than usual.";
-            if (p.OverThresholdAsUsual.Count > 0) overviewLine += $" Over a threshold but within the usual range, so not listed: {JoinNames(p.OverThresholdAsUsual)}.";
+                : $"{string.Join(", ", overview)}. {Plural(p.OkCount, "other instance")} within thresholds{(p.ComparedWithBaseline ? " and in line with baseline" : string.Empty)}.";
+            if (p.BetterThanUsualCount > 0) overviewLine += $" {Plural(p.BetterThanUsualCount, "instance")} below baseline.";
+            if (p.OverThresholdAsUsual.Count > 0) overviewLine += $" Over a threshold but within the baseline range, so not listed: {JoinNames(p.OverThresholdAsUsual)}.";
             html.Append($"<div style=\"font-size:13px;font-weight:bold;margin:8px 0 0 0;color:{(overview.Count == 0 ? GreenDark : TrimbleGray)}\">{(overview.Count == 0 ? "&#10003; " : string.Empty)}{Enc(overviewLine)}</div>");
             text.AppendLine(overviewLine);
 
@@ -1123,13 +1123,13 @@ namespace DBADash.DailyReport
             html.Append("</td></tr>");
             text.AppendLine($"{instance.Instance} [{SeverityText(instance.Severity)}]");
 
-            // Findings: measure | figure and context | usual and change
+            // Findings: measure | figure and context | baseline and change
             html.Append($"<tr><td style=\"padding:4px 12px 8px 12px;{sides};border-bottom:1px solid {Gray0}\">");
             html.Append("<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"font-size:13px;border-collapse:collapse\">");
             foreach (var f in instance.Findings)
             {
                 var main = f.ValueText + (string.IsNullOrEmpty(f.Context) ? string.Empty : $"; {f.Context}");
-                var usual = f.BaselineText == null ? null : $"usual {f.BaselineText}";
+                var usual = f.BaselineText == null ? null : $"baseline {f.BaselineText}";
                 var age = history.AgeText(IssueHistory.PerformanceKey(f.Metric, instance.Instance));
                 text.AppendLine($"  - {f.Label}: {main}{(usual == null ? string.Empty : $" - {usual}")}{(f.ChangeText == null ? string.Empty : $" ({f.ChangeText})")}{(age == null ? string.Empty : $" - {age}")}");
 
@@ -1149,7 +1149,7 @@ namespace DBADash.DailyReport
 
             if (instance.TopQueries.Count > 0)
             {
-                var heading = $"Behind it ({instance.TopQueriesMeasure}, {(instance.TopQueriesByIncrease ? "most above usual" : "highest")}):";
+                var heading = $"Behind it ({instance.TopQueriesMeasure}, {(instance.TopQueriesByIncrease ? "most above baseline" : "highest")}):";
                 text.AppendLine($"    {heading}");
                 html.Append($"<div style=\"font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:0.5px;color:{Gray6};margin:10px 0 4px 0\">{Enc(heading.TrimEnd(':'))}</div>");
                 html.Append($"<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" bgcolor=\"{GrayFaint}\" style=\"background:{GrayFaint};font-size:12px;border-collapse:collapse\">");
@@ -1220,18 +1220,18 @@ namespace DBADash.DailyReport
         {
             PerformanceSeverity.Critical => "Critical",
             PerformanceSeverity.Warning => "Warning",
-            _ => "Worse than usual"
+            _ => "Above baseline"
         };
 
         private static string Badge(string text, string background, string color, string border = null) =>
             $"<span style=\"display:inline-block;background:{background};color:{color};{(border == null ? string.Empty : $"border:1px solid {border};")}padding:1px 7px;border-radius:3px;font-size:11px;line-height:16px;font-weight:bold;white-space:nowrap\">{Enc(text)}</span>";
 
-        /// <summary>Critical and warning as for checks; worse than usual is Blue Pale with Trimble Blue Dark text</summary>
+        /// <summary>Critical and warning as for checks; above baseline is Blue Pale with Trimble Blue Dark text</summary>
         private static string PerformanceBadge(PerformanceSeverity s) => s switch
         {
             PerformanceSeverity.Critical => SeverityBadge(1),
             PerformanceSeverity.Warning => SeverityBadge(2),
-            _ => Badge("Worse than usual", BluePale, TrimbleBlueDark)
+            _ => Badge("Above baseline", BluePale, TrimbleBlueDark)
         };
 
         /// <summary>Status badge: Critical is Red Pale with Red Dark text; Warning is Yellow Pale with a Yellow Dark border (Yellow is never used as text)</summary>

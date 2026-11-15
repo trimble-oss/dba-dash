@@ -2862,7 +2862,9 @@ namespace DBADashGUI
                             selectedNode = nInstance.FindChildOfType(SQLTreeItem.TreeType.ExtendedEvents);
                             break;
 
-                        case Tabs.AzureSummary or Tabs.Performance or Tabs.Metrics or Tabs.PerformanceSummary or Tabs.SlowQueries or Tabs.Waits or Tabs.Memory or Tabs.ObjectExecutionSummary or Tabs.TopQueries or Tabs.QueryStoreForcedPlans:
+                        // Tabs on the instance node itself (see GetAllowedTabs) - anything not listed goes to the Checks node, where these aren't shown
+                        case Tabs.AzureSummary or Tabs.Performance or Tabs.Metrics or Tabs.PerformanceSummary or Tabs.SlowQueries or Tabs.Waits or Tabs.Memory or Tabs.ObjectExecutionSummary or Tabs.TopQueries or Tabs.QueryStoreForcedPlans
+                            or Tabs.Alerts or Tabs.RunningQueries or Tabs.QueryStats or Tabs.TuningRecommendations or Tabs.Latches or Tabs.Spinlocks or Tabs.PoolsAndGroups:
                             break;
 
                         case Tabs.Files or Tabs.Drives or Tabs.TableSize or Tabs.DBSpace:
@@ -2921,6 +2923,13 @@ namespace DBADashGUI
         }
 
         private void DateRangeChanged(object sender, EventArgs e) => DateRangeChanged();
+
+        /// <summary>Set the date range as if the user picked it, and refresh the tab - e.g. an insight card zooming to an hour</summary>
+        public void SetDateRangeUtc(DateTime fromUtc, DateTime toUtc)
+        {
+            tsDateRange.SetDateRangeUtc(fromUtc, toUtc);
+            DateRangeChanged();
+        }
 
         private void DateRangeChanged()
         {

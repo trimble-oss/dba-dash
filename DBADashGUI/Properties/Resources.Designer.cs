@@ -683,6 +683,16 @@ namespace DBADashGUI.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Baseline_16x {
+            get {
+                object obj = ResourceManager.GetObject("Baseline_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
         internal static System.Drawing.Bitmap Lightbulb_16x {
             get {
                 object obj = ResourceManager.GetObject("Lightbulb_16x", resourceCulture);

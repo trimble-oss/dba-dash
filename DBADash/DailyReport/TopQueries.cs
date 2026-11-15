@@ -117,16 +117,16 @@ namespace DBADash.DailyReport
                 : candidates.OrderByDescending(q => q.Current).Take(count).ToList();
         }
 
-        /// <summary>"CPU 1h 10m (usual 5m), 12,040 executions (usual 11,900)"</summary>
+        /// <summary>"CPU 1h 10m (baseline 5m), 12,040 executions (baseline 11,900)"</summary>
         public static string Describe(TopQuery q, string measure)
         {
             string Fmt(double v) => measure == MeasureReads ? Compact(v) + " reads" : CPUTime(v);
             var text = measure == MeasureReads ? $"{Fmt(q.Current)}" : $"CPU {Fmt(q.Current)}";
             // None in the baseline weeks: it's new, which says more than "usual 0ms"
-            if (q.Usual is > 0) text += $" (usual {(measure == MeasureReads ? Compact(q.Usual.Value) : CPUTime(q.Usual.Value))})";
+            if (q.Usual is > 0) text += $" (baseline {(measure == MeasureReads ? Compact(q.Usual.Value) : CPUTime(q.Usual.Value))})";
             else if (q.Usual.HasValue) text += " (new)";
             text += $", {q.Executions.ToString("#,0", CultureInfo.InvariantCulture)} executions";
-            if (q.UsualExecutions is > 0) text += $" (usual {q.UsualExecutions.Value.ToString("#,0", CultureInfo.InvariantCulture)})";
+            if (q.UsualExecutions is > 0) text += $" (baseline {q.UsualExecutions.Value.ToString("#,0", CultureInfo.InvariantCulture)})";
             return text;
         }
 

@@ -31,6 +31,9 @@ namespace DBADash.DailyReport
 
         public double? ReadIOPs { get; init; }
         public double? WriteIOPs { get; init; }
+        /// <summary>Throughput (MB = 1024² bytes, as the IO chart).  Context for latency rather than a measure of its own - more IO isn't a problem in itself</summary>
+        public double? ReadMBsec { get; init; }
+        public double? WriteMBsec { get; init; }
         /// <summary>IO weighted, so busy hours count for more than quiet ones</summary>
         public double? ReadLatency { get; init; }
         public double? WriteLatency { get; init; }
@@ -38,36 +41,46 @@ namespace DBADash.DailyReport
         public double? WaitMsPerSec { get; init; }
         public double? CriticalWaitMsPerSec { get; init; }
         public double? LockWaitMsPerSec { get; init; }
+        /// <summary>Wait sample time of the hours, not weighted - the divisor for the period's wait type totals, which aren't by hour</summary>
         public long WaitSampleMs { get; init; }
 
-        public int BlockingSnapshots { get; init; }
+        /// <summary>Counts are doubles as hours can be weighted (PerformanceData.HourWeights) - whole numbers when they aren't</summary>
+        public double BlockingSnapshots { get; init; }
         public int MaxBlockedSessions { get; init; }
         public long MaxBlockedWaitMs { get; init; }
-        public int Deadlocks { get; init; }
-        public int SlowQueries { get; init; }
-        public int FailedSlowQueries { get; init; }
+        public double Deadlocks { get; init; }
+        public double SlowQueries { get; init; }
+        public double FailedSlowQueries { get; init; }
 
         /// <summary>Hours with fewer CPU samples than this are left out of the busiest hour - a part hour is too noisy</summary>
         public const int MinSamplesForPeakHour = 10;
 
         /// <param name="fullHourSamples">CPU samples in a fully collected hour for this instance - see FullHourCPUSamples</param>
-        public static DayStats From(IEnumerable<PerformanceHour> hours, long fullHourSamples = 0)
+        /// <param name="weight">
+        /// How much each hour counts (PerformanceData.Weight) - 1 for all of it.  Rates (CPU %, latency, ms/s) are averaged with the hours
+        /// weighted, and counts are summed weighted, so a range that covers part of an hour takes that part's share.  Hours weighted 0 are left out
+        /// </param>
+        public static DayStats From(IEnumerable<PerformanceHour> hours, long fullHourSamples = 0, Func<PerformanceHour, double> weight = null)
         {
-            var list = hours.ToList();
+            weight ??= _ => 1;
+            var list = hours.Where(h => weight(h) > 0).ToList();
             var cpuHours = list.Where(h => h.CPUSamples > 0 && h.AvgCPU.HasValue).ToList();
             var ioHours = list.Where(h => h.IOSampleMs > 0).ToList();
             var waitHours = list.Where(h => h.WaitSampleMs > 0).ToList();
 
-            var cpuSamples = cpuHours.Sum(h => h.CPUSamples!.Value);
-            var peak = cpuHours.Where(h => h.CPUSamples >= MinSamplesForPeakHour)
+            var cpuSamples = cpuHours.Sum(h => h.CPUSamples!.Value * weight(h));
+            // The busiest hour is one the range mostly covers, where there is one - not an hour it only clips the end of
+            var peakCandidates = cpuHours.Where(h => h.CPUSamples >= MinSamplesForPeakHour).ToList();
+            if (peakCandidates.Any(h => weight(h) >= 0.5)) peakCandidates = peakCandidates.Where(h => weight(h) >= 0.5).ToList();
+            var peak = peakCandidates
                 .OrderByDescending(h => h.AvgCPU)
                 .ThenBy(h => h.HourOffset)
                 .FirstOrDefault();
 
-            var ioSec = ioHours.Sum(h => h.IOSampleMs!.Value) / 1000.0;
-            var reads = ioHours.Sum(h => h.Reads ?? 0);
-            var writes = ioHours.Sum(h => h.Writes ?? 0);
-            var waitSampleMs = waitHours.Sum(h => h.WaitSampleMs!.Value);
+            var ioSec = ioHours.Sum(h => h.IOSampleMs!.Value * weight(h)) / 1000.0;
+            var reads = ioHours.Sum(h => (h.Reads ?? 0) * weight(h));
+            var writes = ioHours.Sum(h => (h.Writes ?? 0) * weight(h));
+            var waitSampleMs = waitHours.Sum(h => h.WaitSampleMs!.Value * weight(h));
 
             return new DayStats
             {
@@ -76,28 +89,31 @@ namespace DBADash.DailyReport
                 HasWaits = waitHours.Count > 0,
                 HasAny = cpuHours.Count > 0 || ioHours.Count > 0 || waitHours.Count > 0,
 
-                AvgCPU = cpuSamples > 0 ? cpuHours.Sum(h => h.AvgCPU!.Value * h.CPUSamples!.Value) / cpuSamples : null,
+                AvgCPU = cpuSamples > 0 ? cpuHours.Sum(h => h.AvgCPU!.Value * h.CPUSamples!.Value * weight(h)) / cpuSamples : null,
                 MaxCPU = cpuHours.Count > 0 ? cpuHours.Max(h => h.MaxCPU) : null,
                 PeakHourCPU = peak?.AvgCPU,
                 PeakHourCPUOffset = peak?.HourOffset,
-                HighCPUMinutes = cpuHours.Count > 0 ? cpuHours.Sum(h => PerformanceAnalyzer.HighCPUMinutes(h, fullHourSamples) ?? 0) : null,
+                HighCPUMinutes = cpuHours.Count > 0 ? cpuHours.Sum(h => (PerformanceAnalyzer.HighCPUMinutes(h, fullHourSamples) ?? 0) * weight(h)) : null,
 
                 ReadIOPs = ioSec > 0 ? reads / ioSec : null,
                 WriteIOPs = ioSec > 0 ? writes / ioSec : null,
-                ReadLatency = reads > 0 ? ioHours.Sum(h => h.ReadStallMs ?? 0) / (double)reads : null,
-                WriteLatency = writes > 0 ? ioHours.Sum(h => h.WriteStallMs ?? 0) / (double)writes : null,
+                // Null for rows without byte counts, rather than a misleading 0
+                ReadMBsec = ioSec > 0 && ioHours.Any(h => h.ReadBytes.HasValue) ? ioHours.Sum(h => (h.ReadBytes ?? 0) * weight(h)) / PerformanceAnalyzer.BytesPerMB / ioSec : null,
+                WriteMBsec = ioSec > 0 && ioHours.Any(h => h.WriteBytes.HasValue) ? ioHours.Sum(h => (h.WriteBytes ?? 0) * weight(h)) / PerformanceAnalyzer.BytesPerMB / ioSec : null,
+                ReadLatency = reads > 0 ? ioHours.Sum(h => (h.ReadStallMs ?? 0) * weight(h)) / reads : null,
+                WriteLatency = writes > 0 ? ioHours.Sum(h => (h.WriteStallMs ?? 0) * weight(h)) / writes : null,
 
-                WaitMsPerSec = waitSampleMs > 0 ? waitHours.Sum(h => h.WaitMs ?? 0) * 1000.0 / waitSampleMs : null,
-                CriticalWaitMsPerSec = waitSampleMs > 0 ? waitHours.Sum(h => h.CriticalWaitMs ?? 0) * 1000.0 / waitSampleMs : null,
-                LockWaitMsPerSec = waitSampleMs > 0 ? waitHours.Sum(h => h.LockWaitMs ?? 0) * 1000.0 / waitSampleMs : null,
-                WaitSampleMs = waitSampleMs,
+                WaitMsPerSec = waitSampleMs > 0 ? waitHours.Sum(h => (h.WaitMs ?? 0) * weight(h)) * 1000.0 / waitSampleMs : null,
+                CriticalWaitMsPerSec = waitSampleMs > 0 ? waitHours.Sum(h => (h.CriticalWaitMs ?? 0) * weight(h)) * 1000.0 / waitSampleMs : null,
+                LockWaitMsPerSec = waitSampleMs > 0 ? waitHours.Sum(h => (h.LockWaitMs ?? 0) * weight(h)) * 1000.0 / waitSampleMs : null,
+                WaitSampleMs = waitHours.Sum(h => h.WaitSampleMs!.Value),
 
-                BlockingSnapshots = list.Sum(h => h.BlockingSnapshots ?? 0),
+                BlockingSnapshots = list.Sum(h => (h.BlockingSnapshots ?? 0) * weight(h)),
                 MaxBlockedSessions = list.Count == 0 ? 0 : list.Max(h => h.MaxBlockedSessions ?? 0),
                 MaxBlockedWaitMs = list.Count == 0 ? 0 : list.Max(h => h.MaxBlockedWaitMs ?? 0),
-                Deadlocks = list.Sum(h => h.Deadlocks ?? 0),
-                SlowQueries = list.Sum(h => h.SlowQueries ?? 0),
-                FailedSlowQueries = list.Sum(h => h.FailedSlowQueries ?? 0)
+                Deadlocks = list.Sum(h => (h.Deadlocks ?? 0) * weight(h)),
+                SlowQueries = list.Sum(h => (h.SlowQueries ?? 0) * weight(h)),
+                FailedSlowQueries = list.Sum(h => (h.FailedSlowQueries ?? 0) * weight(h))
             };
         }
     }
@@ -218,27 +234,30 @@ namespace DBADash.DailyReport
             foreach (var instance in data.Instances)
             {
                 // Only the hours the report counts (all of them, unless it's set to certain hours of the day)
-                var counted = instance.Hours.Where(h => data.IsIncluded(h.Period, h.HourOffset)).ToList();
+                // and that have some weight - an hour the range doesn't reach, or with no data yet, has none
+                var counted = instance.Hours.Where(h => data.IsIncluded(h.Period, h.HourOffset) && data.Weight(h.Period, h.HourOffset) > 0).ToList();
                 var fullHour = FullHourCPUSamples(instance.Hours);
-                var current = DayStats.From(counted.Where(h => h.Period == 0), fullHour);
+                double Weight(PerformanceHour h) => data.Weight(h.Period, h.HourOffset);
+                var current = DayStats.From(counted.Where(h => h.Period == 0), fullHour, Weight);
                 var baselineDays = Enumerable.Range(1, data.BaselineWeeks)
-                    .Select(p => (Period: p, Stats: DayStats.From(counted.Where(h => h.Period == p), fullHour)))
+                    .Select(p => (Period: p, Stats: DayStats.From(counted.Where(h => h.Period == p), fullHour, Weight)))
                     .Where(d => d.Stats.HasAny)
                     .ToList();
 
-                // Fleet totals, for the measures the report includes - a measure switched off is left out of the overview too
+                // Fleet totals, for the measures the report includes - a measure switched off is left out of the overview too.  Whole numbers
+                // here: the daily report doesn't weight hours
                 if (settings.IsEnabled("Deadlocks"))
                 {
-                    analysis.Deadlocks += current.Deadlocks;
+                    analysis.Deadlocks += (int)Math.Round(current.Deadlocks);
                     if (current.Deadlocks > 0) analysis.DeadlockInstances++;
                 }
                 if (settings.IsEnabled("Blocking") && current.BlockingSnapshots > 0) analysis.BlockingInstances++;
                 if (settings.IsEnabled("SlowQueries"))
                 {
-                    analysis.SlowQueries += current.SlowQueries;
+                    analysis.SlowQueries += (int)Math.Round(current.SlowQueries);
                     if (current.SlowQueries > 0) analysis.SlowQueryInstances++;
                 }
-                if (settings.IsEnabled("FailedSlowQueries")) analysis.FailedSlowQueries += current.FailedSlowQueries;
+                if (settings.IsEnabled("FailedSlowQueries")) analysis.FailedSlowQueries += (int)Math.Round(current.FailedSlowQueries);
 
                 if (!current.HasAny)
                 {
@@ -298,7 +317,7 @@ namespace DBADash.DailyReport
                 {
                     var cpuContext = new List<string>();
                     if (current.HighCPUMinutes > 0) cpuContext.Add($"{Duration(current.HighCPUMinutes.Value)} at 80%+");
-                    if (current.AvgCPU.HasValue) cpuContext.Add($"day average {Pct(current.AvgCPU.Value)}");
+                    if (current.AvgCPU.HasValue) cpuContext.Add($"{(data.WindowHours == 24 ? "day average" : "average")} {Pct(current.AvgCPU.Value)}");
                     Consider("CPU", "CPU", current.PeakHourCPU, d => d.PeakHourCPU,
                         Over(current.PeakHourCPU, t.CPUCritical, t.CPUWarning), Pct,
                         valueText: $"{Pct(current.PeakHourCPU.Value)} in the busiest hour ({formatHour(current.PeakHourCPUOffset!.Value)})",
@@ -315,13 +334,15 @@ namespace DBADash.DailyReport
                 {
                     Consider("ReadLatency", "Read latency", current.ReadLatency, d => d.ReadIOPs >= t.MinIOPs ? d.ReadLatency : null,
                         Over(current.ReadLatency, t.ReadLatencyCritical, t.ReadLatencyWarning), Ms,
-                        context: IOPsContext(current.ReadIOPs, compare ? Median(baseline.Select(d => d.ReadIOPs)) : null));
+                        context: IOPsContext(current.ReadIOPs, compare ? Median(baseline.Select(d => d.ReadIOPs)) : null,
+                            current.ReadMBsec, compare ? Median(baseline.Select(d => d.ReadMBsec)) : null));
                 }
                 if (current.WriteIOPs >= t.MinIOPs)
                 {
                     Consider("WriteLatency", "Write latency", current.WriteLatency, d => d.WriteIOPs >= t.MinIOPs ? d.WriteLatency : null,
                         Over(current.WriteLatency, t.WriteLatencyCritical, t.WriteLatencyWarning), Ms,
-                        context: IOPsContext(current.WriteIOPs, compare ? Median(baseline.Select(d => d.WriteIOPs)) : null));
+                        context: IOPsContext(current.WriteIOPs, compare ? Median(baseline.Select(d => d.WriteIOPs)) : null,
+                            current.WriteMBsec, compare ? Median(baseline.Select(d => d.WriteMBsec)) : null));
                 }
 
                 // Waits, with the wait types behind them
@@ -387,6 +408,8 @@ namespace DBADash.DailyReport
                 "HighCPU" => HighCPUMinutes(h, fullHourSamples),
                 "ReadLatency" => h.Reads > 0 && IOPs(h.Reads) >= minIOPs ? (h.ReadStallMs ?? 0) / (double)h.Reads.Value : null,
                 "WriteLatency" => h.Writes > 0 && IOPs(h.Writes) >= minIOPs ? (h.WriteStallMs ?? 0) / (double)h.Writes.Value : null,
+                "MBsec" => h.IOSampleMs > 0 && (h.ReadBytes.HasValue || h.WriteBytes.HasValue)
+                    ? ((h.ReadBytes ?? 0) + (h.WriteBytes ?? 0)) / BytesPerMB / (h.IOSampleMs.Value / 1000.0) : null,
                 "CriticalWaits" => Rate(h.CriticalWaitMs),
                 "LockWaits" => Rate(h.LockWaitMs),
                 "Waits" => Rate(h.WaitMs),
@@ -396,6 +419,23 @@ namespace DBADash.DailyReport
                 "FailedSlowQueries" => h.FailedSlowQueries ?? 0,
                 _ => null
             };
+        }
+
+        /// <summary>
+        /// The baseline figure for each hour of the window: the median of the same hour in the baseline weeks that have a figure for it, for a
+        /// chart line.  Hours with no baseline figure are left out.  <paramref name="value"/> is the hour's figure, e.g. from HourlyValue
+        /// </summary>
+        /// <param name="minWeeks">Baseline weeks an hour needs a figure in before it has a baseline - one week alone is no baseline</param>
+        public static SortedDictionary<int, double> BaselineByHour(IEnumerable<PerformanceHour> hours, int baselineWeeks, Func<PerformanceHour, double?> value, int minWeeks = 1)
+        {
+            var result = new SortedDictionary<int, double>();
+            foreach (var g in hours.Where(h => h.Period > 0 && h.Period <= baselineWeeks).GroupBy(h => h.HourOffset))
+            {
+                var values = g.Select(value).Where(v => v.HasValue).ToList();
+                if (values.Count < Math.Max(1, minWeeks)) continue;
+                result[g.Key] = Median(values)!.Value;
+            }
+            return result;
         }
 
         /// <summary>Hours either side of an hour that its usual range also takes in - a job that starts a little earlier or later, or a clock change</summary>
@@ -540,10 +580,26 @@ namespace DBADash.DailyReport
             return text.Length == 0 ? null : text;
         }
 
-        private static string IOPsContext(double? iops, double? usual) =>
-            iops == null ? null
-            : usual.HasValue ? $"at {Num(iops.Value)} IOPs (usual {Num(usual.Value)})"
-            : $"at {Num(iops.Value)} IOPs";
+        /// <summary>
+        /// The IO behind a latency figure: "at 1,200 IOPs, 45 MB/s (baseline 800 IOPs, 12 MB/s)" - more IO, or bigger IOs, than the baseline often
+        /// explains the latency.  Throughput is left out where there are no byte counts
+        /// </summary>
+        internal static string IOPsContext(double? iops, double? usual, double? mbSec = null, double? baselineMBsec = null)
+        {
+            if (iops == null) return null;
+            if (mbSec == null)
+            {
+                return usual.HasValue ? $"at {Num(iops.Value)} IOPs (baseline {Num(usual.Value)})" : $"at {Num(iops.Value)} IOPs";
+            }
+            var now = $"at {Num(iops.Value)} IOPs, {MBsec(mbSec.Value)}";
+            return usual.HasValue
+                ? $"{now} (baseline {Num(usual.Value)} IOPs{(baselineMBsec.HasValue ? ", " + MBsec(baselineMBsec.Value) : string.Empty)})"
+                : now;
+        }
+
+        public const double BytesPerMB = 1024d * 1024d;
+
+        public static string MBsec(double v) => v.ToString(v < 10 ? "0.#" : "#,0", CultureInfo.InvariantCulture) + " MB/s";
 
         public static string Pct(double v) => v.ToString("0", CultureInfo.InvariantCulture) + "%";
         public static string Ms(double v) => v.ToString(v < 10 ? "0.#" : "0", CultureInfo.InvariantCulture) + " ms";

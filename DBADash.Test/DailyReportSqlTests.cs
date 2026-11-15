@@ -9,7 +9,7 @@ namespace DBADash.Test
 {
     /// <summary>Daily report procs against a repository database created from the DBADashDB dacpac (LocalDB unless a server is set in the environment variable)</summary>
     [TestClass]
-    public class DailyReportSqlTests
+    public partial class DailyReportSqlTests
     {
         private static readonly string Database = "DBADashDailyReportTest_" + Guid.NewGuid().ToString("N");
         private static readonly string? ServerConnectionString = Environment.GetEnvironmentVariable(MessageAuthorizationSqlTests.ServerEnvironmentVariable) is { Length: > 0 } cs ? cs : null;

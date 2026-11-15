@@ -17,9 +17,12 @@ namespace DBADashGUI.Performance
     {
         private Label lblError = new Label() { Dock = DockStyle.Fill, Visible = false, TextAlign = System.Drawing.ContentAlignment.MiddleCenter };
 
-        private void ToggleError(bool show, string message = "")
+        /// <param name="isError">False for a message that isn't a fault - no stats for the period - shown in the normal text colour</param>
+        private void ToggleError(bool show, string message = "", bool isError = true)
         {
             lblError.Text = message;
+            lblError.ForeColor = !isError ? DBADashUser.SelectedTheme.ForegroundColor
+                : DBADashUser.IsDarkTheme ? DashColors.White : DashColors.Fail;
             lblError.Visible = show;
             objectExecChart.Visible = !show;
         }
@@ -181,12 +184,18 @@ namespace DBADashGUI.Performance
                 loading.Show();
                 var dt = await CommonData.ObjectExecutionStatsAsync(instanceID, databaseid, objectID, dateGrouping, Metric.Measure, DateRange.FromUTC, DateRange.ToUTC, default, TopRows, IncludeOther, cts.Token);
                 if (cts.IsCancellationRequested || IsDisposed) return;
+                // Before drawing, not after: while the overlay shows, the chart under it is laid out at a different size, and LiveCharts
+                // drawn at that size and then resized back could be left blank until the next refresh.  The overlay only shows on loads
+                // over its delay - switching instance, rather than a quick refresh - which is why it was intermittent
+                loading.Hide();
 
                 if (dt == null || dt.Rows.Count == 0)
                 {
                     objectExecChart.Series = Array.Empty<ISeries>();
                     objectExecChart.XAxes = Array.Empty<Axis>();
                     objectExecChart.YAxes = Array.Empty<Axis>();
+                    // Said rather than left as an empty box, which looks like the chart failed to draw
+                    ToggleError(true, $"No execution stats for this period (instance {instanceID}, {DateRange.FromUTC.ToAppTimeZone():g} to {DateRange.ToUTC.ToAppTimeZone():g})", isError: false);
                     return;
                 }
 

@@ -313,7 +313,7 @@ namespace DBADash.Test
             Assert.AreEqual(PerformanceSeverity.Critical, f.Severity);
             Assert.AreEqual("60 ms", f.ValueText);
             Assert.AreEqual("2 ms", f.BaselineText);
-            Assert.AreEqual("at 100 IOPs (usual 100)", f.Context);
+            Assert.AreEqual("at 100 IOPs (baseline 100)", f.Context);
         }
 
         [TestMethod]
@@ -564,9 +564,9 @@ namespace DBADash.Test
             Assert.IsFalse(content.HtmlBody.Contains("SQL<1>"));
             Assert.IsTrue(content.HtmlBody.Contains("Performance (last 24 hours)"));
             Assert.IsTrue(content.TextBody.Contains("Compared with the median of the same 24 hours in the previous 1 week."), content.TextBody);
-            Assert.IsTrue(content.TextBody.Contains("1 critical. 1 other instance within thresholds and usual levels."), content.TextBody);
+            Assert.IsTrue(content.TextBody.Contains("1 critical. 1 other instance within thresholds and in line with baseline."), content.TextBody);
             Assert.IsTrue(content.TextBody.Contains("SQL<1> [Critical]"), content.TextBody);
-            Assert.IsTrue(content.TextBody.Contains("  - CPU: 95% in the busiest hour (08:00); 24h at 80%+, day average 95% - usual 30% (+217%)"), content.TextBody);
+            Assert.IsTrue(content.TextBody.Contains("  - CPU: 95% in the busiest hour (08:00); 24h at 80%+, day average 95% - baseline 30% (+217%)"), content.TextBody);
             Assert.IsFalse(content.TextBody.Contains("Quiet"), "Instances with nothing to report aren't listed");
             Assert.IsTrue(content.TextBody.Contains("DRIVE SPACE"), "A drive flagged on the summary with no object rows is still reported");
             Assert.AreEqual(1, content.CriticalCount, "Performance isn't counted in the checks");
@@ -799,7 +799,7 @@ namespace DBADash.Test
             Assert.AreEqual(0, top[1].Usual!.Value, "Missing from the baseline weeks = used nothing then");
             Assert.AreEqual("ad hoc query 0x01 in Sales", top[1].MetadataName, "No statement text for the AI");
             Assert.AreEqual("Sales.dbo.Regressed", top[0].DisplayName);
-            Assert.AreEqual("CPU 10m (usual 55s), 100 executions (usual 100)", TopQueryAnalyzer.Describe(top[0], TopQueryAnalyzer.MeasureCPU));
+            Assert.AreEqual("CPU 10m (baseline 55s), 100 executions (baseline 100)", TopQueryAnalyzer.Describe(top[0], TopQueryAnalyzer.MeasureCPU));
         }
 
         [TestMethod]
@@ -824,7 +824,7 @@ namespace DBADash.Test
             var email = DailyReportRenderer.Render(config, DateTime.UtcNow, "{All}", new DataTable(), null, perf, "UTC").TextBody;
             var ai = DailyReportRenderer.Render(config, DateTime.UtcNow, "{All}", new DataTable(), null, perf, "UTC", new DailyReportExtras { ForAi = true }).TextBody;
 
-            Assert.IsTrue(email.Contains("Behind it (CPU, most above usual):"), email);
+            Assert.IsTrue(email.Contains("Behind it (CPU, most above baseline):"), email);
             Assert.IsTrue(email.Contains("SELECT secret = 'x' in Sales - CPU 2m"), email);
             Assert.IsFalse(ai.Contains("secret"), "Statement text never goes to the AI");
             Assert.IsTrue(ai.Contains("ad hoc query 0xAB in Sales"), ai);

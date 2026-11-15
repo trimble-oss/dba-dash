@@ -1233,7 +1233,7 @@ ApplyAuthAndRateLimit(app.MapPost("/api/ai/summarise-daily-report", async (
             - Then 2 to 5 bullet points, most urgent first, one topic each.  Start each with "- **Topic:** " (for example "- **Missing backups:** ")
               and keep it under 30 words.  Name at most 3 instances in a point, then "and N others".  Issues marked new matter more than
               ongoing ones; say "new" where it applies.
-            - Mention performance only where the report shows a problem or a change from usual, and say what's behind it when the report says.
+            - Mention performance only where the report shows a problem or a change from baseline, and say what's behind it when the report says.
             - If nothing needs attention, write only the first sentence, saying so.
             - No headings, no other markdown, no closing remarks.
             - Use only what is in the report.  Don't guess at causes it doesn't show, and don't recommend anything it doesn't support.

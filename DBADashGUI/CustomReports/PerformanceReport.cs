@@ -31,6 +31,10 @@ namespace DBADashGUI.CustomReports
             },
             ChartVisible = true,
             TableVisible = false,
+            // Cards for what's over a threshold or not normal for the time, and what else happened - loaded after the charts
+            InsightsProvider = DBADashGUI.Performance.PerformanceInsightsProvider.GetAsync,
+            // One toggle for the baseline lines on all the charts, as well as each chart's own
+            ShowBaselineToggle = true,
             // Prefer a single column layout (1 column x up to 5 rows) for the performance report
             ChartLayoutColumns = 1
         };

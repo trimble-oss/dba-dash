@@ -406,5 +406,29 @@ namespace DBADashGUI.Properties {
                 this["SsmsExtensionSkippedVersion"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string CollapsedInsightsReports {
+            get {
+                return ((string)(this["CollapsedInsightsReports"]));
+            }
+            set {
+                this["CollapsedInsightsReports"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ShowBaseline {
+            get {
+                return ((bool)(this["ShowBaseline"]));
+            }
+            set {
+                this["ShowBaseline"] = value;
+            }
+        }
     }
 }
