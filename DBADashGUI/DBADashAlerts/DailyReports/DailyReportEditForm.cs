@@ -39,13 +39,13 @@ namespace DBADashGUI.DBADashAlerts.DailyReports
         private readonly Button btnScope = new Button { Text = "Choose tags...", AutoSize = true }.WithImage(Properties.Resources.Filter_16x);
         private readonly CheckedListBox clbChannels = new() { Height = 110, Width = 260, CheckOnClick = true };
         private readonly CheckBox chkPerformance = new() { Text = "Include performance: instances over the Performance Summary thresholds", AutoSize = true };
-        private readonly CheckBox chkWeekOverWeek = new() { Text = "Compare with the same day in previous weeks (worse than usual)", AutoSize = true };
+        private readonly CheckBox chkWeekOverWeek = new() { Text = "Compare with the same day in previous weeks (baseline)", AutoSize = true };
         private readonly NumericUpDown numThreshold = new() { Minimum = 1, Maximum = 1000, Value = 50, Width = 70 };
         private readonly Label lblChannelsNote = new() { AutoSize = true, MaximumSize = new System.Drawing.Size(420, 0), Text = "Only Email channels can receive daily reports. Recipients are the channel's To Email." };
         private readonly Label lblPerformanceScope = new() { AutoSize = true, MaximumSize = new System.Drawing.Size(360, 0) };
         private readonly Button btnPerformanceScope = new Button { Text = "Choose tags...", AutoSize = true }.WithImage(Properties.Resources.Filter_16x);
         private DBADashTagSet performanceScope;
-        private readonly CheckBox chkAsUsual = new() { Text = "Only report a threshold breach when it's outside the usual range", AutoSize = true };
+        private readonly CheckBox chkAsUsual = new() { Text = "Only report a threshold breach when it's outside the baseline range", AutoSize = true };
         private readonly CheckBox chkHours = new() { Text = "Only count", AutoSize = true, Padding = new Padding(0, 3, 0, 0) };
         private readonly ComboBox cboHoursFrom = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 70 };
         private readonly ComboBox cboHoursTo = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 70 };

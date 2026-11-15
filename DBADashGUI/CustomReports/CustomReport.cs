@@ -191,6 +191,21 @@ namespace DBADashGUI.CustomReports
         [JsonIgnore]
         public bool ShowInsights { get; set; }
 
+        /// <summary>
+        /// Cards worked out in code rather than returned by the procedure - for a report of metric charts, which has no procedure.
+        /// Run after the report has been drawn, so the charts never wait for it, and shown above the results as with
+        /// <see cref="ShowInsights"/>.  Null or an empty list for no cards.  System reports only, set in code.
+        /// </summary>
+        [JsonIgnore]
+        internal Func<DBADashContext, System.Threading.CancellationToken, System.Threading.Tasks.Task<List<Insight>>> InsightsProvider { get; set; }
+
+        /// <summary>
+        /// A Baseline button on the report's toolbar that turns the baseline lines on and off for all its charts at once - for a report of
+        /// CPU, Waits and IO charts.  The same setting as each chart's own Baseline button.  System reports only, set in code.
+        /// </summary>
+        [JsonIgnore]
+        public bool ShowBaselineToggle { get; set; }
+
         public string CancellationMessageWarning { get; set; }
 
         public bool ChartVisible { get; set; } = true;

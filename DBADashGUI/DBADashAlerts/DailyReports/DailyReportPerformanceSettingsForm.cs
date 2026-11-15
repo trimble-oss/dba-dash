@@ -65,7 +65,7 @@ namespace DBADashGUI.DBADashAlerts.DailyReports
                 Dock = DockStyle.Top,
                 AutoSize = false,
                 Padding = new Padding(8, 6, 8, 6),
-                Text = "A measure is listed when it's over the Performance Summary thresholds, or when it's worse than usual by at least the report's " +
+                Text = "A measure is listed when it's over the Performance Summary thresholds, or when it's above baseline by at least the report's " +
                        "change threshold % and by at least its minimum change.  Untick a measure to leave it out of the report."
             };
 

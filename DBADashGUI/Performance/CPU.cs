@@ -38,7 +38,16 @@ namespace DBADashGUI.Performance
             InitializeComponent();
             this.Controls.Add(lblError);
             lblError.BringToFront();
+            baseline = new BaselineLines(this, RenderCpuChart, null,
+                ("Avg", h => h.CPUSamples > 0 ? h.AvgCPU : null),
+                ("Max", h => h.CPUSamples > 0 ? h.MaxCPU : null));
+            toolStrip1.Items.Add(baseline.Button);
         }
+
+        /// <summary>Baseline lines for average and max CPU - the median of the same hours in the previous weeks</summary>
+        private readonly BaselineLines baseline;
+
+        private int refreshCount;
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool CloseVisible
@@ -134,9 +143,15 @@ namespace DBADashGUI.Performance
                     durationMins = DateRange.DurationMins;
                 }
 
-                CpuDataTable = await GetCpuDataTable();
+                var refresh = ++refreshCount;
+                baseline.Reset();
+                var table = await GetCpuDataTable();
+                // Checked before the result is kept: an older load finishing after a newer one mustn't replace its data
+                if (refresh != refreshCount) return;
+                CpuDataTable = table;
 
                 RenderCpuChart();
+                baseline.Load(InstanceID);
             }
             catch (Exception ex)
             {
@@ -208,7 +223,7 @@ namespace DBADashGUI.Performance
                 };
             }
 
-            ChartHelper.UpdateChart(chartCPU, CpuDataTable, config);
+            ChartHelper.UpdateChart(chartCPU, CpuDataTable, config, baseline.For(Metric.AggregateType == IMetric.AggregateTypes.Avg ? "Avg" : "Max"));
         }
 
         private void AVGToolStripMenuItem_Click(object sender, EventArgs e)

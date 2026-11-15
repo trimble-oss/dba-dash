@@ -2,13 +2,21 @@ CREATE PROC dbo.DailyReport_Performance_Get(
 	@InstanceIDs VARCHAR(MAX),
 	@ToDate DATETIME2(3), /* UTC.  Rounded down to the hour: the report reads whole hours from the hourly rollups */
 	@BaselineWeeks TINYINT=4,
-	@Hours VARCHAR(MAX)=NULL /* "period:hour offset,..." - the hours the report counts (e.g. 09:00-17:00 local).  NULL: all of them */
+	@Hours VARCHAR(MAX)=NULL, /* "period:hour offset,..." - the hours the report counts (e.g. 09:00-17:00 local).  NULL: all of them */
+	@WindowHours SMALLINT=24, /* Whole hours before @ToDate.  At most 168 (a week) with baseline weeks - a longer window would overlap the week before it */
+	/*	"period:minutes,..." - moves a baseline period by whole hours from exactly 7 days per week, so it covers the same local hours as the
+		window when a clock change falls between them (e.g. "1:60,2:60").  Worked out by the caller, which knows the time zone.  NULL: none */
+	@PeriodShiftMins VARCHAR(MAX)=NULL,
+	/*	0 reads only what the charts' baseline lines need - CPU, IO and total waits by hour - and returns the wait types result set empty and
+		no blocking, deadlocks or slow queries in the hours */
+	@Detail BIT=1
 )
 AS
 /*
-	Performance for a daily report: the last 24 whole hours (period 0) and the same 24 hours 1 to @BaselineWeeks weeks
-	earlier (periods 1..n), so the report can compare a day with the same weekday's usual figures rather than with one
-	possibly unusual day.  Hourly rows, so the report can find the busiest hour as well as the day as a whole.
+	Performance for a daily report: the last @WindowHours whole hours (period 0 - 24 for the daily report) and the same hours 1 to
+	@BaselineWeeks weeks earlier (periods 1..n), so the report can compare a day with the same weekday's usual figures rather than with one
+	possibly unusual day.  Hourly rows, so the report can find the busiest hour as well as the day as a whole.  The Performance tab's
+	insights read it too, for the hours of the tab's date range.
 
 	Analysis (thresholds, baseline median, what's worth reporting) is done by the caller - DBADash.DailyReport.PerformanceAnalyzer.
 
@@ -17,7 +25,7 @@ AS
 		1  Hours          - one row per instance, period and hour with any data.
 		2  Wait types     - per instance and period, the wait types that are in the top 10 of any period for the instance, so a type
 		                    that is new this week shows against a baseline of 0 rather than missing.  Only the @Hours hours, when given.
-		                    The hours result set is always all 24 - the caller leaves hours out itself, and charts show them all.
+		                    The hours result set is always every hour of the window - the caller leaves hours out itself, and charts show them all.
 		3  Thresholds     - dbo.PerformanceThresholds, the same thresholds the Performance Summary colours by.
 
 	Every read is a seek per instance and period on (InstanceID, time), so the cost depends on the instances and days read, not on how much
@@ -32,6 +40,17 @@ AS
 SET NOCOUNT ON
 
 SET @ToDate = DATETIMEFROMPARTS(YEAR(@ToDate),MONTH(@ToDate),DAY(@ToDate),DATEPART(hh,@ToDate),0,0,0)
+
+IF @WindowHours IS NULL OR @WindowHours < 1 OR @WindowHours > 744
+BEGIN
+	RAISERROR('@WindowHours must be between 1 and 744',16,1)
+	RETURN
+END
+IF @WindowHours > 168 AND @BaselineWeeks > 0
+BEGIN
+	RAISERROR('@WindowHours can be at most 168 with baseline weeks - a longer window would overlap the week before it',16,1)
+	RETURN
+END
 
 CREATE TABLE #Instances(
 	InstanceID INT PRIMARY KEY,
@@ -49,17 +68,36 @@ CREATE TABLE #Periods(
 	FromDate2 DATETIME2(2) NOT NULL,
 	ToDate2 DATETIME2(2) NOT NULL
 )
+CREATE TABLE #PeriodShift(
+	Period TINYINT PRIMARY KEY,
+	ShiftMins INT NOT NULL
+)
+/* Whole hours only, as hours are counted from each period's start.  Never period 0 - that's the window itself */
+INSERT INTO #PeriodShift(Period, ShiftMins)
+SELECT P, MAX(M)
+FROM (
+	SELECT TRY_CAST(LEFT(value, CHARINDEX(':', value) - 1) AS TINYINT) AS P,
+		TRY_CAST(SUBSTRING(value, CHARINDEX(':', value) + 1, 10) AS INT) AS M
+	FROM STRING_SPLIT(@PeriodShiftMins, ',')
+	WHERE CHARINDEX(':', value) > 1
+) S
+WHERE P > 0
+AND M IS NOT NULL
+AND M % 60 = 0
+GROUP BY P
+
 ;WITH N AS (
 	SELECT TOP(@BaselineWeeks+1) CAST(ROW_NUMBER() OVER(ORDER BY (SELECT NULL))-1 AS TINYINT) AS Period
 	FROM sys.all_objects
 )
 INSERT INTO #Periods(Period,FromDate,ToDate,FromDate2,ToDate2)
-SELECT Period,
-	DATEADD(hh,-24,DATEADD(d,-7*Period,@ToDate)),
-	DATEADD(d,-7*Period,@ToDate),
-	DATEADD(hh,-24,DATEADD(d,-7*Period,@ToDate)),
-	DATEADD(d,-7*Period,@ToDate)
+SELECT N.Period,
+	DATEADD(mi,ISNULL(S.ShiftMins,0),DATEADD(hh,-@WindowHours,DATEADD(d,-7*N.Period,@ToDate))),
+	DATEADD(mi,ISNULL(S.ShiftMins,0),DATEADD(d,-7*N.Period,@ToDate)),
+	DATEADD(mi,ISNULL(S.ShiftMins,0),DATEADD(hh,-@WindowHours,DATEADD(d,-7*N.Period,@ToDate))),
+	DATEADD(mi,ISNULL(S.ShiftMins,0),DATEADD(d,-7*N.Period,@ToDate))
 FROM N
+LEFT JOIN #PeriodShift S ON S.Period = N.Period
 
 CREATE TABLE #IncludedHours(
 	Period TINYINT NOT NULL,
@@ -95,6 +133,8 @@ CREATE TABLE #Hourly(
 	Writes BIGINT NULL,
 	ReadStallMs BIGINT NULL,
 	WriteStallMs BIGINT NULL,
+	ReadBytes BIGINT NULL,
+	WriteBytes BIGINT NULL,
 	IOSampleMs BIGINT NULL,
 	WaitMs BIGINT NULL,
 	CriticalWaitMs BIGINT NULL,
@@ -139,12 +179,14 @@ GROUP BY T.InstanceID, P.Period, DATEDIFF(hh,P.FromDate,A.end_time)
 OPTION(NO_PERFORMANCE_SPOOL)
 
 /* Instance totals are the rows for database, file and drive -1, -1, '*' */
-INSERT INTO #Hourly(InstanceID,Period,HourOffset,Reads,Writes,ReadStallMs,WriteStallMs,IOSampleMs)
+INSERT INTO #Hourly(InstanceID,Period,HourOffset,Reads,Writes,ReadStallMs,WriteStallMs,ReadBytes,WriteBytes,IOSampleMs)
 SELECT T.InstanceID, P.Period, DATEDIFF(hh,P.FromDate2,S.SnapshotDate),
 	SUM(S.num_of_reads),
 	SUM(S.num_of_writes),
 	SUM(S.io_stall_read_ms),
 	SUM(S.io_stall_write_ms),
+	SUM(S.num_of_bytes_read),
+	SUM(S.num_of_bytes_written),
 	SUM(S.sample_ms_diff)
 FROM #Instances T
 CROSS JOIN #Periods P
@@ -168,6 +210,9 @@ CROSS APPLY (SELECT TOP (2147483647) * FROM dbo.Waits_60MIN W WITH (FORCESEEK(PK
 JOIN dbo.WaitType WT ON WT.WaitTypeID = W.WaitTypeID
 GROUP BY T.InstanceID, P.Period, DATEDIFF(hh,P.FromDate2,W.SnapshotDate)
 OPTION(NO_PERFORMANCE_SPOOL)
+
+IF @Detail = 1
+BEGIN
 
 INSERT INTO #Hourly(InstanceID,Period,HourOffset,BlockingSnapshots,MaxBlockedSessions,MaxBlockedWaitMs)
 SELECT T.InstanceID, P.Period, DATEDIFF(hh,P.FromDate,B.SnapshotDateUTC),
@@ -203,6 +248,8 @@ CROSS APPLY (SELECT TOP (2147483647) * FROM dbo.SlowQueries Q WITH (FORCESEEK(PK
 GROUP BY T.InstanceID, P.Period, DATEDIFF(hh,P.FromDate,Q.timestamp)
 OPTION(NO_PERFORMANCE_SPOOL)
 
+END
+
 /* Each source filled its own columns, so there's at most one value per column for each hour */
 SELECT InstanceID,
 	Period,
@@ -215,6 +262,8 @@ SELECT InstanceID,
 	MAX(Writes) AS Writes,
 	MAX(ReadStallMs) AS ReadStallMs,
 	MAX(WriteStallMs) AS WriteStallMs,
+	MAX(ReadBytes) AS ReadBytes,
+	MAX(WriteBytes) AS WriteBytes,
 	MAX(IOSampleMs) AS IOSampleMs,
 	MAX(WaitMs) AS WaitMs,
 	MAX(CriticalWaitMs) AS CriticalWaitMs,
@@ -238,6 +287,7 @@ CREATE TABLE #WaitTypes(
 	WaitMs BIGINT NOT NULL,
 	PRIMARY KEY(InstanceID, Period, WaitTypeID)
 )
+IF @Detail = 1
 INSERT INTO #WaitTypes(InstanceID,Period,WaitTypeID,WaitMs)
 SELECT T.InstanceID, P.Period, W.WaitTypeID,
 	SUM(W.wait_time_ms)

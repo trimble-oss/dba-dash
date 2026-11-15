@@ -38,7 +38,7 @@ namespace DBADashGUI.DBADashAlerts.DailyReports
                 Col("ScopeDescription", "Scope", 200),
                 Col("Channels", "Channels", 200),
                 Col("Performance", "Performance", 90),
-                Col("WeekOverWeek", "Compare with usual", 130),
+                Col("WeekOverWeek", "Compare with baseline", 130),
                 Col("LastSent", "Last sent (UTC)", 130),
                 Col("LastSendResult", "Last send result", 360),
                 Col("LastRun", "Last scheduled run (UTC)", 150),

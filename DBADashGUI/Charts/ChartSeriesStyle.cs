@@ -48,6 +48,12 @@ namespace DBADashGUI.Charts
         public double? StrokeThickness { get; init; }
 
         /// <summary>
+        /// Draw a line series' line dashed - for a reference line (the usual, a target) that shouldn't read as data.  Only applies with
+        /// <see cref="Color"/>, as with <see cref="StrokeThickness"/>.
+        /// </summary>
+        public bool Dashed { get; init; }
+
+        /// <summary>
         /// Convenience for report definitions, which have the palette as <see cref="Color"/> values:
         /// <c>ChartSeriesStyle.FromColor(DashColors.Fail, ChartMarkers.Square)</c>.
         /// </summary>

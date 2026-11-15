@@ -184,7 +184,7 @@ namespace DBADash.DailyReport
             }
             var legendX = left + plotW;
             legendX = Legend(canvas, legendX, "Last 24 hours", Blue, false, font, textPaint);
-            if (s.HasBaseline) legendX = Legend(canvas, legendX, "Usual (range, median)", Median, true, font, textPaint);
+            if (s.HasBaseline) legendX = Legend(canvas, legendX, "Baseline (range, median)", Median, true, font, textPaint);
             if (showThreshold) legendX = Legend(canvas, legendX, "Warning threshold", Red, true, font, textPaint);
             if (s.NotCounted != null && s.NotCounted.Any(n => n)) ShadeLegend(canvas, legendX, "Not counted", font, textPaint);
 

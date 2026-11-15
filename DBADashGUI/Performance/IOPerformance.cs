@@ -34,6 +34,36 @@ namespace DBADashGUI.Performance
             CheckPointSize();
             this.Controls.Add(lblError);
             lblError.BringToFront();
+            baseline = new BaselineLines(this, RenderChart, () => BaselineApplies,
+                ("MBsec", h => DBADash.DailyReport.PerformanceAnalyzer.HourlyValue("MBsec", h, 0)));
+            baseline.Button.ToolTipText = PerformanceBaselineCache.BaselineToolTip + "\nTotal MB/sec for the instance - not shown for a database, drive or file group.";
+            toolStrip1.Items.Add(baseline.Button);
+        }
+
+        /// <summary>Baseline line for total MB/sec - the median of the same hours in the previous weeks</summary>
+        private readonly BaselineLines baseline;
+
+        /// <summary>What the chart was last drawn from, so the baseline line can be added without reading the IO stats again.  Null when nothing's drawn</summary>
+        private (DataTable Data, ChartConfiguration Config, Dictionary<string, int> AxisIndexes)? lastChart;
+
+        /// <summary>
+        /// The baseline is for the instance's total IO, so it's only drawn for the instance - not filtered to a database, drive or file group - and
+        /// only against the total MB/sec series, the first axis
+        /// </summary>
+        private bool BaselineApplies => databaseID <= 0 && string.IsNullOrEmpty(Drive) && string.IsNullOrEmpty(filegroup)
+                                     && Columns.TryGetValue("MBsec", out var mb) && mb.IsVisible;
+
+        private void RenderChart()
+        {
+            if (lastChart is not { } chart) return;
+            ChartHelper.UpdateChart(chartIO, chart.Data, chart.Config, baseline.For("MBsec"));
+
+            // Store references to the axes for external access (e.g., DrivePerformance synchronization)
+            var yAxesArray = chartIO.YAxes.ToArray();
+            TimeAxis = chartIO.XAxes.FirstOrDefault() as DateTimeAxis;
+            MBsecAxis = chart.AxisIndexes.TryGetValue("MBsec", out var mbIdx) && mbIdx < yAxesArray.Length ? yAxesArray[mbIdx] as Axis : null;
+            IOPsAxis = chart.AxisIndexes.TryGetValue("IOPs", out var iopsIdx) && iopsIdx < yAxesArray.Length ? yAxesArray[iopsIdx] as Axis : null;
+            LatencyAxis = chart.AxisIndexes.TryGetValue("Latency", out var latIdx) && latIdx < yAxesArray.Length ? yAxesArray[latIdx] as Axis : null;
         }
 
         private int mins;
@@ -439,14 +469,16 @@ namespace DBADashGUI.Performance
                         DateUnit = TimeSpan.FromMinutes(dateGrouping)
                     };
 
-                    ChartHelper.UpdateChart(chartIO, dt, config);
-
-                    // Store references to the axes for external access (e.g., DrivePerformance synchronization)
-                    var yAxesArray = chartIO.YAxes.ToArray();
-                    TimeAxis = chartIO.XAxes.FirstOrDefault() as DateTimeAxis;
-                    MBsecAxis = axisNameToIndexMap.TryGetValue("MBsec", out var mbIdx) && mbIdx < yAxesArray.Length ? yAxesArray[mbIdx] as Axis : null;
-                    IOPsAxis = axisNameToIndexMap.TryGetValue("IOPs", out var iopsIdx) && iopsIdx < yAxesArray.Length ? yAxesArray[iopsIdx] as Axis : null;
-                    LatencyAxis = axisNameToIndexMap.TryGetValue("Latency", out var latIdx) && latIdx < yAxesArray.Length ? yAxesArray[latIdx] as Axis : null;
+                    baseline.Reset();
+                    lastChart = (dt, config, axisNameToIndexMap);
+                    RenderChart();
+                    baseline.Load(instanceID);
+                }
+                else
+                {
+                    // Nothing drawn for these figures - so a Baseline toggle doesn't redraw the last ones, which may be another instance's
+                    baseline.Reset();
+                    lastChart = null;
                 }
 
                 lblIOPerformance.Text = databaseID > 0 ? "IO Performance: Database" : (string.IsNullOrEmpty(Drive) ? "IO Performance: Instance" : "IO Performance: " + DriveLabel(Drive));

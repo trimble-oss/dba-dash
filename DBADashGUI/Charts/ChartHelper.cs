@@ -793,6 +793,10 @@ namespace DBADashGUI.Charts
                 case ILineSeries lineSeries:
                     var thickness = (float?)style.StrokeThickness;
                     lineSeries.Stroke = Repaint(lineSeries.Stroke, color, thickness ?? DefaultLineStrokeThickness, thickness.HasValue);
+                    if (style.Dashed && lineSeries.Stroke is SolidColorPaint dashedStroke)
+                    {
+                        dashedStroke.PathEffect = new LiveChartsCore.SkiaSharpView.Painting.Effects.DashEffect(new float[] { 6, 4 });
+                    }
                     lineSeries.GeometryStroke = Repaint(lineSeries.GeometryStroke, color, thickness ?? DefaultLineStrokeThickness, thickness.HasValue);
                     lineSeries.GeometryFill = Repaint(lineSeries.GeometryFill, color, 0);
                     if (lineSeries.Fill is not null)

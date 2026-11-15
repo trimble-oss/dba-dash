@@ -12,7 +12,8 @@
 	@Hours IDs READONLY, /* e.g. 9 to 5 :  9,10,11,12,13,14,15,16. Filter applied in local timezone (@UTCOffset)  */
 	@UTCOffset INT=0, /* Used for filtering on hours & weekday in current timezone */
 	@ShowHidden BIT=1,
-	@ShowCollectionMetrics BIT=1 /* 0 leaves out the DBADash collection run counters (CounterType 5) - 8 per collection, and in Collection Health already */
+	@ShowCollectionMetrics BIT=1 /* 0 leaves out the DBADash collection run counters (CounterType 5) - 8 per collection, and in Collection Health already */,
+	@IncludeCurrentValue BIT=1 /* 0 leaves CurrentValue NULL - its status is the last 2 hours, not the range, and it costs a read per counter */
 )
 AS
 SET DATEFIRST 1 /* Start week on Monday */
@@ -55,7 +56,7 @@ WITH T AS (
 			AVG(PC.Value) AS AvgValue,
 			SUM(PC.Value) as TotalValue,
 			COUNT(*) as SampleCount,' END + '
-			(SELECT TOP(1) Value FROM dbo.PerformanceCountersBetweenDates(DATEADD(mi,-120,GETUTCDATE()),GETUTCDATE(),IC.InstanceID,C.CounterID,C.CounterType) LV WHERE LV.InstanceID = IC.InstanceID AND LV.CounterID = C.CounterID ORDER BY LV.SnapshotDate DESC) AS CurrentValue,
+			' + CASE WHEN @IncludeCurrentValue = 1 THEN '(SELECT TOP(1) Value FROM dbo.PerformanceCountersBetweenDates(DATEADD(mi,-120,GETUTCDATE()),GETUTCDATE(),IC.InstanceID,C.CounterID,C.CounterType) LV WHERE LV.InstanceID = IC.InstanceID AND LV.CounterID = C.CounterID ORDER BY LV.SnapshotDate DESC)' ELSE 'CAST(NULL AS DECIMAL(28,9))' END + ' AS CurrentValue,
 			COALESCE(IC.CriticalFrom,C.CriticalFrom,C.SystemCriticalFrom) AS CriticalFrom,
 			COALESCE(IC.CriticalTo,C.CriticalTo,C.SystemCriticalTo) AS CriticalTo,
 			COALESCE(IC.WarningFrom,C.WarningFrom,C.SystemWarningFrom) AS WarningFrom,
