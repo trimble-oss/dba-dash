@@ -310,7 +310,9 @@ namespace DBADash.Test
             var outdated = CommunityToolVersionChecker.GetVersionInfo(tool, Instance(16), "master", "SELECT @Version = '8.12', @VersionDate = '20230101';", "A note");
             Assert.AreEqual(CommunityToolStatus.Outdated, outdated.Status);
             Assert.AreEqual("8.12", outdated.InstalledVersion);
-            Assert.AreEqual("8.34", outdated.ExpectedVersion);
+            var expectedVersion = tool.Files[0].Version;
+            var actualVersion = outdated.ExpectedVersion;
+            Assert.AreEqual(expectedVersion, actualVersion);
             Assert.AreEqual("A note", outdated.Note);
         }
 
@@ -495,9 +497,12 @@ namespace DBADash.Test
         public void ManifestUpdater_UpdatesTheRightFamilyWhenRefsAreShared()
         {
             // First Responder Kit and sp_WhoIsActive both tag releases yyyyMMdd, so they can be pinned to the same Ref.
-            var json = Utility.GetResourceString("DBADash.CommunityTools.CommunityToolsManifest.json")
-                .Replace("\"Ref\": \"20260409\"", "\"Ref\": \"20260708\"");
+            var original = Utility.GetResourceString("DBADash.CommunityTools.CommunityToolsManifest.json");
+            var sharedRef = CommunityToolsManifest.Parse(original).Families.Single(f => f.Name == "FirstResponderKit").Ref;
+            var whoIsActiveRef = CommunityToolsManifest.Parse(original).Families.Single(f => f.Name == "WhoIsActive").Ref;
+            var json = original.Replace($"\"Ref\": \"{whoIsActiveRef}\"", $"\"Ref\": \"{sharedRef}\"");
             var manifest = CommunityToolsManifest.Parse(json);
+            Assert.AreEqual(sharedRef, manifest.Families.Single(f => f.Name == "WhoIsActive").Ref, "Setup must share the FirstResponderKit ref");
             var whoIsActive = manifest.Families.Single(f => f.Name == "WhoIsActive");
             var who = whoIsActive.Tools.Single();
             var update = new CommunityToolFamilyUpdate
@@ -508,7 +513,7 @@ namespace DBADash.Test
 
             var updated = CommunityToolsManifest.Parse(CommunityToolsManifestUpdater.Apply(json, new[] { update }));
 
-            Assert.AreEqual("20260708", updated.Families.Single(f => f.Name == "FirstResponderKit").Ref);
+            Assert.AreEqual(sharedRef, updated.Families.Single(f => f.Name == "FirstResponderKit").Ref);
             Assert.AreEqual("20270202", updated.Families.Single(f => f.Name == "WhoIsActive").Ref);
         }
 
