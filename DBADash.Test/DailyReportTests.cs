@@ -503,6 +503,29 @@ namespace DBADash.Test
         }
 
         [TestMethod]
+        public void SectionLinks_OnlyWhenGiven_TextUnchanged_AndMoreLinkToTheSection()
+        {
+            var run = new DateTime(2026, 11, 12, 8, 0, 0, DateTimeKind.Utc);
+            var config = new DailyReportConfig { ReportName = "Ops", TimeZone = "UTC" };
+            // 12 drives: 10 listed, then "And 2 others."
+            var issues = Enumerable.Range('C', 12).Select(c => Obj("Drive space", 1, "SQL1", ((char)c) + ":")).ToArray();
+
+            var plain = DailyReportRenderer.Render(config, run, "{All}", new DataTable(), issues, null, "UTC");
+            Assert.IsFalse(plain.HtmlBody.Contains("<a "), "The email has no links into the app");
+
+            var linked = DailyReportRenderer.Render(config, run, "{All}", new DataTable(), issues, null, "UTC", new DailyReportExtras
+            {
+                SectionLink = (section, instance, database) => "dbadash://open?tab=Drives&section=" + Uri.EscapeDataString(section)
+                    + (instance == null ? string.Empty : "&instance=" + Uri.EscapeDataString(instance))
+                    + (database == null ? string.Empty : "&database=" + Uri.EscapeDataString(database))
+            });
+            Assert.AreEqual(plain.TextBody, linked.TextBody, "The text is the same with links");
+            Assert.IsTrue(linked.HtmlBody.Contains("href=\"dbadash://open?tab=Drives&amp;section=Drive%20space\""), "Section title links to the section");
+            Assert.IsTrue(linked.HtmlBody.Contains("&amp;instance=SQL1\""), "Server links to the section on that server");
+            Assert.IsTrue(linked.HtmlBody.Contains(">And 2 others.</a>"), "And N others links to the section");
+        }
+
+        [TestMethod]
         public void SummaryPage_AzureRowsNamedByServerWithoutLookup()
         {
             // No InstanceID means no lookup (and no database): the Azure SQL DB row is named by its server, as the summary page shows it

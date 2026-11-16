@@ -38,6 +38,7 @@ namespace DBADashGUI
             InitializeComponent();
             Controls.Add(reportView);
             reportView.SendToBack(); // Fill docks last, so the toolbar keeps its place at the top
+            reportView.AppLinkRequested += ReportView_AppLinkRequested;
             dgvTests.AutoGenerateColumns = false;
             dgvTests.Columns.AddRange(TestCols.ToArray());
             dgvTests.GridFilterChanged += (s, e) => UpdateClearFilter();
@@ -614,6 +615,34 @@ namespace DBADashGUI
             }
         }
 
+        /// <summary>Tab for the report's object sections (check groups).  Other sections use the summary's tab for their column</summary>
+        private static readonly Dictionary<string, Tabs?> ReportSectionTabs = new()
+        {
+            { "Backups - Full", Tabs.Backups }, { "Backups - Diff", Tabs.Backups }, { "Backups - Log", Tabs.Backups }, { "Drive space", Tabs.Drives }, { "Agent jobs", Tabs.Jobs }
+        };
+
+        /// <summary>
+        /// A link into the app for a report section: the tab for the section, on the instance (or the whole fleet when null), and the database
+        /// when the item is one.  Null when the section has no tab, so it isn't a link.
+        /// </summary>
+        private string ReportSectionLink(string section, string instance, string database)
+        {
+            Tabs? tab = ReportSectionTabs.TryGetValue(section, out var groupTab) ? groupTab : tabMapping.TryGetValue(section, out var columnTab) ? columnTab : null;
+            if (tab == null) return null;
+            var link = $"{WebView2Wrapper.AppLinkScheme}://open?tab={Uri.EscapeDataString(tab.Value.ToString())}";
+            if (!string.IsNullOrEmpty(instance)) link += "&instance=" + Uri.EscapeDataString(instance);
+            if (!string.IsNullOrEmpty(database)) link += "&database=" + Uri.EscapeDataString(database);
+            return link;
+        }
+
+        /// <summary>Opens the tab a report link names, on its instance, the same as clicking the summary</summary>
+        private void ReportView_AppLinkRequested(string link)
+        {
+            var query = System.Web.HttpUtility.ParseQueryString(new Uri(link).Query);
+            if (!Enum.TryParse(query["tab"], out Tabs tab)) return;
+            Instance_Selected?.Invoke(this, new InstanceSelectedEventArgs() { Instance = query["instance"], Database = query["database"], Tab = tab });
+        }
+
         private void TsReport_Click(object sender, EventArgs e)
         {
             showReport = tsReport.Checked;
@@ -636,7 +665,7 @@ namespace DBADashGUI
             string html;
             try
             {
-                var content = await Task.Run(() => DailyReportRunner.BuildSummaryPage(summary, Common.ConnectionString, scope, TimeZoneInfo.Local.Id, DateTime.UtcNow));
+                var content = await Task.Run(() => DailyReportRunner.BuildSummaryPage(summary, Common.ConnectionString, scope, TimeZoneInfo.Local.Id, DateTime.UtcNow, ReportSectionLink));
                 html = content.PreviewHtml();
             }
             catch (Exception ex)

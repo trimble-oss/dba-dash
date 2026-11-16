@@ -114,6 +114,12 @@ namespace DBADash.DailyReport
         public bool ForAi { get; init; }
         /// <summary>Formats an hour offset from the start of the performance window as a local time of day</summary>
         public Func<int, string> FormatHour { get; init; }
+        /// <summary>
+        /// Link to the app's view of a report section, or null for none.  Arguments: the section (a check group such as "Backups - Full", or a
+        /// summary column such as "AGStatus"), the instance (null for the whole fleet) and the database (null unless it's a database).
+        /// Only the summary page's report sets it: the email has no links into the app.
+        /// </summary>
+        public Func<string, string, string, string> SectionLink { get; init; }
     }
 
     /// <summary>
@@ -335,13 +341,13 @@ namespace DBADash.DailyReport
                 var groupObjects = objects.Where(i => i.CheckGroup == group).ToList();
                 var groupInstances = instanceOnly.Where(i => i.CheckGroup == group).ToList();
                 if (groupObjects.Count == 0 && groupInstances.Count == 0) continue;
-                AppendObjectSection(group, singular, plural, groupObjects, groupInstances, history, html, text);
+                AppendObjectSection(group, singular, plural, groupObjects, groupInstances, history, extras.SectionLink, html, text);
             }
 
             // Other checks, grouped by check name
             if (other.Count > 0)
             {
-                AppendOtherChecks(other, history, html, text);
+                AppendOtherChecks(other, history, extras.SectionLink, html, text);
             }
             if (objects.Count == 0 && instanceOnly.Count == 0 && other.Count == 0)
             {
@@ -713,11 +719,11 @@ namespace DBADash.DailyReport
         }
 
         /// <summary>A section's heading row: title on the left, an optional count pill on the right, a rule underneath</summary>
-        private static void SectionStart(string title, string pill, StringBuilder html, StringBuilder text)
+        private static void SectionStart(string title, string pill, StringBuilder html, StringBuilder text, string href = null)
         {
             html.Append("<tr><td class=\"dr-pad\" style=\"padding:22px 24px 0 24px\">");
             html.Append("<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\"><tr>");
-            html.Append($"<td style=\"padding:0 0 6px 0;border-bottom:2px solid {Gray0};font-size:16px;font-weight:bold;color:{TrimbleBlueDark}\">{Enc(title)}</td>");
+            html.Append($"<td style=\"padding:0 0 6px 0;border-bottom:2px solid {Gray0};font-size:16px;font-weight:bold;color:{TrimbleBlueDark}\">{Link(title, href, $"color:{TrimbleBlueDark}")}</td>");
             if (!string.IsNullOrEmpty(pill))
             {
                 html.Append($"<td align=\"right\" style=\"padding:0 0 6px 0;border-bottom:2px solid {Gray0};white-space:nowrap\"><span style=\"background:{GrayLight};color:{Gray6};font-size:11px;font-weight:bold;padding:2px 8px;border-radius:10px\">{Enc(pill)}</span></td>");
@@ -745,11 +751,12 @@ namespace DBADash.DailyReport
         /// New items are listed first within their severity.  Servers flagged without any database detail are named on their own line.
         /// </summary>
         private static void AppendObjectSection(string group, string singular, string plural, List<DailyReportIssue> objects,
-            List<DailyReportIssue> instanceOnly, IssueHistory history, StringBuilder html, StringBuilder text)
+            List<DailyReportIssue> instanceOnly, IssueHistory history, Func<string, string, string, string> sectionLink, StringBuilder html, StringBuilder text)
         {
             var newItems = objects.Count(i => history.IsNew(IssueHistory.ObjectKey(group, i.Instance, i.ObjectName)));
             var pill = objects.Count == 0 ? null : $"{Count(objects.Count, singular, plural)}{(newItems > 0 ? $" · {newItems} new" : string.Empty)}";
-            SectionStart(group, pill, html, text);
+            var sectionHref = sectionLink?.Invoke(group, null, null);
+            SectionStart(group, pill, html, text, sectionHref);
 
             if (objects.Count > 0)
             {
@@ -781,7 +788,11 @@ namespace DBADash.DailyReport
                     .ThenBy(r => r.Item.Instance, StringComparer.OrdinalIgnoreCase)
                     .ThenBy(r => r.Item.ObjectName, StringComparer.OrdinalIgnoreCase)
                     .Select(r => (r.Item.Status, (string)null, r.IsNew, Name: r.Item.ObjectName, Server: r.Item.Instance, r.Item.Detail, r.Age));
-                AppendItemTable(rows, objects.Count, html, text);
+                // A database's name opens its backups; a drive or job opens the section with the server
+                var isDatabase = group.StartsWith("Backups", StringComparison.Ordinal);
+                (string NameHref, string ServerHref) Hrefs(string name, string server) =>
+                    (sectionLink?.Invoke(group, server, isDatabase ? name : null), sectionLink?.Invoke(group, server, null));
+                AppendItemTable(rows, objects.Count, html, text, Hrefs, sectionHref);
             }
 
             if (instanceOnly.Count > 0)
@@ -802,7 +813,7 @@ namespace DBADash.DailyReport
         /// Plain text: - [Critical] [New] DB1 on LAB2022 - no full backup recorded (for 2 days)
         /// </summary>
         private static void AppendItemTable(IEnumerable<(int Status, string Label, bool IsNew, string Name, string Server, string Detail, string Age)> rows, int total,
-            StringBuilder html, StringBuilder text)
+            StringBuilder html, StringBuilder text, Func<string, string, (string NameHref, string ServerHref)> hrefs = null, string moreHref = null)
         {
             var shown = 0;
             html.Append($"<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"font-size:13px;border-collapse:collapse\">");
@@ -812,7 +823,8 @@ namespace DBADash.DailyReport
                 var cell = $"padding:6px 8px;border-bottom:1px solid {GrayLight};vertical-align:top";
                 html.Append($"<tr class=\"dr-row\" bgcolor=\"{bg}\" style=\"background:{bg}\">");
                 html.Append($"<td class=\"dr-i\" width=\"76\" style=\"{cell};width:76px;white-space:nowrap\">{SeverityBadge(row.Status, row.Label)}</td>");
-                html.Append($"<td class=\"dr-i\" width=\"38%\" style=\"{cell};width:38%\"><b>{Enc(row.Name)}</b>{(row.IsNew ? " " + NewBadge : string.Empty)}<div style=\"font-size:11px;color:{Gray6}\">{Enc(row.Server)}</div></td>");
+                var (nameHref, serverHref) = hrefs?.Invoke(row.Name, row.Server) ?? (null, null);
+                html.Append($"<td class=\"dr-i\" width=\"38%\" style=\"{cell};width:38%\"><b>{Link(row.Name, nameHref, "color:inherit")}</b>{(row.IsNew ? " " + NewBadge : string.Empty)}<div style=\"font-size:11px;color:{Gray6}\">{Link(row.Server, serverHref, "color:inherit")}</div></td>");
                 html.Append($"<td class=\"dr-b\" style=\"{cell};color:{TrimbleGray}\">{Enc(row.Detail)}</td>");
                 html.Append($"<td class=\"dr-b\" width=\"80\" align=\"right\" style=\"{cell};width:80px;color:{Gray6};font-size:12px;white-space:nowrap\">{Enc(row.Age ?? string.Empty)}</td>");
                 html.Append("</tr>");
@@ -825,7 +837,7 @@ namespace DBADash.DailyReport
             html.Append("</table>");
             if (total > shown)
             {
-                html.Append($"<div style=\"font-size:12px;color:{Gray6};padding:6px 8px 0 8px\">And {total - shown} others.</div>");
+                html.Append($"<div style=\"font-size:12px;color:{Gray6};padding:6px 8px 0 8px\">{Link($"And {total - shown} others.", moreHref, $"color:{Gray6}")}</div>");
                 text.AppendLine($"  And {total - shown} others.");
             }
         }
@@ -834,7 +846,7 @@ namespace DBADash.DailyReport
         /// Other summary checks, one row per check name, worst first, with new instances marked:
         ///   Database State - critical on LAB2005 (new), DESKTOP1 - warning on LAB2019
         /// </summary>
-        private static void AppendOtherChecks(List<SummaryIssue> other, IssueHistory history, StringBuilder html, StringBuilder text)
+        private static void AppendOtherChecks(List<SummaryIssue> other, IssueHistory history, Func<string, string, string, string> sectionLink, StringBuilder html, StringBuilder text)
         {
             string Name(SummaryIssue i) => history.IsNew(IssueHistory.CheckKey(i.Column, i.Instance)) ? $"{i.Instance} (new)" : i.Instance;
 
@@ -843,9 +855,9 @@ namespace DBADash.DailyReport
                 {
                     Check = g.Key,
                     Critical = g.Where(i => i.IsCritical).GroupBy(i => i.Instance, StringComparer.OrdinalIgnoreCase).Select(x => x.First())
-                        .OrderBy(i => i.Instance, StringComparer.OrdinalIgnoreCase).Select(Name).ToList(),
+                        .OrderBy(i => i.Instance, StringComparer.OrdinalIgnoreCase).ToList(),
                     Warning = g.Where(i => !i.IsCritical).GroupBy(i => i.Instance, StringComparer.OrdinalIgnoreCase).Select(x => x.First())
-                        .OrderBy(i => i.Instance, StringComparer.OrdinalIgnoreCase).Select(Name).ToList()
+                        .OrderBy(i => i.Instance, StringComparer.OrdinalIgnoreCase).ToList()
                 })
                 .OrderByDescending(c => c.Critical.Count > 0)
                 .ThenBy(c => c.Check, StringComparer.OrdinalIgnoreCase)
@@ -857,19 +869,32 @@ namespace DBADash.DailyReport
             foreach (var c in byCheck)
             {
                 var parts = new List<string>();
-                if (c.Critical.Count > 0) parts.Add($"critical on {JoinNames(c.Critical)}");
-                if (c.Warning.Count > 0) parts.Add($"warning on {JoinNames(c.Warning)}");
+                if (c.Critical.Count > 0) parts.Add($"critical on {JoinNames(c.Critical.Select(Name).ToList())}");
+                if (c.Warning.Count > 0) parts.Add($"warning on {JoinNames(c.Warning.Select(Name).ToList())}");
                 text.AppendLine($"  - {c.Check} - {string.Join("; ", parts)}");
 
                 var bg = n++ % 2 == 1 ? GrayFaint : White;
                 var cell = $"padding:6px 8px;border-bottom:1px solid {GrayLight};vertical-align:top";
-                html.Append($"<tr class=\"dr-row\" bgcolor=\"{bg}\" style=\"background:{bg}\"><td class=\"dr-b\" width=\"170\" style=\"{cell};font-weight:bold\">{Enc(c.Check)}</td><td class=\"dr-b\" style=\"{cell}\">");
-                if (c.Critical.Count > 0) html.Append($"<div>{SeverityBadge(1)} {Enc(JoinNames(c.Critical))}</div>");
-                if (c.Warning.Count > 0) html.Append($"<div style=\"{(c.Critical.Count > 0 ? "margin-top:4px" : string.Empty)}\">{SeverityBadge(2)} {Enc(JoinNames(c.Warning))}</div>");
+                var checkHref = sectionLink?.Invoke(c.Critical.Concat(c.Warning).First().Column, null, null);
+                html.Append($"<tr class=\"dr-row\" bgcolor=\"{bg}\" style=\"background:{bg}\"><td class=\"dr-b\" width=\"170\" style=\"{cell};font-weight:bold\">{Link(c.Check, checkHref, "color:inherit")}</td><td class=\"dr-b\" style=\"{cell}\">");
+                if (c.Critical.Count > 0) html.Append($"<div>{SeverityBadge(1)} {LinkedNames(c.Critical, sectionLink, Name)}</div>");
+                if (c.Warning.Count > 0) html.Append($"<div style=\"{(c.Critical.Count > 0 ? "margin-top:4px" : string.Empty)}\">{SeverityBadge(2)} {LinkedNames(c.Warning, sectionLink, Name)}</div>");
                 html.Append("</td></tr>");
             }
             html.Append("</table>");
             SectionEnd(html, text);
+        }
+
+        /// <summary>
+        /// Instance names for a check as links to that check's view on each instance, the same as JoinNames for the text.  The names past
+        /// MaxNamesPerLine are a link to the check's view for the whole fleet.
+        /// </summary>
+        private static string LinkedNames(List<SummaryIssue> items, Func<string, string, string, string> sectionLink, Func<SummaryIssue, string> label)
+        {
+            var shown = string.Join(", ", items.Take(MaxNamesPerLine).Select(i => Link(label(i), sectionLink?.Invoke(i.Column, i.Instance, null), "color:inherit")));
+            if (items.Count <= MaxNamesPerLine) return shown;
+            var others = Link($"and {items.Count - MaxNamesPerLine} others", sectionLink?.Invoke(items[0].Column, null, null), "color:inherit");
+            return $"{shown}, {others}";
         }
 
         /// <summary>
@@ -1304,5 +1329,9 @@ namespace DBADash.DailyReport
         private static string Spacer(int px) => $"<div style=\"height:{px}px;line-height:{px}px;font-size:0\">&nbsp;</div>";
 
         private static string Enc(string value) => WebUtility.HtmlEncode(value ?? string.Empty);
+
+        /// <summary>The text as a link to href (when there is one), or plain.  The link keeps the style given, without an underline unless it's wanted</summary>
+        private static string Link(string text, string href, string style) =>
+            string.IsNullOrEmpty(href) ? Enc(text) : $"<a href=\"{Enc(href)}\" style=\"{style};text-decoration:underline\">{Enc(text)}</a>";
     }
 }
