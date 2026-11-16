@@ -5,7 +5,7 @@
       "DisplayName": "SQL Server First Responder Kit",
       "Author": "Brent Ozar Unlimited",
       "Repository": "BrentOzarULTD/SQL-Server-First-Responder-Kit",
-      "Ref": "20260708",
+      "Ref": "20261114",
       "LatestRef": "release",
       "License": "MIT",
       "LicenseUrl": "https://github.com/BrentOzarULTD/SQL-Server-First-Responder-Kit/blob/main/LICENSE.md",
@@ -16,55 +16,55 @@
           "MinMajorVersion": 13,
           "AzureSqlDb": true,
           "Requires": [ "sp_ineachdb" ],
-          "Files": [ { "Path": "sp_Blitz.sql", "Version": "8.34", "VersionDate": "20260702", "Sha256": "3fec0ca79c2126c466098f6a64f4cb4506ba17e62b61c0dd6802c6e656a2938c" } ]
+          "Files": [ { "Path": "sp_Blitz.sql", "Version": "8.35", "VersionDate": "20261114", "Sha256": "c2973f45287375fec321a4873d6d29c16e0adb74c31f2c7c499e82ec3ba234de" } ]
         },
         {
           "Name": "sp_BlitzFirst",
           "MinMajorVersion": 13,
           "AzureSqlDb": true,
-          "Files": [ { "Path": "sp_BlitzFirst.sql", "Version": "8.34", "VersionDate": "20260702", "Sha256": "9b14bbc8877b398acb4d5cad4dd92a089d78963689773cf91d75c28ed3ef0a21" } ]
+          "Files": [ { "Path": "sp_BlitzFirst.sql", "Version": "8.35", "VersionDate": "20261114", "Sha256": "10d7e6f756f18b1538a9f72f27e117c47470cd0322a527487cf8e9fbdef85021" } ]
         },
         {
           "Name": "sp_BlitzIndex",
           "MinMajorVersion": 13,
           "AzureSqlDb": true,
-          "Files": [ { "Path": "sp_BlitzIndex.sql", "Version": "8.34", "VersionDate": "20260702", "Sha256": "be73c4cb986b750f5501db8bd233887fe4861b7a53c9c6bdc665dcd23ce95946" } ]
+          "Files": [ { "Path": "sp_BlitzIndex.sql", "Version": "8.35", "VersionDate": "20261114", "Sha256": "e3f4f97b150195f5e4dd65670bceba06f565b9fe830302089904e5bde5467128" } ]
         },
         {
           "Name": "sp_BlitzCache",
           "MinMajorVersion": 13,
           "AzureSqlDb": true,
-          "Files": [ { "Path": "sp_BlitzCache.sql", "Version": "8.34", "VersionDate": "20260702", "Sha256": "aba9ed53aba3ebabac30b696deec97f83ab5aa84490173315d4a21db45762aac" } ]
+          "Files": [ { "Path": "sp_BlitzCache.sql", "Version": "8.35", "VersionDate": "20261114", "Sha256": "b28876a7f864ff30e613aef49a578dd0a69fdfa85217005c352b012b6b0e810b" } ]
         },
         {
           "Name": "sp_BlitzWho",
           "MinMajorVersion": 13,
           "AzureSqlDb": true,
-          "Files": [ { "Path": "sp_BlitzWho.sql", "Version": "8.34", "VersionDate": "20260702", "Sha256": "685347e601826f59bf2010123859f683ab7a8190e2f8df42701ba6cad4b09ff6" } ]
+          "Files": [ { "Path": "sp_BlitzWho.sql", "Version": "8.35", "VersionDate": "20261114", "Sha256": "e3a882ad60048b8a648958e9f19730051dea58962719ee7fc66910cc047cea09" } ]
         },
         {
           "Name": "sp_BlitzLock",
           "MinMajorVersion": 13,
           "AzureSqlDb": false,
-          "Files": [ { "Path": "sp_BlitzLock.sql", "Version": "8.34", "VersionDate": "20260702", "Sha256": "fe0bbeed5b7d4119d0b484e31502d60b93c9e6fb08b2ef672cd38793c6ef9e49" } ]
+          "Files": [ { "Path": "sp_BlitzLock.sql", "Version": "8.35", "VersionDate": "20261114", "Sha256": "2a291374a01f5ea549c6f478a1189b3f2343f536464d20be321c5296dc2680fb" } ]
         },
         {
           "Name": "sp_BlitzBackups",
           "MinMajorVersion": 13,
           "AzureSqlDb": false,
-          "Files": [ { "Path": "sp_BlitzBackups.sql", "Version": "8.34", "VersionDate": "20260702", "Sha256": "3abd7a198af7b6f21905e0387d1c8bf61a13f8faf4b299e7ff9fd941ff04edc7" } ]
+          "Files": [ { "Path": "sp_BlitzBackups.sql", "Version": "8.35", "VersionDate": "20261114", "Sha256": "15382950676862024de0e17ac910b12f92527d14c88934e47f0f9cae0cbcbd03" } ]
         },
         {
           "Name": "sp_ineachdb",
           "MinMajorVersion": 13,
           "AzureSqlDb": true,
-          "Files": [ { "Path": "sp_ineachdb.sql", "Version": "8.34", "VersionDate": "20260702", "Sha256": "de6c410ce5a7f747d82991d4384b3c020703d390ea82f3e1a8100eeeac5f4597" } ]
+          "Files": [ { "Path": "sp_ineachdb.sql", "Version": "8.35", "VersionDate": "20261114", "Sha256": "0cc0e9926e1f73f399589493f183879bf18d2a4a08d3018d4b51748fbca3309a" } ]
         },
         {
           "Name": "sp_DatabaseRestore",
           "MinMajorVersion": 13,
           "AzureSqlDb": false,
-          "Files": [ { "Path": "sp_DatabaseRestore.sql", "Version": "8.34", "VersionDate": "20260702", "Sha256": "4084dbb9b55816ddfac83e3459f25891e5db7d2f2f697cf0dc89cf5d6644c7f6" } ]
+          "Files": [ { "Path": "sp_DatabaseRestore.sql", "Version": "8.35", "VersionDate": "20261114", "Sha256": "ad3da1caf9b305e2e75a3baf76e2224d7cab868fa4aad6b8d89f73bec98f01d6" } ]
         }
       ]
     },
