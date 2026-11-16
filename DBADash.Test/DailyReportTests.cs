@@ -806,10 +806,144 @@ namespace DBADash.Test
         public void TopQueries_MeasureFollowsTheFindings()
         {
             var io = new InstancePerformanceResult();
-            io.Findings.Add(new PerformanceFinding { Metric = "ReadLatency" });
-            Assert.AreEqual(TopQueryAnalyzer.MeasureReads, TopQueryAnalyzer.MeasureFor(io));
+            io.Findings.Add(new PerformanceFinding { Metric = "ReadLatency", Severity = PerformanceSeverity.Critical });
+            Assert.AreEqual(TopQueryAnalyzer.MeasurePhysicalReads, TopQueryAnalyzer.MeasureFor(io));
+            io.Findings.Add(new PerformanceFinding { Metric = "WriteLatency", Severity = PerformanceSeverity.Warning });
+            Assert.AreEqual(TopQueryAnalyzer.MeasurePhysicalReads, TopQueryAnalyzer.MeasureFor(io), "Read latency is the worse finding");
+            var write = new InstancePerformanceResult();
+            write.Findings.Add(new PerformanceFinding { Metric = "WriteLatency", Severity = PerformanceSeverity.WorseThanUsual });
+            Assert.AreEqual(TopQueryAnalyzer.MeasureWrites, TopQueryAnalyzer.MeasureFor(write));
             io.Findings.Add(new PerformanceFinding { Metric = "CPU" });
             Assert.AreEqual(TopQueryAnalyzer.MeasureCPU, TopQueryAnalyzer.MeasureFor(io));
+
+            var waits = new InstancePerformanceResult();
+            waits.Findings.Add(new PerformanceFinding { Metric = "CriticalWaits" });
+            Assert.AreEqual(TopQueryAnalyzer.MeasureCPU, TopQueryAnalyzer.MeasureFor(waits));
+        }
+
+        [TestMethod]
+        public void TopQueries_RankedByTheIncreaseInTheDaysTotal_NotPerExecution()
+        {
+            // One run that went from 20ms to 5 minutes, against a million runs that went from 100ms to 200ms: the second is a far bigger
+            // increase in total, so it's listed first
+            var rows = new List<TopQueryRow>
+            {
+                new() { Source = "Object", InstanceID = 1, ID = 1, Period = 0, Name = "dbo.OnceSlow", CPUMs = 300_000, Executions = 1 },
+                new() { Source = "Object", InstanceID = 1, ID = 1, Period = 1, Name = "dbo.OnceSlow", CPUMs = 20, Executions = 1 },
+                new() { Source = "Object", InstanceID = 1, ID = 2, Period = 0, Name = "dbo.Busy", CPUMs = 200_000_000, Executions = 1_000_000 },
+                new() { Source = "Object", InstanceID = 1, ID = 2, Period = 1, Name = "dbo.Busy", CPUMs = 100_000_000, Executions = 1_000_000 }
+            };
+            var top = TopQueryAnalyzer.Rank(rows, TopQueryAnalyzer.MeasureCPU, byIncrease: true, count: 2);
+            CollectionAssert.AreEqual(new[] { "dbo.Busy", "dbo.OnceSlow" }, top.Select(q => q.Name).ToArray());
+        }
+
+        [TestMethod]
+        public void TopQueries_IOMeasuresUsePhysicalReadsAndWrites()
+        {
+            var rows = new List<TopQueryRow>
+            {
+                new() { Source = "Object", InstanceID = 1, ID = 1, Period = 0, Name = "dbo.Reader", LogicalReads = 900_000_000, PhysicalReads = 10, LogicalWrites = 0, CPUMs = 1, Executions = 5 },
+                new() { Source = "Object", InstanceID = 1, ID = 2, Period = 0, Name = "dbo.ColdReader", LogicalReads = 1_000_000, PhysicalReads = 1_000_000, LogicalWrites = 0, CPUMs = 1, Executions = 5 },
+                new() { Source = "Object", InstanceID = 1, ID = 3, Period = 0, Name = "dbo.Loader", LogicalReads = 10, PhysicalReads = 0, LogicalWrites = 340_000, CPUMs = 1, Executions = 5 }
+            };
+            var reads = TopQueryAnalyzer.Rank(rows, TopQueryAnalyzer.MeasurePhysicalReads, byIncrease: false, count: 1).Single();
+            Assert.AreEqual("dbo.ColdReader", reads.Name, "Logical reads from cache don't touch the disk");
+            Assert.AreEqual("1M physical reads, 5 executions", TopQueryAnalyzer.Describe(reads, TopQueryAnalyzer.MeasurePhysicalReads));
+            var writes = TopQueryAnalyzer.Rank(rows, TopQueryAnalyzer.MeasureWrites, byIncrease: false, count: 1).Single();
+            Assert.AreEqual("dbo.Loader", writes.Name);
+            Assert.AreEqual("340K writes, 5 executions", TopQueryAnalyzer.Describe(writes, TopQueryAnalyzer.MeasureWrites));
+        }
+
+        [TestMethod]
+        public void TopQueries_NotListedForBlockingAlone()
+        {
+            // A query can block others with next to no CPU, so the queries using the most CPU don't explain blocking
+            var blocking = new InstancePerformanceResult { InstanceID = 1, Instance = "SQL1" };
+            foreach (var metric in new[] { "Blocking", "LockWaits", "Deadlocks", "SlowQueries", "FailedSlowQueries" })
+            {
+                blocking.Findings.Add(new PerformanceFinding { Metric = metric });
+            }
+            Assert.IsNull(TopQueryAnalyzer.MeasureFor(blocking));
+
+            var perf = new DBADash.DailyReport.PerformanceAnalysis { ComparedWithBaseline = true };
+            perf.Flagged.Add(blocking);
+            TopQueryAnalyzer.Apply(perf, new[] { new TopQueryRow { Source = "Object", InstanceID = 1, ID = 1, Period = 0, Name = "dbo.usp_Busy", CPUMs = 120_000, Executions = 5 } }, 3);
+            Assert.AreEqual(0, blocking.TopQueries.Count);
+            Assert.IsNull(blocking.TopQueriesMeasure);
+        }
+
+        // ---- Lead blockers ----
+
+        private static DailyReportBlocker Blocker(int instanceID, int snapshots, string? text = null, string? objectName = null, int sleeping = 0) => new()
+        {
+            InstanceID = instanceID,
+            DatabaseName = "Sales",
+            ObjectName = objectName,
+            QueryHash = "0xAB",
+            ProgramName = "OrderApp",
+            StatementText = text,
+            Snapshots = snapshots,
+            SleepingSnapshots = sleeping,
+            MaxBlockedSessions = 23,
+            MaxBlockedWaitMs = 250_000,
+            FirstSeenUtc = new DateTime(2026, 11, 13, 9, 10, 0),
+            LastSeenUtc = new DateTime(2026, 11, 13, 9, 42, 0)
+        };
+
+        [TestMethod]
+        public void Blockers_OnlyForBlockingAndLockWaits()
+        {
+            var blocking = new InstancePerformanceResult { InstanceID = 1 };
+            blocking.Findings.Add(new PerformanceFinding { Metric = "Blocking" });
+            var locks = new InstancePerformanceResult { InstanceID = 2 };
+            locks.Findings.Add(new PerformanceFinding { Metric = "LockWaits" });
+            var cpu = new InstancePerformanceResult { InstanceID = 3 };
+            cpu.Findings.Add(new PerformanceFinding { Metric = "CPU" });
+            var perf = new DBADash.DailyReport.PerformanceAnalysis();
+            perf.Flagged.AddRange(new[] { blocking, locks, cpu });
+
+            DailyReportBlockerAnalyzer.Apply(perf, new[] { Blocker(1, 3), Blocker(1, 9), Blocker(1, 5), Blocker(2, 1), Blocker(3, 4) }, 2, utc => utc.ToString("HH:mm"));
+
+            CollectionAssert.AreEqual(new[] { 9, 5 }, blocking.Blockers.Select(b => b.Snapshots).ToArray(), "Most snapshots first, limited to the count");
+            Assert.AreEqual(1, locks.Blockers.Count);
+            Assert.AreEqual(0, cpu.Blockers.Count, "Blockers don't explain CPU");
+            Assert.AreEqual("09:10-09:42", blocking.Blockers[0].SeenText);
+        }
+
+        [TestMethod]
+        public void Blockers_TextIsMaskedAndNeverSentToTheAi()
+        {
+            var adhoc = Blocker(1, 14, text: "UPDATE dbo.Customers\r\n  SET Email = N'jo@example.com' WHERE CustomerID = 42 -- ticket 991", sleeping: 9);
+
+            var title = DailyReportBlockerAnalyzer.Title(adhoc, forAi: false);
+            Assert.AreEqual("UPDATE dbo.Customers SET Email = N'?' WHERE CustomerID = ? in Sales", title);
+            Assert.AreEqual("ad hoc query 0xAB in Sales", DailyReportBlockerAnalyzer.Title(adhoc, forAi: true));
+            Assert.AreEqual("Sales.dbo.usp_Close", DailyReportBlockerAnalyzer.Title(Blocker(1, 1, text: "UPDATE t SET a = 1", objectName: "dbo.usp_Close"), forAi: false),
+                "A procedure is named rather than its statement");
+
+            adhoc.SeenText = "09:10-09:42";
+            Assert.AreEqual("lead blocker in 14 snapshots (09:10-09:42), up to 23 sessions and 4m blocked wait in one snapshot - sleeping with an open transaction in 9 - OrderApp",
+                DailyReportBlockerAnalyzer.Describe(adhoc));
+        }
+
+        [TestMethod]
+        public void Blockers_ListedUnderTheInstance()
+        {
+            var config = new DailyReportConfig { ReportName = "Ops", IncludePerformance = true, IncludeWeekOverWeek = true, TimeZone = "UTC" };
+            config.Settings.IncludeCharts = false;
+            var perf = PerformanceAnalyzer.Analyze(Data(1, Instance("SQL1", Day(0, cpu: 95), Day(1, cpu: 20))), true, true, 50);
+            var result = perf.Flagged.Single();
+            result.Findings.Add(new PerformanceFinding { Metric = "Blocking", Label = "Snapshots with blocking", ValueText = "40" });
+            DailyReportBlockerAnalyzer.Apply(perf, new[] { Blocker(result.InstanceID, 14, text: "DELETE FROM dbo.Orders WHERE Ref = 'secret'") }, 3, utc => utc.ToString("HH:mm"));
+
+            var email = DailyReportRenderer.Render(config, DateTime.UtcNow, "{All}", new DataTable(), null, perf, "UTC").TextBody;
+            var ai = DailyReportRenderer.Render(config, DateTime.UtcNow, "{All}", new DataTable(), null, perf, "UTC", new DailyReportExtras { ForAi = true }).TextBody;
+
+            Assert.IsTrue(email.Contains("Lead blockers (most snapshots):"), email);
+            Assert.IsTrue(email.Contains("DELETE FROM dbo.Orders WHERE Ref = '?' in Sales - lead blocker in 14 snapshots"), email);
+            Assert.IsFalse(email.Contains("secret"), "Literals are masked in the email");
+            Assert.IsFalse(ai.Contains("DELETE"), "No statement text for the AI, masked or not");
+            Assert.IsTrue(ai.Contains("ad hoc query 0xAB in Sales"), ai);
         }
 
         [TestMethod]

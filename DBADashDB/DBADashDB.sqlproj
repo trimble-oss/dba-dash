@@ -449,6 +449,7 @@
     <Build Include="dbo\Stored Procedures\DailyReport_Issues_Get.sql" />
     <Build Include="dbo\Stored Procedures\DailyReport_Alerts_Get.sql" />
     <Build Include="dbo\Stored Procedures\DailyReport_Activity_Get.sql" />
+    <Build Include="dbo\Stored Procedures\DailyReport_Blockers_Get.sql" />
     <Build Include="dbo\Stored Procedures\DailyReport_Performance_Get.sql" />
     <Build Include="dbo\Functions\DailyReport_AgeText.sql" />
     <Build Include="dbo\Stored Procedures\DailyReport_IssueState_Upd.sql" />

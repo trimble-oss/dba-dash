@@ -158,6 +158,8 @@ namespace DBADash.DailyReport
         public string TopQueriesMeasure { get; set; }
         /// <summary>Whether TopQueries are ranked by their increase on the usual (true) or by their total (false)</summary>
         public bool TopQueriesByIncrease { get; set; }
+        /// <summary>The lead blockers behind a blocking or lock wait finding, from the blocking snapshots - see DailyReportBlockerAnalyzer</summary>
+        public List<DailyReportBlocker> Blockers { get; } = new();
         /// <summary>Long running requests that fit the findings (DBCC, backups, index maintenance...), from the running query snapshots</summary>
         public List<DailyReportActivity> Activity { get; } = new();
         /// <summary>What Activity is ranked by: writes, reads, CPU or duration - see DailyReportActivityAnalyzer</summary>

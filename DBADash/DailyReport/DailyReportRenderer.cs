@@ -1022,6 +1022,7 @@ namespace DBADash.DailyReport
         ///     - Critical waits: 310 ms/s (RESOURCE_SEMAPHORE +280 ms/s) - baseline 20 ms/s (+1450%) - for 3 days
         ///     Behind it (CPU, most above baseline):
         ///     - Sales.dbo.usp_Orders - CPU 1h 10m (baseline 5m), 12,040 executions (baseline 11,900)
+        /// (or for a blocking finding, Lead blockers: - Sales.dbo.usp_Close - lead blocker in 14 snapshots (09:10-09:42), up to 23 sessions blocked...)
         /// then, in the HTML, a chart of the instance's first finding by hour.  Instances with nothing to report are counted, not listed.
         /// </summary>
         private static void AppendPerformance(PerformanceAnalysis p, IssueHistory history, DailyReportExtras extras, bool plainTextOnly, List<DailyReportImage> images,
@@ -1160,6 +1161,24 @@ namespace DBADash.DailyReport
                     text.AppendLine($"    - {name} - {figures}");
                     html.Append($"<tr><td style=\"padding:6px 8px;border-bottom:1px solid {White}\"><div style=\"font-family:{MonoFont};color:{TrimbleBlueDark};word-break:break-all\">{Enc(name)}</div>");
                     html.Append($"<div style=\"color:{Gray6};margin-top:1px\">{Enc(figures)}</div></td></tr>");
+                }
+                html.Append("</table>");
+            }
+
+            // What was at the head of the blocking chains - the statement text masked, and never sent to the AI
+            if (instance.Blockers.Count > 0)
+            {
+                const string heading = "Lead blockers (most snapshots):";
+                text.AppendLine($"    {heading}");
+                html.Append($"<div style=\"font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:0.5px;color:{Gray6};margin:10px 0 4px 0\">{Enc(heading.TrimEnd(':'))}</div>");
+                html.Append($"<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" bgcolor=\"{GrayFaint}\" style=\"background:{GrayFaint};font-size:12px;border-collapse:collapse\">");
+                foreach (var b in instance.Blockers)
+                {
+                    var title = DailyReportBlockerAnalyzer.Title(b, extras.ForAi);
+                    var detail = DailyReportBlockerAnalyzer.Describe(b);
+                    text.AppendLine($"    - {title} - {detail}");
+                    html.Append($"<tr><td style=\"padding:6px 8px;border-bottom:1px solid {White}\"><div style=\"font-family:{MonoFont};color:{TrimbleBlueDark};word-break:break-all\">{Enc(title)}</div>");
+                    html.Append($"<div style=\"color:{Gray6};margin-top:1px\">{Enc(detail)}</div></td></tr>");
                 }
                 html.Append("</table>");
             }

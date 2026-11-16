@@ -77,6 +77,7 @@ namespace DBADash.DailyReport
                 if (settings.IncludeTopQueries && performance.Flagged.Count > 0)
                 {
                     AddTopQueries(performance, settings, repositoryConnectionString, data.WindowEndUtc, baselineWeeks, config.ReportName);
+                    AddBlockers(performance, settings, repositoryConnectionString, data.WindowStartUtc, data.WindowEndUtc, config);
                 }
                 if (settings.IncludeActivity && performance.Flagged.Count > 0)
                 {
@@ -117,12 +118,29 @@ namespace DBADash.DailyReport
             }
         }
 
+        /// <summary>The lead blockers behind each listed instance's blocking findings.  Left out, with a warning, if they can't be read</summary>
+        private static void AddBlockers(PerformanceAnalysis performance, DailyReportSettings settings, string connectionString, DateTime fromUtc, DateTime toUtc, DailyReportConfig config)
+        {
+            try
+            {
+                var listed = performance.Flagged.Take(settings.MaxPerformanceInstances).Where(DailyReportBlockerAnalyzer.IsNeeded).Select(f => f.InstanceID).ToList();
+                if (listed.Count == 0) return;
+                var rows = DailyReportBlockerRepository.Get(connectionString, listed, fromUtc, toUtc, performance.IncludedHours);
+                DailyReportBlockerAnalyzer.Apply(performance, rows, settings.TopQueriesCount, utc => DailyReportRenderer.FormatHour(utc, config.TimeZone));
+            }
+            catch (SqlException ex)
+            {
+                Log.Warning(ex, "Daily report {ReportName}: lead blockers not available", config.ReportName);
+            }
+        }
+
         /// <summary>The procedures and queries behind each listed instance's findings.  Left out, with a warning, if they can't be read</summary>
         private static void AddTopQueries(PerformanceAnalysis performance, DailyReportSettings settings, string connectionString, DateTime windowEndUtc, int baselineWeeks, string reportName)
         {
             try
             {
-                var listed = performance.Flagged.Take(settings.MaxPerformanceInstances).Select(f => f.InstanceID).ToList();
+                var listed = performance.Flagged.Take(settings.MaxPerformanceInstances).Where(f => TopQueryAnalyzer.MeasureFor(f) != null).Select(f => f.InstanceID).ToList();
+                if (listed.Count == 0) return;
                 var rows = TopQueryRepository.Get(connectionString, listed, windowEndUtc, baselineWeeks, performance.IncludedHours);
                 TopQueryAnalyzer.Apply(performance, rows, settings.TopQueriesCount);
             }
