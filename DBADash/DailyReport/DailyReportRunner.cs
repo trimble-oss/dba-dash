@@ -415,7 +415,8 @@ namespace DBADash.DailyReport
         /// called new or resolved.  Nothing is recorded.  Object problems are read for the instances with an InstanceID; Azure SQL DB rows
         /// have none, so their object problems aren't listed.
         /// </summary>
-        public static DailyReportContent BuildSummaryPage(DataTable summary, string connectionString, string scopeDescription, string timeZone, DateTime nowUtc)
+        public static DailyReportContent BuildSummaryPage(DataTable summary, string connectionString, string scopeDescription, string timeZone, DateTime nowUtc,
+            Func<string, string, string, string> sectionLink = null)
         {
             var table = summary.Copy();
             var instanceIDs = table.AsEnumerable().Where(r => !r.IsNull("InstanceID")).Select(r => Convert.ToInt32(r["InstanceID"])).Distinct().ToList();
@@ -431,7 +432,7 @@ namespace DBADash.DailyReport
             }
             var objectIssues = instanceIDs.Count > 0 ? DailyReportRepository.GetObjectIssues(connectionString, instanceList) : new List<DailyReportIssue>();
             var config = new DailyReportConfig { ReportName = "Summary", ScopeDescription = scopeDescription, TimeZone = timeZone };
-            return DailyReportRenderer.Render(config, nowUtc, scopeDescription, table, objectIssues, null, timeZone);
+            return DailyReportRenderer.Render(config, nowUtc, scopeDescription, table, objectIssues, null, timeZone, new DailyReportExtras { SectionLink = sectionLink });
         }
 
         private static DataTable GetSummary(string connectionString, string instanceList)

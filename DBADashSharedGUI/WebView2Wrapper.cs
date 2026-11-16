@@ -22,6 +22,12 @@ namespace DBADashGUI.AgentJobs
 
         public event WebView2SetupCompleted SetupCompleted;
 
+        /// <summary>The scheme of links into the app, such as dbadash://open?instance=SQL1.  Clicking one raises AppLinkRequested</summary>
+        public const string AppLinkScheme = "dbadash";
+
+        /// <summary>A link into the app was clicked.  The link isn't followed in the control; the handler gets the whole link</summary>
+        public event Action<string> AppLinkRequested;
+
         public Microsoft.Web.WebView2.WinForms.WebView2 WebView2 { get; private set; }
 
         /// <summary>
@@ -67,6 +73,12 @@ namespace DBADashGUI.AgentJobs
             }
 
             e.Cancel = true;
+
+            if (uri.StartsWith(AppLinkScheme + ":", StringComparison.OrdinalIgnoreCase))
+            {
+                AppLinkRequested?.Invoke(uri);
+                return;
+            }
 
             if (uri.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
                 uri.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
