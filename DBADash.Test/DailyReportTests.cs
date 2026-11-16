@@ -526,6 +526,22 @@ namespace DBADash.Test
         }
 
         [TestMethod]
+        public void Footer_SentReportsOnly()
+        {
+            var config = new DailyReportConfig { ReportName = "Ops", TimeZone = "UTC" };
+            const string footer = "Sent by DBA Dash daily report.";
+
+            var sent = DailyReportRenderer.Render(config, DateTime.UtcNow, "{All}", new DataTable(), Array.Empty<DailyReportIssue>(), null, "UTC");
+            Assert.IsTrue(sent.HtmlBody.Contains(footer), "Emailed report has the footer");
+            Assert.IsTrue(sent.TextBody.Contains(footer), "Emailed text has the footer");
+
+            var interactive = DailyReportRenderer.Render(config, DateTime.UtcNow, "{All}", new DataTable(), Array.Empty<DailyReportIssue>(), null, "UTC",
+                new DailyReportExtras { Interactive = true });
+            Assert.IsFalse(interactive.HtmlBody.Contains(footer), "Report shown in the app has no footer");
+            Assert.IsFalse(interactive.TextBody.Contains(footer), "Text shown in the app has no footer");
+        }
+
+        [TestMethod]
         public void SummaryPage_AzureRowsNamedByServerWithoutLookup()
         {
             // No InstanceID means no lookup (and no database): the Azure SQL DB row is named by its server, as the summary page shows it
