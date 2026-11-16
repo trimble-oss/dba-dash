@@ -432,7 +432,7 @@ namespace DBADash.DailyReport
             }
             var objectIssues = instanceIDs.Count > 0 ? DailyReportRepository.GetObjectIssues(connectionString, instanceList) : new List<DailyReportIssue>();
             var config = new DailyReportConfig { ReportName = "Summary", ScopeDescription = scopeDescription, TimeZone = timeZone };
-            return DailyReportRenderer.Render(config, nowUtc, scopeDescription, table, objectIssues, null, timeZone, new DailyReportExtras { SectionLink = sectionLink });
+            return DailyReportRenderer.Render(config, nowUtc, scopeDescription, table, objectIssues, null, timeZone, new DailyReportExtras { SectionLink = sectionLink, Interactive = true });
         }
 
         private static DataTable GetSummary(string connectionString, string instanceList)

@@ -120,6 +120,8 @@ namespace DBADash.DailyReport
         /// Only the summary page's report sets it: the email has no links into the app.
         /// </summary>
         public Func<string, string, string, string> SectionLink { get; init; }
+        /// <summary>Shown in the app, not sent: the footer about the email is left out</summary>
+        public bool Interactive { get; init; }
     }
 
     /// <summary>
@@ -373,7 +375,7 @@ namespace DBADash.DailyReport
                 AppendResolved(resolved, generatedUtc, html, text);
             }
 
-            AppendDocumentEnd(html, text);
+            AppendDocumentEnd(html, text, !extras.Interactive);
 
             return new DailyReportContent
             {
@@ -632,13 +634,20 @@ namespace DBADash.DailyReport
             text.AppendLine();
         }
 
-        private static void AppendDocumentEnd(StringBuilder html, StringBuilder text)
+        /// <summary>The footer, which tells the reader the report was sent to them.  Left out of a report shown in the app (footer false)</summary>
+        private static void AppendDocumentEnd(StringBuilder html, StringBuilder text, bool footer = true)
         {
-            const string footer = "Sent by DBA Dash daily report. Change the schedule, scope or recipients in DBA Dash.";
-            html.Append($"<tr><td class=\"dr-pad\" style=\"padding:20px 24px 22px 24px;border-top:1px solid {Gray0};font-size:11px;color:{Gray6}\">{footer}</td></tr>");
+            const string footerText = "Sent by DBA Dash daily report. Change the schedule, scope or recipients in DBA Dash.";
+            if (footer)
+            {
+                html.Append($"<tr><td class=\"dr-pad\" style=\"padding:20px 24px 22px 24px;border-top:1px solid {Gray0};font-size:11px;color:{Gray6}\">{footerText}</td></tr>");
+            }
             html.Append("</table></td></tr></table></td></tr></table></body></html>");
-            text.AppendLine("--");
-            text.AppendLine(footer);
+            if (footer)
+            {
+                text.AppendLine("--");
+                text.AppendLine(footerText);
+            }
         }
 
         /// <summary>
