@@ -78,12 +78,13 @@ INSERT INTO #Leads(InstanceID, SnapshotDateUTC, session_id, BlockedSessions, Blo
 SELECT Q.InstanceID, Q.SnapshotDateUTC, Q.session_id, stat.BlockCountRecursive, stat.BlockWaitTimeRecursiveMs,
 	CONCAT(CAST(Q.database_id AS NVARCHAR(10)), '|',
 		CASE WHEN O.ObjectID IS NOT NULL THEN 'O:' + CAST(O.ObjectID AS NVARCHAR(20))
-			WHEN Q.query_hash IS NOT NULL THEN 'H:' + CONVERT(NVARCHAR(18), Q.query_hash, 1)
+			/* A request without a compiled plan has an all zero hash - no hash, rather than one shared by every such request */
+			WHEN NULLIF(Q.query_hash, 0x0000000000000000) IS NOT NULL THEN 'H:' + CONVERT(NVARCHAR(18), Q.query_hash, 1)
 			WHEN Q.sql_handle IS NOT NULL THEN 'S:' + CONVERT(NVARCHAR(130), Q.sql_handle, 1) + ':' + CAST(ISNULL(Q.statement_start_offset, -1) AS NVARCHAR(11)) + ':' + CAST(ISNULL(Q.statement_end_offset, -1) AS NVARCHAR(11))
 			ELSE 'P:' + ISNULL(Q.program_name, N'') END),
 	ISNULL(objD.name, D.name),
 	O.SchemaName + '.' + O.ObjectName,
-	CONVERT(VARCHAR(18), Q.query_hash, 1),
+	CONVERT(VARCHAR(18), NULLIF(Q.query_hash, 0x0000000000000000), 1),
 	Q.program_name,
 	CASE WHEN Q.status = 'sleeping' THEN 1 ELSE 0 END,
 	Q.sql_handle,
@@ -103,6 +104,9 @@ OUTER APPLY(SELECT TOP(1) O.ObjectID, O.SchemaName, O.ObjectName
 /* A lead blocker: not blocked itself, blocking at least one other - as IsRootBlocker in dbo.RunningQueriesInfo */
 WHERE Q.blocking_session_id = 0
 AND stat.BlockCount > 0
+/* The function's recursive CTE walks each chain down from its lead: a chain deeper than the default 100 would fail the whole proc.  It
+   can't loop - a lead isn't blocked, and each session has one blocker per snapshot (the key), so no cycle is reachable from a lead */
+OPTION(MAXRECURSION 0)
 
 ;WITH Grouped AS (
 	SELECT InstanceID,

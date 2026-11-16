@@ -114,7 +114,9 @@ namespace DBADash.DailyReport
             var inDatabase = database == null ? string.Empty : $" in {database}";
             if (!forAi && !string.IsNullOrWhiteSpace(b.StatementText))
             {
-                var masked = Regex.Replace(QueryTemplate.Create(b.StatementText), @"\s+", " ").Trim();
+                // QUOTED_IDENTIFIER isn't captured with the snapshot, so a double quoted token could be a string - masked to be safe.  At
+                // worst a "quoted name" shows as "?": a name lost, never a value shown
+                var masked = Regex.Replace(QueryTemplate.Create(b.StatementText, quotedIdentifier: false), @"\s+", " ").Trim();
                 if (masked.Length > 0) return (masked.Length <= 90 ? masked : masked[..87] + "...") + inDatabase;
             }
             if (!string.IsNullOrWhiteSpace(b.QueryHash)) return $"ad hoc query {b.QueryHash}{inDatabase}";

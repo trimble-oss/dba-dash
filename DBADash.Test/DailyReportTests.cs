@@ -918,6 +918,9 @@ namespace DBADash.Test
             var title = DailyReportBlockerAnalyzer.Title(adhoc, forAi: false);
             Assert.AreEqual("UPDATE dbo.Customers SET Email = N'?' WHERE CustomerID = ? in Sales", title);
             Assert.AreEqual("ad hoc query 0xAB in Sales", DailyReportBlockerAnalyzer.Title(adhoc, forAi: true));
+            // QUOTED_IDENTIFIER OFF isn't known from a snapshot, so double quotes are masked as though they could hold a string
+            Assert.AreEqual("UPDATE t SET Email = \"?\" in Sales",
+                DailyReportBlockerAnalyzer.Title(Blocker(1, 1, text: "UPDATE t SET Email = \"private@example.com\""), forAi: false));
             Assert.AreEqual("Sales.dbo.usp_Close", DailyReportBlockerAnalyzer.Title(Blocker(1, 1, text: "UPDATE t SET a = 1", objectName: "dbo.usp_Close"), forAi: false),
                 "A procedure is named rather than its statement");
 

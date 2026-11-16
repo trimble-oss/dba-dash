@@ -579,6 +579,33 @@ VALUES(@ID,'2026-11-13T09:10:00',70,N'sleeping',0,NULL,N'app','2026-11-13T09:00:
         }
 
         [TestMethod]
+        public void Blockers_DeepChainsAndZeroHashes()
+        {
+            Exec(@"
+INSERT INTO dbo.Instances(Instance,ConnectionID,IsActive,ShowInSummary,EngineEdition,UTCOffset,sqlserver_start_time)
+VALUES(N'BlkDeep',N'BlkDeep',1,1,3,0,GETUTCDATE())
+DECLARE @ID INT = SCOPE_IDENTITY()
+INSERT INTO dbo.BlockingSnapshotSummary(InstanceID,SnapshotDateUTC,BlockedSessionCount,BlockedWaitTime,UTCOffset)
+VALUES(@ID,'2026-11-13T09:10:00',107,0,0)
+/* Two lead blockers with no compiled plan (an all zero query_hash) running different statements: 200, at the head of a chain 120 deep
+   (201 blocked by 200, 202 by 201...), and 400, blocking 401 */
+INSERT INTO dbo.RunningQueries(InstanceID,SnapshotDateUTC,session_id,status,blocking_session_id,wait_time,login_name,last_request_start_time_utc,sql_handle,statement_start_offset,statement_end_offset,query_hash)
+VALUES(@ID,'2026-11-13T09:10:00',200,N'running',0,NULL,N'app','2026-11-13T09:00:00',0x0B02,0,-1,0x0000000000000000),
+	(@ID,'2026-11-13T09:10:00',400,N'running',0,NULL,N'app','2026-11-13T09:00:00',0x0B03,0,-1,0x0000000000000000),
+	(@ID,'2026-11-13T09:10:00',401,N'suspended',400,1000,N'app','2026-11-13T09:05:00',NULL,NULL,NULL,NULL)
+INSERT INTO dbo.RunningQueries(InstanceID,SnapshotDateUTC,session_id,status,blocking_session_id,wait_time,login_name,last_request_start_time_utc)
+SELECT TOP(120) @ID,'2026-11-13T09:10:00',200 + ROW_NUMBER() OVER(ORDER BY (SELECT NULL)),N'suspended',199 + ROW_NUMBER() OVER(ORDER BY (SELECT NULL)),1000,N'app','2026-11-13T09:05:00'
+FROM sys.all_objects");
+            var id = Scalar("SELECT InstanceID FROM dbo.Instances WHERE Instance = N'BlkDeep'");
+
+            var rows = DailyReportBlockerRepository.Get(ConnectionString, new[] { id }, new DateTime(2026, 11, 13, 8, 0, 0), new DateTime(2026, 11, 14, 8, 0, 0));
+
+            Assert.AreEqual(2, rows.Count, "An all zero hash isn't shared - each statement is its own lead blocker");
+            Assert.IsTrue(rows.All(r => r.QueryHash == null), "No hash rather than 0x0000000000000000");
+            Assert.AreEqual(120, rows.Max(r => r.MaxBlockedSessions), "A chain deeper than the default recursion limit of 100");
+        }
+
+        [TestMethod]
         public void PerformanceScope_NarrowsTheReportsInstances()
         {
             Exec(@"
