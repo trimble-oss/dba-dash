@@ -1,4 +1,6 @@
-﻿using DBADashGUI.Checks;
+﻿using DBADash.DailyReport;
+using DBADashGUI.AgentJobs;
+using DBADashGUI.Checks;
 using Humanizer;
 using Microsoft.Data.SqlClient;
 using System;
@@ -23,9 +25,19 @@ namespace DBADashGUI
 
         private DateTime? lastRefresh;
 
+        /// <summary>The summary as last loaded, which the Report view is built from</summary>
+        private DataTable lastSummaryData;
+        /// <summary>The Report view is shown in place of the grids</summary>
+        private bool showReport;
+        /// <summary>Counts report builds, so a build that finishes after a newer one (or after the view is closed) isn't shown</summary>
+        private int reportGeneration;
+        private readonly WebView2Wrapper reportView = new() { Dock = DockStyle.Fill, Visible = false };
+
         public Summary()
         {
             InitializeComponent();
+            Controls.Add(reportView);
+            reportView.SendToBack(); // Fill docks last, so the toolbar keeps its place at the top
             dgvTests.AutoGenerateColumns = false;
             dgvTests.Columns.AddRange(TestCols.ToArray());
             dgvTests.GridFilterChanged += (s, e) => UpdateClearFilter();
@@ -161,6 +173,11 @@ namespace DBADashGUI
                     GroupSummaryByTest(ref dt);
                     UpdateSummary(ref dt);
                     AutoSizeSplitter();
+                    lastSummaryData = dt;
+                    if (showReport)
+                    {
+                        toolStrip1.Invoke((Action)(() => _ = ShowReportAsync()));
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -345,7 +362,7 @@ namespace DBADashGUI
             }
             );
             refresh1.Invoke((Action)(() => refresh1.Visible = false));
-            splitContainer1.Invoke(() => splitContainer1.Visible = true);
+            splitContainer1.Invoke(() => splitContainer1.Visible = !showReport);
             timer1.Enabled = true;
         }
 
@@ -595,6 +612,40 @@ namespace DBADashGUI
             {
                 dv.Sort = sortCol + (dv.Sort == sortCol ? " DESC" : "");
             }
+        }
+
+        private void TsReport_Click(object sender, EventArgs e)
+        {
+            showReport = tsReport.Checked;
+            _ = ShowReportAsync();
+        }
+
+        /// <summary>
+        /// Shows the Report view of the loaded summary, or the grids again.  The report reads object problems from the database, so it's
+        /// built off the UI thread.  The summary as loaded is used, so the report matches what the grid shows.
+        /// </summary>
+        private async Task ShowReportAsync()
+        {
+            splitContainer1.Visible = !showReport;
+            reportView.Visible = showReport;
+            if (!showReport || lastSummaryData == null) return;
+
+            var generation = ++reportGeneration;
+            var summary = lastSummaryData;
+            var scope = $"Summary page ({summary.Rows.Count} instances)";
+            string html;
+            try
+            {
+                var content = await Task.Run(() => DailyReportRunner.BuildSummaryPage(summary, Common.ConnectionString, scope, TimeZoneInfo.Local.Id, DateTime.UtcNow));
+                html = content.PreviewHtml();
+            }
+            catch (Exception ex)
+            {
+                html = "<html><body style=\"font-family:Segoe UI,Arial,sans-serif;margin:16px\"><p>The report could not be built:</p><pre>" +
+                       System.Net.WebUtility.HtmlEncode(ex.Message) + "</pre></body></html>";
+            }
+            if (IsDisposed || generation != reportGeneration || !showReport) return;
+            await reportView.NavigateToLargeString(html);
         }
 
         private void TsRefresh_Click(object sender, EventArgs e)

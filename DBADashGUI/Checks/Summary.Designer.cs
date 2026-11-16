@@ -81,6 +81,7 @@ namespace DBADashGUI
             exportSummaryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             exportTestSummaryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             tsView = new System.Windows.Forms.ToolStripDropDownButton();
+            tsReport = new System.Windows.Forms.ToolStripButton();
             focusedViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             showTestSummaryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -507,7 +508,7 @@ namespace DBADashGUI
             // toolStrip1
             // 
             toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopyGrid, tsExportToExcel, tsView, lblRefreshTime, tsOptions, tsClearFilter });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { tsRefresh, tsCopyGrid, tsExportToExcel, tsView, tsReport, lblRefreshTime, tsOptions, tsClearFilter });
             toolStrip1.Location = new System.Drawing.Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
@@ -585,6 +586,18 @@ namespace DBADashGUI
             tsView.Name = "tsView";
             tsView.Size = new System.Drawing.Size(75, 24);
             tsView.Text = "View";
+            //
+            // tsReport
+            //
+            tsReport.CheckOnClick = true;
+            tsReport.Image = Properties.Resources.VBReport_16x;
+            tsReport.ImageTransparentColor = System.Drawing.Color.Magenta;
+            tsReport.Margin = new System.Windows.Forms.Padding(0, 2, 0, 5);
+            tsReport.Name = "tsReport";
+            tsReport.Size = new System.Drawing.Size(80, 24);
+            tsReport.Text = "Report";
+            tsReport.ToolTipText = "Show the summary as a daily report: the same layout as the report email";
+            tsReport.Click += TsReport_Click;
             // 
             // focusedViewToolStripMenuItem
             // 
@@ -954,6 +967,7 @@ namespace DBADashGUI
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn16;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn17;
         private System.Windows.Forms.ToolStripDropDownButton tsView;
+        private System.Windows.Forms.ToolStripButton tsReport;
         private System.Windows.Forms.ToolStripMenuItem focusedViewToolStripMenuItem;
         private System.Windows.Forms.ToolStripLabel lblRefreshTime;
         private System.Windows.Forms.Timer timer1;

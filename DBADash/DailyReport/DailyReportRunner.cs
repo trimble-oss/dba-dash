@@ -371,7 +371,7 @@ namespace DBADash.DailyReport
         /// Adds InstanceDisplayName to the summary rows.  The object-level rows are named by display name, so the summary
         /// rows must be too, or the same instance is reported under two names.
         /// </summary>
-        private static void AddDisplayNames(DataTable summary, string connectionString, string instanceList)
+        internal static void AddDisplayNames(DataTable summary, string connectionString, string instanceList)
         {
             using var cn = new SqlConnection(connectionString);
             using var cmd = new SqlCommand("SELECT InstanceID, InstanceDisplayName FROM dbo.Instances WHERE InstanceID IN (SELECT TRY_CAST(value AS INT) FROM STRING_SPLIT(@InstanceIDs,','))", cn);
@@ -406,6 +406,32 @@ namespace DBADash.DailyReport
                 }
                 row["InstanceDisplayName"] = names.TryGetValue(Convert.ToInt32(row["InstanceID"]), out var name) ? name : (object)DBNull.Value;
             }
+        }
+
+        /// <summary>
+        /// The summary page's Report view: the checks and object problems for the instances in summary, laid out the way the daily report
+        /// lays them out.  Takes the summary the page already loaded, so the view shows what the grid shows.  Performance, alerts and the AI
+        /// summary are left out (they're slow, or cost a call, and the summary page doesn't show them), and so is history, so nothing is
+        /// called new or resolved.  Nothing is recorded.  Object problems are read for the instances with an InstanceID; Azure SQL DB rows
+        /// have none, so their object problems aren't listed.
+        /// </summary>
+        public static DailyReportContent BuildSummaryPage(DataTable summary, string connectionString, string scopeDescription, string timeZone, DateTime nowUtc)
+        {
+            var table = summary.Copy();
+            var instanceIDs = table.AsEnumerable().Where(r => !r.IsNull("InstanceID")).Select(r => Convert.ToInt32(r["InstanceID"])).Distinct().ToList();
+            var instanceList = string.Join(",", instanceIDs);
+            if (instanceIDs.Count > 0)
+            {
+                AddDisplayNames(table, connectionString, instanceList);
+            }
+            else
+            {
+                // Nothing to look up: Azure SQL DB rows are still named by their server
+                ApplyDisplayNames(table, new Dictionary<int, string>());
+            }
+            var objectIssues = instanceIDs.Count > 0 ? DailyReportRepository.GetObjectIssues(connectionString, instanceList) : new List<DailyReportIssue>();
+            var config = new DailyReportConfig { ReportName = "Summary", ScopeDescription = scopeDescription, TimeZone = timeZone };
+            return DailyReportRenderer.Render(config, nowUtc, scopeDescription, table, objectIssues, null, timeZone);
         }
 
         private static DataTable GetSummary(string connectionString, string instanceList)

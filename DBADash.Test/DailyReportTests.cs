@@ -503,6 +503,23 @@ namespace DBADash.Test
         }
 
         [TestMethod]
+        public void SummaryPage_AzureRowsNamedByServerWithoutLookup()
+        {
+            // No InstanceID means no lookup (and no database): the Azure SQL DB row is named by its server, as the summary page shows it
+            var summary = new DataTable();
+            summary.Columns.Add("InstanceID", typeof(int));
+            summary.Columns.Add("InstanceGroupName", typeof(string));
+            summary.Columns.Add("AGStatus", typeof(int));
+            summary.Rows.Add(DBNull.Value, "azsql01", 1);
+
+            var content = DailyReportRunner.BuildSummaryPage(summary, "unused", "Summary page (1 instances)", "UTC", DateTime.UtcNow);
+
+            Assert.IsTrue(content.TextBody.Contains("AG - critical on azsql01"), content.TextBody);
+            Assert.IsFalse(content.HtmlBody.Contains("cid:"), "No performance images on the summary page");
+            Assert.IsFalse(content.TextBody.Contains("Performance"), "Performance is left out of the summary page");
+        }
+
+        [TestMethod]
         public void ObjectSection_ServerFlaggedWithoutDatabaseDetailIsNamed()
         {
             var config = new DailyReportConfig { ReportName = "Ops", TimeZone = "UTC" };
