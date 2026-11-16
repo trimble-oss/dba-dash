@@ -24,6 +24,8 @@ namespace DBADash.DailyReport
         public long LogicalReads { get; init; }
         public long PhysicalReads { get; init; }
         public long Executions { get; init; }
+        /// <summary>Pages it changed in the buffer pool - written out later by checkpoint and the lazy writer, the closest a query's stats come to its writes</summary>
+        public long LogicalWrites { get; init; }
     }
 
     /// <summary>A procedure or query listed under an instance's performance findings</summary>
@@ -49,22 +51,54 @@ namespace DBADash.DailyReport
     }
 
     /// <summary>
-    /// Picks the procedures and ad hoc queries behind an instance's performance findings: ranked by how much more CPU (or logical reads,
-    /// for IO findings) they used than the median of the baseline weeks.  Without a baseline, ranked by their total.
+    /// Picks the procedures and ad hoc queries behind an instance's performance findings: ranked by how much more CPU (physical reads for
+    /// read latency, logical writes for write latency) they used in total over the day than the median of the baseline weeks.  Totals, not
+    /// per execution figures: a query that went from 100ms to 200ms a million times is listed above one that went from 20ms to 5 minutes
+    /// once.  Without a baseline, ranked by their total.
     /// </summary>
     public static class TopQueryAnalyzer
     {
         public const string MeasureCPU = "CPU";
-        public const string MeasureReads = "Logical reads";
+        public const string MeasurePhysicalReads = "Physical reads";
+        public const string MeasureWrites = "Logical writes";
 
-        private static readonly HashSet<string> IOMetrics = new(StringComparer.OrdinalIgnoreCase) { "ReadLatency", "WriteLatency" };
+        private static readonly HashSet<string> CPUMetrics = new(StringComparer.OrdinalIgnoreCase) { "CPU", "HighCPU" };
 
-        /// <summary>Logical reads for an instance whose findings are about IO and not CPU, otherwise CPU</summary>
+        /// <summary>
+        /// Findings that the queries using the most CPU or reads go some way to explain.  Not lock waits, blocking, deadlocks or slow
+        /// queries: a query can block others, deadlock or run slowly while using very little CPU, so a CPU list would point the wrong way
+        /// </summary>
+        private static readonly HashSet<string> ResourceMetrics = new(StringComparer.OrdinalIgnoreCase) { "CPU", "HighCPU", "ReadLatency", "WriteLatency", "Waits", "CriticalWaits" };
+
+        /// <summary>
+        /// What an instance's queries are ranked by: CPU for a CPU finding or waits, physical reads for read latency and logical writes for
+        /// write latency (both latencies: the worse finding's, writes on a tie).  Null when none of its findings are about resource use (just
+        /// blocking, say), so no queries are listed
+        /// </summary>
         public static string MeasureFor(InstancePerformanceResult result)
         {
-            var metrics = result.Findings.Select(f => f.Metric).ToList();
-            return metrics.Any(IOMetrics.Contains) && !metrics.Any(m => m is "CPU" or "HighCPU") ? MeasureReads : MeasureCPU;
+            if (!result.Findings.Any(f => ResourceMetrics.Contains(f.Metric))) return null;
+            if (result.Findings.Any(f => CPUMetrics.Contains(f.Metric))) return MeasureCPU;
+            var read = result.Findings.FirstOrDefault(f => f.Metric == "ReadLatency");
+            var write = result.Findings.FirstOrDefault(f => f.Metric == "WriteLatency");
+            if (write != null && (read == null || write.Severity <= read.Severity)) return MeasureWrites;
+            return read != null ? MeasurePhysicalReads : MeasureCPU;
         }
+
+        private static double Value(TopQueryRow r, string measure) => measure switch
+        {
+            MeasurePhysicalReads => r.PhysicalReads,
+            MeasureWrites => r.LogicalWrites,
+            _ => r.CPUMs
+        };
+
+        /// <summary>A measure's figure: "1h 10m" of CPU, "1.2M physical reads", "340K writes"</summary>
+        private static string Format(double v, string measure) => measure switch
+        {
+            MeasurePhysicalReads => Compact(v) + " physical reads",
+            MeasureWrites => Compact(v) + " writes",
+            _ => CPUTime(v)
+        };
 
         public static void Apply(PerformanceAnalysis analysis, IEnumerable<TopQueryRow> rows, int count)
         {
@@ -73,6 +107,7 @@ namespace DBADash.DailyReport
             {
                 if (!byInstance.TryGetValue(result.InstanceID, out var instanceRows)) continue;
                 var measure = MeasureFor(result);
+                if (measure == null) continue;
                 var byIncrease = analysis.ComparedWithBaseline && result.BaselineWeeks > 0;
                 result.TopQueriesMeasure = measure;
                 result.TopQueriesByIncrease = byIncrease;
@@ -84,7 +119,7 @@ namespace DBADash.DailyReport
 
         public static List<TopQuery> Rank(List<TopQueryRow> rows, string measure, bool byIncrease, int count, IReadOnlyCollection<int> baselineCoverage = null)
         {
-            double Value(TopQueryRow r) => measure == MeasureReads ? r.LogicalReads : r.CPUMs;
+            double Value(TopQueryRow r) => TopQueryAnalyzer.Value(r, measure);
             // Baseline weeks with figures for the instance: a candidate missing from one of them used nothing that week.  The rows are only
             // today's top candidates, so a week none of them ran in has no rows - the coverage from the instance's hourly data says it was there
             var baselinePeriods = rows.Where(r => r.Period > 0).Select(r => r.Period).Concat(baselineCoverage ?? Array.Empty<int>()).Distinct().ToList();
@@ -117,13 +152,12 @@ namespace DBADash.DailyReport
                 : candidates.OrderByDescending(q => q.Current).Take(count).ToList();
         }
 
-        /// <summary>"CPU 1h 10m (baseline 5m), 12,040 executions (baseline 11,900)"</summary>
+        /// <summary>"CPU 1h 10m (baseline 5m), 12,040 executions (baseline 11,900)", "1.2M physical reads (baseline 40K), ..."</summary>
         public static string Describe(TopQuery q, string measure)
         {
-            string Fmt(double v) => measure == MeasureReads ? Compact(v) + " reads" : CPUTime(v);
-            var text = measure == MeasureReads ? $"{Fmt(q.Current)}" : $"CPU {Fmt(q.Current)}";
+            var text = measure == MeasureCPU ? $"CPU {Format(q.Current, measure)}" : Format(q.Current, measure);
             // None in the baseline weeks: it's new, which says more than "usual 0ms"
-            if (q.Usual is > 0) text += $" (baseline {(measure == MeasureReads ? Compact(q.Usual.Value) : CPUTime(q.Usual.Value))})";
+            if (q.Usual is > 0) text += $" (baseline {(measure == MeasureCPU ? CPUTime(q.Usual.Value) : Compact(q.Usual.Value))})";
             else if (q.Usual.HasValue) text += " (new)";
             text += $", {q.Executions.ToString("#,0", CultureInfo.InvariantCulture)} executions";
             if (q.UsualExecutions is > 0) text += $" (baseline {q.UsualExecutions.Value.ToString("#,0", CultureInfo.InvariantCulture)})";
@@ -173,7 +207,8 @@ namespace DBADash.DailyReport
                     CPUMs = Convert.ToDouble(r["CPUMs"], CultureInfo.InvariantCulture),
                     LogicalReads = Convert.ToInt64(r["LogicalReads"]),
                     PhysicalReads = Convert.ToInt64(r["PhysicalReads"]),
-                    Executions = Convert.ToInt64(r["Executions"])
+                    Executions = Convert.ToInt64(r["Executions"]),
+                    LogicalWrites = Convert.ToInt64(r["LogicalWrites"])
                 });
             }
             return rows;

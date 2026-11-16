@@ -58,7 +58,10 @@ namespace DBADash.DailyReport
         /// <summary>A chart of the last 24 hours against the usual range for each instance listed in the performance section</summary>
         public bool IncludeCharts { get; set; } = true;
 
-        /// <summary>The procedures and queries that used the most more CPU or IO than usual on an instance that's listed</summary>
+        /// <summary>
+        /// The procedures and queries that used the most more CPU or IO than usual on an instance that's listed, and the lead blockers for
+        /// a blocking or lock wait finding.  TopQueriesCount of each
+        /// </summary>
         public bool IncludeTopQueries { get; set; } = true;
         public int TopQueriesCount { get; set; } = 3;
 

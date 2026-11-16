@@ -540,6 +540,45 @@ VALUES(@ID,'2026-11-13T01:10:00',60,N'DBCC',N'running',0,N'sa','2026-11-13T01:00
         }
 
         [TestMethod]
+        public void Blockers_LeadBlockersFromSnapshots()
+        {
+            Exec(@"
+INSERT INTO dbo.Instances(Instance,ConnectionID,IsActive,ShowInSummary,EngineEdition,UTCOffset,sqlserver_start_time)
+VALUES(N'BlkInst',N'BlkInst',1,1,3,0,GETUTCDATE())
+DECLARE @ID INT = SCOPE_IDENTITY()
+INSERT INTO dbo.QueryText(sql_handle,text) VALUES(0x0B01,N'UPDATE dbo.Orders SET Status = ''secret'' WHERE ID = 7')
+INSERT INTO dbo.BlockingSnapshotSummary(InstanceID,SnapshotDateUTC,BlockedSessionCount,BlockedWaitTime,UTCOffset)
+VALUES(@ID,'2026-11-13T09:10:00',3,0,0),(@ID,'2026-11-13T09:20:00',1,0,0)
+/* 09:10: 70 (sleeping, open transaction) blocks 71, which blocks 72 - both are under 70.  73 'blocks' itself (parallel threads) and
+   74 is blocked by 99, which wasn't captured: neither is a lead blocker.  09:20: 70 blocks 71 again */
+INSERT INTO dbo.RunningQueries(InstanceID,SnapshotDateUTC,session_id,status,blocking_session_id,wait_time,login_name,last_request_start_time_utc,program_name,sql_handle,statement_start_offset,statement_end_offset)
+VALUES(@ID,'2026-11-13T09:10:00',70,N'sleeping',0,NULL,N'app','2026-11-13T09:00:00',N'OrderApp',0x0B01,0,-1),
+	(@ID,'2026-11-13T09:10:00',71,N'suspended',70,30000,N'app','2026-11-13T09:05:00',N'OrderApp',NULL,NULL,NULL),
+	(@ID,'2026-11-13T09:10:00',72,N'suspended',71,45000,N'app','2026-11-13T09:05:00',N'OrderApp',NULL,NULL,NULL),
+	(@ID,'2026-11-13T09:10:00',73,N'suspended',73,100,N'app','2026-11-13T09:05:00',N'OrderApp',NULL,NULL,NULL),
+	(@ID,'2026-11-13T09:10:00',74,N'suspended',99,100,N'app','2026-11-13T09:05:00',N'OrderApp',NULL,NULL,NULL),
+	(@ID,'2026-11-13T09:20:00',70,N'sleeping',0,NULL,N'app','2026-11-13T09:00:00',N'OrderApp',0x0B01,0,-1),
+	(@ID,'2026-11-13T09:20:00',71,N'suspended',70,600000,N'app','2026-11-13T09:05:00',N'OrderApp',NULL,NULL,NULL)");
+            var id = Scalar("SELECT InstanceID FROM dbo.Instances WHERE Instance = N'BlkInst'");
+
+            var rows = DailyReportBlockerRepository.Get(ConnectionString, new[] { id }, new DateTime(2026, 11, 13, 8, 0, 0), new DateTime(2026, 11, 14, 8, 0, 0));
+
+            var lead = rows.Single();
+            Assert.AreEqual(2, lead.Snapshots);
+            Assert.AreEqual(2, lead.SleepingSnapshots);
+            Assert.AreEqual(2, lead.MaxBlockedSessions, "71 and 72, down the chain");
+            Assert.AreEqual(600000, lead.MaxBlockedWaitMs, "09:20's 10 minutes beats 09:10's 30s + 45s");
+            Assert.AreEqual("OrderApp", lead.ProgramName);
+            Assert.AreEqual(new DateTime(2026, 11, 13, 9, 10, 0), lead.FirstSeenUtc);
+            Assert.AreEqual(new DateTime(2026, 11, 13, 9, 20, 0), lead.LastSeenUtc);
+            Assert.AreEqual("UPDATE dbo.Orders SET Status = '?' WHERE ID = ?", DailyReportBlockerAnalyzer.Title(lead, forAi: false), "Captured as is, masked to show");
+
+            // Counting only 10:00 onwards (offsets 2+ from 08:00): neither snapshot counts
+            var later = Enumerable.Range(2, 22).Select(h => (0, h)).ToHashSet();
+            Assert.AreEqual(0, DailyReportBlockerRepository.Get(ConnectionString, new[] { id }, new DateTime(2026, 11, 13, 8, 0, 0), new DateTime(2026, 11, 14, 8, 0, 0), later).Count);
+        }
+
+        [TestMethod]
         public void PerformanceScope_NarrowsTheReportsInstances()
         {
             Exec(@"
@@ -605,9 +644,12 @@ VALUES({instanceID},@Obj,'2026-11-11T14:00:00',3600000000,600000000,700000000,10
 INSERT INTO dbo.QueryStatements(InstanceID,StatementKey,StatementType,DatabaseID,statement_start_offset,statement_end_offset,query_hash,FirstSeen,LastSeen)
 VALUES({instanceID},0x01,5,@DB,0,-1,0x0102030405060708,'2026-11-11','2026-11-11') SET @Stmt = SCOPE_IDENTITY()
 INSERT INTO dbo.QueryStats_60MIN(InstanceID,SnapshotDate,StatementID,query_plan_hash,execution_count,total_worker_time,total_elapsed_time,total_logical_reads,total_logical_writes,total_physical_reads,total_clr_time,MaxPlanCount,IsCompile,IsOtherPlans,FirstPeriodStart,LastSnapshotDate)
-VALUES({instanceID},'2026-11-11T15:00:00',@Stmt,0x01,10,20000000,20000000,500,0,0,0,1,0,0,'2026-11-11T15:00:00','2026-11-11T15:55:00')");
+VALUES({instanceID},'2026-11-11T15:00:00',@Stmt,0x01,10,20000000,20000000,500,7300,4200,0,1,0,0,'2026-11-11T15:00:00','2026-11-11T15:55:00')");
 
             var rows = TopQueryRepository.Get(ConnectionString, new[] { instanceID }, new DateTime(2026, 11, 12, 8, 0, 0), 1);
+            var adhoc = rows.Single(r => r.Source == "Query");
+            Assert.AreEqual(7300, adhoc.LogicalWrites, "For write latency");
+            Assert.AreEqual(4200, adhoc.PhysicalReads, "For read latency");
 
             var proc = rows.Where(r => r.Source == "Object").ToList();
             Assert.AreEqual(600000, proc.Single(r => r.Period == 0).CPUMs, 0.001, "µs to ms");

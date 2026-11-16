@@ -51,7 +51,7 @@ namespace DBADashGUI.DBADashAlerts.DailyReports
         private readonly ComboBox cboHoursTo = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 70 };
         private readonly CheckBox chkActivity = new() { Text = "Long running requests on each listed instance (DBCC, backups, index maintenance)", AutoSize = true };
         private readonly CheckBox chkCharts = new() { Text = "Charts of each listed instance by hour", AutoSize = true };
-        private readonly CheckBox chkTopQueries = new() { Text = "Procedures and queries behind each listed instance", AutoSize = true };
+        private readonly CheckBox chkTopQueries = new() { Text = "Procedures, queries and lead blockers behind each listed instance", AutoSize = true };
         private readonly CheckBox chkResolved = new() { Text = "List issues resolved since the last report", AutoSize = true };
         private readonly CheckBox chkAlerts = new() { Text = "Open alerts (not acknowledged or in a blackout) - in a changes report, alerts raised, escalated or cleared", AutoSize = true };
         private readonly CheckBox chkOpenSummary = new() { Text = "Brief summary of everything still open (changes report)", AutoSize = true };

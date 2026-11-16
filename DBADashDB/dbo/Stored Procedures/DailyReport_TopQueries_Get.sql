@@ -8,7 +8,8 @@ CREATE PROC dbo.DailyReport_TopQueries_Get(
 AS
 /*
 	The procedures and ad hoc queries behind a daily report's performance findings: for each instance, the candidates that are in the
-	top @Top of the last 24 hours by CPU or by logical reads, with their figures for the last 24 hours (period 0) and the same 24 hours
+	top @Top of the last 24 hours by CPU, physical reads (for read latency) or logical writes (for write latency - the closest a query's
+	stats come to the writes it caused), with their figures for the last 24 hours (period 0) and the same 24 hours
 	in each baseline week (periods 1..n), so the caller (DBADash.DailyReport.TopQueryAnalyzer) can rank them by how much they went up.
 
 	Procedures, functions and triggers come from dbo.ObjectExecutionStats_60MIN.  Statements come from dbo.QueryStats_60MIN, ad hoc ones
@@ -60,15 +61,17 @@ CREATE TABLE #Totals(
 	LogicalReads BIGINT NOT NULL,
 	PhysicalReads BIGINT NOT NULL,
 	Executions BIGINT NOT NULL,
+	LogicalWrites BIGINT NOT NULL,
 	PRIMARY KEY(Source, InstanceID, ID, Period)
 )
 
-INSERT INTO #Totals(Source, InstanceID, ID, Period, CPUMs, LogicalReads, PhysicalReads, Executions)
+INSERT INTO #Totals(Source, InstanceID, ID, Period, CPUMs, LogicalReads, PhysicalReads, Executions, LogicalWrites)
 SELECT 'Object', T.InstanceID, OES.ObjectID, P.Period,
 	SUM(OES.total_worker_time)/1000.0,
 	SUM(OES.total_logical_reads),
 	SUM(OES.total_physical_reads),
-	SUM(OES.execution_count)
+	SUM(OES.execution_count),
+	SUM(OES.total_logical_writes)
 FROM #Instances T
 CROSS JOIN #Periods P
 /* Seek on (InstanceID, SnapshotDate) per instance and period - see dbo.DailyReport_Performance_Get for why the TOP and named columns */
@@ -77,12 +80,13 @@ WHERE (@Hours IS NULL OR EXISTS(SELECT 1 FROM #IncludedHours H WHERE H.Period = 
 GROUP BY T.InstanceID, OES.ObjectID, P.Period
 OPTION(RECOMPILE, NO_PERFORMANCE_SPOOL)
 
-INSERT INTO #Totals(Source, InstanceID, ID, Period, CPUMs, LogicalReads, PhysicalReads, Executions)
+INSERT INTO #Totals(Source, InstanceID, ID, Period, CPUMs, LogicalReads, PhysicalReads, Executions, LogicalWrites)
 SELECT 'Query', T.InstanceID, QS.StatementID, P.Period,
 	SUM(QS.total_worker_time)/1000.0,
 	SUM(QS.total_logical_reads),
 	SUM(QS.total_physical_reads),
-	SUM(QS.execution_count)
+	SUM(QS.execution_count),
+	SUM(QS.total_logical_writes)
 FROM #Instances T
 CROSS JOIN #Periods P
 CROSS APPLY (SELECT TOP (2147483647) * FROM dbo.QueryStats_60MIN QS WITH (FORCESEEK(PK_QueryStats_60MIN(InstanceID,SnapshotDate))) WHERE QS.InstanceID = T.InstanceID AND QS.SnapshotDate >= P.FromDate AND QS.SnapshotDate < P.ToDate) QS
@@ -95,7 +99,8 @@ OPTION(RECOMPILE, NO_PERFORMANCE_SPOOL)
 ;WITH Ranked AS (
 	SELECT Source, InstanceID, ID,
 		ROW_NUMBER() OVER(PARTITION BY InstanceID ORDER BY CPUMs DESC) AS CPURank,
-		ROW_NUMBER() OVER(PARTITION BY InstanceID ORDER BY LogicalReads DESC) AS ReadsRank
+		ROW_NUMBER() OVER(PARTITION BY InstanceID ORDER BY PhysicalReads DESC) AS ReadsRank,
+		ROW_NUMBER() OVER(PARTITION BY InstanceID ORDER BY LogicalWrites DESC) AS WritesRank
 	FROM #Totals
 	WHERE Period = 0
 )
@@ -110,11 +115,12 @@ SELECT T.Source,
 	T.CPUMs,
 	T.LogicalReads,
 	T.PhysicalReads,
-	T.Executions
+	T.Executions,
+	T.LogicalWrites
 FROM #Totals T
 JOIN Ranked R ON R.Source = T.Source AND R.InstanceID = T.InstanceID AND R.ID = T.ID
 LEFT JOIN dbo.DBObjects O ON T.Source = 'Object' AND O.ObjectID = T.ID
 LEFT JOIN dbo.QueryStatements S ON T.Source = 'Query' AND S.StatementID = T.ID
 LEFT JOIN dbo.Databases D ON D.DatabaseID = ISNULL(O.DatabaseID, S.DatabaseID)
-WHERE R.CPURank <= @Top OR R.ReadsRank <= @Top
+WHERE R.CPURank <= @Top OR R.ReadsRank <= @Top OR R.WritesRank <= @Top
 ORDER BY T.InstanceID, T.Source, T.ID, T.Period
