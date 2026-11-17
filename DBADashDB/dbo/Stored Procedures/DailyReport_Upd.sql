@@ -14,7 +14,8 @@ CREATE PROC dbo.DailyReport_Upd(
 	@IncludeWeekOverWeek BIT,
 	@ChangeThresholdPct INT,
 	@Settings NVARCHAR(MAX)=NULL,
-	@NotificationChannelIDs dbo.IDs READONLY
+	@EmailServerID INT=NULL,
+	@Recipients NVARCHAR(MAX)=NULL /* Addresses separated by "; " */
 )
 AS
 SET NOCOUNT ON
@@ -42,14 +43,16 @@ IF @Settings IS NOT NULL AND ISJSON(@Settings) = 0
 	THROW 50000, 'Daily report settings are not valid JSON.', 1;
 IF @ChangeThresholdPct < 1 OR @ChangeThresholdPct > 1000
 	THROW 50000, 'Change threshold must be between 1 and 1000 percent.', 1;
-IF NOT EXISTS(SELECT 1 FROM @NotificationChannelIDs)
-	THROW 50000, 'Select at least one notification channel for the daily report.', 1;
+IF @EmailServerID IS NULL OR NOT EXISTS(SELECT 1 FROM Alert.EmailServer WHERE EmailServerID = @EmailServerID)
+	THROW 50000, 'Select an email server for the daily report.', 1;
+IF NULLIF(LTRIM(RTRIM(@Recipients)),'') IS NULL
+	THROW 50000, 'Enter at least one email address to send the daily report to.', 1;
 
 BEGIN TRAN
 IF @DailyReportID IS NULL
 BEGIN
-	INSERT INTO dbo.DailyReport(ReportName,IsActive,ScheduleTime,TimeZone,DaysOfWeek,IntervalMinutes,WindowEndTime,ReportType,ApplyToTagID,ApplyToTagIDs,IncludePerformance,IncludeWeekOverWeek,ChangeThresholdPct,Settings)
-	VALUES(@ReportName,@IsActive,@ScheduleTime,@TimeZone,@DaysOfWeek,@IntervalMinutes,@WindowEndTime,@ReportType,@ApplyToTagID,@ApplyToTagIDs,@IncludePerformance,@IncludeWeekOverWeek,@ChangeThresholdPct,@Settings);
+	INSERT INTO dbo.DailyReport(ReportName,IsActive,ScheduleTime,TimeZone,DaysOfWeek,IntervalMinutes,WindowEndTime,ReportType,ApplyToTagID,ApplyToTagIDs,IncludePerformance,IncludeWeekOverWeek,ChangeThresholdPct,Settings,EmailServerID,Recipients)
+	VALUES(@ReportName,@IsActive,@ScheduleTime,@TimeZone,@DaysOfWeek,@IntervalMinutes,@WindowEndTime,@ReportType,@ApplyToTagID,@ApplyToTagIDs,@IncludePerformance,@IncludeWeekOverWeek,@ChangeThresholdPct,@Settings,@EmailServerID,@Recipients);
 	SET @DailyReportID = SCOPE_IDENTITY();
 END
 ELSE
@@ -68,18 +71,11 @@ BEGIN
 		IncludePerformance = @IncludePerformance,
 		IncludeWeekOverWeek = @IncludeWeekOverWeek,
 		ChangeThresholdPct = @ChangeThresholdPct,
-		Settings = @Settings
+		Settings = @Settings,
+		EmailServerID = @EmailServerID,
+		Recipients = @Recipients
 	WHERE DailyReportID = @DailyReportID;
 	IF @@ROWCOUNT = 0
 		THROW 50000, 'Daily report not found.', 1;
 END
-
-DELETE FROM dbo.DailyReportChannel
-WHERE DailyReportID = @DailyReportID
-AND NotificationChannelID NOT IN (SELECT ID FROM @NotificationChannelIDs);
-
-INSERT INTO dbo.DailyReportChannel(DailyReportID,NotificationChannelID)
-SELECT @DailyReportID, C.ID
-FROM @NotificationChannelIDs C
-WHERE NOT EXISTS(SELECT 1 FROM dbo.DailyReportChannel RC WHERE RC.DailyReportID = @DailyReportID AND RC.NotificationChannelID = C.ID);
 COMMIT

@@ -21,7 +21,7 @@ namespace DBADashGUI.DBADashAlerts.DailyReports
         private readonly ToolStripButton btnAdd = new("Add", Properties.Resources._077_AddFile_16x16_72);
         private readonly ToolStripButton btnEdit = new("Edit", Properties.Resources.EditTooltip_16x);
         private readonly ToolStripButton btnDelete = new("Delete", Properties.Resources.Close_red_16x);
-        private readonly ToolStripButton btnSendNow = new("Send now", Properties.Resources.SendEmail_16x) { ToolTipText = "Send this report now to its channels.  Doesn't change the schedule.  A changes report's next send lists what changed since this one." };
+        private readonly ToolStripButton btnSendNow = new("Send now", Properties.Resources.SendEmail_16x) { ToolTipText = "Send this report now to its recipients.  Doesn't change the schedule.  A changes report's next send lists what changed since this one." };
         private readonly ToolStripButton btnRefresh = new("Refresh", Properties.Resources._112_RefreshArrow_Green_16x16_72);
         private readonly ToolStripLabel lblStatus = new();
 
@@ -36,7 +36,8 @@ namespace DBADashGUI.DBADashAlerts.DailyReports
                 Col("Type", "Type", 75),
                 Col("Schedule", "Schedule", 230),
                 Col("ScopeDescription", "Scope", 200),
-                Col("Channels", "Channels", 200),
+                Col("EmailServerName", "Email server", 140),
+                Col("Recipients", "Recipients", 220),
                 Col("Performance", "Performance", 90),
                 Col("WeekOverWeek", "Compare with baseline", 130),
                 Col("LastSent", "Last sent (UTC)", 130),
@@ -51,7 +52,7 @@ namespace DBADashGUI.DBADashAlerts.DailyReports
             btnRefresh.Click += (_, _) => LoadReports();
             dgv.CellDoubleClick += (_, e) => { if (e.RowIndex >= 0) OpenEditor(Selected); };
             dgv.SelectionChanged += (_, _) => UpdateButtons();
-            // The full send result, one line per channel, as the cell shows it on one line
+            // The full send result, one line per recipient, as the cell shows it on one line
             dgv.CellFormatting += (_, e) =>
             {
                 if (e.RowIndex >= 0 && dgv.Columns[e.ColumnIndex].Name == "LastSendResult" && dgv.Rows[e.RowIndex].DataBoundItem is DailyReportRow row)
@@ -152,7 +153,7 @@ namespace DBADashGUI.DBADashAlerts.DailyReports
             {
                 var (content, result) = await Task.Run(() => DailyReportRunner.SendNowAsync(config, ConnectionString, DateTime.UtcNow));
 
-                // Each channel's outcome with the mail server's reply: "accepted" means the server took it, so a report that then doesn't
+                // Each recipient's outcome with the mail server's reply: "accepted" means the server took it, so a report that then doesn't
                 // arrive was held or filtered further on, not lost here
                 var message = $"{content.Subject}{Environment.NewLine}{Environment.NewLine}{result}";
                 if (result.SentToAny)
@@ -160,7 +161,7 @@ namespace DBADashGUI.DBADashAlerts.DailyReports
                     message += Environment.NewLine + Environment.NewLine +
                                "If it doesn't arrive in a few minutes, check the junk or quarantine folder: the mail server accepted it, so it was held or filtered after that.";
                 }
-                MessageBox.Show(message, result.SentToAll ? "Daily report sent" : result.SentToAny ? "Daily report not sent to every channel" : "Daily report not sent",
+                MessageBox.Show(message, result.SentToAll ? "Daily report sent" : result.SentToAny ? "Daily report not sent to every recipient" : "Daily report not sent",
                     MessageBoxButtons.OK, result.SentToAll ? MessageBoxIcon.Information : MessageBoxIcon.Warning);
             }
             catch (Exception ex)
@@ -184,12 +185,13 @@ namespace DBADashGUI.DBADashAlerts.DailyReports
             public string Type => Config.ReportType == DailyReportType.Changes ? "Changes" : "Full";
             public string Schedule => $"{Config.ScheduleDescription} ({Config.TimeZone})";
             public string ScopeDescription => Config.ScopeDescription;
-            public string Channels => string.Join(", ", Config.Channels.Select(c => c.ChannelName));
+            public string EmailServerName => Config.EmailServerName;
+            public string Recipients => Config.Recipients;
             public string Performance => Config.IncludePerformance ? "Yes" : "No";
             public string WeekOverWeek => Config.IncludeWeekOverWeek ? $"Yes ({Config.ChangeThresholdPct}%)" : "No";
             public string LastRun => Config.LastRunUTC?.ToString("yyyy-MM-dd HH:mm") ?? "Never";
             public string LastSent => Config.LastSentUTC?.ToString("yyyy-MM-dd HH:mm") ?? (Config.LastSendAttemptUTC.HasValue ? "Not sent" : "Never");
-            // One line per channel - shown on one line in the grid, in full in the tooltip
+            // One line per recipient - shown on one line in the grid, in full in the tooltip
             public string LastSendResult => Config.LastSendResult?.Replace(Environment.NewLine, " | ");
             public string LastRunError => Config.LastRunError;
         }

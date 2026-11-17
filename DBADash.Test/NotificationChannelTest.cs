@@ -20,10 +20,6 @@ namespace DBADashConfig.Test
         private const string DefaultAlertType = "Test";
 
         private const string DefaultChannelName = "TestChannel";
-        private const string DefaultSmtpHost = "smtp.example.com";
-        private const int DefaultSmtpPort = 587;
-        private const string DefaultFromEmail = "alerts@example.com";
-        private const string DefaultFromName = "DBADash";
         private const string DefaultToEmail = "to@example.com";
         private const string DefaultResolutionToEmail = "resolved@example.com";
 
@@ -493,19 +489,11 @@ namespace DBADashConfig.Test
         private static EmailNotificationChannel CreateEmailChannel(
             string toEmail = DefaultToEmail,
             string resolutionToEmail = DefaultResolutionToEmail,
-            string channelName = DefaultChannelName,
-            string host = DefaultSmtpHost,
-            int port = DefaultSmtpPort,
-            string fromEmail = DefaultFromEmail,
-            string from = DefaultFromName)
+            string channelName = DefaultChannelName)
         {
             return new EmailNotificationChannel
             {
                 ChannelName = channelName,
-                Host = host,
-                Port = port,
-                FromEmail = fromEmail,
-                From = from,
                 ToEmail = toEmail,
                 ResolutionToEmail = resolutionToEmail
             };

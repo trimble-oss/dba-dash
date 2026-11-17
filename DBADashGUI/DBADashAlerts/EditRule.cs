@@ -68,7 +68,7 @@ namespace DBADashGUI.DBADashAlerts
             }
 
             TypeDescriptor.AddProviderTransparent(
-                new GroupIdConverterProvider(TypeDescriptor.GetProvider(alertRule)),
+                new PropertyConverterProvider(TypeDescriptor.GetProvider(alertRule), new PropertyConverter("GroupID", new NotificationChannelGroupConverter())),
                 alertRule);
         }
 

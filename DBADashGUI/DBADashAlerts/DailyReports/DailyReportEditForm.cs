@@ -1,4 +1,5 @@
 using DBADash;
+using DBADash.Alert;
 using DBADash.DailyReport;
 using DBADashGUI.Theme;
 using Microsoft.Data.SqlClient;
@@ -15,7 +16,7 @@ using System.Windows.Forms;
 
 namespace DBADashGUI.DBADashAlerts.DailyReports
 {
-    /// <summary>Add or edit a daily report: schedule, instance scope, email channels and what to include.</summary>
+    /// <summary>Add or edit a daily report: schedule, instance scope, email server and recipients, and what to include.</summary>
     public class DailyReportEditForm : Form
     {
         private readonly string connectionString;
@@ -37,11 +38,14 @@ namespace DBADashGUI.DBADashAlerts.DailyReports
         private readonly ComboBox cboTimeZone = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 260 };
         private readonly Label lblScope = new() { AutoSize = true, MaximumSize = new System.Drawing.Size(360, 0) };
         private readonly Button btnScope = new Button { Text = "Choose tags...", AutoSize = true }.WithImage(Properties.Resources.Filter_16x);
-        private readonly CheckedListBox clbChannels = new() { Height = 110, Width = 260, CheckOnClick = true };
+        private readonly ComboBox cboEmailServer = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 260 };
+        private readonly Button btnNewEmailServer = new Button { Text = "New server...", AutoSize = true }.WithImage(Properties.Resources.EmailServer_16x);
+        // AcceptsReturn: Enter starts a new line here rather than pressing Save
+        private readonly TextBox txtRecipients = new() { Multiline = true, AcceptsReturn = true, ScrollBars = ScrollBars.Vertical, Height = 60, Width = 360 };
+        private readonly Label lblRecipientsNote = new() { AutoSize = true, MaximumSize = new System.Drawing.Size(420, 0), Text = "Separate addresses with ; or a new line. Each recipient gets their own copy." };
         private readonly CheckBox chkPerformance = new() { Text = "Include performance: instances over the Performance Summary thresholds", AutoSize = true };
         private readonly CheckBox chkWeekOverWeek = new() { Text = "Compare with the same day in previous weeks (baseline)", AutoSize = true };
         private readonly NumericUpDown numThreshold = new() { Minimum = 1, Maximum = 1000, Value = 50, Width = 70 };
-        private readonly Label lblChannelsNote = new() { AutoSize = true, MaximumSize = new System.Drawing.Size(420, 0), Text = "Only Email channels can receive daily reports. Recipients are the channel's To Email." };
         private readonly Label lblPerformanceScope = new() { AutoSize = true, MaximumSize = new System.Drawing.Size(360, 0) };
         private readonly Button btnPerformanceScope = new Button { Text = "Choose tags...", AutoSize = true }.WithImage(Properties.Resources.Filter_16x);
         private DBADashTagSet performanceScope;
@@ -63,8 +67,6 @@ namespace DBADashGUI.DBADashAlerts.DailyReports
         private readonly Button btnSave = new Button { Text = "Save", DialogResult = DialogResult.None, AutoSize = true }.WithImage(Properties.Resources.Save_16x);
         private readonly Button btnCancel = new() { Text = "Cancel", DialogResult = DialogResult.Cancel, AutoSize = true };
 
-        private readonly List<DailyReportChannelRef> emailChannels;
-
         public DailyReportEditForm(DailyReportConfig existing, string connectionString)
         {
             this.connectionString = connectionString;
@@ -78,20 +80,6 @@ namespace DBADashGUI.DBADashAlerts.DailyReports
             AutoScaleMode = AutoScaleMode.Font;
             AutoSize = true;
             AutoSizeMode = AutoSizeMode.GrowAndShrink;
-
-            // Every Email channel, including ones in their disable window: leaving those out made them vanish from the list without a word.
-            // They're marked as disabled instead - a report isn't sent to a channel while it's disabled (see DailyReportRunner.SendAsync)
-            emailChannels = DailyReportLookups.GetChannels(connectionString)
-                .Where(c => string.Equals(c.ChannelType, NotificationChannelBase.NotificationChannelTypes.Email.ToString(), StringComparison.OrdinalIgnoreCase))
-                .ToList();
-            if (emailChannels.Count == 0)
-            {
-                lblChannelsNote.Text = "There are no Email notification channels yet. Add one in the alert configuration (Configure > Notification Channels), then come back here.";
-            }
-            else if (emailChannels.Any(c => !c.IsActive))
-            {
-                lblChannelsNote.Text += Environment.NewLine + "Channels marked (disabled) are in their disable window - reports aren't sent to them until it ends.";
-            }
 
             var layout = new TableLayoutPanel { AutoSize = true, ColumnCount = 2, Padding = new Padding(12) };
             layout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
@@ -115,8 +103,9 @@ namespace DBADashGUI.DBADashAlerts.DailyReports
             Row("Repeat", FlowOf(cboRepeat, new Label { Text = "until (HH:mm)", AutoSize = true, Padding = new Padding(6, 6, 4, 0) }, txtUntil));
             Row("Time zone", cboTimeZone);
             Row("Instances", FlowOf(btnScope, lblScope));
-            Row("Email channels", clbChannels);
-            Row("", lblChannelsNote);
+            Row("Email server", FlowOf(cboEmailServer, btnNewEmailServer));
+            Row("Recipients", txtRecipients);
+            Row("", lblRecipientsNote);
             Row("", chkPerformance);
             Row("", chkWeekOverWeek);
             Row("Change threshold %", numThreshold);
@@ -142,6 +131,7 @@ namespace DBADashGUI.DBADashAlerts.DailyReports
 
             btnScope.Click += (_, _) => ChooseScope();
             btnPerformanceScope.Click += (_, _) => ChoosePerformanceScope();
+            btnNewEmailServer.Click += (_, _) => NewEmailServer();
             btnSave.Click += (_, _) => Save();
             btnPreview.Click += async (_, _) => await PreviewAsync();
             var hours = Enumerable.Range(0, 24).Select(h => (object)$"{h:00}:00").ToArray();
@@ -185,7 +175,9 @@ namespace DBADashGUI.DBADashAlerts.DailyReports
             IncludeWeekOverWeek = c.IncludeWeekOverWeek,
             ChangeThresholdPct = c.ChangeThresholdPct,
             Settings = (c.Settings ?? new DailyReportSettings()).Clone(),
-            Channels = c.Channels.ToList()
+            EmailServerID = c.EmailServerID,
+            EmailServerName = c.EmailServerName,
+            Recipients = c.Recipients
         };
 
         private void LoadValues()
@@ -196,10 +188,8 @@ namespace DBADashGUI.DBADashAlerts.DailyReports
                 cboTimeZone.SelectedItem = config.TimeZone;
                 if (cboTimeZone.SelectedItem == null) cboTimeZone.SelectedItem = "UTC";
 
-                foreach (var ch in emailChannels)
-                {
-                    clbChannels.Items.Add(new ChannelItem(ch), config.ChannelIDs.Contains(ch.NotificationChannelID));
-                }
+                LoadEmailServers(config.EmailServerID);
+                txtRecipients.Text = string.Join(Environment.NewLine, config.RecipientList);
 
                 txtName.Text = config.ReportName ?? string.Empty;
                 chkActive.Checked = config.IsActive;
@@ -272,6 +262,25 @@ namespace DBADashGUI.DBADashAlerts.DailyReports
             btnPerformanceSettings.Enabled = performance;
         }
 
+        /// <summary>Fills the server list and selects a server: the given one, or the only one when a new report has just one to choose from</summary>
+        private void LoadEmailServers(int? selectID)
+        {
+            var servers = EmailServer.GetServerList(connectionString);
+            cboEmailServer.Items.Clear();
+            cboEmailServer.Items.AddRange(servers.Cast<object>().ToArray());
+            cboEmailServer.SelectedItem = servers.FirstOrDefault(s => s.EmailServerID == selectID)
+                                          ?? (selectID == null && config.DailyReportID == 0 && servers.Count == 1 ? servers[0] : null);
+        }
+
+        private void NewEmailServer()
+        {
+            var server = new EmailServer();
+            if (EmailServersDialog.EditServer(this, server))
+            {
+                LoadEmailServers(server.EmailServerID);
+            }
+        }
+
         private void EditPerformanceSettings()
         {
             using var frm = new DailyReportPerformanceSettingsForm(settings);
@@ -315,8 +324,8 @@ namespace DBADashGUI.DBADashAlerts.DailyReports
         }
 
         /// <summary>Checks the form and builds the report settings from it.  Shows a message and returns false if something is wrong.</summary>
-        /// <param name="requireChannels">False for a preview, which doesn't send anything</param>
-        private bool TryCollect(bool requireChannels, out DailyReportConfig result)
+        /// <param name="requireRecipients">False for a preview, which doesn't send anything</param>
+        private bool TryCollect(bool requireRecipients, out DailyReportConfig result)
         {
             result = null;
             if (string.IsNullOrWhiteSpace(txtName.Text))
@@ -351,12 +360,25 @@ namespace DBADashGUI.DBADashAlerts.DailyReports
                 }
                 until = u;
             }
-            var channelIDs = clbChannels.CheckedItems.Cast<ChannelItem>().Select(c => c.Channel.NotificationChannelID).ToList();
-            if (requireChannels && channelIDs.Count == 0)
+            var server = cboEmailServer.SelectedItem as EmailServer;
+            if (requireRecipients && server == null)
             {
-                MessageBox.Show(emailChannels.Count == 0
-                    ? "There are no Email notification channels. Add one in the alert configuration first."
-                    : "Select at least one email channel.", "Daily report", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show(cboEmailServer.Items.Count == 0
+                    ? "There are no email servers yet. Use New server... to add one."
+                    : "Select an email server.", "Daily report", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+            var recipients = EmailRecipients.Parse(txtRecipients.Text);
+            var invalid = EmailRecipients.Invalid(recipients);
+            if (invalid.Count > 0)
+            {
+                MessageBox.Show("These aren't valid email addresses:" + Environment.NewLine + Environment.NewLine + string.Join(Environment.NewLine, invalid),
+                    "Daily report", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+            if (requireRecipients && recipients.Count == 0)
+            {
+                MessageBox.Show("Enter at least one email address to send the report to.", "Daily report", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
             }
             if (chkHours.Checked && cboHoursFrom.SelectedIndex == cboHoursTo.SelectedIndex)
@@ -401,14 +423,16 @@ namespace DBADashGUI.DBADashAlerts.DailyReports
             settings.IncludeAISummary = chkAISummary.Checked;
             settings.PlainTextOnly = chkPlainText.Checked;
             config.Settings = settings.Clone();
-            config.Channels = emailChannels.Where(c => channelIDs.Contains(c.NotificationChannelID)).ToList();
+            config.EmailServerID = server?.EmailServerID;
+            config.EmailServerName = server?.EmailServerName;
+            config.Recipients = EmailRecipients.Normalize(txtRecipients.Text);
             result = config;
             return true;
         }
 
         private void Save()
         {
-            if (!TryCollect(requireChannels: true, out var report)) return;
+            if (!TryCollect(requireRecipients: true, out var report)) return;
             try
             {
                 DailyReportRepository.Save(connectionString, report);
@@ -428,7 +452,7 @@ namespace DBADashGUI.DBADashAlerts.DailyReports
         /// </summary>
         private async Task PreviewAsync()
         {
-            if (!TryCollect(requireChannels: false, out var report)) return;
+            if (!TryCollect(requireRecipients: false, out var report)) return;
 
             btnPreview.Enabled = false;
             Cursor = Cursors.WaitCursor;
@@ -454,12 +478,5 @@ namespace DBADashGUI.DBADashAlerts.DailyReports
         private static string PreviewDocument(DailyReportContent content) =>
             content.PreviewHtml("<div style=\"font-family:Segoe UI,Arial,sans-serif;color:#666;font-size:12px;padding:8px 16px;background:#fff5e4;border-bottom:1px solid #e49325\">Preview only - nothing was sent. Subject: " +
                                 WebUtility.HtmlEncode(content.Subject) + "</div>");
-
-        private class ChannelItem
-        {
-            public ChannelItem(DailyReportChannelRef channel) => Channel = channel;
-            public DailyReportChannelRef Channel { get; }
-            public override string ToString() => Channel.IsActive ? Channel.ChannelName : $"{Channel.ChannelName} (disabled)";
-        }
     }
 }

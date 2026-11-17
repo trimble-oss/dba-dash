@@ -24,6 +24,11 @@ namespace DBADashGUI.DBADashAlerts
         [Category("DBA Dash Notification Channel")]
         public abstract NotificationChannelTypes NotificationChannelType { get; }
 
+        /// <summary>Email channels only: the shared Email Server the channel sends through.  Null: the channel's own settings</summary>
+        [JsonIgnore]
+        [Browsable(false)]
+        public virtual int? EmailServerID { get; set; }
+
         public enum NotificationChannelTypes
         {
             Webhook = 1,
@@ -143,7 +148,10 @@ namespace DBADashGUI.DBADashAlerts
             SaveSchedules(connectionString);
         }
 
-        public string GetChannelDetails() => JsonConvert.SerializeObject(this).EncryptString(ClassGuid + ChannelName);
+        public string GetChannelDetails() => GetChannelDetailsJson().EncryptString(ClassGuid + ChannelName);
+
+        /// <summary>The channel's settings as JSON, before they are encrypted</summary>
+        internal string GetChannelDetailsJson() => JsonConvert.SerializeObject(this);
 
         private void SaveSchedules(string connectionString)
         {
@@ -227,6 +235,7 @@ namespace DBADashGUI.DBADashAlerts
             cmd.Parameters.AddWithValue("@ChannelDetails", GetChannelDetails());
             cmd.Parameters.AddWithValue("@AcknowledgedNotification", AcknowledgedNotification);
             cmd.Parameters.AddWithValue("@GroupID", GroupID);
+            cmd.Parameters.AddWithValue("@EmailServerID", (object)EmailServerID ?? DBNull.Value);
             cmd.ExecuteNonQuery();
         }
 
@@ -243,6 +252,7 @@ namespace DBADashGUI.DBADashAlerts
             cmd.Parameters.AddWithValue("@NotificationChannelTypeID", NotificationChannelType);
             cmd.Parameters.AddWithValue("@AcknowledgedNotification", AcknowledgedNotification);
             cmd.Parameters.AddWithValue("@GroupID", GroupID);
+            cmd.Parameters.AddWithValue("@EmailServerID", (object)EmailServerID ?? DBNull.Value);
             var pChannelID = new SqlParameter("@NotificationChannelID", SqlDbType.Int)
             { Direction = ParameterDirection.Output };
             cmd.Parameters.Add(pChannelID);
@@ -298,6 +308,11 @@ namespace DBADashGUI.DBADashAlerts
                 channel.Schedules = GetSchedules(channelId, connectionString);
                 channel.AcknowledgedNotification = (bool)rdr["AcknowledgedNotification"];
                 channel.GroupID = rdr["GroupID"] == DBNull.Value ? 0 : Convert.ToInt32(rdr["GroupID"]);
+                channel.EmailServerID = rdr["EmailServerID"] == DBNull.Value ? null : Convert.ToInt32(rdr["EmailServerID"]);
+                if (channel is EmailNotificationChannel { EmailServerID: null } email)
+                {
+                    email.LegacyServer = EmailNotificationChannel.LegacySettings(channelDetails);
+                }
                 return channel;
             }
             else

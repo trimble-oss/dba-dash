@@ -6,6 +6,7 @@ CREATE PROC Alert.NotificationChannel_Add(
 	@ChannelDetails NVARCHAR(MAX),
 	@AcknowledgedNotification BIT=0,
 	@GroupID INT=0,
+	@EmailServerID INT=NULL,
 	@NotificationChannelID INT OUT
 )
 AS
@@ -16,9 +17,10 @@ INSERT INTO Alert.NotificationChannel(
 	DisableTo,
 	ChannelDetails,
 	AcknowledgedNotification,
-	GroupID
+	GroupID,
+	EmailServerID
 	)
-VALUES(@NotificationChannelTypeID,@ChannelName,@DisableFrom,@DisableTo,@ChannelDetails,@AcknowledgedNotification,@GroupID);
+VALUES(@NotificationChannelTypeID,@ChannelName,@DisableFrom,@DisableTo,@ChannelDetails,@AcknowledgedNotification,@GroupID,@EmailServerID);
 
 SET @NotificationChannelID = SCOPE_IDENTITY();
 GO

@@ -12,6 +12,7 @@ CREATE TABLE Alert.NotificationChannel(
 	LastFailure NVARCHAR(MAX) NULL,
 	AcknowledgedNotification BIT NOT NULL CONSTRAINT DF_Alert_AcknowledgedNotification DEFAULT(0),
 	GroupID INT NOT NULL CONSTRAINT DF_NotificationChannel_GroupID DEFAULT(0),
+	EmailServerID INT NULL CONSTRAINT FK_NotificationChannel_EmailServer REFERENCES Alert.EmailServer(EmailServerID),
 	CONSTRAINT FK_NotificationChannel_NotificationChannelType FOREIGN KEY(NotificationChannelTypeID) REFERENCES Alert.NotificationChannelType(NotificationChannelTypeID),
 	CONSTRAINT PK_NotificationChannel PRIMARY KEY(NotificationChannelID)
 )

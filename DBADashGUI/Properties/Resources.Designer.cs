@@ -893,6 +893,16 @@ namespace DBADashGUI.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap EmailServer_16x {
+            get {
+                object obj = ResourceManager.GetObject("EmailServer_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap SendEmail_16x {
             get {
                 object obj = ResourceManager.GetObject("SendEmail_16x", resourceCulture);

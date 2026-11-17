@@ -29,7 +29,7 @@ CREATE TABLE dbo.DailyReport(
 	/* Set by dbo.DailyReport_Claim while a run is in progress, cleared by dbo.DailyReport_RunResult_Upd, so a repeating report isn't claimed for its
 	   next slot (by another service) while the last run is still going.  A run that never finishes stops blocking after an hour */
 	RunningSinceUTC DATETIME2(3) NULL,
-	/* The last send, scheduled or Send now: when it reached at least one channel, and each channel's outcome (the mail server's reply, or why it wasn't sent) */
+	/* The last send, scheduled or Send now: when it reached at least one recipient, and each recipient's outcome (the mail server's reply, or why it wasn't sent) */
 	LastSentUTC DATETIME2(3) NULL,
 	LastSendResult NVARCHAR(MAX) NULL,
 	LastSendAttemptUTC DATETIME2(3) NULL,
@@ -37,5 +37,9 @@ CREATE TABLE dbo.DailyReport(
 	RetryDue BIT NOT NULL CONSTRAINT DF_DailyReport_RetryDue DEFAULT(0),
 	/* Retries of today's run so far */
 	RetryAttempts TINYINT NOT NULL CONSTRAINT DF_DailyReport_RetryAttempts DEFAULT(0),
-	CreatedDate DATETIME2(3) NOT NULL CONSTRAINT DF_DailyReport_CreatedDate DEFAULT(SYSUTCDATETIME())
+	CreatedDate DATETIME2(3) NOT NULL CONSTRAINT DF_DailyReport_CreatedDate DEFAULT(SYSUTCDATETIME()),
+	/* The SMTP settings the report is sent with */
+	EmailServerID INT NULL CONSTRAINT FK_DailyReport_EmailServer REFERENCES Alert.EmailServer(EmailServerID),
+	/* Email addresses the report is sent to, separated by "; " - each recipient gets their own copy */
+	Recipients NVARCHAR(MAX) NULL
 );

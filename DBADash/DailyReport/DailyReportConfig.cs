@@ -1,3 +1,4 @@
+using DBADash.Alert;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
@@ -7,7 +8,7 @@ using System.Linq;
 namespace DBADash.DailyReport
 {
     /// <summary>
-    /// A scheduled daily health report, emailed to the recipients of its notification channels.
+    /// A scheduled daily health report, emailed to its recipients through its email server.
     /// Stored in the repository (dbo.DailyReport) so the service can send it without the GUI running.
     /// </summary>
     public class DailyReportConfig
@@ -82,14 +83,20 @@ namespace DBADash.DailyReport
 
         public DateTime? LastRunUTC { get; set; }
         public string LastRunError { get; set; }
-        /// <summary>The last send (scheduled or Send now) that reached at least one channel</summary>
+        /// <summary>The last send (scheduled or Send now) that reached at least one recipient</summary>
         public DateTime? LastSentUTC { get; set; }
         public DateTime? LastSendAttemptUTC { get; set; }
-        /// <summary>Each channel's outcome on the last send: the mail server's reply, or why it wasn't sent</summary>
+        /// <summary>Each recipient's outcome on the last send: the mail server's reply, or why it wasn't sent</summary>
         public string LastSendResult { get; set; }
 
-        public List<DailyReportChannelRef> Channels { get; set; } = new();
-        public List<int> ChannelIDs => Channels.Select(c => c.NotificationChannelID).ToList();
+        /// <summary>The SMTP settings the report is sent with (Alert.EmailServer)</summary>
+        public int? EmailServerID { get; set; }
+        public string EmailServerName { get; set; }
+
+        /// <summary>Addresses the report is sent to, separated by ; , or new lines.  Each recipient gets their own copy</summary>
+        public string Recipients { get; set; }
+
+        public List<string> RecipientList => EmailRecipients.Parse(Recipients);
     }
 
     public enum DailyReportType
@@ -98,14 +105,6 @@ namespace DBADash.DailyReport
         Full = 0,
         /// <summary>Only what changed since the last send - new, worse, better and resolved issues.  Nothing is sent when nothing changed</summary>
         Changes = 1
-    }
-
-    public class DailyReportChannelRef
-    {
-        public int NotificationChannelID { get; set; }
-        public string ChannelName { get; set; }
-        public string ChannelType { get; set; }
-        public bool IsActive { get; set; }
     }
 
     /// <summary>Reads and writes daily reports in the repository database.</summary>
@@ -143,21 +142,10 @@ namespace DBADash.DailyReport
                     LastSentUTC = r.IsDBNull(r.GetOrdinal("LastSentUTC")) ? null : r.GetDateTime(r.GetOrdinal("LastSentUTC")),
                     LastSendAttemptUTC = r.IsDBNull(r.GetOrdinal("LastSendAttemptUTC")) ? null : r.GetDateTime(r.GetOrdinal("LastSendAttemptUTC")),
                     LastSendResult = r.IsDBNull(r.GetOrdinal("LastSendResult")) ? null : r.GetString(r.GetOrdinal("LastSendResult")),
-                    Settings = DailyReportSettings.FromJson(r.IsDBNull(r.GetOrdinal("Settings")) ? null : r.GetString(r.GetOrdinal("Settings")))
-                });
-            }
-
-            r.NextResult();
-            while (r.Read())
-            {
-                var reportID = r.GetInt32(r.GetOrdinal("DailyReportID"));
-                var report = reports.FirstOrDefault(x => x.DailyReportID == reportID);
-                report?.Channels.Add(new DailyReportChannelRef
-                {
-                    NotificationChannelID = r.GetInt32(r.GetOrdinal("NotificationChannelID")),
-                    ChannelName = r.GetString(r.GetOrdinal("ChannelName")),
-                    ChannelType = r.GetString(r.GetOrdinal("NotificationChannelType")),
-                    IsActive = r.GetBoolean(r.GetOrdinal("IsActive"))
+                    Settings = DailyReportSettings.FromJson(r.IsDBNull(r.GetOrdinal("Settings")) ? null : r.GetString(r.GetOrdinal("Settings"))),
+                    EmailServerID = r.IsDBNull(r.GetOrdinal("EmailServerID")) ? null : r.GetInt32(r.GetOrdinal("EmailServerID")),
+                    EmailServerName = r.IsDBNull(r.GetOrdinal("EmailServerName")) ? null : r.GetString(r.GetOrdinal("EmailServerName")),
+                    Recipients = r.IsDBNull(r.GetOrdinal("Recipients")) ? null : r.GetString(r.GetOrdinal("Recipients"))
                 });
             }
             return reports;
@@ -166,13 +154,6 @@ namespace DBADash.DailyReport
         /// <summary>Adds (DailyReportID = 0) or updates a report.  Returns the DailyReportID.</summary>
         public static int Save(string connectionString, DailyReportConfig config)
         {
-            var channelIDs = new DataTable();
-            channelIDs.Columns.Add("ID", typeof(int));
-            foreach (var id in config.ChannelIDs.Distinct())
-            {
-                channelIDs.Rows.Add(id);
-            }
-
             using var cn = new SqlConnection(connectionString);
             using var cmd = new SqlCommand("dbo.DailyReport_Upd", cn) { CommandType = CommandType.StoredProcedure };
             var pID = new SqlParameter("@DailyReportID", SqlDbType.Int)
@@ -192,7 +173,8 @@ namespace DBADash.DailyReport
             cmd.Parameters.AddWithValue("@IncludeWeekOverWeek", config.IncludeWeekOverWeek);
             cmd.Parameters.AddWithValue("@ChangeThresholdPct", config.ChangeThresholdPct);
             cmd.Parameters.AddWithValue("@Settings", (config.Settings ?? new DailyReportSettings()).ToJson());
-            cmd.Parameters.Add(new SqlParameter("@NotificationChannelIDs", SqlDbType.Structured) { TypeName = "dbo.IDs", Value = channelIDs });
+            cmd.Parameters.AddWithValue("@EmailServerID", (object)config.EmailServerID ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@Recipients", (object)EmailRecipients.Normalize(config.Recipients) ?? DBNull.Value);
             cn.Open();
             cmd.ExecuteNonQuery();
             return (int)pID.Value;
@@ -259,7 +241,7 @@ namespace DBADash.DailyReport
             cmd.ExecuteNonQuery();
         }
 
-        /// <summary>Records a send (scheduled or Send now): sent is true when it reached at least one channel</summary>
+        /// <summary>Records a send (scheduled or Send now): sent is true when it reached at least one recipient</summary>
         public static void SetSendResult(string connectionString, int dailyReportID, bool sent, string result)
         {
             using var cn = new SqlConnection(connectionString);
@@ -331,27 +313,6 @@ namespace DBADash.DailyReport
 {
     public static class DailyReportLookups
     {
-        /// <summary>Notification channels that can be chosen for a daily report</summary>
-        public static List<DailyReportChannelRef> GetChannels(string connectionString)
-        {
-            var channels = new List<DailyReportChannelRef>();
-            using var cn = new SqlConnection(connectionString);
-            using var cmd = new SqlCommand("Alert.NotificationChannel_Get", cn) { CommandType = CommandType.StoredProcedure };
-            cn.Open();
-            using var r = cmd.ExecuteReader();
-            while (r.Read())
-            {
-                channels.Add(new DailyReportChannelRef
-                {
-                    NotificationChannelID = r.GetInt32(r.GetOrdinal("NotificationChannelID")),
-                    ChannelName = r.GetString(r.GetOrdinal("ChannelName")),
-                    ChannelType = r.GetString(r.GetOrdinal("NotificationChannelType")),
-                    IsActive = r.GetBoolean(r.GetOrdinal("IsActive"))
-                });
-            }
-            return channels.OrderBy(c => c.ChannelName).ToList();
-        }
-
         /// <summary>Time zone names accepted by the repository (sys.time_zone_info)</summary>
         public static List<string> GetTimeZones(string connectionString)
         {

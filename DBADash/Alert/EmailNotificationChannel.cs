@@ -1,9 +1,7 @@
 ﻿using DBADashGUI.DBADashAlerts;
 using DBADash;
-using MailKit.Net.Smtp;
-using MailKit.Security;
 using MimeKit;
-using Serilog;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -18,37 +16,19 @@ namespace DBADash.Alert
     {
         public override NotificationChannelTypes NotificationChannelType => NotificationChannelTypes.Email;
 
+        [JsonIgnore]
+        [Browsable(true)]
         [Category("Email Config")]
-        [Description("Email host. e.g. smtp.gmail.com")]
-        public string Host { get; set; }
-
-        [Category("Email Config")]
-        [Description("Port")]
-        public int Port { get; set; } = 587;
-
-        [Category("Email Config")]
-        public string UserName { get; set; }
-
-        [PasswordPropertyText(true)]
-        [Category("Email Config")]
-        public string Password { get; set; }
-
-        [Category("Email Config")]
-        public SecureSocketOptions SecureSocketOption { get; set; } = SecureSocketOptions.Auto;
+        [DisplayName("Email Server (Required)")]
+        [Description("The SMTP settings alerts and daily reports are sent with, from the Email Servers dialog on the Alerts page. Use New server... to create one.")]
+        // Named by string: the picker lives in the GUI assembly (DBADash), which this assembly can't reference
+        [Editor("DBADashGUI.DBADashAlerts.EmailServerEditor, DBADash", "System.Drawing.Design.UITypeEditor, System.Drawing")]
+        public override int? EmailServerID { get; set; }
 
         [Category("Email Config")]
         [DisplayName("To Email")]
         [Description("Email address to send alert to")]
         public string ToEmail { get; set; }
-
-        [Category("Email Config")]
-        [DisplayName("From Email")]
-        [Description("Email address alert is sent from")]
-        public string FromEmail { get; set; }
-
-        [Description("Name associated with from email address")]
-        [Category("Email Config")]
-        public string From { get; set; } = "DBADash Alerts";
 
         [Description("Name associated with to email address.  Default to channel name.")]
         [Category("Email Config")]
@@ -112,8 +92,32 @@ namespace DBADash.Alert
             return ShouldUseResolutionRecipient(alert) ? ResolutionToEmail : ToEmail;
         }
 
+        /// <summary>
+        /// SMTP settings saved on the channel before email servers existed.  Only for a channel the upgrade couldn't move to a server (the
+        /// deployment lacked UNMASK - see Script.PostDeployment1.sql), so it keeps sending until it's edited and given one.  Never saved.
+        /// </summary>
+        [JsonIgnore]
+        [Browsable(false)]
+        internal EmailServer LegacyServer { get; set; }
+
+        /// <summary>The SMTP settings in a channel's details from before email servers, or null when it has none</summary>
+        internal static EmailServer LegacySettings(string channelDetailsJson)
+        {
+            var server = JsonConvert.DeserializeObject<EmailServer>(channelDetailsJson);
+            return string.IsNullOrWhiteSpace(server?.Host) ? null : server;
+        }
+
+        /// <summary>
+        /// The server to send through, loaded for each send so an edit to it applies to the next alert (the channel itself is cached by the
+        /// service).  A channel without one uses its pre-email-server settings if it has them.  Otherwise fails with a message the user can act on
+        /// </summary>
+        private EmailServer LoadServer(string connectionString) => EmailServerID is int id
+            ? EmailServer.GetServer(id, connectionString)
+            : LegacyServer ?? throw new InvalidOperationException($"Email channel '{ChannelName}' has no Email Server. Edit the channel and select one.");
+
         protected override async Task InternalSendNotificationAsync(Alert alert, string connectionString)
         {
+            var server = LoadServer(connectionString);
             var recipientEmail = GetRecipientEmail(alert);
             var useResolutionRecipient = ShouldUseResolutionRecipient(alert);
             var recipientName = useResolutionRecipient
@@ -121,7 +125,7 @@ namespace DBADash.Alert
                 : (string.IsNullOrWhiteSpace(To) ? ChannelName : To);
 
             using var message = new MimeMessage();
-            message.From.Add(new MailboxAddress(From, FromEmail));
+            message.From.Add(new MailboxAddress(server.From, server.FromEmail));
             message.To.Add(new MailboxAddress(recipientName, recipientEmail));
             message.Subject = ReplacePlaceholders(alert, GetEmailSubjectTemplate());
 
@@ -130,83 +134,14 @@ namespace DBADash.Alert
                 Text = ReplacePlaceholders(alert, GetEmailMessageTemplate())
             };
 
-            await SendMessageAsync(message);
-        }
-
-        /// <summary>
-        /// Sends a daily report (HTML with a plain text alternative) to this channel's To Email.
-        /// Uses the same SMTP settings as alerts.  Channel schedules and the alert templates don't apply to reports.
-        /// </summary>
-        /// <param name="inlineImages">PNGs the HTML references as cid:ContentId, sent as linked resources so they show in the body rather than as attachments</param>
-        /// <returns>The mail server's reply, e.g. "2.0.0 OK queued as 1A2B3C" - accepted by the server, which isn't the same as delivered</returns>
-        public async Task<string> SendDailyReportAsync(string subject, string htmlBody, string textBody, IEnumerable<(string ContentId, byte[] Png)> inlineImages = null)
-        {
-            using var message = new MimeMessage();
-            message.From.Add(new MailboxAddress(From, FromEmail));
-            message.To.Add(new MailboxAddress(string.IsNullOrWhiteSpace(To) ? ChannelName : To, ToEmail));
-            message.Subject = subject;
-            var builder = new BodyBuilder { TextBody = textBody, HtmlBody = htmlBody };
-            var n = 0;
-            foreach (var (contentId, png) in inlineImages ?? Enumerable.Empty<(string, byte[])>())
-            {
-                var resource = builder.LinkedResources.Add($"chart{++n}.png", png, new ContentType("image", "png"));
-                resource.ContentId = contentId;
-            }
-            message.Body = builder.ToMessageBody();
-            return await SendMessageAsync(message);
-        }
-
-        /// <returns>The server's reply to the message</returns>
-        private async Task<string> SendMessageAsync(MimeMessage message)
-        {
-            using var client = new SmtpClient();
-            try
-            {
-                await client.ConnectAsync(Host, Port, SecureSocketOption);
-                if (!string.IsNullOrEmpty(UserName) || !string.IsNullOrEmpty(Password)) // Authenticate if username or password is supplied
-                {
-                    await client.AuthenticateAsync(UserName, Password);
-                }
-
-                var reply = await client.SendAsync(message);
-                // The server has accepted the message: a failure saying goodbye doesn't unsend it, and reporting it as a failure would send it again
-                try
-                {
-                    await client.DisconnectAsync(true);
-                }
-                catch (Exception ex)
-                {
-                    Log.Warning(ex, "Email accepted by {Host}:{Port} but the disconnect failed", Host, Port);
-                }
-                return reply;
-            }
-            catch (AuthenticationException ex)
-            {
-                throw new Exception($"SMTP authentication failed on {Host}:{Port} (security: {SecureSocketOption}). Check the username and password.", ex);
-            }
-            catch (SmtpCommandException ex)
-            {
-                throw new Exception($"The mail server at {Host}:{Port} (security: {SecureSocketOption}) rejected the request with status {(int)ex.StatusCode} ({ex.StatusCode}, {ex.ErrorCode}). Verify the port, security option and that this host is permitted to relay. {ex.Message}", ex);
-            }
-            catch (SmtpProtocolException ex)
-            {
-                throw new Exception($"SMTP protocol error connecting to {Host}:{Port} (security: {SecureSocketOption}). The server may not support the selected security option on this port - try a different port/security option combination. {ex.Message}", ex);
-            }
-            catch (SslHandshakeException ex)
-            {
-                throw new Exception($"TLS handshake failed connecting to {Host}:{Port} (security: {SecureSocketOption}). Check the security option matches the port (e.g. SslOnConnect for 465, StartTls for 587) and that the server certificate is trusted. {ex.Message}", ex);
-            }
-            catch (System.Net.Sockets.SocketException ex)
-            {
-                throw new Exception($"Could not connect to {Host}:{Port} (security: {SecureSocketOption}). Check the host name, port and that a firewall/network is not blocking the connection. {ex.Message}", ex);
-            }
+            await server.SendAsync(message);
         }
 
         public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            if (string.IsNullOrEmpty(Host))
+            if (EmailServerID == null)
             {
-                yield return new ValidationResult("Host is required");
+                yield return new ValidationResult("Select an Email Server. Use New server... to create one.");
             }
 
             if (string.IsNullOrEmpty(ToEmail))

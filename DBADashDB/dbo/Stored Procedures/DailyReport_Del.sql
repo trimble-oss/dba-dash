@@ -9,9 +9,6 @@ BEGIN TRAN
 DELETE dbo.DailyReportIssueState
 WHERE DailyReportID = @DailyReportID
 
-DELETE dbo.DailyReportChannel
-WHERE DailyReportID = @DailyReportID
-
 DELETE dbo.DailyReport
 WHERE DailyReportID = @DailyReportID
 COMMIT
