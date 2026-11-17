@@ -46,6 +46,13 @@ namespace DBADashGUI.DBADashAlerts
             tsManageGroups.Click += ManageGroups_Click;
             customReportView1.ToolStrip.Items.Add(tsManageGroups);
 
+            var tsEmailServers = new ToolStripButton("Email Servers", Properties.Resources.EmailServer_16x)
+            {
+                ToolTipText = "Manage the SMTP settings that email notification channels and daily reports can share. Set up a server once, then select it on each email channel."
+            };
+            tsEmailServers.Click += EmailServers_Click;
+            customReportView1.ToolStrip.Items.Add(tsEmailServers);
+
             customReportView1.PostGridRefresh += OnPostGridRefresh;
         }
 
@@ -63,6 +70,13 @@ namespace DBADashGUI.DBADashAlerts
             {
                 CommonShared.ShowExceptionDialog(ex);
             }
+        }
+
+        private void EmailServers_Click(object sender, EventArgs e)
+        {
+            using var dialog = new EmailServersDialog();
+            dialog.ShowDialog(this);
+            EmailServerConverter.Invalidate();
         }
 
         private void ManageGroups_Click(object sender, EventArgs e)
@@ -92,7 +106,9 @@ namespace DBADashGUI.DBADashAlerts
         {
             // Attach the group converter so the PropertyGrid shows a dropdown instead of a raw int
             TypeDescriptor.AddProviderTransparent(
-                new GroupIdConverterProvider(TypeDescriptor.GetProvider(channel)),
+                new PropertyConverterProvider(TypeDescriptor.GetProvider(channel),
+                    new PropertyConverter("GroupID", new NotificationChannelGroupConverter()),
+                    new PropertyConverter("EmailServerID", new EmailServerConverter())),
                 channel);
 
             using var edit = new PropertyGridDialog();
@@ -417,7 +433,8 @@ namespace DBADashGUI.DBADashAlerts
                                     MessageBoxButtons.YesNo,
                                     MessageBoxIcon.Question) != DialogResult.Yes) return;
 
-                            await channel.SendNotificationAsync(Alert.GetTestAlert(), string.Empty);
+                            // The repository is needed to load an email channel's server.  Nothing is recorded for a test alert (AlertID -1)
+                            await channel.SendNotificationAsync(Alert.GetTestAlert(), Common.ConnectionString);
                             RefreshData();
                             break;
                         }

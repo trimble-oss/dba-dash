@@ -2643,6 +2643,76 @@ BEGIN
 	WHERE EXISTS(SELECT 1 FROM @BlankTagIDs B WHERE B.TagID = T.TagID);
 END
 
+/* One-time: email servers are new, so every existing email channel gets its own server holding the SMTP settings
+   it already has.  The channel's details are copied as they are - the server uses the same encryption key as the
+   channel (EmailServer.cs) - and the channel is pointed at its server.  Channels set to (None) afterwards are left alone.
+   Duplicates are not merged; they can be consolidated later in the Email Servers dialog.
+   Needs UNMASK: without it the channel details read as 'xxxx' and would be copied into the server, so the migration is
+   skipped and the flag is left unset for a later deployment made by a principal with UNMASK.
+*/
+IF NOT EXISTS(SELECT 1 FROM dbo.Settings WHERE SettingName = 'EmailServerChannelsMigrated')
+AND HAS_PERMS_BY_NAME(DB_NAME(),'DATABASE','UNMASK') = 1
+BEGIN
+	INSERT INTO Alert.EmailServer(EmailServerName, ServerDetails)
+	SELECT NC.ChannelName, NC.ChannelDetails
+	FROM Alert.NotificationChannel NC
+	WHERE NC.NotificationChannelTypeID = 2 /* Email */
+	AND NC.EmailServerID IS NULL
+	AND NOT EXISTS(SELECT 1 FROM Alert.EmailServer ES WHERE ES.EmailServerName = NC.ChannelName)
+
+	/* To the server made from the channel: its name and an exact copy of its details.  Matching both makes this safe to repeat - if a
+	   deployment stops part way, the next one links the servers the first created - and leaves alone a channel named like a server
+	   someone created themselves.  That channel keeps its own settings (the server has to be named after the channel for the copied
+	   details to decrypt), and needs a server choosing */
+	UPDATE NC
+	SET EmailServerID = ES.EmailServerID
+	FROM Alert.NotificationChannel NC
+	JOIN Alert.EmailServer ES ON ES.EmailServerName = NC.ChannelName AND ES.ServerDetails = NC.ChannelDetails
+	WHERE NC.NotificationChannelTypeID = 2 /* Email */
+	AND NC.EmailServerID IS NULL
+
+	INSERT INTO dbo.Settings(SettingName, SettingValue) VALUES('EmailServerChannelsMigrated', 1)
+END
+
+/* Daily reports were sent through notification channels.  They now have their own email server and recipients: each report takes the
+   email server of its first channel (set by the migration above).  Recipients can't be carried over - they're in the channel's encrypted
+   details - so they need entering again.  dbo.DailyReportChannel is no longer in the project, so it's dropped here once it has been read.
+   Waits for the email server migration above: until it has run, channels have no servers, and the links are the only record of
+   which server a report used.
+   Dynamic SQL: the table isn't in the model, so the script mustn't reference it directly.
+*/
+IF OBJECT_ID('dbo.DailyReportChannel') IS NOT NULL
+AND EXISTS(SELECT 1 FROM dbo.Settings WHERE SettingName = 'EmailServerChannelsMigrated')
+BEGIN
+	EXEC sp_executesql N'
+	UPDATE DR
+	SET EmailServerID = X.EmailServerID
+	FROM dbo.DailyReport DR
+	CROSS APPLY(SELECT TOP(1) NC.EmailServerID
+				FROM dbo.DailyReportChannel DRC
+				JOIN Alert.NotificationChannel NC ON NC.NotificationChannelID = DRC.NotificationChannelID
+				WHERE DRC.DailyReportID = DR.DailyReportID
+				AND NC.EmailServerID IS NOT NULL
+				ORDER BY NC.NotificationChannelID) X
+	WHERE DR.EmailServerID IS NULL;
+
+	DROP TABLE dbo.DailyReportChannel;'
+END
+
+/* While the report migration above waits, dbo.DailyReportChannel stays - but its foreign keys mustn't stop a channel or report being
+   deleted, so they're dropped.  The migration ignores links to channels and reports that no longer exist */
+IF OBJECT_ID('dbo.DailyReportChannel') IS NOT NULL
+BEGIN
+	DECLARE @DailyReportChannelFK SYSNAME, @DropDailyReportChannelFK NVARCHAR(MAX)
+	WHILE 1 = 1
+	BEGIN
+		SET @DailyReportChannelFK = (SELECT TOP(1) name FROM sys.foreign_keys WHERE parent_object_id = OBJECT_ID('dbo.DailyReportChannel'))
+		IF @DailyReportChannelFK IS NULL BREAK
+		SET @DropDailyReportChannelFK = N'ALTER TABLE dbo.DailyReportChannel DROP CONSTRAINT ' + QUOTENAME(@DailyReportChannelFK)
+		EXEC sp_executesql @DropDailyReportChannelFK
+	END
+END
+
 /*
 	Update extended property to indicate that a DB deployment is no longer in progress, allowing the GUI to continue loading.
 */

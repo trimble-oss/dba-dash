@@ -28,20 +28,13 @@ SELECT	R.DailyReportID,
 		R.LastSentUTC,
 		R.LastSendAttemptUTC,
 		R.LastSendResult,
-		R.CreatedDate
+		R.CreatedDate,
+		R.EmailServerID,
+		ES.EmailServerName,
+		R.Recipients
 FROM dbo.DailyReport R
 LEFT JOIN dbo.Tags T ON T.TagID = R.ApplyToTagID
+LEFT JOIN Alert.EmailServer ES ON ES.EmailServerID = R.EmailServerID
 OUTER APPLY Alert.TagScope_Describe(R.ApplyToTagIDs) TS
 WHERE @DailyReportID IS NULL OR R.DailyReportID = @DailyReportID
 ORDER BY R.ReportName
-
-SELECT	RC.DailyReportID,
-		NC.NotificationChannelID,
-		NC.ChannelName,
-		NCT.NotificationChannelType,
-		CASE WHEN NC.DisableFrom < SYSUTCDATETIME() AND (NC.DisableTo > SYSUTCDATETIME() OR NC.DisableTo IS NULL) THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS IsActive
-FROM dbo.DailyReportChannel RC
-JOIN Alert.NotificationChannel NC ON NC.NotificationChannelID = RC.NotificationChannelID
-JOIN Alert.NotificationChannelType NCT ON NCT.NotificationChannelTypeID = NC.NotificationChannelTypeID
-WHERE @DailyReportID IS NULL OR RC.DailyReportID = @DailyReportID
-ORDER BY NC.ChannelName

@@ -807,17 +807,6 @@ namespace DBADash.Test
         }
 
         [TestMethod]
-        public void Channel_DisableWindow()
-        {
-            var now = new DateTime(2026, 11, 13, 10, 0, 0);
-            Assert.IsFalse(DailyReportRunner.IsInDisableWindow(null, null, now));
-            Assert.IsTrue(DailyReportRunner.IsInDisableWindow(now.AddHours(-1), null, now), "Disabled indefinitely");
-            Assert.IsTrue(DailyReportRunner.IsInDisableWindow(now.AddHours(-1), now.AddHours(1), now));
-            Assert.IsFalse(DailyReportRunner.IsInDisableWindow(now.AddHours(1), null, now), "Not started");
-            Assert.IsFalse(DailyReportRunner.IsInDisableWindow(now.AddHours(-2), now.AddHours(-1), now), "Ended");
-        }
-
-        [TestMethod]
         public void Settings_NonFiniteMinChangeTakesTheDefault()
         {
             var settings = new DailyReportSettings();
@@ -1163,22 +1152,78 @@ namespace DBADash.Test
         }
 
         [TestMethod]
-        public void SendResult_SaysWhatEachChannelDid()
+        public void SendResult_SaysWhatHappenedForEachRecipient()
         {
             var result = new DailyReportRunner.SendResult();
             Assert.IsFalse(result.SentToAny);
-            Assert.AreEqual("The report has no notification channels.", result.ToString());
+            Assert.AreEqual("The report has no recipients.", result.ToString());
 
-            result.Channels.Add(new DailyReportRunner.ChannelSendResult { ChannelName = "Ops", Recipient = "ops@example.com", Sent = true, Detail = "2.0.0 OK queued as 1A2B " });
-            result.Channels.Add(new DailyReportRunner.ChannelSendResult { ChannelName = "DBAs", Detail = "the channel is in its disable window (Disable From / Disable To)" });
+            result.Recipients.Add(new DailyReportRunner.RecipientSendResult { Recipient = "ops@example.com", Sent = true, Detail = "2.0.0 OK queued as 1A2B " });
+            result.Recipients.Add(new DailyReportRunner.RecipientSendResult { Recipient = "dba@example.com", Detail = "Mailbox unavailable" });
 
             Assert.IsTrue(result.SentToAny);
             Assert.IsFalse(result.SentToAll);
-            Assert.AreEqual("DBAs", result.Failures.Single().ChannelName);
+            Assert.AreEqual("dba@example.com", result.Failures.Single().Recipient);
             Assert.AreEqual(
-                "Ops: accepted by the mail server for ops@example.com (2.0.0 OK queued as 1A2B)" + Environment.NewLine +
-                "DBAs: not sent - the channel is in its disable window (Disable From / Disable To)",
+                "ops@example.com: accepted by the mail server (2.0.0 OK queued as 1A2B)" + Environment.NewLine +
+                "dba@example.com: not sent - Mailbox unavailable",
                 result.ToString());
+        }
+
+        [TestMethod]
+        public void ConfigurationProblem_NeedsServerAndRecipients()
+        {
+            var config = new DailyReportConfig { ReportName = "R", Recipients = "ops@example.com" };
+            StringAssert.Contains(DailyReportRunner.ConfigurationProblem(config), "no email server");
+
+            config.EmailServerID = 1;
+            Assert.IsNull(DailyReportRunner.ConfigurationProblem(config));
+
+            config.Recipients = " ; ";
+            StringAssert.Contains(DailyReportRunner.ConfigurationProblem(config), "no recipients", "A migrated report has a server but no recipients");
+        }
+
+        [TestMethod]
+        public void BuildMessage_IsForOneRecipientWithHtmlTextAndCharts()
+        {
+            var server = new DBADash.Alert.EmailServer { From = "DBA Dash", FromEmail = "dbadash@example.com" };
+            var content = new DailyReportContent
+            {
+                Subject = "Daily report",
+                HtmlBody = "<p>Report <img src=\"cid:chart1\"></p>",
+                TextBody = "Report",
+                Images = new List<DailyReportImage> { new() { ContentId = "chart1", Png = new byte[] { 1, 2, 3 } } }
+            };
+
+            using var message = DailyReportRunner.BuildMessage(server, "Ops <ops@example.com>", content);
+
+            Assert.AreEqual("dbadash@example.com", message.From.Mailboxes.Single().Address);
+            Assert.AreEqual("DBA Dash", message.From.Mailboxes.Single().Name);
+            Assert.AreEqual("ops@example.com", message.To.Mailboxes.Single().Address, "Each recipient gets their own message");
+            Assert.AreEqual("Daily report", message.Subject);
+            Assert.AreEqual("Report", message.TextBody);
+            StringAssert.Contains(message.HtmlBody, "cid:chart1");
+            Assert.AreEqual("chart1", message.BodyParts.OfType<MimeKit.MimePart>().Single(p => p.ContentType.MimeType == "image/png").ContentId);
+        }
+
+        [TestMethod]
+        public void BuildMessage_PlainTextHasNoHtmlOrImages()
+        {
+            var server = new DBADash.Alert.EmailServer { FromEmail = "dbadash@example.com" };
+            var content = new DailyReportContent
+            {
+                Subject = "Daily report",
+                HtmlBody = "<p>Report</p>",
+                TextBody = "Report",
+                PlainTextOnly = true,
+                Images = new List<DailyReportImage> { new() { ContentId = "chart1", Png = new byte[] { 1 } } }
+            };
+
+            using var message = DailyReportRunner.BuildMessage(server, "ops@example.com", content);
+
+            Assert.AreEqual("Report", message.TextBody);
+            Assert.IsNull(message.HtmlBody);
+            Assert.IsFalse(message.BodyParts.OfType<MimeKit.MimePart>().Any(p => p.ContentType.MediaType == "image"));
         }
 
         // ---- AI summary ----

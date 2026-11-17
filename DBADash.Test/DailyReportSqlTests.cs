@@ -74,16 +74,16 @@ namespace DBADash.Test
             return Convert.ToInt32(cmd.ExecuteScalar());
         }
 
-        /// <summary>An email channel, as the GUI creates it</summary>
-        private static int AddEmailChannel(string name)
+        /// <summary>An email server.  The SMTP settings don't matter here - nothing is sent</summary>
+        private static int AddEmailServer(string name)
         {
             return Scalar($@"
-INSERT INTO Alert.NotificationChannel(NotificationChannelTypeID,ChannelName,ChannelDetails)
-VALUES(2,N'{name}',N'{{}}');
+INSERT INTO Alert.EmailServer(EmailServerName,ServerDetails)
+VALUES(N'{name}',N'{{}}');
 SELECT CAST(SCOPE_IDENTITY() AS INT);");
         }
 
-        private static DailyReportConfig NewReport(string name, params int[] channelIDs) => new()
+        private static DailyReportConfig NewReport(string name, int? emailServerID = null) => new()
         {
             ReportName = name,
             IsActive = true,
@@ -91,15 +91,17 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);");
             TimeZone = "UTC",
             ApplyToTagID = -1,
             ChangeThresholdPct = 50,
-            Channels = channelIDs.Select(id => new DailyReportChannelRef { NotificationChannelID = id }).ToList()
+            EmailServerID = emailServerID,
+            Recipients = "ops@example.com"
         };
 
         [TestMethod]
-        public void Save_AddsReportWithItsChannels()
+        public void Save_AddsReportWithItsServerAndRecipients()
         {
-            var channelID = AddEmailChannel("Save-Ops");
-            var config = NewReport("Save-Morning", channelID);
+            var serverID = AddEmailServer("Save-Ops");
+            var config = NewReport("Save-Morning", serverID);
             config.IncludePerformance = true;
+            config.Recipients = "a@example.com, b@example.com" + Environment.NewLine + " A@example.com ;";
 
             var id = DailyReportRepository.Save(ConnectionString, config);
 
@@ -108,56 +110,71 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);");
             Assert.AreEqual("Save-Morning", saved.ReportName);
             Assert.IsTrue(saved.IncludePerformance);
             Assert.AreEqual("{All}", saved.ScopeDescription);
-            CollectionAssert.AreEqual(new[] { channelID }, saved.ChannelIDs);
-            Assert.AreEqual("Save-Ops", saved.Channels.Single().ChannelName);
+            Assert.AreEqual(serverID, saved.EmailServerID);
+            Assert.AreEqual("Save-Ops", saved.EmailServerName);
+            Assert.AreEqual("a@example.com; b@example.com", saved.Recipients, "Stored without blanks or duplicates, separated by \"; \"");
+            CollectionAssert.AreEqual(new[] { "a@example.com", "b@example.com" }, saved.RecipientList);
         }
 
         [TestMethod]
-        public void Save_UpdateReplacesChannels()
+        public void Save_UpdateChangesServerAndRecipients()
         {
-            var first = AddEmailChannel("Upd-First");
-            var second = AddEmailChannel("Upd-Second");
+            var first = AddEmailServer("Upd-First");
+            var second = AddEmailServer("Upd-Second");
             var config = NewReport("Upd-Report", first);
             var id = DailyReportRepository.Save(ConnectionString, config);
 
             config = DailyReportRepository.GetReports(ConnectionString, id).Single();
-            config.Channels = new List<DailyReportChannelRef> { new() { NotificationChannelID = second } };
+            config.EmailServerID = second;
+            config.Recipients = "dba@example.com";
             config.ChangeThresholdPct = 75;
             DailyReportRepository.Save(ConnectionString, config);
 
             var saved = DailyReportRepository.GetReports(ConnectionString, id).Single();
-            CollectionAssert.AreEqual(new[] { second }, saved.ChannelIDs);
+            Assert.AreEqual(second, saved.EmailServerID);
+            Assert.AreEqual("Upd-Second", saved.EmailServerName);
+            Assert.AreEqual("dba@example.com", saved.Recipients);
             Assert.AreEqual(75, saved.ChangeThresholdPct);
         }
 
         [TestMethod]
         public void Save_RejectsDuplicateName()
         {
-            var channelID = AddEmailChannel("Dup-Ops");
-            DailyReportRepository.Save(ConnectionString, NewReport("Dup-Name", channelID));
-            Assert.ThrowsExactly<SqlException>(() => DailyReportRepository.Save(ConnectionString, NewReport("Dup-Name", channelID)));
+            var serverID = AddEmailServer("Dup-Ops");
+            DailyReportRepository.Save(ConnectionString, NewReport("Dup-Name", serverID));
+            Assert.ThrowsExactly<SqlException>(() => DailyReportRepository.Save(ConnectionString, NewReport("Dup-Name", serverID)));
         }
 
         [TestMethod]
         public void Save_RejectsUnknownTimeZone()
         {
-            var channelID = AddEmailChannel("Tz-Ops");
-            var config = NewReport("Tz-Report", channelID);
+            var serverID = AddEmailServer("Tz-Ops");
+            var config = NewReport("Tz-Report", serverID);
             config.TimeZone = "Not/AZone";
             Assert.ThrowsExactly<SqlException>(() => DailyReportRepository.Save(ConnectionString, config));
         }
 
         [TestMethod]
-        public void Save_RequiresAChannel()
+        public void Save_RequiresAnEmailServer()
         {
-            Assert.ThrowsExactly<SqlException>(() => DailyReportRepository.Save(ConnectionString, NewReport("No-Channel")));
+            var ex = Assert.ThrowsExactly<SqlException>(() => DailyReportRepository.Save(ConnectionString, NewReport("No-Server")));
+            StringAssert.Contains(ex.Message, "email server");
+        }
+
+        [TestMethod]
+        public void Save_RequiresRecipients()
+        {
+            var config = NewReport("No-Recipients", AddEmailServer("NoRcpt-Ops"));
+            config.Recipients = " ; ";
+            var ex = Assert.ThrowsExactly<SqlException>(() => DailyReportRepository.Save(ConnectionString, config));
+            StringAssert.Contains(ex.Message, "email address");
         }
 
         [TestMethod]
         public void Claim_ReturnsDueReportOncePerDay()
         {
-            var channelID = AddEmailChannel("Claim-Ops");
-            var id = DailyReportRepository.Save(ConnectionString, NewReport("Claim-Daily", channelID)); // 00:00 UTC has always passed
+            var serverID = AddEmailServer("Claim-Ops");
+            var id = DailyReportRepository.Save(ConnectionString, NewReport("Claim-Daily", serverID)); // 00:00 UTC has always passed
             CreatedYesterday(id);
 
             var first = DailyReportRepository.ClaimDueReports(ConnectionString);
@@ -177,20 +194,20 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);");
         [TestMethod]
         public void Claim_NewReportAfterSendTimeWaitsForTomorrow()
         {
-            var channelID = AddEmailChannel("New-Ops");
-            var id = DailyReportRepository.Save(ConnectionString, NewReport("New-Report", channelID)); // created after 00:00 today
+            var serverID = AddEmailServer("New-Ops");
+            var id = DailyReportRepository.Save(ConnectionString, NewReport("New-Report", serverID)); // created after 00:00 today
             CollectionAssert.DoesNotContain(DailyReportRepository.ClaimDueReports(ConnectionString), id);
         }
 
         [TestMethod]
         public void Claim_OnlyOnTheSelectedDays()
         {
-            var channelID = AddEmailChannel("Days-Ops");
+            var serverID = AddEmailServer("Days-Ops");
             var today = DailyReportConfig.DayBit(DateTime.UtcNow.DayOfWeek); // the reports are in UTC
-            var notToday = NewReport("Days-NotToday", channelID);
+            var notToday = NewReport("Days-NotToday", serverID);
             notToday.DaysOfWeek = DailyReportConfig.AllDays & ~today;
             var notTodayID = DailyReportRepository.Save(ConnectionString, notToday);
-            var todayOnly = NewReport("Days-Today", channelID);
+            var todayOnly = NewReport("Days-Today", serverID);
             todayOnly.DaysOfWeek = today;
             var todayID = DailyReportRepository.Save(ConnectionString, todayOnly);
             CreatedYesterday(notTodayID);
@@ -205,8 +222,8 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);");
         [TestMethod]
         public void Claim_RepeatingReportOncePerSlot()
         {
-            var channelID = AddEmailChannel("Repeat-Ops");
-            var report = NewReport("Repeat-Report", channelID);
+            var serverID = AddEmailServer("Repeat-Ops");
+            var report = NewReport("Repeat-Report", serverID);
             report.IntervalMinutes = 15;
             var id = DailyReportRepository.Save(ConnectionString, report);
             CreatedYesterday(id);
@@ -224,8 +241,8 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);");
         public void Claim_RepeatingReportStopsAtTheEndTime()
         {
             if (DateTime.UtcNow.TimeOfDay < TimeSpan.FromMinutes(20)) Assert.Inconclusive("Needs a run earlier today, after 00:00 UTC");
-            var channelID = AddEmailChannel("Window-Ops");
-            var report = NewReport("Window-Report", channelID);
+            var serverID = AddEmailServer("Window-Ops");
+            var report = NewReport("Window-Report", serverID);
             report.IntervalMinutes = 15;
             report.WindowEndTime = TimeSpan.Zero; // one slot: 00:00
             var id = DailyReportRepository.Save(ConnectionString, report);
@@ -239,8 +256,8 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);");
         [TestMethod]
         public void Claim_NotWhileTheLastRunIsInProgress()
         {
-            var channelID = AddEmailChannel("Busy-Ops");
-            var report = NewReport("Busy-Report", channelID);
+            var serverID = AddEmailServer("Busy-Ops");
+            var report = NewReport("Busy-Report", serverID);
             report.IntervalMinutes = 15;
             var id = DailyReportRepository.Save(ConnectionString, report);
             CreatedYesterday(id);
@@ -261,11 +278,11 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);");
         [TestMethod]
         public void Save_RejectsNoDaysAndBadInterval()
         {
-            var channelID = AddEmailChannel("Bad-Ops");
-            var noDays = NewReport("Bad-NoDays", channelID);
+            var serverID = AddEmailServer("Bad-Ops");
+            var noDays = NewReport("Bad-NoDays", serverID);
             noDays.DaysOfWeek = 0;
             Assert.ThrowsExactly<SqlException>(() => DailyReportRepository.Save(ConnectionString, noDays));
-            var tooOften = NewReport("Bad-Interval", channelID);
+            var tooOften = NewReport("Bad-Interval", serverID);
             tooOften.IntervalMinutes = 5;
             Assert.ThrowsExactly<SqlException>(() => DailyReportRepository.Save(ConnectionString, tooOften));
         }
@@ -273,8 +290,8 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);");
         [TestMethod]
         public void Save_KeepsTypeAndScheduleAndDropsEndTimeWithoutInterval()
         {
-            var channelID = AddEmailChannel("Type-Ops");
-            var report = NewReport("Type-Report", channelID);
+            var serverID = AddEmailServer("Type-Ops");
+            var report = NewReport("Type-Report", serverID);
             report.ReportType = DailyReportType.Changes;
             report.WindowEndTime = new TimeSpan(18, 0, 0); // no interval, so no end time
             var id = DailyReportRepository.Save(ConnectionString, report);
@@ -287,8 +304,8 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);");
         [TestMethod]
         public void Claim_RetriesARunThatSentNothing()
         {
-            var channelID = AddEmailChannel("Retry-Ops");
-            var id = DailyReportRepository.Save(ConnectionString, NewReport("Retry-Report", channelID));
+            var serverID = AddEmailServer("Retry-Ops");
+            var id = DailyReportRepository.Save(ConnectionString, NewReport("Retry-Report", serverID));
             CreatedYesterday(id);
             CollectionAssert.Contains(DailyReportRepository.ClaimDueReports(ConnectionString), id);
             DailyReportRepository.SetRunResult(ConnectionString, id, "SMTP down", retry: true);
@@ -310,8 +327,8 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);");
         {
             // The claim is backdated 61 minutes, which must still be today (after the 00:00 slot)
             if (DateTime.UtcNow.TimeOfDay < TimeSpan.FromMinutes(65)) Assert.Inconclusive("Needs a claim earlier today, after 00:00 UTC");
-            var channelID = AddEmailChannel("Died-Ops");
-            var id = DailyReportRepository.Save(ConnectionString, NewReport("Died-Report", channelID));
+            var serverID = AddEmailServer("Died-Ops");
+            var id = DailyReportRepository.Save(ConnectionString, NewReport("Died-Report", serverID));
             CreatedYesterday(id);
             CollectionAssert.Contains(DailyReportRepository.ClaimDueReports(ConnectionString), id);
 
@@ -328,8 +345,8 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);");
         [TestMethod]
         public void RunLock_SendNowAndScheduledRunsDontOverlap()
         {
-            var channelID = AddEmailChannel("Lock-Ops");
-            var id = DailyReportRepository.Save(ConnectionString, NewReport("Lock-Report", channelID));
+            var serverID = AddEmailServer("Lock-Ops");
+            var id = DailyReportRepository.Save(ConnectionString, NewReport("Lock-Report", serverID));
             CreatedYesterday(id);
 
             var lockUtc = DailyReportRepository.AcquireRunLock(ConnectionString, id);
@@ -351,8 +368,8 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);");
         {
             // Backdating the last run 20 minutes must stay today, or it's in yesterday and today's 00:00 run is rightly due
             if (DateTime.UtcNow.TimeOfDay < TimeSpan.FromMinutes(25)) Assert.Inconclusive("Needs a run earlier today, after 00:00 UTC");
-            var channelID = AddEmailChannel("Partial-Ops");
-            var id = DailyReportRepository.Save(ConnectionString, NewReport("Partial-Report", channelID));
+            var serverID = AddEmailServer("Partial-Ops");
+            var id = DailyReportRepository.Save(ConnectionString, NewReport("Partial-Report", serverID));
             CreatedYesterday(id);
             DailyReportRepository.ClaimDueReports(ConnectionString);
             DailyReportRepository.SetRunResult(ConnectionString, id, "One channel failed", retry: false);
@@ -394,8 +411,8 @@ INSERT INTO dbo.Deadlocks(InstanceID,EventTime,DeadlockHash) VALUES({instanceID}
         [TestMethod]
         public void Save_KeepsSettings()
         {
-            var channelID = AddEmailChannel("Settings-Ops");
-            var config = NewReport("Settings-Report", channelID);
+            var serverID = AddEmailServer("Settings-Ops");
+            var config = NewReport("Settings-Report", serverID);
             config.Settings.BaselineWeeks = 3;
             config.Settings.IncludeAISummary = true;
             config.Settings.MetricSettings["Deadlocks"] = new PerformanceMetricSetting { Enabled = false, MinChange = 2 };
@@ -410,8 +427,8 @@ INSERT INTO dbo.Deadlocks(InstanceID,EventTime,DeadlockHash) VALUES({instanceID}
         [TestMethod]
         public void SendResult_RecordedWithoutTouchingTheSchedule()
         {
-            var channelID = AddEmailChannel("SendRes-Ops");
-            var id = DailyReportRepository.Save(ConnectionString, NewReport("SendRes-Report", channelID));
+            var serverID = AddEmailServer("SendRes-Ops");
+            var id = DailyReportRepository.Save(ConnectionString, NewReport("SendRes-Report", serverID));
 
             DailyReportRepository.SetSendResult(ConnectionString, id, false, "Ops: not sent - SMTP down");
             var failed = DailyReportRepository.GetReports(ConnectionString, id).Single();
@@ -428,8 +445,8 @@ INSERT INTO dbo.Deadlocks(InstanceID,EventTime,DeadlockHash) VALUES({instanceID}
         [TestMethod]
         public void IssueState_NewOngoingResolved()
         {
-            var channelID = AddEmailChannel("State-Ops");
-            var id = DailyReportRepository.Save(ConnectionString, NewReport("State-Report", channelID));
+            var serverID = AddEmailServer("State-Ops");
+            var id = DailyReportRepository.Save(ConnectionString, NewReport("State-Report", serverID));
             var day1 = new DateTime(2026, 11, 10, 8, 0, 0);
             var day2 = day1.AddDays(1);
 
@@ -480,8 +497,8 @@ VALUES(@ID,5,'Counter','KeyA',N'first',N'not acknowledged','2026-11-13T08:00:00'
         [TestMethod]
         public void IssueState_ReconciledKeyKeepsFirstSeenAcrossRuns()
         {
-            var channelID = AddEmailChannel("Recon-Ops");
-            var id = DailyReportRepository.Save(ConnectionString, NewReport("Recon-Report", channelID));
+            var serverID = AddEmailServer("Recon-Ops");
+            var id = DailyReportRepository.Save(ConnectionString, NewReport("Recon-Report", serverID));
             var drive = IssueHistory.ObjectKey("Drive space", "SQL1", "C:");
             var instanceOnly = IssueHistory.ObjectKey("Drive space", "SQL1", string.Empty);
             var day1 = new DateTime(2026, 11, 10, 8, 0, 0);
@@ -496,8 +513,8 @@ VALUES(@ID,5,'Counter','KeyA',N'first',N'not acknowledged','2026-11-13T08:00:00'
         [TestMethod]
         public void IssueState_KeepsKeysWhoseSourceCouldNotBeRead()
         {
-            var channelID = AddEmailChannel("Keep-Ops");
-            var id = DailyReportRepository.Save(ConnectionString, NewReport("Keep-Report", channelID));
+            var serverID = AddEmailServer("Keep-Ops");
+            var id = DailyReportRepository.Save(ConnectionString, NewReport("Keep-Report", serverID));
             var alert = IssueHistory.AlertKey("SQL1", "CPU");
             var run = new DateTime(2026, 11, 10, 8, 0, 0);
             IssueHistoryRepository.Compare(ConnectionString, id, new[] { new ReportIssue(alert, "CPU", 10), new ReportIssue("chk|x|SQL1", "X", 1) }, run, update: true);
@@ -629,8 +646,8 @@ INSERT INTO dbo.InstanceIDsTags(InstanceID,TagID) SELECT InstanceID, @DR FROM db
         [TestMethod]
         public void IssueState_TracksStatusForWorseAndBetter()
         {
-            var channelID = AddEmailChannel("Sev-Ops");
-            var id = DailyReportRepository.Save(ConnectionString, NewReport("Sev-Report", channelID));
+            var serverID = AddEmailServer("Sev-Ops");
+            var id = DailyReportRepository.Save(ConnectionString, NewReport("Sev-Report", serverID));
             var run1 = new DateTime(2026, 11, 10, 8, 0, 0);
             IssueHistoryRepository.Compare(ConnectionString, id, new[] { new ReportIssue("up", "Up", 2), new ReportIssue("down", "Down", 1), new ReportIssue("perf", "Perf") }, run1, update: true);
 
@@ -645,8 +662,8 @@ INSERT INTO dbo.InstanceIDsTags(InstanceID,TagID) SELECT InstanceID, @DR FROM db
         [TestMethod]
         public void IssueState_RunWithNoIssuesStillCountsAsARun()
         {
-            var channelID = AddEmailChannel("Empty-Ops");
-            var id = DailyReportRepository.Save(ConnectionString, NewReport("Empty-Report", channelID));
+            var serverID = AddEmailServer("Empty-Ops");
+            var id = DailyReportRepository.Save(ConnectionString, NewReport("Empty-Report", serverID));
             IssueHistoryRepository.Compare(ConnectionString, id, Array.Empty<ReportIssue>(), new DateTime(2026, 11, 10, 8, 0, 0), update: true);
             var next = IssueHistoryRepository.Compare(ConnectionString, id, new[] { new ReportIssue("z", "Z") }, new DateTime(2026, 11, 11, 8, 0, 0), update: false);
             Assert.IsFalse(next.IsFirstRun);
@@ -712,8 +729,8 @@ VALUES({instanceID},'2026-11-11T15:00:00',@Stmt,0x01,10,20000000,20000000,500,73
         [TestMethod]
         public void Claim_IgnoresInactiveReports()
         {
-            var channelID = AddEmailChannel("Inactive-Ops");
-            var config = NewReport("Inactive-Report", channelID);
+            var serverID = AddEmailServer("Inactive-Ops");
+            var config = NewReport("Inactive-Report", serverID);
             config.IsActive = false;
             var id = DailyReportRepository.Save(ConnectionString, config);
 
@@ -723,8 +740,8 @@ VALUES({instanceID},'2026-11-11T15:00:00',@Stmt,0x01,10,20000000,20000000,500,73
         [TestMethod]
         public void RunResult_RecordsAndClearsError()
         {
-            var channelID = AddEmailChannel("Result-Ops");
-            var id = DailyReportRepository.Save(ConnectionString, NewReport("Result-Report", channelID));
+            var serverID = AddEmailServer("Result-Ops");
+            var id = DailyReportRepository.Save(ConnectionString, NewReport("Result-Report", serverID));
 
             DailyReportRepository.SetRunResult(ConnectionString, id, "SMTP down");
             Assert.AreEqual("SMTP down", DailyReportRepository.GetReports(ConnectionString, id).Single().LastRunError);
@@ -734,31 +751,32 @@ VALUES({instanceID},'2026-11-11T15:00:00',@Stmt,0x01,10,20000000,20000000,500,73
         }
 
         [TestMethod]
-        public void Delete_RemovesReportAndChannelLinks()
+        public void Delete_RemovesReportAndIssueState()
         {
-            var channelID = AddEmailChannel("Del-Ops");
-            var id = DailyReportRepository.Save(ConnectionString, NewReport("Del-Report", channelID));
+            var serverID = AddEmailServer("Del-Ops");
+            var id = DailyReportRepository.Save(ConnectionString, NewReport("Del-Report", serverID));
             Exec($"INSERT INTO dbo.DailyReportIssueState(DailyReportID,IssueKey,Description,FirstSeenUTC,LastSeenUTC) VALUES({id},N'K',N'D',SYSUTCDATETIME(),SYSUTCDATETIME())");
 
             DailyReportRepository.Delete(ConnectionString, id);
 
             Assert.AreEqual(0, DailyReportRepository.GetReports(ConnectionString, id).Count);
-            Assert.AreEqual(0, Scalar($"SELECT COUNT(*) FROM dbo.DailyReportChannel WHERE DailyReportID = {id}"));
             Assert.AreEqual(0, Scalar($"SELECT COUNT(*) FROM dbo.DailyReportIssueState WHERE DailyReportID = {id}"));
         }
 
         [TestMethod]
-        public void DeletingChannel_RemovesItFromReports()
+        public void DeletingEmailServer_RefusedWhileAReportUsesIt()
         {
-            var keep = AddEmailChannel("ChDel-Keep");
-            var drop = AddEmailChannel("ChDel-Drop");
-            var id = DailyReportRepository.Save(ConnectionString, NewReport("ChDel-Report", keep, drop));
+            var serverID = AddEmailServer("SrvDel-Ops");
+            var id = DailyReportRepository.Save(ConnectionString, NewReport("SrvDel-Report", serverID));
 
-            Exec($"EXEC Alert.NotificationChannel_Del @NotificationChannelID = {drop}");
+            var ex = Assert.ThrowsExactly<SqlException>(() => Exec($"EXEC Alert.EmailServer_Del @EmailServerID = {serverID}"));
+            StringAssert.Contains(ex.Message, "daily reports");
+            Assert.AreEqual(1, Scalar($"SELECT COUNT(*) FROM Alert.EmailServer WHERE EmailServerID = {serverID}"));
+            Assert.AreEqual(1, Scalar($"SELECT ReportCount FROM (SELECT COUNT(*) AS ReportCount FROM dbo.DailyReport WHERE EmailServerID = {serverID}) X"));
 
-            Assert.AreEqual(0, Scalar($"SELECT COUNT(*) FROM Alert.NotificationChannel WHERE NotificationChannelID = {drop}"));
-            Assert.AreEqual(1, Scalar($"SELECT COUNT(*) FROM dbo.DailyReportChannel WHERE DailyReportID = {id} AND NotificationChannelID = {keep}"));
-            Assert.AreEqual(0, Scalar($"SELECT COUNT(*) FROM dbo.DailyReportChannel WHERE NotificationChannelID = {drop}"));
+            DailyReportRepository.Delete(ConnectionString, id);
+            Exec($"EXEC Alert.EmailServer_Del @EmailServerID = {serverID}");
+            Assert.AreEqual(0, Scalar($"SELECT COUNT(*) FROM Alert.EmailServer WHERE EmailServerID = {serverID}"), "Deleted once nothing uses it");
         }
 
         [TestMethod]

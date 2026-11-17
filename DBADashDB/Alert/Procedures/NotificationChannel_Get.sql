@@ -42,7 +42,8 @@ SELECT	NC.NotificationChannelID,
 			WHEN NC.LastFailedNotification > DATEADD(d,-3,SYSUTCDATETIME()) THEN 2  ELSE 4 END AS LastFailureStatus,
 		NC.AcknowledgedNotification,
 		NC.GroupID,
-		G.GroupName
+		G.GroupName,
+		NC.EmailServerID
 FROM Alert.NotificationChannel NC 
 JOIN Alert.NotificationChannelType NCT ON NC.NotificationChannelTypeID = NCT.NotificationChannelTypeID
 LEFT JOIN Alert.NotificationChannelGroup G ON NC.GroupID = G.GroupID

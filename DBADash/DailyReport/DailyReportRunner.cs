@@ -1,5 +1,6 @@
-using DBADashGUI.DBADashAlerts;
+using DBADash.Alert;
 using Microsoft.Data.SqlClient;
+using MimeKit;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -178,76 +179,146 @@ namespace DBADash.DailyReport
             }
         }
 
-        /// <summary>What happened on one channel: the address it went to and the mail server's reply, or why it wasn't sent</summary>
-        public class ChannelSendResult
+        /// <summary>What happened for one recipient: the mail server's reply, or why it wasn't sent</summary>
+        public class RecipientSendResult
         {
-            public string ChannelName { get; init; }
             public string Recipient { get; init; }
             public bool Sent { get; init; }
             /// <summary>The server's reply when sent (e.g. "2.0.0 OK queued as 1A2B"), otherwise the reason it wasn't</summary>
             public string Detail { get; init; }
 
             public override string ToString() => Sent
-                ? $"{ChannelName}: accepted by the mail server for {Recipient}{(string.IsNullOrWhiteSpace(Detail) ? string.Empty : $" ({Detail.Trim()})")}"
-                : $"{ChannelName}: not sent - {Detail}";
+                ? $"{Recipient}: accepted by the mail server{(string.IsNullOrWhiteSpace(Detail) ? string.Empty : $" ({Detail.Trim()})")}"
+                : $"{Recipient}: not sent - {Detail}";
         }
 
         public class SendResult
         {
-            public List<ChannelSendResult> Channels { get; } = new();
-            public bool SentToAll => Channels.Count > 0 && Channels.All(c => c.Sent);
-            public bool SentToAny => Channels.Any(c => c.Sent);
-            public List<ChannelSendResult> Failures => Channels.Where(c => !c.Sent).ToList();
+            public List<RecipientSendResult> Recipients { get; } = new();
+            public bool SentToAll => Recipients.Count > 0 && Recipients.All(r => r.Sent);
+            public bool SentToAny => Recipients.Any(r => r.Sent);
+            public List<RecipientSendResult> Failures => Recipients.Where(r => !r.Sent).ToList();
 
-            /// <summary>One line per channel, as recorded on the report (LastSendResult)</summary>
-            public override string ToString() => Channels.Count == 0
-                ? "The report has no notification channels."
-                : string.Join(Environment.NewLine, Channels);
+            /// <summary>One line per recipient, as recorded on the report (LastSendResult)</summary>
+            public override string ToString() => Recipients.Count == 0
+                ? "The report has no recipients."
+                : string.Join(Environment.NewLine, Recipients);
         }
 
         /// <summary>
-        /// Sends the content to every channel of the report.  Never throws: each channel's outcome is in the result, with the mail server's
-        /// reply for the ones that were sent, so "the server accepted it" can be told apart from "it never left".
+        /// Sends the content to each recipient of the report, as a separate email, through the report's email server.  Never throws: each
+        /// recipient's outcome is in the result, with the mail server's reply for the ones that were sent, so "the server accepted it" can be
+        /// told apart from "it never left".
         /// </summary>
         public static async Task<SendResult> SendAsync(DailyReportConfig config, DailyReportContent content, string repositoryConnectionString)
         {
             var result = new SendResult();
-            foreach (var channelRef in config.Channels)
+            var recipients = config.RecipientList;
+            if (recipients.Count == 0) return result;
+
+            EmailServer server;
+            try
             {
-                try
+                if (config.EmailServerID == null)
                 {
-                    // Loaded now rather than trusting the report's copy: building the report can take minutes, and a disable window can start or end meanwhile
-                    var channel = NotificationChannelBase.GetChannel(channelRef.NotificationChannelID, repositoryConnectionString);
-                    if (IsInDisableWindow(channel.DisableFrom, channel.DisableTo, DateTime.UtcNow))
+                    throw new InvalidOperationException("The report has no email server. Edit the report and select one.");
+                }
+                // Loaded now rather than when the report was read: building the report can take minutes, and the server can be edited meanwhile
+                server = EmailServer.GetServer(config.EmailServerID.Value, repositoryConnectionString);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Daily report {ReportName}: email server not available", config.ReportName);
+                result.Recipients.AddRange(recipients.Select(r => new RecipientSendResult { Recipient = r, Detail = ex.Message }));
+                return result;
+            }
+
+            // One SMTP session for all of them, rather than a connection and login per recipient
+            EmailServer.Connection connection = null;
+            try
+            {
+                for (var i = 0; i < recipients.Count; i++)
+                {
+                    var recipient = recipients[i];
+                    if (connection == null)
                     {
-                        result.Channels.Add(new ChannelSendResult { ChannelName = channelRef.ChannelName, Detail = "the channel is in its disable window (Disable From / Disable To)" });
-                        continue;
+                        try
+                        {
+                            connection = await server.ConnectAsync();
+                        }
+                        catch (Exception ex)
+                        {
+                            // Can't reach the server or log in: the rest would fail the same way, each after the same wait
+                            Log.Error(ex, "Daily report {ReportName}: could not connect to the email server", config.ReportName);
+                            result.Recipients.AddRange(recipients.Skip(i).Select(r => new RecipientSendResult { Recipient = r, Detail = ex.Message }));
+                            break;
+                        }
                     }
-                    if (channel is not DBADash.Alert.EmailNotificationChannel email)
+
+                    MimeMessage message;
+                    try
                     {
-                        result.Channels.Add(new ChannelSendResult { ChannelName = channelRef.ChannelName, Detail = $"{channelRef.ChannelType} channels can't receive daily reports yet - use an Email channel" });
+                        message = BuildMessage(server, recipient, content);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex, "Daily report {ReportName}: not sent to {Recipient}", config.ReportName, recipient);
+                        result.Recipients.Add(new RecipientSendResult { Recipient = recipient, Detail = ex.Message });
                         continue;
                     }
 
-                    // Plain text only: no HTML part and no images, so every client shows the text as it is
-                    var reply = await email.SendDailyReportAsync(content.Subject, content.PlainTextOnly ? null : content.HtmlBody, content.TextBody,
-                        content.PlainTextOnly ? null : content.Images.Select(i => (i.ContentId, i.Png)));
-                    Log.Information("Daily report {ReportName} sent to channel {ChannelName} ({Recipient}). Server reply: {Reply}",
-                        config.ReportName, channelRef.ChannelName, email.ToEmail, reply);
-                    result.Channels.Add(new ChannelSendResult { ChannelName = channelRef.ChannelName, Recipient = email.ToEmail, Sent = true, Detail = reply });
+                    using (message)
+                    {
+                        try
+                        {
+                            var reply = await connection.SendAsync(message);
+                            Log.Information("Daily report {ReportName} sent to {Recipient}. Server reply: {Reply}", config.ReportName, recipient, reply);
+                            result.Recipients.Add(new RecipientSendResult { Recipient = recipient, Sent = true, Detail = reply });
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error(ex, "Daily report {ReportName} failed for {Recipient}", config.ReportName, recipient);
+                            result.Recipients.Add(new RecipientSendResult { Recipient = recipient, Detail = ex.Message });
+                            // The session may not be usable after a failure, so the next recipient starts a new one
+                            await connection.DisposeAsync();
+                            connection = null;
+                        }
+                    }
                 }
-                catch (Exception ex)
+            }
+            finally
+            {
+                if (connection != null)
                 {
-                    Log.Error(ex, "Daily report {ReportName} failed for channel {ChannelName}", config.ReportName, channelRef.ChannelName);
-                    result.Channels.Add(new ChannelSendResult { ChannelName = channelRef.ChannelName, Detail = ex.Message });
+                    await connection.DisposeAsync();
                 }
             }
             return result;
         }
 
-        /// <summary>The same rule as alert notifications (Alert.Notifications_Get): disabled from DisableFrom (UTC) until DisableTo, or indefinitely</summary>
-        public static bool IsInDisableWindow(DateTime? disableFrom, DateTime? disableTo, DateTime nowUtc) =>
-            disableFrom <= nowUtc && (disableTo == null || disableTo >= nowUtc);
+        /// <summary>
+        /// The email for one recipient: HTML with a plain text alternative, with the charts as linked resources so they show in the body rather
+        /// than as attachments.  A plain text report has no HTML part and no images, so every client shows the text as it is.
+        /// </summary>
+        internal static MimeMessage BuildMessage(EmailServer server, string recipient, DailyReportContent content)
+        {
+            var message = new MimeMessage();
+            message.From.Add(new MailboxAddress(server.From, server.FromEmail));
+            message.To.Add(MailboxAddress.Parse(recipient));
+            message.Subject = content.Subject;
+            var builder = new BodyBuilder { TextBody = content.TextBody, HtmlBody = content.PlainTextOnly ? null : content.HtmlBody };
+            if (!content.PlainTextOnly)
+            {
+                var n = 0;
+                foreach (var image in content.Images)
+                {
+                    var resource = builder.LinkedResources.Add($"chart{++n}.png", image.Png, new ContentType("image", "png"));
+                    resource.ContentId = image.ContentId;
+                }
+            }
+            message.Body = builder.ToMessageBody();
+            return message;
+        }
 
         /// <summary>
         /// Send now from the GUI: build, send and record the send (LastSentUTC, LastSendResult) - but not as the scheduled run, so today's
@@ -258,6 +329,13 @@ namespace DBADash.DailyReport
         {
             // A Send now that records history (a changes report) takes the report's run lock, as a scheduled run does, so the two never overlap -
             // both build from the history and update it.  The scheduled run waits for the next check rather than being lost
+            // Checked before building, which can take minutes
+            var problem = ConfigurationProblem(config);
+            if (problem != null)
+            {
+                throw new InvalidOperationException(problem);
+            }
+
             DateTime? lockUtc = null;
             if (RecordsHistoryOnSendNow(config))
             {
@@ -299,38 +377,55 @@ namespace DBADash.DailyReport
         /// </summary>
         public static bool RecordsHistoryOnSendNow(DailyReportConfig config) => config.ReportType == DailyReportType.Changes && config.DailyReportID > 0;
 
+        /// <summary>Why the report can't be sent as it's set up, or null.  Only editing the report fixes it, so a run with a problem isn't retried</summary>
+        public static string ConfigurationProblem(DailyReportConfig config) =>
+            config.EmailServerID == null ? "The report has no email server. Edit the report and select one."
+            : config.RecipientList.Count == 0 ? "The report has no recipients. Edit the report and add at least one email address."
+            : null;
+
         /// <summary>
-        /// Scheduled run: build, send and record the result on the report.  Once the report has reached at least one channel its issues are
+        /// Scheduled run: build, send and record the result on the report.  Once the report has reached at least one recipient its issues are
         /// recorded as the last run's, so the next report can say what's new.  A changes report with nothing to say isn't sent, but its issues
         /// are recorded - on its first run that's the starting point it compares with.  Returns the error text, or null on success.
         /// </summary>
         public static async Task<string> RunScheduledAsync(DailyReportConfig config, string repositoryConnectionString, DateTime nowUtc, CancellationToken cancellationToken = default)
         {
             string error;
-            // Retry only when nothing was sent - a retry goes to every channel, so one that reached some recipients isn't repeated
+            // Retry only when nothing was sent - a retry goes to every recipient, so a report that reached some of them isn't repeated
             bool retry;
             try
             {
-                var built = await BuildAsync(config, repositoryConnectionString, nowUtc, cancellationToken);
-                if (built.Content.NothingToSend)
+                var problem = ConfigurationProblem(config);
+                if (problem != null)
                 {
-                    // Recording where things stand is all this run does, so it isn't optional: if it fails, the run fails and is retried.  Swallowing
-                    // it would leave a first run without its baseline, and the next run would quietly take its place
-                    Log.Information("Daily report {ReportName}: no changes to send", config.ReportName);
-                    IssueHistoryRepository.Compare(repositoryConnectionString, config.DailyReportID, built.Issues, nowUtc, update: true, built.KeepKeyPrefix);
-                    error = null;
+                    // Nothing can be sent until the report is edited: building it would take minutes for nothing, and a retry can't help
+                    Log.Warning("Daily report {ReportName} not run: {Problem}", config.ReportName, problem);
+                    error = problem;
                     retry = false;
                 }
                 else
                 {
-                    var result = await SendAsync(config, built.Content, repositoryConnectionString);
-                    RecordSend(config, repositoryConnectionString, result);
-                    error = result.SentToAll ? null : string.Join(Environment.NewLine, result.Channels.Count == 0 ? new List<string> { result.ToString() } : result.Failures.Select(f => f.ToString()));
-                    retry = !result.SentToAny;
-                    if (result.SentToAny)
+                    var built = await BuildAsync(config, repositoryConnectionString, nowUtc, cancellationToken);
+                    if (built.Content.NothingToSend)
                     {
-                        // Once sent, a failure to record the history can't unsend it - CompareHistory logs it and the run still counts as sent
-                        CompareHistory(config, repositoryConnectionString, built.Issues, nowUtc, update: true, built.KeepKeyPrefix);
+                        // Recording where things stand is all this run does, so it isn't optional: if it fails, the run fails and is retried.  Swallowing
+                        // it would leave a first run without its baseline, and the next run would quietly take its place
+                        Log.Information("Daily report {ReportName}: no changes to send", config.ReportName);
+                        IssueHistoryRepository.Compare(repositoryConnectionString, config.DailyReportID, built.Issues, nowUtc, update: true, built.KeepKeyPrefix);
+                        error = null;
+                        retry = false;
+                    }
+                    else
+                    {
+                        var result = await SendAsync(config, built.Content, repositoryConnectionString);
+                        RecordSend(config, repositoryConnectionString, result);
+                        error = result.SentToAll ? null : string.Join(Environment.NewLine, result.Recipients.Count == 0 ? new List<string> { result.ToString() } : result.Failures.Select(f => f.ToString()));
+                        retry = !result.SentToAny;
+                        if (result.SentToAny)
+                        {
+                            // Once sent, a failure to record the history can't unsend it - CompareHistory logs it and the run still counts as sent
+                            CompareHistory(config, repositoryConnectionString, built.Issues, nowUtc, update: true, built.KeepKeyPrefix);
+                        }
                     }
                 }
             }
