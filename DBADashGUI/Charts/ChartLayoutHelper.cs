@@ -247,6 +247,8 @@ namespace DBADashGUI.Charts
             var panel = new Panel { Dock = DockStyle.Fill, Tag = tag };
             // set a stable Name for persistence. If caller supplied a name, use it; otherwise generate a GUID
             panel.Name = !string.IsNullOrEmpty(panelName) ? panelName : "panel_" + Guid.NewGuid().ToString("N");
+            // Every resize of the panel - the form, the splitters, a maximize - so the metric control inside always fills it
+            panel.SizeChanged += (_, _) => FitMetricControls(panel);
             var childTs = childControl.Controls.OfType<ToolStrip>().FirstOrDefault();
             var ts = childTs == null ? new ToolStrip() { Dock = DockStyle.Top } : childTs;
             var toggleButton = new ToolStripButton("+")
@@ -285,6 +287,32 @@ namespace DBADashGUI.Charts
             }
 
             return panel;
+        }
+
+        /// <summary>
+        /// Sets the metric control in a panel to fill the panel and redraws its charts.  Done explicitly rather than trusting
+        /// the docking, which left the metric controls at their old width after the form was resized.
+        /// </summary>
+        private static void FitMetricControls(Panel panel)
+        {
+            if (panel == null || panel.IsDisposed) return;
+            // Below any toolstrip docked to the top of the panel, which the docking has already placed
+            var top = panel.Controls.OfType<ToolStrip>().Where(t => t.Dock == DockStyle.Top && t.Visible).Sum(t => t.Height);
+            var client = panel.ClientRectangle;
+            var fill = new Rectangle(0, top, client.Width, Math.Max(0, client.Height - top));
+            foreach (Control child in panel.Controls.Cast<Control>().Where(c => c is not ToolStrip).ToList())
+            {
+                if (child.Bounds != fill)
+                {
+                    child.Bounds = fill;
+                }
+                child.PerformLayout();
+                foreach (var chart in ControlResizeHelper.FindChartControls(child).ToList())
+                {
+                    chart.Invalidate();
+                    chart.Update();
+                }
+            }
         }
 
         private void ToggleMaximize(Panel panel, ToolStripButton toggleButton)
@@ -385,21 +413,20 @@ namespace DBADashGUI.Charts
 
         private static void RefreshCharts(Panel pnl)
         {
+            if (pnl == null) return;
             pnl.BeginInvoke((Action)(() =>
             {
                 pnl.PerformLayout();
+                // The metric charts sit a level down, inside their UserControl - lay that out too, so the chart takes the
+                // panel's current width before it's redrawn.
                 foreach (Control child in pnl.Controls)
                 {
-                    if (child is LiveChartsCore.SkiaSharpView.WinForms.CartesianChart chart)
-                    {
-                        chart.Invalidate();
-                        chart.Update();
-                    }
-                    if (child is LiveChartsCore.SkiaSharpView.WinForms.PieChart pie)
-                    {
-                        pie.Invalidate();
-                        pie.Update();
-                    }
+                    child.PerformLayout();
+                }
+                foreach (var chart in ControlResizeHelper.FindChartControls(pnl).ToList())
+                {
+                    chart.Invalidate();
+                    chart.Update();
                 }
             }));
         }
