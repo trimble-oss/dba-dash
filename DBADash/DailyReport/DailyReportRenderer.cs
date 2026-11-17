@@ -797,10 +797,9 @@ namespace DBADash.DailyReport
                     .ThenBy(r => r.Item.Instance, StringComparer.OrdinalIgnoreCase)
                     .ThenBy(r => r.Item.ObjectName, StringComparer.OrdinalIgnoreCase)
                     .Select(r => (r.Item.Status, (string)null, r.IsNew, Name: r.Item.ObjectName, Server: r.Item.Instance, r.Item.Detail, r.Age));
-                // A database's name opens its backups; a drive or job opens the section with the server
-                var isDatabase = group.StartsWith("Backups", StringComparison.Ordinal);
+                // The name and the server both open the section on the server.  The backups tab can't select a database, so a database name doesn't narrow it
                 (string NameHref, string ServerHref) Hrefs(string name, string server) =>
-                    (sectionLink?.Invoke(group, server, isDatabase ? name : null), sectionLink?.Invoke(group, server, null));
+                    (sectionLink?.Invoke(group, server, null), sectionLink?.Invoke(group, server, null));
                 AppendItemTable(rows, objects.Count, html, text, Hrefs, sectionHref);
             }
 

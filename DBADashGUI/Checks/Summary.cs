@@ -640,7 +640,9 @@ namespace DBADashGUI
         {
             var query = System.Web.HttpUtility.ParseQueryString(new Uri(link).Query);
             if (!Enum.TryParse(query["tab"], out Tabs tab)) return;
-            Instance_Selected?.Invoke(this, new InstanceSelectedEventArgs() { Instance = query["instance"], Database = query["database"], Tab = tab });
+            // Links without an instance are for the group this page shows (the root, or a tag group): the tab's node under it, such as its HA/DR
+            var instance = query["instance"];
+            Instance_Selected?.Invoke(this, new InstanceSelectedEventArgs() { Instance = instance, Database = query["database"], Tab = tab, GroupLevel = string.IsNullOrEmpty(instance) });
         }
 
         private void TsReport_Click(object sender, EventArgs e)

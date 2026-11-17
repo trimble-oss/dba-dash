@@ -44,6 +44,9 @@ namespace DBADashGUI
             public Tabs? Tab;
             public string Database;
             public bool SearchFromRoot = false;
+
+            /// <summary>With no instance, stay on the selected node (the group the Summary page shows) rather than moving up from it</summary>
+            public bool GroupLevel = false;
         }
 
         private void RefreshAllowedTabsForCurrentNode()
@@ -2787,7 +2790,15 @@ namespace DBADashGUI
 
             if (e.InstanceID <= 0 && string.IsNullOrEmpty(e.Instance)) // No Instance - Use root Level
             {
-                nInstance = root.Type == SQLTreeItem.TreeType.DBADashRoot ? root : root.Parent.AsSQLTreeItem();
+                // Group level: the root or tag group the page is for.  The Summary page can be on the Checks node under that group, so go up to it
+                if (e.GroupLevel)
+                {
+                    nInstance = root.Type == SQLTreeItem.TreeType.DBAChecks ? root.Parent.AsSQLTreeItem() : root;
+                }
+                else
+                {
+                    nInstance = root.Type == SQLTreeItem.TreeType.DBADashRoot ? root : root.Parent.AsSQLTreeItem();
+                }
             }
             else
             {

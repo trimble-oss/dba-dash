@@ -430,9 +430,38 @@ namespace DBADash.DailyReport
                 // Nothing to look up: Azure SQL DB rows are still named by their server
                 ApplyDisplayNames(table, new Dictionary<int, string>());
             }
-            var objectIssues = instanceIDs.Count > 0 ? DailyReportRepository.GetObjectIssues(connectionString, instanceList) : new List<DailyReportIssue>();
+            var objectIssues = instanceIDs.Count > 0 ? GetSummaryObjectIssues(connectionString, instanceList) : new List<DailyReportIssue>();
             var config = new DailyReportConfig { ReportName = "Summary", ScopeDescription = scopeDescription, TimeZone = timeZone };
             return DailyReportRenderer.Render(config, nowUtc, scopeDescription, table, objectIssues, null, timeZone, new DailyReportExtras { SectionLink = sectionLink, Interactive = true });
+        }
+
+        /// <summary>How old the object problems for the summary page's report can be before they're read again.  Matches the summary's own refresh tolerance</summary>
+        private static readonly TimeSpan SummaryObjectIssuesMaxAge = TimeSpan.FromMinutes(1);
+
+        private static readonly object SummaryObjectIssuesLock = new();
+        private static (string Key, DateTime TakenUtc, List<DailyReportIssue> Issues) summaryObjectIssues;
+
+        /// <summary>
+        /// Object problems for the summary page's report.  Read from the database, but a copy read less than a minute ago for the same instances
+        /// is reused, so reports built together, or toggling the Report view, don't each query the database.  The report is never older than that.
+        /// </summary>
+        private static List<DailyReportIssue> GetSummaryObjectIssues(string connectionString, string instanceList)
+        {
+            var key = connectionString + "|" + instanceList;
+            lock (SummaryObjectIssuesLock)
+            {
+                var cached = summaryObjectIssues;
+                if (cached.Key == key && DateTime.UtcNow - cached.TakenUtc < SummaryObjectIssuesMaxAge)
+                {
+                    return cached.Issues;
+                }
+            }
+            var issues = DailyReportRepository.GetObjectIssues(connectionString, instanceList);
+            lock (SummaryObjectIssuesLock)
+            {
+                summaryObjectIssues = (key, DateTime.UtcNow, issues);
+            }
+            return issues;
         }
 
         private static DataTable GetSummary(string connectionString, string instanceList)
