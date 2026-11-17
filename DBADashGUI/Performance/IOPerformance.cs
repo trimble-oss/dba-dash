@@ -56,7 +56,8 @@ namespace DBADashGUI.Performance
         private void RenderChart()
         {
             if (lastChart is not { } chart) return;
-            ChartHelper.UpdateChart(chartIO, chart.Data, chart.Config, baseline.For("MBsec"));
+            var baselineLines = baseline.For("MBsec");
+            ChartHelper.UpdateChart(chartIO, chart.Data, chart.Config, baselineLines);
 
             // Store references to the axes for external access (e.g., DrivePerformance synchronization)
             var yAxesArray = chartIO.YAxes.ToArray();
@@ -64,7 +65,44 @@ namespace DBADashGUI.Performance
             MBsecAxis = chart.AxisIndexes.TryGetValue("MBsec", out var mbIdx) && mbIdx < yAxesArray.Length ? yAxesArray[mbIdx] as Axis : null;
             IOPsAxis = chart.AxisIndexes.TryGetValue("IOPs", out var iopsIdx) && iopsIdx < yAxesArray.Length ? yAxesArray[iopsIdx] as Axis : null;
             LatencyAxis = chart.AxisIndexes.TryGetValue("Latency", out var latIdx) && latIdx < yAxesArray.Length ? yAxesArray[latIdx] as Axis : null;
+
+            if (baselineLines != null) MatchBaselineToMBsec();
         }
+
+        /// <summary>
+        /// The baseline is drawn in a lighter shade of the MB/sec line so the two read as a pair.  The theme gives the MB/sec
+        /// line its colour when the chart is painted, so this waits for that, then redraws the baseline line in a lighter shade of it.
+        /// </summary>
+        private async void MatchBaselineToMBsec()
+        {
+            var chart = chartIO;
+            await ChartHelper.WaitForColorsToBeReady(chart, System.Threading.CancellationToken.None);
+            if (IsDisposed || chart.IsDisposed || !Columns.TryGetValue("MBsec", out var mb)) return;
+
+            // Not matched if the MB/sec line still isn't painted, or the chart has been redrawn since
+            var colors = ChartHelper.ExtractColorsFromChart(chart);
+            if (!colors.TryGetValue(mb.Name, out var mbColor) || mbColor == SkiaSharp.SKColors.Gray) return;
+            var baselineColor = LighterShade(mbColor, 0.45);
+
+            foreach (var series in chart.Series)
+            {
+                if (series is LiveChartsCore.Kernel.Sketches.ILineSeries line && series.Name?.StartsWith("Baseline", StringComparison.Ordinal) == true)
+                {
+                    line.Stroke = new LiveChartsCore.SkiaSharpView.Painting.SolidColorPaint(baselineColor)
+                    {
+                        StrokeThickness = 2,
+                        PathEffect = new LiveChartsCore.SkiaSharpView.Painting.Effects.DashEffect(new float[] { 6, 4 })
+                    };
+                }
+            }
+        }
+
+        /// <summary>A shade of <paramref name="color"/> moved <paramref name="amount"/> (0 to 1) of the way towards white</summary>
+        private static SkiaSharp.SKColor LighterShade(SkiaSharp.SKColor color, double amount) => new(
+            (byte)(color.Red + ((255 - color.Red) * amount)),
+            (byte)(color.Green + ((255 - color.Green) * amount)),
+            (byte)(color.Blue + ((255 - color.Blue) * amount)),
+            color.Alpha);
 
         private int mins;
         private int instanceID;
