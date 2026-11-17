@@ -1,5 +1,6 @@
 using LiveChartsCore.SkiaSharpView.WinForms;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Windows.Forms;
@@ -20,6 +21,9 @@ namespace DBADashGUI
         private int neighborRow;
         private Control resizingControl;
         private bool startedNearTopEdge = false;
+
+        // The charts this drag hid.  Only these are shown again - a chart hidden by its own error message stays hidden.
+        private readonly System.Collections.Generic.List<Control> chartsHiddenByDrag = new();
         private const int ResizeZoneHeight = 50;
         private const int MinimumHeight = 100;
         private const int ResizeSensitivity = 5;
@@ -262,6 +266,7 @@ namespace DBADashGUI
 
                     ShowChartsInRow(tableLayout, activeRow);
                     ShowChartsInRow(tableLayout, neighborRow);
+                    chartsHiddenByDrag.Clear();
                 }
 
                 resizingControl = null;
@@ -270,7 +275,13 @@ namespace DBADashGUI
 
         private void HideChartsInRow(TableLayoutPanel tableLayout, int row)
         {
-            ApplyToChartsInRow(tableLayout, row, (ctrl) => { ctrl.Visible = false; });
+            ApplyToChartsInRow(tableLayout, row, (ctrl) =>
+            {
+                // Only a chart that is showing now is hidden by the drag, so it's the only one shown again afterwards
+                if (!ctrl.Visible) return;
+                ctrl.Visible = false;
+                chartsHiddenByDrag.Add(ctrl);
+            });
         }
 
         private void ShowChartsInRow(TableLayoutPanel tableLayout, int row)
@@ -278,13 +289,35 @@ namespace DBADashGUI
             if (row >= tableLayout.RowCount) return;
             ApplyToChartsInRow(tableLayout, row, (ctrl) =>
             {
+                if (!chartsHiddenByDrag.Remove(ctrl)) return;
                 ctrl.Visible = true;
                 try { ctrl.Invalidate(true); } catch { }
                 try { ctrl.Refresh(); } catch { }
             });
         }
 
-        // Helper to apply an action to chart controls (Cartesian and Pie) in every column of a given row
+        /// <summary>
+        /// The LiveCharts controls (Cartesian and Pie) in a panel at any depth.  Metric charts (CPU, Blocking, IO...) are
+        /// a chart inside a UserControl inside the panel, so checking only the panel's direct children finds nothing for them.
+        /// </summary>
+        internal static IEnumerable<Control> FindChartControls(Control root)
+        {
+            if (root == null) yield break;
+            foreach (Control child in root.Controls)
+            {
+                if (child is CartesianChart || child is PieChart)
+                {
+                    yield return child;
+                    continue;
+                }
+                foreach (var nested in FindChartControls(child))
+                {
+                    yield return nested;
+                }
+            }
+        }
+
+        // Helper to apply an action to every chart control (Cartesian and Pie) in every column of a given row
         private static void ApplyToChartsInRow(TableLayoutPanel tableLayout, int row, Action<Control> action)
         {
             if (tableLayout == null || row < 0 || row >= tableLayout.RowCount || action == null) return;
@@ -294,16 +327,9 @@ namespace DBADashGUI
                 var control = tableLayout.GetControlFromPosition(col, row);
                 if (control is Panel panel)
                 {
-                    // Cartesian charts
-                    foreach (Control child in panel.Controls.OfType<CartesianChart>())
+                    foreach (var child in FindChartControls(panel).ToList())
                     {
-                        try { action(child); } catch (Exception ex) { Debug.WriteLine($"ApplyToChartsInRow: action failed on CartesianChart: {ex}"); }
-                    }
-
-                    // Pie charts (and other non-cartesian LiveCharts controls)
-                    foreach (Control child in panel.Controls.OfType<PieChart>())
-                    {
-                        try { action(child); } catch (Exception ex) { Debug.WriteLine($"ApplyToChartsInRow: action failed on PieChart: {ex}"); }
+                        try { action(child); } catch (Exception ex) { Debug.WriteLine($"ApplyToChartsInRow: action failed on {child.GetType().Name}: {ex}"); }
                     }
                 }
             }
