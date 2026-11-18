@@ -85,6 +85,15 @@ namespace DBADashGUI.Performance
 
         private int CompareOffset => int.Parse(SelectedCompareOffsetItem.Tag?.ToString() ?? "-1");
 
+        /// <summary>The Compare To tag for the median of the same time in the previous weeks - a baseline on the chart, not a period to compare the grid to</summary>
+        private const string BaselineTag = "-2";
+        private const int BaselineWeeks = 4;
+
+        private bool CompareBaseline => SelectedCompareOffsetItem.Tag?.ToString() == BaselineTag;
+
+        /// <summary>The grid has compare columns for a period compared to, or for the median of the baseline weeks</summary>
+        private bool ShowCompareColumns => HasCompare || CompareBaseline;
+
         private DateTime _compareTo = DateTime.MinValue;
         private DateTime _compareFrom = DateTime.MinValue;
 
@@ -175,7 +184,7 @@ namespace DBADashGUI.Performance
                     col.Visible = true;
                     _cols.Add(col);
                     displayIdx += 1;
-                    if (CompareFrom <= DateTime.MinValue || col is DataGridViewLinkColumn) continue; // A link has nothing to compare
+                    if (!ShowCompareColumns || col is DataGridViewLinkColumn) continue; // A link has nothing to compare
                     var compareCol = new DataGridViewTextBoxColumn
                     {
                         Name = "Compare " + col.Name,
@@ -232,7 +241,7 @@ namespace DBADashGUI.Performance
 
                 dgv.Columns.Clear();
                 dgv.AutoGenerateColumns = false;
-                tsCompare.Font = new Font(tsCompare.Font, HasCompare ? FontStyle.Bold : FontStyle.Regular);
+                tsCompare.Font = new Font(tsCompare.Font, ShowCompareColumns ? FontStyle.Bold : FontStyle.Regular);
                 dgv.DataSource = new DataView(dt, filter, "total_duration_sec DESC", DataViewRowState.CurrentRows);
                 dgv.Columns.AddRange(Columns.ToArray());
                 dgv.Columns["Query Store"].Visible = CurrentContext.CanMessage && CurrentContext.InstanceSupportsQueryStore;
@@ -268,6 +277,70 @@ namespace DBADashGUI.Performance
 
         private DataTable GetObjectExecutionStatsSummary()
         {
+            var dt = GetObjectExecutionStatsSummary(FromUTC, ToUTC, HasCompare);
+            if (CompareBaseline)
+            {
+                AddBaselineCompare(dt);
+            }
+            return dt;
+        }
+
+        /// <summary>
+        /// The compare columns for the median baseline.  The summary is read for each of the baseline weeks, and each
+        /// compare_ value is the median of the weeks' values for that object (where the object had activity in the week).
+        /// The diff columns are then worked out from those medians, as the summary does for a single compare period.
+        /// </summary>
+        private void AddBaselineCompare(DataTable dt)
+        {
+            var weeks = Enumerable.Range(1, BaselineWeeks)
+                .Select(week => GetObjectExecutionStatsSummary(FromUTC.AddDays(-7 * week), ToUTC.AddDays(-7 * week), false))
+                .ToList();
+
+            static (int InstanceID, long ObjectID) KeyOf(DataRow row) => (Convert.ToInt32(row["InstanceID"]), Convert.ToInt64(row["ObjectID"]));
+            static bool IsMeasure(DataColumn c) =>
+                !c.ColumnName.StartsWith("compare_", StringComparison.Ordinal) && !c.ColumnName.StartsWith("diff_", StringComparison.Ordinal) &&
+                c.ColumnName is not ("InstanceID" or "ObjectID" or "ConnectionID") &&
+                c.DataType is var t && (t == typeof(double) || t == typeof(decimal) || t == typeof(long) || t == typeof(int) || t == typeof(float));
+
+            var measures = weeks.SelectMany(w => w.Columns.Cast<DataColumn>()).Where(IsMeasure).Select(c => c.ColumnName).Distinct().ToList();
+            foreach (var name in measures.Append("diff_avg_duration_pct").Append("diff_avg_cpu_pct"))
+            {
+                var compareName = name.StartsWith("diff_", StringComparison.Ordinal) ? name : "compare_" + name;
+                if (!dt.Columns.Contains(compareName)) dt.Columns.Add(compareName, typeof(double));
+            }
+
+            var weekRows = weeks.Select(w => w.AsEnumerable().ToDictionary(KeyOf)).ToList();
+            foreach (DataRow row in dt.Rows)
+            {
+                var key = KeyOf(row);
+                foreach (var name in measures)
+                {
+                    var values = weekRows.Select(wr => wr.TryGetValue(key, out var wRow) && wRow.Table.Columns.Contains(name) && wRow[name] != DBNull.Value
+                        ? Convert.ToDouble(wRow[name]) : (double?)null).Where(v => v.HasValue).Select(v => v!.Value).ToList();
+                    row["compare_" + name] = values.Count == 0 ? DBNull.Value : Median(values);
+                }
+                AddDiff(row, "avg_duration_sec", "diff_avg_duration_pct");
+                AddDiff(row, "avg_cpu_sec", "diff_avg_cpu_pct");
+            }
+
+            static void AddDiff(DataRow row, string measure, string diffName)
+            {
+                if (row["compare_" + measure] == DBNull.Value || row[measure] == DBNull.Value) return;
+                var compare = Convert.ToDouble(row["compare_" + measure]);
+                if (compare == 0) return;
+                row[diffName] = (Convert.ToDouble(row[measure]) - compare) / compare;
+            }
+        }
+
+        private static double Median(List<double> values)
+        {
+            var sorted = values.OrderBy(v => v).ToArray();
+            var mid = sorted.Length / 2;
+            return sorted.Length % 2 == 1 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+        }
+
+        private DataTable GetObjectExecutionStatsSummary(DateTime fromUtc, DateTime toUtc, bool withCompare)
+        {
             using var cn = new SqlConnection(Common.ConnectionString);
             using var cmd = new SqlCommand("dbo.ObjectExecutionStatsSummary_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Config.DefaultCommandTimeout };
             using var da = new SqlDataAdapter(cmd);
@@ -282,7 +355,7 @@ namespace DBADashGUI.Performance
             cmd.Parameters.AddStringIfNotNullOrEmpty("ObjectName", ObjectName);
             cmd.Parameters.AddIfGreaterThanZero("DatabaseID", DatabaseID);
 
-            if (HasCompare)
+            if (withCompare)
             {
                 cmd.Parameters.AddWithValue("CompareFrom", CompareFrom);
                 cmd.Parameters.AddWithValue("CompareTo", CompareTo);
@@ -299,8 +372,8 @@ namespace DBADashGUI.Performance
                 cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
             }
 
-            cmd.Parameters.AddWithValue("FromDate", FromUTC);
-            cmd.Parameters.AddWithValue("ToDate", ToUTC);
+            cmd.Parameters.AddWithValue("FromDate", fromUtc);
+            cmd.Parameters.AddWithValue("ToDate", toUtc);
             cmd.Parameters.AddWithValue("UTCOffset", DateHelper.UtcOffset);
             cmd.Parameters.AddWithValue("InstanceIDs", CurrentContext.InstanceIDs.AsDataTable());
             var dt = new DataTable();
@@ -408,17 +481,10 @@ namespace DBADashGUI.Performance
 
         private void RefreshChart()
         {
-            if (CompareFrom > DateTime.MinValue)
-            {
-                splitChart.Panel2Collapsed = false;
-                compareObjectExecutionLineChart.FromDate = CompareFrom;
-                compareObjectExecutionLineChart.ToDate = CompareTo;
-                compareObjectExecutionLineChart.RefreshData();
-            }
-            else
-            {
-                splitChart.Panel2Collapsed = true;
-            }
+            // The comparison is drawn over the chart rather than in a chart of its own.  The baseline is the median of the previous weeks
+            objectExecutionLineChart1.CompareFrom = HasCompare ? CompareFrom : DateTime.MinValue;
+            objectExecutionLineChart1.CompareTo = HasCompare ? CompareTo : DateTime.MinValue;
+            objectExecutionLineChart1.BaselineWeeks = CompareBaseline ? BaselineWeeks : 0;
             objectExecutionLineChart1.FromDate = FromUTC;
             objectExecutionLineChart1.ToDate = ToUTC;
             objectExecutionLineChart1.RefreshData();
@@ -427,11 +493,6 @@ namespace DBADashGUI.Performance
         private void RefreshChart(long objectID, string title)
         {
             splitContainer1.Panel1Collapsed = false;
-
-            compareObjectExecutionLineChart.InstanceID = InstanceID;
-            compareObjectExecutionLineChart.Instance = Instance;
-            compareObjectExecutionLineChart.ObjectID = objectID;
-            compareObjectExecutionLineChart.Title = title + " (Compare)";
 
             objectExecutionLineChart1.InstanceID = InstanceID;
             objectExecutionLineChart1.Instance = Instance;

@@ -43,6 +43,8 @@ namespace DBADashGUI.Performance
             tsPreviousPeriod = new System.Windows.Forms.ToolStripMenuItem();
             ts24Hrs = new System.Windows.Forms.ToolStripMenuItem();
             ts7Days = new System.Windows.Forms.ToolStripMenuItem();
+            ts28Days = new System.Windows.Forms.ToolStripMenuItem();
+            ts4WeekBaseline = new System.Windows.Forms.ToolStripMenuItem();
             toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             tsCustomCompare = new System.Windows.Forms.ToolStripMenuItem();
             tsNoCompare = new System.Windows.Forms.ToolStripMenuItem();
@@ -60,9 +62,7 @@ namespace DBADashGUI.Performance
             tsClearFilter = new System.Windows.Forms.ToolStripButton();
             tsDateRange = new DateRangeToolStripMenuItem();
             splitContainer1 = new System.Windows.Forms.SplitContainer();
-            splitChart = new System.Windows.Forms.SplitContainer();
             objectExecutionLineChart1 = new ObjectExecutionLineChart();
-            compareObjectExecutionLineChart = new ObjectExecutionLineChart();
             statusStrip1 = new System.Windows.Forms.StatusStrip();
             lblStatus = new System.Windows.Forms.ToolStripStatusLabel();
             tmrSearch = new System.Windows.Forms.Timer(components);
@@ -72,10 +72,6 @@ namespace DBADashGUI.Performance
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
             splitContainer1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)splitChart).BeginInit();
-            splitChart.Panel1.SuspendLayout();
-            splitChart.Panel2.SuspendLayout();
-            splitChart.SuspendLayout();
             statusStrip1.SuspendLayout();
             SuspendLayout();
             // 
@@ -159,7 +155,7 @@ namespace DBADashGUI.Performance
             // 
             // tsCompare
             // 
-            tsCompare.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { tsPreviousPeriod, ts24Hrs, ts7Days, toolStripSeparator2, tsCustomCompare, tsNoCompare });
+            tsCompare.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { tsPreviousPeriod, ts24Hrs, ts7Days, ts28Days, ts4WeekBaseline, toolStripSeparator2, tsCustomCompare, tsNoCompare });
             tsCompare.Image = Properties.Resources.Time_16x;
             tsCompare.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsCompare.Name = "tsCompare";
@@ -192,6 +188,24 @@ namespace DBADashGUI.Performance
             ts7Days.Tag = "10080";
             ts7Days.Text = "-7 days offset";
             ts7Days.Click += TsSetOffset_Click;
+            //
+            // ts28Days
+            //
+            ts28Days.Font = new System.Drawing.Font("Segoe UI", 9F);
+            ts28Days.Name = "ts28Days";
+            ts28Days.Size = new System.Drawing.Size(193, 26);
+            ts28Days.Tag = "40320";
+            ts28Days.Text = "-28 days offset (4 weeks)";
+            ts28Days.Click += TsSetOffset_Click;
+            //
+            // ts4WeekBaseline
+            //
+            ts4WeekBaseline.Font = new System.Drawing.Font("Segoe UI", 9F);
+            ts4WeekBaseline.Name = "ts4WeekBaseline";
+            ts4WeekBaseline.Size = new System.Drawing.Size(193, 26);
+            ts4WeekBaseline.Tag = "-2";
+            ts4WeekBaseline.Text = "Median of last 4 weeks (same time)";
+            ts4WeekBaseline.Click += TsSetOffset_Click;
             // 
             // toolStripSeparator2
             // 
@@ -345,7 +359,7 @@ namespace DBADashGUI.Performance
             // 
             // splitContainer1.Panel1
             // 
-            splitContainer1.Panel1.Controls.Add(splitChart);
+            splitContainer1.Panel1.Controls.Add(objectExecutionLineChart1);
             // 
             // splitContainer1.Panel2
             // 
@@ -355,47 +369,17 @@ namespace DBADashGUI.Performance
             splitContainer1.SplitterDistance = 789;
             splitContainer1.SplitterWidth = 5;
             splitContainer1.TabIndex = 6;
-            // 
-            // splitChart
-            // 
-            splitChart.Dock = System.Windows.Forms.DockStyle.Fill;
-            splitChart.Location = new System.Drawing.Point(0, 0);
-            splitChart.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            splitChart.Name = "splitChart";
-            splitChart.Orientation = System.Windows.Forms.Orientation.Horizontal;
-            // 
-            // splitChart.Panel1
-            // 
-            splitChart.Panel1.Controls.Add(objectExecutionLineChart1);
-            // 
-            // splitChart.Panel2
-            // 
-            splitChart.Panel2.Controls.Add(compareObjectExecutionLineChart);
-            splitChart.Size = new System.Drawing.Size(1262, 789);
-            splitChart.SplitterDistance = 391;
-            splitChart.SplitterWidth = 5;
-            splitChart.TabIndex = 7;
-            // 
+            //
             // objectExecutionLineChart1
-            // 
+            //
             objectExecutionLineChart1.Dock = System.Windows.Forms.DockStyle.Fill;
             objectExecutionLineChart1.Location = new System.Drawing.Point(0, 0);
             objectExecutionLineChart1.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
             objectExecutionLineChart1.Name = "objectExecutionLineChart1";
-            objectExecutionLineChart1.Size = new System.Drawing.Size(1262, 391);
+            objectExecutionLineChart1.Size = new System.Drawing.Size(1262, 789);
             objectExecutionLineChart1.TabIndex = 5;
             objectExecutionLineChart1.Title = "abc";
-            // 
-            // compareObjectExecutionLineChart
-            // 
-            compareObjectExecutionLineChart.Dock = System.Windows.Forms.DockStyle.Fill;
-            compareObjectExecutionLineChart.Location = new System.Drawing.Point(0, 0);
-            compareObjectExecutionLineChart.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
-            compareObjectExecutionLineChart.Name = "compareObjectExecutionLineChart";
-            compareObjectExecutionLineChart.Size = new System.Drawing.Size(1262, 393);
-            compareObjectExecutionLineChart.TabIndex = 6;
-            compareObjectExecutionLineChart.Title = "abc";
-            // 
+            //
             // statusStrip1
             // 
             statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
@@ -435,10 +419,6 @@ namespace DBADashGUI.Performance
             splitContainer1.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
             splitContainer1.ResumeLayout(false);
-            splitChart.Panel1.ResumeLayout(false);
-            splitChart.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)splitChart).EndInit();
-            splitChart.ResumeLayout(false);
             statusStrip1.ResumeLayout(false);
             statusStrip1.PerformLayout();
             ResumeLayout(false);
@@ -454,6 +434,8 @@ namespace DBADashGUI.Performance
         private System.Windows.Forms.ToolStripDropDownButton tsCompare;
         private System.Windows.Forms.ToolStripMenuItem ts24Hrs;
         private System.Windows.Forms.ToolStripMenuItem ts7Days;
+        private System.Windows.Forms.ToolStripMenuItem ts28Days;
+        private System.Windows.Forms.ToolStripMenuItem ts4WeekBaseline;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripMenuItem tsCustomCompare;
         private System.Windows.Forms.ToolStripMenuItem tsNoCompare;
@@ -467,8 +449,6 @@ namespace DBADashGUI.Performance
         private System.Windows.Forms.ToolStripMenuItem extendedStoredProcedureToolStripMenuItem;
         private ObjectExecutionLineChart objectExecutionLineChart1;
         private System.Windows.Forms.SplitContainer splitContainer1;
-        private System.Windows.Forms.SplitContainer splitChart;
-        private ObjectExecutionLineChart compareObjectExecutionLineChart;
         private System.Windows.Forms.ToolStripButton tsExcel;
         private System.Windows.Forms.ToolStripSeparator tsSep1;
         private System.Windows.Forms.ToolStripLabel lblSearch;
