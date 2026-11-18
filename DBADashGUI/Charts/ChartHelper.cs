@@ -1993,7 +1993,7 @@ namespace DBADashGUI.Charts
         /// Draws a series against the Y axis at <paramref name="axisIndex"/>.  ScalesYAt is declared on each series
         /// type rather than on ISeries, hence the reflection.
         /// </summary>
-        private static void SetScalesYAt(ISeries series, int axisIndex)
+        internal static void SetScalesYAt(ISeries series, int axisIndex)
         {
             var property = series.GetType().GetProperty("ScalesYAt");
             if (property != null && property.CanWrite)
