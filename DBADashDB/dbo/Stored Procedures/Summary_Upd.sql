@@ -485,7 +485,12 @@ AND I.IsActive=1
 
 BEGIN TRAN
 
-DELETE dbo.Summary
+/*
+	TABLOCKX serializes concurrent refreshes.  Without it, two refreshes against an empty table (e.g. first load on a new repository)
+	both delete nothing, then both insert the same InstanceIDs and the second fails with a PK_Summary violation.
+	The lock is held until COMMIT so the second refresh deletes the first one's rows before inserting its own.
+*/
+DELETE dbo.Summary WITH (TABLOCKX)
 INSERT INTO dbo.Summary(
 	InstanceID,
 	Instance,
