@@ -21,7 +21,7 @@ EXEC Alert.ApplicableInstances_Ensure;
 CREATE TABLE #EffectiveThresholds (
 	InstanceID INT NOT NULL,
 	RuleID INT NOT NULL,
-	EvaluationPeriodMins TINYINT NOT NULL,
+	EvaluationPeriodMins INT NOT NULL,
 	Priority TINYINT NOT NULL,
 	WaitType NVARCHAR(60) COLLATE DATABASE_DEFAULT NOT NULL,
 	TotalWaitMsPerSec DECIMAL(18,2) NULL,

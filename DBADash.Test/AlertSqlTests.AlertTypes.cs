@@ -98,6 +98,23 @@ CROSS JOIN (VALUES(1),(2),(3)) M(Mins)
 EXEC Alert.CPUAlert_Upd", "Alert");
         }
 
+        /// <summary>
+        /// A day long evaluation period sees data from hours ago - past the old 60 minute cap - but not data from before the period.
+        /// Both instances have high CPU: Alert two hours ago, OK 25 hours ago.
+        /// </summary>
+        [TestMethod]
+        public void CPUAlertOverADay()
+        {
+            AssertAlerted(TwoInstances + @"
+DECLARE @Type VARCHAR(50)='CPU'
+INSERT INTO dbo.CPU(InstanceID,EventTime,SQLProcessCPU,SystemIdleCPU)
+SELECT I.InstanceID, DATEADD(mi,-I.Mins-M.Mins,SYSUTCDATETIME()), 50, 5
+FROM (VALUES(@Alert,120),(@OK,1500)) I(InstanceID,Mins)
+CROSS JOIN (VALUES(1),(2),(3)) M(Mins)
+" + Rule("CPU", "CPU", threshold: 90, evaluationPeriodMins: 1440) + @"
+EXEC Alert.CPUAlert_Upd", "Alert");
+        }
+
         [TestMethod]
         public void AgentNotRunningAlertExcludesExpress()
         {
@@ -173,6 +190,26 @@ EXEC Alert.WaitAlert_Upd", "Alert");
             Assert.AreEqual("Wait - LCK_M_X", alerts[0].AlertKey);
         }
 
+        /// <summary>A day long evaluation period: Alert's waits two hours ago count, OK's 25 hours ago don't.</summary>
+        [TestMethod]
+        public void WaitAlertOverADay()
+        {
+            AssertAlerted(TwoInstances + @"
+DECLARE @Type VARCHAR(50)='Wait', @WaitTypeID SMALLINT
+SELECT @WaitTypeID = WaitTypeID FROM dbo.WaitType WHERE WaitType = N'LCK_M_X'
+IF @WaitTypeID IS NULL
+BEGIN
+	INSERT INTO dbo.WaitType(WaitType) VALUES(N'LCK_M_X')
+	SET @WaitTypeID = SCOPE_IDENTITY()
+END
+INSERT INTO dbo.Waits(InstanceID,SnapshotDate,WaitTypeID,waiting_tasks_count,wait_time_ms,signal_wait_time_ms,sample_ms_diff)
+SELECT I.InstanceID, CAST(DATEADD(mi,-I.Mins-M.Mins,SYSUTCDATETIME()) AS DATETIME2(2)), @WaitTypeID, 10, 60000, 0, 60000
+FROM (VALUES(@Alert,120),(@OK,1500)) I(InstanceID,Mins)
+CROSS JOIN (VALUES(1),(2),(3)) M(Mins)
+" + Rule("Wait", "Wait - LCK_M_X", threshold: 500, evaluationPeriodMins: 1440, details: @"{""WaitType"":""LCK_M_X"",""IsPerCore"":false}") + @"
+EXEC Alert.WaitAlert_Upd", "Alert");
+        }
+
         [TestMethod]
         public void CounterAlertAboveThreshold()
         {
@@ -187,6 +224,33 @@ CROSS JOIN (VALUES(1),(2),(3)) M(Mins)
 " + Rule("Counter", "SQLServer:General Statistics\\User Connections", threshold: 100, evaluationPeriodMins: 5,
                 details: @"{""ComparisonSymbol"":"">="",""Aggregation"":""Avg"",""Counter"":{""ObjectName"":""SQLServer:General Statistics"",""CounterName"":""User Connections"",""InstanceName"":"""",""ApplyToAllInstances"":false}}") + @"
 EXEC Alert.CounterAlert_Upd", "Alert");
+        }
+
+        /// <summary>
+        /// A day long rule alongside a 5 minute one.  The day long rule sees Alert's values from two hours ago but not OK's from
+        /// 25 hours ago, and the 5 minute rule - evaluated in the same statement - sees neither.
+        /// </summary>
+        [TestMethod]
+        public void CounterAlertOverADay()
+        {
+            var alerts = AssertAlerted(TwoInstances + @"
+DECLARE @Type VARCHAR(50)='Counter', @CounterID INT, @ShortCounterID INT
+INSERT INTO dbo.Counters(object_name,counter_name,instance_name,CounterType) VALUES(N'SQLServer:General Statistics',N'User Connections',N'',1)
+SET @CounterID = SCOPE_IDENTITY()
+INSERT INTO dbo.Counters(object_name,counter_name,instance_name,CounterType) VALUES(N'SQLServer:General Statistics',N'Logins/sec',N'',1)
+SET @ShortCounterID = SCOPE_IDENTITY()
+INSERT INTO dbo.PerformanceCounters(InstanceID,CounterID,SnapshotDate,Value)
+SELECT I.InstanceID, C.CounterID, CAST(DATEADD(mi,-I.Mins-M.Mins,SYSUTCDATETIME()) AS DATETIME2(2)), 500
+FROM (VALUES(@Alert,120),(@OK,1500)) I(InstanceID,Mins)
+CROSS JOIN (VALUES(@CounterID),(@ShortCounterID)) C(CounterID)
+CROSS JOIN (VALUES(1),(2),(3)) M(Mins)
+" + Rule("Counter", "SQLServer:General Statistics\\User Connections", threshold: 100, evaluationPeriodMins: 1440,
+                details: @"{""ComparisonSymbol"":"">="",""Aggregation"":""Avg"",""Counter"":{""ObjectName"":""SQLServer:General Statistics"",""CounterName"":""User Connections"",""InstanceName"":"""",""ApplyToAllInstances"":false}}")
+              + Rule("Counter", "SQLServer:General Statistics\\Logins/sec", threshold: 100, evaluationPeriodMins: 5,
+                details: @"{""ComparisonSymbol"":"">="",""Aggregation"":""Avg"",""Counter"":{""ObjectName"":""SQLServer:General Statistics"",""CounterName"":""Logins/sec"",""InstanceName"":"""",""ApplyToAllInstances"":false}}") + @"
+EXEC Alert.CounterAlert_Upd", "Alert");
+            Assert.AreEqual(@"SQLServer:General Statistics\User Connections", alerts[0].AlertKey);
+            StringAssert.Contains(alerts[0].Message, "over 1440mins");
         }
 
         private const string Databases = @"

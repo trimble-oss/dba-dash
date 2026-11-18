@@ -23,7 +23,7 @@ CREATE TABLE #EffectiveThresholds(
 	AlertKey NVARCHAR(256) COLLATE DATABASE_DEFAULT NOT NULL,	
 	InstanceID INT NOT NULL,
 	Priority TINYINT NOT NULL,
-	EvaluationPeriodMins TINYINT NOT NULL,
+	EvaluationPeriodMins INT NOT NULL,
 	Threshold TINYINT NOT NULL,
 	GroupID INT NOT NULL DEFAULT(0)
 )
@@ -84,7 +84,6 @@ WITH T AS (
 				FROM dbo.CPU 
 				WHERE T.InstanceID = CPU.InstanceID
 				AND CPU.EventTime >=CAST(DATEADD(mi,-EvaluationPeriodMins,SYSUTCDATETIME()) AS DATETIME2(3))
-				AND CPU.EventTime >=CAST(DATEADD(mi,-60,SYSUTCDATETIME()) AS DATETIME2(3)) /* Hard cap at 60min evaluation period for performance */	
 				AND CPU.EventTime <= CAST(SYSUTCDATETIME() AS DATETIME2(3)) 
 				) agg
 	WHERE agg.AvgCPU >T.Threshold
