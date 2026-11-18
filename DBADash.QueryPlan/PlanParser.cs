@@ -1078,6 +1078,11 @@ namespace DBADash.QueryPlan
             Add(properties, "Estimated Rows Per Execution", PlanFormat.Rows(node.EstimateRows));
             Add(properties, "Estimated Number of Executions", PlanFormat.Rows(node.EstimatedExecutions));
 
+            if (Double(Attribute(relOp, "EstimatedRowsRead")) is { } estimatedRowsRead)
+            {
+                Add(properties, "Estimated Rows Read", PlanFormat.Rows(estimatedRowsRead));
+            }
+
             if (node.EstimateRowsWithoutRowGoal is { } withoutRowGoal)
             {
                 Add(properties, "Estimated Rows Without Row Goal", PlanFormat.Rows(withoutRowGoal));
@@ -1239,7 +1244,7 @@ namespace DBADash.QueryPlan
             // written.  Showing them beats silently dropping detail the reader came for.
             var unhandled = relOp.Attributes()
                 .Where(a => !KnownRelOpAttributes.Contains(a.Name.LocalName))
-                .Select(a => new PlanProperty(SplitCamelCase(a.Name.LocalName), a.Value))
+                .Select(a => new PlanProperty(SplitCamelCase(a.Name.LocalName), ReadableNumber(a.Value)))
                 .ToList();
 
             if (unhandled.Count > 0) properties.Add(new PlanProperty("Other", null, unhandled));
@@ -1249,7 +1254,7 @@ namespace DBADash.QueryPlan
 
         private static readonly HashSet<string> KnownRelOpAttributes = new(StringComparer.Ordinal)
         {
-            "NodeId", "PhysicalOp", "LogicalOp", "EstimateRows", "EstimateRowsWithoutRowGoal", "TableCardinality",
+            "NodeId", "PhysicalOp", "LogicalOp", "EstimateRows", "EstimateRowsWithoutRowGoal", "EstimatedRowsRead", "TableCardinality",
             "EstimateIO", "EstimateCPU", "EstimateRebinds", "EstimateRewinds", "EstimatedExecutionMode",
             "EstimatedTotalSubtreeCost", "AvgRowSize", "Parallel", "Partitioned"
         };
@@ -1699,6 +1704,18 @@ namespace DBADash.QueryPlan
             double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var result)
                 ? result
                 : null;
+
+        /// <summary>
+        /// A raw attribute shown as the plan gave it, except a large figure in scientific notation
+        /// (3.36478e+07), which reads better grouped (33,647,800).  Any fraction is kept
+        /// (1.25e+00 is 1.25), and small and non numeric values are left alone - there is no
+        /// telling what unit an unrecognised attribute is in.
+        /// </summary>
+        private static string ReadableNumber(string value) =>
+            value.Contains('e', StringComparison.OrdinalIgnoreCase)
+            && Double(value) is { } number && Math.Abs(number) >= 1
+                ? number.ToString("#,##0.######", CultureInfo.InvariantCulture)
+                : value;
 
         private static bool? Bool(string? value) => value switch
         {
