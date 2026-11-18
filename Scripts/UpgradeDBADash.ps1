@@ -132,7 +132,6 @@ if($Tag.Length -eq 0){
 }
 else{
     Write-Host "Checking specified tag exists"
-    Stop-Process -Name DBADashServiceConfigTool -ErrorAction Ignore
 }
 
 # Convert tag string to Sytem.Version.  Pad out to 0.0.0.0 format
