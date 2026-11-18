@@ -3319,11 +3319,20 @@ namespace DBADashGUI
 
         private void AddTimeZoneMenus()
         {
-            cboTimeZone.Items.Clear();
-            cboTimeZone.Items.Add(TimeZoneInfo.Local);
-            cboTimeZone.Items.AddRange(TimeZoneInfo.GetSystemTimeZones().ToArray());
-            cboTimeZone.SelectedItem = DateHelper.AppTimeZone;
-            IsLoadingTimeZones = false;
+            // Called on every connection - including switching connections, after the selected tab has started loading.
+            // Don't let repopulating the list refresh the selected tab a second time.
+            IsLoadingTimeZones = true;
+            try
+            {
+                cboTimeZone.Items.Clear();
+                cboTimeZone.Items.Add(TimeZoneInfo.Local);
+                cboTimeZone.Items.AddRange(TimeZoneInfo.GetSystemTimeZones().ToArray());
+                cboTimeZone.SelectedItem = DateHelper.AppTimeZone;
+            }
+            finally
+            {
+                IsLoadingTimeZones = false;
+            }
         }
 
         private void TimeZone_Selected(object sender, EventArgs e)
