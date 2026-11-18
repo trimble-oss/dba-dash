@@ -12,9 +12,9 @@
             {
                 return (false, "Threshold must be between 0 and 100");
             }
-            else if (EvaluationPeriodMins is not (>= 1 and <= 60))
+            else if (EvaluationPeriodMins is not (>= 1 and <= 1440))
             {
-                return (false, "Evaluation Period must be between 1 and 60");
+                return (false, "Evaluation Period must be between 1 and 1440");
             }
             return (true, string.Empty);
         }

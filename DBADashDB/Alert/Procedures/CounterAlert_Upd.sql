@@ -22,7 +22,7 @@ CREATE TABLE #EffectiveThresholds (
 	InstanceID INT NOT NULL,
 	RuleID INT NOT NULL,
 	AlertKey NVARCHAR(256) COLLATE DATABASE_DEFAULT NOT NULL,
-	EvaluationPeriodMins TINYINT NOT NULL,
+	EvaluationPeriodMins INT NOT NULL,
 	Priority TINYINT NOT NULL,
 	CounterID INT NOT NULL,
 	Aggregation VARCHAR(10) COLLATE DATABASE_DEFAULT NOT NULL,
@@ -83,7 +83,7 @@ CREATE TABLE #ExceededThreshold(
 	GroupID INT NOT NULL DEFAULT(0),
 	Aggregation VARCHAR(10) COLLATE DATABASE_DEFAULT NOT NULL,
 	ComparisonSymbol VARCHAR(10) COLLATE DATABASE_DEFAULT NOT NULL,
-	EvaluationPeriodMins TINYINT NOT NULL,
+	EvaluationPeriodMins INT NOT NULL,
 )
 
 INSERT INTO #ExceededThreshold(
@@ -120,7 +120,6 @@ CROSS APPLY(
 			FROM dbo.PerformanceCountersBetweenDates(DATEADD(mi,-T.EvaluationPeriodMins,SYSUTCDATETIME()),SYSUTCDATETIME(),T.InstanceID,T.CounterID,T.CounterType) PC
 			WHERE PC.InstanceID = T.InstanceID
 			AND PC.CounterID = T.CounterID
-			AND PC.SnapshotDate >=DATEADD(mi,-60,SYSUTCDATETIME())
 			) Agg
 WHERE	(
 			(Agg.CounterValue >= T.Threshold AND T.ComparisonSymbol='>=')
