@@ -306,7 +306,9 @@ namespace DBADashGUI.Performance
             foreach (var name in measures.Append("diff_avg_duration_pct").Append("diff_avg_cpu_pct"))
             {
                 var compareName = name.StartsWith("diff_", StringComparison.Ordinal) ? name : "compare_" + name;
-                if (!dt.Columns.Contains(compareName)) dt.Columns.Add(compareName, typeof(double));
+                // The summary always has compare_ columns, as integers for the counts.  A median can be fractional, so each is replaced as a double
+                if (dt.Columns.Contains(compareName)) dt.Columns.Remove(compareName);
+                dt.Columns.Add(compareName, typeof(double));
             }
 
             var weekRows = weeks.Select(w => w.AsEnumerable().ToDictionary(KeyOf)).ToList();
