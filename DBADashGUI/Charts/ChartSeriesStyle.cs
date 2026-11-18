@@ -54,6 +54,18 @@ namespace DBADashGUI.Charts
         public bool Dashed { get; init; }
 
         /// <summary>
+        /// Fill a line series' area see-through at LiveCharts' default level, so a line over it still reads.  Only applies with <see cref="Color"/>.
+        /// Stacked areas and columns keep the full colour, as LiveCharts draws them by default.
+        /// </summary>
+        public bool TranslucentFill { get; init; }
+
+        /// <summary>
+        /// Leave a line series' marker centre to the theme, as LiveCharts draws it by default (near white, with the coloured outline), rather than
+        /// filling it with <see cref="Color"/>.  Only applies with <see cref="Color"/>.
+        /// </summary>
+        public bool ThemeMarkerFill { get; init; }
+
+        /// <summary>
         /// Convenience for report definitions, which have the palette as <see cref="Color"/> values:
         /// <c>ChartSeriesStyle.FromColor(DashColors.Fail, ChartMarkers.Square)</c>.
         /// </summary>

@@ -76,6 +76,17 @@ namespace DBADashGUI
         public bool SmoothLines { get; set; } = false;
 
         /// <summary>
+        /// The period the chart compares to, drawn over it as dashed lines.  "None", "Previous" (the period before), "Baseline" (the median of
+        /// the same time in the last 4 weeks), or the offset in minutes (e.g. "10080" for 7 days earlier).  Defaults to none, so older saved views don't compare.
+        /// </summary>
+        public string CompareSelection { get; set; } = "None";
+
+        /// <summary>
+        /// Draw the comparison as a straight line at each series' average, rather than over time.  Defaults to false.
+        /// </summary>
+        public bool CompareAverage { get; set; } = false;
+
+        /// <summary>
         /// Optional fixed minimum for the Y-axis. When null the axis auto-scales.
         /// </summary>
         public double? YAxisMin { get; set; }

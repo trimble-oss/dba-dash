@@ -38,7 +38,6 @@
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.tsSmooth0 = new System.Windows.Forms.ToolStripMenuItem();
             this.pointSizeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsAverageCompare = new System.Windows.Forms.ToolStripMenuItem();
             this.noneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.smallToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mediumToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -69,23 +68,12 @@
             this.tsOptions.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             this.tsOptions.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.lineSmoothnesToolStripMenuItem,
-            this.pointSizeToolStripMenuItem,
-            this.tsAverageCompare});
+            this.pointSizeToolStripMenuItem});
             this.tsOptions.Image = global::DBADashGUI.Properties.Resources.SettingsOutline_16x;
             this.tsOptions.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsOptions.Name = "tsOptions";
             this.tsOptions.Size = new System.Drawing.Size(34, 28);
             this.tsOptions.Text = "Options";
-            //
-            // tsAverageCompare
-            //
-            this.tsAverageCompare.CheckOnClick = true;
-            this.tsAverageCompare.Checked = false;
-            this.tsAverageCompare.CheckState = System.Windows.Forms.CheckState.Unchecked;
-            this.tsAverageCompare.Name = "tsAverageCompare";
-            this.tsAverageCompare.Size = new System.Drawing.Size(197, 26);
-            this.tsAverageCompare.Text = "Average Compare Line";
-            this.tsAverageCompare.Click += new System.EventHandler(this.TsAverageCompare_Click);
             //
             // lineSmoothnesToolStripMenuItem
             // 
@@ -245,7 +233,6 @@
         private System.Windows.Forms.ToolStripLabel tsTitle;
         private System.Windows.Forms.ToolStripDropDownButton tsMeasures;
         private System.Windows.Forms.ToolStripDropDownButton tsGroup;
-        private System.Windows.Forms.ToolStripMenuItem tsAverageCompare;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem3;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem2;
         private System.Windows.Forms.ToolStripMenuItem pointSizeToolStripMenuItem;

@@ -22,6 +22,65 @@ namespace DBADashGUI.Performance
             InitializeComponent();
             this.Controls.Add(lblError);
             lblError.BringToFront();
+            defaultAnimationSpeed = chart1.AnimationsSpeed;
+            CreateCompareMenu();
+        }
+
+        /// <summary>
+        /// The Compare To menu.  The period compared to is drawn over the chart as a dashed line for each series, in the series' colour.
+        /// Each is shifted to line up with the period viewed.  Set by the Tag: "None", "Previous", "Baseline" (median of the same time in the
+        /// last 4 weeks), or the offset in minutes.
+        /// </summary>
+        private void CreateCompareMenu()
+        {
+            foreach (var (text, tag) in ComparePeriods.Options)
+            {
+                var item = new ToolStripMenuItem(text) { Tag = tag, Checked = tag == ComparePeriods.None };
+                item.Click += TsCompare_Click;
+                tsCompare.DropDownItems.Add(item);
+            }
+            tsCompare.DropDownItems.Add(new ToolStripSeparator());
+            tsCompareAverage.Click += TsCompareAverage_Click;
+            tsCompare.DropDownItems.Add(tsCompareAverage);
+            tsCompare.Text = "Compare To";
+            tsCompare.ToolTipText = "Compare to another period";
+            toolStrip1.Items.Insert(toolStrip1.Items.IndexOf(tsConfigure) + 1, tsCompare);
+        }
+
+        private readonly ToolStripDropDownButton tsCompare = new() { Image = Properties.Resources.Time_16x, ImageTransparentColor = System.Drawing.Color.Magenta, DisplayStyle = ToolStripItemDisplayStyle.Image };
+        private readonly ToolStripMenuItem tsCompareAverage = new("Average Compare Line") { CheckOnClick = true };
+
+        /// <summary>The Compare To selection, kept with the chart's metric so it's saved with the view - see <see cref="CreateCompareMenu"/></summary>
+        private string compareSelection => Metric.CompareSelection ?? ComparePeriods.None;
+
+        /// <summary>Shows the saved Compare To selection on the menu</summary>
+        private void UpdateCompareMenuChecked()
+        {
+            if (tsCompare == null || tsCompareAverage == null) return;
+            foreach (var item in tsCompare.DropDownItems.OfType<ToolStripMenuItem>().Where(m => m != tsCompareAverage))
+            {
+                item.Checked = (string)item.Tag == compareSelection;
+            }
+            tsCompare.Text = compareSelection == ComparePeriods.None ? "Compare To" : "Compare: " + tsCompare.DropDownItems.OfType<ToolStripMenuItem>().FirstOrDefault(m => m.Checked)?.Text;
+            tsCompareAverage.Checked = Metric.CompareAverage;
+        }
+
+        /// <summary>The periods compared to, each shifted by the time between its start and the period viewed's start</summary>
+        private readonly List<(DataTable Table, TimeSpan Shift)> comparePeriods = new();
+
+        private TimeSpan defaultAnimationSpeed;
+
+        private void TsCompare_Click(object sender, EventArgs e)
+        {
+            Metric.CompareSelection = (string)((ToolStripMenuItem)sender).Tag;
+            UpdateCompareMenuChecked();
+            RefreshData();
+        }
+
+        private void TsCompareAverage_Click(object sender, EventArgs e)
+        {
+            Metric.CompareAverage = tsCompareAverage.Checked;
+            RefreshChart();
         }
 
         private void UpdateLegendMenuChecked()
@@ -82,7 +141,7 @@ namespace DBADashGUI.Performance
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public PerformanceCounterMetric Metric
-        { get => _metric; set { _metric = value; EnsureCountersHaveAggregate(); UpdateLegendMenuChecked(); UpdateYAxisMenuChecked(); UpdateChartTypeMenuChecked(); UpdateDisplayOptionsMenuChecked(); } }
+        { get => _metric; set { _metric = value; EnsureCountersHaveAggregate(); UpdateLegendMenuChecked(); UpdateYAxisMenuChecked(); UpdateChartTypeMenuChecked(); UpdateDisplayOptionsMenuChecked(); UpdateCompareMenuChecked(); } }
 
         IMetric IMetricChart.Metric => Metric;
 
@@ -195,27 +254,24 @@ namespace DBADashGUI.Performance
             dtSeries.BeginLoadData();
             try
             {
-                foreach (DataRow r in dt.Rows)
+                foreach (var p in FlattenSeries(dt, seriesByCounter, null))
                 {
-                    if (r["SnapshotDate"] == DBNull.Value) continue;
-                    var snapshot = Convert.ToDateTime(r["SnapshotDate"]);
-                    var rowCounterId = dt.Columns.Contains("CounterID") && r["CounterID"] != DBNull.Value ? Convert.ToInt32(r["CounterID"]) : 0;
-
-                    if (!seriesByCounter.TryGetValue(rowCounterId, out var matches)) continue;
-
-                    foreach (var s in matches)
-                    {
-                        var valObj = r[s.ColumnName];
-                        if (valObj == null || valObj == DBNull.Value) continue;
-                        var val = Convert.ToDouble(valObj);
-                        var seriesName = s.CounterName + " - " + s.AggName;
-                        dtSeries.LoadDataRow(new object[] { snapshot, seriesName, val }, false);
-                    }
+                    dtSeries.LoadDataRow(new object[] { p.Time, p.Series, p.Value }, false);
                 }
             }
             finally
             {
                 dtSeries.EndLoadData();
+            }
+
+            // The period compared to, as dashed lines in the colour of their series - see ChartSeriesPalette
+            var seriesOrder = seriesDefs.Select(s => s.CounterName + " - " + s.AggName).Distinct().ToList();
+            var colours = seriesOrder.Select((s, i) => new { Series = s, Colour = ChartSeriesPalette.ColourAt(i) }).ToDictionary(c => c.Series, c => c.Colour);
+            ChartOverlayData overlay = null;
+            Dictionary<string, (int Axis, System.Drawing.Color Colour)> compareLines = null;
+            if (comparePeriods.Count > 0)
+            {
+                overlay = BuildCompareOverlay(seriesByCounter, seriesOrder, colours, out compareLines);
             }
 
             // Calculate min/max for Y-axis scaling from dtSeries.
@@ -248,6 +304,21 @@ namespace DBADashGUI.Performance
                     var value = Convert.ToDouble(r["SelectedValue"]);
                     maxValue = value > maxValue ? value : maxValue;
                     minValue = value < minValue ? value : minValue;
+                }
+            }
+
+            // The comparison lines count too, so they're not drawn off the chart
+            if (overlay != null)
+            {
+                foreach (DataRow r in overlay.Table.Rows)
+                {
+                    foreach (var key in overlay.Overlay.MetricColumns)
+                    {
+                        if (r[key] == DBNull.Value) continue;
+                        var value = Convert.ToDouble(r[key]);
+                        maxValue = value > maxValue ? value : maxValue;
+                        minValue = value < minValue ? value : minValue;
+                    }
                 }
             }
 
@@ -302,30 +373,54 @@ namespace DBADashGUI.Performance
                 YAxisFormat = "#,##0.######",
                 YAxisMin = minValue,
                 YAxisMax = maxValue,
-                LegendPosition = Metric.LegendPosition
+                LegendPosition = Metric.LegendPosition,
+                // Each series in its palette colour, so a comparison line can match it
+                SeriesStyles = colours.ToDictionary(c => c.Key, c => ChartSeriesStyle.FromColor(c.Value) with { TranslucentFill = true, ThemeMarkerFill = true })
             };
 
-            ChartHelper.UpdateChart(chart1, dtSeries, config);
+            // No animation while comparing: the animated redraw makes the dashed lines appear to move
+            chart1.AnimationsSpeed = overlay != null ? TimeSpan.Zero : defaultAnimationSpeed;
+            ChartHelper.UpdateChart(chart1, dtSeries, config, overlay == null ? null : new List<ChartOverlayData> { overlay });
+            if (compareLines != null)
+            {
+                ChartHelper.StyleCompareLines(chart1, compareLines);
+            }
             // Ensure legend menu state is in sync with the Metric setting after chart is updated
             UpdateLegendMenuChecked();
         }
 
+        private DateTime EffectiveFrom => FromDate == DateTime.MinValue ? DateRange.FromUTC : FromDate;
+        private DateTime EffectiveTo => ToDate == DateTime.MinValue ? DateRange.ToUTC : ToDate;
+
+        /// <summary>The periods compared to, as (from, to) in UTC, for the period from <paramref name="from"/> to <paramref name="to"/></summary>
         private DataTable GetPerformanceCounter()
         {
+            comparePeriods.Clear();
             if (Metric.Counters == null) return new DataTable();
-            using var cn = new SqlConnection(Common.ConnectionString);
-            cn.Open();
-            DataTable dt = new();
 
             var counterIds = Metric.Counters.Where(c => c.CounterID > 0).Select(c => c.CounterID).Distinct().ToList().AsDataTable();
             if (counterIds.Rows.Count == 0)
             {
                 throw new Exception("Unable to resolve Counter IDs for the selected counters.");
             }
+            var from = EffectiveFrom;
+            var to = EffectiveTo;
+            foreach (var (windowFrom, windowTo) in ComparePeriods.Windows(compareSelection, from, to))
+            {
+                comparePeriods.Add((FetchCounters(counterIds, windowFrom, windowTo), from - windowFrom));
+            }
+            return FetchCounters(counterIds, from, to);
+        }
+
+        private DataTable FetchCounters(DataTable counterIds, DateTime from, DateTime to)
+        {
+            using var cn = new SqlConnection(Common.ConnectionString);
+            cn.Open();
+            DataTable dt = new();
             using var cmd = new SqlCommand("dbo.PerformanceCounter_Get", cn) { CommandType = CommandType.StoredProcedure };
             cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-            cmd.Parameters.AddWithValue("FromDate", FromDate == DateTime.MinValue ? DateRange.FromUTC : FromDate);
-            cmd.Parameters.AddWithValue("ToDate", ToDate == DateTime.MinValue ? DateRange.ToUTC : ToDate);
+            cmd.Parameters.AddWithValue("FromDate", from);
+            cmd.Parameters.AddWithValue("ToDate", to);
             cmd.Parameters.AddWithValue("CounterIDs", counterIds);
             cmd.Parameters.AddWithValue("DateGroupingMin", DateGrouping);
             cmd.Parameters.AddWithValue("UTCOffset", DateHelper.UtcOffset);
@@ -342,6 +437,124 @@ namespace DBADashGUI.Performance
 
             DateHelper.ConvertUTCToAppTimeZone(ref dt);
             return dt;
+        }
+
+        /// <summary>
+        /// One point for each counter aggregate value in a table.  <paramref name="timeOf"/> moves the time of a point - null to keep it as it is.
+        /// </summary>
+        private static List<(DateTime Time, string Series, double Value)> FlattenSeries(DataTable source,
+            Dictionary<int, List<(int CounterID, string CounterName, string AggName, string ColumnName)>> seriesByCounter, Func<DateTime, DateTime> timeOf)
+        {
+            var points = new List<(DateTime Time, string Series, double Value)>();
+            foreach (DataRow r in source.Rows)
+            {
+                if (r["SnapshotDate"] == DBNull.Value) continue;
+                var snapshot = Convert.ToDateTime(r["SnapshotDate"]);
+                var rowCounterId = source.Columns.Contains("CounterID") && r["CounterID"] != DBNull.Value ? Convert.ToInt32(r["CounterID"]) : 0;
+
+                if (!seriesByCounter.TryGetValue(rowCounterId, out var matches)) continue;
+
+                foreach (var s in matches)
+                {
+                    var valObj = r[s.ColumnName];
+                    if (valObj == null || valObj == DBNull.Value) continue;
+                    points.Add((timeOf == null ? snapshot : timeOf(snapshot), s.CounterName + " - " + s.AggName, Convert.ToDouble(valObj)));
+                }
+            }
+            return points;
+        }
+
+        /// <summary>
+        /// The compared periods as one overlay.  Each point is moved onto the period viewed, and where there's more than one period (the baseline weeks)
+        /// it's the median of the periods' values at that time.  The average option instead draws each series as a straight line at its average.
+        /// </summary>
+        private ChartOverlayData BuildCompareOverlay(Dictionary<int, List<(int CounterID, string CounterName, string AggName, string ColumnName)>> seriesByCounter,
+            IReadOnlyList<string> seriesOrder, IReadOnlyDictionary<string, System.Drawing.Color> colours,
+            out Dictionary<string, (int Axis, System.Drawing.Color Colour)> lines)
+        {
+            var suffix = compareSelection == ComparePeriods.Baseline ? " (baseline)" : " (compare)";
+            lines = new Dictionary<string, (int Axis, System.Drawing.Color Colour)>();
+
+            // The values of each series at each time, from every period
+            var valuesByTime = new SortedDictionary<DateTime, Dictionary<string, List<double>>>();
+            foreach (var (periodTable, shift) in comparePeriods)
+            {
+                foreach (var p in FlattenSeries(periodTable, seriesByCounter, t => t.AppTimeZoneToUtc().Add(shift).ToAppTimeZone()))
+                {
+                    if (!valuesByTime.TryGetValue(p.Time, out var bySeries))
+                    {
+                        bySeries = new Dictionary<string, List<double>>();
+                        valuesByTime[p.Time] = bySeries;
+                    }
+                    if (!bySeries.TryGetValue(p.Series, out var values))
+                    {
+                        values = new List<double>();
+                        bySeries[p.Series] = values;
+                    }
+                    values.Add(p.Value);
+                }
+            }
+
+            var table = new DataTable();
+            table.Columns.Add("SnapshotDate", typeof(DateTime));
+            var names = new Dictionary<string, string>();
+            foreach (var series in seriesOrder)
+            {
+                table.Columns.Add(series, typeof(double));
+                names[series] = series + suffix;
+                lines[series + suffix] = (0, colours[series]);
+            }
+
+            if (Metric.CompareAverage)
+            {
+                // The average of each series' points, as a straight line across the period viewed.  A point at each bucket
+                // rather than just the ends, so the line has a point under the mouse to show its tooltip.
+                var averages = seriesOrder.ToDictionary(series => series, series =>
+                {
+                    var points = valuesByTime.Values.Where(d => d.ContainsKey(series)).Select(d => ComparePeriods.Median(d[series])).ToList();
+                    return points.Count == 0 ? (double?)null : points.Average();
+                });
+                var start = EffectiveFrom.ToAppTimeZone();
+                var end = EffectiveTo.ToAppTimeZone();
+                var step = TimeSpan.FromMinutes(Math.Max(1, DateGrouping));
+                var times = new List<DateTime>();
+                for (var time = start; time < end; time += step) times.Add(time);
+                times.Add(end);
+                foreach (var time in times)
+                {
+                    var row = table.NewRow();
+                    row["SnapshotDate"] = time;
+                    foreach (var series in seriesOrder)
+                    {
+                        if (averages[series].HasValue) row[series] = averages[series].Value;
+                    }
+                    table.Rows.Add(row);
+                }
+            }
+            else
+            {
+                foreach (var (time, bySeries) in valuesByTime)
+                {
+                    var row = table.NewRow();
+                    row["SnapshotDate"] = time;
+                    foreach (var series in seriesOrder)
+                    {
+                        if (bySeries.TryGetValue(series, out var values)) row[series] = ComparePeriods.Median(values);
+                    }
+                    table.Rows.Add(row);
+                }
+            }
+
+            var overlay = new ChartOverlay
+            {
+                XColumn = "SnapshotDate",
+                MetricColumns = seriesOrder.ToArray(),
+                ChartType = ChartTypes.Line,
+                LineSmoothness = Metric.SmoothLines ? (double?)null : 0,
+                GeometrySize = 0,
+                SeriesNames = names
+            };
+            return new ChartOverlayData(overlay, table);
         }
 
         private void PerformanceCounters_Load(object sender, EventArgs e)

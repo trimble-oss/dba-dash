@@ -798,19 +798,28 @@ namespace DBADashGUI.Charts
                         dashedStroke.PathEffect = new LiveChartsCore.SkiaSharpView.Painting.Effects.DashEffect(new float[] { 6, 4 });
                     }
                     lineSeries.GeometryStroke = Repaint(lineSeries.GeometryStroke, color, thickness ?? DefaultLineStrokeThickness, thickness.HasValue);
-                    lineSeries.GeometryFill = Repaint(lineSeries.GeometryFill, color, 0);
+                    if (!style.ThemeMarkerFill)
+                    {
+                        lineSeries.GeometryFill = Repaint(lineSeries.GeometryFill, color, 0);
+                    }
                     if (lineSeries.Fill is not null)
                     {
-                        lineSeries.Fill = Repaint(lineSeries.Fill, color, 0);
+                        // A line's area is see-through, as LiveCharts draws it by default.  A stacked area is opaque by default, so stays so.
+                        var isStackedArea = series.GetType().Name.StartsWith("StackedArea", StringComparison.Ordinal);
+                        var fillColor = style.TranslucentFill && !isStackedArea ? color.WithAlpha(LineFillAlpha) : color;
+                        lineSeries.Fill = Repaint(lineSeries.Fill, fillColor, 0);
                     }
                     break;
 
-                // Columns and scatter points.
+                // Columns and scatter points, which are opaque by default
                 case IStrokedAndFilled strokedAndFilled:
                     strokedAndFilled.Fill = Repaint(strokedAndFilled.Fill, color, 0);
                     break;
             }
         }
+
+        /// <summary>The alpha of a line series' area: LiveCharts' default, about 20%</summary>
+        private const byte LineFillAlpha = 50;
 
         /// <param name="thicknessWhenUnpainted">Used where the theme hasn't painted the series yet, or always with <paramref name="overrideThickness"/>.</param>
         /// <remarks>
@@ -1314,6 +1323,28 @@ namespace DBADashGUI.Charts
         /// True for a series drawn from a <see cref="ChartOverlay"/> rather than from the chart's own table.
         /// </summary>
         internal static bool IsOverlaySeries(ISeries series) => series != null && OverlaySeries.TryGetValue(series, out _);
+
+        /// <summary>
+        /// Draws each comparison line dashed, in its series' colour, on its Y axis.  Set straight after the chart is drawn, as the
+        /// colours are known up front (see <see cref="ChartSeriesPalette"/>).  Keyed by the line's series name.
+        /// </summary>
+        internal static void StyleCompareLines(CartesianChart chart, IReadOnlyDictionary<string, (int Axis, System.Drawing.Color Colour)> lines)
+        {
+            foreach (var series in chart.Series)
+            {
+                if (series?.Name == null || !lines.TryGetValue(series.Name, out var match)) continue;
+                SetScalesYAt(series, match.Axis);
+                if (series is ILineSeries line)
+                {
+                    var colour = new SKColor(match.Colour.R, match.Colour.G, match.Colour.B, match.Colour.A);
+                    line.Stroke = new SolidColorPaint(colour)
+                    {
+                        StrokeThickness = 2,
+                        PathEffect = new LiveChartsCore.SkiaSharpView.Painting.Effects.DashEffect(new float[] { 6, 4 })
+                    };
+                }
+            }
+        }
 
         /// <summary>
         /// The series for each overlay that can be drawn on the chart.  An overlay that doesn't fit - a missing

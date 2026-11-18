@@ -81,6 +81,9 @@ namespace DBADashGUI.Performance
 
         private bool HasBaseline => BaselineWeeks > 0;
 
+        /// <summary>Draw the comparison as a straight line at each series' average, rather than over time.  Set from the Compare To menu.</summary>
+        public bool CompareAverage;
+
         /// <summary>The name of a comparison series is the metric's name with this on the end</summary>
         private const string CompareSuffix = " (compare)";
         private const string BaselineSuffix = " (baseline)";
@@ -89,12 +92,6 @@ namespace DBADashGUI.Performance
         /// <summary>Overlay series name -> the metric's series on the chart, and the Y axis it's drawn on</summary>
         private readonly Dictionary<string, (int Axis, Color Colour)> compareSeries = new();
 
-        /// <summary>The colours of the metrics, in the order they're shown.  Fixed, so a comparison line is drawn in its metric's colour straight away.</summary>
-        private static readonly Color[] SeriesPalette =
-        {
-            DashColors.TrimbleBlue, DashColors.Red, DashColors.Green, DashColors.YellowDark,
-            DashColors.BlueLight, DashColors.RedLight, DashColors.GreenLight, DashColors.Gray7
-        };
 
         private CancellationTokenSource refreshCts;
 
@@ -121,10 +118,7 @@ namespace DBADashGUI.Performance
                 var windows = new List<(DateTime From, DateTime To)>();
                 if (HasBaseline)
                 {
-                    for (var week = 1; week <= BaselineWeeks; week++)
-                    {
-                        windows.Add((FromDate.AddDays(-7 * week), ToDate.AddDays(-7 * week)));
-                    }
+                    windows = ComparePeriods.Windows(ComparePeriods.Baseline, FromDate, ToDate);
                 }
                 else if (HasCompare)
                 {
@@ -234,7 +228,7 @@ namespace DBADashGUI.Performance
             }
 
             // Each metric has its colour from the palette, so a comparison line can be drawn in its metric's colour as it's drawn - not after the theme has painted the chart
-            var colours = visibleColumns.Select((key, i) => (key, colour: SeriesPalette[i % SeriesPalette.Length])).ToDictionary(c => c.key, c => c.colour);
+            var colours = visibleColumns.Select((key, i) => (key, colour: ChartSeriesPalette.ColourAt(i))).ToDictionary(c => c.key, c => c.colour);
 
             // Update chart using ChartHelper with name-based axis mapping
             var config = new ChartConfiguration
@@ -248,21 +242,20 @@ namespace DBADashGUI.Performance
                 XAxisMin = FromDate.ToAppTimeZone(),
                 XAxisMax = ToDate.ToAppTimeZone(),
                 SeriesNames = seriesNames,
-                SeriesStyles = colours.ToDictionary(c => c.Key, c => ChartSeriesStyle.FromColor(c.Value)),
+                SeriesStyles = colours.ToDictionary(c => c.Key, c => ChartSeriesStyle.FromColor(c.Value) with { ThemeMarkerFill = true }),
                 YAxes = yAxes.ToArray(),
                 ColumnAxisNames = columnAxisNames,
                 DateUnit = TimeSpan.FromMinutes(dateGrouping)
             };
 
-            var compareAsAverage = tsAverageCompare.Checked;
             var overlays = comparePeriods.Count > 0
-                ? BuildCompareOverlays(comparePeriods, HasBaseline ? BaselineSuffix : CompareSuffix, visibleColumns, seriesNames, columnAxisNames, axisNameToIndexMap, compareAsAverage, colours)
+                ? BuildCompareOverlays(comparePeriods, HasBaseline ? BaselineSuffix : CompareSuffix, visibleColumns, seriesNames, columnAxisNames, axisNameToIndexMap, CompareAverage, colours)
                 : null;
 
             ChartHelper.UpdateChart(chart1, dt, config, overlays);
             if (overlays != null)
             {
-                StyleCompareSeries(chart1);
+                ChartHelper.StyleCompareLines(chart1, compareSeries);
             }
         }
 
@@ -318,7 +311,7 @@ namespace DBADashGUI.Performance
                 // The average of the points compared to, as a straight line across the whole period
                 var averages = metricColumns.ToDictionary(k => k, k =>
                 {
-                    var points = valuesByTime.Values.Where(m => m[k].Count > 0).Select(m => Median(m[k])).ToList();
+                    var points = valuesByTime.Values.Where(m => m[k].Count > 0).Select(m => ComparePeriods.Median(m[k])).ToList();
                     return points.Count == 0 ? (double?)null : points.Average();
                 });
                 // A point at each bucket, not just the ends, so the line has a point under the mouse to show its tooltip
@@ -347,7 +340,7 @@ namespace DBADashGUI.Performance
                     newRow["SnapshotDate"] = time;
                     foreach (var key in metricColumns)
                     {
-                        newRow[key] = byMetric[key].Count == 0 ? DBNull.Value : Median(byMetric[key]);
+                        newRow[key] = byMetric[key].Count == 0 ? DBNull.Value : ComparePeriods.Median(byMetric[key]);
                     }
                     table.Rows.Add(newRow);
                 }
@@ -363,41 +356,6 @@ namespace DBADashGUI.Performance
                 SeriesNames = overlayNames,
             };
             return new List<ChartOverlayData> { new(overlay, table) };
-        }
-
-        private static double Median(List<double> values)
-        {
-            var sorted = values.OrderBy(v => v).ToArray();
-            var mid = sorted.Length / 2;
-            return sorted.Length % 2 == 1 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
-        }
-
-        /// <summary>
-        /// Each comparison line goes on the same Y axis as the metric it compares to, and is drawn dotted in that metric's colour.
-        /// Set straight after the chart is drawn, as the colours are known up front.
-        /// </summary>
-        private void StyleCompareSeries(CartesianChartWithDataTable chart)
-        {
-            foreach (var series in chart.Series)
-            {
-                if (series?.Name == null || !compareSeries.TryGetValue(series.Name, out var match)) continue;
-                ChartHelper.SetScalesYAt(series, match.Axis);
-                if (series is LiveChartsCore.Kernel.Sketches.ILineSeries line)
-                {
-                    var colour = new SKColor(match.Colour.R, match.Colour.G, match.Colour.B, match.Colour.A);
-                    line.Stroke = new SolidColorPaint(colour)
-                    {
-                        StrokeThickness = 2,
-                        PathEffect = new LiveChartsCore.SkiaSharpView.Painting.Effects.DashEffect(new float[] { 6, 4 })
-                    };
-                }
-            }
-        }
-
-        /// <summary>The Options menu's average line changes how the comparison is drawn, so the chart is drawn again</summary>
-        private void TsAverageCompare_Click(object sender, EventArgs e)
-        {
-            RefreshData();
         }
 
         private void TsLineSmoothness_Click(object sender, EventArgs e)
