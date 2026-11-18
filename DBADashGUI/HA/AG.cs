@@ -679,7 +679,9 @@ namespace DBADashGUI.HA
         public void ResetAndRefreshData(DBADashContext _context)
         {
             SaveLayout(); // Persist layout before changing context
-            customReportView1.Report = _context.InstanceIDs.Count == 1 ? AGDetailReport : AGSummaryReport;
+            // Detail report needs an instance node: a group node that happens to contain one instance has no InstanceID,
+            // so @InstanceID would be NULL.  Show the summary there instead.
+            customReportView1.Report = _context.InstanceID > 0 ? AGDetailReport : AGSummaryReport;
             customReportView1.SetContext(_context);
             navigateBackMenuItem.Enabled = _context != CurrentContext;
             ReportContext = _context;
