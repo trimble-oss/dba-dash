@@ -25,6 +25,8 @@ namespace DBADashGUI.Performance
         public ObjectExecutionLineChart()
         {
             InitializeComponent();
+            // No animation: the animated redraw makes the dashed comparison lines appear to move
+            chart1.AnimationsSpeed = TimeSpan.Zero;
             loading = new LoadingOverlay(this);
             // Stop a load still running on the server when the control goes away
             Disposed += (_, _) => refreshCts?.Cancel();
@@ -133,7 +135,8 @@ namespace DBADashGUI.Performance
 
                 dt = await CommonData.ObjectExecutionStatsAsync(InstanceID, -1, ObjectID, dateGrouping, "AvgDuration", FromDate, ToDate, Instance, token: cts.Token);
                 var windowTables = await fetchTask;
-                comparePeriods = windows.Zip(windowTables, (w, table) => (table, FromDate.ToAppTimeZone() - w.From.ToAppTimeZone())).ToList();
+                // The shift is the elapsed time between the periods, so every period's buckets fall on the same grid as this period's
+                comparePeriods = windows.Zip(windowTables, (w, table) => (table, FromDate - w.From)).ToList();
                 if (cts.IsCancellationRequested || IsDisposed) return;
             }
             catch (Exception) when (cts.IsCancellationRequested)
@@ -291,7 +294,7 @@ namespace DBADashGUI.Performance
             {
                 foreach (DataRow row in periodTable.Rows)
                 {
-                    var time = ((DateTime)row["SnapshotDate"]).Add(shift);
+                    var time = ((DateTime)row["SnapshotDate"]).AppTimeZoneToUtc().Add(shift).ToAppTimeZone();
                     if (!valuesByTime.TryGetValue(time, out var byMetric))
                     {
                         byMetric = metricColumns.ToDictionary(k => k, _ => new List<double>());
