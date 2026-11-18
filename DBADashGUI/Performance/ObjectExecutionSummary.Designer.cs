@@ -1,4 +1,5 @@
-﻿using DBADashGUI.CustomReports;
+﻿using DBADashGUI.Charts;
+using DBADashGUI.CustomReports;
 
 namespace DBADashGUI.Performance
 {
@@ -46,6 +47,8 @@ namespace DBADashGUI.Performance
             ts28Days = new System.Windows.Forms.ToolStripMenuItem();
             ts4WeekBaseline = new System.Windows.Forms.ToolStripMenuItem();
             toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            tsCompareAverage = new System.Windows.Forms.ToolStripMenuItem();
             tsCustomCompare = new System.Windows.Forms.ToolStripMenuItem();
             tsNoCompare = new System.Windows.Forms.ToolStripMenuItem();
             tsCols = new System.Windows.Forms.ToolStripButton();
@@ -155,7 +158,7 @@ namespace DBADashGUI.Performance
             // 
             // tsCompare
             // 
-            tsCompare.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { tsPreviousPeriod, ts24Hrs, ts7Days, ts28Days, ts4WeekBaseline, toolStripSeparator2, tsCustomCompare, tsNoCompare });
+            tsCompare.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { tsPreviousPeriod, ts24Hrs, ts7Days, ts28Days, ts4WeekBaseline, toolStripSeparator2, tsCustomCompare, tsNoCompare, toolStripSeparator3, tsCompareAverage });
             tsCompare.Image = Properties.Resources.Time_16x;
             tsCompare.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsCompare.Name = "tsCompare";
@@ -167,7 +170,7 @@ namespace DBADashGUI.Performance
             tsPreviousPeriod.Font = new System.Drawing.Font("Segoe UI", 9F);
             tsPreviousPeriod.Name = "tsPreviousPeriod";
             tsPreviousPeriod.Size = new System.Drawing.Size(193, 26);
-            tsPreviousPeriod.Tag = "-1";
+            tsPreviousPeriod.Tag = ComparePeriods.Previous;
             tsPreviousPeriod.Text = "Previous Period";
             tsPreviousPeriod.Click += TsSetOffset_Click;
             // 
@@ -203,7 +206,7 @@ namespace DBADashGUI.Performance
             ts4WeekBaseline.Font = new System.Drawing.Font("Segoe UI", 9F);
             ts4WeekBaseline.Name = "ts4WeekBaseline";
             ts4WeekBaseline.Size = new System.Drawing.Size(193, 26);
-            ts4WeekBaseline.Tag = "-2";
+            ts4WeekBaseline.Tag = ComparePeriods.Baseline;
             ts4WeekBaseline.Text = "Median of last 4 weeks (same time)";
             ts4WeekBaseline.Click += TsSetOffset_Click;
             // 
@@ -217,7 +220,7 @@ namespace DBADashGUI.Performance
             tsCustomCompare.Font = new System.Drawing.Font("Segoe UI", 9F);
             tsCustomCompare.Name = "tsCustomCompare";
             tsCustomCompare.Size = new System.Drawing.Size(193, 26);
-            tsCustomCompare.Tag = "-1";
+            tsCustomCompare.Tag = ComparePeriods.Custom;
             tsCustomCompare.Text = "Custom";
             tsCustomCompare.Click += TsCustomCompare_Click;
             // 
@@ -228,10 +231,24 @@ namespace DBADashGUI.Performance
             tsNoCompare.Font = new System.Drawing.Font("Segoe UI", 9F);
             tsNoCompare.Name = "tsNoCompare";
             tsNoCompare.Size = new System.Drawing.Size(193, 26);
-            tsNoCompare.Tag = "-1";
+            tsNoCompare.Tag = ComparePeriods.None;
             tsNoCompare.Text = "None";
             tsNoCompare.Click += TsSetOffset_Click;
-            // 
+            //
+            // toolStripSeparator3
+            //
+            toolStripSeparator3.Name = "toolStripSeparator3";
+            toolStripSeparator3.Size = new System.Drawing.Size(190, 6);
+            //
+            // tsCompareAverage
+            //
+            tsCompareAverage.CheckOnClick = true;
+            tsCompareAverage.Font = new System.Drawing.Font("Segoe UI", 9F);
+            tsCompareAverage.Name = "tsCompareAverage";
+            tsCompareAverage.Size = new System.Drawing.Size(197, 26);
+            tsCompareAverage.Text = "Average Compare Line";
+            tsCompareAverage.Click += TsCompareAverage_Click;
+            //
             // tsCols
             // 
             tsCols.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -437,6 +454,8 @@ namespace DBADashGUI.Performance
         private System.Windows.Forms.ToolStripMenuItem ts28Days;
         private System.Windows.Forms.ToolStripMenuItem ts4WeekBaseline;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
+        private System.Windows.Forms.ToolStripMenuItem tsCompareAverage;
         private System.Windows.Forms.ToolStripMenuItem tsCustomCompare;
         private System.Windows.Forms.ToolStripMenuItem tsNoCompare;
         private System.Windows.Forms.ToolStripMenuItem tsPreviousPeriod;

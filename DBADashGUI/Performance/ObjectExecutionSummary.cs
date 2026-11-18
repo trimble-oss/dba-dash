@@ -1,4 +1,5 @@
 ﻿using DBADash;
+using DBADashGUI.Charts;
 using DBADashGUI.Theme;
 using Microsoft.Data.SqlClient;
 using System;
@@ -83,13 +84,11 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private int CompareOffset => int.Parse(SelectedCompareOffsetItem.Tag?.ToString() ?? "-1");
+        /// <summary>The offset in minutes of the Compare To choice, or 0 where it isn't an offset (None, Previous, Baseline, Custom)</summary>
+        private int CompareOffset => int.TryParse(SelectedCompareOffsetItem.Tag?.ToString(), out var offset) ? offset : 0;
 
-        /// <summary>The Compare To tag for the median of the same time in the previous weeks - a baseline on the chart, not a period to compare the grid to</summary>
-        private const string BaselineTag = "-2";
-        private const int BaselineWeeks = 4;
-
-        private bool CompareBaseline => SelectedCompareOffsetItem.Tag?.ToString() == BaselineTag;
+        /// <summary>The median of the same time in the previous weeks - a baseline on the chart, not a period to compare the grid to</summary>
+        private bool CompareBaseline => SelectedCompareOffsetItem.Tag?.ToString() == ComparePeriods.Baseline;
 
         /// <summary>The grid has compare columns for a period compared to, or for the median of the baseline weeks</summary>
         private bool ShowCompareColumns => HasCompare || CompareBaseline;
@@ -97,7 +96,10 @@ namespace DBADashGUI.Performance
         private DateTime _compareTo = DateTime.MinValue;
         private DateTime _compareFrom = DateTime.MinValue;
 
-        private ToolStripMenuItem SelectedCompareOffsetItem => tsCompare.DropDownItems.OfType<ToolStripMenuItem>().FirstOrDefault(mnu => mnu.Checked, tsNoCompare);
+        /// <summary>The period choice that is checked.  The average line is a check too, but it isn't a period, so it's left out.</summary>
+        private ToolStripMenuItem SelectedCompareOffsetItem => CompareMenuPeriods.FirstOrDefault(mnu => mnu.Checked, tsNoCompare);
+
+        private IEnumerable<ToolStripMenuItem> CompareMenuPeriods => tsCompare.DropDownItems.OfType<ToolStripMenuItem>().Where(mnu => mnu != tsCompareAverage);
 
         private DateTime CompareTo
         {
@@ -241,7 +243,7 @@ namespace DBADashGUI.Performance
 
                 dgv.Columns.Clear();
                 dgv.AutoGenerateColumns = false;
-                tsCompare.Font = new Font(tsCompare.Font, ShowCompareColumns ? FontStyle.Bold : FontStyle.Regular);
+                UpdateCompareButtonFont();
                 dgv.DataSource = new DataView(dt, filter, "total_duration_sec DESC", DataViewRowState.CurrentRows);
                 dgv.Columns.AddRange(Columns.ToArray());
                 dgv.Columns["Query Store"].Visible = CurrentContext.CanMessage && CurrentContext.InstanceSupportsQueryStore;
@@ -292,8 +294,8 @@ namespace DBADashGUI.Performance
         /// </summary>
         private void AddBaselineCompare(DataTable dt)
         {
-            var weeks = Enumerable.Range(1, BaselineWeeks)
-                .Select(week => GetObjectExecutionStatsSummary(FromUTC.AddDays(-7 * week), ToUTC.AddDays(-7 * week), false))
+            var weeks = ComparePeriods.Windows(ComparePeriods.Baseline, FromUTC, ToUTC)
+                .Select(w => GetObjectExecutionStatsSummary(w.From, w.To, false))
                 .ToList();
 
             static (int InstanceID, long ObjectID) KeyOf(DataRow row) => (Convert.ToInt32(row["InstanceID"]), Convert.ToInt64(row["ObjectID"]));
@@ -319,7 +321,7 @@ namespace DBADashGUI.Performance
                 {
                     var values = weekRows.Select(wr => wr.TryGetValue(key, out var wRow) && wRow.Table.Columns.Contains(name) && wRow[name] != DBNull.Value
                         ? Convert.ToDouble(wRow[name]) : (double?)null).Where(v => v.HasValue).Select(v => v!.Value).ToList();
-                    row["compare_" + name] = values.Count == 0 ? DBNull.Value : Median(values);
+                    row["compare_" + name] = values.Count == 0 ? DBNull.Value : ComparePeriods.Median(values);
                 }
                 AddDiff(row, "avg_duration_sec", "diff_avg_duration_pct");
                 AddDiff(row, "avg_cpu_sec", "diff_avg_cpu_pct");
@@ -332,13 +334,6 @@ namespace DBADashGUI.Performance
                 if (compare == 0) return;
                 row[diffName] = (Convert.ToDouble(row[measure]) - compare) / compare;
             }
-        }
-
-        private static double Median(List<double> values)
-        {
-            var sorted = values.OrderBy(v => v).ToArray();
-            var mid = sorted.Length / 2;
-            return sorted.Length % 2 == 1 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
         }
 
         private DataTable GetObjectExecutionStatsSummary(DateTime fromUtc, DateTime toUtc, bool withCompare)
@@ -403,11 +398,21 @@ namespace DBADashGUI.Performance
 
         private void CheckCompareOffset(ToolStripItem ts)
         {
-            foreach (var itm in tsCompare.DropDownItems.OfType<ToolStripMenuItem>())
+            foreach (var itm in CompareMenuPeriods)
             {
                 itm.Checked = itm == ts;
             }
             tsCompare.Text = "Compare To: " + ts.Text;
+            UpdateCompareButtonFont();
+        }
+
+        /// <summary>
+        /// The Compare To button is bold while the grid has compare columns, so it's clear a comparison is in the grid.
+        /// The average line isn't a comparison in the grid, so it doesn't make the button bold.
+        /// </summary>
+        private void UpdateCompareButtonFont()
+        {
+            tsCompare.Font = new Font(tsCompare.Font, ShowCompareColumns ? FontStyle.Bold : FontStyle.Regular);
         }
 
         private void ObjectExecutionSummary_Load(object sender, EventArgs e)
@@ -420,6 +425,16 @@ namespace DBADashGUI.Performance
             else
             {
                 tsDateRange.SetDateRangeUtc(DateRange.FromUTC, DateRange.ToUTC);
+            }
+        }
+
+        /// <summary>The average line changes how the comparison is drawn on the chart, so the chart is drawn again.  The grid doesn't change.
+        /// Only an open chart is drawn: with no object selected the chart has no instance or object to load, and the next time it opens it takes the setting.</summary>
+        private void TsCompareAverage_Click(object sender, EventArgs e)
+        {
+            if (splitContainer1.Panel1Collapsed == false)
+            {
+                RefreshChart();
             }
         }
 
@@ -486,7 +501,8 @@ namespace DBADashGUI.Performance
             // The comparison is drawn over the chart rather than in a chart of its own.  The baseline is the median of the previous weeks
             objectExecutionLineChart1.CompareFrom = HasCompare ? CompareFrom : DateTime.MinValue;
             objectExecutionLineChart1.CompareTo = HasCompare ? CompareTo : DateTime.MinValue;
-            objectExecutionLineChart1.BaselineWeeks = CompareBaseline ? BaselineWeeks : 0;
+            objectExecutionLineChart1.BaselineWeeks = CompareBaseline ? ComparePeriods.BaselineWeeks : 0;
+            objectExecutionLineChart1.CompareAverage = tsCompareAverage.Checked;
             objectExecutionLineChart1.FromDate = FromUTC;
             objectExecutionLineChart1.ToDate = ToUTC;
             objectExecutionLineChart1.RefreshData();
