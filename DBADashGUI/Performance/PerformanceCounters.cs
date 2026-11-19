@@ -10,6 +10,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using static DBADashGUI.Performance.IMetric;
 
@@ -151,19 +152,33 @@ namespace DBADashGUI.Performance
         private int DateGrouping;
         private DataTable dt;
 
-        public void RefreshData()
+        /// <summary>Incremented by each refresh, so a refresh that has been overtaken by a newer one doesn't draw over it</summary>
+        private int refreshVersion;
+
+        public async void RefreshData()
         {
             try
             {
                 ToggleError(false);
                 SetDateGroup(DateRange.DurationMins);
-                dt = GetPerformanceCounter();
-                RefreshChart();
+                await LoadAndDrawAsync();
             }
             catch (Exception ex)
             {
                 ToggleError(true, ex.Message);
             }
+        }
+
+        /// <summary>Loads the counters and the periods compared to, then draws the chart.  A load overtaken by a newer one is not drawn.</summary>
+        private async Task LoadAndDrawAsync()
+        {
+            var version = ++refreshVersion;
+            var (data, periods) = await GetPerformanceCountersAsync();
+            if (version != refreshVersion || IsDisposed) return;
+            dt = data;
+            comparePeriods.Clear();
+            comparePeriods.AddRange(periods);
+            RefreshChart();
         }
 
         private void ToggleError(bool show, string message = "")
@@ -393,10 +408,13 @@ namespace DBADashGUI.Performance
         private DateTime EffectiveTo => ToDate == DateTime.MinValue ? DateRange.ToUTC : ToDate;
 
         /// <summary>The periods compared to, as (from, to) in UTC, for the period from <paramref name="from"/> to <paramref name="to"/></summary>
-        private DataTable GetPerformanceCounter()
+        /// <summary>
+        /// The counters for the period viewed, and each period compared to with its shift.  The queries run together on
+        /// background threads, so the window isn't held up by the four weekly baseline queries running one after another.
+        /// </summary>
+        private async Task<(DataTable Data, List<(DataTable Table, TimeSpan Shift)> Periods)> GetPerformanceCountersAsync()
         {
-            comparePeriods.Clear();
-            if (Metric.Counters == null) return new DataTable();
+            if (Metric.Counters == null) return (new DataTable(), new List<(DataTable Table, TimeSpan Shift)>());
 
             var counterIds = Metric.Counters.Where(c => c.CounterID > 0).Select(c => c.CounterID).Distinct().ToList().AsDataTable();
             if (counterIds.Rows.Count == 0)
@@ -405,11 +423,13 @@ namespace DBADashGUI.Performance
             }
             var from = EffectiveFrom;
             var to = EffectiveTo;
-            foreach (var (windowFrom, windowTo) in ComparePeriods.Windows(compareSelection, from, to))
-            {
-                comparePeriods.Add((FetchCounters(counterIds, windowFrom, windowTo), from - windowFrom));
-            }
-            return FetchCounters(counterIds, from, to);
+            var windows = ComparePeriods.Windows(compareSelection, from, to);
+            var windowFetches = windows.Select(w => Task.Run(() => FetchCounters(counterIds, w.From, w.To))).ToArray();
+            var viewedFetch = Task.Run(() => FetchCounters(counterIds, from, to));
+
+            var windowTables = await Task.WhenAll(windowFetches);
+            var periods = windows.Zip(windowTables, (w, table) => (table, from - w.From)).ToList();
+            return (await viewedFetch, periods);
         }
 
         private DataTable FetchCounters(DataTable counterIds, DateTime from, DateTime to)
@@ -465,6 +485,18 @@ namespace DBADashGUI.Performance
         }
 
         /// <summary>
+        /// Moves a time to the nearest point of the date grouping's grid, counted from midnight UTC on 1 January 2000.  The
+        /// same bucket in each week then lands on the same time, even where the snapshots aren't exactly on the bucket times,
+        /// so the weeks' values are medianed together rather than each standing alone.
+        /// </summary>
+        private static DateTime SnapToGrid(DateTime utc, TimeSpan step)
+        {
+            var grid = new DateTime(2000, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            var steps = Math.Round((utc - grid).TotalMinutes / step.TotalMinutes, MidpointRounding.AwayFromZero);
+            return grid.AddMinutes(steps * step.TotalMinutes);
+        }
+
+        /// <summary>
         /// The compared periods as one overlay.  Each point is moved onto the period viewed, and where there's more than one period (the baseline weeks)
         /// it's the median of the periods' values at that time.  The average option instead draws each series as a straight line at its average.
         /// </summary>
@@ -477,9 +509,10 @@ namespace DBADashGUI.Performance
 
             // The values of each series at each time, from every period
             var valuesByTime = new SortedDictionary<DateTime, Dictionary<string, List<double>>>();
+            var gridStep = TimeSpan.FromMinutes(Math.Max(1, DateGrouping));
             foreach (var (periodTable, shift) in comparePeriods)
             {
-                foreach (var p in FlattenSeries(periodTable, seriesByCounter, t => t.AppTimeZoneToUtc().Add(shift).ToAppTimeZone()))
+                foreach (var p in FlattenSeries(periodTable, seriesByCounter, t => SnapToGrid(t.AppTimeZoneToUtc().Add(shift), gridStep).ToAppTimeZone()))
                 {
                     if (!valuesByTime.TryGetValue(p.Time, out var bySeries))
                     {
@@ -565,15 +598,14 @@ namespace DBADashGUI.Performance
                 : t + "\n(Click to edit)");
         }
 
-        private void TsDateGrouping_Click(object sender, EventArgs e)
+        private async void TsDateGrouping_Click(object sender, EventArgs e)
         {
             var ts = (ToolStripMenuItem)sender;
             DateGrouping = Convert.ToInt32(ts.Tag);
             tsDateGrouping.Text = DateHelper.DateGroupString(DateGrouping);
             try
             {
-                dt = GetPerformanceCounter();
-                RefreshChart();
+                await LoadAndDrawAsync();
             }
             catch (Exception ex)
             {
