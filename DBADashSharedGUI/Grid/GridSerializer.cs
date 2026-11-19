@@ -3,6 +3,7 @@ using System;
 using System.Data;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Text;
 
 namespace DBADashGUI.CustomReports
@@ -18,6 +19,8 @@ namespace DBADashGUI.CustomReports
     ///   <item><b>.json.gz</b> - the same JSON, gzip-compressed.  Best for large traces (event JSON compresses very
     ///   well) while staying re-openable.</item>
     /// </list>
+    /// Any other JSON opens too - a sequence of records such as JSON lines or a structured log - see
+    /// <see cref="JsonRecords"/>.
     /// Used both for the general grid export (right-click a grid) and the XE trace file viewer's save/reload, so any
     /// grid's data can be saved and re-opened.
     /// </summary>
@@ -41,11 +44,22 @@ namespace DBADashGUI.CustomReports
             "Compressed XML (*.xml.gz)|*.xml.gz|DataSet XML (*.xml)|*.xml|" +
             "JSON (*.json)|*.json|Compressed JSON (*.json.gz)|*.json.gz";
 
-        /// <summary>Filter for an Open dialog offering all native formats.</summary>
+        /// <summary>
+        /// Extensions for a sequence of JSON records - JSON lines, and Serilog's compact log format - which open as a
+        /// grid (see <see cref="JsonRecords"/>), but aren't a format grids are saved in.
+        /// </summary>
+        public static readonly string[] JsonRecordsExtensions = [".jsonl", ".ndjson", ".clef"];
+
+        /// <summary>Filter for an Open dialog offering all native formats, and JSON records.</summary>
         public const string OpenFilter =
             "DBA Dash grid files (*.json;*.json.gz;*.xml;*.xml.gz)|*.json;*.json.gz;*.xml;*.xml.gz|" +
             "JSON (*.json)|*.json|Compressed JSON (*.json.gz)|*.json.gz|" +
-            "DataTable XML (*.xml)|*.xml|Compressed XML (*.xml.gz)|*.xml.gz";
+            "DataTable XML (*.xml)|*.xml|Compressed XML (*.xml.gz)|*.xml.gz|" +
+            "JSON lines and logs (*.jsonl;*.ndjson;*.clef)|*.jsonl;*.ndjson;*.clef";
+
+        /// <summary>True for a JSON lines or compact log file, by its extension.</summary>
+        public static bool IsJsonRecordsExtension(string path) =>
+            JsonRecordsExtensions.Any(extension => EndsWith(path, extension));
 
         private enum Format
         { Json, Xml }
@@ -149,7 +163,7 @@ namespace DBADashGUI.CustomReports
         /// </summary>
         public static DataSet LoadDataSet(string path)
         {
-            var (fmt, compressed) = Resolve(path);
+            var (fmt, compressed) = IsJsonRecordsExtension(path) ? (Format.Json, false) : Resolve(path);
 
             if (fmt == Format.Xml && IsSsmsResultsXml(path, compressed))
             {
@@ -159,33 +173,25 @@ namespace DBADashGUI.CustomReports
                 return results;
             }
 
-            using var inStream = OpenRead(path, compressed);
-
             if (fmt == Format.Xml)
             {
                 // DataTable.WriteXml with its schema writes a DataSet-shaped document too, so this reads both.
+                using var inStream = OpenRead(path, compressed);
                 var ds = new DataSet();
                 ds.ReadXml(inStream);
                 return ds;
             }
 
-            using var reader = new StreamReader(inStream);
-            var json = reader.ReadToEnd();
-
-            // A DataTable serializes as an array of rows; a DataSet as an object of named tables.
-            if (json.TrimStart().StartsWith('{'))
-            {
-                return JsonConvert.DeserializeObject<DataSet>(json) ?? new DataSet();
-            }
-
-            var single = new DataSet();
-            single.Tables.Add(JsonConvert.DeserializeObject<DataTable>(json) ?? new DataTable());
-            return single;
+            // A DataTable export, a DataSet export, or JSON records such as a log - told apart by parsing, not layout.
+            return JsonRecords.Load(() => new StreamReader(OpenRead(path, compressed)));
         }
 
+        /// <summary>
+        /// Shared for reading and writing, so a log file can be opened while the program writing it still has it open.
+        /// </summary>
         private static Stream OpenRead(string path, bool compressed)
         {
-            var fileStream = File.OpenRead(path);
+            var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
             return compressed ? new GZipStream(fileStream, CompressionMode.Decompress) : fileStream;
         }
 
