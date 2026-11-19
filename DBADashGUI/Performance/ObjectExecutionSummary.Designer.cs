@@ -159,11 +159,11 @@ namespace DBADashGUI.Performance
             // tsCompare
             // 
             tsCompare.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { tsPreviousPeriod, ts24Hrs, ts7Days, ts28Days, ts4WeekBaseline, toolStripSeparator2, tsCustomCompare, tsNoCompare, toolStripSeparator3, tsCompareAverage });
-            tsCompare.Image = Properties.Resources.Time_16x;
+            tsCompare.Image = Properties.Resources.Baseline_16x;
             tsCompare.ImageTransparentColor = System.Drawing.Color.Magenta;
             tsCompare.Name = "tsCompare";
             tsCompare.Size = new System.Drawing.Size(124, 24);
-            tsCompare.Text = "Compare To";
+            tsCompare.Text = "Baseline";
             // 
             // tsPreviousPeriod
             // 
@@ -171,7 +171,7 @@ namespace DBADashGUI.Performance
             tsPreviousPeriod.Name = "tsPreviousPeriod";
             tsPreviousPeriod.Size = new System.Drawing.Size(193, 26);
             tsPreviousPeriod.Tag = ComparePeriods.Previous;
-            tsPreviousPeriod.Text = "Previous Period";
+            tsPreviousPeriod.Text = "Previous period";
             tsPreviousPeriod.Click += TsSetOffset_Click;
             // 
             // ts24Hrs
@@ -180,7 +180,7 @@ namespace DBADashGUI.Performance
             ts24Hrs.Name = "ts24Hrs";
             ts24Hrs.Size = new System.Drawing.Size(193, 26);
             ts24Hrs.Tag = "1440";
-            ts24Hrs.Text = "-24hrs offset";
+            ts24Hrs.Text = "24 hours earlier";
             ts24Hrs.Click += TsSetOffset_Click;
             // 
             // ts7Days
@@ -189,7 +189,7 @@ namespace DBADashGUI.Performance
             ts7Days.Name = "ts7Days";
             ts7Days.Size = new System.Drawing.Size(193, 26);
             ts7Days.Tag = "10080";
-            ts7Days.Text = "-7 days offset";
+            ts7Days.Text = "7 days earlier";
             ts7Days.Click += TsSetOffset_Click;
             //
             // ts28Days
@@ -198,7 +198,7 @@ namespace DBADashGUI.Performance
             ts28Days.Name = "ts28Days";
             ts28Days.Size = new System.Drawing.Size(193, 26);
             ts28Days.Tag = "40320";
-            ts28Days.Text = "-28 days offset (4 weeks)";
+            ts28Days.Text = "4 weeks earlier";
             ts28Days.Click += TsSetOffset_Click;
             //
             // ts4WeekBaseline
@@ -246,7 +246,7 @@ namespace DBADashGUI.Performance
             tsCompareAverage.Font = new System.Drawing.Font("Segoe UI", 9F);
             tsCompareAverage.Name = "tsCompareAverage";
             tsCompareAverage.Size = new System.Drawing.Size(197, 26);
-            tsCompareAverage.Text = "Average Compare Line";
+            tsCompareAverage.Text = "Show Baseline as Average";
             tsCompareAverage.Click += TsCompareAverage_Click;
             //
             // tsCols

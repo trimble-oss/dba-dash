@@ -81,11 +81,10 @@ namespace DBADashGUI.Performance
 
         private bool HasBaseline => BaselineWeeks > 0;
 
-        /// <summary>Draw the comparison as a straight line at each series' average, rather than over time.  Set from the Compare To menu.</summary>
+        /// <summary>Draw the comparison as a straight line at each series' average, rather than over time.  Set from the Baseline menu.</summary>
         public bool CompareAverage;
 
         /// <summary>The name of a comparison series is the metric's name with this on the end</summary>
-        private const string CompareSuffix = " (compare)";
         private const string BaselineSuffix = " (baseline)";
 
 
@@ -249,7 +248,7 @@ namespace DBADashGUI.Performance
             };
 
             var overlays = comparePeriods.Count > 0
-                ? BuildCompareOverlays(comparePeriods, HasBaseline ? BaselineSuffix : CompareSuffix, visibleColumns, seriesNames, columnAxisNames, axisNameToIndexMap, CompareAverage, colours)
+                ? BuildCompareOverlays(comparePeriods, BaselineSuffix, visibleColumns, seriesNames, columnAxisNames, axisNameToIndexMap, CompareAverage, colours)
                 : null;
 
             ChartHelper.UpdateChart(chart1, dt, config, overlays);

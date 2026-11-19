@@ -164,7 +164,7 @@ namespace DBADashGUI.Performance
         {
             if (sender.GetType() != typeof(ToolStripMenuItem)) return;
             var mnu = (ToolStripMenuItem)sender;
-            foreach (var name in new[] { mnu.Text, "Compare " + mnu.Text })
+            foreach (var name in new[] { mnu.Text, "Baseline " + mnu.Text })
             {
                 if (dgv.Columns.Contains(name))
                 {
@@ -189,7 +189,7 @@ namespace DBADashGUI.Performance
                     if (!ShowCompareColumns || col is DataGridViewLinkColumn) continue; // A link has nothing to compare
                     var compareCol = new DataGridViewTextBoxColumn
                     {
-                        Name = "Compare " + col.Name,
+                        Name = "Baseline " + col.Name,
                         DataPropertyName = "compare_" + col.DataPropertyName,
                         DisplayIndex = displayIdx,
                         DefaultCellStyle = col.DefaultCellStyle.Clone()
@@ -225,7 +225,7 @@ namespace DBADashGUI.Performance
 
         public void RefreshData()
         {
-            var status = FromUTC.ToAppTimeZone() + " - " + ToUTC.ToAppTimeZone() + (HasCompare ? " comparing to " + CompareFrom.ToAppTimeZone() + " - " + CompareTo.ToAppTimeZone() : "");
+            var status = FromUTC.ToAppTimeZone() + " - " + ToUTC.ToAppTimeZone() + (HasCompare ? ", baseline: " + CompareFrom.ToAppTimeZone() + " - " + CompareTo.ToAppTimeZone() : "");
             lblStatus.ForeColor = Color.Black;
             lblStatus.Text = "Refreshing Data...";
             Cursor = Cursors.WaitCursor;
@@ -402,7 +402,7 @@ namespace DBADashGUI.Performance
             {
                 itm.Checked = itm == ts;
             }
-            tsCompare.Text = "Compare To: " + ts.Text;
+            tsCompare.Text = "Baseline: " + ts.Text;
             UpdateCompareButtonFont();
         }
 
