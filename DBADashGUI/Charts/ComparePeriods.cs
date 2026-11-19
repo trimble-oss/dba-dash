@@ -5,7 +5,7 @@ using System.Linq;
 namespace DBADashGUI.Charts
 {
     /// <summary>
-    /// The Compare To choices shared by the Metrics and Object Execution charts, and the arithmetic they both need.
+    /// The Baseline choices shared by the Metrics and Object Execution charts, and the arithmetic they both need.
     /// A choice is stored as its key, so a saved view keeps working: "None", "Previous", "Baseline", or an offset in minutes.
     /// </summary>
     public static class ComparePeriods
@@ -22,10 +22,10 @@ namespace DBADashGUI.Charts
         public static readonly (string Text, string Key)[] Options =
         {
             ("None", None),
-            ("Previous Period", Previous),
-            ("-24hrs offset", "1440"),
-            ("-7 days offset", "10080"),
-            ("-28 days offset (4 weeks)", "40320"),
+            ("Previous period", Previous),
+            ("24 hours earlier", "1440"),
+            ("7 days earlier", "10080"),
+            ("4 weeks earlier", "40320"),
             ("Median of last 4 weeks (same time)", Baseline),
         };
 

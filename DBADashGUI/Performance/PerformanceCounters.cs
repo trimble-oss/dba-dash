@@ -43,13 +43,13 @@ namespace DBADashGUI.Performance
             tsCompare.DropDownItems.Add(new ToolStripSeparator());
             tsCompareAverage.Click += TsCompareAverage_Click;
             tsCompare.DropDownItems.Add(tsCompareAverage);
-            tsCompare.Text = "Compare To";
-            tsCompare.ToolTipText = "Compare to another period";
+            tsCompare.Text = "Baseline";
+            tsCompare.ToolTipText = "Baseline: a dashed line for the period compared to, lined up with the period viewed";
             toolStrip1.Items.Insert(toolStrip1.Items.IndexOf(tsConfigure) + 1, tsCompare);
         }
 
-        private readonly ToolStripDropDownButton tsCompare = new() { Image = Properties.Resources.Time_16x, ImageTransparentColor = System.Drawing.Color.Magenta, DisplayStyle = ToolStripItemDisplayStyle.Image };
-        private readonly ToolStripMenuItem tsCompareAverage = new("Average Compare Line") { CheckOnClick = true };
+        private readonly ToolStripDropDownButton tsCompare = new() { Image = Properties.Resources.Baseline_16x, ImageTransparentColor = System.Drawing.Color.Magenta, DisplayStyle = ToolStripItemDisplayStyle.Image };
+        private readonly ToolStripMenuItem tsCompareAverage = new("Show Baseline as Average") { CheckOnClick = true };
 
         /// <summary>The Compare To selection, kept with the chart's metric so it's saved with the view - see <see cref="CreateCompareMenu"/></summary>
         private string compareSelection => Metric.CompareSelection ?? ComparePeriods.None;
@@ -62,7 +62,7 @@ namespace DBADashGUI.Performance
             {
                 item.Checked = (string)item.Tag == compareSelection;
             }
-            tsCompare.Text = compareSelection == ComparePeriods.None ? "Compare To" : "Compare: " + tsCompare.DropDownItems.OfType<ToolStripMenuItem>().FirstOrDefault(m => m.Checked)?.Text;
+            tsCompare.Text = compareSelection == ComparePeriods.None ? "Baseline" : "Baseline: " + tsCompare.DropDownItems.OfType<ToolStripMenuItem>().FirstOrDefault(m => m.Checked)?.Text;
             tsCompareAverage.Checked = Metric.CompareAverage;
         }
 
@@ -504,7 +504,7 @@ namespace DBADashGUI.Performance
             IReadOnlyList<string> seriesOrder, IReadOnlyDictionary<string, System.Drawing.Color> colours,
             out Dictionary<string, (int Axis, System.Drawing.Color Colour)> lines)
         {
-            var suffix = compareSelection == ComparePeriods.Baseline ? " (baseline)" : " (compare)";
+            const string suffix = " (baseline)";
             lines = new Dictionary<string, (int Axis, System.Drawing.Color Colour)>();
 
             // The values of each series at each time, from every period
