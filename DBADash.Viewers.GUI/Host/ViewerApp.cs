@@ -187,12 +187,13 @@ namespace DBADashGUI.Viewers
         /// <summary>
         /// The files the viewers open, for the Open dialog: .sqlplan and .xdl, the .xml either of them is also saved
         /// as, and the grid files DBA Dash exports (<see cref="GridSerializer"/>) - which is also how the SSMS extension
-        /// hands over a results grid.
+        /// hands over a results grid - along with other JSON, such as JSON lines and structured logs.
         /// </summary>
         public const string OpenFileFilter =
-            "Query plans, deadlock graphs and grids (*.sqlplan;*.xdl;*.xml;*.json;*.json.gz;*.xml.gz)|*.sqlplan;*.xdl;*.xml;*.json;*.json.gz;*.xml.gz|" +
+            "Query plans, deadlock graphs and grids (*.sqlplan;*.xdl;*.xml;*.json;*.json.gz;*.xml.gz;*.jsonl;*.ndjson;*.clef)|*.sqlplan;*.xdl;*.xml;*.json;*.json.gz;*.xml.gz;*.jsonl;*.ndjson;*.clef|" +
             "Query plan (*.sqlplan)|*.sqlplan|Deadlock graph (*.xdl)|*.xdl|XML (*.xml)|*.xml|" +
-            "Grid (*.json;*.json.gz;*.xml.gz)|*.json;*.json.gz;*.xml.gz|All files (*.*)|*.*";
+            "Grid (*.json;*.json.gz;*.xml.gz)|*.json;*.json.gz;*.xml.gz|" +
+            "JSON lines and logs (*.jsonl;*.ndjson;*.clef)|*.jsonl;*.ndjson;*.clef|All files (*.*)|*.*";
 
         /// <summary>
         /// A grid file DBA Dash exports - by extension alone.  A grid saved as a bare .xml can't be told apart from a
@@ -202,7 +203,8 @@ namespace DBADashGUI.Viewers
         private static bool IsGridFile(string file) =>
             file.EndsWith(GridSerializer.JsonExtension, StringComparison.OrdinalIgnoreCase) ||
             file.EndsWith(GridSerializer.CompressedJsonExtension, StringComparison.OrdinalIgnoreCase) ||
-            file.EndsWith(GridSerializer.CompressedXmlExtension, StringComparison.OrdinalIgnoreCase);
+            file.EndsWith(GridSerializer.CompressedXmlExtension, StringComparison.OrdinalIgnoreCase) ||
+            GridSerializer.IsJsonRecordsExtension(file);
 
         /// <summary>True for a file the viewers can open, by its extension - what a window accepts dropped on it.</summary>
         public static bool CanOpen(string file) =>

@@ -61,12 +61,40 @@ namespace DBADashGUI.Grids
             _grid.CellContentClick += Grid_CellContentClick;
 
             Controls.Add(_grid);
+            // Docked after the toolbar, so below it: what went wrong reading the file, where something did.
+            if (table.ExtendedProperties[JsonRecords.LoadWarningProperty] is string warning)
+            {
+                Controls.Add(new NoticeLabel { Text = warning, Dock = DockStyle.Top });
+            }
+
             Controls.Add(BuildToolbar());
 
             // A DataView rather than the table, as that's what the grid's filtering works through.
             _grid.DataSource = new DataView(table);
 
             this.ApplyTheme();
+        }
+
+        /// <summary>The warning shown above the grid, or null - see <see cref="JsonRecords.LoadWarningProperty"/>.</summary>
+        public string Notice => Controls.OfType<NoticeLabel>().FirstOrDefault()?.Text;
+
+        /// <summary>A one-line warning across the top of the grid, in the theme's warning colours.</summary>
+        private sealed class NoticeLabel : Label, IThemedControl
+        {
+            public NoticeLabel()
+            {
+                AutoSize = false;
+                AutoEllipsis = true;
+                Padding = new Padding(6, 0, 6, 0);
+                Height = TextRenderer.MeasureText("X", Font).Height + 8;
+                TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            }
+
+            public void ApplyTheme(BaseTheme theme)
+            {
+                BackColor = theme.WarningLowBackColor;
+                ForeColor = theme.WarningLowForeColor;
+            }
         }
 
         /// <summary>What the tab is called: the name the result set was opened with.</summary>
