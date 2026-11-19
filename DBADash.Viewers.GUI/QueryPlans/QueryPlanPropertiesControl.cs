@@ -974,6 +974,7 @@ namespace DBADashGUI.QueryPlans
 
         private void RemoveCard(int index)
         {
+            InsightCard.ReleaseActiveControl(_cards[index].Card);
             _cards[index].Card.Dispose();
             _cards.RemoveAt(index);
             _cardContent.RemoveAt(index);

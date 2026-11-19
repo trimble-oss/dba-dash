@@ -192,6 +192,7 @@ namespace DBADashGUI.Performance
             while (Controls.Count > 0)
             {
                 var card = Controls[^1];
+                InsightCard.ReleaseActiveControl(card);
                 Controls.RemoveAt(Controls.Count - 1);
                 card.Dispose();
             }

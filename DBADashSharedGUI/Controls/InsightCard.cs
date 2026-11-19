@@ -235,6 +235,30 @@ namespace DBADashGUI.Controls
         }
 
         /// <summary>
+        /// Stop the containers above <paramref name="control"/> from holding it, or anything in it, as their active
+        /// control.  Call before removing a card that is about to be disposed.
+        /// <para>
+        /// A card's link can become the active control without being clicked: removing the focused control (e.g. a
+        /// chart cleared on refresh) moves focus to the next tab stop, which can be a link.  When the card is then
+        /// removed, WinForms looks for another control to activate, and can settle on the link again, because it
+        /// compares the active control with the card being removed rather than with what is inside it.  The
+        /// container is left holding the link, which is then disposed, and the next activation of the window throws
+        /// an ObjectDisposedException trying to focus it - issue 2315.
+        /// </para>
+        /// </summary>
+        public static void ReleaseActiveControl(Control control)
+        {
+            for (var parent = control.Parent; parent != null; parent = parent.Parent)
+            {
+                if (parent is ContainerControl container && container.ActiveControl is { } active &&
+                    (active == control || control.Contains(active)))
+                {
+                    container.ActiveControl = null;
+                }
+            }
+        }
+
+        /// <summary>
         /// The height <paramref name="label"/>'s text needs when wrapped to <paramref name="width"/>.
         /// <para>
         /// Ask the label rather than measuring with <see cref="TextRenderer"/>: a <see cref="LinkLabel"/>
