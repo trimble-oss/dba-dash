@@ -17,6 +17,12 @@
     <Setting Name="RunningQueriesInsightsMode" Type="System.String" Scope="User">
       <Value Profile="(Default)">WithSummary</Value>
     </Setting>
+    <Setting Name="RunningQueriesSummaryChartVisible" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="RunningQueriesSummaryChartLine" Type="System.String" Scope="User">
+      <Value Profile="(Default)">SumMemoryGrantMB</Value>
+    </Setting>
     <Setting Name="SuppressXETraceWarning" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>

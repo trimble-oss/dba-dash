@@ -85,6 +85,30 @@ namespace DBADashGUI.Properties {
 
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool RunningQueriesSummaryChartVisible {
+            get {
+                return ((bool)(this["RunningQueriesSummaryChartVisible"]));
+            }
+            set {
+                this["RunningQueriesSummaryChartVisible"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("SumMemoryGrantMB")]
+        public string RunningQueriesSummaryChartLine {
+            get {
+                return ((string)(this["RunningQueriesSummaryChartLine"]));
+            }
+            set {
+                this["RunningQueriesSummaryChartLine"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool SuppressXETraceWarning {
             get {

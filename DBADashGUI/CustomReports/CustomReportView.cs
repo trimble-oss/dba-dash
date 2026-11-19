@@ -3865,15 +3865,6 @@ namespace DBADashGUI.CustomReports
         }
 
         /// <summary>
-        /// How far the pointer must move before the cursor is worked out again.  Hit testing a chart on
-        /// every mouse move is wasted work - the cursor only changes when the pointer leaves a point.
-        /// </summary>
-        private const int ChartMouseMoveThresholdPixels = 3;
-
-        /// <summary>How far the pointer may travel between press and release and still count as a click.</summary>
-        private const int ChartClickTolerancePixels = 3;
-
-        /// <summary>
         /// Makes a chart's points clickable where the report gives the chart a drill-down.
         ///
         /// The row behind a point is resolved when the click happens rather than captured here: cartesian
@@ -3884,63 +3875,22 @@ namespace DBADashGUI.CustomReports
         {
             if (chartControl == null || chartWrapper?.DrillDown == null || chartWrapper.Config == null) return;
 
-            // Navigating on release rather than on press, and only where the pointer stayed put: a press on
-            // a chart can be the start of a drag - resizing the panel from its edge, or panning the chart -
-            // and drilling away in the middle of one would be the last thing the user asked for.
-            var pressedAt = (System.Drawing.Point?)null;
-            chartControl.MouseDown += (_, e) => pressedAt = e.Button == MouseButtons.Left ? e.Location : null;
-
-            chartControl.MouseUp += (_, e) =>
-            {
-                var pressed = pressedAt;
-                pressedAt = null;
-                if (e.Button != MouseButtons.Left || pressed == null) return;
-                if (Math.Abs(e.X - pressed.Value.X) > ChartClickTolerancePixels
-                    || Math.Abs(e.Y - pressed.Value.Y) > ChartClickTolerancePixels) return;
-
-                var row = FindChartDrillDownRow(chartControl, chartWrapper, e.Location);
-                if (row == null) return;
-                try
+            // The panel's resize helper also sets the cursor - AttachPointClick only clears a hand it set itself, leaving its resize arrows at the panel edges
+            ChartHelper.AttachPointClick(chartControl,
+                location => FindChartDrillDownRow(chartControl, chartWrapper, location) != null,
+                location =>
                 {
-                    chartWrapper.DrillDown.Navigate(GetContext(), new DataRowDrillDownSource(row), chartWrapper.TableIndex, this);
-                }
-                catch (Exception ex)
-                {
-                    CommonShared.ShowExceptionDialog(ex, "Error navigating to link");
-                }
-            };
-
-            // Whether the pointer is over a point is worked out only when it has moved enough to be worth
-            // hit testing again, but the cursor is set from that answer on every move.  The panel's resize
-            // helper sets the cursor on every move too, so a hand set once is cleared again by the next
-            // twitch of the mouse - which is why re-asserting it is not the redundancy it looks like.
-            var lastPosition = System.Drawing.Point.Empty;
-            var overPoint = false;
-            chartControl.MouseMove += (_, e) =>
-            {
-                if (Math.Abs(e.X - lastPosition.X) > ChartMouseMoveThresholdPixels
-                    || Math.Abs(e.Y - lastPosition.Y) > ChartMouseMoveThresholdPixels)
-                {
-                    lastPosition = e.Location;
-                    overPoint = FindChartDrillDownRow(chartControl, chartWrapper, e.Location) != null;
-                }
-                if (overPoint)
-                {
-                    if (chartControl.Cursor != Cursors.Hand) chartControl.Cursor = Cursors.Hand;
-                }
-                else if (chartControl.Cursor == Cursors.Hand)
-                {
-                    // Only the cursor this handler set is cleared - the resize helper owns the cursor
-                    // elsewhere, and its resize arrows are the point of the panel edges.
-                    chartControl.Cursor = Cursors.Default;
-                }
-            };
-
-            chartControl.MouseLeave += (_, _) =>
-            {
-                overPoint = false;
-                if (chartControl.Cursor == Cursors.Hand) chartControl.Cursor = Cursors.Default;
-            };
+                    var row = FindChartDrillDownRow(chartControl, chartWrapper, location);
+                    if (row == null) return;
+                    try
+                    {
+                        chartWrapper.DrillDown.Navigate(GetContext(), new DataRowDrillDownSource(row), chartWrapper.TableIndex, this);
+                    }
+                    catch (Exception ex)
+                    {
+                        CommonShared.ShowExceptionDialog(ex, "Error navigating to link");
+                    }
+                });
         }
 
         /// <summary>

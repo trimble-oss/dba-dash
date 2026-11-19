@@ -742,6 +742,7 @@
     <Build Include="dbo\Stored Procedures\RunningQueries_Upd.sql" />
     <Build Include="dbo\Stored Procedures\RunningQueriesServerSummary_Get.sql" />
     <Build Include="dbo\Stored Procedures\RunningQueriesSummary_Get.sql" />
+    <Build Include="dbo\Stored Procedures\RunningQueriesSummaryChart_Get.sql" />
     <Build Include="dbo\Tables\QueryPlans.sql" />
     <Build Include="dbo\Tables\RunningQueryLiveProfiles.sql" />
     <Build Include="dbo\Tables\QueryText.sql" />
