@@ -56,7 +56,51 @@ namespace DBADashGUI.Performance
             splitContainer1.Panel1.SizeChanged += (_, _) => LimitInsightsHeight();
             LimitInsightsHeight();
             UpdateInsightsModeMenu();
+
+            // Chart of running queries over time, above the snapshot list for an instance.  Added after the insights panel so it docks first (top).
+            // The splitter is added before the chart so it docks directly beneath it.
+            summaryChart = new RunningQueriesSummaryChart { Dock = DockStyle.Top, Height = 260, Visible = false };
+            summaryChartSplitter = new Splitter { Dock = DockStyle.Top, Height = 4, Visible = false };
+            splitContainer1.Panel1.Controls.Add(summaryChartSplitter);
+            splitContainer1.Panel1.Controls.Add(summaryChart);
+            summaryChart.SnapshotSelected += (_, e) =>
+            {
+                if (e.NewWindow)
+                {
+                    OpenInNewWindow(e.SnapshotDateUTC, InstanceID);
+                    return;
+                }
+                IsForceDetail = false;
+                LoadSnapshot(e.SnapshotDateUTC);
+            };
+            summaryChart.ViewRangeChanged += (_, _) => LoadSummaryGridOnly();
+            tsChart = new ToolStripButton("Chart", Properties.Resources.StackedColumnChart_24x)
+            {
+                CheckOnClick = true,
+                Checked = Properties.Settings.Default.RunningQueriesSummaryChartVisible,
+                Visible = false,
+                ToolTipText = "Show a chart of running queries over time above the snapshot list"
+            };
+            tsChart.CheckedChanged += (_, _) =>
+            {
+                Properties.Settings.Default.RunningQueriesSummaryChartVisible = tsChart.Checked;
+                Properties.Settings.Default.Save();
+                if (!tsChart.Checked && summaryChart.IsZoomed)
+                {
+                    // The zoom can't be seen or undone with the chart hidden, so go back to the full range
+                    summaryChart.ResetZoom();
+                }
+                RefreshData();
+            };
+            toolStrip1.Items.Add(tsChart);
         }
+
+        private readonly RunningQueriesSummaryChart summaryChart;
+        private readonly Splitter summaryChartSplitter;
+        private readonly ToolStripButton tsChart;
+
+        /// <summary>Set while reloading the snapshot list after the chart zoomed, as the chart has already loaded the range</summary>
+        private bool summaryChartLoaded;
 
         private readonly InsightsPanel insightsPanel;
 
@@ -662,6 +706,7 @@ namespace DBADashGUI.Performance
             dgv.DataSource = null;
             InstanceID = _context.InstanceID;
             IsForceDetail = false;
+            summaryChart.ResetZoom();
             if (InstanceIDs is { Count: 1 })
             {
                 InstanceID = InstanceIDs.First();
@@ -719,6 +764,23 @@ namespace DBADashGUI.Performance
             tsTriggerCollection.Visible = DBADashUser.AllowMessaging && !IsServerLevelSummary && JobId == Guid.Empty &&
                                           SessionID == 0 && CollectionMessaging.IsMessagingEnabled(InstanceID);
             lblSnapshotDate.Visible = SnapshotDateFrom == SnapshotDateTo && !IsForceDetail;
+            // Shown by LoadSummaryData for an instance's list of snapshots.  The chart itself is left as it is here and hidden by RefreshData / LoadSummaryData
+            // where the view isn't one, so refreshing the summary doesn't hide and re-show it.
+            tsChart.Visible = false;
+        }
+
+        /// <summary>Reload the list of snapshots for the range the chart has zoomed to, without reloading the chart</summary>
+        private void LoadSummaryGridOnly()
+        {
+            summaryChartLoaded = true;
+            try
+            {
+                RefreshData();
+            }
+            finally
+            {
+                summaryChartLoaded = false;
+            }
         }
 
         public void RefreshData()
@@ -754,6 +816,7 @@ namespace DBADashGUI.Performance
             {
                 if (detail) // Show a specific blocking snapshot (e.g. Blocking chart drill down)
                 {
+                    SetSummaryChartVisible(false);
                     var filters = IsForceDetail
                         ? forceDetailFilters
                         : new RunningQueriesFilters()
@@ -970,13 +1033,15 @@ namespace DBADashGUI.Performance
             tsStatus.Visible = false;
             if (IsServerLevelSummary) // Show a list of snapshots for the selected database instance
             {
+                SetSummaryChartVisible(false);
                 dt = RunningQueriesServerSummary();
                 tsBack.Enabled = false;
             }
             else // Show the last snapshot for all instances
             {
+                LoadSummaryChart();
                 dt = RunningQueriesSummary();
-                tsBack.Enabled = CurrentContext?.InstanceIDs is { Count: > 1 };
+                tsBack.Enabled = CurrentContext?.InstanceIDs is { Count: > 1 } || summaryChart.IsZoomed;
                 lblRowLimit.Visible = dt.Rows.Count == Properties.Settings.Default.RunningQueriesSummaryMaxRows;
                 tsEditLimit.Visible = true;
             }
@@ -1181,6 +1246,39 @@ namespace DBADashGUI.Performance
             Common.ReplaceBinaryContextInfoColumn(ref dt);
         }
 
+        /// <summary>Show (and load) the chart above an instance's list of snapshots, if the user has it switched on</summary>
+        private void LoadSummaryChart()
+        {
+            tsChart.Visible = true;
+            // Not when reloading the grid after a zoom: the chart has just loaded the range the zoom set.  For a range up to now, SetRange
+            // would move the dates on to the current time after the last Zoom Out, leaving the grid showing a later range than the chart.
+            if (!summaryChartLoaded)
+            {
+                summaryChart.SetRange(InstanceID, DateRange.FromUTC, DateRange.ToUTC, DateRange.SelectedTimeSpan);
+            }
+            var show = tsChart.Checked;
+            SetSummaryChartVisible(show);
+            if (!show) return;
+            summaryChart.ApplyTheme(DBADashUser.SelectedTheme);
+            if (!summaryChartLoaded)
+            {
+                summaryChart.RefreshData();
+            }
+        }
+
+        /// <summary>
+        /// Show or hide the chart and its splitter.  Only changed where it differs, so refreshing the summary (e.g. auto refresh) doesn't
+        /// collapse and re-expand the chart and resize the grid each time.
+        /// </summary>
+        private void SetSummaryChartVisible(bool visible)
+        {
+            if (summaryChart.Visible == visible && summaryChartSplitter.Visible == visible) return;
+            splitContainer1.Panel1.SuspendLayout();
+            summaryChart.Visible = visible;
+            summaryChartSplitter.Visible = visible;
+            splitContainer1.Panel1.ResumeLayout(true);
+        }
+
         /// <summary>Get last running query snapshot summary data for all servers</summary>
         private DataTable RunningQueriesServerSummary()
         {
@@ -1206,8 +1304,9 @@ namespace DBADashGUI.Performance
             using var da = new SqlDataAdapter(cmd);
             var dt = new DataTable();
             cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-            cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
-            cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
+            // Follows the chart's zoom.  The same as the selected date range when the chart isn't zoomed (or is hidden).
+            cmd.Parameters.AddWithValue("FromDate", summaryChart.ViewFromUTC);
+            cmd.Parameters.AddWithValue("ToDate", summaryChart.ViewToUTC);
             cmd.Parameters.AddWithValue("MaxRows", Properties.Settings.Default.RunningQueriesSummaryMaxRows);
             da.Fill(dt);
             DateHelper.ConvertUTCToAppTimeZone(ref dt);
@@ -1830,13 +1929,13 @@ namespace DBADashGUI.Performance
                 return false;
             }
 
-            var rowFilter = string.Empty;
-            if (dgv.DataSource.GetType() == typeof(DataView))
-            {
-                rowFilter = ((DataView)dgv.DataSource).RowFilter;
-            }
+            var rowFilter = dgv.DataSource is DataView view ? view.RowFilter : string.Empty;
 
-            if (dgv.Columns.Contains("colGroup") || !string.IsNullOrEmpty(rowFilter)) // Remove filter
+            if (snapshotDT == null && !string.IsNullOrEmpty(rowFilter)) // Remove filter from the list of snapshots (there's no snapshot to reload)
+            {
+                dgv.ClearFilter();
+            }
+            else if (snapshotDT != null && (dgv.Columns.Contains("colGroup") || !string.IsNullOrEmpty(rowFilter))) // Remove filter
             {
                 ClearBlocking();
                 LoadSnapshot(new DataView(snapshotDT));
@@ -1846,6 +1945,10 @@ namespace DBADashGUI.Performance
             {
                 IsForceDetail = false;
                 RefreshData();
+            }
+            else if (!dgv.Columns.Contains("colSessionID") && !IsServerLevelSummary && summaryChart.IsZoomed)
+            {
+                summaryChart.ZoomOut();
             }
             else if (!dgv.Columns.Contains("colSessionID"))
             {

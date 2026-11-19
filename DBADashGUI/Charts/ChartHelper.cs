@@ -1760,6 +1760,79 @@ namespace DBADashGUI.Charts
         /// The chart point under a mouse position, or null when the pointer is not over one.  Takes the
         /// control rather than a chart type so pie and cartesian charts are hit tested the same way.
         /// </summary>
+        /// <summary>
+        /// How far the pointer must move before <see cref="AttachPointClick"/> works out the cursor again.  Hit testing a chart on
+        /// every mouse move is wasted work - the cursor only changes when the pointer leaves a point.
+        /// </summary>
+        private const int PointClickMouseMoveThresholdPixels = 3;
+
+        /// <summary>How far the pointer may travel between press and release and still count as a click.</summary>
+        private const int PointClickTolerancePixels = 3;
+
+        /// <summary>
+        /// Makes a chart's points clickable: a hand cursor over a point that can be clicked, and <paramref name="onClick"/> on a click.
+        ///
+        /// <para>The click is acted on at release rather than press, and only where the pointer stayed put: a press on a chart can
+        /// be the start of a drag - resizing a panel from its edge, or panning the chart - and navigating away in the middle of one
+        /// would be the last thing the user asked for.</para>
+        ///
+        /// <para>Whatever the point stands for is resolved at the time of the click (through <paramref name="isClickable"/> and in
+        /// <paramref name="onClick"/>) rather than captured here, as charts are updated in place when their data is refreshed.</para>
+        /// </summary>
+        /// <param name="chartControl">The chart</param>
+        /// <param name="isClickable">Whether the pointer at this location is over a point that can be clicked</param>
+        /// <param name="onClick">Called on a click at this location.  Where nothing is clickable there it's for the caller to ignore.</param>
+        internal static void AttachPointClick(Control chartControl, Func<System.Drawing.Point, bool> isClickable, Action<System.Drawing.Point> onClick)
+        {
+            ArgumentNullException.ThrowIfNull(chartControl);
+            ArgumentNullException.ThrowIfNull(isClickable);
+            ArgumentNullException.ThrowIfNull(onClick);
+
+            var pressedAt = (System.Drawing.Point?)null;
+            chartControl.MouseDown += (_, e) => pressedAt = e.Button == MouseButtons.Left ? e.Location : null;
+
+            chartControl.MouseUp += (_, e) =>
+            {
+                var pressed = pressedAt;
+                pressedAt = null;
+                if (e.Button != MouseButtons.Left || pressed == null) return;
+                if (Math.Abs(e.X - pressed.Value.X) > PointClickTolerancePixels
+                    || Math.Abs(e.Y - pressed.Value.Y) > PointClickTolerancePixels) return;
+                onClick(e.Location);
+            };
+
+            // Whether the pointer is over a point is worked out only when it has moved enough to be worth hit testing again, but the
+            // cursor is set from that answer on every move.  A panel's resize helper can set the cursor on every move too, so a hand
+            // set once would be cleared again by the next twitch of the mouse - which is why re-asserting it is not the redundancy it
+            // looks like.
+            var lastPosition = System.Drawing.Point.Empty;
+            var overPoint = false;
+            chartControl.MouseMove += (_, e) =>
+            {
+                if (Math.Abs(e.X - lastPosition.X) > PointClickMouseMoveThresholdPixels
+                    || Math.Abs(e.Y - lastPosition.Y) > PointClickMouseMoveThresholdPixels)
+                {
+                    lastPosition = e.Location;
+                    overPoint = isClickable(e.Location);
+                }
+                if (overPoint)
+                {
+                    if (chartControl.Cursor != Cursors.Hand) chartControl.Cursor = Cursors.Hand;
+                }
+                else if (chartControl.Cursor == Cursors.Hand)
+                {
+                    // Only the cursor this handler set is cleared - something else (e.g. a resize helper) may own the cursor elsewhere
+                    chartControl.Cursor = Cursors.Default;
+                }
+            };
+
+            chartControl.MouseLeave += (_, _) =>
+            {
+                overPoint = false;
+                if (chartControl.Cursor == Cursors.Hand) chartControl.Cursor = Cursors.Default;
+            };
+        }
+
         internal static ChartPoint GetPointAt(Control chartControl, System.Drawing.Point location)
         {
             if (chartControl is not IChartView view) return null;
@@ -1864,7 +1937,7 @@ namespace DBADashGUI.Charts
         /// The row whose X value is closest to the one clicked, or null when the closest is further away
         /// than <paramref name="tolerance"/> - which means the point did not come from this table.
         /// </summary>
-        private static DataRow FindNearestRow(DataTable dt, Func<DataRow, double?> getValue, double target, double tolerance)
+        internal static DataRow FindNearestRow(DataTable dt, Func<DataRow, double?> getValue, double target, double tolerance)
         {
             DataRow nearest = null;
             var nearestDistance = double.MaxValue;
@@ -2235,9 +2308,11 @@ namespace DBADashGUI.Charts
             if (minIntervalMinutes == double.MaxValue)
                 return TimeSpan.FromMinutes(defaultIntervalMinutes);
 
-            var detectedIntervalMinutes = (int)Math.Round(minIntervalMinutes);
-            return detectedIntervalMinutes > 0
-                ? TimeSpan.FromMinutes(detectedIntervalMinutes)
+            // Whole seconds rather than whole minutes - data collected more often than once a minute (e.g. every 30 seconds) would
+            // otherwise get bars a minute wide, each overlapping the next.
+            var detectedIntervalSeconds = Math.Round(minIntervalMinutes * 60);
+            return detectedIntervalSeconds >= 1
+                ? TimeSpan.FromSeconds(detectedIntervalSeconds)
                 : TimeSpan.FromMinutes(defaultIntervalMinutes);
         }
 
