@@ -93,6 +93,9 @@ namespace DBADash.Messaging
         /// </summary>
         internal async Task<DataSet> CollectAsync(CollectionConfig cfg, string connectionID, string databaseName, CancellationToken cancellationToken)
         {
+            // MultiCollectionMessage calls this directly, for each of its instances, so the message's own scope - one
+            // connection, or none for a batch - isn't the instance's
+            using var logConnection = LogScope.Connection(connectionID);
             using var op = Operation.Begin("Collection triggered from message {MessageId} to collect {Types} from {ConnectionID}",
                 Id,
                 CollectionTypes,
