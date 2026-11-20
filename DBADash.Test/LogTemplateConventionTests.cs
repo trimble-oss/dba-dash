@@ -42,7 +42,7 @@ namespace DBADash.Test
         /// LogError method of DBA Dash's own, such as DBCollector's, which records an error rather than logging a template.
         /// </summary>
         private static readonly Regex LogCall = new(
-            @"\b(?:Log|_log|log|logger|_logger|Logger|op|Operation)\.(?:Verbose|Debug|Information|Warning|Error|Fatal|Write|Begin|Time)\s*\(" +
+            @"\b(?:Log|_log|log|logger|_logger|Logger|op|Operation|LogTiming)\.(?:Verbose|Debug|Information|Warning|Error|Fatal|Write|Begin|Time)\s*\(" +
             @"|\b_?[Ll]ogger\.Log(?:Information|Warning|Error|Debug|Trace|Critical)\s*\(" +
             @"|\)\s*\.\s*(?:Begin|Time)\s*\(");
 
@@ -275,6 +275,27 @@ namespace DBADash.Test
             Assert.AreEqual(0, reserved.Count,
                 "The JSON log shows its own fields under these names - use another, e.g. {Error}, {Reason}, {Detail}:" +
                 List(reserved.Select(p => $"{{{p.Name}}} at {p.Where}")));
+        }
+
+        /// <summary>
+        /// Operation.At(level) shares one Operation between callers when its level is off, which mixes up their log
+        /// context - see <see cref="LogTiming"/>, which is used instead.
+        /// </summary>
+        [TestMethod]
+        public void TimedOperationsAtALevel_UseLogTiming()
+        {
+            var root = RepoRoot();
+            var skip = new[] { "bin", "obj", ".claude", ".git", "DBADashBuild", "TestResults" };
+            var direct = Directory.EnumerateFiles(root, "*.cs", SearchOption.AllDirectories)
+                .Where(f => !Path.GetRelativePath(root, f).Split(Path.DirectorySeparatorChar)
+                    .Any(part => skip.Contains(part, StringComparer.OrdinalIgnoreCase)))
+                .Where(f => Path.GetFileName(f) is not ("LogTiming.cs" or "LogTemplateConventionTests.cs"))
+                .SelectMany(f => File.ReadLines(f).Select((line, i) => (line, where: $"{Path.GetRelativePath(root, f)}:{i + 1}")))
+                .Where(l => l.line.Contains("Operation.At(", StringComparison.Ordinal) && !l.line.TrimStart().StartsWith("//"))
+                .Select(l => l.where)
+                .ToList();
+
+            Assert.AreEqual(0, direct.Count, "Use LogTiming.Begin(level, ...) rather than Operation.At(level):" + List(direct));
         }
 
         [TestMethod]

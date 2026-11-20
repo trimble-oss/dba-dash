@@ -2,7 +2,6 @@
 using Microsoft.SqlServer.Management.Smo;
 using Microsoft.SqlServer.Management.Smo.Agent;
 using Serilog;
-using SerilogTimings;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -77,27 +76,27 @@ namespace DBADash
         public async Task CollectJobsAsync(DataSet ds, bool scriptJobs, bool isRDS)
         {
             DataTable jobsDT;
-            using (var op = Operation.At(Serilog.Events.LogEventLevel.Debug).Begin("Run Jobs query on instance {Source}", SourceConnection.ConnectionForPrint))
+            using (var op = LogTiming.Begin(Serilog.Events.LogEventLevel.Debug, "Run Jobs query on instance {Source}", SourceConnection.ConnectionForPrint))
             {
                 jobsDT = await GetJobsDTAsync();
-                op.Complete();
+                op?.Complete();
             }
 
             DataTable jobStepsDT;
-            using (var op = Operation.At(Serilog.Events.LogEventLevel.Debug)
-                       .Begin("Run JobsSteps query instance {Source}", SourceConnection.ConnectionForPrint))
+            using (var op = LogTiming.Begin(Serilog.Events.LogEventLevel.Debug,
+                       "Run JobsSteps query instance {Source}", SourceConnection.ConnectionForPrint))
             {
                 jobStepsDT = isRDS ? GetJobStepsDTForRDS() : GetJobStepsDT();
-                op.Complete();
+                op?.Complete();
             }
             ds.Tables.Add(jobStepsDT);
 
             if (scriptJobs)
             {
-                using (var op = Operation.At(Serilog.Events.LogEventLevel.Debug).Begin("Script Jobs from instance {Source}", SourceConnection.ConnectionForPrint))
+                using (var op = LogTiming.Begin(Serilog.Events.LogEventLevel.Debug, "Script Jobs from instance {Source}", SourceConnection.ConnectionForPrint))
                 {
                     ScriptJobs(ref jobsDT);
-                    op.Complete();
+                    op?.Complete();
                 }
             }
             ds.Tables.Add(jobsDT);
@@ -115,7 +114,7 @@ namespace DBADash
                 {
                     cnt++;
                     var jobName = (string)row["name"];
-                    using (var op = Operation.At(Serilog.Events.LogEventLevel.Debug).Begin("Script Job {Number}/{TotalJobs} ({Pct}) {Job} from {Source}", cnt, totalJobs, (cnt * 1.0 / totalJobs).ToString("P1"), jobName, SourceConnection.ConnectionForPrint))
+                    using (var op = LogTiming.Begin(Serilog.Events.LogEventLevel.Debug, "Script Job {Number}/{TotalJobs} ({Pct}) {Job} from {Source}", cnt, totalJobs, (cnt * 1.0 / totalJobs).ToString("P1"), jobName, SourceConnection.ConnectionForPrint))
                     {
                         string sDDL;
                         try
@@ -133,7 +132,7 @@ namespace DBADash
                         var bDDL = Zip(sDDL);
                         row["DDL"] = bDDL;
                         row["DDLHash"] = ComputeHash(bDDL);
-                        op.Complete();
+                        op?.Complete();
                     }
                 }
             }
