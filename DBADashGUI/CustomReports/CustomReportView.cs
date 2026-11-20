@@ -353,8 +353,8 @@ namespace DBADashGUI.CustomReports
         private ToolStripButton tsBack;
 
         /// <summary>
-        /// Programmatic grid filters applied by drill-down navigation.
-        /// These are re-applied on every grid refresh so they persist across tab changes.
+        /// Programmatic grid filters applied by drill-down navigation, when the grids are first built.  After that the
+        /// grids keep whatever filter they have across refreshes, so the user can add to or clear these.
         /// Key = result set index, Value = DataView RowFilter expression.
         /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -389,6 +389,9 @@ namespace DBADashGUI.CustomReports
                 // Restore params and refresh directly since SetContext would short-circuit.
                 customParams = state.Params;
                 ShowDrillDownDatesInDateRange();
+                // Clear the drilled-down view's grids so their filters aren't kept: the view Back goes to starts
+                // from its own drill-down filters, as it would through SetContext.
+                ClearResults();
                 RefreshData();
             }
             else
@@ -1533,6 +1536,9 @@ namespace DBADashGUI.CustomReports
         public List<Control> Charts { get; } = new();
         private string previousSchema;
 
+        /// <summary>The report the grids were built for: filters are only kept across a refresh of the same report</summary>
+        private CustomReport gridsReport;
+
         private void ClearResults()
         {
             CleanupUI();
@@ -2144,8 +2150,12 @@ namespace DBADashGUI.CustomReports
             // Which charts are shown is part of it: the same results with a chart left out are a different layout
             var currentSchema = (reportDS?.GetXmlSchema() ?? string.Empty) + "\n" + Report.Serialize()
                                 + "\n" + string.Concat(Report.Charts?.Select(c => IsChartShown(c) ? '1' : '0') ?? Enumerable.Empty<char>());
-            if (currentSchema == previousSchema)
+            // A view that swaps in another report and refreshes (e.g. DB Options' Summary/Detail) is navigating, not
+            // refreshing: the grids are rebuilt without the previous report's filters.
+            var sameReport = ReferenceEquals(gridsReport, Report);
+            if (currentSchema == previousSchema && sameReport)
             {
+                // The grids keep their DataView filters, so the filters the user added survive the refresh
                 LoadResultsIntoExistingGrids();
                 OnPostGridRefresh();
                 return;
@@ -2153,6 +2163,10 @@ namespace DBADashGUI.CustomReports
 
             const int minDataGridViewHeight = 100; // Minimum height for a DataGridView
             var parentPanel = TablePanel;
+            // A refresh that rebuilds the grids (results returned in a different shape, another result set picked,
+            // the report edited) keeps the filters the grids had.  Navigating clears the grids first or changes the
+            // report, so a new context, drill-down or report starts from its own filters.
+            var previousFilters = sameReport ? CaptureGridFilters() : new Dictionary<int, string>();
             ClearResults();
             List<Panel> panels = new();
             GetChartPanels();
@@ -2307,6 +2321,8 @@ namespace DBADashGUI.CustomReports
                 }
             }
             parentPanel.Controls.AddRange(panels.OrderByDescending(p => (int)p.Tag!).Cast<Control>().ToArray());
+            ApplyInitialGridFilters(previousFilters);
+            gridsReport = Report;
             OnPostGridRefresh();
             previousSchema = currentSchema;
         }
@@ -2518,24 +2534,45 @@ namespace DBADashGUI.CustomReports
 
         protected virtual void OnPostGridRefresh()
         {
-            ApplyDrillDownGridFilters();
             UpdateClearFilter();
             UpdateBackButtonVisibility();
             PostGridRefresh?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>
-        /// Re-applies programmatic drill-down grid filters after every grid refresh.
+        /// The filter each grid has, by result set, so it can be put back when the grids are rebuilt.  A grid with no
+        /// filter is included (as an empty string) so a drill-down filter the user cleared isn't applied again.
         /// </summary>
-        private void ApplyDrillDownGridFilters()
+        private Dictionary<int, string> CaptureGridFilters()
         {
-            if (DrillDownGridFilters is not { Count: > 0 }) return;
-            foreach (var kvp in DrillDownGridFilters)
+            var filters = new Dictionary<int, string>();
+            foreach (var grid in Grids.Where(g => !g.IsDisposed))
             {
-                var grid = Grids.FirstOrDefault(g => g.ResultSetID == kvp.Key);
-                if (grid != null && !string.IsNullOrEmpty(kvp.Value))
+                filters.TryAdd(grid.ResultSetID, grid.RowFilter ?? string.Empty);
+            }
+            return filters;
+        }
+
+        /// <summary>
+        /// Filters newly built grids: a grid that was showing before the rebuild gets back the filter it had (which
+        /// includes any drill-down filter, unless the user cleared it).  A grid that wasn't showing starts from its
+        /// drill-down filter.  The grids are kept as they are between refreshes that don't rebuild them.
+        /// </summary>
+        private void ApplyInitialGridFilters(Dictionary<int, string> previousFilters)
+        {
+            foreach (var grid in Grids)
+            {
+                if (previousFilters.TryGetValue(grid.ResultSetID, out var previous))
                 {
-                    grid.SetFilter(kvp.Value);
+                    // Quietly dropped when it no longer applies, e.g. a column it names was renamed
+                    if (!string.IsNullOrEmpty(previous) && !grid.TrySetFilter(previous))
+                    {
+                        Debug.WriteLine($"Grid filter for result set {grid.ResultSetID} no longer applies: {previous}");
+                    }
+                }
+                else if (DrillDownGridFilters?.TryGetValue(grid.ResultSetID, out var drillDown) == true && !string.IsNullOrEmpty(drillDown))
+                {
+                    grid.SetFilter(drillDown);
                 }
             }
         }
@@ -4133,7 +4170,8 @@ namespace DBADashGUI.CustomReports
 
         private void Reset_Click(object sender, EventArgs e)
         {
-            previousSchema = null;
+            // Clearing the grids first means they're rebuilt without the filters the user added
+            ClearResults();
             ShowTable();
         }
 

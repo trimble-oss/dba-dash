@@ -1727,7 +1727,22 @@ namespace DBADashGUI.CustomReports
 
         public void SetFilter(string filter)
         {
-            if (DataSource is not DataView dv) return;
+            if (!TrySetFilter(filter, out var ex) && ex != null)
+            {
+                CommonShared.ShowExceptionDialog(ex, "Error setting row filter");
+            }
+        }
+
+        /// <summary>
+        /// <see cref="SetFilter"/> without the error dialog: for putting back a filter the user set earlier, which may
+        /// no longer apply (a column it names has gone).  The previous filter is kept when it fails.
+        /// </summary>
+        public bool TrySetFilter(string filter) => TrySetFilter(filter, out _);
+
+        private bool TrySetFilter(string filter, out Exception error)
+        {
+            error = null;
+            if (DataSource is not DataView dv) return false;
             // Applying a DataView filter rebinds the rows, superseding any row-visibility group drill.
             _groupDrillFilterActive = false;
             var previousFilter = dv.RowFilter;
@@ -1736,11 +1751,13 @@ namespace DBADashGUI.CustomReports
                 dv.RowFilter = filter;
                 FormatFilteredColumns();
                 GridFilterChanged?.Invoke(this, EventArgs.Empty);
+                return true;
             }
             catch (Exception ex)
             {
                 dv.RowFilter = previousFilter;
-                CommonShared.ShowExceptionDialog(ex, "Error setting row filter");
+                error = ex;
+                return false;
             }
         }
 

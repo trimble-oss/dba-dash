@@ -143,7 +143,59 @@ namespace DBADashGUI
             RefreshData(false);
         }
 
-        public void RefreshData(bool forceRefresh, DateTime? forceRefreshDate = null)
+        public void RefreshData(bool forceRefresh, DateTime? forceRefreshDate = null) => RefreshData(forceRefresh, forceRefreshDate, keepFilters: true);
+
+        /// <summary>
+        /// The filters to put back once a refresh has rebuilt the grids' views.  Null means the defaults
+        /// (<see cref="SummaryRowFilter"/> / <see cref="TestRowFilter"/>).  <paramref name="StatusTest"/> is the test
+        /// <see cref="FilterByStatus(List{DBADashStatusEnum}, string)"/> narrowed the status columns to.
+        /// </summary>
+        private sealed record CarriedFilters(string Summary, string Tests, string StatusTest);
+
+        /// <summary>The test the instance grid was filtered to by clicking the test summary, while that filter is on</summary>
+        private string statusFilterTest;
+
+        /// <summary>
+        /// The instances (and hidden setting) the data in the grids is for.  Not <see cref="refreshInstanceIDs"/>, which
+        /// is set when a load starts: if it fails, the grids still show the previous instances' data.
+        /// </summary>
+        private sealed record LoadedInstances(List<int> InstanceIDs, bool IncludeHidden)
+        {
+            public bool Matches(DBADashContext ctx) => ctx.InstanceIDs.Count == InstanceIDs.Count &&
+                                                       InstanceIDs.All(ctx.InstanceIDs.Contains) &&
+                                                       IncludeHidden == Common.ShowHidden;
+        }
+
+        private LoadedInstances boundInstances;
+
+        /// <summary>
+        /// The filters the user added, so a refresh keeps them.  Not when the instances shown have changed (another
+        /// tree node): a filter belongs to the view it was set on.
+        /// </summary>
+        private CarriedFilters CaptureFilters()
+        {
+            if (dgvSummary.DataSource is not DataView || boundInstances?.Matches(context) != true) return null;
+            var summary = dgvSummary.RowFilter == SummaryRowFilter ? null : dgvSummary.RowFilter;
+            var tests = dgvTests.RowFilter == TestRowFilter ? null : dgvTests.RowFilter;
+            return summary == null && tests == null ? null : new CarriedFilters(summary, tests, summary == null ? null : statusFilterTest);
+        }
+
+        private void ApplyCarriedFilters(CarriedFilters carried)
+        {
+            statusFilterTest = null;
+            if (carried == null) return;
+            // Quietly dropped if one no longer applies
+            if (carried.Tests != null) dgvTests.TrySetFilter(carried.Tests);
+            if (carried.Summary != null && dgvSummary.TrySetFilter(carried.Summary) && carried.StatusTest != null
+                && dgvSummary.Columns.Contains(carried.StatusTest))
+            {
+                HideStatusColumns();
+                dgvSummary.Columns[carried.StatusTest].Visible = true;
+                statusFilterTest = carried.StatusTest;
+            }
+        }
+
+        private void RefreshData(bool forceRefresh, DateTime? forceRefreshDate, bool keepFilters)
         {
             if (context == null) return;
             if (!savedLayoutLoaded)
@@ -151,6 +203,7 @@ namespace DBADashGUI
                 LoadSavedLayout();
                 savedLayoutLoaded = true;
             }
+            var carriedFilters = keepFilters ? CaptureFilters() : null;
             cancellationTS.Cancel(); // Cancel previous execution
             cancellationTS = new();
             dgvSummary.Columns[0].Frozen = Common.FreezeKeyColumn;
@@ -159,6 +212,7 @@ namespace DBADashGUI
             splitContainer1.Visible = false;
             refreshInstanceIDs = new List<int>(context.InstanceIDs);
             refreshIncludeHidden = Common.ShowHidden;
+            var loading = new LoadedInstances(refreshInstanceIDs, refreshIncludeHidden);
             tsRefresh.Enabled = false;
             _ = GetSummaryAsync(forceRefresh, forceRefreshDate).ContinueWith(task =>
             {
@@ -172,7 +226,7 @@ namespace DBADashGUI
                 try
                 {
                     GroupSummaryByTest(ref dt);
-                    UpdateSummary(ref dt);
+                    UpdateSummary(ref dt, loading, carriedFilters);
                     AutoSizeSplitter();
                     lastSummaryData = dt;
                     if (showReport)
@@ -311,7 +365,7 @@ namespace DBADashGUI
             }
         }
 
-        private void UpdateSummary(ref DataTable dt)
+        private void UpdateSummary(ref DataTable dt, LoadedInstances loading, CarriedFilters carriedFilters)
         {
             GroupSummaryByTest(ref dt);
             dgvSummary.AutoGenerateColumns = false;
@@ -352,6 +406,9 @@ namespace DBADashGUI
             dgvSummary.Invoke((Action)(() =>
             {
                 dgvSummary.DataSource = dv;
+                boundInstances = loading;
+                // Both views are new (the test summary's was set in GroupSummaryByTest), so put back the user's filters
+                ApplyCarriedFilters(carriedFilters);
                 dgvSummary.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             }
             ));
@@ -734,7 +791,8 @@ namespace DBADashGUI
 
         private void FocusedViewToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            RefreshData();
+            // The default filters change with the focused view, so start again from them
+            RefreshData(false, null, keepFilters: false);
         }
 
         private void UpdateRefreshTime()
@@ -867,11 +925,13 @@ namespace DBADashGUI
             dv.RowFilter = sbFilter.ToString();
             HideStatusColumns();
             dgvSummary.Columns[test].Visible = true;
+            statusFilterTest = test;
             tsClearFilter.Enabled = true;
         }
 
         private void TsClearFilter_Click(object sender, EventArgs e)
         {
+            statusFilterTest = null;
             dgvSummary.SetFilter(SummaryRowFilter);
             dgvTests.SetFilter(TestRowFilter);
             UpdateClearFilter();
