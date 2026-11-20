@@ -179,12 +179,16 @@ namespace DBADash.Messaging
         {
             bool endConversation = true;
             using var logHandle = LogScope.Handle(handle);
+            // Set once the message is read, and kept until the end - through the handlers below, so a skipped or
+            // failed message's warning or error carries them too
+            IDisposable logMessage = null;
+            IDisposable logConnection = null;
 
             try
             {
                 var msg = MessageBase.Deserialize(message);
-                using var logMessage = LogScope.Message(msg.Id);
-                using var logConnection = LogScope.Connection((msg as IConnectionMessage)?.ConnectionID);
+                logMessage = LogScope.Message(msg.Id);
+                logConnection = LogScope.Connection((msg as IConnectionMessage)?.ConnectionID);
                 if (msg.IsExpired)
                 {
                     Log.Error("Message {MessageId} of type {MessageType} with handle {Handle} created at {Created} is expired.", msg.Id, type, handle, msg.Created);
@@ -285,6 +289,10 @@ namespace DBADash.Messaging
                 {
                     await EndConversation(handle, dest.ConnectionString);
                 }
+
+                // In the reverse of the order they were added
+                logConnection?.Dispose();
+                logMessage?.Dispose();
             }
         }
 

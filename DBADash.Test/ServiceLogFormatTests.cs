@@ -101,19 +101,38 @@ namespace DBADash.Test
             Assert.AreEqual("Logs/log-.json", (string)FileSinkArgs(ServiceLogFormat.LocalConfigFileName)["path"]);
         }
 
+        /// <summary>
+        /// An extension the user chose is kept where it suits the new format.  Otherwise it's changed, so the new format
+        /// isn't appended to a file in the old one when the service restarts within the same rolling period.
+        /// </summary>
         [TestMethod]
-        public void SetFormat_LeavesAnExtensionTheUserChose()
+        [DataRow("Logs/service-.clef", ServiceLogFileFormat.Json, "Logs/service-.clef")]
+        [DataRow("Logs/service-.jsonl", ServiceLogFileFormat.Json, "Logs/service-.jsonl")]
+        [DataRow("Logs/service-.log", ServiceLogFileFormat.Text, "Logs/service-.log")]
+        [DataRow("Logs/service-.log", ServiceLogFileFormat.Json, "Logs/service-.json")]
+        [DataRow("Logs/service-.clef", ServiceLogFileFormat.Text, "Logs/service-.txt")]
+        [DataRow("Logs/service-.data", ServiceLogFileFormat.Json, "Logs/service-.json")]
+        [DataRow("Logs/service-", ServiceLogFileFormat.Text, "Logs/service-.txt")]
+        public void SetFormat_KeepsAnExtensionOnlyWhereItSuitsTheFormat(string path, ServiceLogFileFormat format, string expected)
         {
-            var config = JObject.Parse("""
-                { "Serilog": { "WriteTo": [ { "Name": "File", "Args": { "path": "Logs/service-.log", "outputTemplate": "{Message}" } } ] } }
+            var config = JObject.Parse($$"""
+                { "Serilog": { "WriteTo": [ { "Name": "File", "Args": { "path": "{{path}}", "outputTemplate": "{Message}" } } ] } }
                 """);
 
-            ServiceLogFormat.SetFormat(config, ServiceLogFileFormat.Json);
+            ServiceLogFormat.SetFormat(config, format);
 
             var args = config.SelectToken("Serilog.WriteTo[0].Args")!;
-            Assert.AreEqual("Logs/service-.log", (string)args["path"]);
-            Assert.AreEqual(ServiceLogFormat.JsonFormatter, (string)args["formatter"]);
-            Assert.IsNull(args["outputTemplate"]);
+            Assert.AreEqual(expected, (string)args["path"]);
+            if (format == ServiceLogFileFormat.Json)
+            {
+                Assert.AreEqual(ServiceLogFormat.JsonFormatter, (string)args["formatter"]);
+                Assert.IsNull(args["outputTemplate"]);
+            }
+            else
+            {
+                Assert.AreEqual(ServiceLogFormat.TextOutputTemplate, (string)args["outputTemplate"]);
+                Assert.IsNull(args["formatter"]);
+            }
         }
 
         [TestMethod]

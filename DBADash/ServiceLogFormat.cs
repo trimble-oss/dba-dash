@@ -38,6 +38,11 @@ namespace DBADash
         private const string TextExtension = ".txt";
         private const string JsonExtension = ".json";
 
+        /// <summary>The extensions a file in each format can keep when the format is switched to it.</summary>
+        private static readonly string[] TextExtensions = [TextExtension, ".log"];
+
+        private static readonly string[] JsonExtensions = [JsonExtension, ".clef", ".jsonl"];
+
         /// <summary>The configuration file the service reads: the user's own if there is one, otherwise the release's.</summary>
         public static string ConfigFileName(string folder) =>
             File.Exists(Path.Combine(folder, LocalConfigFileName)) ? LocalConfigFileName : DefaultConfigFileName;
@@ -98,20 +103,24 @@ namespace DBADash
 
                 if (args["path"] is JValue { Type: JTokenType.String } path)
                 {
-                    path.Value = ChangeExtension((string)path.Value, format == ServiceLogFileFormat.Json ? JsonExtension : TextExtension);
+                    path.Value = ChangeExtension((string)path.Value, format);
                 }
             }
         }
 
         /// <summary>
-        /// Swaps a .txt extension for .json or the other way round.  Any other is left as it is: the user chose it.
+        /// An extension that suits <paramref name="format"/> is kept - the user may have chosen .log or .clef.  Any
+        /// other becomes .txt or .json, so the new format never goes on the end of a file in the old one: a rolling
+        /// file restarted within the same period is appended to.
         /// </summary>
-        private static string ChangeExtension(string path, string extension)
+        private static string ChangeExtension(string path, ServiceLogFileFormat format)
         {
             var current = Path.GetExtension(path);
-            return current.Equals(TextExtension, StringComparison.OrdinalIgnoreCase) || current.Equals(JsonExtension, StringComparison.OrdinalIgnoreCase)
-                ? path[..^current.Length] + extension
-                : path;
+            var suits = format == ServiceLogFileFormat.Json ? JsonExtensions : TextExtensions;
+            if (suits.Contains(current, StringComparer.OrdinalIgnoreCase)) return path;
+
+            var extension = format == ServiceLogFileFormat.Json ? JsonExtension : TextExtension;
+            return string.IsNullOrEmpty(current) ? path + extension : path[..^current.Length] + extension;
         }
 
         /// <summary>The Args of each File sink, at the top level of WriteTo or inside a wrapper such as Async.</summary>

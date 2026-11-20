@@ -407,6 +407,10 @@ namespace DBADashService
 
                 var isLow = item.Priority == WorkItemPriority.Low;
 
+                // Around the handler as well as the work, so an error processing the item carries its ConnectionID.
+                // Disposed at the end of each item - before the next is read.
+                using var logConnection = LogScope.Connection(item.Source?.ConnectionID);
+
                 InterlockedMax(ref _maxBusyWorkers, Interlocked.Increment(ref _busyWorkers));
                 try
                 {
@@ -439,7 +443,6 @@ namespace DBADashService
         private async Task ProcessWorkItemAsync(IWorkItem item, CancellationToken cancellationToken)
         {
             var connectionString = item.Source?.ConnectionString ?? Guid.NewGuid().ToString();
-            using var logConnection = LogScope.Connection(item.Source?.ConnectionID);
 
             // Allow up to N concurrent collections per instance (configured via MaxCount in AsyncKeyedLocker)
             // This maintains the current behavior where different schedules can run concurrently
