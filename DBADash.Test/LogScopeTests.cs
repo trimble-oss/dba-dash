@@ -18,7 +18,11 @@ namespace DBADash.Test
         private sealed class ListSink : ILogEventSink
         {
             public readonly List<LogEvent> Events = new();
-            public void Emit(LogEvent logEvent) => Events.Add(logEvent);
+
+            public void Emit(LogEvent logEvent)
+            {
+                lock (Events) Events.Add(logEvent);
+            }
         }
 
         private static (ILogger Logger, ListSink Sink) CreateLogger()
@@ -90,6 +94,53 @@ namespace DBADash.Test
             }
 
             Assert.AreEqual("Inner", Property(sink.Events.Single(), LogScope.ConnectionIDProperty));
+        }
+
+        /// <summary>
+        /// Concurrent flows each keep their own ConnectionID through timed operations at a level that isn't logged.  An
+        /// Operation.At(level) operation whose level is off is shared between callers, and gave flows each other's - see
+        /// <see cref="LogTiming"/>.
+        /// </summary>
+        [TestMethod]
+        public async Task TimedOperationsAtAnUnloggedLevel_KeepEachFlowsConnectionID()
+        {
+            var (logger, sink) = CreateLogger();
+            var previous = Log.Logger;
+            Log.Logger = logger; // Operations log through the static logger
+            try
+            {
+                async Task Flow(string id)
+                {
+                    using var scope = LogScope.Connection(id);
+                    for (var i = 0; i < 100; i++)
+                    {
+                        using (var op = LogTiming.Begin(LogEventLevel.Debug, "Outer {Id}", id))
+                        {
+                            await Task.Yield();
+                            using (var inner = LogTiming.Begin(LogEventLevel.Debug, "Inner {Id}", id))
+                            {
+                                inner?.Complete();
+                            }
+
+                            op?.Complete();
+                        }
+
+                        Log.Information("Check {Expected}", id);
+                    }
+                }
+
+                await Task.WhenAll(Enumerable.Range(0, 8).Select(n => Task.Run(() => Flow("SQL" + n))));
+            }
+            finally
+            {
+                Log.Logger = previous;
+            }
+
+            List<LogEvent> checks;
+            lock (sink.Events) checks = sink.Events.Where(e => e.MessageTemplate.Text == "Check {Expected}").ToList();
+            Assert.AreEqual(800, checks.Count);
+            Assert.AreEqual(0, checks.Count(e => !Equals(Property(e, LogScope.ConnectionIDProperty), Property(e, "Expected"))),
+                "every event carries its own flow's ConnectionID");
         }
 
         [TestMethod]
