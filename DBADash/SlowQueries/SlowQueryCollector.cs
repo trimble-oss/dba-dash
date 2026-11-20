@@ -274,12 +274,12 @@ namespace DBADash.SlowQueries
             var rebuilt = rdr.GetBoolean(1);
             if (rebuilt)
             {
-                Log.Information("Rebuilt extended events session {session} on {instance} to match the slow query configuration",
+                Log.Information("Rebuilt extended events session {SessionName} on {Instance} to match the slow query configuration",
                     DBADashSource.ManagedSlowQueryXESessionName, instance);
             }
             else if (created)
             {
-                Log.Information("Created extended events session {session} on {instance} for slow query capture",
+                Log.Information("Created extended events session {SessionName} on {Instance} for slow query capture",
                     DBADashSource.ManagedSlowQueryXESessionName, instance);
             }
         }
@@ -322,7 +322,7 @@ namespace DBADash.SlowQueries
             }
             catch (Exception ex)
             {
-                Log.Warning(ex, "Could not remove leftover extended events sessions {sessions} for {connection}",
+                Log.Warning(ex, "Could not remove leftover extended events sessions {Sessions} for {ConnectionID}",
                     string.Join(", ", sessionNames), connectionID);
             }
         }
@@ -473,7 +473,7 @@ namespace DBADash.SlowQueries
                     }
                     catch (XmlException ex)
                     {
-                        Log.Warning(ex, "Slow query collection could not parse an event from {path}", readPath);
+                        Log.Warning(ex, "Slow query collection could not parse an event from {Path}", readPath);
                     }
                 }
 
@@ -483,7 +483,7 @@ namespace DBADash.SlowQueries
                 {
                     // Expected once on a first read of a session that already holds a lot.  On every run it means the
                     // session captures more than a run reads, and the collection will fall further behind.
-                    Log.Warning("Slow query collection read the maximum of {count} events from {path}; the rest is left for the next run.  If this repeats, raise the threshold or collect SlowQueries more often.",
+                    Log.Warning("Slow query collection read the maximum of {Count} events from {Path}; the rest is left for the next run.  If this repeats, raise the threshold or collect SlowQueries more often.",
                         MaxBatchesPerRun * MaxEventsPerBatch, readPath);
                 }
             }
@@ -523,7 +523,7 @@ namespace DBADash.SlowQueries
             }
             catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
             {
-                Log.Debug(ex, "Could not read dropped_event_count for session {session}", sessionName);
+                Log.Debug(ex, "Could not read dropped_event_count for session {SessionName}", sessionName);
                 return 0;
             }
 

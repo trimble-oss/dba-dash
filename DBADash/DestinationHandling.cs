@@ -90,14 +90,14 @@ namespace DBADash
                 {
                     if (!src.WriteToSecondaryDestinations &&
                         d != cfg.DestinationConnection) continue;
-                    using var op = Operation.Begin("Write to destination {destination} from {source}",
+                    using var op = Operation.Begin("Write to destination {Destination} from {Source}",
                         d.ConnectionForPrint, src.SourceConnection.ConnectionForPrint);
                     await WriteAsync(ds, d, fileName, cfg);
                     op.Complete();
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex, "Error writing to destination {destination} from {source}", d.ConnectionForPrint, src.SourceConnection.ConnectionForPrint);
+                    Log.Error(ex, "Error writing to destination {Destination} from {Source}", d.ConnectionForPrint, src.SourceConnection.ConnectionForPrint);
                     exceptions.Add(ex);
                 }
             }
@@ -115,13 +115,13 @@ namespace DBADash
                 {
                     try
                     {
-                        using var op = Operation.Begin("Write to destination {destination}", d.ConnectionForPrint);
+                        using var op = Operation.Begin("Write to destination {Destination}", d.ConnectionForPrint);
                         await WriteAsync(ds, d, fileName, cfg);
                         op.Complete();
                     }
                     catch (Exception ex)
                     {
-                        Log.Error(ex, "Error writing to destination {destination}", d.ConnectionForPrint);
+                        Log.Error(ex, "Error writing to destination {Destination}", d.ConnectionForPrint);
                         exceptions.Add(ex);
                     }
                 }))
@@ -243,7 +243,7 @@ namespace DBADash
             }
             else
             {
-                Log.Error("Destination Folder doesn't exist {folder}", destination);
+                Log.Error("Destination Folder doesn't exist {Folder}", destination);
                 return null;
             }
         }
@@ -278,7 +278,7 @@ namespace DBADash
             }
             catch (Exception ex)
             {
-                Log.Warning(ex, "Error deleting temp file {tempPath}", tempPath);
+                Log.Warning(ex, "Error deleting temp file {TempPath}", tempPath);
             }
         }
 

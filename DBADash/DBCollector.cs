@@ -416,11 +416,11 @@ namespace DBADash
             var unsupportedCompatibilityNote = GetUnsupportedCompatibilityNote(ex);
             if (unsupportedCompatibilityNote == null)
             {
-                Log.Error(ex, "{ErrorContext} {ErrorSource} {Connection}", errorContext, errorSource, Source.SourceConnection.ConnectionForPrint);
+                Log.Error(ex, "{ErrorContext} {ErrorSource} {Source}", errorContext, errorSource, Source.SourceConnection.ConnectionForPrint);
             }
             else
             {
-                Log.Error(ex, "{Note} {ErrorContext} {ErrorSource} {Connection}", unsupportedCompatibilityNote, errorContext, errorSource, Source.SourceConnection.ConnectionForPrint);
+                Log.Error(ex, "{Note} {ErrorContext} {ErrorSource} {Source}", unsupportedCompatibilityNote, errorContext, errorSource, Source.SourceConnection.ConnectionForPrint);
             }
             Exceptions.Add(ex);
 
@@ -613,7 +613,7 @@ namespace DBADash
             }
             catch (Exception ex)
             {
-                Log.Error("Error checking if Resource Governor is in use for instance {instanceName}. Assuming not applicable. Error: {errorMessage}", ConnectionID, ex.Message);
+                Log.Error(ex, "Error checking if Resource Governor is in use for instance {ConnectionID}. Assuming not applicable.", ConnectionID);
                 return false;
             }
 
@@ -625,7 +625,7 @@ namespace DBADash
             cache.Set(cacheKey, hasWorkloadGroups, cachePolicy);
             if (!hasWorkloadGroups)
             {
-                Log.Information("ResourceGovernorWorkloadGroups/ResourceGovernorResourcePools for instance {instanceName} are disabled as no workload groups have been defined.", ConnectionID);
+                Log.Information("ResourceGovernorWorkloadGroups/ResourceGovernorResourcePools for instance {ConnectionID} are disabled as no workload groups have been defined.", ConnectionID);
             }
 
             return hasWorkloadGroups;
@@ -684,7 +684,7 @@ namespace DBADash
         {
             if (!swatch.IsRunning) return;
             swatch.Stop();
-            Log.Debug("Collect {0} on {1} completed in {2}ms", currentCollection, instanceName, swatch.ElapsedMilliseconds);
+            Log.Debug("Collect {Collection} on {Instance} completed in {Elapsed} ms", currentCollection, instanceName, swatch.ElapsedMilliseconds);
         }
 
         private async Task StartupAsync()
@@ -728,7 +728,7 @@ namespace DBADash
                     {
                         if (Utility.ShouldRetry(ex) && !DisableRetry)
                         {
-                            Log.Warning(ex, "Error collecting {collection}", collection);
+                            Log.Warning(ex, "Error collecting {Collection}", collection);
                         }
 
                         errors.Add(ex);
@@ -950,7 +950,7 @@ namespace DBADash
             if (dt.Rows[0]["Instance"] == DBNull.Value)
             {
                 dt.Rows[0]["Instance"] = "";
-                Log.Warning("@@SERVERNAME returned NULL for {connection}.  Consider fixing with sp_addserver", Source.SourceConnection.ConnectionForPrint);
+                Log.Warning("@@SERVERNAME returned NULL for {Source}.  Consider fixing with sp_addserver", Source.SourceConnection.ConnectionForPrint);
             }
             instanceName = (string)dt.Rows[0]["Instance"];
             productVersion = (string)dt.Rows[0]["ProductVersion"];
@@ -970,7 +970,7 @@ namespace DBADash
             }
             if (platform == HostPlatform.Linux) // Disable WMI collection for Linux
             {
-                Log.Debug("Instance {0} is a Linux instance. WMI collections are disabled.", instanceName);
+                Log.Debug("Instance {Instance} is a Linux instance. WMI collections are disabled.", instanceName);
                 noWMI = true;
             }
             IsRDS = (bool)dt.Rows[0]["IsRDS"];
@@ -1057,7 +1057,7 @@ namespace DBADash
                     run.Failed = true;
                     var message = $"Warning: Custom collection stored procedure {customCollection.Value.ProcedureName} doesn't exist";
                     LogDBError(collectionReference, message);
-                    Log.Error(ex, message);
+                    Log.Error(ex, "Custom collection stored procedure {Procedure} doesn't exist", customCollection.Value.ProcedureName);
                 }
                 catch (Exception ex)
                 {
@@ -1397,7 +1397,7 @@ namespace DBADash
                     .Select(p => p.First())
                     .ToList();
 
-                Log.Information("Plans {0}, {1} to collect from {2}", plans.Count, collectList.Count, instanceName);
+                Log.Information("Plans {Count}, {ToCollect} to collect from {Instance}", plans.Count, collectList.Count, instanceName);
 
                 LogInternalPerformanceCounter("DBADash", "Count of plans meeting threshold for collection", "", plans.Count); // Total number of plans that meet the threshold for collection
                 LogInternalPerformanceCounter("DBADash", "Count of plans to collect", "", collectList.Count); // Total number of plans we want to collect (plans that meet the threshold that are not cached)
@@ -1708,7 +1708,7 @@ OPTION(RECOMPILE)");
             var backfillSessionName = IsXESupported ? Source.GetDeadlockBackfillSessionName(IsAzureDB) : null;
             if (backfillSessionName == null)
             {
-                Log.Information("Deadlock backfill for {instance} no longer applies; marking it complete", instanceName);
+                Log.Information("Deadlock backfill for {Instance} no longer applies; marking it complete", instanceName);
                 CompleteDeadlockBackfill();
                 return false;
             }
@@ -1799,7 +1799,7 @@ INSERT INTO @handles(sql_handle)");
 
             if ((cnt + cacheCount) > 0)
             {
-                Log.Information("QueryText: {0} from cache, {1} to collect from {2}", cacheCount, cnt, instanceName);
+                Log.Information("QueryText: {Cached} from cache, {ToCollect} to collect from {Instance}", cacheCount, cnt, instanceName);
             }
             if (cnt == 0)
             {
@@ -1871,7 +1871,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             if (collectionType == CollectionType.JobHistory)
             {
                 param = new[] { new SqlParameter { DbType = DbType.Int32, Value = Job_instance_id, ParameterName = "instance_id" }, new SqlParameter { DbType = DbType.Int32, ParameterName = "run_date", Value = Convert.ToInt32(DateTime.Now.AddDays(-7).ToString("yyyyMMdd")) } };
-                Log.Debug("JobHistory From {JobInstanceID} on {Instance}", Job_instance_id, Source.SourceConnection.ConnectionForPrint);
+                Log.Debug("JobHistory From {JobInstanceID} on {Source}", Job_instance_id, Source.SourceConnection.ConnectionForPrint);
             }
             else if (collectionType is CollectionType.AzureDBResourceStats or CollectionType.AzureDBElasticPoolResourceStats)
             {
@@ -1928,7 +1928,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
                 {
                     // RDS instances only support extended events for Standard and Enterprise editions.  If we encounter an error because it's not supported, log the error and continue
                     // Set IsExtendedEventsNotSupportedException which is used to disable the collection for future schedules
-                    Log.Warning("Slow query capture relies on extended events which is not supported for {0}: {1}", instanceName, ex.Message);
+                    Log.Warning("Slow query capture relies on extended events which is not supported for {Instance}: {Error}", instanceName, ex.Message);
                     LogDBError(collectionTypeString, "Slow query capture relies on extended events which is not supported for this instance", "Collect[Warning]");
                     IsExtendedEventsNotSupportedException = true;
                 }
@@ -1963,7 +1963,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
                     }
                     catch (Microsoft.SqlServer.Management.Smo.UnsupportedFeatureException ex)
                     {
-                        Log.Warning("SnapshotJobs not supported: {0}. From {1}", ex.Message, Source.SourceConnection.ConnectionForPrint);
+                        Log.Warning("SnapshotJobs not supported: {Error}. From {Source}", ex.Message, Source.SourceConnection.ConnectionForPrint);
                     }
                     catch (AggregateException ex) // thrown if any issues scripting jobs
                     {
@@ -2206,7 +2206,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             if (Source.QueryStatsMaxReadDurationMs > 0 && baseline.LastReadDurationMs > Source.QueryStatsMaxReadDurationMs)
             {
                 Log.Warning(
-                    "Skipping query stats collection for {Instance}. The previous read of sys.dm_exec_query_stats took {Duration}ms, over the {Max}ms limit.",
+                    "Skipping query stats collection for {Instance}. The previous read of sys.dm_exec_query_stats took {DurationMs}ms, over the {MaxDurationMs}ms limit.",
                     instanceName, baseline.LastReadDurationMs, Source.QueryStatsMaxReadDurationMs);
                 var periodTime = (long)snapshotDate.Subtract(periodStart).TotalMilliseconds * 1000;
                 Data.Tables.Add(QueryStatsProcessor.GetSkippedCollection(snapshotDate, periodTime, baseline.LastReadDurationMs));
@@ -2252,7 +2252,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             LogInternalPerformanceCounter("DBADash", "Query stats baseline size", "", baseline.Count);
             LogInternalPerformanceCounter("DBADash", "Query stats read duration (ms)", "", result.ReadDurationMs);
 
-            Log.Debug("Query stats for {Instance}: {Read} rows read in {Duration}ms, {Stored} stored.",
+            Log.Debug("Query stats for {Instance}: {Read} rows read in {DurationMs}ms, {Stored} stored.",
                 instanceName, result.RowsRead, result.ReadDurationMs, result.QueryStats.Rows.Count);
         }
 
@@ -2368,7 +2368,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
                     pendingAGHealthEventCursor = (ConnectionID, state);
                     break;
                 case AGHealthEventCollector.CollectionStatus.NoAvailabilityGroups when statusChanged:
-                    Log.Information("No availability groups on {instance}.  AGHealthEvents collection will be checked again in {interval}",
+                    Log.Information("No availability groups on {Instance}.  AGHealthEvents collection will be checked again in {Interval}",
                         instanceName, AGHealthEventCollector.RecheckInterval);
                     break;
                 case AGHealthEventCollector.CollectionStatus.SessionUnavailable when statusChanged:
@@ -2381,7 +2381,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             AddDT(result.Events);
             if (result.Events.Rows.Count > 0)
             {
-                Log.Debug("Collected {count} AlwaysOn_health event(s) on {instance}", result.Events.Rows.Count, instanceName);
+                Log.Debug("Collected {Count} AlwaysOn_health event(s) on {Instance}", result.Events.Rows.Count, instanceName);
             }
         }
 
@@ -2459,7 +2459,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
                 // CollectDeadlockBackfillAsync - and marked whether or not this run commits, so a failed write doesn't
                 // schedule it again.
                 DeadlockCursorStore.MarkBackfillPending(cursorKey);
-                Log.Information("First deadlock collection for {instance}: backfill from session {backfill} scheduled",
+                Log.Information("First deadlock collection for {Instance}: backfill from session {Backfill} scheduled",
                     instanceName, backfillSessionName);
             }
 
@@ -2484,7 +2484,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
 
             if (result.GraphCount > 0)
             {
-                Log.Debug("Collected {count} deadlock(s) from session {session} on {instance}", result.GraphCount,
+                Log.Debug("Collected {Count} deadlock(s) from session {SessionName} on {Instance}", result.GraphCount,
                     sessionName, instanceName);
             }
         }
@@ -2560,7 +2560,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
         private void LogSlowQueryModeFallbackOnce()
         {
             if (!SlowQueryModeFallbackLogged.TryAdd(ConnectionID ?? string.Empty, 0)) return;
-            Log.Warning("Slow query capture for {instance} is set to {mode}, which needs a local event file - not available on {edition}.  Using the ring buffer instead.",
+            Log.Warning("Slow query capture for {Instance} is set to {Mode}, which needs a local event file - not available on {Edition}.  Using the ring buffer instead.",
                 instanceName, Source.SlowQueryCaptureMode,
                 IsAzureDB ? "Azure SQL Database" : "Azure SQL Managed Instance");
         }
@@ -2614,7 +2614,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             catch (Exception ex)
             {
                 var builder = new SqlConnectionStringBuilder(ConnectionString);
-                Log.Error(ex, $"Unable to connect to the SQL instance. {builder.DataSource}");
+                Log.Error(ex, "Unable to connect to the SQL instance {Instance}", builder.DataSource);
                 throw new DatabaseConnectionException("Unable to connect to the SQL instance.", ex);
             }
             await using var usage = await MeasureAsync(cn);
@@ -2762,7 +2762,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
         {
             localSessionOptions = options;
             cache.Set("WMISessionOptions_" + computerName, localSessionOptions, new CacheItemPolicy() { AbsoluteExpiration = DateTime.Now.AddDays(1) });
-            Log.Debug("Cache WMI options {options} on {Computer}", localSessionOptions is DComSessionOptions ? "DCom" : "WSMan", computerName);
+            Log.Debug("Cache WMI options {Options} on {Computer}", localSessionOptions is DComSessionOptions ? "DCom" : "WSMan", computerName);
         }
 
         /// <summary>
@@ -2773,7 +2773,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             localSessionOptions = (CimSessionOptions)cache.Get("WMISessionOptions_" + computerName);
             if (localSessionOptions != null)
             {
-                Log.Debug("Set WMISessionOptions from cache to {options} on {Computer}", localSessionOptions is DComSessionOptions ? "DCom" : "WSMan", computerName);
+                Log.Debug("Set WMISessionOptions from cache to {Options} on {Computer}", localSessionOptions is DComSessionOptions ? "DCom" : "WSMan", computerName);
             }
         }
 
@@ -2797,17 +2797,17 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
                         // Try to connect with WSMan first
                         TestWMI(new WSManSessionOptions());
                         SetWMISessionOptions(new WSManSessionOptions());
-                        Log.Debug("WMI Connection succeeded using WSMan on {computer}", computerName);
+                        Log.Debug("WMI Connection succeeded using WSMan on {Computer}", computerName);
                     }
                     catch (Exception wsManEx)
                     {
                         // Connection failed, try again with DCom
-                        Log.Debug(wsManEx, "WMI Connection failed using WSMan on {computer}.  Connection will be attempted using DCom.", computerName);
+                        Log.Debug(wsManEx, "WMI Connection failed using WSMan on {Computer}.  Connection will be attempted using DCom.", computerName);
                         try
                         {
                             TestWMI(new DComSessionOptions());
                             SetWMISessionOptions(new DComSessionOptions());
-                            Log.Debug("WMI Connection succeeded using DCom on {computer}", computerName);
+                            Log.Debug("WMI Connection succeeded using DCom on {Computer}", computerName);
                         }
                         catch (Exception dcomEx)
                         {
@@ -2983,7 +2983,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
                 var debug = Log.IsEnabled(LogEventLevel.Debug);
                 var swSession = debug ? Stopwatch.StartNew() : null;
                 using CimSession session = CimSession.Create(computerName, WMISessionOptions);
-                if (debug) Log.Debug("Perfmon {computer}: CimSession created in {ms}ms", computerName, swSession.ElapsedMilliseconds);
+                if (debug) Log.Debug("Perfmon {Computer}: CimSession created in {Elapsed} ms", computerName, swSession.ElapsedMilliseconds);
 
                 // Build a query plan per class (metadata resolve + projection) - cheap and synchronous.
                 var plans = counters
@@ -3085,7 +3085,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             try
             {
                 instances = await QueryInstancesAsync(session, plan.Query).ConfigureAwait(false);
-                if (debug) Log.Debug("Perfmon {computer}: {class} queried {instances} instance(s) in {ms}ms",
+                if (debug) Log.Debug("Perfmon {Computer}: {Class} queried {Instances} instance(s) in {Elapsed} ms",
                     computerName, plan.WmiClass, instances.Count, swClass.ElapsedMilliseconds);
 
                 foreach (var itm in instances)
@@ -3145,7 +3145,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
                                 if (freqPerfTime > 0) value = value * 10000000m / freqPerfTime; // ticks -> 100ns units
                                 break;
                             default: // unhandled type: collect raw as-is, but flag it so it's not silently wrong
-                                Log.Warning("Perfmon counter {object}\\{counter} has unhandled CounterType {type} - collected as a raw value",
+                                Log.Warning("Perfmon counter {Object}\\{Counter} has unhandled CounterType {Type} - collected as a raw value",
                                     objectName, counterName, cm.CounterType);
                                 emitType = PerfLargeRawCount; break;
                         }

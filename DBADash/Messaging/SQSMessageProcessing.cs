@@ -65,7 +65,7 @@ namespace DBADash.Messaging
         /// <returns></returns>
         public async Task ProcessSQSQueue(string DBADashAgentIdentifier, CancellationToken cancellationToken)
         {
-            Log.Information("Listening to messages from SQS Queue sent to {identifier}", DBADashAgentIdentifier);
+            Log.Information("Listening to messages from SQS Queue sent to {Identifier}", DBADashAgentIdentifier);
             if (string.IsNullOrEmpty(Config.ServiceSQSQueueUrl)) return;
             var receiveMessageRequest = new ReceiveMessageRequest
             {
@@ -91,7 +91,7 @@ namespace DBADash.Messaging
                                 if (!ValidateMessageAttributes(message, DBADashAgentIdentifier, out var reason,
                                         out var messageType, out var handle, out var destinationConnectionHash, out var notForThisAgent, out var deleteMessage, out string replySQS, out var replyAgent))
                                 {
-                                    Log.Warning("Invalid message: {reason}", reason);
+                                    Log.Warning("Invalid message: {Reason}", reason);
                                     if (notForThisAgent) // Message is for a different agent, change visibility so it can be processed immediately
                                     {
                                         await AWSTools.ChangeMessageVisibilityAsync(_sqsClient, Config.ServiceSQSQueueUrl,
@@ -126,7 +126,7 @@ namespace DBADash.Messaging
                             catch (Exception ex)
                             {
                                 // Handle any exceptions that occurred during processing
-                                Log.Error(ex, $"Error processing message: {message.Body}");
+                                Log.Error(ex, "Error processing SQS message {SqsMessageId}", message.MessageId);
                                 await Task.Delay(errorDelay, cancellationToken); // Extra delay if error occurs to avoid burning CPU cycles
                             }
                         }
@@ -237,8 +237,11 @@ namespace DBADash.Messaging
         /// <returns></returns>
         private async Task ProcessMessageAsync(Message message, string DBADashAgentIdentifier, Guid handle, string destinationConnectionHash, string replySQS, string replyAgent)
         {
+            using var logHandle = LogScope.Handle(handle);
             var msg = await ValidateMessage(message, DBADashAgentIdentifier, handle, destinationConnectionHash, replySQS, replyAgent);
             if (msg == null) return;
+            using var logMessage = LogScope.Message(msg.Id);
+            using var logConnection = LogScope.Connection((msg as IConnectionMessage)?.ConnectionID);
 
             // Implementations of MessageBase will process the message and return a DataSet or null
             try
@@ -269,7 +272,7 @@ namespace DBADash.Messaging
                 using var semaphore = await _semaphores.LockOrNullAsync(destinationConnectionHash, msg.SemaphoreTimeout);
                 if (semaphore is null) // Semaphore used to limit concurrent processing per connection
                 {
-                    Log.Warning("Semaphore timeout for message {id} of type {type} with handle {handle}.  Service is busy.", msg.Id, msg.GetType().ToString(), handle);
+                    Log.Warning("Semaphore timeout for message {MessageId} of type {MessageType} with handle {Handle}.  Service is busy.", msg.Id, msg.GetType().Name, handle);
                     // Semaphore timed out, service is busy
                     await SendReplyMessage(DBADashAgentIdentifier, handle, destinationConnectionHash, replySQS, replyAgent,
                         ResponseMessage.ResponseTypes.Failure, "Service is busy.  Try again later.").ConfigureAwait(false);
@@ -283,7 +286,7 @@ namespace DBADash.Messaging
             catch (CollectionScheduleDisabledException ex)
             {
                 // Requested collections are disabled for the instance - report as a warning, not an error.
-                Log.Warning("Message with handle {handle} skipped: {Message}", handle, ex.Message);
+                Log.Warning("Message with handle {Handle} skipped: {Reason}", handle, ex.Message);
                 await SendReplyMessage(DBADashAgentIdentifier, handle, destinationConnectionHash, replySQS, replyAgent,
                     ResponseMessage.ResponseTypes.Warning, ex.Message, disabledCollections: ex.DisabledCollections,
                     configurationDisabledCollections: ex.ConfigurationDisabledCollections).ConfigureAwait(false);
@@ -292,13 +295,13 @@ namespace DBADash.Messaging
             {
                 // None of the requested collections are valid for the instance - report as a warning, not an
                 // error.  No disabled list: unlike unscheduled collections there's nothing to offer to re-run.
-                Log.Warning("Message with handle {handle} skipped: {Message}", handle, ex.Message);
+                Log.Warning("Message with handle {Handle} skipped: {Reason}", handle, ex.Message);
                 await SendReplyMessage(DBADashAgentIdentifier, handle, destinationConnectionHash, replySQS, replyAgent,
                     ResponseMessage.ResponseTypes.Warning, ex.Message).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error processing message with handle {handle}", handle);
+                Log.Error(ex, "Error processing message with handle {Handle}", handle);
                 await SendReplyMessage(DBADashAgentIdentifier, handle, destinationConnectionHash, replySQS, replyAgent,
                     ResponseMessage.ResponseTypes.Failure, ex.Message).ConfigureAwait(false);
             }
@@ -317,7 +320,7 @@ namespace DBADash.Messaging
         private async Task DoProcessMessageAsync(MessageBase msg, string DBADashAgentIdentifier, Guid handle, string destinationConnectionHash, string replySQS, string replyAgent)
         {
             // Errors handled by the caller
-            Log.Information("Send message receipt for handle {handle} & process message", handle);
+            Log.Information("Send message receipt for handle {Handle} & process message", handle);
             await SendReplyMessage(DBADashAgentIdentifier, handle, destinationConnectionHash, replySQS, replyAgent,
                 ResponseMessage.ResponseTypes.Progress, "Message Received");
 
@@ -353,7 +356,7 @@ namespace DBADash.Messaging
             {
                 // DataSet might be large, so write to S3 and send the path in the reply message
                 var fileName = $"{handle}.message";
-                Log.Debug("Writing message to S3 {filename}", fileName);
+                Log.Debug("Writing message to S3 {FileName}", fileName);
                 messageDataPath = msg.CollectAgent.S3Path.AppendToUrl(fileName);
                 await DestinationHandling.WriteS3Async(ds, msg.CollectAgent.S3Path, fileName, Config);
             }
@@ -392,20 +395,20 @@ namespace DBADash.Messaging
             try
             {
                 // Acknowledge the message is received before we start processing
-                Log.Debug($"Received message: {message.MessageId}");
+                Log.Debug("Received SQS message {SqsMessageId}", message.MessageId);
                 var payloadBin = Convert.FromBase64String(message.Body);
                 msg = MessageBase.Deserialize(payloadBin);
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Message with handle {handle} couldn't be deserialized", handle);
+                Log.Error(ex, "Message with handle {Handle} couldn't be deserialized", handle);
                 await SendReplyMessage(DBADashAgentIdentifier, handle, destinationConnectionHash, replySQS, replyAgent,
                     ResponseMessage.ResponseTypes.Failure, "Message couldn't be read");
                 return null;
             }
             if (msg.IsExpired) // Check if the message is expired - if so, send a failure message
             {
-                Log.Error("Message with handle {handle} created at {Created} is expired.", handle, msg.Created);
+                Log.Error("Message with handle {Handle} created at {Created} is expired.", handle, msg.Created);
 
                 await SendReplyMessage(DBADashAgentIdentifier, handle, destinationConnectionHash, replySQS, replyAgent,
                     ResponseMessage.ResponseTypes.Failure, "Message is Expired");
@@ -443,6 +446,7 @@ namespace DBADash.Messaging
         /// <returns></returns>
         private async Task ProcessReply(Message message, Guid handle, string destinationConnectionHash)
         {
+            using var logHandle = LogScope.Handle(handle);
             if (Config.DestinationConnection.Type != DBADashConnection.ConnectionType.SQL)
             {
                 Log.Error("Destination is not SQL");
@@ -491,12 +495,12 @@ namespace DBADash.Messaging
                 catch (SqlException ex) when (ex.Number == 8426) // The conversation handle "%.*ls" is not found.
                 {
                     Log.Warning(
-                        "The conversation handle {handle} was not found.  The conversation might have ended & this message is processing out of order.",
+                        "The conversation handle {Handle} was not found.  The conversation might have ended & this message is processing out of order.",
                         handle);
                 }
                 catch (Exception ex)
                 {
-                    Log.Warning(ex, "Error sending reply message for handle {handle}", handle);
+                    Log.Warning(ex, "Error sending reply message for handle {Handle}", handle);
                     throw;
                 }
             });
@@ -504,12 +508,12 @@ namespace DBADash.Messaging
             switch (responseMessage.Type)
             {
                 case ResponseMessage.ResponseTypes.Success:
-                    Log.Information("Message with handle {handle} processed successfully by remote service.", handle);
+                    Log.Information("Message with handle {Handle} processed successfully by remote service.", handle);
                     DeferEndConversation(handle, responseMessage.ExpectedProgressCount);
                     break;
 
                 case ResponseMessage.ResponseTypes.Progress:
-                    Log.Information("Message with handle {handle} is in progress on remote service. {message}", handle, responseMessage.Message);
+                    Log.Information("Message with handle {Handle} is in progress on remote service. {Reply}", handle, responseMessage.Message);
                     // Count any progress the remote counted in ExpectedProgressCount.  New remotes flag these
                     // explicitly (CountsTowardProgressTotal); the CollectionProgress fallback keeps older remotes,
                     // which only flagged per-instance collection updates, working.
@@ -520,12 +524,12 @@ namespace DBADash.Messaging
                     break;
 
                 case ResponseMessage.ResponseTypes.Warning:
-                    Log.Warning("Message with handle {handle} returned a warning from remote service: {message}", handle, responseMessage.Message);
+                    Log.Warning("Message with handle {Handle} returned a warning from remote service: {Reply}", handle, responseMessage.Message);
                     DeferEndConversation(handle, responseMessage.ExpectedProgressCount);
                     break;
 
                 case ResponseMessage.ResponseTypes.Failure:
-                    Log.Error("Message with handle {handle} failed on remote service: {message}", handle, responseMessage.Message);
+                    Log.Error("Message with handle {Handle} failed on remote service: {Reply}", handle, responseMessage.Message);
                     DeferEndConversation(handle, responseMessage.ExpectedProgressCount);
                     break;
             }
@@ -565,7 +569,7 @@ namespace DBADash.Messaging
                     if (tracker.ProgressReceived < tracker.ExpectedProgressCount)
                     {
                         var outstanding = tracker.ExpectedProgressCount - tracker.ProgressReceived;
-                        Log.Information("Handle {handle}: terminal reply arrived but {outstanding} of {expected} progress messages still pending, waiting up to {timeout}ms",
+                        Log.Information("Handle {Handle}: terminal reply arrived but {Outstanding} of {Expected} progress messages still pending, waiting up to {TimeoutMs}ms",
                             handle, outstanding, tracker.ExpectedProgressCount, DeferredReplyTimeoutMs);
 
                         var completed = await Task.WhenAny(tracker.AllProgressReceived.Task,
@@ -573,7 +577,7 @@ namespace DBADash.Messaging
 
                         if (!completed)
                         {
-                            Log.Warning("Handle {handle}: timed out waiting for {outstanding} outstanding progress messages",
+                            Log.Warning("Handle {Handle}: timed out waiting for {Outstanding} outstanding progress messages",
                                 handle, tracker.ExpectedProgressCount - tracker.ProgressReceived);
                         }
                     }
@@ -585,7 +589,7 @@ namespace DBADash.Messaging
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error ending conversation for handle {handle}", handle);
+                Log.Error(ex, "Error ending conversation for handle {Handle}", handle);
             }
         }
     }

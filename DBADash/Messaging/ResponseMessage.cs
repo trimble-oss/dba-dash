@@ -131,7 +131,7 @@ namespace DBADash.Messaging
         {
             if (!string.IsNullOrWhiteSpace(MessageDataPath))
             {
-                Log.Information("Downloading message data from {path}", MessageDataPath);
+                Log.Information("Downloading message data from {Path}", MessageDataPath);
                 var uri = new Amazon.S3.Util.AmazonS3Uri(MessageDataPath);
                 using var s3Cli = await AWSTools.GetS3ClientForEndpointAsync(Config.AWSProfile, Config.AccessKey, Config.GetSecretKey(), MessageDataPath);
 
@@ -142,7 +142,7 @@ namespace DBADash.Messaging
                 var ds = new DataSet();
                 ds.ReadXml(responseStream);
                 Data = ds;
-                Log.Information("Downloaded succeeded, removing data from bucket {path}", MessageDataPath);
+                Log.Information("Downloaded succeeded, removing data from bucket {Path}", MessageDataPath);
                 await s3Cli.DeleteObjectAsync(uri.Bucket, uri.Key);
             }
         }
@@ -162,7 +162,7 @@ namespace DBADash.Messaging
             sw.Restart();
             var compressed = json.Compress();
             Log.Debug(
-                "ResponseMessage.Serialize ({type}): json {jsonBytes} bytes in {jsonMs}ms, gzip {gzipBytes} bytes in {gzipMs}ms",
+                "ResponseMessage.Serialize ({Type}): json {JsonBytes} bytes in {JsonMs}ms, gzip {GzipBytes} bytes in {GzipMs}ms",
                 Type, json.Length, jsonMs, compressed.Length, sw.ElapsedMilliseconds);
             return compressed;
         }

@@ -64,7 +64,7 @@ namespace DBADashService
             {
                 if (await _workQueue.EnqueueAsync(item, cancellationToken))
                 {
-                    Log.Information("Queued deadlock backfill for {instance}", InstanceName(source));
+                    Log.Information("Queued deadlock backfill for {ConnectionID}", InstanceName(source));
                     return;
                 }
             }
@@ -84,7 +84,7 @@ namespace DBADashService
                 if (OfflineInstances.IsOffline(Source))
                 {
                     // Left pending: the next Deadlocks run once the instance is back schedules it again.
-                    Log.Warning("Skipping deadlock backfill for {instance} - offline", InstanceName(Source));
+                    Log.Warning("Skipping deadlock backfill for {ConnectionID} - offline", InstanceName(Source));
                     return;
                 }
 
@@ -95,7 +95,7 @@ namespace DBADashService
                 // an earlier item for the same instance.
                 if (!collector.IsDeadlockBackfillPending) return;
 
-                using var op = SerilogTimings.Operation.Begin("Deadlock backfill for instance {instance}",
+                using var op = SerilogTimings.Operation.Begin("Deadlock backfill for instance {Source}",
                     Source.SourceConnection.ConnectionForPrint);
 
                 if (!await collector.CollectDeadlockBackfillAsync(cancellationToken))
@@ -111,7 +111,7 @@ namespace DBADashService
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex, "Error writing {filename} to destination. File will be copied to {folder}",
+                    Log.Error(ex, "Error writing {FileName} to destination. File will be copied to {Folder}",
                         fileName, SchedulerServiceConfig.FailedMessageFolder);
                     string failedPath = null;
                     try
@@ -122,7 +122,7 @@ namespace DBADashService
                     catch (Exception folderEx)
                     {
                         // Caught so it can't escape to the handler below, which would leave the backfill pending.
-                        Log.Error(folderEx, "Error writing {filename} to {folder}", fileName,
+                        Log.Error(folderEx, "Error writing {FileName} to {Folder}", fileName,
                             SchedulerServiceConfig.FailedMessageFolder);
                     }
 
@@ -131,8 +131,8 @@ namespace DBADashService
                     if (string.IsNullOrEmpty(SchedulerServiceConfig.FailedMessageFolder) ||
                         failedPath == null || !File.Exists(failedPath))
                     {
-                        Log.Error("Deadlock backfill for {instance} could not be written to a destination or to the " +
-                                  "failed message folder.  Its {count} deadlock(s) are discarded, and the backfill is " +
+                        Log.Error("Deadlock backfill for {ConnectionID} could not be written to a destination or to the " +
+                                  "failed message folder.  Its {Count} deadlock(s) are discarded, and the backfill is " +
                                   "not attempted again.", InstanceName(Source),
                             collector.Data.Tables["Deadlocks"]?.Rows.Count ?? 0);
                     }
@@ -151,7 +151,7 @@ namespace DBADashService
             catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
             {
                 // Left pending, so a later Deadlocks run schedules it again.
-                Log.Error(ex, "Error running deadlock backfill for {instance}", Source.SourceConnection.ConnectionForPrint);
+                Log.Error(ex, "Error running deadlock backfill for {Source}", Source.SourceConnection.ConnectionForPrint);
             }
             finally
             {

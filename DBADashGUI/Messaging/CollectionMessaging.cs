@@ -274,7 +274,7 @@ namespace DBADashGUI.Messaging
             }
             catch (Exception ex)
             {
-                Log.Debug(ex, "Error draining conversation {group} after warning", group);
+                Log.Debug(ex, "Error draining conversation {Group} after warning", group);
             }
         }
 

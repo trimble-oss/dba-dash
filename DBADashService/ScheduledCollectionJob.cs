@@ -83,7 +83,7 @@ namespace DBADashService
             var customCollections = JsonConvert.DeserializeObject<Dictionary<string, CustomCollection>>(dataMap.GetString("CustomCollections"));
 
             var queueDepth = _workQueue.QueueDepth;
-            Log.Information("Enqueuing collection for {instanceCount} instances on schedule {schedule}. Queue Total:{total} (H:{high}, N:{normal} L:{low}). Priority: {priority}",
+            Log.Information("Enqueuing collection for {InstanceCount} instances on schedule {Schedule}. Queue Total:{Total} (H:{High}, N:{Normal} L:{Low}). Priority: {Priority}",
                 sources.Count, schedule, _workQueue.QueueDepth, _workQueue.HighQueueDepth, _workQueue.NormalQueueDepth, _workQueue.LowQueueDepth, priority);
 
             var enqueueTasks = new List<Task<bool>>(sources.Count * 2);
@@ -115,11 +115,11 @@ namespace DBADashService
 
             if (failedCount > 0)
             {
-                Log.Warning("Failed to enqueue {failedCount} work items for schedule {schedule} in {duration}ms", failedCount, schedule, totalMs);
+                Log.Warning("Failed to enqueue {FailedCount} work items for schedule {Schedule} in {Elapsed} ms", failedCount, schedule, totalMs);
             }
             else
             {
-                Log.Information("Successfully enqueued {count} work items for schedule {schedule} in {duration}ms", enqueueTasks.Count, schedule, totalMs);
+                Log.Information("Successfully enqueued {Count} work items for schedule {Schedule} in {Elapsed} ms", enqueueTasks.Count, schedule, totalMs);
             }
         }
 
@@ -137,7 +137,7 @@ namespace DBADashService
             var isOffline = OfflineInstances.IsOffline(source);
             if (isOffline)
             {
-                Log.Debug("Skipping {instance} - offline",
+                Log.Debug("Skipping {ConnectionID} - offline",
                     source.ConnectionID ?? source.SourceConnection.ConnectionForPrint);
                 return 0;
             }
@@ -260,12 +260,12 @@ namespace DBADashService
                     return WorkItemPriority.Low;
                 }
 
-                Log.Warning("Unable to determine interval from cron schedule {schedule}. Defaulting priority to Normal.", schedule);
+                Log.Warning("Unable to determine interval from cron schedule {Schedule}. Defaulting priority to Normal.", schedule);
                 return WorkItemPriority.Normal;
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Invalid cron schedule {schedule}. Defaulting priority to Normal.", schedule);
+                Log.Error(ex, "Invalid cron schedule {Schedule}. Defaulting priority to Normal.", schedule);
                 return WorkItemPriority.Normal;
             }
         }

@@ -19,7 +19,7 @@ namespace DBADash.Messaging
 
         public override Task<DataSet> Process(CollectionConfig cfg, Guid handle, CancellationToken cancellationToken)
         {
-            Log.Debug("Heartbeat for message {id}", TraceMessageId);
+            Log.Debug("Heartbeat for message {TraceMessageId}", TraceMessageId);
             HeartbeatManager.Beat(TraceMessageId);
             return Task.FromResult(new DataSet());
         }

@@ -148,7 +148,7 @@ namespace DBADashGUI.Deadlocks
                 // The reader's own conversations are unaffected - they are not in there.
                 // An older repository without the table, or a user without the grant: the viewer works
                 // the same, it just cannot offer what was found before.
-                Log.Debug(ex, "Could not read deadlock analysis history for {signature}", signature);
+                Log.Debug(ex, "Could not read deadlock analysis history for {Signature}", signature);
                 return new List<Entry>();
             }
         }

@@ -99,7 +99,7 @@ namespace DBADash.XE
                     var total = Interlocked.Read(ref dropped);
                     if (total <= reportedDrops) return;
                     Log.Warning(
-                        "XE live trace on session {session}: dropped {count} event(s) - consumer could not keep up ({total} total this stream)",
+                        "XE live trace on session {SessionName}: dropped {Count} event(s) - consumer could not keep up ({Total} total this stream)",
                         _sessionName, total - reportedDrops, total);
                     reportedDrops = total;
                 }

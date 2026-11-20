@@ -18,7 +18,7 @@ namespace DBADash.Messaging
     /// query_post_execution_showplan was running.<br/>
     /// The plan isn't stored in the repository - it's a point in time view of a request in progress.
     /// </summary>
-    public class LivePlanMessage : MessageBase
+    public class LivePlanMessage : MessageBase, IConnectionMessage
     {
         public string ConnectionID { get; set; }
 
@@ -39,7 +39,7 @@ namespace DBADash.Messaging
             ThrowIfExpired();
 
             using var op = Operation.Begin(
-                "Get live plan for session {session} on {instance} triggered from message {id} with handle {handle}",
+                "Get live plan for session {SessionID} on {ConnectionID} triggered from message {MessageId} with handle {Handle}",
                 SessionID,
                 ConnectionID,
                 Id,
@@ -68,7 +68,7 @@ namespace DBADash.Messaging
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error getting live plan for session {session} on {instance} from message {id} with handle {handle}",
+                Log.Error(ex, "Error getting live plan for session {SessionID} on {ConnectionID} from message {MessageId} with handle {Handle}",
                     SessionID, ConnectionID, Id, handle);
                 throw;
             }

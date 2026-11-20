@@ -8,7 +8,7 @@ using Serilog;
 
 namespace DBADash.Messaging
 {
-    public class QueryStorePlanForcingMessage : MessageBase
+    public class QueryStorePlanForcingMessage : MessageBase, IConnectionMessage
     {
         public string ConnectionID { get; set; }
 
@@ -34,7 +34,7 @@ namespace DBADash.Messaging
                 throw new Exception("Plan forcing is not enabled on the DBA Dash service");
             }
             using var op = Operation.Begin(
-                "{Operation} plan {PlanID} for query {QueryID} in database {database} on {instance} triggered from message {handle}",
+                "{Operation} plan {PlanID} for query {QueryID} in database {Database} on {ConnectionID} triggered from message {Handle}",
                 PlanForcingOperation,
                 PlanID,
                 QueryID,
@@ -66,7 +66,7 @@ namespace DBADash.Messaging
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error with {type} plan operation", PlanForcingOperation.ToString());
+                Log.Error(ex, "Error with {Type} plan operation", PlanForcingOperation);
                 throw;
             }
         }

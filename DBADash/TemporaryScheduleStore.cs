@@ -141,7 +141,7 @@ namespace DBADash
                 catch (Exception ex)
                 {
                     // Expired schedules are ignored anyway - the file just catches up on the next change
-                    Log.Warning(ex, "Error removing expired temporary schedules from {file}", filePath);
+                    Log.Warning(ex, "Error removing expired temporary schedules from {File}", filePath);
                 }
                 schedules = updated;
                 return expired;

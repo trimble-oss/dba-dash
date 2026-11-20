@@ -158,7 +158,7 @@ namespace DBADash.CommunityTools
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Unable to deploy community tools to {instance}", instance);
+                Log.Error(ex, "Unable to deploy community tools to {Instance}", instance);
                 return new CommunityToolInstanceDeployResult { Instance = instance, Error = ex.Message };
             }
 
@@ -170,10 +170,10 @@ namespace DBADash.CommunityTools
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Unable to connect to {instance}", instance);
+                Log.Error(ex, "Unable to connect to {Instance}", instance);
                 return new CommunityToolInstanceDeployResult { Instance = result.Instance, Database = database, Error = ex.Message };
             }
-            cn.InfoMessage += (_, e) => Log.Debug("{instance}: {message}", result.Instance, e.Message);
+            cn.InfoMessage += (_, e) => Log.Debug("{Instance}: {InfoMessage}", result.Instance, e.Message);
 
             // By default each tool updates the copy DBA Dash runs (the connection's database, then master), so an
             // existing install in master isn't joined by a second copy in the user database that takes over from it.
@@ -187,7 +187,7 @@ namespace DBADash.CommunityTools
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
-                Log.Error(ex, "Unable to check where community tools are installed on {instance}", instance);
+                Log.Error(ex, "Unable to check where community tools are installed on {Instance}", instance);
                 return new CommunityToolInstanceDeployResult { Instance = result.Instance, Database = database, Error = ex.Message };
             }
 
@@ -221,7 +221,7 @@ namespace DBADash.CommunityTools
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
-                Log.Error(ex, "Unable to check the installed community tools on {instance}", instance);
+                Log.Error(ex, "Unable to check the installed community tools on {Instance}", instance);
                 return new CommunityToolInstanceDeployResult { Instance = result.Instance, Database = database, Error = ex.Message };
             }
 
@@ -255,7 +255,7 @@ namespace DBADash.CommunityTools
             if (rollback.IsValueCreated && System.IO.File.Exists(rollback.Value.Path))
             {
                 result.RollbackScript = rollback.Value.Path;
-                Log.Information("Rollback script for {instance}: {path}", result.Instance, result.RollbackScript);
+                Log.Information("Rollback script for {Instance}: {Path}", result.Instance, result.RollbackScript);
             }
             return result;
         }
@@ -290,7 +290,7 @@ namespace DBADash.CommunityTools
             if (file == null)
             {
                 if (checkOnly) return null;
-                Log.Information("Skipping {tool} on {instance}: {reason}", tool.Name, instance, notSupportedReason);
+                Log.Information("Skipping {Tool} on {Instance}: {Reason}", tool.Name, instance, notSupportedReason);
                 return new CommunityToolDeployResult { Tool = tool, Status = CommunityToolDeployStatus.Skipped, Message = notSupportedReason, Database = database };
             }
 
@@ -304,7 +304,7 @@ namespace DBADash.CommunityTools
                 var existing = check != null ? check.Existing : await GetExistingAsync(cn, tool, cancellationToken);
                 if (GetConflict(tool, existing) is { } conflict)
                 {
-                    Log.Warning("Not deploying {tool} to {instance}.{database}: {reason}", tool.Name, instance, database, conflict);
+                    Log.Warning("Not deploying {Tool} to {Instance}.{Database}: {Reason}", tool.Name, instance, database, conflict);
                     return new CommunityToolDeployResult { Tool = tool, Database = database, Status = CommunityToolDeployStatus.Failed, Message = conflict, IsConflict = true };
                 }
 
@@ -322,7 +322,7 @@ namespace DBADash.CommunityTools
                         return new CommunityToolDeployResult { Tool = tool, Database = database, Status = CommunityToolDeployStatus.Failed, Message = upToDateSetupError };
                     }
                     var installedVersion = script.MatchesPin ? file.Version : CommunityToolVersionChecker.ParseVersion(tool.Family, script.Text).version;
-                    Log.Information("{tool} {version} is already deployed to {instance}.{database}", tool.Name, installedVersion, instance, database);
+                    Log.Information("{Tool} {Version} is already deployed to {Instance}.{Database}", tool.Name, installedVersion, instance, database);
                     return new CommunityToolDeployResult { Tool = tool, Database = database, Status = CommunityToolDeployStatus.UpToDate, Version = installedVersion, Origin = script.Origin };
                 }
                 var warnings = new List<string>();
@@ -352,10 +352,10 @@ namespace DBADash.CommunityTools
                     {
                         if (!OverrideSafetyChecks)
                         {
-                            Log.Warning("Not deploying {tool} to {instance}.{database}: {reason}", tool.Name, instance, database, block);
+                            Log.Warning("Not deploying {Tool} to {Instance}.{Database}: {Reason}", tool.Name, instance, database, block);
                             return new CommunityToolDeployResult { Tool = tool, Database = database, Status = CommunityToolDeployStatus.Failed, Message = block + "  Override the safety checks to replace it anyway.", Origin = script.Origin };
                         }
-                        Log.Warning("Deploying {tool} to {instance}.{database} with safety checks overridden: {reason}", tool.Name, instance, database, block);
+                        Log.Warning("Deploying {Tool} to {Instance}.{Database} with safety checks overridden: {Reason}", tool.Name, instance, database, block);
                         warnings.Add("Safety checks overridden: " + block);
                     }
                 }
@@ -380,12 +380,12 @@ namespace DBADash.CommunityTools
                 cn.ChangeDatabase(database);
                 await ExecuteScriptAsync(cn, script, tool.Name, cancellationToken);
                 var version = script.MatchesPin ? file.Version : CommunityToolVersionChecker.ParseVersion(tool.Family, script.Text).version;
-                Log.Information("Deployed {tool} {version} to {instance}.{database}", tool.Name, version, instance, database);
+                Log.Information("Deployed {Tool} {Version} to {Instance}.{Database}", tool.Name, version, instance, database);
                 return new CommunityToolDeployResult { Tool = tool, Database = database, Status = CommunityToolDeployStatus.Deployed, Version = version, Origin = script.Origin, Message = warnings.Count == 0 ? null : string.Join("  ", warnings) };
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
-                Log.Error(ex, "Error deploying {tool} to {instance}.{database}", tool.Name, instance, database);
+                Log.Error(ex, "Error deploying {Tool} to {Instance}.{Database}", tool.Name, instance, database);
                 return new CommunityToolDeployResult { Tool = tool, Database = database, Status = CommunityToolDeployStatus.Failed, Message = ex.Message, Origin = script?.Origin };
             }
         }
@@ -421,7 +421,7 @@ namespace DBADash.CommunityTools
             {
                 if (SqlBatchSplitter.IsUseOnlyBatch(batch))
                 {
-                    Log.Debug("Skipping USE batch in {name}: {batch}", name, batch.Trim());
+                    Log.Debug("Skipping USE batch in {Name}: {Batch}", name, batch.Trim());
                     continue;
                 }
                 await using var cmd = new SqlCommand(batch, cn) { CommandTimeout = CommandTimeout };
@@ -545,7 +545,7 @@ ORDER BY P.parameter_id", cn);
             }
             catch (SqlException ex)
             {
-                Log.Warning(ex, "Unable to read Agent job steps to check {tool}'s parameters", tool.Name);
+                Log.Warning(ex, "Unable to read Agent job steps to check {Tool}'s parameters", tool.Name);
                 // Not knowing is treated as unsafe - overriding the safety checks is the way past it
                 blocks.Add($"The new version {DescribeChanges(removed, addedRequired)}, and Agent jobs couldn't be checked for calls that would break: {ex.Message}");
                 return;
@@ -588,7 +588,7 @@ ORDER BY P.parameter_id", cn);
                 {
                     if (!string.IsNullOrEmpty(file.Table) && await GetTableConflictAsync(cn, file, cancellationToken) is { } conflict)
                     {
-                        Log.Warning("Not deploying {family} to {instance}.{database}: {reason}", tool.Family.Name, instance, database, conflict);
+                        Log.Warning("Not deploying {Family} to {Instance}.{Database}: {Reason}", tool.Family.Name, instance, database, conflict);
                         return conflict;
                     }
                     var script = await source.GetScriptAsync(tool, file, cancellationToken);
@@ -597,7 +597,7 @@ ORDER BY P.parameter_id", cn);
                 }
                 catch (Exception ex) when (ex is not OperationCanceledException)
                 {
-                    Log.Error(ex, "Error running {file} on {instance}.{database}", file.Path, instance, database);
+                    Log.Error(ex, "Error running {File} on {Instance}.{Database}", file.Path, instance, database);
                     return $"{file.Path}: {ex.Message}";
                 }
             }

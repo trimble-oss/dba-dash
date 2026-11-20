@@ -72,7 +72,7 @@ namespace DBADashGUI.Grids
             catch (Exception ex)
             {
                 // A file that can't be read loses the remembered bars, not the grid.
-                Log.Warning(ex, "Unable to read the remembered grid data bars from {path}", path);
+                Log.Warning(ex, "Unable to read the remembered grid data bars from {Path}", path);
                 dataBars = null;
                 return false;
             }
@@ -107,7 +107,7 @@ namespace DBADashGUI.Grids
             }
             catch (Exception ex)
             {
-                Log.Warning(ex, "Unable to save the remembered grid data bars to {path}", path);
+                Log.Warning(ex, "Unable to save the remembered grid data bars to {Path}", path);
             }
         }
 
@@ -121,7 +121,7 @@ namespace DBADashGUI.Grids
             }
             catch (Exception ex)
             {
-                Log.Warning(ex, "Unable to forget the remembered grid data bars at {path}", path);
+                Log.Warning(ex, "Unable to forget the remembered grid data bars at {Path}", path);
             }
         }
 

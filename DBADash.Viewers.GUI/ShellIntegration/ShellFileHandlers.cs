@@ -149,7 +149,7 @@ namespace DBADashGUI.ShellIntegration
             }
             catch (Exception ex)
             {
-                Log.Debug(ex, "Unable to load icon for {handler}", name);
+                Log.Debug(ex, "Unable to load icon for {Handler}", name);
                 return null;
             }
         }

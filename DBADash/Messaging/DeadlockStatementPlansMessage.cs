@@ -16,7 +16,7 @@ namespace DBADash.Messaging
     /// plan handle.  It doesn't return plan XML either: the rows carry the plan handle and offsets that the
     /// existing plan collection path takes, so only the plan the user actually asks for gets fetched.
     /// </summary>
-    public class DeadlockStatementPlansMessage : MessageBase
+    public class DeadlockStatementPlansMessage : MessageBase, IConnectionMessage
     {
         public string ConnectionID { get; set; }
 
@@ -37,7 +37,7 @@ namespace DBADash.Messaging
                 throw new ArgumentException("No sql handle supplied", nameof(SqlHandle));
             }
             using var op = Operation.Begin(
-                "Get deadlock statement plans from {instance} triggered from message {id} with handle {handle}",
+                "Get deadlock statement plans from {ConnectionID} triggered from message {MessageId} with handle {Handle}",
                 ConnectionID,
                 Id,
                 handle);
@@ -73,7 +73,7 @@ namespace DBADash.Messaging
             catch (Exception ex)
             {
                 Log.Error(ex,
-                    "Error getting deadlock statement plans from {instance} from message {id} with handle {handle}",
+                    "Error getting deadlock statement plans from {ConnectionID} from message {MessageId} with handle {Handle}",
                     ConnectionID, Id, handle);
                 throw;
             }

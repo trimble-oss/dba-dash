@@ -57,7 +57,7 @@ namespace DBADash.Messaging
             ThrowIfExpired();
 
             var parallelism = Math.Max(1, MaxParallelInstances);
-            Log.Information("Processing batched collection {Id} for {types} across {count} instances ({parallelism} at a time)",
+            Log.Information("Processing batched collection {MessageId} for {Types} across {Count} instances ({Parallelism} at a time)",
                 Id, CollectionTypes, Instances.Count, parallelism);
 
             // Throttle limits how many instances collect at once; replyLock serialises the per-instance
@@ -121,7 +121,7 @@ namespace DBADash.Messaging
                         // the skipped types are visible rather than silently dropped.
                         status = "Warning";
                         detail = UnknownCollectionTypeException.DescribeSkipped(collector.UnknownCollectionTypes);
-                        Log.Warning("Batched collection {Id} skipped unknown collection type(s) for instance {InstanceID} ({ConnectionID}): {detail}",
+                        Log.Warning("Batched collection {MessageId} skipped unknown collection type(s) for instance {InstanceID} ({ConnectionID}): {Detail}",
                             Id, instance.InstanceID, instance.ConnectionID, detail);
                     }
                     else
@@ -139,7 +139,7 @@ namespace DBADash.Messaging
                     // failure.  Unlike disabled collections there's nothing to re-run, so no disabled list.
                     status = "Warning";
                     detail = ex.Message;
-                    Log.Warning("Batched collection {Id} skipped all-unknown collection type(s) for instance {InstanceID} ({ConnectionID}): {detail}",
+                    Log.Warning("Batched collection {MessageId} skipped all-unknown collection type(s) for instance {InstanceID} ({ConnectionID}): {Detail}",
                         Id, instance.InstanceID, instance.ConnectionID, ex.Message);
                 }
                 catch (CollectionScheduleDisabledException ex)
@@ -150,14 +150,14 @@ namespace DBADash.Messaging
                     detail = ex.Message;
                     disabledCollections = ex.DisabledCollections;
                     configurationDisabledCollections = ex.ConfigurationDisabledCollections;
-                    Log.Warning("Batched collection {Id} skipped disabled collection(s) for instance {InstanceID} ({ConnectionID}): {detail}",
+                    Log.Warning("Batched collection {MessageId} skipped disabled collection(s) for instance {InstanceID} ({ConnectionID}): {Detail}",
                         Id, instance.InstanceID, instance.ConnectionID, ex.Message);
                 }
                 catch (Exception ex)
                 {
                     status = "Failed";
                     detail = ex.Message;
-                    Log.Error(ex, "Batched collection {Id} failed for instance {InstanceID} ({ConnectionID})",
+                    Log.Error(ex, "Batched collection {MessageId} failed for instance {InstanceID} ({ConnectionID})",
                         Id, instance.InstanceID, instance.ConnectionID);
                 }
 
@@ -189,7 +189,7 @@ namespace DBADash.Messaging
                 {
                     // A failed progress reply (e.g. a transient send error) must not sink the whole batch -
                     // this instance's collection has already run.  Log it and let the other instances finish.
-                    Log.Error(ex, "Batched collection {Id} failed to send progress reply for instance {InstanceID} ({ConnectionID})",
+                    Log.Error(ex, "Batched collection {MessageId} failed to send progress reply for instance {InstanceID} ({ConnectionID})",
                         Id, instance.InstanceID, instance.ConnectionID);
                 }
                 finally

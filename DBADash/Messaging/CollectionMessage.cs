@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace DBADash.Messaging
 {
     // Concrete message type for triggering a collection
-    public class CollectionMessage : MessageBase
+    public class CollectionMessage : MessageBase, IConnectionMessage
     {
         public List<string> CollectionTypes { get; set; }
 
@@ -93,7 +93,7 @@ namespace DBADash.Messaging
         /// </summary>
         internal async Task<DataSet> CollectAsync(CollectionConfig cfg, string connectionID, string databaseName, CancellationToken cancellationToken)
         {
-            using var op = Operation.Begin("Collection triggered from message {Id} to collect {types} from {instance}",
+            using var op = Operation.Begin("Collection triggered from message {MessageId} to collect {Types} from {ConnectionID}",
                 Id,
                 CollectionTypes,
                 connectionID);
@@ -111,7 +111,7 @@ namespace DBADash.Messaging
                 {
                     throw new ArgumentException(SlowQueriesNotTriggerable);
                 }
-                Log.Warning("Message {Id}: skipping SlowQueries for {instance}.  {reason}", Id, connectionID,
+                Log.Warning("Message {MessageId}: skipping SlowQueries for {ConnectionID}.  {Reason}", Id, connectionID,
                     SlowQueriesNotTriggerable);
             }
 
@@ -134,7 +134,7 @@ namespace DBADash.Messaging
                 {
                     throw new UnknownCollectionTypeException(unknownCollections);
                 }
-                Log.Warning("Message {Id}: skipping unknown collection type(s) {unknown} for {instance}", Id, unknownCollections, connectionID);
+                Log.Warning("Message {MessageId}: skipping unknown collection type(s) {Unknown} for {ConnectionID}", Id, unknownCollections, connectionID);
             }
 
             var collector = await DBCollector.CreateAsync(src, cfg.ServiceName, true, cfg.LogInternalPerformanceCounters);
@@ -156,12 +156,12 @@ namespace DBADash.Messaging
                     // Snapshot all configured databases
                     // Written to destinations as usual.  Could be additional delay to process.
                     // It's done DB at a time to limit the size of the data being processed.
-                    Log.Information("Message {Id} requested schema snapshots for {instance}", Id, connectionID);
+                    Log.Information("Message {MessageId} requested schema snapshots for {ConnectionID}", Id, connectionID);
                     await SchemaSnapshotDB.GenerateSchemaSnapshots(cfg, src);
                 }
                 else
                 {
-                    Log.Information("Message {Id} requested snapshot for database {DatabaseName} on {instance}", Id, databaseName, connectionID);
+                    Log.Information("Message {MessageId} requested snapshot for database {Database} on {ConnectionID}", Id, databaseName, connectionID);
                     var schema = new SchemaSnapshotDB(src.SourceConnection, cfg.SchemaSnapshotOptions);
                     var dt = schema.SnapshotDB(databaseName, collector);
                     collector.Data.Tables.Add(dt);
@@ -272,7 +272,7 @@ namespace DBADash.Messaging
                 throw new CollectionScheduleDisabledException(disabled, configurationDisabled);
             }
 
-            Log.Warning("Message {Id}: skipping disabled collection(s) {disabled} for {instance}", Id, disabled, connectionID);
+            Log.Warning("Message {MessageId}: skipping disabled collection(s) {Disabled} for {ConnectionID}", Id, disabled, connectionID);
             return onDemandDeadlockSession;
         }
 

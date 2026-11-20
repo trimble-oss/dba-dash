@@ -84,7 +84,7 @@ namespace DBADashAI.Services
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Could not record the deadlock analysis for {signature}", signature);
+                _logger.LogWarning(ex, "Could not record the deadlock analysis for {Signature}", signature);
             }
         }
     }

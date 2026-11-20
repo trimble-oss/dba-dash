@@ -37,7 +37,7 @@ namespace DBADash.Messaging
     /// backed by the deterministic session name existing on the source (a repo unique index is the third guard,
     /// added when the schema lands).</para>
     /// </summary>
-    public class XETraceMessage : MessageBase
+    public class XETraceMessage : MessageBase, IConnectionMessage
     {
         public string ConnectionID { get; set; }
 
@@ -143,7 +143,7 @@ namespace DBADash.Messaging
             }
 
             using var op = Operation.Begin(
-                "Ad-hoc XE trace on {instance} ({target}, {duration}s) triggered from message {id} with handle {handle}",
+                "Ad-hoc XE trace on {ConnectionID} ({Target}, {DurationSeconds}s) triggered from message {MessageId} with handle {Handle}",
                 ConnectionID, targetType, duration, Id, handle);
 
             var definition = BuildDefinition(targetType, scope);
@@ -187,7 +187,7 @@ namespace DBADash.Messaging
                     {
                         // Reclaim an orphaned session (e.g. after a service restart).  We now own it and will stop it.
                         own = true;
-                        Log.Information("Reclaiming existing ad-hoc XE session on {instance}", ConnectionID);
+                        Log.Information("Reclaiming existing ad-hoc XE session on {ConnectionID}", ConnectionID);
                     }
                     else
                     {
@@ -259,7 +259,7 @@ namespace DBADash.Messaging
                     {
                         heartbeatLost = true;
                         Log.Warning(
-                            "Ad-hoc XE trace on {instance} stopping: no heartbeat from the client for over {timeout}s",
+                            "Ad-hoc XE trace on {ConnectionID} stopping: no heartbeat from the client for over {TimeoutSeconds}s",
                             ConnectionID, XETraceHeartbeat.TimeoutSeconds);
                         break;
                     }
@@ -298,7 +298,7 @@ namespace DBADash.Messaging
             XESessionScope scope, int duration, int batchInterval, Guid handle, CancellationToken cancellationToken)
         {
             using var op = Operation.Begin(
-                "Ad-hoc LIVE XE trace on {instance} ({duration}s) triggered from message {id} with handle {handle}",
+                "Ad-hoc LIVE XE trace on {ConnectionID} ({DurationSeconds}s) triggered from message {MessageId} with handle {Handle}",
                 ConnectionID, duration, Id, handle);
 
             // A .xel capture bolts an event_file target onto the live session, but Azure SQL Database can't write one
@@ -342,7 +342,7 @@ namespace DBADash.Messaging
                     if (running)
                     {
                         own = true; // reclaim an orphan
-                        Log.Information("Reclaiming existing ad-hoc XE session on {instance}", ConnectionID);
+                        Log.Information("Reclaiming existing ad-hoc XE session on {ConnectionID}", ConnectionID);
                     }
                     else
                     {
@@ -418,7 +418,7 @@ namespace DBADash.Messaging
                     // aborts the streaming query, and an external drop can surface as a SqlException before the token is
                     // observed cancelled.  Swallow it so we fall through to teardown and still return the summary - which
                     // for a .xel-capture trace carries the captured bytes the caller needs for "Save .xel".
-                    Log.Debug(ex, "Live ad-hoc XE stream on {instance} ended via exception (treated as stop)", ConnectionID);
+                    Log.Debug(ex, "Live ad-hoc XE stream on {ConnectionID} ended via exception (treated as stop)", ConnectionID);
                 }
                 finally
                 {
@@ -443,11 +443,11 @@ namespace DBADash.Messaging
                         }
                         catch (Exception ex)
                         {
-                            Log.Warning(ex, "Error capturing .xel for live ad-hoc XE session on {instance}", ConnectionID);
+                            Log.Warning(ex, "Error capturing .xel for live ad-hoc XE session on {ConnectionID}", ConnectionID);
                         }
                     }
                     try { await ExecAsync(connectionString, DropIfExistsSql(scope), CancellationToken.None); }
-                    catch (Exception ex) { Log.Warning(ex, "Error dropping live ad-hoc XE session on {instance}", ConnectionID); }
+                    catch (Exception ex) { Log.Warning(ex, "Error dropping live ad-hoc XE session on {ConnectionID}", ConnectionID); }
                 }
             }
 
@@ -474,7 +474,7 @@ namespace DBADash.Messaging
                     if (HeartbeatManager.IsExpired(Id, heartbeatTimeout))
                     {
                         monitor.HeartbeatLost = true;
-                        Log.Warning("Live ad-hoc XE trace on {instance} stopping: no heartbeat from the client for over {timeout}s",
+                        Log.Warning("Live ad-hoc XE trace on {ConnectionID} stopping: no heartbeat from the client for over {TimeoutSeconds}s",
                             ConnectionID, XETraceHeartbeat.TimeoutSeconds);
                         streamCts.Cancel();
                         return;
@@ -612,12 +612,12 @@ namespace DBADash.Messaging
             }
             catch (Exception ex)
             {
-                Log.Warning(ex, "Error stopping/draining ad-hoc XE session on {instance}", ConnectionID);
+                Log.Warning(ex, "Error stopping/draining ad-hoc XE session on {ConnectionID}", ConnectionID);
             }
             finally
             {
                 try { await ExecAsync(connectionString, DropIfExistsSql(scope), CancellationToken.None); }
-                catch (Exception ex) { Log.Warning(ex, "Error dropping ad-hoc XE session on {instance}", ConnectionID); }
+                catch (Exception ex) { Log.Warning(ex, "Error dropping ad-hoc XE session on {ConnectionID}", ConnectionID); }
             }
             return drained;
         }
@@ -713,7 +713,7 @@ namespace DBADash.Messaging
             }
 
             Log.Warning(
-                "Live ad-hoc XE stream on {instance} did not stop within {grace}s of cancellation; forcing teardown (the session DROP will abort the stuck read)",
+                "Live ad-hoc XE stream on {ConnectionID} did not stop within {Grace}s of cancellation; forcing teardown (the session DROP will abort the stuck read)",
                 ConnectionID, StreamStopGraceSeconds);
             // Abandon the stuck streamTask - it unwinds once the finally DROP aborts the underlying read.  Observe its
             // eventual exception so it doesn't surface as an unobserved TaskException.
@@ -731,13 +731,13 @@ namespace DBADash.Messaging
             try
             {
                 Log.Information(
-                    "Live ad-hoc XE trace on {instance} cancelled - issuing server-side STOP to end the live stream",
+                    "Live ad-hoc XE trace on {ConnectionID} cancelled - issuing server-side STOP to end the live stream",
                     ConnectionID);
                 await ExecAsync(connectionString, StateSql("STOP", scope), CancellationToken.None);
             }
             catch (Exception ex)
             {
-                Log.Warning(ex, "Error issuing STOP to unblock live ad-hoc XE stream on {instance}", ConnectionID);
+                Log.Warning(ex, "Error issuing STOP to unblock live ad-hoc XE stream on {ConnectionID}", ConnectionID);
             }
         }
 
@@ -804,7 +804,7 @@ END CATCH";
             }
             catch (Exception ex)
             {
-                Log.Warning(ex, "Unable to determine event_file start cursor on {instance}; reading from the start",
+                Log.Warning(ex, "Unable to determine event_file start cursor on {ConnectionID}; reading from the start",
                     ConnectionID);
             }
             return FileTargetCursor.None;
@@ -840,7 +840,7 @@ END";
                 var bytes = (byte[])result;
                 if (bytes.Length > MaxXelBytes)
                 {
-                    Log.Warning("Captured .xel for {instance} is {size} bytes (> {cap} cap) - not returned",
+                    Log.Warning("Captured .xel for {ConnectionID} is {Size} bytes (> {Cap} cap) - not returned",
                         ConnectionID, bytes.Length, MaxXelBytes);
                     return null;
                 }
@@ -849,7 +849,7 @@ END";
             catch (Exception ex)
             {
                 Log.Warning(ex,
-                    "Unable to capture .xel bytes for {instance} (OPENROWSET may need ADMINISTER BULK OPERATIONS)",
+                    "Unable to capture .xel bytes for {ConnectionID} (OPENROWSET may need ADMINISTER BULK OPERATIONS)",
                     ConnectionID);
                 return null;
             }

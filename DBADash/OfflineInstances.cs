@@ -30,7 +30,7 @@ namespace DBADashService
 
         private static void AddInternal(DBADashSource src, string message)
         {
-            Log.Warning("Connection to {Connection} failed.  Adding to offline instances", src.ConnectionID ?? src.SourceConnection.ConnectionForPrint);
+            Log.Warning("Connection to {ConnectionID} failed.  Adding to offline instances", src.ConnectionID ?? src.SourceConnection.ConnectionForPrint);
             Instances.TryAdd(src.SourceConnection.ConnectionString, (src, DateTime.UtcNow, DateTime.UtcNow, 1, message, message));
         }
 
@@ -138,7 +138,7 @@ namespace DBADashService
                 var connectionId = instance.Value.Source.ConnectionID;
                 if (string.IsNullOrEmpty(connectionId))
                 {
-                    Log.Warning("{instance} is offline & doesn't have a ConnectionID set for tracking", instance.Value.Source.SourceConnection.ConnectionForPrint);
+                    Log.Warning("{Source} is offline & doesn't have a ConnectionID set for tracking", instance.Value.Source.SourceConnection.ConnectionForPrint);
                     continue;
                 }
                 dt.Rows.Add(connectionId, instance.Value.FirstFail, instance.Value.LastFail, instance.Value.FirstMessage, instance.Value.LastMessage, instance.Value.FailCount);
@@ -253,7 +253,7 @@ namespace DBADashService
                 if (result.IsConnected)
                 {
                     Instances.TryRemove(result.Source.SourceConnection.ConnectionString, out var instance);
-                    Log.Information("Connection to {Connection} was successful.  Instance was offline for {mins}. Removing from offline instances", instance.Source.ConnectionID, instance.LastFail.Subtract(instance.FirstFail).Humanize());
+                    Log.Information("Connection to {ConnectionID} was successful.  Instance was offline for {OfflineFor}. Removing from offline instances", instance.Source.ConnectionID, instance.LastFail.Subtract(instance.FirstFail).Humanize());
                 }
                 else
                 {

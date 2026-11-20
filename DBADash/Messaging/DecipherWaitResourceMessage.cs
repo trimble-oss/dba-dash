@@ -14,7 +14,7 @@ namespace DBADash.Messaging
     /// If the function isn't available the script returns a row with RequiresScript = 1 so the GUI can fall back
     /// to prompting the user to run the manual script.
     /// </summary>
-    public class DecipherWaitResourceMessage : MessageBase
+    public class DecipherWaitResourceMessage : MessageBase, IConnectionMessage
     {
         public string ConnectionID { get; set; }
 
@@ -24,7 +24,7 @@ namespace DBADash.Messaging
         {
             ThrowIfExpired();
             using var op = Operation.Begin(
-                "Decipher wait resource on {instance} triggered from message {id} with handle {handle}",
+                "Decipher wait resource on {ConnectionID} triggered from message {MessageId} with handle {Handle}",
                 ConnectionID,
                 Id,
                 handle);
@@ -54,7 +54,7 @@ namespace DBADash.Messaging
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error deciphering wait resource on {instance} from message {id} with handle {handle}",
+                Log.Error(ex, "Error deciphering wait resource on {ConnectionID} from message {MessageId} with handle {Handle}",
                     ConnectionID, Id, handle);
                 throw;
             }

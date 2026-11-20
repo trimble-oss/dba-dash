@@ -25,15 +25,16 @@ namespace DBADashService
 
         public async ValueTask Execute(IJobExecutionContext context, System.Threading.CancellationToken cancellationToken = default)
         {
-            Log.Information("Processing Job : " + context.JobDetail.Key);
+            Log.Information("Processing job {Job}", context.JobDetail.Key);
             var dataMap = context.JobDetail.JobDataMap;
             var cfg = JsonConvert.DeserializeObject<DBADashSource>(dataMap.GetString("CFG")!);
+            using var logConnection = LogScope.Connection(cfg.ConnectionID);
             var schedule = dataMap.GetString("Schedule");
             try
             {
                 if (OfflineInstances.IsOffline(cfg))
                 {
-                    Log.Warning("Skipping {job} on {instance} as it is offline", context.JobDetail.Key, cfg.ConnectionID ?? cfg.SourceConnection.ConnectionForPrint);
+                    Log.Warning("Skipping {Job} on {ConnectionID} as it is offline", context.JobDetail.Key, cfg.ConnectionID ?? cfg.SourceConnection.ConnectionForPrint);
                     return;
                 }
                 switch (cfg.SourceConnection.Type)
@@ -66,7 +67,7 @@ namespace DBADashService
                         var inProgressKey = workItem.DedupKey;
                         if (!InProgress.TryAdd(inProgressKey, 0))
                         {
-                            Log.Warning("Skipping {job} for {instance}.  The previous run of these collections is still in progress.",
+                            Log.Warning("Skipping {Job} for {ConnectionID}.  The previous run of these collections is still in progress.",
                                 context.JobDetail.Key, cfg.ConnectionID ?? cfg.SourceConnection.ConnectionForPrint);
                             return;
                         }
@@ -87,7 +88,7 @@ namespace DBADashService
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
-                Log.Information("Job {job} cancelled during shutdown", context.JobDetail.Key);
+                Log.Information("Job {Job} cancelled during shutdown", context.JobDetail.Key);
             }
             catch (Exception ex)
             {

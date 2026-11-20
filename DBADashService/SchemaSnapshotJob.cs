@@ -14,14 +14,15 @@ namespace DBADashService
             if (sourceString == null) return;
 
             var src = JsonConvert.DeserializeObject<DBADashSource>(sourceString);
+            using var logConnection = LogScope.Connection(src.ConnectionID);
             if(OfflineInstances.IsOffline(src))
             {
-                Log.Warning("Connection to {Connection} is offline.  Skipping schema snapshot", src.ConnectionID ?? src.SourceConnection.ConnectionForPrint);
+                Log.Warning("Connection to {ConnectionID} is offline.  Skipping schema snapshot", src.ConnectionID ?? src.SourceConnection.ConnectionForPrint);
                 return;
             }
             if (CollectionPauseStore.Current.IsPaused(src.ConnectionID, out var pausedUntil))
             {
-                Log.Information("Collections for {Connection} are paused until {pausedUntil:u}.  Skipping schema snapshot", src.ConnectionID, pausedUntil);
+                Log.Information("Collections for {ConnectionID} are paused until {PausedUntil:u}.  Skipping schema snapshot", src.ConnectionID, pausedUntil);
                 return;
             }
             await SchemaSnapshotDB.GenerateSchemaSnapshots(SchedulerServiceConfig.Config, src);

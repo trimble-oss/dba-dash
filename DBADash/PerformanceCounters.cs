@@ -35,14 +35,14 @@ namespace DBADash
                 {
                     if (HasCustomPerformanceCounters())
                     {
-                        Log.Information("Read performance counters from {filename} (user)", userFileName);
+                        Log.Information("Read performance counters from {FileName} (user)", userFileName);
                         countersXML = File.ReadAllText(userFileName);
                     }
                 }
                 catch (Exception ex)
                 {
                     Log.Error(ex,
-                        "Error reading performance counters file '{filename}'.  Performance counter collection disabled",
+                        "Error reading performance counters file '{FileName}'.  Performance counter collection disabled",
                         userFileName);
                     countersXML = "";
                 }
@@ -69,7 +69,7 @@ namespace DBADash
                 catch (Exception ex)
                 {
                     Log.Error(ex,
-                        "Error reading performance counters from embedded resource '{filename}'.  Performance counter collection disabled",
+                        "Error reading performance counters from embedded resource '{FileName}'.  Performance counter collection disabled",
                         defaultFileNameResourceName);
                     countersXML = "";
                 }
@@ -137,7 +137,7 @@ namespace DBADash
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error removing legacy file {file}", legacyFileName);
+                Log.Error(ex, "Error removing legacy file {File}", legacyFileName);
             }
         }
 

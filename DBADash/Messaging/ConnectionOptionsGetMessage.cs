@@ -10,7 +10,7 @@ namespace DBADash.Messaging
     /// (<see cref="ConnectionOptionsUpdateMessage"/>).  Read from ServiceConfig.json.  Gated like the change it's used
     /// for (<see cref="CollectionConfig.AllowConnectionChanges"/>).
     /// </summary>
-    public class ConnectionOptionsGetMessage : MessageBase
+    public class ConnectionOptionsGetMessage : MessageBase, IConnectionMessage
     {
         public string ConnectionID { get; set; }
 

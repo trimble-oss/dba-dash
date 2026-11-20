@@ -12,7 +12,7 @@ namespace DBADash.Messaging
 
         public override Task<DataSet> Process(CollectionConfig cfg, Guid handle, CancellationToken cancellationToken)
         {
-            Log.Information("Cancellation requested for message {id}", CancelMessageId);
+            Log.Information("Cancellation requested for message {CancelMessageId}", CancelMessageId);
             CancellationTokenManager.TryCancel(CancelMessageId);
             return Task.FromResult(new DataSet());
         }

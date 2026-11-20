@@ -79,7 +79,7 @@ namespace DBADashGUI.Updates
             catch (Exception ex)
             {
                 // A release without an installer has no feed: GitHub answers 404.
-                Log.Warning(ex, "Unable to find the installer for version {version}", target);
+                Log.Warning(ex, "Unable to find the installer for version {Version}", target);
                 info = null;
             }
 
@@ -124,7 +124,7 @@ namespace DBADashGUI.Updates
             {
                 if (failure == null) return Outcome.Declined; // Cancelled
 
-                Log.Warning(failure, "Unable to download version {version}", target);
+                Log.Warning(failure, "Unable to download version {Version}", target);
                 CommonShared.ShowExceptionDialog(failure, "Unable to download the update",
                     text: $"You can download the setup program from {Repository}/releases instead.");
                 return Outcome.Unavailable;
@@ -142,7 +142,7 @@ namespace DBADashGUI.Updates
             }
             catch (Exception ex)
             {
-                Log.Warning(ex, "Unable to install version {version}", target);
+                Log.Warning(ex, "Unable to install version {Version}", target);
                 CommonShared.ShowExceptionDialog(ex, "Unable to install the update");
                 return Outcome.Unavailable;
             }

@@ -192,7 +192,7 @@ namespace DBADash.Messaging
                 }
                 catch (Exception ex)
                 {
-                    Serilog.Log.Warning(ex, "Error dropping extended events sessions no longer used by {connection}", c.Source.SourceConnection.ConnectionForPrint);
+                    Serilog.Log.Warning(ex, "Error dropping extended events sessions no longer used by {Source}", c.Source.SourceConnection.ConnectionForPrint);
                     return (c.Source, Dropped: new List<string>(), Error: ex.Message);
                 }
             }, cancellationToken);

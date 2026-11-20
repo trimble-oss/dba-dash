@@ -22,7 +22,7 @@ namespace DBADash.Messaging
     /// clear message.  Gated on <see cref="CollectionConfig.AllowWatchXE"/> and the per-session watch list (viewing
     /// captured data is the same read sensitivity as watching).</para>
     /// </summary>
-    public class XEViewTargetDataMessage : MessageBase
+    public class XEViewTargetDataMessage : MessageBase, IConnectionMessage
     {
         public string ConnectionID { get; set; }
 
@@ -79,7 +79,7 @@ namespace DBADash.Messaging
             }
 
             using var op = Operation.Begin(
-                "View XE target data for {session} on {instance} from message {id} with handle {handle}",
+                "View XE target data for {SessionName} on {ConnectionID} from message {MessageId} with handle {Handle}",
                 SessionName, ConnectionID, Id, handle);
 
             var maxEvents = MaxEvents > 0 ? MaxEvents : 0;
@@ -141,8 +141,8 @@ namespace DBADash.Messaging
             // Diagnostics: the read stage timing (per-path) so we can see where the time goes vs the transport/bind
             // (timed on the client).  Serialize cost is logged in ResponseMessage.Serialize.
             Log.Information(
-                "View XE data {session} on {instance}: {rows} rows, {cols} cols, target {target} - {readDiag} " +
-                "(total read {totalMs}ms)",
+                "View XE data {SessionName} on {ConnectionID}: {Rows} rows, {Cols} cols, target {Target} - {ReadDiag} " +
+                "(total read {Elapsed} ms)",
                 SessionName, ConnectionID, events.Rows.Count, events.Columns.Count, chosenTarget, readDiag,
                 readSw.ElapsedMilliseconds);
 
@@ -182,7 +182,7 @@ namespace DBADash.Messaging
                 catch (Exception ex)
                 {
                     Log.Warning(ex,
-                        "XELite fast path failed for {session} on {instance}; falling back to fn_xe_file_target_read_file",
+                        "XELite fast path failed for {SessionName} on {ConnectionID}; falling back to fn_xe_file_target_read_file",
                         SessionName, ConnectionID);
                 }
             }

@@ -104,7 +104,7 @@ namespace DBADashGUI
             catch (Exception ex)
             {
                 // The action has already happened - a failure to record the outcome shouldn't surface as an error.
-                Serilog.Log.Warning(ex, "Failed to update UserActionLog for message group {messageGroup}", messageGroup);
+                Serilog.Log.Warning(ex, "Failed to update UserActionLog for message group {MessageGroup}", messageGroup);
             }
         }
     }

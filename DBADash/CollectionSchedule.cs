@@ -201,7 +201,7 @@ namespace DBADashService
             {
                 if (!CollectionTypeLegacyNames.TryParse(property.Name, out var type))
                 {
-                    Log.Warning("Ignoring unknown collection type '{type}' in custom schedule", property.Name);
+                    Log.Warning("Ignoring unknown collection type '{Type}' in custom schedule", property.Name);
                     continue;
                 }
                 result[type] = property.Value.ToObject<CollectionSchedule>(serializer);

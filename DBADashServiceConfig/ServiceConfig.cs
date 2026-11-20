@@ -266,7 +266,7 @@ namespace DBADashServiceConfig
             catch (Exception ex)
             {
                 // Only a warning - adding the connection doesn't depend on it
-                Serilog.Log.Warning(ex, "Error checking whether {connectionID} is deleted in the repository", connectionID);
+                Serilog.Log.Warning(ex, "Error checking whether {ConnectionID} is deleted in the repository", connectionID);
             }
             return false;
         }

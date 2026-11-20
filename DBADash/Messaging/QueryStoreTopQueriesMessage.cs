@@ -10,7 +10,7 @@ using System.Threading;
 
 namespace DBADash.Messaging
 {
-    public class QueryStoreTopQueriesMessage : MessageBase
+    public class QueryStoreTopQueriesMessage : MessageBase, IConnectionMessage
     {
         public string ConnectionID { get; set; }
 
@@ -60,7 +60,7 @@ namespace DBADash.Messaging
             {
                 throw new Exception("Database and QueryID must be specified when grouping by date bucket");
             }
-            using var op = Operation.Begin("Query store top queries for {database} on {instance} triggered from message {handle}",
+            using var op = Operation.Begin("Query store top queries for {Database} on {ConnectionID} triggered from message {Handle}",
                 DatabaseName,
                 ConnectionID,
                 handle);
@@ -76,7 +76,7 @@ namespace DBADash.Messaging
                 {
                     databases = new List<string> { DatabaseName };
                 }
-                Log.Debug("Collecting Query Store for databases: {databases} for message {handle}", databases, handle);
+                Log.Debug("Collecting Query Store for databases: {Databases} for message {Handle}", databases, handle);
 
                 if (databases.Count == 0)
                 {

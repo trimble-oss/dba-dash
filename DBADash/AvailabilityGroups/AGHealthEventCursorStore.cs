@@ -113,11 +113,11 @@ namespace DBADash.AvailabilityGroups
                         States[entry.Key] = new AGHealthEventCollectionState { Cursor = entry.Value };
                         Persisted[entry.Key] = entry.Value;
                     }
-                    Log.Debug("Restored {count} AlwaysOn_health read position(s) from {path}", States.Count, FilePath);
+                    Log.Debug("Restored {Count} AlwaysOn_health read position(s) from {Path}", States.Count, FilePath);
                 }
                 catch (Exception ex)
                 {
-                    Log.Warning(ex, "Could not read AlwaysOn_health read positions from {path}; starting from the " +
+                    Log.Warning(ex, "Could not read AlwaysOn_health read positions from {Path}; starting from the " +
                                     "beginning of each instance's event file set.", FilePath);
                 }
                 finally
@@ -151,7 +151,7 @@ namespace DBADash.AvailabilityGroups
                 }
                 catch (Exception ex)
                 {
-                    Log.Warning(ex, "Could not write AlwaysOn_health read positions to {path}.", FilePath);
+                    Log.Warning(ex, "Could not write AlwaysOn_health read positions to {Path}.", FilePath);
                     return false;
                 }
             }

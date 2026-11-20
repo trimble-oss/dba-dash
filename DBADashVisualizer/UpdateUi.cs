@@ -361,7 +361,7 @@ namespace DBADashVisualizer
             }
             catch (Exception ex)
             {
-                Log.Warning(ex, "Unable to open {url}", url);
+                Log.Warning(ex, "Unable to open {Url}", url);
             }
         }
     }

@@ -47,6 +47,8 @@ namespace DBADash.Messaging
         /// <returns></returns>
         public async Task<DataSet> ProcessWithCancellation(CollectionConfig cfg, Guid handle)
         {
+            using var logConnection = LogScope.Connection((this as IConnectionMessage)?.ConnectionID);
+            using var logMessage = LogScope.Message(Id);
             // Create a CancellationTokenSource and track it
             using var cts = new CancellationTokenSource();
             CancellationTokenManager.Add(Id, cts);

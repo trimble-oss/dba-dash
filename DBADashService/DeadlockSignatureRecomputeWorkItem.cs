@@ -120,8 +120,8 @@ namespace DBADashService
                         {
                             if (read > 0 || analysesRead > 0)
                             {
-                                Log.Information("Deadlock signature recompute to version {version} complete for {connection}.  " +
-                                                "{read} deadlock(s) and {analysesRead} AI analyses read this run, {failed} could not be parsed.",
+                                Log.Information("Deadlock signature recompute to version {Version} complete for {Destination}.  " +
+                                                "{Read} deadlock(s) and {AnalysesRead} AI analyses read this run, {Failed} could not be parsed.",
                                     DeadlockSignature.VersionNumber, ConnectionForPrint, read, analysesRead, failed);
                             }
 
@@ -133,14 +133,14 @@ namespace DBADashService
                     if (sw.Elapsed >= MaxRunTime) break;
                 }
 
-                Log.Information("Deadlock signature recompute to version {version} for {connection}: {read} deadlock(s) " +
-                                "and {analysesRead} AI analyses read in {elapsed}, {failed} could not be parsed.  Continuing next run.",
-                    DeadlockSignature.VersionNumber, ConnectionForPrint, read, analysesRead, sw.Elapsed, failed);
+                Log.Information("Deadlock signature recompute to version {Version} for {Destination}: {Read} deadlock(s) " +
+                                "and {AnalysesRead} AI analyses read in {Elapsed} ms, {Failed} could not be parsed.  Continuing next run.",
+                    DeadlockSignature.VersionNumber, ConnectionForPrint, read, analysesRead, sw.ElapsedMilliseconds, failed);
             }
             catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
             {
                 // The job stays scheduled, so the next run tries again.
-                Log.Error(ex, "Error recomputing deadlock signatures for {connection}", ConnectionForPrint);
+                Log.Error(ex, "Error recomputing deadlock signatures for {Destination}", ConnectionForPrint);
             }
             finally
             {
@@ -170,7 +170,7 @@ namespace DBADashService
                     ConnectionForPrint = dataMap.GetString("ConnectionForPrint"),
                     OnComplete = async () =>
                     {
-                        Log.Debug("No deadlock signatures left to recompute.  Removing job {job}", jobKey);
+                        Log.Debug("No deadlock signatures left to recompute.  Removing job {Job}", jobKey);
                         await scheduler.DeleteJob(jobKey);
                     }
                 }, context.CancellationToken);

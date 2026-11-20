@@ -93,7 +93,7 @@ namespace DBADash.CommunityTools
 
         protected internal static async Task<byte[]> DownloadAsync(string url, CancellationToken cancellationToken)
         {
-            Log.Information("Downloading {url}", url);
+            Log.Information("Downloading {Url}", url);
             using var response = await httpClient.Value.GetAsync(url, cancellationToken);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadAsByteArrayAsync(cancellationToken);
@@ -142,7 +142,7 @@ namespace DBADash.CommunityTools
             var parts = family.Repository.Split('/');
             var client = new GitHubClient(new Octokit.ProductHeaderValue(Upgrade.GITHUB_APP));
             var release = await client.Repository.Release.GetLatest(parts[0], parts[1]);
-            Log.Information("Latest release of {repo} is {tag}", family.Repository, release.TagName);
+            Log.Information("Latest release of {Repo} is {Tag}", family.Repository, release.TagName);
             return release.TagName;
         }
     }
@@ -177,7 +177,7 @@ namespace DBADash.CommunityTools
             var script = CreateScript(await File.ReadAllBytesAsync(path, cancellationToken), file, path);
             if (!script.MatchesPin)
             {
-                Log.Warning("{path} is not the version DBA Dash has tested ({ref}).  Deploying it anyway.", path, tool.Family.Ref);
+                Log.Warning("{Path} is not the version DBA Dash has tested ({Ref}).  Deploying it anyway.", path, tool.Family.Ref);
             }
             return script;
         }

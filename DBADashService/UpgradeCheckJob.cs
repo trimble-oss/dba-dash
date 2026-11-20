@@ -24,7 +24,7 @@ namespace DBADashService
                 // Check if upgrade is already in progress
                 if (Upgrade.IsUpgradeIncomplete)
                 {
-                    Log.Warning("Incomplete upgrade detected. Skipping upgrade check. {message}", Upgrade.IncompleteUpgradeMessage);
+                    Log.Warning("Incomplete upgrade detected. Skipping upgrade check. {Detail}", Upgrade.IncompleteUpgradeMessage);
                     return;
                 }
 
@@ -49,7 +49,7 @@ namespace DBADashService
                 var currentVersion = Upgrade.CurrentVersion();
                 var releaseVersion = new Version(release.TagName);
 
-                Log.Information("Current version: {currentVersion}, Latest version: {latestVersion}", currentVersion, releaseVersion);
+                Log.Information("Current version: {CurrentVersion}, Latest version: {LatestVersion}", currentVersion, releaseVersion);
 
                 // Check if upgrade is available
                 if (!Upgrade.IsUpgradeAvailable(release))
@@ -58,7 +58,7 @@ namespace DBADashService
                     return;
                 }
 
-                Log.Information("Upgrade available: {version}", release.TagName);
+                Log.Information("Upgrade available: {Version}", release.TagName);
 
                 // Validate that the service account has the necessary permissions before attempting upgrade
                 // ServiceTools is Windows-only; automatic upgrade is not supported on other platforms
@@ -73,17 +73,17 @@ namespace DBADashService
                     return;
                 }
 
-                Log.Information("Service account has necessary permissions. Initiating upgrade to {version}", release.TagName);
+                Log.Information("Service account has necessary permissions. Initiating upgrade to {Version}", release.TagName);
 
                 // Trigger the upgrade
                 try
                 {
                     await Upgrade.UpgradeDBADashAsync(tag: release.TagName, startGUI: false, startConfig: false, noExit: false, nonInteractive: true);
-                    Log.Information("Upgrade initiated successfully for version {version}", release.TagName);
+                    Log.Information("Upgrade initiated successfully for version {Version}", release.TagName);
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex, "Failed to initiate upgrade to {version}", release.TagName);
+                    Log.Error(ex, "Failed to initiate upgrade to {Version}", release.TagName);
                 }
             }
             catch (Exception ex)

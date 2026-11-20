@@ -34,7 +34,7 @@ namespace DBADash.Messaging
                 OnRetry = args =>
                 {
                     Log.Error(args.Outcome.Exception,
-                        $"Error getting Agent Id.  Retrying in {args.RetryDelay.TotalSeconds} seconds. (Retry count: {args.AttemptNumber})");
+                        "Error getting Agent Id.  Retrying in {RetryDelaySeconds} seconds. (Retry count: {RetryCount})", args.RetryDelay.TotalSeconds, args.AttemptNumber);
                     return ValueTask.CompletedTask;
                 }
             })
@@ -51,7 +51,14 @@ namespace DBADash.Messaging
 
         public async Task ScheduleMessaging()
         {
-            Log.Information(Config.EnableMessaging ? $"Setting up messaging for destinations. {MessageThreads} threads" : "Disable Messaging for destinations");
+            if (Config.EnableMessaging)
+            {
+                Log.Information("Setting up messaging for destinations. {MessageThreads} threads", MessageThreads);
+            }
+            else
+            {
+                Log.Information("Disable Messaging for destinations");
+            }
             var tasks = Config.AllDestinations
                 .Where(dest => dest.Type == DBADashConnection.ConnectionType.SQL)
                 .Select(ScheduleMessagingForDestination);
@@ -120,7 +127,7 @@ namespace DBADash.Messaging
                         var type = (string)rdr["message_type_name"];
                         if (type == SendMessageType)
                         {
-                            Log.Information("Received message of type {MessageType} with handle {handle}", type, handle);
+                            Log.Information("Received message of type {MessageType} with handle {Handle}", type, handle);
                             await SendReplyMessage(handle,
                                 (new ResponseMessage()
                                 { Type = ResponseMessage.ResponseTypes.Progress, Message = "Message Received" })
@@ -151,16 +158,16 @@ namespace DBADash.Messaging
                 if (type == ErrorMessageType) // Probably dialog exceeded lifetime
                 {
                     var messageText = Encoding.Unicode.GetString(message);
-                    Log.Error("Error message received with handle {handle}: {message}", handle, messageText);
+                    Log.Error("Error message received with handle {Handle}: {MessageText}", handle, messageText);
                 }
                 else
                 {
-                    Log.Error("Unknown message type {type} with message {message}", type, message);
+                    Log.Error("Unknown message type {MessageType} with message {MessageBody}", type, message);
                 }
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error handling message type {type} with {handle}", type, handle);
+                Log.Error(ex, "Error handling message type {MessageType} with {Handle}", type, handle);
             }
             finally
             {
@@ -171,13 +178,16 @@ namespace DBADash.Messaging
         public async Task ProcessMessage(DBADashConnection dest, Guid handle, string type, byte[] message)
         {
             bool endConversation = true;
+            using var logHandle = LogScope.Handle(handle);
 
             try
             {
                 var msg = MessageBase.Deserialize(message);
+                using var logMessage = LogScope.Message(msg.Id);
+                using var logConnection = LogScope.Connection((msg as IConnectionMessage)?.ConnectionID);
                 if (msg.IsExpired)
                 {
-                    Log.Error("Message {Id} of type {type} with handle {handle} created at {Created} is expired.", msg.Id, type, handle, msg.Created);
+                    Log.Error("Message {MessageId} of type {MessageType} with handle {Handle} created at {Created} is expired.", msg.Id, type, handle, msg.Created);
                     await SendReplyMessage(handle,
                         (new ResponseMessage()
                         { Type = ResponseMessage.ResponseTypes.Failure, Message = "Message is Expired." }).Serialize(),
@@ -188,7 +198,7 @@ namespace DBADash.Messaging
                     // Relay to the queue and S3 path the agent registered in the repository, not the ones in the message - the message could name any
                     await ApplyRegisteredRelayAsync(msg.CollectAgent, dest.ConnectionString);
 
-                    Log.Information("Message {Id} with handle {handle} needs to be relayed to the remote service {host} via {sqs}", msg.Id, handle, msg.CollectAgent.AgentHostName, msg.CollectAgent.ServiceSQSQueueUrl);
+                    Log.Information("Message {MessageId} with handle {Handle} needs to be relayed to the remote service {Host} via {Sqs}", msg.Id, handle, msg.CollectAgent.AgentHostName, msg.CollectAgent.ServiceSQSQueueUrl);
                     // The message needs to be relayed to the remote agent via SQS queue
                     await SendReplyMessage(handle,
                                                (new ResponseMessage()
@@ -239,7 +249,7 @@ namespace DBADash.Messaging
                     if (messageLock is null)
                     {
                         // Semaphore timed out - send a message back to the service to try again later
-                        Log.Warning("Semaphore timed out processing message {id} of type {MessageType} with handle {handle}", msg.Id, type, handle);
+                        Log.Warning("Semaphore timed out processing message {MessageId} of type {MessageType} with handle {Handle}", msg.Id, type, handle);
                         await SendReplyMessage(handle,
                             (new ResponseMessage()
                             { Type = ResponseMessage.ResponseTypes.Failure, Message = "Service is busy processing other requests.  Please try again later.", Data = null }).Serialize(),
@@ -254,19 +264,19 @@ namespace DBADash.Messaging
             catch (CollectionScheduleDisabledException ex)
             {
                 // Requested collections are disabled for the instance - report as a warning, not an error.
-                Log.Warning("Message of type {MessageType} with handle {handle} skipped: {Message}", type, handle, ex.Message);
+                Log.Warning("Message of type {MessageType} with handle {Handle} skipped: {Reason}", type, handle, ex.Message);
                 await SendReplyMessage(handle, (new ResponseMessage() { Type = ResponseMessage.ResponseTypes.Warning, Message = ex.Message, DisabledCollections = ex.DisabledCollections, ConfigurationDisabledCollections = ex.ConfigurationDisabledCollections }).Serialize(), dest.ConnectionString);
             }
             catch (UnknownCollectionTypeException ex)
             {
                 // None of the requested collections are valid for the instance - report as a warning, not an
                 // error.  No disabled list: unlike unscheduled collections there's nothing to offer to re-run.
-                Log.Warning("Message of type {MessageType} with handle {handle} skipped: {Message}", type, handle, ex.Message);
+                Log.Warning("Message of type {MessageType} with handle {Handle} skipped: {Reason}", type, handle, ex.Message);
                 await SendReplyMessage(handle, (new ResponseMessage() { Type = ResponseMessage.ResponseTypes.Warning, Message = ex.Message }).Serialize(), dest.ConnectionString);
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error processing message of type {MessageType} with handle {handle}", type, handle);
+                Log.Error(ex, "Error processing message of type {MessageType} with handle {Handle}", type, handle);
                 await SendReplyMessage(handle, (new ResponseMessage() { Type = ResponseMessage.ResponseTypes.Failure, Message = ex.Message, Exception = ex }).Serialize(), dest.ConnectionString);
             }
             finally
@@ -285,7 +295,7 @@ namespace DBADash.Messaging
         /// </summary>
         private async Task ProcessAndReply(MessageBase msg, Guid handle, DBADashConnection dest, string type)
         {
-            Log.Information("Processing message {id} of type {MessageType} with handle {handle}", msg.Id, type, handle);
+            Log.Information("Processing message {MessageId} of type {MessageType} with handle {Handle}", msg.Id, type, handle);
 
             // Allow the message to stream intermediate replies back to the GUI (e.g. per-instance
             // progress for a batched collection).  Local path - data (if any) is serialized inline.

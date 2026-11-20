@@ -558,6 +558,8 @@ namespace DBADash
             }
             List<Exception> exceptions = new();
             var rInstance = data.Tables["DBADash"]?.Rows[0];
+            // Imports from a folder or S3 bucket come from many connections - this one is the data's own
+            using var logConnection = LogScope.Connection(rInstance?["ConnectionID"] as string);
             snapshotDate = (DateTime)rInstance!["SnapshotDateUTC"];
             importStartUtc = DateTime.UtcNow;
             measureImport = data.Tables[CollectionRunsTable.TableName] is { } runs && CollectionRunsTable.GetStoreDetail(runs);
@@ -750,7 +752,7 @@ namespace DBADash
                 var upgraded = DeadlockSignatureRecompute.UpgradeCollectedSignatures(dtDeadlocks);
                 if (upgraded > 0)
                 {
-                    Log.Debug("Recomputed {count} deadlock signature(s) collected under an older signature version", upgraded);
+                    Log.Debug("Recomputed {Count} deadlock signature(s) collected under an older signature version", upgraded);
                 }
 
                 cmd.Parameters.AddWithValue("Deadlocks", dtDeadlocks);

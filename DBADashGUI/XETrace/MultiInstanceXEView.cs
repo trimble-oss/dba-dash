@@ -657,7 +657,7 @@ namespace DBADashGUI.XETrace
             {
                 // Best-effort single-instance refresh - the session was already started/stopped; the grid just keeps its
                 // last-known rows for this instance if the re-list fails.
-                Serilog.Log.Debug(ex, "Multi-instance XE: single-instance refresh failed for instance {instanceID}.", instanceId);
+                Serilog.Log.Debug(ex, "Multi-instance XE: single-instance refresh failed for instance {InstanceID}.", instanceId);
             }
         }
 

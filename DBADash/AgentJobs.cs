@@ -77,7 +77,7 @@ namespace DBADash
         public async Task CollectJobsAsync(DataSet ds, bool scriptJobs, bool isRDS)
         {
             DataTable jobsDT;
-            using (var op = Operation.At(Serilog.Events.LogEventLevel.Debug).Begin("Run Jobs query on instance {instance}", SourceConnection.ConnectionForPrint))
+            using (var op = Operation.At(Serilog.Events.LogEventLevel.Debug).Begin("Run Jobs query on instance {Source}", SourceConnection.ConnectionForPrint))
             {
                 jobsDT = await GetJobsDTAsync();
                 op.Complete();
@@ -85,7 +85,7 @@ namespace DBADash
 
             DataTable jobStepsDT;
             using (var op = Operation.At(Serilog.Events.LogEventLevel.Debug)
-                       .Begin("Run JobsSteps query instance {instance}", SourceConnection.ConnectionForPrint))
+                       .Begin("Run JobsSteps query instance {Source}", SourceConnection.ConnectionForPrint))
             {
                 jobStepsDT = isRDS ? GetJobStepsDTForRDS() : GetJobStepsDT();
                 op.Complete();
@@ -94,7 +94,7 @@ namespace DBADash
 
             if (scriptJobs)
             {
-                using (var op = Operation.At(Serilog.Events.LogEventLevel.Debug).Begin("Script Jobs from instance {instance}", SourceConnection.ConnectionForPrint))
+                using (var op = Operation.At(Serilog.Events.LogEventLevel.Debug).Begin("Script Jobs from instance {Source}", SourceConnection.ConnectionForPrint))
                 {
                     ScriptJobs(ref jobsDT);
                     op.Complete();
@@ -115,7 +115,7 @@ namespace DBADash
                 {
                     cnt++;
                     var jobName = (string)row["name"];
-                    using (var op = Operation.At(Serilog.Events.LogEventLevel.Debug).Begin("Script Job {number}/{totalJobs} ({pct}) {job} from {instance}", cnt, totalJobs, (cnt * 1.0 / totalJobs).ToString("P1"), jobName, SourceConnection.ConnectionForPrint))
+                    using (var op = Operation.At(Serilog.Events.LogEventLevel.Debug).Begin("Script Job {Number}/{TotalJobs} ({Pct}) {Job} from {Source}", cnt, totalJobs, (cnt * 1.0 / totalJobs).ToString("P1"), jobName, SourceConnection.ConnectionForPrint))
                     {
                         string sDDL;
                         try
@@ -128,7 +128,7 @@ namespace DBADash
                             var message = $"Error scripting agent job `{jobName}` on {instance.Name}";
                             sDDL = "/*\n Error scripting job: \n" + ex.Message + "\n*/";
                             errors.Add(new Exception(message, ex));
-                            Log.Error(ex, message);
+                            Log.Error(ex, "Error scripting agent job {Job} on {Instance}", jobName, instance.Name);
                         }
                         var bDDL = Zip(sDDL);
                         row["DDL"] = bDDL;

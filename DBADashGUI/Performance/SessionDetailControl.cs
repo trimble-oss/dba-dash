@@ -374,7 +374,7 @@ namespace DBADashGUI.Performance
             catch (Exception ex)
             {
                 // The kill itself has already happened - a failure to record the outcome shouldn't surface as an error.
-                Serilog.Log.Warning(ex, "Failed to update KillSessionLog for message group {messageGroup}", messageGroup);
+                Serilog.Log.Warning(ex, "Failed to update KillSessionLog for message group {MessageGroup}", messageGroup);
             }
         }
 
@@ -566,7 +566,7 @@ DBCC FREEPROCCACHE({planHandle});";
             catch (Exception ex)
             {
                 // The flush itself has already happened - a failure to record the outcome shouldn't surface as an error.
-                Serilog.Log.Warning(ex, "Failed to update FlushPlanLog for message group {messageGroup}", messageGroup);
+                Serilog.Log.Warning(ex, "Failed to update FlushPlanLog for message group {MessageGroup}", messageGroup);
             }
         }
 
@@ -882,7 +882,7 @@ DBCC FREEPROCCACHE({planHandle});";
             }
             catch (Exception ex)
             {
-                Serilog.Log.Warning(ex, "Failed to check KillSessionLog for session {session}", SessionID);
+                Serilog.Log.Warning(ex, "Failed to check KillSessionLog for session {SessionID}", SessionID);
             }
         }
 

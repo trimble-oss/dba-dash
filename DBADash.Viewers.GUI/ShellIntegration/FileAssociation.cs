@@ -159,13 +159,13 @@ namespace DBADashGUI.ShellIntegration
                 // newer copy takes over so files do not keep opening in the old viewer.
                 if (File.Exists(registered) && !IsNewerThan(registered)) return;
 
-                Log.Information("Registering {path} to open {extension} files.  Previously {previous}",
+                Log.Information("Registering {Path} to open {Extension} files.  Previously {Previous}",
                     ExePath, Extension, registered);
                 Register();
             }
             catch (Exception ex)
             {
-                Log.Warning(ex, "Unable to register the {extension} file association", Extension);
+                Log.Warning(ex, "Unable to register the {Extension} file association", Extension);
             }
         }
 
@@ -326,7 +326,7 @@ namespace DBADashGUI.ShellIntegration
             }
             catch (Exception ex)
             {
-                Log.Debug(ex, "Unable to compare the version of {path}", otherExePath);
+                Log.Debug(ex, "Unable to compare the version of {Path}", otherExePath);
                 return false;
             }
         }

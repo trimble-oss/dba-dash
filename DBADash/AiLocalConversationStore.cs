@@ -409,7 +409,7 @@ namespace DBADash
                         // Left alone from here on.  Nothing writes to this id, so what could not be
                         // opened today survives for a profile - or a DPAPI key - that comes back.
                         Unreadable.Add(id);
-                        Log.Warning("A saved AI conversation could not be opened: {file}", file);
+                        Log.Warning("A saved AI conversation could not be opened: {File}", file);
                         continue;
                     }
 
@@ -465,7 +465,7 @@ namespace DBADash
                 // A cancellation is none of those things - the read simply stopped - so it is let
                 // through rather than caught here, because a caller that treated it as a bad file
                 // would mark a perfectly good conversation Unreadable and stop writing to it.
-                Log.Debug(ex, "Could not read a saved AI conversation from {path}", path);
+                Log.Debug(ex, "Could not read a saved AI conversation from {Path}", path);
                 return null;
             }
         }

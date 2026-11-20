@@ -93,7 +93,7 @@ namespace DBADashGUI.Viewers
                     }
                     catch (Exception ex)
                     {
-                        Log.Warning(ex, "Unable to read the {extension} file association", association.Extension);
+                        Log.Warning(ex, "Unable to read the {Extension} file association", association.Extension);
                     }
                 }
 

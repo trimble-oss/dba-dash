@@ -19,7 +19,7 @@ namespace DBADash.Messaging
     /// other target types have no readable event stream.  Requires <see cref="CollectionConfig.AllowWatchXE"/> and the
     /// per-session watch list.</para>
     /// </summary>
-    public class XEWatchSessionMessage : MessageBase
+    public class XEWatchSessionMessage : MessageBase, IConnectionMessage
     {
         public string ConnectionID { get; set; }
 
@@ -78,7 +78,7 @@ namespace DBADash.Messaging
             }
 
             using var op = Operation.Begin(
-                "Watch XE session {session} on {instance} ({duration}s) from message {id} with handle {handle}",
+                "Watch XE session {SessionName} on {ConnectionID} ({DurationSeconds}s) from message {MessageId} with handle {Handle}",
                 SessionName, ConnectionID, duration, Id, handle);
 
             IXETraceReader reader;
@@ -156,7 +156,7 @@ namespace DBADash.Messaging
                     {
                         heartbeatLost = true;
                         Log.Warning(
-                            "Watch of {session} on {instance} stopping: no heartbeat from the client for over {timeout}s",
+                            "Watch of {SessionName} on {ConnectionID} stopping: no heartbeat from the client for over {TimeoutSeconds}s",
                             SessionName, ConnectionID, XETraceHeartbeat.TimeoutSeconds);
                         break;
                     }
@@ -167,7 +167,7 @@ namespace DBADash.Messaging
                 if (chosenTarget == "event_file")
                 {
                     try { totalEvents += await ReadAndReportAsync(reader, totalEvents, CancellationToken.None); }
-                    catch (Exception ex) { Log.Warning(ex, "Error draining watched event_file on {instance}", ConnectionID); }
+                    catch (Exception ex) { Log.Warning(ex, "Error draining watched event_file on {ConnectionID}", ConnectionID); }
                 }
             }
             finally
@@ -225,7 +225,7 @@ END CATCH";
             }
             catch (Exception ex)
             {
-                Log.Warning(ex, "Unable to determine event_file start cursor for watch on {instance}", ConnectionID);
+                Log.Warning(ex, "Unable to determine event_file start cursor for watch on {ConnectionID}", ConnectionID);
             }
             return FileTargetCursor.None;
         }

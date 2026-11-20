@@ -70,7 +70,7 @@ namespace DBADashVisualizer
                 var target = Target();
                 if (string.IsNullOrWhiteSpace(target) || SamePath(target, ExePath) || File.Exists(target)) return;
 
-                Log.Information("Pointing the Start menu shortcut at {path}.  Previously {previous}", ExePath, target);
+                Log.Information("Pointing the Start menu shortcut at {Path}.  Previously {Previous}", ExePath, target);
                 Create();
             }
             catch (Exception ex)

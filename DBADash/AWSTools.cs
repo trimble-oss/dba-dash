@@ -42,7 +42,7 @@ namespace DBADash
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex, "Error getting AWS creds from profile {profile}", profile);
+                    Log.Error(ex, "Error getting AWS creds from profile {Profile}", profile);
                     throw;
                 }
             }
@@ -67,12 +67,12 @@ namespace DBADash
                 catch (AmazonS3Exception ex) when (ex.Message == "Access Denied")
                 {
                     AWSRegion = uri.Region ?? RegionEndpoint.USEast1;
-                    Log.Warning(ex, "Insufficient permissions to get bucket location for {bucket}.  Grant s3:GetBucketLocation. Region set to {region} (Uri parsing or default)", uri.Bucket, AWSRegion.SystemName);
+                    Log.Warning(ex, "Insufficient permissions to get bucket location for {Bucket}.  Grant s3:GetBucketLocation. Region set to {Region} (Uri parsing or default)", uri.Bucket, AWSRegion.SystemName);
                 }
                 catch (Exception ex)
                 {
                     AWSRegion = uri.Region ?? RegionEndpoint.USEast1;
-                    Log.Warning(ex, "Unable to get bucket location using GetBucketLocationAsync for {bucket}.  Region set to {region} (Uri parsing or default)", uri.Bucket, AWSRegion.SystemName);
+                    Log.Warning(ex, "Unable to get bucket location using GetBucketLocationAsync for {Bucket}.  Region set to {Region} (Uri parsing or default)", uri.Bucket, AWSRegion.SystemName);
                 }
 
                 RegionCache.TryAdd(uri.Bucket, AWSRegion);
@@ -141,7 +141,7 @@ namespace DBADash
             else
             {
                 authRegion = RegionEndpoint.USEast1;
-                Log.Warning("Unrecognized or invalid auth region '{authRegionCandidate}' for host {host}. Defaulting to {region}.", authRegionCandidate, host, authRegion);
+                Log.Warning("Unrecognized or invalid auth region '{AuthRegionCandidate}' for host {Host}. Defaulting to {Region}.", authRegionCandidate, host, authRegion);
             }
             RegionCache.TryAdd(host, authRegion);
             return authRegion;
@@ -178,7 +178,7 @@ namespace DBADash
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error getting region for queue {queueUrl}", queueUrl);
+                Log.Error(ex, "Error getting region for queue {QueueUrl}", queueUrl);
                 throw;
             }
             return AWSRegion;

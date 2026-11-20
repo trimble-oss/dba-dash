@@ -89,11 +89,11 @@ namespace DBADashService
             }
         }
 
-        private async Task LogErrorAsync(Exception exception, string message)
+        private async Task LogErrorAsync(Exception exception, string messageTemplate, params object[] propertyValues)
         {
             try
             {
-                Log.Error(exception, message);
+                Log.Error(exception, messageTemplate, propertyValues);
                 var dtErrors = DBCollector.GetErrorDataTableSchema();
                 DBCollector.AddErrorRow(ref dtErrors, "Alert", exception.ToString(), "AlertProcessing");
                 await DBImporter.InsertErrorsAsync(ConnectionString, null, DateTime.UtcNow, dtErrors, default);
@@ -194,7 +194,7 @@ namespace DBADashService
                 }
                 catch (Exception ex)
                 {
-                    await LogErrorAsync(ex, $"Error sending notification to channel {channel.ChannelName}");
+                    await LogErrorAsync(ex, "Error sending notification to channel {ChannelName}", channel.ChannelName);
                 }
             }
         }

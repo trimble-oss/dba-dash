@@ -47,7 +47,7 @@ namespace DBADashGUI.XETrace
             }
             catch (Exception ex)
             {
-                Log.Debug(ex, "Unable to read XE catalog cache for {key}", key);
+                Log.Debug(ex, "Unable to read XE catalog cache for {Key}", key);
                 return null;
             }
         }
@@ -67,7 +67,7 @@ namespace DBADashGUI.XETrace
             }
             catch (Exception ex)
             {
-                Log.Debug(ex, "Unable to write XE catalog cache for {key}", key);
+                Log.Debug(ex, "Unable to write XE catalog cache for {Key}", key);
             }
         }
 

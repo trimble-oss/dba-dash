@@ -14,7 +14,7 @@ namespace DBADash.Messaging
     /// (a manage-only user still needs to enumerate sessions to start/stop them).  Scope-aware: server-scoped views on-prem /
     /// Managed Instance, database-scoped views for Azure SQL Database.
     /// </summary>
-    public class XESessionListMessage : MessageBase
+    public class XESessionListMessage : MessageBase, IConnectionMessage
     {
         public string ConnectionID { get; set; }
 
@@ -64,7 +64,7 @@ ORDER BY s.name;";
             da.Fill(ds);
             if (ds.Tables.Count > 0) ds.Tables[0].TableName = "Sessions";
 
-            Log.Information("Returned {count} XE sessions for {instance} (handle {handle})",
+            Log.Information("Returned {Count} XE sessions for {ConnectionID} (handle {Handle})",
                 ds.Tables.Count > 0 ? ds.Tables[0].Rows.Count : 0, ConnectionID, handle);
             return ds;
         }

@@ -119,7 +119,7 @@ namespace DBADash.Messaging
                 CollectionScheduleUpdateMessage.ConfigFileLock.Release();
             }
 
-            Log.Information("Connection options changed via message {id} for {connections}: {options}", Id,
+            Log.Information("Connection options changed via message {MessageId} for {Connections}: {Options}", Id,
                 changed.Select(c => c.Source.ConnectionID), Options.Serialize());
 
             await ReportProgressAsync(new ResponseMessage
@@ -139,7 +139,7 @@ namespace DBADash.Messaging
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error rescheduling collections after changing connection options via message {id}", Id);
+                Log.Error(ex, "Error rescheduling collections after changing connection options via message {MessageId}", Id);
                 warnings.Add($"The options were saved, but rescheduling failed - restart the service to apply them.  {ex.Message}");
             }
 

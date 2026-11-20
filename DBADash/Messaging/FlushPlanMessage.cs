@@ -17,7 +17,7 @@ namespace DBADash.Messaging
     /// statement (FREEPROCCACHE takes a literal, not a parameter, so it can't be parameterised).  A short command
     /// timeout is used so a blocked DBCC can't hang the service.
     /// </summary>
-    public class FlushPlanMessage : MessageBase
+    public class FlushPlanMessage : MessageBase, IConnectionMessage
     {
         public string ConnectionID { get; set; }
 
@@ -48,7 +48,7 @@ namespace DBADash.Messaging
             }
 
             using var op = Operation.Begin(
-                "Flush plan {planHandle} (session {session}) on {instance} triggered from message {id} with handle {handle}",
+                "Flush plan {PlanHandle} (session {SessionID}) on {ConnectionID} triggered from message {MessageId} with handle {Handle}",
                 PlanHandle,
                 SessionID,
                 ConnectionID,
@@ -87,7 +87,7 @@ namespace DBADash.Messaging
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error flushing plan {planHandle} (session {session}) on {instance} from message {id} with handle {handle}",
+                Log.Error(ex, "Error flushing plan {PlanHandle} (session {SessionID}) on {ConnectionID} from message {MessageId} with handle {Handle}",
                     PlanHandle, SessionID, ConnectionID, Id, handle);
                 throw;
             }

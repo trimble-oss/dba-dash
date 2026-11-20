@@ -15,24 +15,24 @@ namespace DBADashConfig
                 var latest = Upgrade.GetLatestVersionAsync().GetAwaiter().GetResult();
                 if (Upgrade.IsUpgradeIncomplete)
                 {
-                    Log.Warning(Upgrade.IncompleteUpgradeMessage);
+                    Log.Warning("{Detail}", Upgrade.IncompleteUpgradeMessage);
                     Log.Information("Upgrade will be attempted");
                 }
                 if (Upgrade.IsUpgradeAvailable(latest) || Upgrade.IsUpgradeIncomplete)
                 {
                     if (Upgrade.IsAdministrator)
                     {
-                        Log.Information($"Upgrade is available to {latest.TagName}.  Initiating upgrade.");
+                        Log.Information("Upgrade is available to {LatestVersion}.  Initiating upgrade.", latest.TagName);
                         Upgrade.UpgradeDBADashAsync(noExit: false).Wait();
                     }
                     else
                     {
-                        Log.Information($"Upgrade is available to {latest.TagName}.  Please re-run as Administrator.");
+                        Log.Information("Upgrade is available to {LatestVersion}.  Please re-run as Administrator.", latest.TagName);
                     }
                 }
                 else
                 {
-                    Log.Information($"Latest version is {latest.TagName}.  Upgrade is not available at this time. ");
+                    Log.Information("Latest version is {LatestVersion}.  Upgrade is not available at this time.", latest.TagName);
                 }
             }
             catch (AggregateException ex) when (ex.InnerException != null &&
@@ -85,7 +85,7 @@ namespace DBADashConfig
                 return;
             }
 
-            Log.Information("Remove existing connection: {Connection}", sourceToRemove.SourceConnection.ConnectionForPrint);
+            Log.Information("Remove existing connection: {Source}", sourceToRemove.SourceConnection.ConnectionForPrint);
             config.SourceConnections.Remove(sourceToRemove);
             if (delete)
             {
@@ -103,7 +103,7 @@ namespace DBADashConfig
             }
             foreach (var dest in config.AllDestinations.Where(d => d.Type == DBADashConnection.ConnectionType.SQL))
             {
-                Log.Information("Marking instance {status} in {Destination}", status, dest.ConnectionForPrint);
+                Log.Information("Marking instance {Status} in {Destination}", status, dest.ConnectionForPrint);
                 try
                 {
                     if (isActive)
@@ -121,7 +121,7 @@ namespace DBADashConfig
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex, "Error marking instance {status} in {Destination}", status, dest.ConnectionForPrint);
+                    Log.Error(ex, "Error marking instance {Status} in {Destination}", status, dest.ConnectionForPrint);
                     Environment.Exit(1);
                 }
             }
@@ -130,11 +130,11 @@ namespace DBADashConfig
         public static void CheckForUpdates()
         {
             var latest = Upgrade.GetLatestVersionAsync().GetAwaiter().GetResult();
-            Log.Information("Upgrade Available: : {0}", Upgrade.IsUpgradeAvailable(latest));
-            Log.Information("Current Version: {0}", Upgrade.CurrentVersion().ToString());
-            Log.Information("Latest Version: {0}", latest.TagName);
-            Log.Information("Release Date: {0}", latest.PublishedAt.ToString());
-            Log.Information("URL: {0}", latest.Url);
+            Log.Information("Upgrade Available: {UpgradeAvailable}", Upgrade.IsUpgradeAvailable(latest));
+            Log.Information("Current Version: {CurrentVersion}", Upgrade.CurrentVersion());
+            Log.Information("Latest Version: {LatestVersion}", latest.TagName);
+            Log.Information("Release Date: {ReleaseDate}", latest.PublishedAt);
+            Log.Information("URL: {Url}", latest.Url);
             Console.WriteLine(latest.Body);
         }
 
@@ -161,7 +161,7 @@ namespace DBADashConfig
 
             // ConnectionForPrint is the whole string for a connection string that can't be parsed - it could have a password in it
             var newConnection = new DBADashConnection(o.ConnectionString);
-            Log.Information("Add new connection: {Connection}", newConnection.Type == DBADashConnection.ConnectionType.Invalid ? "(invalid connection string)" : newConnection.ConnectionForPrint);
+            Log.Information("Add new connection: {Source}", newConnection.Type == DBADashConnection.ConnectionType.Invalid ? "(invalid connection string)" : newConnection.ConnectionForPrint);
 
             var source = new DBADashSource()
             {
@@ -478,14 +478,14 @@ namespace DBADashConfig
                 }
                 catch (ArgumentException ex)
                 {
-                    Log.Error("Invalid --PerfmonCounters value: {Message}", ex.Message);
+                    Log.Error("Invalid --PerfmonCounters value: {Error}", ex.Message);
                     Environment.Exit(1);
                     return;
                 }
             }
             else
             {
-                Log.Error("Nothing to do.  Specify --PerfmonDefaults and/or --PerfmonCounters, --PerfmonClear to disable{0}.",
+                Log.Error("Nothing to do.  Specify --PerfmonDefaults and/or --PerfmonCounters, --PerfmonClear to disable{InheritOption}.",
                     perConnection ? ", or --PerfmonInherit to use the global list" : string.Empty);
                 Environment.Exit(1);
                 return;
@@ -501,7 +501,7 @@ namespace DBADashConfig
                     return;
                 }
                 source.PerfmonCounters = result;
-                Log.Information("Perfmon counters for {Connection} set to {State}", source.SourceConnection.ConnectionForPrint,
+                Log.Information("Perfmon counters for {Source} set to {State}", source.SourceConnection.ConnectionForPrint,
                     result == null ? "inherit global" : result.Count == 0 ? "disabled" : $"{result.Count} counter(s)");
             }
             else
@@ -709,11 +709,11 @@ namespace DBADashConfig
                     {
                         source.SetConnectionIDFromBuilderIfNotSet();
                         succeeded++;
-                        Log.Warning(ex, "Error generating ConnectionID for {ConnectionString}.  Connection set to {ConnectionID} from connection string builder.", source.SourceConnection.ConnectionForPrint, source.ConnectionID);
+                        Log.Warning(ex, "Error generating ConnectionID for {Source}.  Connection set to {ConnectionID} from connection string builder.", source.SourceConnection.ConnectionForPrint, source.ConnectionID);
                     }
                     else
                     {
-                        Log.Error(ex, "Error generating ConnectionID for {ConnectionString}", source.SourceConnection.ConnectionForPrint);
+                        Log.Error(ex, "Error generating ConnectionID for {Source}", source.SourceConnection.ConnectionForPrint);
                         errors++;
                     }
                 }
@@ -837,7 +837,7 @@ namespace DBADashConfig
                 }
                 catch (InvalidOperationException ex)
                 {
-                    Log.Error(ex.Message);
+                    Log.Error("{Error}", ex.Message);
                     Environment.Exit(1);
                     return;
                 }
@@ -889,7 +889,7 @@ namespace DBADashConfig
             }
             catch (InvalidOperationException ex)
             {
-                Log.Error(ex.Message);
+                Log.Error("{Error}", ex.Message);
                 Environment.Exit(1);
                 return;
             }
@@ -912,7 +912,7 @@ namespace DBADashConfig
             }
             catch (ArgumentException ex)
             {
-                Log.Error(ex.Message);
+                Log.Error("{Error}", ex.Message);
                 Environment.Exit(1);
                 return;
             }

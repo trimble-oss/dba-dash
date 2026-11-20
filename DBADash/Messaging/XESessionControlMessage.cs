@@ -22,7 +22,7 @@ namespace DBADash.Messaging
     /// text), and the session name is escaped server-side with <c>QUOTENAME</c> before being inlined into the DDL
     /// (which can't take a variable), so any valid session name is handled without injection risk.</para>
     /// </summary>
-    public class XESessionControlMessage : MessageBase
+    public class XESessionControlMessage : MessageBase, IConnectionMessage
     {
         public string ConnectionID { get; set; }
 
@@ -84,7 +84,7 @@ namespace DBADash.Messaging
             da.Fill(ds);
             if (ds.Tables.Count > 0) ds.Tables[0].TableName = "Result";
 
-            Log.Information("XE session {session} {state} on {instance} (handle {handle})",
+            Log.Information("XE session {SessionName} {State} on {ConnectionID} (handle {Handle})",
                 SessionName, state, ConnectionID, handle);
             return ds;
         }

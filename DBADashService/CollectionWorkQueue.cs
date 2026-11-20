@@ -85,7 +85,7 @@ namespace DBADashService
             });
             // Cap low-priority concurrency to 25% of workers (min 1)
             _lowMaxConcurrent = Convert.ToInt32(Math.Max(1, config.GetLowPriorityQueueMaxThreadPercentage() * _workerCount));
-            Log.Information("Low-priority queue max concurrency set to {lowMaxConcurrent} ({percentage:P0} of total workers)", _lowMaxConcurrent, config.GetLowPriorityQueueMaxThreadPercentage());
+            Log.Information("Low-priority queue max concurrency set to {LowMaxConcurrent} ({Percentage:P0} of total workers)", _lowMaxConcurrent, config.GetLowPriorityQueueMaxThreadPercentage());
             _lowGate = new SemaphoreSlim(_lowMaxConcurrent, _lowMaxConcurrent);
 
             var capacity = config.ChannelCapacity ?? DEFAULT_CHANNEL_CAPACITY;
@@ -99,8 +99,8 @@ namespace DBADashService
             _normalChannel = Channel.CreateBounded<QueuedItem>(options);
             _lowChannel = Channel.CreateBounded<QueuedItem>(options);
 
-            Log.Information("CollectionWorkQueue initialized with {workerCount} workers, channel capacity {capacity} ({default}) per priority, max {maxConcurrency} concurrent collections per instance",
-                _workerCount, capacity, config.ChannelCapacity.HasValue ? "User configured" : "Default", config.SourceConnections.Count, _maxConcurrentCollectionsPerInstance);
+            Log.Information("CollectionWorkQueue initialized with {WorkerCount} workers, channel capacity {Capacity} ({CapacitySetting}) per priority, max {MaxConcurrency} concurrent collections per instance",
+                _workerCount, capacity, config.ChannelCapacity.HasValue ? "User configured" : "Default", _maxConcurrentCollectionsPerInstance);
         }
 
         public void Start(CancellationToken cancellationToken)
@@ -114,7 +114,7 @@ namespace DBADashService
                 _workers[i] = Task.Run(async () => await WorkerAsync(workerId, _cts.Token), _cts.Token);
             }
 
-            Log.Information("Started {workerCount} collection workers", _workerCount);
+            Log.Information("Started {WorkerCount} collection workers", _workerCount);
         }
 
         public async Task StopAsync()
@@ -169,7 +169,7 @@ namespace DBADashService
                     if (!_pendingKeys.TryAdd(item.DedupKey, 0))
                     {
                         Interlocked.Increment(ref _skipped);
-                        Log.Warning("Skipping enqueue of {item}.  The previous scheduled collection is still enqueued or in progress.",
+                        Log.Warning("Skipping enqueue of {Item}.  The previous scheduled collection is still enqueued or in progress.",
                             item.Description);
                         return false;
                     }
@@ -390,7 +390,7 @@ namespace DBADashService
 
         private async Task WorkerAsync(int workerId, CancellationToken cancellationToken)
         {
-            Log.Debug("Worker {workerId} started", workerId);
+            Log.Debug("Worker {WorkerId} started", workerId);
 
             while (!cancellationToken.IsCancellationRequested)
             {
@@ -401,7 +401,7 @@ namespace DBADashService
                 }
                 catch (OperationCanceledException)
                 {
-                    Log.Information("Worker {workerId} canceled", workerId);
+                    Log.Information("Worker {WorkerId} canceled", workerId);
                     break;
                 }
 
@@ -414,7 +414,7 @@ namespace DBADashService
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex, "Worker {workerId} error processing {item}",
+                    Log.Error(ex, "Worker {WorkerId} error processing {Item}",
                         workerId, item.Description);
                 }
                 finally
@@ -433,12 +433,13 @@ namespace DBADashService
                 }
             }
 
-            Log.Debug("Worker {workerId} stopped", workerId);
+            Log.Debug("Worker {WorkerId} stopped", workerId);
         }
 
         private async Task ProcessWorkItemAsync(IWorkItem item, CancellationToken cancellationToken)
         {
             var connectionString = item.Source?.ConnectionString ?? Guid.NewGuid().ToString();
+            using var logConnection = LogScope.Connection(item.Source?.ConnectionID);
 
             // Allow up to N concurrent collections per instance (configured via MaxCount in AsyncKeyedLocker)
             // This maintains the current behavior where different schedules can run concurrently

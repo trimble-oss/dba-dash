@@ -13,7 +13,7 @@ namespace DBADash.Messaging
     /// columns, and the global actions - so the GUI can populate the event/field pickers and validate a request.
     /// Read-only metadata; the GUI caches it per SQL Server version.  See <see cref="XEObjectCatalog"/>.
     /// </summary>
-    public class XEObjectCatalogMessage : MessageBase
+    public class XEObjectCatalogMessage : MessageBase, IConnectionMessage
     {
         public string ConnectionID { get; set; }
 
@@ -100,7 +100,7 @@ ORDER BY o.name;";
             {
                 ds.Tables[5].TableName = "Comparators"; // available predicate comparators (pred_compare), e.g. the case-sensitive equal_unicode_string
             }
-            Log.Information("Returned XE catalog for {instance}: {events} events (handle {handle})",
+            Log.Information("Returned XE catalog for {ConnectionID}: {Events} events (handle {Handle})",
                 ConnectionID, ds.Tables.Contains("Events") ? ds.Tables["Events"].Rows.Count : 0, handle);
             return ds;
         }

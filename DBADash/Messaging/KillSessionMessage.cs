@@ -16,7 +16,7 @@ namespace DBADash.Messaging
     /// running on that SPID), so nothing can change between the check and the KILL.  System sessions
     /// (session_id &lt;= 50 / background tasks) are never killed.
     /// </summary>
-    public class KillSessionMessage : MessageBase
+    public class KillSessionMessage : MessageBase, IConnectionMessage
     {
         public string ConnectionID { get; set; }
 
@@ -54,7 +54,7 @@ namespace DBADash.Messaging
             }
 
             using var op = Operation.Begin(
-                "Kill session {session} on {instance} triggered from message {id} with handle {handle}",
+                "Kill session {SessionID} on {ConnectionID} triggered from message {MessageId} with handle {Handle}",
                 SessionID,
                 ConnectionID,
                 Id,
@@ -89,7 +89,7 @@ namespace DBADash.Messaging
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error killing session {session} on {instance} from message {id} with handle {handle}",
+                Log.Error(ex, "Error killing session {SessionID} on {ConnectionID} from message {MessageId} with handle {Handle}",
                     SessionID, ConnectionID, Id, handle);
                 throw;
             }

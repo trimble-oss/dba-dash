@@ -144,7 +144,7 @@ namespace DBADashGUI.QueryPlans
                 // An older repository without the table, or a user without the grant: the viewer works
                 // the same, it just cannot offer what was found before.  The reader's own conversations
                 // are unaffected - they are not in there.
-                Log.Debug(ex, "Could not read query plan analysis history for {signature}", signature);
+                Log.Debug(ex, "Could not read query plan analysis history for {Signature}", signature);
                 return new List<Entry>();
             }
         }

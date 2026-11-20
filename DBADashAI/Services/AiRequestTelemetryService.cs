@@ -15,7 +15,7 @@ namespace DBADashAI.Services
         public Stopwatch Start(string requestId, string question, string? toolName)
         {
             _logger.LogInformation(
-                "AI request {RequestId} started. Tool={ToolName}, QuestionLength={QuestionLength}",
+                "AI request {RequestId} started. Tool={Tool}, QuestionLength={QuestionLength}",
                 LogSanitizer.SanitizeForLog(requestId),
                 LogSanitizer.SanitizeForLog(toolName ?? "auto"),
                 question?.Length ?? 0);
@@ -37,7 +37,7 @@ namespace DBADashAI.Services
         public void Complete(string requestId, string toolName, int rowCount, long toolMs, long totalMs, double confidenceScore, string confidenceLabel)
         {
             _logger.LogInformation(
-                "AI request {RequestId} completed. Tool={ToolName}, RowCount={RowCount}, ToolMs={ToolMs}, TotalMs={TotalMs}, ConfidenceScore={ConfidenceScore}, ConfidenceLabel={ConfidenceLabel}",
+                "AI request {RequestId} completed. Tool={Tool}, RowCount={RowCount}, ToolMs={ToolMs}, TotalMs={TotalMs}, ConfidenceScore={ConfidenceScore}, ConfidenceLabel={ConfidenceLabel}",
                 LogSanitizer.SanitizeForLog(requestId),
                 LogSanitizer.SanitizeForLog(toolName),
                 rowCount,

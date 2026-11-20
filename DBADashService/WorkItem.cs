@@ -65,7 +65,7 @@ namespace DBADashService
             if (!config.IsCollected(Source))
             {
                 // Queued or scheduled before its connection was removed, or changed to a new connection string
-                Log.Information("Skipping {types} for {instance} - it's no longer collected with this configuration", AllTypes, Source.ConnectionID ?? Source.SourceConnection.ConnectionForPrint);
+                Log.Information("Skipping {Types} for {ConnectionID} - it's no longer collected with this configuration", AllTypes, Source.ConnectionID ?? Source.SourceConnection.ConnectionForPrint);
                 return;
             }
 
@@ -89,14 +89,14 @@ namespace DBADashService
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex, "Error reporting schedule info for instance {instance}", Source.SourceConnection.ConnectionForPrint);
+                    Log.Error(ex, "Error reporting schedule info for instance {Source}", Source.SourceConnection.ConnectionForPrint);
                 }
             }
 
             // After schedule info, which also reports the pause to the repository
             if (CollectionPauseStore.Current.IsPaused(Source.ConnectionID, out var pausedUntil))
             {
-                Log.Debug("Skipping {types} for {instance} - collections are paused until {pausedUntil:u}", types, Source.ConnectionID, pausedUntil);
+                Log.Debug("Skipping {Types} for {ConnectionID} - collections are paused until {PausedUntil:u}", types, Source.ConnectionID, pausedUntil);
                 return;
             }
 
@@ -134,7 +134,7 @@ namespace DBADashService
                     // null inherits the global list.  Empty overall => nothing collected (no auto-defaults).
                     collector.PerfmonCounters = Source.PerfmonCounters ?? config.PerfmonCounters ?? new List<PerfmonCounter>();
 
-                    using (var op = SerilogTimings.Operation.Begin("Collect {types} from instance {instance} on schedule {schedule} with priority {priority}. Dequeue latency {latency}ms.",
+                    using (var op = SerilogTimings.Operation.Begin("Collect {Types} from instance {Source} on schedule {Schedule} with priority {Priority}. Dequeue latency {LatencyMs}ms.",
                                string.Join(", ", types.Select(s => s.ToString())),
                                Source.SourceConnection.ConnectionForPrint,
                                Schedule,
@@ -146,7 +146,7 @@ namespace DBADashService
                         if (!State.IsExtendedEventsNotSupportedException && collector.IsExtendedEventsNotSupportedException)
                         {
                             Log.Information(
-                                "Disabling Extended events collection for {0}. Instance type doesn't support extended events",
+                                "Disabling Extended events collection for {Source}. Instance type doesn't support extended events",
                                 Source.SourceConnection.ConnectionForPrint);
                             State.IsExtendedEventsNotSupportedException = true;
                         }
@@ -156,7 +156,7 @@ namespace DBADashService
 
                     if (CustomCollections?.Count > 0)
                     {
-                        using var op = SerilogTimings.Operation.Begin("Collect Custom Collections {types} from instance {instance}",
+                        using var op = SerilogTimings.Operation.Begin("Collect Custom Collections {Types} from instance {Source}",
                             string.Join(", ", CustomCollections.Select(s => s.Key)),
                             Source.SourceConnection.ConnectionForPrint);
                         await collector.CollectAsync(CustomCollections);
@@ -181,7 +181,7 @@ namespace DBADashService
                     }
                     catch (Exception ex)
                     {
-                        Log.Error(ex, "Error writing {filename} to destination. File will be copied to {folder}",
+                        Log.Error(ex, "Error writing {FileName} to destination. File will be copied to {Folder}",
                             fileName, SchedulerServiceConfig.FailedMessageFolder);
                         await FailedMessageFolder.WriteAsync(collector.Data,
                             SchedulerServiceConfig.FailedMessageFolder, fileName, config);
@@ -207,7 +207,7 @@ namespace DBADashService
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error collecting types {types} from instance {instance}",
+                Log.Error(ex, "Error collecting types {Types} from instance {Source}",
                     string.Join(", ", Types.Select(s => s.ToString())),
                     Source.SourceConnection.ConnectionForPrint);
             }
@@ -225,19 +225,19 @@ namespace DBADashService
 
             if (state.JobCollectDate == DateTime.MinValue)
             {
-                Log.Debug("Skipping setting JobLastModified (First collection on startup) on {Connection}",
+                Log.Debug("Skipping setting JobLastModified (First collection on startup) on {Source}",
                     cfg.SourceConnection.ConnectionForPrint);
             }
             else if (DateTime.Now < forcedCollectionDate)
             {
                 collector.JobLastModified = state.JobLastModified;
-                Log.Debug("Setting JobLastModified to {JobLastModified}. Forced collection will run after {ForcedCollectionDate}. {MinsSinceLastCollection}mins since last collection ({LastCollected}) on {Connection}",
+                Log.Debug("Setting JobLastModified to {JobLastModified}. Forced collection will run after {ForcedCollectionDate}. {MinsSinceLastCollection}mins since last collection ({LastCollected}) on {Source}",
                     state.JobLastModified, forcedCollectionDate, minsSinceLastCollection.ToString("N0"),
                     state.JobCollectDate, cfg.SourceConnection.ConnectionForPrint);
             }
             else
             {
-                Log.Debug("Skipping setting JobLastModified to {JobLastModified} - forcing job collection to run. {MinsSinceLastCollection}mins since last collection ({LastCollected}) on {Connection}.",
+                Log.Debug("Skipping setting JobLastModified to {JobLastModified} - forcing job collection to run. {MinsSinceLastCollection}mins since last collection ({LastCollected}) on {Source}.",
                     state.JobLastModified, minsSinceLastCollection.ToString("N0"),
                     state.JobCollectDate, cfg.SourceConnection.ConnectionForPrint);
             }
@@ -260,7 +260,7 @@ namespace DBADashService
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex, "Error writing {filename} to destination. File will be copied to {folder}",
+                    Log.Error(ex, "Error writing {FileName} to destination. File will be copied to {Folder}",
                         fileName, SchedulerServiceConfig.FailedMessageFolder);
                     await FailedMessageFolder.WriteAsync(collector.Data,
                         SchedulerServiceConfig.FailedMessageFolder, fileName, config);
