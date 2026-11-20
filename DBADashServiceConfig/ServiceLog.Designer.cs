@@ -37,6 +37,7 @@
             this.label1 = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
             this.bttnNotepad = new System.Windows.Forms.Button();
+            this.lnkSwitchFormat = new System.Windows.Forms.LinkLabel();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -107,6 +108,7 @@
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.lnkSwitchFormat);
             this.panel1.Controls.Add(this.bttnNotepad);
             this.panel1.Controls.Add(this.label2);
             this.panel1.Controls.Add(this.label1);
@@ -130,6 +132,18 @@
             this.toolTip1.SetToolTip(this.bttnNotepad, "Open log in Notepad");
             this.bttnNotepad.UseVisualStyleBackColor = true;
             this.bttnNotepad.Click += new System.EventHandler(this.BttnNotepad_Click);
+            // 
+            // lnkSwitchFormat
+            //
+            this.lnkSwitchFormat.AutoSize = true;
+            this.lnkSwitchFormat.Location = new System.Drawing.Point(812, 27);
+            this.lnkSwitchFormat.Name = "lnkSwitchFormat";
+            this.lnkSwitchFormat.Size = new System.Drawing.Size(234, 20);
+            this.lnkSwitchFormat.TabIndex = 12;
+            this.lnkSwitchFormat.TabStop = true;
+            this.lnkSwitchFormat.Text = "Switch service log format to Text";
+            this.lnkSwitchFormat.Visible = false;
+            this.lnkSwitchFormat.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkSwitchFormat_LinkClicked);
             // 
             // ServiceLog
             // 
@@ -160,5 +174,6 @@
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.Button bttnNotepad;
+        private System.Windows.Forms.LinkLabel lnkSwitchFormat;
     }
 }

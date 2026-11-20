@@ -270,6 +270,27 @@ namespace DBADash.Viewers.GUI.Test
         }
 
         /// <summary>
+        /// The Visualizer opens any log, so it shows every column, in the log's own order - which of them matter is for a
+        /// viewer of one kind of log to decide, as the service config tool's log viewer does for DBA Dash's.
+        /// </summary>
+        [TestMethod]
+        public void GridViewer_ShowsEveryColumnOfALog()
+        {
+            var table = Load("log.json",
+                "{\"@t\":\"2026-11-20T13:34:08Z\",\"@m\":\"Hello\",\"Schedule\":\"30\",\"ThreadId\":26,\"ConnectionID\":\"SQL1\"}\n").Tables[0];
+
+            using var form = new System.Windows.Forms.Form();
+            using var control = new GridViewerControl(table, "log") { Dock = System.Windows.Forms.DockStyle.Fill };
+            form.Controls.Add(control);
+            form.CreateControl();
+
+            var grid = control.Controls.OfType<DBADashDataGridView>().Single();
+            CollectionAssert.AreEqual(new[] { "Timestamp", "Level", "Message", "Schedule", "ThreadId", "ConnectionID" },
+                grid.Columns.Cast<System.Windows.Forms.DataGridViewColumn>()
+                    .Where(c => c.Visible).OrderBy(c => c.DisplayIndex).Select(c => c.Name).ToArray());
+        }
+
+        /// <summary>
         /// Strings are kept as written: a message that looks like a date doesn't stop a file being read as a log, or
         /// get rendered as a date - while a column of dates is still typed as one.
         /// </summary>

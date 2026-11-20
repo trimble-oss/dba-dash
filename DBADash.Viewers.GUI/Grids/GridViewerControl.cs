@@ -57,6 +57,10 @@ namespace DBADashGUI.Grids
                 ShowRowCount();
             };
             _grid.GridFilterChanged += (_, _) => ShowRowCount();
+            _grid.ColumnStateChanged += (_, e) =>
+            {
+                if (_columnsConfigured && e.StateChanged == DataGridViewElementStates.Visible) ShowRowCount();
+            };
             _grid.CellDoubleClick += Grid_CellDoubleClick;
             _grid.CellContentClick += Grid_CellContentClick;
 
@@ -272,8 +276,13 @@ namespace DBADashGUI.Grids
         {
             var shown = _grid.Rows.Count;
             _rowCount.Text = shown == _table.Rows.Count
-                ? $"{shown:N0} rows"
+                ? $"{shown:N0} {(shown == 1 ? "row" : "rows")}"
                 : $"{shown:N0} of {_table.Rows.Count:N0} rows";
+            // So a hidden column isn't taken for one that isn't there
+            var hidden = _grid.Columns.Cast<DataGridViewColumn>().Count(c => !c.Visible);
+            var hiddenText = $"{hidden:N0} {(hidden == 1 ? "column" : "columns")} hidden";
+            _rowCount.ToolTipText = hidden == 0 ? null : $"{hiddenText} - right-click a column header, Columns, to show them";
+            if (hidden > 0) _rowCount.Text += $", {hiddenText}";
         }
 
         private void OpenFiles()
