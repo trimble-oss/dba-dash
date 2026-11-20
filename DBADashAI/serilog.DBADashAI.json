@@ -3,7 +3,8 @@
     "Using": [
       "Serilog.Sinks.Console",
       "Serilog.Sinks.File",
-      "Serilog.Sinks.Async"
+      "Serilog.Sinks.Async",
+      "Serilog.Enrichers.Thread"
     ],
     "MinimumLevel": {
       "Default": "Information",
@@ -22,24 +23,24 @@
             {
               "Name": "Console",
               "Args": {
-                "outputTemplate": "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
+                "outputTemplate": "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj} <{ThreadId}>{NewLine}{Exception}"
               }
             },
             {
               "Name": "File",
               "Args": {
-                "path": "Logs/DBADashAI-log-.txt",
+                "path": "Logs/DBADashAI-log-.json",
                 "rollingInterval": "Hour",
                 "retainedFileCountLimit": 24,
                 "buffered": true,
                 "flushToDiskInterval": "00:00:02",
-                "outputTemplate": "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
+                "formatter": "Serilog.Formatting.Compact.RenderedCompactJsonFormatter, Serilog.Formatting.Compact"
               }
             }
           ]
         }
       }
     ],
-    "Enrich": [ "FromLogContext" ]
+    "Enrich": [ "FromLogContext", "WithThreadId" ]
   }
 }

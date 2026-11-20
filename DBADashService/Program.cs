@@ -114,11 +114,13 @@ namespace DBADashService
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(AppContext.BaseDirectory)
                 // reloadOnChange will allow you to auto reload the minimum level and level switches
-                .AddJsonFile(path: "serilog.json", optional: false, reloadOnChange: true)
+                // serilog.local.json, if the user has one, in place of the release's serilog.json - see ServiceLogFormat
+                .AddJsonFile(path: ServiceLogFormat.ConfigFileName(AppContext.BaseDirectory), optional: false, reloadOnChange: true)
                 .Build();
             Log.Logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(configuration)
-                // The ConnectionID, MessageId and Handle of the work being logged - see LogScope.
+                // The ConnectionID, MessageId and Handle of the work being logged - see LogScope.  In code, so a serilog.local.json made
+                // before it was added still has it.
                 .Enrich.FromLogContext()
                 .Enrich.WithProperty("ApplicationName", "DBADash")
                 .Enrich.WithProperty("MachineName", Environment.MachineName)

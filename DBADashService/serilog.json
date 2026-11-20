@@ -23,12 +23,12 @@
             {
               "Name": "File",
               "Args": {
-                "path": "Logs/log-.txt",
+                "path": "Logs/log-.json",
                 "rollingInterval": "Hour",
                 "retainedFileCountLimit": 24,
                 "buffered": true,
                 "flushToDiskInterval": "00:00:02",
-                "outputTemplate": "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj} <{ThreadId}>{NewLine}{Exception}"
+                "formatter": "Serilog.Formatting.Compact.RenderedCompactJsonFormatter, Serilog.Formatting.Compact"
               }
             }
           ]

@@ -2,6 +2,7 @@
 using DBADashSharedGUI;
 using DBADashGUI.Viewers;
 using Serilog;
+using Serilog.Formatting.Compact;
 using System.IO;
 using System.Text;
 using Velopack;
@@ -210,12 +211,12 @@ namespace DBADashVisualizer
             {
                 Log.Logger = new LoggerConfiguration()
                     .MinimumLevel.Information()
-                    .WriteTo.File(Path.Combine(LogFolder, "DBADashVisualizer-.log"),
+                    // Serilog's compact JSON - which the Visualizer itself opens as a grid
+                    .WriteTo.File(new RenderedCompactJsonFormatter(), Path.Combine(LogFolder, "DBADashVisualizer-.json"),
                         rollingInterval: RollingInterval.Day,
                         retainedFileCountLimit: 7,
                         // A copy per file Explorer opens can be running at once
                         shared: true,
-                        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj} {NewLine}{Exception}",
                         encoding: Encoding.UTF8)
                     .CreateLogger();
             }
