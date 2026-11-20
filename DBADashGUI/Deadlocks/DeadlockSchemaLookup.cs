@@ -50,7 +50,7 @@ namespace DBADashGUI.Deadlocks
                 {
                     // A database with no snapshots, a dropped database, a permission the user does not
                     // have: the analysis is still worth running without this.
-                    Log.Debug(ex, "Deadlock schema lookup failed for {database}", database);
+                    Log.Debug(ex, "Deadlock schema lookup failed for {Database}", database);
                 }
             }
 

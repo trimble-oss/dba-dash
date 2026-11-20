@@ -27,7 +27,7 @@ namespace DBADash.Messaging
             // operation is cancelled the moment it starts rather than running orphaned.
             if (PreCancelled.TryRemove(Id, out _))
             {
-                Log.Information("Applying pre-emptive cancellation for message {id} registered after its cancel request", Id);
+                Log.Information("Applying pre-emptive cancellation for message {MessageId} registered after its cancel request", Id);
                 cts.Cancel();
             }
             PrunePreCancelled();
@@ -43,10 +43,10 @@ namespace DBADash.Messaging
                 // starting and running orphaned.
                 PreCancelled[Id] = DateTime.UtcNow;
                 PrunePreCancelled();
-                Log.Warning("Cancellation requested for message {id}, but no token found - recorded as a pre-emptive cancellation", Id);
+                Log.Warning("Cancellation requested for message {MessageId}, but no token found - recorded as a pre-emptive cancellation", Id);
                 return false;
             }
-            Log.Information("Cancellation trigger for message {id}", Id);
+            Log.Information("Cancellation trigger for message {MessageId}", Id);
             cts.Cancel();
 
             return true;

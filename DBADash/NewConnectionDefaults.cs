@@ -45,7 +45,7 @@ namespace DBADash
             }
             catch (Exception ex)
             {
-                Log.Warning(ex, "Error reading new connection defaults from {path}.  Using the app defaults.", FilePath);
+                Log.Warning(ex, "Error reading new connection defaults from {Path}.  Using the app defaults.", FilePath);
                 return SourceConnectionOptions.AppDefaults;
             }
         }

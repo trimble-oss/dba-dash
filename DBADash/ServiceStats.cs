@@ -292,11 +292,11 @@ namespace DBADash
             var sampleSeconds = config.GetServiceStatsFrequencySeconds();
             if (sampleSeconds <= 0)
             {
-                Log.Information("Service stats are disabled{reason}", config.LogInternalPerformanceCounters ? string.Empty : " - they're collected with LogInternalPerformanceCounters on");
+                Log.Information("Service stats are disabled{Reason}", config.LogInternalPerformanceCounters ? string.Empty : " - they're collected with LogInternalPerformanceCounters on");
                 return;
             }
             var queues = config.AllDestinations.Select(d => new DestinationQueue(d, SendInterval(d, config))).ToList();
-            Log.Information("Service stats sampled every {sample} seconds.  Sent to SQL destinations as they're taken, to folder and S3 destinations every {report} seconds",
+            Log.Information("Service stats sampled every {Sample} seconds.  Sent to SQL destinations as they're taken, to folder and S3 destinations every {Report} seconds",
                 sampleSeconds, config.GetServiceStatsReportInterval());
 
             var sampler = new ServiceStatsSampler(workQueue, () => OfflineInstances.OfflineInstanceCount,
@@ -337,7 +337,7 @@ namespace DBADash
                 catch (Exception ex)
                 {
                     // Kept for the next send.  A sample the destination did get is skipped then (ServiceStats_Upd).
-                    Log.Warning(ex, "Error writing service stats to {destination}.  {count} samples will be sent again", q.Destination.ConnectionForPrint, sent.Count);
+                    Log.Warning(ex, "Error writing service stats to {Destination}.  {Count} samples will be sent again", q.Destination.ConnectionForPrint, sent.Count);
                     return;
                 }
                 lock (q.Pending)

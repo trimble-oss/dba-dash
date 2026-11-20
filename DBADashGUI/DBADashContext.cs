@@ -241,7 +241,7 @@ namespace DBADashGUI
                 else
                 {
                     _engineEdition = DatabaseEngineEdition.Unknown;
-                    Log.Debug($"Unknown database engine edition: {engineEditionValue}");
+                    Log.Debug("Unknown database engine edition: {EngineEdition}", engineEditionValue);
                 }
             }
             catch (Exception ex)

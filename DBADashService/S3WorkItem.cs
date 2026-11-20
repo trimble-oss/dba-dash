@@ -28,7 +28,7 @@ namespace DBADashService
 
         public async Task ExecuteAsync(CollectionConfig config, CancellationToken cancellationToken)
         {
-            Log.Information("Import from S3 {connection}", Source.ConnectionString);
+            Log.Information("Import from S3 {Source}", Source.SourceConnection.ConnectionForPrint);
 
             // One job per S3 source at a time
             using (await _s3Locker.LockAsync(Source.ConnectionString).ConfigureAwait(false))
@@ -80,7 +80,7 @@ namespace DBADashService
 
                             var filesByInstance = DirectoryWorkItem.GetFilesToProcessByInstance(fileList);
 
-                            Log.Information("Processing {count} files from {prefix}. Instances: {instances}", fileList.Count, string.IsNullOrEmpty(keyPrefix) ? "(root)" : keyPrefix, filesByInstance.Count);
+                            Log.Information("Processing {Count} files from {Prefix}. Instances: {Instances}", fileList.Count, string.IsNullOrEmpty(keyPrefix) ? "(root)" : keyPrefix, filesByInstance.Count);
 
                             // Pass per-instance lists to tasks to avoid concurrent mutations of the same list
                             var tasks = filesByInstance
@@ -92,7 +92,7 @@ namespace DBADashService
 
                         if (resp?.IsTruncated == true)
                         {
-                            Log.Debug("Response truncated. Processing next marker for {prefix}", keyPrefix);
+                            Log.Debug("Response truncated. Processing next marker for {Prefix}", keyPrefix);
                             request.Marker = resp.NextMarker;
                         }
                         else
@@ -133,7 +133,7 @@ namespace DBADashService
                     catch (Exception ex)
                     {
                         Log.Error(ex,
-                            "Error importing file {filename}.  Writing file to failed message folder {folder}",
+                            "Error importing file {FileName}.  Writing file to failed message folder {Folder}",
                             fileName, SchedulerServiceConfig.FailedMessageFolder);
                         await FailedMessageFolder.WriteAsync(ds, SchedulerServiceConfig.FailedMessageFolder,
                             fileName, config);
@@ -144,7 +144,7 @@ namespace DBADashService
                     }
                 }
 
-                Log.Information("Imported {file}", s3Path);
+                Log.Information("Imported {File}", s3Path);
             }
         }
     }

@@ -14,7 +14,7 @@ namespace DBADash.Messaging
     /// traces.  Unlike <see cref="CancellationMessage"/> (which cancels a live in-process message by id), this
     /// works even when nothing is tracking the session in memory.
     /// </summary>
-    public class XETraceStopMessage : MessageBase
+    public class XETraceStopMessage : MessageBase, IConnectionMessage
     {
         public string ConnectionID { get; set; }
 
@@ -48,7 +48,7 @@ namespace DBADash.Messaging
             await cn.OpenAsync(cancellationToken);
             await cmd.ExecuteNonQueryAsync(cancellationToken);
 
-            Log.Information("Ad-hoc XE session {session} stopped/removed on {instance} (handle {handle})",
+            Log.Information("Ad-hoc XE session {SessionName} stopped/removed on {ConnectionID} (handle {Handle})",
                 XETraceMessage.SessionName, ConnectionID, handle);
 
             var dt = new DataTable("StopResult");

@@ -22,7 +22,7 @@ namespace DBADash
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error reading {description} from {file}.  It will be ignored", description, path);
+                Log.Error(ex, "Error reading {Description} from {File}.  It will be ignored", description, path);
                 return null;
             }
         }

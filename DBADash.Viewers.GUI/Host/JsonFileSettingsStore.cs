@@ -88,7 +88,7 @@ namespace DBADashGUI.Viewers
             }
             catch (Exception ex)
             {
-                Log.Warning(ex, "Unable to save the viewer settings to {path}", _path);
+                Log.Warning(ex, "Unable to save the viewer settings to {Path}", _path);
             }
         }
 
@@ -121,7 +121,7 @@ namespace DBADashGUI.Viewers
             }
             catch (Exception ex)
             {
-                Log.Warning(ex, "Unable to read the viewer settings from {path} - using the defaults", _path);
+                Log.Warning(ex, "Unable to read the viewer settings from {Path} - using the defaults", _path);
             }
 
             return values;

@@ -253,7 +253,7 @@ namespace DBADashConfig
                 sb.AppendLine($"| {result.Tool.Name} | {result.Status} {result.Message} | {version.Status} {version.InstalledVersion} |");
                 if (!ok)
                 {
-                    Log.Error("{Tool} failed testing: deploy {DeployStatus} {Message}, version check {VersionStatus}", result.Tool.Name, result.Status, result.Message, version.Status);
+                    Log.Error("{Tool} failed testing: deploy {DeployStatus} {Detail}, version check {VersionStatus}", result.Tool.Name, result.Status, result.Message, version.Status);
                 }
             }
             sb.AppendLine();
@@ -397,7 +397,7 @@ AND p.name <> ''";
             var nonSql = connections.Where(c => c.Type != DBADashConnection.ConnectionType.SQL).ToList();
             foreach (var c in nonSql)
             {
-                Log.Warning("Skipping {Connection} - not a SQL Server connection", c.ConnectionForPrint);
+                Log.Warning("Skipping {Source} - not a SQL Server connection", c.ConnectionForPrint);
             }
             connections = connections.Except(nonSql).ToList();
             if (connections.Count == 0)
@@ -430,7 +430,7 @@ AND p.name <> ''";
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex, "Error processing {Connection}", connection.ConnectionForPrint);
+                    Log.Error(ex, "Error processing {Source}", connection.ConnectionForPrint);
                     return (connection, (T?)null, ex.Message);
                 }
                 finally

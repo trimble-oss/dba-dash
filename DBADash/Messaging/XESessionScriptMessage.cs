@@ -20,7 +20,7 @@ namespace DBADash.Messaging
     /// all handled by SMO).  Scope-aware: <see cref="XEStore"/> server-scoped on-prem / Managed Instance,
     /// <see cref="DatabaseXEStore"/> database-scoped for Azure SQL Database.</para>
     /// </summary>
-    public class XESessionScriptMessage : MessageBase
+    public class XESessionScriptMessage : MessageBase, IConnectionMessage
     {
         public string ConnectionID { get; set; }
 
@@ -78,7 +78,7 @@ namespace DBADash.Messaging
             var ds = new DataSet();
             ds.Tables.Add(dt);
 
-            Log.Information("Scripted XE session {session} for {instance} (handle {handle})",
+            Log.Information("Scripted XE session {SessionName} for {ConnectionID} (handle {Handle})",
                 SessionName, ConnectionID, handle);
             return ds;
         }

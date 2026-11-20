@@ -103,11 +103,11 @@ namespace DBADash.SlowQueries
                         States[entry.Key] = new SlowQueryCollectionState { Cursor = entry.Value };
                         Persisted[entry.Key] = entry.Value;
                     }
-                    Log.Debug("Restored {count} slow query read position(s) from {path}", States.Count, FilePath);
+                    Log.Debug("Restored {Count} slow query read position(s) from {Path}", States.Count, FilePath);
                 }
                 catch (Exception ex)
                 {
-                    Log.Warning(ex, "Could not read slow query read positions from {path}; starting from the " +
+                    Log.Warning(ex, "Could not read slow query read positions from {Path}; starting from the " +
                                     "beginning of each instance's event file set.", FilePath);
                 }
                 finally
@@ -141,7 +141,7 @@ namespace DBADash.SlowQueries
                 }
                 catch (Exception ex)
                 {
-                    Log.Warning(ex, "Could not write slow query read positions to {path}.", FilePath);
+                    Log.Warning(ex, "Could not write slow query read positions to {Path}.", FilePath);
                     return false;
                 }
             }

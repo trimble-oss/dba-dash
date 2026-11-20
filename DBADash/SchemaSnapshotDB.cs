@@ -178,7 +178,7 @@ namespace DBADash
             var StartTime = DateTime.UtcNow;
 
             using (var cn = new SqlConnection(ConnectionString))
-            using (var opSS = Operation.Begin("Schema snapshot {dbName}", DBName))
+            using (var opSS = Operation.Begin("Schema snapshot {Database}", DBName))
             {
                 DataTable dtSchema = new("Schema_" + DBName);
                 dtSchema.Columns.Add("ObjectName");
@@ -213,7 +213,7 @@ namespace DBADash
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.Aggregate))
                     {
-                        using (var op = Operation.Begin("Schema snapshot {dbName}: {Object}", DBName, "Aggregate"))
+                        using (var op = Operation.Begin("Schema snapshot {Database}: {Object}", DBName, "Aggregate"))
                         {
                             AddAggregate(db, dtSchema);
                             op.Complete();
@@ -221,7 +221,7 @@ namespace DBADash
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.Assembly))
                     {
-                        using (var op = Operation.Begin("Schema snapshot {dbName}: {Object}", DBName, "Assembly"))
+                        using (var op = Operation.Begin("Schema snapshot {Database}: {Object}", DBName, "Assembly"))
                         {
                             AddAssembly(db, dtSchema);
                             op.Complete();
@@ -229,7 +229,7 @@ namespace DBADash
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.UserDefinedType))
                     {
-                        using (var op = Operation.Begin("Schema snapshot {dbName}: {Object}", DBName, "UserDefinedType"))
+                        using (var op = Operation.Begin("Schema snapshot {Database}: {Object}", DBName, "UserDefinedType"))
                         {
                             AddUserDefinedType(db, dtSchema);
                             op.Complete();
@@ -237,7 +237,7 @@ namespace DBADash
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.XMLSchema))
                     {
-                        using (var op = Operation.Begin("Schema snapshot {dbName}: {Object}", DBName, "XMLSchema"))
+                        using (var op = Operation.Begin("Schema snapshot {Database}: {Object}", DBName, "XMLSchema"))
                         {
                             AddXMLSchema(db, dtSchema);
                             op.Complete();
@@ -245,7 +245,7 @@ namespace DBADash
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.Schema))
                     {
-                        using (var op = Operation.Begin("Schema snapshot {dbName}: {Object}", DBName, "Schema"))
+                        using (var op = Operation.Begin("Schema snapshot {Database}: {Object}", DBName, "Schema"))
                         {
                             AddSchema(db, dtSchema);
                             op.Complete();
@@ -253,7 +253,7 @@ namespace DBADash
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.Tables))
                     {
-                        using (var op = Operation.Begin("Schema snapshot {dbName}: {Object}", DBName, "Tables"))
+                        using (var op = Operation.Begin("Schema snapshot {Database}: {Object}", DBName, "Tables"))
                         {
                             AddTables(db, dtSchema);
                             op.Complete();
@@ -261,7 +261,7 @@ namespace DBADash
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.StoredProcedures))
                     {
-                        using (var op = Operation.Begin("Schema snapshot {dbName}: {Object}", DBName, "StoredProcedures"))
+                        using (var op = Operation.Begin("Schema snapshot {Database}: {Object}", DBName, "StoredProcedures"))
                         {
                             AddSPs(db, dtSchema);
                             op.Complete();
@@ -269,7 +269,7 @@ namespace DBADash
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.UserDefinedFunction))
                     {
-                        using (var op = Operation.Begin("Schema snapshot {dbName}: {Object}", DBName, "UserDefinedFunctions"))
+                        using (var op = Operation.Begin("Schema snapshot {Database}: {Object}", DBName, "UserDefinedFunctions"))
                         {
                             AddUDFs(db, dtSchema);
                             op.Complete();
@@ -277,7 +277,7 @@ namespace DBADash
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.View))
                     {
-                        using (var op = Operation.Begin("Schema snapshot {dbName}: {Object}", DBName, "Views"))
+                        using (var op = Operation.Begin("Schema snapshot {Database}: {Object}", DBName, "Views"))
                         {
                             AddViews(db, dtSchema);
                             op.Complete();
@@ -285,7 +285,7 @@ namespace DBADash
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.UserDefinedTableType) && instance.VersionMajor >= 10) // Support for User Defined Table Types added in SQL 2008
                     {
-                        using (var op = Operation.Begin("Schema snapshot {dbName}: {Object}", DBName, "UserDefinedTableTypes"))
+                        using (var op = Operation.Begin("Schema snapshot {Database}: {Object}", DBName, "UserDefinedTableTypes"))
                         {
                             AddUserDefinedTableType(db, dtSchema);
                             op.Complete();
@@ -293,7 +293,7 @@ namespace DBADash
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.UserDefinedDataType))
                     {
-                        using (var op = Operation.Begin("Schema snapshot {dbName}: {Object}", DBName, "UserDefinedDataTypes"))
+                        using (var op = Operation.Begin("Schema snapshot {Database}: {Object}", DBName, "UserDefinedDataTypes"))
                         {
                             AddUserDefinedDataType(db, dtSchema);
                             op.Complete();
@@ -301,7 +301,7 @@ namespace DBADash
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.DDLTrigger))
                     {
-                        using (var op = Operation.Begin("Schema snapshot {dbName}: {Object}", DBName, "DDLTriggers"))
+                        using (var op = Operation.Begin("Schema snapshot {Database}: {Object}", DBName, "DDLTriggers"))
                         {
                             AddDDLTriggers(db, dtSchema);
                             op.Complete();
@@ -309,7 +309,7 @@ namespace DBADash
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.Synonym))
                     {
-                        using (var op = Operation.Begin("Schema snapshot {dbName}: {Object}", DBName, "Synonyms"))
+                        using (var op = Operation.Begin("Schema snapshot {Database}: {Object}", DBName, "Synonyms"))
                         {
                             AddSynonyms(db, dtSchema, errorLogger);
                             op.Complete();
@@ -317,7 +317,7 @@ namespace DBADash
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.Roles))
                     {
-                        using (var op = Operation.Begin("Schema snapshot {dbName}: {Object}", DBName, "Roles"))
+                        using (var op = Operation.Begin("Schema snapshot {Database}: {Object}", DBName, "Roles"))
                         {
                             AddRoles(db, dtSchema);
                             op.Complete();
@@ -325,7 +325,7 @@ namespace DBADash
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.Users))
                     {
-                        using (var op = Operation.Begin("Schema snapshot {dbName}: {Object}", DBName, "Users"))
+                        using (var op = Operation.Begin("Schema snapshot {Database}: {Object}", DBName, "Users"))
                         {
                             AddUsers(db, dtSchema);
                             op.Complete();
@@ -333,7 +333,7 @@ namespace DBADash
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.ApplicationRole))
                     {
-                        using (var op = Operation.Begin("Schema snapshot {dbName}: {Object}", DBName, "ApplicationRoles"))
+                        using (var op = Operation.Begin("Schema snapshot {Database}: {Object}", DBName, "ApplicationRoles"))
                         {
                             AddAppRole(db, dtSchema);
                             op.Complete();
@@ -341,7 +341,7 @@ namespace DBADash
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.Sequence))
                     {
-                        using (var op = Operation.Begin("Schema snapshot {dbName}: {Object}", DBName, "Sequences"))
+                        using (var op = Operation.Begin("Schema snapshot {Database}: {Object}", DBName, "Sequences"))
                         {
                             AddSeq(db, dtSchema);
                             op.Complete();
@@ -351,7 +351,7 @@ namespace DBADash
                     {
                         if (instance.ServerType != Microsoft.SqlServer.Management.Common.DatabaseEngineType.SqlAzureDatabase)
                         {
-                            using (var op = Operation.Begin("Schema snapshot {dbName}: {Object}", DBName, "ServiceBroker"))
+                            using (var op = Operation.Begin("Schema snapshot {Database}: {Object}", DBName, "ServiceBroker"))
                             {
                                 AddServiceBroker(db, dtSchema);
                                 op.Complete();
@@ -952,7 +952,7 @@ namespace DBADash
             {
                 return;
             }
-            Log.Information("DB Snapshots from instance {source}", src.SourceConnection.ConnectionForPrint);
+            Log.Information("DB Snapshots from instance {Source}", src.SourceConnection.ConnectionForPrint);
 
             var matchedCount = 0;
             foreach (Database db in instance.Databases)
@@ -964,7 +964,7 @@ namespace DBADash
                 if (!include) continue;
                 matchedCount++;
 
-                Log.Information("DB Snapshot {db} from instance {instance}", db.Name, builder.DataSource);
+                Log.Information("DB Snapshot {Database} from instance {Instance}", db.Name, builder.DataSource);
                 DataTable dt = null;
                 try
                 {
@@ -982,7 +982,7 @@ namespace DBADash
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex, "Error writing schema snapshot {db} to destination", db.Name);
+                    Log.Error(ex, "Error writing schema snapshot {Database} to destination", db.Name);
                 }
                 if (dt != null)
                 {
@@ -996,7 +996,7 @@ namespace DBADash
                 // The job "ran" but did nothing - no error to catch, so nothing else would otherwise
                 // surface this. Without at least one match, dbo.CollectionDates for SchemaSnapshot never
                 // gets touched here, so its age grows indefinitely with no other indication why.
-                Log.Warning("SchemaSnapshotDBs ({schemaSnapshotDBs}) matched no databases on {instance} - schema snapshot will not run until this is corrected",
+                Log.Warning("SchemaSnapshotDBs ({SchemaSnapshotDBs}) matched no databases on {Source} - schema snapshot will not run until this is corrected",
                     src.SchemaSnapshotDBs, src.SourceConnection.ConnectionForPrint);
             }
         }

@@ -21,7 +21,7 @@ namespace DBADash.Messaging
     /// sources it discovers at runtime (Azure DBs, read replicas) to its in-memory config and those must not be
     /// persisted.</para>
     /// </summary>
-    public class CollectionScheduleUpdateMessage : MessageBase
+    public class CollectionScheduleUpdateMessage : MessageBase, IConnectionMessage
     {
         public enum ScheduleScopes
         {
@@ -121,7 +121,7 @@ namespace DBADash.Messaging
                 }
             }
 
-            Log.Information("Collection schedule changed{temporary} via message {id} for {scope} {connectionID}: {changes}",
+            Log.Information("Collection schedule changed{Temporary} via message {MessageId} for {Scope} {ConnectionID}: {Changes}",
                 Temporary ? $" temporarily until {TemporaryUntilUtc:u}" : string.Empty, Id, Scope,
                 Scope == ScheduleScopes.Instance ? ConnectionID : cfg.ServiceName, DescribeChanges());
 

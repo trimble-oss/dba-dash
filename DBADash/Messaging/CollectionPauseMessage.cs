@@ -57,7 +57,7 @@ namespace DBADash.Messaging
 
             CollectionPauseStore.Current.Update(current => Apply(current, DateTime.UtcNow));
 
-            Log.Information("Collections {action} via message {id} for {instances}", PauseUntilUtc.HasValue ? $"paused until {PauseUntilUtc:u}" : "resumed",
+            Log.Information("Collections {Action} via message {MessageId} for {Instances}", PauseUntilUtc.HasValue ? $"paused until {PauseUntilUtc:u}" : "resumed",
                 Id, ConnectionIDs);
 
             // Report straight away so the repository mutes (or unmutes) alerts now rather than at the next service start.

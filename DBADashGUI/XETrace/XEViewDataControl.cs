@@ -116,7 +116,7 @@ namespace DBADashGUI.XETrace
                 bindSw.Stop();
                 totalSw.Stop();
                 Serilog.Log.Information(
-                    "View XE data {session}: {rows} rows - round-trip {roundTripMs}ms, grid bind {bindMs}ms",
+                    "View XE data {SessionName}: {Rows} rows - round-trip {RoundTripMs}ms, grid bind {BindMs}ms",
                     _sessionName, outcome.TotalEvents, roundTripSw.ElapsedMilliseconds, bindSw.ElapsedMilliseconds);
 
                 var more = outcome.Capped ? $" (showing the newest {outcome.MaxEvents:N0} - more are available)" : string.Empty;

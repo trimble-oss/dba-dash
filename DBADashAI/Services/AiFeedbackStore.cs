@@ -53,12 +53,12 @@ namespace DBADashAI.Services
                 }
 
                 if (_count > 0)
-                    _logger.LogInformation("Replayed {Count} feedback records from {FilePath}", _count, _filePath);
+                    _logger.LogInformation("Replayed {Count} feedback records from {Path}", _count, _filePath);
             }
             catch (Exception ex)
             {
                 // Non-fatal — service starts cleanly with an empty queue if the file is corrupt.
-                _logger.LogWarning(ex, "Failed to replay feedback from {FilePath}. Starting with empty feedback store.", _filePath);
+                _logger.LogWarning(ex, "Failed to replay feedback from {Path}. Starting with empty feedback store.", _filePath);
             }
         }
 
@@ -90,7 +90,7 @@ namespace DBADashAI.Services
                 var comment = LogSanitizer.SanitizeForLog(record.Comment ?? "(none)");
 
                 _logger.LogWarning(
-                    "AI feedback negative. RequestId={RequestId}, Tool={ToolName}, Category={Category}, QuestionExcerpt={QuestionExcerpt}, Comment={Comment}",
+                    "AI feedback negative. RequestId={RequestId}, Tool={Tool}, Category={Category}, QuestionExcerpt={QuestionExcerpt}, Comment={Comment}",
                     requestId,
                     toolName,
                     category,
@@ -172,7 +172,7 @@ namespace DBADashAI.Services
                 catch (Exception ex)
                 {
                     // Persistence is best-effort — never let a file I/O failure block the feedback flow.
-                    _logger.LogWarning(ex, "Failed to persist feedback record to {FilePath}", path);
+                    _logger.LogWarning(ex, "Failed to persist feedback record to {Path}", path);
                 }
                 finally
                 {

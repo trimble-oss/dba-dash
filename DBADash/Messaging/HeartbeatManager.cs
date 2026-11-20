@@ -27,11 +27,11 @@ namespace DBADash.Messaging
             if (Beats.ContainsKey(id))
             {
                 Beats[id] = DateTime.UtcNow;
-                Log.Debug("Heartbeat received for message {id}", id);
+                Log.Debug("Heartbeat received for message {MessageId}", id);
             }
             else
             {
-                Log.Debug("Heartbeat received for message {id}, but it is not being monitored", id);
+                Log.Debug("Heartbeat received for message {MessageId}, but it is not being monitored", id);
             }
         }
 

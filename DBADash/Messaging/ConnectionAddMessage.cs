@@ -158,7 +158,7 @@ namespace DBADash.Messaging
                 CollectionScheduleUpdateMessage.ConfigFileLock.Release();
             }
 
-            Log.Information("Source connections changed via message {id}: added {added}, replaced {replaced}", Id,
+            Log.Information("Source connections changed via message {MessageId}: added {Added}, replaced {Replaced}", Id,
                 newSources.Select(s => s.ConnectionID), replacing.Select(s => s.ConnectionID));
 
             await ReportProgressAsync(new ResponseMessage
@@ -185,7 +185,7 @@ namespace DBADash.Messaging
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error scheduling collections for connections added via message {id}", Id);
+                Log.Error(ex, "Error scheduling collections for connections added via message {MessageId}", Id);
                 warnings.Add($"The connections were saved, but scheduling their collections failed - restart the service to collect them.  {ex.Message}");
             }
 

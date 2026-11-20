@@ -18,7 +18,7 @@ namespace DBADash.Messaging
     /// finds an entry under the row's plan shape first - see SQLQueryStatsPlan.sql - then fetches its plan the same
     /// way.  Returns the table that message returns, with no rows when the plan is no longer cached.
     /// </summary>
-    public class QueryStatsPlanMessage : MessageBase
+    public class QueryStatsPlanMessage : MessageBase, IConnectionMessage
     {
         public string ConnectionID { get; set; }
 
@@ -51,7 +51,7 @@ namespace DBADash.Messaging
                 throw new ArgumentException("Neither a sql handle nor a query hash was supplied");
             }
             using var op = Operation.Begin(
-                "Get query stats plan from {instance} triggered from message {id} with handle {handle}",
+                "Get query stats plan from {ConnectionID} triggered from message {MessageId} with handle {Handle}",
                 ConnectionID,
                 Id,
                 handle);
@@ -87,7 +87,7 @@ namespace DBADash.Messaging
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error getting query stats plan from {instance} from message {id} with handle {handle}",
+                Log.Error(ex, "Error getting query stats plan from {ConnectionID} from message {MessageId} with handle {Handle}",
                     ConnectionID, Id, handle);
                 throw;
             }

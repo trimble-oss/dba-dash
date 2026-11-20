@@ -81,7 +81,7 @@ namespace DBADash
                     r["query_plan_compressed"] = SMOBaseClass.Zip(strPlan);
                     if (string.IsNullOrEmpty(strPlan))
                     {
-                        Log.Warning("No query plan retrieved from sys.dm_exec_text_query_plan({0}, {1}, {2})", r["plan_handle"] == DBNull.Value ? null : ((byte[])(r["plan_handle"])).ToHexString(), r["statement_start_offset"], r["statement_end_offset"]);
+                        Log.Warning("No query plan retrieved from sys.dm_exec_text_query_plan({PlanHandle}, {StatementStart}, {StatementEnd})", r["plan_handle"] == DBNull.Value ? null : ((byte[])(r["plan_handle"])).ToHexString(), r["statement_start_offset"], r["statement_end_offset"]);
                         continue;
                     }
                     var hash = GetPlanHash(strPlan);
@@ -100,7 +100,7 @@ namespace DBADash
             // Remove rows with null query plan hash
             if (nullRows.Length > 0)
             {
-                Log.Information("Removing {0} rows with NULL query_plan_hash", nullRows.Length);
+                Log.Information("Removing {Count} rows with NULL query_plan_hash", nullRows.Length);
                 foreach (var row in nullRows)
                 {
                     row.Delete();

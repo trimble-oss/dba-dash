@@ -152,7 +152,7 @@ namespace DBADashService
                             Log.Warning("Repository database deployment already appears to be in progress.");
                         }
 
-                        Log.Information("Waiting {waitTime} seconds for completion before continuing",
+                        Log.Information("Waiting {WaitSeconds} seconds for completion before continuing",
                             Convert.ToInt32(endTime.Subtract(DateTime.UtcNow).TotalSeconds));
                         count++;
                         await Task.Delay(5000, _); // Wait for 5 seconds before checking again
@@ -173,14 +173,14 @@ namespace DBADashService
         {
             foreach (var d in config.AllDestinations.Where(dest => dest.Type == ConnectionType.SQL))
             {
-                Log.Logger.Information("Version check for repository database {connection}", d.ConnectionForPrint);
+                Log.Information("Version check for repository database {Destination}", d.ConnectionForPrint);
                 DBValidations.DBVersionStatus status = null;
                 status = await GetDBVersionStatus(d);
 
                 switch (status.VersionStatus)
                 {
                     case DBValidations.DBVersionStatusEnum.AppUpgradeRequired:
-                        Log.Warning("This version of the app is older than the repository database and should be upgraded. DB {dbVersion}.  App {appVersion}", status.DACVersion, status.DBVersion);
+                        Log.Warning("This version of the app is older than the repository database and should be upgraded. DB {DbVersion}.  App {AppVersion}", status.DACVersion, status.DBVersion);
                         break;
 
                     case DBValidations.DBVersionStatusEnum.CreateDB when config.AutoUpdateDatabase:
@@ -197,7 +197,7 @@ namespace DBADashService
                         {
                             Log.Information("Validating destination");
                             await CollectionConfig.ValidateDestinationAsync(d);
-                            Log.Information("Upgrade DB from {oldVersion} to {newVersion}", status.DBVersion.ToString(), status.DACVersion.ToString());
+                            Log.Information("Upgrade DB from {OldVersion} to {NewVersion}", status.DBVersion, status.DACVersion);
                             await DBValidations.UpgradeDBAsync(d.ConnectionString);
                             status = await DBValidations.VersionStatusAsync(d.ConnectionString);
                             if (status.VersionStatus == DBValidations.DBVersionStatusEnum.OK)
@@ -215,7 +215,7 @@ namespace DBADashService
                     case DBValidations.DBVersionStatusEnum.UpgradeRequired:
                         throw new Exception("Database upgrade is required.  Enable auto updates or run the service configuration tool to update.");
                     case DBValidations.DBVersionStatusEnum.OK:
-                        Log.Information("Repository database version check OK {version}", status.DBVersion.ToString());
+                        Log.Information("Repository database version check OK {Version}", status.DBVersion);
                         break;
                 }
             }
@@ -252,7 +252,7 @@ namespace DBADashService
                 var offlineCount = OfflineInstances.OfflineInstanceCount;
                 if (offlineCount > 0)
                 {
-                    Log.Warning("{offlineCount} connections are offline", offlineCount);
+                    Log.Warning("{OfflineCount} connections are offline", offlineCount);
                 }
                 else
                 {
@@ -296,11 +296,11 @@ namespace DBADashService
             if (!File.Exists(filePath)) return;
             foreach (var d in config.AllDestinations.Where(cn => cn.Type == ConnectionType.SQL))
             {
-                Log.Information("Updating BuildReference {connection}", d.ConnectionForPrint);
+                Log.Information("Updating BuildReference {Destination}", d.ConnectionForPrint);
                 var jsonBuildReference = await File.ReadAllTextAsync(filePath);
                 await BuildReference.UpdateBuildReferenceAsync(d.ConnectionString, jsonBuildReference);
             }
-            Log.Debug("Remove {filePath}", filePath);
+            Log.Debug("Remove {Path}", filePath);
             File.Delete(filePath);
         }
 
@@ -349,7 +349,7 @@ namespace DBADashService
                 }
                 catch (OperationCanceledException)
                 {
-                    Log.Warning("Collection work queue stop timed out after {timeout} seconds", (workQueueTimeout));
+                    Log.Warning("Collection work queue stop timed out after {TimeoutSeconds} seconds", (workQueueTimeout));
                 }
                 catch (Exception ex)
                 {
@@ -366,7 +366,7 @@ namespace DBADashService
             {
                 if (tasksSnapshot.Length > 0)
                 {
-                    Log.Information("Waiting for {count} background task(s) to complete...", tasksSnapshot.Length);
+                    Log.Information("Waiting for {Count} background task(s) to complete...", tasksSnapshot.Length);
                     try
                     {
                         var timeout = TimeSpan.FromSeconds(backgroundTaskTimeout);
@@ -375,7 +375,7 @@ namespace DBADashService
                     }
                     catch (TimeoutException)
                     {
-                        Log.Warning("Background tasks did not complete within {timeout} seconds", backgroundTaskTimeout);
+                        Log.Warning("Background tasks did not complete within {TimeoutSeconds} seconds", backgroundTaskTimeout);
                     }
                     catch (OperationCanceledException)
                     {
@@ -439,7 +439,7 @@ namespace DBADashService
                     .WithIdentity("SummaryRefreshJob" + i)
                     .UsingJobData("ConnectionString", d.ConnectionString)
                     .Build();
-                Log.Information("Schedule summary refresh on schedule {schedule}", config.SummaryRefreshCron);
+                Log.Information("Schedule summary refresh on schedule {Schedule}", config.SummaryRefreshCron);
                 ScheduleJob(config.SummaryRefreshCron, job);
             }
         }
@@ -501,7 +501,7 @@ namespace DBADashService
                 .WithIdentity("UpgradeCheckJob")
                 .Build();
 
-            Log.Information("Schedule upgrade check on schedule {schedule}", config.UpgradeCheckCron);
+            Log.Information("Schedule upgrade check on schedule {Schedule}", config.UpgradeCheckCron);
             ScheduleJob(config.UpgradeCheckCron, job);
         }
 
@@ -530,7 +530,7 @@ namespace DBADashService
             }
             if (config.ScanForAzureDBsInterval > 0 && (config.ScanForAzureDBs || config.MonitorReadReplicas))
             {
-                Log.Information("Schedule Scan for new Azure DBs/read replicas every {scanInterval} seconds", config.ScanForAzureDBsInterval);
+                Log.Information("Schedule Scan for new Azure DBs/read replicas every {ScanInterval} seconds", config.ScanForAzureDBsInterval);
                 azureScanForNewDBsTimer = new System.Timers.Timer
                 {
                     Enabled = true,
@@ -600,7 +600,7 @@ namespace DBADashService
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex, "ConnectionInfo Error {0}", src.SourceConnection.ConnectionForPrint);
+                    Log.Error(ex, "ConnectionInfo Error {Source}", src.SourceConnection.ConnectionForPrint);
                 }
                 try
                 {
@@ -619,7 +619,7 @@ namespace DBADashService
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex, "ConnectionInfo Error {0}", src.SourceConnection.ConnectionForPrint);
+                    Log.Error(ex, "ConnectionInfo Error {Source}", src.SourceConnection.ConnectionForPrint);
                 }
             }
             return newSources;
@@ -681,12 +681,12 @@ namespace DBADashService
             {
                 if (scheduledSources.Contains(src))
                 {
-                    Log.Debug("{source} has already been scheduled", src.SourceConnection.ConnectionForPrint);
+                    Log.Debug("{Source} has already been scheduled", src.SourceConnection.ConnectionForPrint);
                     return;
                 }
                 if (!IsCollected(src))
                 {
-                    Log.Information("{source} was removed before it was scheduled", src.SourceConnection.ConnectionForPrint);
+                    Log.Information("{Source} was removed before it was scheduled", src.SourceConnection.ConnectionForPrint);
                     return;
                 }
                 await ScheduleSourceCoreAsync(src, runOnStart: true);
@@ -714,7 +714,7 @@ namespace DBADashService
                 }
                 catch (Exception ex) when (errors != null)
                 {
-                    Log.Error(ex, "Error scheduling job for {source} on schedule {schedule}", src.SourceConnection.ConnectionForPrint, schedule);
+                    Log.Error(ex, "Error scheduling job for {Source} on schedule {Schedule}", src.SourceConnection.ConnectionForPrint, schedule);
                     errors.Add(ex);
                     return false;
                 }
@@ -723,7 +723,7 @@ namespace DBADashService
             var cfgString = JsonConvert.SerializeObject(src);
             if (src.CollectionSchedules is { Count: > 0 })
             {
-                Log.Information("Custom schedule defined for instance: {instance}", src.SourceConnection.ConnectionForPrint);
+                Log.Information("Custom schedule defined for instance: {Source}", src.SourceConnection.ConnectionForPrint);
             }
             var srcSchedule = GetCombinedSchedule(src);
             var customCollections = src.CustomCollections.CombineCollections(config.CustomCollections);
@@ -732,7 +732,7 @@ namespace DBADashService
 
             if (runOnStart && srcSchedule.OnServiceStartCollection.Any())
             {
-                Log.Information("Trigger on startup collections for {source} to collect {collection}", src.SourceConnection.ConnectionForPrint, onStartCollections);
+                Log.Information("Trigger on startup collections for {Source} to collect {Collection}", src.SourceConnection.ConnectionForPrint, onStartCollections);
                 var onStartCustom = customCollections
                     .Where(c => c.Value.RunOnServiceStart)
                     .ToDictionary(c => c.Key, c => c.Value);
@@ -770,7 +770,7 @@ namespace DBADashService
                             }
 
                             var job = GetJob(collections, src, cfgString, custom, s.Key, CollectionJobGroup);
-                            Log.Information("Add schedule for {source} to collect {collection},{custom} on schedule {schedule}", src.SourceConnection.ConnectionForPrint, collections, custom.Keys, s.Key);
+                            Log.Information("Add schedule for {Source} to collect {Collection},{Custom} on schedule {Schedule}", src.SourceConnection.ConnectionForPrint, collections, custom.Keys, s.Key);
                             TryScheduleJob(s.Key, job);
                         }
 
@@ -779,7 +779,7 @@ namespace DBADashService
                             var snapshotSchedule = srcSchedule[CollectionType.SchemaSnapshot];
                             if (!string.IsNullOrEmpty(snapshotSchedule.NormalizedSchedule))
                             {
-                                Log.Information("Add schedule for {source} to collect Schema Snapshots on schedule {schedule}", src.SourceConnection.ConnectionForPrint, snapshotSchedule.NormalizedSchedule);
+                                Log.Information("Add schedule for {Source} to collect Schema Snapshots on schedule {Schedule}", src.SourceConnection.ConnectionForPrint, snapshotSchedule.NormalizedSchedule);
                                 var job = JobBuilder.Create<SchemaSnapshotJob>()
                                     .WithIdentity(Guid.NewGuid().ToString(), CollectionJobGroup)
                                     .UsingJobData("Source", src.SourceConnection.ConnectionString)
@@ -800,7 +800,7 @@ namespace DBADashService
                 case ConnectionType.Directory or ConnectionType.AWSS3:
                     {
                         var job = GetJob(null, src, cfgString, null, CollectionSchedule.DefaultImportSchedule.NormalizedSchedule);
-                        Log.Information("Add schedule for {source} to import on schedule {schedule}", src.SourceConnection.ConnectionForPrint, CollectionSchedule.DefaultImportSchedule.NormalizedSchedule);
+                        Log.Information("Add schedule for {Source} to import on schedule {Schedule}", src.SourceConnection.ConnectionForPrint, CollectionSchedule.DefaultImportSchedule.NormalizedSchedule);
                         ScheduleJob(CollectionSchedule.DefaultImportSchedule.NormalizedSchedule, job);
                         break;
                     }
@@ -811,7 +811,7 @@ namespace DBADashService
 
         private async Task ScheduleJobsAsync(CancellationToken stoppingToken)
         {
-            Log.Information("Agent Version {version}", Assembly.GetEntryAssembly().GetName().Version);
+            Log.Information("Agent Version {Version}", Assembly.GetEntryAssembly().GetName().Version);
             messageProcessing = new MessageProcessing(config);
             var messageTask = messageProcessing.ScheduleMessaging();
             if (!messageTask.Wait(TimeSpan.FromSeconds(60)))
@@ -878,7 +878,7 @@ namespace DBADashService
         /// </summary>
         private async Task ScheduleNewSourcesAsync(IReadOnlyList<DBADashSource> sources)
         {
-            Log.Information("Scheduling {count} source(s) added while running: {sources}", sources.Count, sources.Select(s => s.SourceConnection.ConnectionForPrint));
+            Log.Information("Scheduling {Count} source(s) added while running: {Sources}", sources.Count, sources.Select(s => s.SourceConnection.ConnectionForPrint));
             if (config.IsUseQueueBasedScheduling())
             {
                 await ScheduleCollectionsWithQueueAsync(sources.ToList());
@@ -974,7 +974,7 @@ namespace DBADashService
             {
                 var expired = TemporaryScheduleStore.Current.RemoveExpired();
                 if (expired.Count == 0) return;
-                Log.Information("Temporary schedules ended for {instances}.  Reverting to their normal schedule", expired);
+                Log.Information("Temporary schedules ended for {Instances}.  Reverting to their normal schedule", expired);
                 await RescheduleCollectionsAsync();
 
                 List<DBADashSource> sources;
@@ -1055,12 +1055,12 @@ namespace DBADashService
                         }
                         catch (Exception ex)
                         {
-                            Log.Error(ex, "Error rescheduling collections for {source}", src.SourceConnection.ConnectionForPrint);
+                            Log.Error(ex, "Error rescheduling collections for {Source}", src.SourceConnection.ConnectionForPrint);
                             errors.Add(ex);
                         }
                     }
                 }
-                Log.Information("Collections rescheduled after schedule change.  Replaced {jobCount} jobs for {sourceCount} instances", jobKeys.Count, sources.Count);
+                Log.Information("Collections rescheduled after schedule change.  Replaced {JobCount} jobs for {SourceCount} instances", jobKeys.Count, sources.Count);
             }
             catch (Exception ex)
             {
@@ -1118,7 +1118,7 @@ namespace DBADashService
                 var collected = connections.Where(IsCollected).ToList();
                 if (collected.Count < connections.Count)
                 {
-                    Log.Information("{count} source(s) were removed before they were scheduled", connections.Count - collected.Count);
+                    Log.Information("{Count} source(s) were removed before they were scheduled", connections.Count - collected.Count);
                 }
                 await ScheduleCollectionsWithQueueCoreAsync(collected, runOnStart: true);
             }
@@ -1207,7 +1207,7 @@ namespace DBADashService
                 var schedule = ExtractScheduleFromGroupKey(kvp.Key);
                 var (types, sources, customForSchedule) = kvp.Value;
 
-                Log.Information("Creating scheduled job for {instanceCount} instances on schedule {schedule} with types {types}",
+                Log.Information("Creating scheduled job for {InstanceCount} instances on schedule {Schedule} with types {Types}",
                     sources.Count, schedule, string.Join(", ", types.Select(t => t.ToString())));
 
                 var job = JobBuilder.Create<ScheduledCollectionJob>()
@@ -1228,7 +1228,7 @@ namespace DBADashService
                 }
                 catch (Exception ex) when (errors != null)
                 {
-                    Log.Error(ex, "Error scheduling {types} on schedule {schedule} for {instanceCount} instances", types, schedule, sources.Count);
+                    Log.Error(ex, "Error scheduling {Types} on schedule {Schedule} for {InstanceCount} instances", types, schedule, sources.Count);
                     errors.Add(ex);
                 }
             }
@@ -1290,7 +1290,7 @@ namespace DBADashService
                     Schedule = "OnStartup",
                     Priority = kvp.Key
                 };
-                Log.Information("Enqueue on-start work item for {source} with types {types} at priority {priority}", src.SourceConnection.ConnectionForPrint, workItem.AllTypes, kvp.Key);
+                Log.Information("Enqueue on-start work item for {Source} with types {Types} at priority {Priority}", src.SourceConnection.ConnectionForPrint, workItem.AllTypes, kvp.Key);
 
                 await workQueue.EnqueueAsync(workItem);
             }
@@ -1414,19 +1414,19 @@ namespace DBADashService
                         var collector = await DBCollector.CreateAsync(src, config.ServiceName);
                         if (src.PersistXESessions)
                         {
-                            Log.Logger.Information("Stop DBADash event sessions for {connection}", src.SourceConnection.ConnectionForPrint);
+                            Log.Information("Stop DBADash event sessions for {Source}", src.SourceConnection.ConnectionForPrint);
                             await collector.StopEventSessionsAsync();
                         }
                         else
                         {
-                            Log.Logger.Information("Remove DBADash event sessions for {connection}", src.SourceConnection.ConnectionForPrint);
+                            Log.Information("Remove DBADash event sessions for {Source}", src.SourceConnection.ConnectionForPrint);
                             await collector.RemoveEventSessionsAsync();
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    Log.Logger.Error(ex, "Error Stop/Remove DBADash event sessions for {connection}", src.SourceConnection.ConnectionForPrint);
+                    Log.Error(ex, "Error Stop/Remove DBADash event sessions for {Source}", src.SourceConnection.ConnectionForPrint);
                 }
             }
         }
@@ -1464,7 +1464,7 @@ namespace DBADashService
                         var collector = await DBCollector.CreateAsync(src, config.ServiceName);
                         if (await collector.RemoveAdhocXESessionAsync(cancellationToken))
                         {
-                            Log.Logger.Information("Removed leftover ad-hoc XE session for {connection}", src.SourceConnection.ConnectionForPrint);
+                            Log.Information("Removed leftover ad-hoc XE session for {Source}", src.SourceConnection.ConnectionForPrint);
                         }
                     }
                 }
@@ -1474,7 +1474,7 @@ namespace DBADashService
                 }
                 catch (Exception ex)
                 {
-                    Log.Logger.Error(ex, "Error removing leftover ad-hoc XE session for {connection}", src.SourceConnection.ConnectionForPrint);
+                    Log.Error(ex, "Error removing leftover ad-hoc XE session for {Source}", src.SourceConnection.ConnectionForPrint);
                 }
             }
         }

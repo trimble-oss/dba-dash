@@ -10,7 +10,7 @@ using System.Threading;
 
 namespace DBADash.Messaging
 {
-    public class QueryStoreForcedPlansMessage : MessageBase
+    public class QueryStoreForcedPlansMessage : MessageBase, IConnectionMessage
     {
         public string ConnectionID { get; set; }
 
@@ -19,7 +19,7 @@ namespace DBADash.Messaging
         public override async Task<DataSet> Process(CollectionConfig cfg, Guid handle, CancellationToken cancellationToken)
         {
             ThrowIfExpired();
-            using var op = Operation.Begin("Query store forced plans {database} on {instance} triggered from message {handle}",
+            using var op = Operation.Begin("Query store forced plans {Database} on {ConnectionID} triggered from message {Handle}",
     DatabaseName,
     ConnectionID,
     handle);
@@ -40,7 +40,7 @@ namespace DBADash.Messaging
                 {
                     throw new Exception("No databases found with Query Store enabled");
                 }
-                Log.Debug("Collecting Query Store Forced Plans for databases: {databases} for message {handle}", databases, handle);
+                Log.Debug("Collecting Query Store Forced Plans for databases: {Databases} for message {Handle}", databases, handle);
 
                 DatabaseOperationDelegate operation = GetForcedPlans;
                 var resultTable = await RunPerDatabaseCollectionWithUnionResults(operation, src.SourceConnection.ConnectionString, databases);

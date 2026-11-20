@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace DBADash.Messaging
 {
-    public class PlanCollectionMessage : MessageBase
+    public class PlanCollectionMessage : MessageBase, IConnectionMessage
     {
         public string ConnectionID { get; set; }
         public string DatabaseName { get; set; }
@@ -23,7 +23,7 @@ namespace DBADash.Messaging
             }
 
             using var op = Operation.Begin(
-                "Get Plan Id {id} from {database} on {instance} triggered from message {handle}",
+                "Get Plan Id {PlanID} from {Database} on {ConnectionID} triggered from message {Handle}",
                 PlanID,
                 DatabaseName,
                 ConnectionID,
@@ -49,7 +49,7 @@ namespace DBADash.Messaging
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Plan collection request from {handle} failed", handle);
+                Log.Error(ex, "Plan collection request from {Handle} failed", handle);
                 throw;
             }
         }

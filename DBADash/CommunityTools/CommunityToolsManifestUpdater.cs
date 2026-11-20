@@ -53,7 +53,7 @@ namespace DBADash.CommunityTools
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex, "Unable to check {family} for updates", family.Name);
+                    Log.Error(ex, "Unable to check {Family} for updates", family.Name);
                     updates.Add(new CommunityToolFamilyUpdate { Family = family, Error = ex.Message });
                 }
             }
@@ -66,10 +66,10 @@ namespace DBADash.CommunityTools
             var newRef = await ResolveLatestRefAsync(client, family);
             if (string.Equals(newRef, family.Ref, StringComparison.Ordinal))
             {
-                Log.Information("{family} is up to date at {ref}", family.Name, family.Ref);
+                Log.Information("{Family} is up to date at {Ref}", family.Name, family.Ref);
                 return null;
             }
-            Log.Information("{family}: checking {newRef} (pinned {ref})", family.Name, newRef, family.Ref);
+            Log.Information("{Family}: checking {NewRef} (pinned {Ref})", family.Name, newRef, family.Ref);
 
             var update = new CommunityToolFamilyUpdate { Family = family, NewRef = newRef };
             // Setup files (tables) have no version - only their hash is pinned.  They're attributed to the family's first tool.
@@ -94,7 +94,7 @@ namespace DBADash.CommunityTools
             if (update.Files.Count == 0)
             {
                 // Release made no change to the scripts we use.  The old pin still works, so leave it alone.
-                Log.Information("{family}: {newRef} has no script changes", family.Name, newRef);
+                Log.Information("{Family}: {NewRef} has no script changes", family.Name, newRef);
                 return null;
             }
             return update;

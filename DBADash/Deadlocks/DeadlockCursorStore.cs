@@ -227,13 +227,13 @@ namespace DBADash.Deadlocks
                         Persisted[entry.Key] = entry.Value.Cursor;
                         if (entry.Value.BackfillPending) PendingBackfills[entry.Key] = 0;
                     }
-                    Log.Debug("Restored {count} deadlock read position(s) from {path}", States.Count, FilePath);
+                    Log.Debug("Restored {Count} deadlock read position(s) from {Path}", States.Count, FilePath);
                 }
                 catch (Exception ex)
                 {
                     // Starting from no cursor is the pre-existing behaviour and always safe, so a bad file is
                     // worth a warning and nothing more.
-                    Log.Warning(ex, "Could not read deadlock read positions from {path}; starting from the " +
+                    Log.Warning(ex, "Could not read deadlock read positions from {Path}; starting from the " +
                                     "beginning of each instance's event file set.", FilePath);
                 }
                 finally
@@ -282,7 +282,7 @@ namespace DBADash.Deadlocks
                 {
                     // The cursor is still held in memory, so this run and the ones after it are unaffected -
                     // only a restart would go back to reading from the start.
-                    Log.Warning(ex, "Could not write deadlock read positions to {path}.", FilePath);
+                    Log.Warning(ex, "Could not write deadlock read positions to {Path}.", FilePath);
                     return false;
                 }
             }

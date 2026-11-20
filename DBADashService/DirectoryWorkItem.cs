@@ -50,10 +50,10 @@ namespace DBADashService
         public async Task ExecuteAsync(CollectionConfig config, CancellationToken cancellationToken)
         {
             var folder = Source.GetSource();
-            Log.Logger.Information("Import from folder {folder}", folder);
+            Log.Information("Import from folder {Folder}", folder);
             if (!Directory.Exists(folder))
             {
-                Log.Error("Source directory doesn't exist {folder}", folder);
+                Log.Error("Source directory doesn't exist {Folder}", folder);
                 return;
             }
 
@@ -68,7 +68,7 @@ namespace DBADashService
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex, "Enumerate files {folder}", folder);
+                    Log.Error(ex, "Enumerate files {Folder}", folder);
                     return;
                 }
                 DeleteStaleTempFiles(allFiles);
@@ -131,7 +131,7 @@ namespace DBADashService
         {
             const int MaxTryCount = 5;
             const int RetryDelay = 10;
-            Log.Information("Processing file {0}", f);
+            Log.Information("Processing file {Path}", f);
             var fileName = Path.GetFileName(f);
             try
             {
@@ -173,7 +173,7 @@ namespace DBADashService
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error importing from {filename}.  File will be copied to {failedMessageFolder}", fileName, SchedulerServiceConfig.FailedMessageFolder);
+                Log.Error(ex, "Error importing from {FileName}.  File will be copied to {FailedMessageFolder}", fileName, SchedulerServiceConfig.FailedMessageFolder);
                 // A quarantined file can never be imported, so the files behind it aren't overtaking anything
                 // by continuing.  One that's still in the source folder is imported again on the next
                 // iteration, so they wait for it instead.
@@ -218,7 +218,7 @@ namespace DBADashService
                 catch (Exception ex)
                 {
                     instance = "default";
-                    Log.Warning("Unable to parse Instance from {0}: {1}", path, ex.Message);
+                    Log.Warning("Unable to parse Instance from {Path}: {Error}", path, ex.Message);
                 }
                 if (filesToProcessByInstance.TryGetValue(instance, out var value))
                 {
@@ -262,7 +262,7 @@ namespace DBADashService
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error copying {FileName} to failed message folder {failedMessageFolder}.  The file will be left in place and retried", fileName, SchedulerServiceConfig.FailedMessageFolder);
+                Log.Error(ex, "Error copying {FileName} to failed message folder {FailedMessageFolder}.  The file will be left in place and retried", fileName, SchedulerServiceConfig.FailedMessageFolder);
                 return false;
             }
         }

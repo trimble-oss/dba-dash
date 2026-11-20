@@ -23,7 +23,7 @@ namespace DBADash
                     args.ErrorContext.Error is JsonSerializationException)
                 {
                     args.ErrorContext.Handled = true;
-                    Log.Warning($"Invalid collection type '{args.ErrorContext.Member}' in '{FilePath}'");
+                    Log.Warning("Invalid collection type {CollectionType} in {Path}", args.ErrorContext.Member, FilePath);
                 }
             }
         };
@@ -31,7 +31,7 @@ namespace DBADash
         static CollectionCommandTimeout()
         {
             LoadCommandTimeouts();
-            Log.Debug("Timeout  Settings:\n" + Settings.ToJson());
+            Log.Debug("Timeout settings: {Settings}", Settings.ToJson());
         }
 
         private static void LoadCommandTimeouts()
@@ -49,12 +49,12 @@ namespace DBADash
 
                 Settings = JsonConvert.DeserializeObject<CommandTimeoutSettings>(json, serializationOpts);
 
-                Log.Information($"Custom command timeouts loaded from {FilePath}");
+                Log.Information("Custom command timeouts loaded from {Path}", FilePath);
             }
             catch (JsonException ex)
             {
                 // Ignore any errors in the JSON file and use the default command timeouts
-                Log.Warning(ex, $"Error loading custom command timeouts from {FilePath}");
+                Log.Warning(ex, "Error loading custom command timeouts from {Path}", FilePath);
                 Settings = new CommandTimeoutSettings();
             }
         }
@@ -85,7 +85,7 @@ namespace DBADash
             catch (JsonException ex)
             {
                 // Leave malformed JSON untouched so callers handle (and log) the error as before.
-                Log.Debug(ex, "Skipping legacy collection type remap - {FilePath} is not valid JSON", FilePath);
+                Log.Debug(ex, "Skipping legacy collection type remap - {Path} is not valid JSON", FilePath);
                 return json;
             }
             if (root["CollectionCommandTimeouts"] is JObject timeouts)

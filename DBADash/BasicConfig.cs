@@ -250,7 +250,7 @@ namespace DBADash
         public static void ClearOldConfigBackups(int retentionDays)
         {
             if (retentionDays < 0) return;
-            Log.Information("Remove configs older than {retentionDays} days", retentionDays);
+            Log.Information("Remove configs older than {RetentionDays} days", retentionDays);
 
             Directory.EnumerateFiles(AppContext.BaseDirectory, "ServiceConfig.json*.backup*")
                 .Where(file => (File.GetCreationTime(file)) < DateTime.Now.AddDays(-retentionDays))
@@ -258,7 +258,7 @@ namespace DBADash
                 .ForEach(file =>
                 {
                     File.Delete(file);
-                    Log.Information("Remove old config {file}", file);
+                    Log.Information("Remove old config {File}", file);
                 });
         }
 

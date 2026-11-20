@@ -37,7 +37,7 @@ namespace DBADashService
 
         public static void LogFatalError(Exception ex)
         {
-            Log.Logger.Error(ex, "Fatal error during startup");
+            Log.Error(ex, "Fatal error during startup");
             EnsureDirectoryExists(FatalErrorDirectoryPath);
             File.WriteAllText(FatalErrorFilePath, ex.ToString());
         }
@@ -50,7 +50,7 @@ namespace DBADashService
             }
             catch (Exception ex)
             {
-                Log.Logger.Error(ex, "Error deleting {path}", path);
+                Log.Error(ex, "Error deleting {Path}", path);
             }
         }
 
@@ -118,6 +118,8 @@ namespace DBADashService
                 .Build();
             Log.Logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(configuration)
+                // The ConnectionID, MessageId and Handle of the work being logged - see LogScope.
+                .Enrich.FromLogContext()
                 .Enrich.WithProperty("ApplicationName", "DBADash")
                 .Enrich.WithProperty("MachineName", Environment.MachineName)
                 .CreateLogger();
@@ -164,7 +166,7 @@ namespace DBADashService
                             Console.WriteLine($"Installing service: {cfg.ServiceName}");
                             if (ServiceTools.IsServiceInstalledByName(cfg.ServiceName))
                             {
-                                Log.Error($"Service {cfg.ServiceName} already exists.");
+                                Log.Error("Service {ServiceName} already exists.", cfg.ServiceName);
                             }
                             else
                             {
@@ -179,7 +181,7 @@ namespace DBADashService
                         if (!OperatingSystem.IsWindows()) return;
                         if (!ServiceTools.IsServiceInstalledByName(cfg.ServiceName))
                         {
-                            Log.Error($"Service {cfg.ServiceName} has already been removed.");
+                            Log.Error("Service {ServiceName} has already been removed.", cfg.ServiceName);
                         }
                         else
                         {
@@ -194,7 +196,7 @@ namespace DBADashService
                         if (!OperatingSystem.IsWindows()) return;
                         if (!ServiceTools.IsServiceInstalledByName(cfg.ServiceName))
                         {
-                            Log.Error($"Service {cfg.ServiceName} does not exist");
+                            Log.Error("Service {ServiceName} does not exist", cfg.ServiceName);
                         }
                         else
                         {
@@ -210,7 +212,7 @@ namespace DBADashService
                         if (!OperatingSystem.IsWindows()) return;
                         if (!ServiceTools.IsServiceInstalledByName(cfg.ServiceName))
                         {
-                            Log.Error($"Service {cfg.ServiceName} does not exist");
+                            Log.Error("Service {ServiceName} does not exist", cfg.ServiceName);
                         }
                         else
                         {
@@ -228,7 +230,7 @@ namespace DBADashService
                             var sentenceBuilder = SentenceBuilder.Create();
                             foreach (var error in errors)
                             {
-                                Log.Error(sentenceBuilder.FormatError(error));
+                                Log.Error("{Error}", sentenceBuilder.FormatError(error));
                             }
                         }
 

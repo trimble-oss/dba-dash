@@ -61,7 +61,7 @@ namespace DBADashService
 
         private static async Task LogErrorAsync(Exception ex, string connectionString, string errorSource, string errorMessage, string errorContext = "Maintenance")
         {
-            Log.Error(ex, "{errorContext} | {errorSource}", errorContext, errorSource);
+            Log.Error(ex, "{ErrorContext} | {ErrorSource}", errorContext, errorSource);
             try
             {
                 var dtErrors = new DataTable("Errors");
@@ -79,7 +79,7 @@ namespace DBADashService
             }
             catch (Exception ex2)
             {
-                Log.Error(ex2, "Write errors to database from {errorContext} | {errorSource}", errorContext, errorSource);
+                Log.Error(ex2, "Write errors to database from {ErrorContext} | {ErrorSource}", errorContext, errorSource);
             }
         }
     }

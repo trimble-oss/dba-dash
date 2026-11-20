@@ -14,7 +14,7 @@ namespace DBADash.Messaging
     /// schedule, which can't tell a service level setting from a default, and has nothing for collections that are
     /// disabled.  Read-only, but gated like the changes it's used to make (<see cref="CollectionConfig.AllowScheduleChanges"/>).
     /// </summary>
-    public class CollectionScheduleGetMessage : MessageBase
+    public class CollectionScheduleGetMessage : MessageBase, IConnectionMessage
     {
         public string ConnectionID { get; set; }
 

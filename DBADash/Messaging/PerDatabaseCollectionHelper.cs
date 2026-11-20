@@ -29,7 +29,7 @@ namespace DBADash.Messaging
             try
             {
                 idleSchedulerCount = await GetIdleSchedulerCount(connectionString);
-                Log.Debug("Idle scheduler count {idleSchedulerCount}", idleSchedulerCount);
+                Log.Debug("Idle scheduler count {IdleSchedulerCount}", idleSchedulerCount);
             }
             catch (Exception ex)
             {
@@ -58,7 +58,7 @@ namespace DBADash.Messaging
             var semaphore = new SemaphoreSlim(threadCount.Value);
 
             var tasks = new List<Task>();
-            Log.Debug("Running {Method} with thread count {maxDegreeOfParallelism}", databaseCollection.Method.Name, threadCount);
+            Log.Debug("Running {Method} with thread count {MaxDegreeOfParallelism}", databaseCollection.Method.Name, threadCount);
             foreach (var database in databases)
             {
                 var builder = new SqlConnectionStringBuilder(connectionString)
@@ -75,12 +75,12 @@ namespace DBADash.Messaging
                     {
                         var dt = await databaseCollection(builder.ConnectionString, database);
                         dt.TableName = database;
-                        Log.Debug("{Method} for {database} returned {rows} rows", databaseCollection.Method.Name, database, dt.Rows.Count);
+                        Log.Debug("{Method} for {Database} returned {Rows} rows", databaseCollection.Method.Name, database, dt.Rows.Count);
                         dataTables.Add(dt); // Ensure dataTables is thread-safe, e.g., ConcurrentBag.
                     }
                     catch (Exception ex)
                     {
-                        Log.Error(ex, "Running {Method} for {database} failed", databaseCollection.Method.Name, database);
+                        Log.Error(ex, "Running {Method} for {Database} failed", databaseCollection.Method.Name, database);
                         exceptions.Add(ex); // Ensure exceptions is thread-safe, e.g., ConcurrentBag.
                     }
                     finally

@@ -390,7 +390,7 @@ namespace DBADash
 
             if (ServiceThreads > 0)
             {
-                Log.Information("Threads {threadCount} (user)", ServiceThreads);
+                Log.Information("Threads {ThreadCount} (user)", ServiceThreads);
                 _cachedThreadCount = ServiceThreads;
                 return ServiceThreads;
             }
@@ -431,20 +431,20 @@ namespace DBADash
             if (!IsUseQueueBasedScheduling())
             {
                 var threads = ServiceThreads > 0 ? ServiceThreads : GetThreadCount();
-                Log.Information("Scheduler thread count: {threads} (traditional scheduling - these threads do all work)", threads);
+                Log.Information("Scheduler thread count: {Threads} (traditional scheduling - these threads do all work)", threads);
                 return threads;
             }
 
             // Queue-based scheduling: use explicit SchedulerThreads if set
             if (SchedulerThreads > 0)
             {
-                Log.Information("Scheduler thread count: {threads} (user-configured, queue-based scheduling)", SchedulerThreads);
+                Log.Information("Scheduler thread count: {Threads} (user-configured, queue-based scheduling)", SchedulerThreads);
                 return SchedulerThreads;
             }
 
             // Queue-based scheduling default: 10 threads for lightweight scheduling/enqueue operations
             const int defaultSchedulerThreads = 10;
-            Log.Information("Scheduler thread count: {schedulerThreads} (default for queue-based scheduling - lightweight scheduling/enqueue)",
+            Log.Information("Scheduler thread count: {SchedulerThreads} (default for queue-based scheduling - lightweight scheduling/enqueue)",
                 defaultSchedulerThreads);
             return defaultSchedulerThreads;
         }
@@ -456,7 +456,7 @@ namespace DBADash
         public int GetWorkerThreadCount()
         {
             var threads = ServiceThreads > 0 ? ServiceThreads : GetThreadCount();
-            Log.Information("Worker thread count: {threads} (queue-based scheduling - collection processing threads)", threads);
+            Log.Information("Worker thread count: {Threads} (queue-based scheduling - collection processing threads)", threads);
             return threads;
         }
 
@@ -814,7 +814,7 @@ namespace DBADash
                 {
                     ValidateDestinationVersion(destination);
                 }
-                Log.Information("DB Version Status: {status}", status.VersionStatus);
+                Log.Information("DB Version Status: {Status}", status.VersionStatus);
             }
             else
             {
@@ -828,7 +828,7 @@ namespace DBADash
             var cInfo = master.ConnectionInfo;
             if (string.IsNullOrEmpty(cInfo.ServerName))
             {
-                Log.Warning("@@SERVERNAME returned NULL for {connection}.  Consider fixing with sp_addserver", destination.ConnectionForPrint);
+                Log.Warning("@@SERVERNAME returned NULL for {Destination}.  Consider fixing with sp_addserver", destination.ConnectionForPrint);
             }
             if (cInfo.MajorVersion < 13 && cInfo.EngineEdition != Microsoft.SqlServer.Management.Common.DatabaseEngineEdition.SqlDatabase && cInfo.EngineEdition != Microsoft.SqlServer.Management.Common.DatabaseEngineEdition.SqlManagedInstance) // 13=2016, 12 might be Azure DB which is OK
             {
@@ -930,7 +930,7 @@ namespace DBADash
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex, "Error getting Azure DB connections from master {connection}", master.SourceConnection.ConnectionForPrint);
+                    Log.Error(ex, "Error getting Azure DB connections from master {Source}", master.SourceConnection.ConnectionForPrint);
                 }
             }
             return added;
@@ -972,7 +972,7 @@ namespace DBADash
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex, "Error getting Azure DB connections from master {connection}", cfg.SourceConnection.ConnectionForPrint);
+                    Log.Error(ex, "Error getting Azure DB connections from master {Source}", cfg.SourceConnection.ConnectionForPrint);
                 }
             }
             return newConnections;
@@ -999,7 +999,7 @@ namespace DBADash
                     if (!SourceExists(dbCn.SourceConnection.ConnectionString, true))
                     {
                         newConnections.Add(dbCn);
-                        Log.Information("Add Azure DB connection {DataSource}|{DB}", builder.DataSource, builder.InitialCatalog);
+                        Log.Information("Add Azure DB connection {Instance}|{Database}", builder.DataSource, builder.InitialCatalog);
                     }
                 }
             }
@@ -1078,7 +1078,7 @@ namespace DBADash
                     }
                     catch (Exception ex)
                     {
-                        Log.Error(ex, "Error checking for read replica for {connection}", cfg.SourceConnection.ConnectionForPrint);
+                        Log.Error(ex, "Error checking for read replica for {Source}", cfg.SourceConnection.ConnectionForPrint);
                     }
                 });
 

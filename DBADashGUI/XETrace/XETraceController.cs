@@ -165,7 +165,7 @@ namespace DBADashGUI.XETrace
                     {
                         // Best-effort: the completion summary backfills the DDL/target, so a failure here isn't fatal -
                         // just log it (we lose the early-persist durability if the trace is later abandoned).
-                        Serilog.Log.Warning(ex, "Failed to persist XE trace definition for session {sessionID}", sessionID);
+                        Serilog.Log.Warning(ex, "Failed to persist XE trace definition for session {SessionID}", sessionID);
                     }
                 }
 

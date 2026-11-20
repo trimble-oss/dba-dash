@@ -2098,7 +2098,7 @@ namespace DBADashGUI.XETrace
                 await Task.WhenAll(beats.Select(async b =>
                 {
                     try { await MessagingHelper.SendHeartbeatAsync(b.Context, b.Group); }
-                    catch (Exception ex) { Serilog.Log.Debug(ex, "Error sending XE trace heartbeat for {group}", b.Group); }
+                    catch (Exception ex) { Serilog.Log.Debug(ex, "Error sending XE trace heartbeat for {Group}", b.Group); }
                 }));
             }
             finally { System.Threading.Interlocked.Exchange(ref _heartbeatInFlight, 0); }

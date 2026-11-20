@@ -145,7 +145,7 @@ public class ServiceRegistrationBackgroundService : BackgroundService
         catch (SqlException ex) when (ex.Number is 2812 or 8144 or 8145)
         {
             // Could not find stored procedure (2812) or parameter mismatch (8144/8145).
-            _logger.LogWarning("Failed to register AI service in repository database. The repository database might not be upgraded yet - will retry in {Interval}. {Message}", _heartbeatInterval, ex.Message);
+            _logger.LogWarning("Failed to register AI service in repository database. The repository database might not be upgraded yet - will retry in {Interval}. {Error}", _heartbeatInterval, ex.Message);
             return false;
         }
         catch (Exception ex)

@@ -42,7 +42,7 @@ namespace DBADashService
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex, "Error reporting schedule info for {instance}", src.SourceConnection.ConnectionForPrint);
+                    Log.Error(ex, "Error reporting schedule info for {Source}", src.SourceConnection.ConnectionForPrint);
                     failures.Add($"{src.ConnectionID ?? src.SourceConnection.ConnectionForPrint}: {(ex as AggregateException)?.InnerExceptions.FirstOrDefault()?.Message ?? ex.Message}");
                 }
             });
@@ -77,7 +77,7 @@ namespace DBADashService
 
                 if (string.IsNullOrEmpty(source.ConnectionID))
                 {
-                    Log.Warning("Skipping schedule info report for {connection} - ConnectionID isn't known and couldn't be resolved (instance may be offline, or this source wasn't added via the config tools)",
+                    Log.Warning("Skipping schedule info report for {Source} - ConnectionID isn't known and couldn't be resolved (instance may be offline, or this source wasn't added via the config tools)",
                         source.SourceConnection.ConnectionForPrint);
                     return;
                 }

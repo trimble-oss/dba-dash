@@ -18,7 +18,7 @@ namespace DBADash.Messaging
     /// running the table also identifies the statement, so the GUI can tell the request has moved on to another one and
     /// fetch its plan, and a Profiles table has the counters for each operator and thread.
     /// </summary>
-    public class LiveQueryProfileMessage : MessageBase
+    public class LiveQueryProfileMessage : MessageBase, IConnectionMessage
     {
         public string ConnectionID { get; set; }
 
@@ -67,7 +67,7 @@ namespace DBADash.Messaging
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error getting live query profile for session {session} on {instance} from message {id} with handle {handle}",
+                Log.Error(ex, "Error getting live query profile for session {SessionID} on {ConnectionID} from message {MessageId} with handle {Handle}",
                     SessionID, ConnectionID, Id, handle);
                 throw;
             }

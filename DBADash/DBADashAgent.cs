@@ -167,7 +167,7 @@ namespace DBADash
             {
                 Log.Information("Update DBADashAgent");
                 agentID = Update(connectionString);
-                Log.Information("DBADashAgentID: {0}", agentID);
+                Log.Information("DBADashAgentID: {AgentID}", agentID);
                 var connectionHash = Convert.ToBase64String(MD5.HashData(System.Text.Encoding.UTF8.GetBytes(connectionString)));
                 var agentIdKey = $"{agentID}|{connectionHash}"; // Namespace by connection to avoid collisions across repositories
                 var oldCacheKey = cache.Get(agentIdKey) as string;
@@ -176,7 +176,7 @@ namespace DBADash
                     // Remove old cacheKey entry which will prevent updates if settings are toggled back and forth
                     cache.Remove(oldCacheKey);
                     cache.Remove(agentIdKey);
-                    Log.Debug("Removed old cache entry for agentID: {0}", agentID);
+                    Log.Debug("Removed old cache entry for agentID: {AgentID}", agentID);
                 }
                 var policy = NewPolicy();
                 cache.Set(cacheKey, agentID, policy);

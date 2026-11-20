@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace DBADash.Messaging
 {
-    public class ProcedureExecutionMessage : MessageBase
+    public class ProcedureExecutionMessage : MessageBase, IConnectionMessage
     {
         public string ConnectionID { get; set; }
 
@@ -113,12 +113,12 @@ namespace DBADash.Messaging
             ThrowIfExpired();
             if (!IsAllowedProc(cfg))
             {
-                Log.Error("Command {Proc} is not allowed.  Use the service configuration tool to enable access", ProcedureName);
+                Log.Error("Command {Procedure} is not allowed.  Use the service configuration tool to enable access", ProcedureName);
                 throw new Exception($"Command {ProcedureName} is not allowed.  Use the service configuration tool to enable access");
             }
             try
             {
-                using var op = Operation.Begin("Running {Proc} on {instance} triggered from message {id} with handle {handle}",
+                using var op = Operation.Begin("Running {Procedure} on {ConnectionID} triggered from message {MessageId} with handle {Handle}",
                     QualifiedProcedureName,
                     ConnectionID,
                     Id,
@@ -152,7 +152,7 @@ namespace DBADash.Messaging
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error running {Proc} on {instance} from message {id} with handle {handle}", QualifiedProcedureName, ConnectionID, Id, handle);
+                Log.Error(ex, "Error running {Procedure} on {ConnectionID} from message {MessageId} with handle {Handle}", QualifiedProcedureName, ConnectionID, Id, handle);
                 throw;
             }
         }

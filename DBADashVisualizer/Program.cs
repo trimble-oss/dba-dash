@@ -65,7 +65,7 @@ namespace DBADashVisualizer
             }
             catch (Exception ex)
             {
-                Log.Fatal(ex, "Unable to start {app}", AppName);
+                Log.Fatal(ex, "Unable to start {App}", AppName);
                 CommonShared.ShowExceptionDialog(ex, $"Error starting {AppName}");
                 return 1;
             }

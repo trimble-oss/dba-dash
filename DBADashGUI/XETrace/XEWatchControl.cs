@@ -120,7 +120,7 @@ namespace DBADashGUI.XETrace
         private async Task SendHeartbeatAsync(DBADashContext context, Guid group)
         {
             try { await MessagingHelper.SendHeartbeatAsync(context, group); }
-            catch (Exception ex) { Serilog.Log.Debug(ex, "Error sending XE watch heartbeat for {group}", group); }
+            catch (Exception ex) { Serilog.Log.Debug(ex, "Error sending XE watch heartbeat for {Group}", group); }
             finally { System.Threading.Interlocked.Exchange(ref _heartbeatInFlight, 0); }
         }
 

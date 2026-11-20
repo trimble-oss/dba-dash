@@ -40,7 +40,7 @@ namespace DBADashService
             {
                 // A missed heartbeat isn't worth failing the collection over - it just means the status may
                 // briefly show as overdue until the next heartbeat or a real collection.
-                Log.Warning(ex, "Error writing collection heartbeat for {references} on {instance}",
+                Log.Warning(ex, "Error writing collection heartbeat for {References} on {Source}",
                     string.Join(", ", refs), source.SourceConnection.ConnectionForPrint);
             }
         }

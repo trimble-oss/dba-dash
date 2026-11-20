@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace DBADash.Messaging
 {
-    public class QueryPlanCollectionMessage : MessageBase
+    public class QueryPlanCollectionMessage : MessageBase, IConnectionMessage
     {
         public List<Plan> PlansToCollect { get; set; }
 
@@ -19,7 +19,7 @@ namespace DBADash.Messaging
         public override async Task<DataSet> Process(CollectionConfig cfg, Guid handle, CancellationToken cancellationToken)
         {
             using var op = Operation.Begin(
-                "GetPlans from {instance} triggered from message {handle}",
+                "GetPlans from {ConnectionID} triggered from message {Handle}",
                 ConnectionID,
                 handle);
             try

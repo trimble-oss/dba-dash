@@ -512,7 +512,7 @@ ApplyAuth(app.MapPost("/api/ai/feedback", (
     store.Add(request);
 
     var logger = loggerFactory.CreateLogger("AiFeedback");
-    logger.LogInformation("AI feedback received. RequestId={RequestId}, Helpful={Helpful}, Tool={ToolName}, Category={Category}",
+    logger.LogInformation("AI feedback received. RequestId={RequestId}, Helpful={Helpful}, Tool={Tool}, Category={Category}",
         LogSanitizer.SanitizeForLog(request.RequestId),
         request.IsHelpful,
         LogSanitizer.SanitizeForLog(request.ToolName ?? "(unknown)"),
@@ -1150,7 +1150,7 @@ ApplyAuthAndRateLimit(app.MapPost("/api/ai/analyse-performance", async (
             {
                 // The procedures arrive with the repository upgrade.  None of the others will be there either,
                 // so the model is told it has no more lookups rather than trying each in turn.
-                logger.LogWarning("Performance investigation is unavailable: {Message} Upgrade the repository database. RequestId={RequestId}", ex.Message, requestId);
+                logger.LogWarning("Performance investigation is unavailable: {Error} Upgrade the repository database. RequestId={RequestId}", ex.Message, requestId);
                 summary = "Lookups are not available - the repository database needs upgrading to this version of DBA Dash";
                 lookupResult = "Lookups are not available on this repository.";
                 lookupsLeft = 0;
@@ -1413,7 +1413,7 @@ static void LoadSettingsFromServiceConfig(ConfigurationManager config)
     catch(Exception ex)
     {
         // ServiceConfig.json is optional - swallow and continue
-        Log.Information("Error loading ServiceConfig.json for repository connection string inheritance: {Message}", ex.Message);
+        Log.Information("Error loading ServiceConfig.json for repository connection string inheritance: {Error}", ex.Message);
         }
 }
 

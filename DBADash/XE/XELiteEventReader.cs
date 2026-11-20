@@ -153,7 +153,7 @@ namespace DBADash.XE
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
-                Log.Debug(ex, "fn_MSxe_read_event_stream path failed for {file}; using the OPENROWSET/TVF hybrid",
+                Log.Debug(ex, "fn_MSxe_read_event_stream path failed for {File}; using the OPENROWSET/TVF hybrid",
                     _currentFilePath);
             }
 
@@ -193,7 +193,7 @@ namespace DBADash.XE
                         // e.g. a rollover made this the active (locked) file, OPENROWSET isn't permitted, or a transient
                         // FS error - the TVF can still read it.  (Enumeration errors bubble up so the caller uses the
                         // full TVF fallback.)
-                        Log.Debug(ex, "OPENROWSET failed for {file}; reading it via fn_xe_file_target_read_file", file);
+                        Log.Debug(ex, "OPENROWSET failed for {File}; reading it via fn_xe_file_target_read_file", file);
                         table = await ReadFileViaTvfAsync(file, readCap, ct);
                     }
 
@@ -289,7 +289,7 @@ namespace DBADash.XE
                 if (t > max) max = t;
             }
             Log.Information(
-                "fn_MSxe {source}: {rows} buffer rows, {events} events, ts {minTs:yyyy-MM-dd HH:mm:ss}..{maxTs:yyyy-MM-dd HH:mm:ss} (UTC)",
+                "fn_MSxe {Source}: {Rows} buffer rows, {Events} events, ts {MinTs:yyyy-MM-dd HH:mm:ss}..{MaxTs:yyyy-MM-dd HH:mm:ss} (UTC)",
                 source, rows.Count, events.Count, min, max);
             return events;
         }

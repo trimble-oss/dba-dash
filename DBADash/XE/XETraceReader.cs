@@ -369,7 +369,7 @@ namespace DBADash.XE
                                               e.Number is ErrorFileNotFound or ErrorInvalidOffset))
             {
                 Log.Warning(ex,
-                    "The resume position for {path} no longer exists ({file} offset {offset}); reading from the start of the file set.",
+                    "The resume position for {Path} no longer exists ({File} offset {Offset}); reading from the start of the file set.",
                     _readPath, _cursor.FileName, _cursor.Offset);
                 _cursor = FileTargetCursor.None;
                 CursorWasReset = true;

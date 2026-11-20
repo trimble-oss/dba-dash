@@ -90,7 +90,7 @@ namespace DBADash.Messaging
                 CollectionScheduleUpdateMessage.ConfigFileLock.Release();
             }
 
-            Log.Information("Source connections removed via message {id}: {connections}", Id, removedSources.Select(s => s.ConnectionID));
+            Log.Information("Source connections removed via message {MessageId}: {Connections}", Id, removedSources.Select(s => s.ConnectionID));
 
             await ReportProgressAsync(new ResponseMessage
             {
@@ -108,7 +108,7 @@ namespace DBADash.Messaging
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error rescheduling collections after removing connections via message {id}", Id);
+                Log.Error(ex, "Error rescheduling collections after removing connections via message {MessageId}", Id);
                 warnings.Add($"The connections were removed from the config, but rescheduling failed - restart the service to stop collecting them.  {ex.Message}");
             }
 
@@ -185,7 +185,7 @@ namespace DBADash.Messaging
                 }
                 catch (Exception ex)
                 {
-                    Log.Warning(ex, "Error dropping DBA Dash event sessions for removed connection {connection}", src.SourceConnection.ConnectionForPrint);
+                    Log.Warning(ex, "Error dropping DBA Dash event sessions for removed connection {Source}", src.SourceConnection.ConnectionForPrint);
                     return (src, Dropped: new List<string>(), Error: ex.Message);
                 }
             }, cancellationToken);

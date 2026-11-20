@@ -235,15 +235,15 @@ namespace DBADash.Deadlocks
             {
                 // Treated like a read that ran out of time - finished, with nothing to keep - rather than as a
                 // failure that leaves the backfill to be tried again.
-                Log.Warning("Deadlock backfill from {backfill} stopped at its {limit}s time limit before finding when " +
-                            "{session} started; the backfill is not attempted again.", backfillSessionName,
+                Log.Warning("Deadlock backfill from {Backfill} stopped at its {LimitSeconds}s time limit before finding when " +
+                            "{SessionName} started; the backfill is not attempted again.", backfillSessionName,
                     timeLimitSeconds, configuredSessionName);
                 return Build(Array.Empty<CapturedDeadlock>());
             }
 
             if (configuredStart == null)
             {
-                Log.Information("Deadlock backfill from {backfill} deferred: session {session} is not running, so " +
+                Log.Information("Deadlock backfill from {Backfill} deferred: session {SessionName} is not running, so " +
                                 "there is no start time to backfill up to.", backfillSessionName, configuredSessionName);
                 return null;
             }
@@ -253,8 +253,8 @@ namespace DBADash.Deadlocks
                 isManagedInstance, timeLimitSeconds, budget, elapsed, cancellationToken);
             var before = captured.Where(c => c.EventTime < cutoff).ToList();
 
-            Log.Information("Deadlock backfill keeping {kept} of {read} deadlock(s) from {backfill}: those before " +
-                            "{session} started at {start:u}", before.Count, captured.Count, backfillSessionName,
+            Log.Information("Deadlock backfill keeping {Kept} of {Read} deadlock(s) from {Backfill}: those before " +
+                            "{SessionName} started at {Start:u}", before.Count, captured.Count, backfillSessionName,
                 configuredSessionName, configuredStart.Value);
             return Build(before);
         }
@@ -346,13 +346,13 @@ namespace DBADash.Deadlocks
                 {
                     readMethod = "ring_buffer";
                     var fromRingBuffer = ParseRingBuffer(ringTargetData, managedSession: false).ToList();
-                    Log.Information("Deadlock backfill read {count} deadlock(s) from session {session}",
+                    Log.Information("Deadlock backfill read {Count} deadlock(s) from session {SessionName}",
                         fromRingBuffer.Count, sessionName);
                     return fromRingBuffer;
                 }
                 else
                 {
-                    Log.Warning("Deadlock backfill skipped: extended events session {session} is not running or " +
+                    Log.Warning("Deadlock backfill skipped: extended events session {SessionName} is not running or " +
                                 "has no event_file or ring_buffer target to read.", sessionName);
                     return new List<CapturedDeadlock>();
                 }
@@ -363,24 +363,24 @@ namespace DBADash.Deadlocks
                 // keeps what was read, where a shutdown still propagates.
                 if (budget.IsCancellationRequested)
                 {
-                    Log.Warning("Deadlock backfill from session {session} stopped at its {limit}s time limit, " +
-                                "reading with {method}.  Keeping the {count} deadlock event(s) read before it " +
+                    Log.Warning("Deadlock backfill from session {SessionName} stopped at its {LimitSeconds}s time limit, " +
+                                "reading with {Method}.  Keeping the {Count} deadlock event(s) read before it " +
                                 "stopped; the backfill is not attempted again.  Raise DeadlockBackfillTimeLimitSeconds " +
                                 "in the service configuration (0 for no limit) if older deadlocks are needed.",
                         sessionName, timeLimitSeconds, readMethod, captured.Count + eventXml.Count);
                 }
                 else
                 {
-                    Log.Warning(ex, "Deadlock backfill from session {session} failed after {elapsed:N0}s, reading " +
-                                    "with {method}.  Keeping the {count} deadlock event(s) read before it stopped; the " +
-                                    "backfill is not attempted again.", sessionName, elapsed.Elapsed.TotalSeconds,
+                    Log.Warning(ex, "Deadlock backfill from session {SessionName} failed after {Elapsed:N0} ms, reading " +
+                                    "with {Method}.  Keeping the {Count} deadlock event(s) read before it stopped; the " +
+                                    "backfill is not attempted again.", sessionName, elapsed.Elapsed.TotalMilliseconds,
                         readMethod, captured.Count + eventXml.Count);
                 }
             }
 
             captured.AddRange(ParseEvents(eventXml));
-            Log.Information("Deadlock backfill read {count} deadlock(s) from session {session} in {elapsed:N0}s using {method}",
-                captured.Count, sessionName, elapsed.Elapsed.TotalSeconds, readMethod);
+            Log.Information("Deadlock backfill read {Count} deadlock(s) from session {SessionName} in {Elapsed:N0} ms using {Method}",
+                captured.Count, sessionName, elapsed.Elapsed.TotalMilliseconds, readMethod);
             return captured;
         }
 
@@ -444,15 +444,15 @@ namespace DBADash.Deadlocks
             }
             catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
             {
-                Log.Information(ex, "Deadlock backfill could not read {file} with fn_MSxe_read_event_stream after " +
-                                    "{events} event(s); falling back to fn_xe_file_target_read_file", currentFile, events);
+                Log.Information(ex, "Deadlock backfill could not read {File} with fn_MSxe_read_event_stream after " +
+                                    "{Events} event(s); falling back to fn_xe_file_target_read_file", currentFile, events);
                 return false;
             }
 
             // A system_health file set is never empty, so nothing decoded means a stream this parser doesn't
             // understand rather than a session with nothing in it.  The TVF is the one to say which.
             if (events > 0) return true;
-            Log.Information("Deadlock backfill decoded no events from {file} with fn_MSxe_read_event_stream; falling " +
+            Log.Information("Deadlock backfill decoded no events from {File} with fn_MSxe_read_event_stream; falling " +
                             "back to fn_xe_file_target_read_file", currentFile);
             return false;
         }
@@ -463,14 +463,14 @@ namespace DBADash.Deadlocks
             if (ev.Fields == null || !ev.Fields.TryGetValue("xml_report", out var report) ||
                 report is not string { Length: > 0 } graphXml)
             {
-                Log.Warning("Skipping a deadlock event at {eventTime} with no xml_report.", ev.Timestamp);
+                Log.Warning("Skipping a deadlock event at {EventTime} with no xml_report.", ev.Timestamp);
                 return Array.Empty<CapturedDeadlock>();
             }
 
             var eventTime = TruncateToMillisecond(ev.Timestamp.UtcDateTime);
             if (!DeadlockParser.TryParse(graphXml, out var graphs))
             {
-                Log.Warning("Skipping a deadlock event at {eventTime} whose graph could not be parsed.", eventTime);
+                Log.Warning("Skipping a deadlock event at {EventTime} whose graph could not be parsed.", eventTime);
                 return Array.Empty<CapturedDeadlock>();
             }
 
@@ -579,7 +579,7 @@ namespace DBADash.Deadlocks
             catch (Exception ex)
             {
                 Log.Warning(ex,
-                    "Could not empty the ring buffer of extended events session {session} after reading it.  " +
+                    "Could not empty the ring buffer of extended events session {SessionName} after reading it.  " +
                     "The deadlocks it returned are unaffected; the next read will be slower for having the " +
                     "same buffer to read again.", sessionName);
             }
@@ -774,12 +774,13 @@ namespace DBADash.Deadlocks
                 // Nearly always the buffer being too big: SQL Server truncates a large ring buffer's
                 // target_data mid-XML, so what comes back will not parse and the whole read is lost rather
                 // than part of it.  Named here because nothing else about the failure points at the cause.
-                Log.Warning(ex,
-                    "Deadlock collection could not parse the ring buffer target data.  A ring buffer over " +
-                    "1MB can have its target_data truncated, which leaves it malformed" +
-                    (managedSession
-                        ? " - reduce DeadlockXERingBufferKB in the service configuration if it has been raised above that."
-                        : "."));
+                // Two templates rather than one with the advice joined on: what's logged is still a template
+                Log.Warning(ex, managedSession
+                    ? "Deadlock collection could not parse the ring buffer target data.  A ring buffer over 1MB can " +
+                      "have its target_data truncated, which leaves it malformed - reduce DeadlockXERingBufferKB in the " +
+                      "service configuration if it has been raised above that."
+                    : "Deadlock collection could not parse the ring buffer target data.  A ring buffer over 1MB can " +
+                      "have its target_data truncated, which leaves it malformed.");
                 yield break;
             }
 
@@ -834,7 +835,7 @@ namespace DBADash.Deadlocks
             // The parser handles the XE envelope itself, so it gets the event rather than the extracted graph.
             if (!DeadlockParser.TryParse(ev.ToString(SaveOptions.DisableFormatting), out var graphs))
             {
-                Log.Warning("Skipping a deadlock event at {eventTime} whose graph could not be parsed.", eventTime);
+                Log.Warning("Skipping a deadlock event at {EventTime} whose graph could not be parsed.", eventTime);
                 return Array.Empty<CapturedDeadlock>();
             }
 

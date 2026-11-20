@@ -149,12 +149,12 @@ namespace DBADash
                 .FirstOrDefault(s => s.ServiceName == serviceName);
             if (svcCtrl?.Status == ServiceControllerStatus.Running)
             {
-                Log.Information($"Stopping service {serviceName}");
+                Log.Information("Stopping service {ServiceName}", serviceName);
                 svcCtrl.Stop();
                 svcCtrl.WaitForStatus(ServiceControllerStatus.Stopped, TimeSpan.FromSeconds(waitSeconds));
                 svcCtrl.Refresh();
             }
-            Log.Information($"Service {serviceName} is {svcCtrl?.Status}");
+            Log.Information("Service {ServiceName} is {Status}", serviceName, svcCtrl?.Status);
             return svcCtrl?.Status;
         }
 
@@ -168,12 +168,12 @@ namespace DBADash
                 .FirstOrDefault(s => s.ServiceName == serviceName);
             if (svcCtrl?.Status == ServiceControllerStatus.Stopped)
             {
-                Log.Information($"Starting service {serviceName}");
+                Log.Information("Starting service {ServiceName}", serviceName);
                 svcCtrl.Start();
                 svcCtrl.WaitForStatus(ServiceControllerStatus.Running, TimeSpan.FromSeconds(waitSeconds));
                 svcCtrl.Refresh();
             }
-            Log.Information($"Service {serviceName} is {svcCtrl?.Status}");
+            Log.Information("Service {ServiceName} is {Status}", serviceName, svcCtrl?.Status);
             return svcCtrl?.Status;
         }
 
@@ -201,7 +201,7 @@ namespace DBADash
             }
             using Process p = new();
             var args = $"delete {serviceName}";
-            Log.Information($"sc.exe {args}");
+            Log.Information("sc.exe {Arguments}", args);
             var psi = new ProcessStartInfo
             {
                 FileName = "sc.exe",
@@ -251,7 +251,7 @@ namespace DBADash
             }
             using Process p = new();
             var args = $"description {serviceName} \"{description}\"";
-            Log.Information($"sc.exe {args}");
+            Log.Information("sc.exe {Arguments}", args);
             var psi = new ProcessStartInfo
             {
                 FileName = "sc.exe",
@@ -290,7 +290,7 @@ namespace DBADash
             }
             using Process p = new();
             var args = $"failure {serviceName} reset=0 actions=restart/60000/restart/60000//60000"; // Restart twice after 60 seconds, then take no action
-            Log.Information($"sc.exe {args}");
+            Log.Information("sc.exe {Arguments}", args);
             var psi = new ProcessStartInfo
             {
                 FileName = "sc.exe",
@@ -338,7 +338,7 @@ namespace DBADash
             using Process p = new();
             var args = GetServiceInstallArgs(serviceName, binPath, userName, password, mode);
             var DebugArgs = GetServiceInstallArgs(serviceName, binPath, userName, string.IsNullOrEmpty(password) ? string.Empty : "*****", mode);
-            Log.Information($"sc.exe {DebugArgs}");
+            Log.Information("sc.exe {Arguments}", DebugArgs);
             var psi = new ProcessStartInfo
             {
                 FileName = "sc.exe",
@@ -367,7 +367,7 @@ namespace DBADash
                 var descriptionResult = SetServiceDescription(serviceName, description);
                 if (!descriptionResult.Success)
                 {
-                    Log.Error("Error setting service description: {result}", descriptionResult.Output);
+                    Log.Error("Error setting service description: {Result}", descriptionResult.Output);
                     result.Output += "Error setting service description\n" + descriptionResult.Output;
                     result.ExitCode = descriptionResult.ExitCode;
                 }
@@ -375,7 +375,7 @@ namespace DBADash
                 var recoveryResult = SetServiceRecovery(serviceName);
                 if (!recoveryResult.Success)
                 {
-                    Log.Error("Error setting service recovery options: {result}", recoveryResult.Output);
+                    Log.Error("Error setting service recovery options: {Result}", recoveryResult.Output);
                     result.Output += "Error setting service recovery options\n" + recoveryResult.Output;
                     result.ExitCode = recoveryResult.ExitCode;
                 }
@@ -473,7 +473,7 @@ namespace DBADash
                     serviceInfo = GetServiceInfoFromName(serviceName);
                     if (serviceInfo == null)
                     {
-                        Log.Warning("DBA Dash service {serviceName} not found", serviceName);
+                        Log.Warning("DBA Dash service {ServiceName} not found", serviceName);
                         return false;
                     }
                 }
@@ -499,7 +499,7 @@ namespace DBADash
                     var svc = NativeMethods.OpenService(scm, serviceInfo.Name, NativeMethods.SERVICE_STOP | NativeMethods.SERVICE_START);
                     if (svc == IntPtr.Zero)
                     {
-                        Log.Warning("Service account does not have stop/start permissions on service {serviceName}", serviceInfo.Name);
+                        Log.Warning("Service account does not have stop/start permissions on service {ServiceName}", serviceInfo.Name);
                         return false;
                     }
                     NativeMethods.CloseServiceHandle(svc);
@@ -572,7 +572,7 @@ namespace DBADash
                             var handle = NativeMethods.OpenProcess(NativeMethods.PROCESS_TERMINATE, false, proc.Id);
                             if (handle == IntPtr.Zero)
                             {
-                                Log.Warning("Cannot terminate process {name} (PID {pid}): insufficient permissions", name, proc.Id);
+                                Log.Warning("Cannot terminate process {Name} (PID {Pid}): insufficient permissions", name, proc.Id);
                                 return false;
                             }
                             NativeMethods.CloseHandle(handle);
@@ -639,11 +639,11 @@ namespace DBADash
 
                     if (result > 0)
                     {
-                        Log.Information("Database principal has CONTROL permission (e.g. via db_owner) in repository database: {database}", destination.InitialCatalog());
+                        Log.Information("Database principal has CONTROL permission (e.g. via db_owner) in repository database: {Database}", destination.InitialCatalog());
                     }
                     else
                     {
-                        Log.Warning("Database principal does not have CONTROL permission in repository database: {database}. Grant db_owner or equivalent CONTROL permission.", destination.InitialCatalog());
+                        Log.Warning("Database principal does not have CONTROL permission in repository database: {Database}. Grant db_owner or equivalent CONTROL permission.", destination.InitialCatalog());
                         allHaveAccess = false;
                     }
                 }

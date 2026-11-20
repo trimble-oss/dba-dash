@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace DBADash.Messaging
 {
-    public class AgentJobExecutionMessage : MessageBase
+    public class AgentJobExecutionMessage : MessageBase, IConnectionMessage
     {
         public string ConnectionID { get; set; }
 
@@ -55,7 +55,7 @@ namespace DBADash.Messaging
             }
 
             using var op = Operation.Begin(
-                "Execute Job {job} on {ConnectionID} triggered from message {handle}",
+                "Execute Job {Job} on {ConnectionID} triggered from message {Handle}",
                 JobId,
                 ConnectionID,
                 handle);
@@ -81,7 +81,7 @@ namespace DBADash.Messaging
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Plan collection request from {handle} failed", handle);
+                Log.Error(ex, "Plan collection request from {Handle} failed", handle);
                 throw;
             }
         }

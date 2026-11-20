@@ -117,13 +117,13 @@ EXECUTE sp_updateextendedproperty
               (s, e) =>
               {
                   AddMessage(e.Message);
-                  Log.Information(e.Message);
+                  Log.Information("{DacMessage}", e.Message);
               };
             dacServiceInstance.Message +=
               (s, e) =>
               {
                   AddMessage(e.Message.Message);
-                  Log.Information(e.Message.Message);
+                  Log.Information("{DacMessage}", e.Message.Message);
               };
 
             try
@@ -340,13 +340,13 @@ WHERE o.schema_id = SCHEMA_ID(@Schema) AND o.name = @Name";
                     cmd.ExecuteNonQuery();
                     var msg = $"Recreated [{schema}].[{name}] after the upgrade completed.";
                     AddMessage(msg);
-                    Log.Information(msg);
+                    Log.Information("Recreated [{Schema}].[{Object}] after the upgrade completed.", schema, name);
                 }
                 catch (Exception ex)
                 {
                     var msg = $"Could not automatically recreate [{schema}].[{name}] after the upgrade - please recreate it manually using the definition saved to the Logs folder. Error: {ex.Message}";
                     AddMessage(msg);
-                    Log.Warning(ex, msg);
+                    Log.Warning(ex, "Could not automatically recreate [{Schema}].[{Object}] after the upgrade - please recreate it manually using the definition saved to the Logs folder.", schema, name);
                 }
             }
         }
