@@ -10,7 +10,7 @@ public class Program
     public static async Task<int> Main(string[] args)
     {
         Log.Logger = new LoggerConfiguration()
-           .WriteTo.Console(outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj} {NewLine}{Exception}")
+           .WriteTo.Console(outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
            .CreateLogger();
 
         // Parser.Default's settings, plus case-insensitive enum values so e.g. "--SlowQueryCaptureMode eventfile" parses.

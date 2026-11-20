@@ -78,7 +78,8 @@ menus - the layout, edge widths and so on.  Two are edited by hand:
 | `Theme` | `Default`, `White`, `Dark` | Follows the Windows light / dark app setting |
 | `CheckForUpdates` | `true`, `false` | `true` (also set from *About*) |
 
-The log is `%LOCALAPPDATA%\DBADash\Logs\DBADashVisualizer-<date>.log`.
+The log is `%LOCALAPPDATA%\DBADash\Logs\DBADashVisualizer-<date>.json`, in Serilog's compact JSON format - open it in the
+Visualizer to see it as a grid.
 
 ## Updating
 

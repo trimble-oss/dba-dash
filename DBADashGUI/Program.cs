@@ -17,6 +17,7 @@ using DBADash.Alert;
 using DBADashGUI.DBADashAlerts;
 using LiveChartsCore.SkiaSharpView;
 using Serilog;
+using Serilog.Formatting.Compact;
 using DBADashGUI.Viewers;
 using Velopack;
 
@@ -105,12 +106,12 @@ namespace DBADashGUI
             {
                 Log.Logger = new LoggerConfiguration()
                     .MinimumLevel.Information()
-                    .WriteTo.File(Path.Combine(LogFolder, "DBADashGUI-.log"),
+                    // Serilog's compact JSON - the Visualizer opens it as a grid that can be sorted and filtered
+                    .WriteTo.File(new RenderedCompactJsonFormatter(), Path.Combine(LogFolder, "DBADashGUI-.json"),
                         rollingInterval: RollingInterval.Day,
                         retainedFileCountLimit: 7,
                         // Standalone deadlock viewers run as separate processes alongside the main GUI
-                        shared: true,
-                        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj} {NewLine}{Exception}")
+                        shared: true)
                     .CreateLogger();
             }
             catch

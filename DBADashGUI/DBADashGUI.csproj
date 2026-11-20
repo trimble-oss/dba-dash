@@ -230,6 +230,7 @@
     <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" />
     <PackageReference Include="Microsoft.SqlServer.TransactSql.ScriptDom" />
     <PackageReference Include="Microsoft.Web.WebView2" />
+    <PackageReference Include="Serilog.Formatting.Compact" />
     <PackageReference Include="Serilog.Sinks.File" />
     <PackageReference Include="SkiaSharp.Views.WindowsForms" />
     <PackageReference Include="System.Data.DataSetExtensions" />
