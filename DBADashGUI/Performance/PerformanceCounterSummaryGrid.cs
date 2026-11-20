@@ -80,6 +80,9 @@ namespace DBADashGUI.Performance
             CellContentClick += PerformanceCounterSummaryGrid_CellContentClick;
         }
 
+        /// <summary>The instance the grid's data is for - a filter is only kept across a refresh of the same instance</summary>
+        private int? loadedInstanceID;
+
         private void RefreshSummary()
         {
             AddCols();
@@ -111,7 +114,15 @@ namespace DBADashGUI.Performance
             DataTable dt = new();
             da.Fill(dt);
             AutoGenerateColumns = false;
+            // A refresh for the same instance keeps the filter the user added to the grid.  Another instance starts clean.
+            var previousFilter = InstanceID == loadedInstanceID ? RowFilter : null;
             DataSource = new DataView(dt);
+            loadedInstanceID = InstanceID;
+            if (!string.IsNullOrEmpty(previousFilter))
+            {
+                // Quietly dropped if it no longer applies
+                TrySetFilter(previousFilter);
+            }
 
             AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             this.ApplyTheme();

@@ -798,6 +798,12 @@ namespace DBADashGUI.Performance
                 ShowLatestOnNextExecution = false;
             }
             tsCursors.Visible = false;
+            // The user's filter and sort, kept if the refresh shows the same view again.  Not a Group By's: that
+            // filters the grouped rows, and the refresh shows the ungrouped snapshot.
+            var previousView = loadedView;
+            var previousFilter = IsGroupBy ? null : dgv.RowFilter;
+            var previousSort = IsGroupBy ? null : dgv.SortString;
+            loadedView = null;
             SetHighlightBeforeRefresh(out var highlightSnapshot, out var highlight);
             dgv.DataSource = null;
             snapshotDT = null;
@@ -836,6 +842,8 @@ namespace DBADashGUI.Performance
                     GetCounts();
                     lblSnapshotDate.Text = "Snapshot Date: " +
                                            SnapshotDateFrom.ToAppTimeZone().ToString(CultureInfo.CurrentCulture);
+                    // Get Latest / Next / Previous carry the filter to another snapshot
+                    var carried = !string.IsNullOrEmpty(PersistedFilter) || !string.IsNullOrEmpty(PersistedSort);
                     try
                     {
                         LoadSnapshot(new DataView(snapshotDT, PersistedFilter, PersistedSort,
@@ -850,6 +858,11 @@ namespace DBADashGUI.Performance
                     PersistedSort = string.Empty;
                     tsViewALL.Visible = false;
                     currentSnapshotDate = SnapshotDateFrom;
+                    loadedView = CurrentView(true);
+                    if (!carried)
+                    {
+                        KeepFilterOnRefresh(previousView, previousFilter, previousSort);
+                    }
                     lblRowLimit.Visible = snapshotDT.Rows.Count == filters.Top;
                     insightsAvailable = singleSnapshot;
                 }
@@ -857,6 +870,8 @@ namespace DBADashGUI.Performance
                 {
                     tsViewALL.Visible = InstanceID > 0;
                     LoadSummaryData();
+                    loadedView = CurrentView(false);
+                    KeepFilterOnRefresh(previousView, previousFilter, previousSort);
                     if (highlightSnapshot.HasValue)
                     {
                         HighlightSnapshot(highlightSnapshot.Value, highlight);
@@ -871,6 +886,44 @@ namespace DBADashGUI.Performance
             UpdateInsights();
             dgv.ApplyTheme(DBADashUser.SelectedTheme);
             tsEditLimit.LinkColor = DBADashUser.SelectedTheme.LinkColor;
+        }
+
+        /// <summary>
+        /// What the grid is showing: the snapshot list for the context or an instance, or one snapshot (or a session/job
+        /// or forced detail filter).  A refresh that shows the same view again keeps the user's filter and sort.
+        /// </summary>
+        private sealed record GridView(DBADashContext Context, int InstanceID, bool Detail, DateTime SnapshotDate,
+            int SessionID, Guid JobId, RunningQueriesFilters ForceDetailFilters);
+
+        /// <summary>The view in the grid, or null while loading or after a failed load</summary>
+        private GridView loadedView;
+
+        private GridView CurrentView(bool detail) => new(CurrentContext, InstanceID, detail,
+            detail ? currentSnapshotDate : DateTime.MinValue, SessionID, JobId, IsForceDetail ? forceDetailFilters : null);
+
+        /// <summary>
+        /// Put back the filter and sort the grid had before a refresh, when the refresh shows the same view again
+        /// (issue #1163).  Navigating to another view starts clean.
+        /// </summary>
+        private void KeepFilterOnRefresh(GridView previousView, string filter, string sort)
+        {
+            if (previousView == null || previousView != loadedView || dgv.DataSource is not DataView dv) return;
+            if (!string.IsNullOrEmpty(sort))
+            {
+                try
+                {
+                    dv.Sort = sort;
+                }
+                catch (Exception ex) // A column it names may have gone
+                {
+                    Debug.WriteLine($"Running queries sort no longer applies: {ex.Message}");
+                }
+            }
+            if (!string.IsNullOrEmpty(filter))
+            {
+                // Quietly dropped if it no longer applies
+                dgv.TrySetFilter(filter);
+            }
         }
 
         #region Insights
