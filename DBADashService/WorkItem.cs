@@ -106,6 +106,9 @@ namespace DBADashService
                 {
                     var collector = await DBCollector.CreateAsync(Source, config.ServiceName, logInternalPerformanceCounters: config.LogInternalPerformanceCounters);
                     collector.Job_instance_id = State.JobInstanceId;
+                    collector.ElasticJobsFromUtc = State.ElasticJobsFromUtc;
+                    collector.ElasticJobsDefinitionsHash = State.ElasticJobsDefinitionsHash;
+                    collector.ElasticJobsDefinitionsSentUtc = State.ElasticJobsDefinitionsSentUtc;
                     collector.IsExtendedEventsNotSupportedException = State.IsExtendedEventsNotSupportedException;
                     collector.FailedLoginsBackfillMinutes = config.FailedLoginsBackfillMinutes ??
                         CollectionConfig.DefaultFailedLoginsBackfillMinutes;
@@ -177,6 +180,10 @@ namespace DBADashService
                         // JobHistory_Upd derives its own watermark from the repository, so re-reading the same
                         // rows imports nothing twice.
                         State.JobInstanceId = collector.Job_instance_id;
+                        // Same reasoning for elastic job executions, which ElasticJobs_Upd upserts
+                        State.ElasticJobsFromUtc = collector.ElasticJobsFromUtc;
+                        State.ElasticJobsDefinitionsHash = collector.ElasticJobsDefinitionsHash;
+                        State.ElasticJobsDefinitionsSentUtc = collector.ElasticJobsDefinitionsSentUtc;
                         written = true;
                     }
                     catch (Exception ex)

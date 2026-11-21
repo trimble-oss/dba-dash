@@ -70,3 +70,23 @@ JOIN dbo.Instances I ON I.InstanceID = J.InstanceID
 WHERE J.JobStatus IN (1,2)
 AND J.enabled = 1
 AND I.ShowInSummary = 1
+UNION ALL
+/*	Elastic jobs.  Listed against the Azure server (InstanceGroupName), as the summary shows Azure - its job status is the status of
+	these jobs.  The detail names the job database, as a server can have more than one elastic job agent. */
+SELECT 'Elastic jobs',
+	J.JobStatus,
+	I.InstanceGroupName,
+	J.name,
+	CASE WHEN J.IsLastFail = 1 THEN 'last failed ' + CONVERT(VARCHAR(16), J.LastFailed, 120) + ' UTC'
+		WHEN J.LastSucceeded IS NULL THEN 'no successful execution'
+		ELSE 'last succeeded ' + CONVERT(VARCHAR(16), J.LastSucceeded, 120) + ' UTC' END
+		+ CASE WHEN J.JobStepFails24Hrs = 1 THEN ', 1 step execution against a target failed in the last 24hrs'
+			WHEN J.JobStepFails24Hrs > 1 THEN ', ' + CAST(J.JobStepFails24Hrs AS VARCHAR(10)) + ' step executions against targets failed in the last 24hrs'
+			ELSE '' END
+		+ ' (job database ' + J.InstanceDisplayName + ')'
+FROM dbo.ElasticJobStatus J
+JOIN Scope S ON S.InstanceID = J.InstanceID
+JOIN dbo.Instances I ON I.InstanceID = J.InstanceID
+WHERE J.JobStatus IN (1,2)
+AND J.enabled = 1
+AND I.ShowInSummary = 1

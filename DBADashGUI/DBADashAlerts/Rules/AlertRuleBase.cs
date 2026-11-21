@@ -42,7 +42,8 @@ namespace DBADashGUI.DBADashAlerts.Rules
             DatabaseMail,
             AzureDBSpace,
             ElasticPoolSpace,
-            ServiceBroker
+            ServiceBroker,
+            ElasticJob
         }
 
         public static AlertRuleBase CreateRule(RuleTypes type)
@@ -68,6 +69,7 @@ namespace DBADashGUI.DBADashAlerts.Rules
                 RuleTypes.AzureDBSpace => new AzureDBSpaceRule(),
                 RuleTypes.ElasticPoolSpace => new ElasticPoolSpaceRule(),
                 RuleTypes.ServiceBroker => new ServiceBrokerRule(),
+                RuleTypes.ElasticJob => new ElasticJobRule(),
                 _ => throw new ArgumentOutOfRangeException()
             };
         }
@@ -270,6 +272,7 @@ namespace DBADashGUI.DBADashAlerts.Rules
                 RuleTypes.AzureDBSpace => string.IsNullOrEmpty(details) ? new AzureDBSpaceRule() : JsonConvert.DeserializeObject<AzureDBSpaceRule>(details),
                 RuleTypes.ElasticPoolSpace => string.IsNullOrEmpty(details) ? new ElasticPoolSpaceRule() : JsonConvert.DeserializeObject<ElasticPoolSpaceRule>(details),
                 RuleTypes.ServiceBroker => string.IsNullOrEmpty(details) ? new ServiceBrokerRule() : JsonConvert.DeserializeObject<ServiceBrokerRule>(details),
+                RuleTypes.ElasticJob => string.IsNullOrEmpty(details) ? new ElasticJobRule() : JsonConvert.DeserializeObject<ElasticJobRule>(details),
                 _ => throw new NotImplementedException()
             };
             rule.RuleID = ruleID;

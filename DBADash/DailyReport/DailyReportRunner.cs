@@ -510,8 +510,12 @@ namespace DBADash.DailyReport
         /// called new or resolved.  Nothing is recorded.  Object problems are read for the instances with an InstanceID; Azure SQL DB rows
         /// have none, so their object problems aren't listed.
         /// </summary>
+        /// <param name="azureInstanceIDs">
+        /// The Azure DBs the page is for.  The summary has a row per Azure server with no InstanceID, so their object problems (elastic jobs,
+        /// listed against the server) are only read for the databases given here.
+        /// </param>
         public static DailyReportContent BuildSummaryPage(DataTable summary, string connectionString, string scopeDescription, string timeZone, DateTime nowUtc,
-            Func<string, string, string, string> sectionLink = null)
+            Func<string, string, string, string> sectionLink = null, IEnumerable<int> azureInstanceIDs = null)
         {
             var table = summary.Copy();
             var instanceIDs = table.AsEnumerable().Where(r => !r.IsNull("InstanceID")).Select(r => Convert.ToInt32(r["InstanceID"])).Distinct().ToList();
@@ -525,7 +529,8 @@ namespace DBADash.DailyReport
                 // Nothing to look up: Azure SQL DB rows are still named by their server
                 ApplyDisplayNames(table, new Dictionary<int, string>());
             }
-            var objectIssues = instanceIDs.Count > 0 ? GetSummaryObjectIssues(connectionString, instanceList) : new List<DailyReportIssue>();
+            var issueInstanceIDs = instanceIDs.Union(azureInstanceIDs ?? Enumerable.Empty<int>()).OrderBy(id => id).ToList();
+            var objectIssues = issueInstanceIDs.Count > 0 ? GetSummaryObjectIssues(connectionString, string.Join(",", issueInstanceIDs)) : new List<DailyReportIssue>();
             var config = new DailyReportConfig { ReportName = "Summary", ScopeDescription = scopeDescription, TimeZone = timeZone };
             return DailyReportRenderer.Render(config, nowUtc, scopeDescription, table, objectIssues, null, timeZone, new DailyReportExtras { SectionLink = sectionLink, Interactive = true });
         }

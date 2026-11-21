@@ -12,6 +12,7 @@ namespace DBADashService
     public class CollectionSchedules : Dictionary<CollectionType, CollectionSchedule>
     {
         private const string every1min = "0 0/1 * * * ?";
+        private const string every2min = "0 0/2 * * * ?";
         private const string every5min = "0 0/5 * * * ?";
         private const string hourly = "0 0 0/1 * * ?";
         private const string midnight = "0 0 0 * * ?";
@@ -52,6 +53,9 @@ namespace DBADashService
                             {CollectionType.AzureDBResourceStats, new CollectionSchedule(){ Schedule = every1min,RunOnServiceStart=false  } },
                             {CollectionType.AzureDBElasticPoolResourceStats, new CollectionSchedule(){ Schedule = every1min,RunOnServiceStart=false  } },
                             {CollectionType.SlowQueries, new CollectionSchedule(){ Schedule = every1min,RunOnServiceStart=false  } },
+                            // Azure DB only, and only does anything where the database is an elastic job database (the jobs schema can be read).
+                            // Every 2 minutes: elastic jobs are scheduled in minutes at the finest, and each collection reads what's changed.
+                            {CollectionType.ElasticJobs, new CollectionSchedule(){ Schedule = every2min,RunOnServiceStart=false  } },
                             {CollectionType.PerformanceCounters, new CollectionSchedule(){ Schedule = every1min,RunOnServiceStart=false } },
                             {CollectionType.PerfmonCounters, new CollectionSchedule(){ Schedule = every1min,RunOnServiceStart=false } },
                             {CollectionType.JobHistory, new CollectionSchedule(){ Schedule = every1min,RunOnServiceStart=false  } },

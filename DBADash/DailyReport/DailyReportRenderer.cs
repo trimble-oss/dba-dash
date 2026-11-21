@@ -89,6 +89,8 @@ namespace DBADash.DailyReport
         public string Check { get; init; }
         public int Status { get; init; }
         public string Detail { get; init; }
+        /// <summary>An Azure server row of the summary (no InstanceID)</summary>
+        public bool IsAzure { get; init; }
         public bool IsCritical => Status == 1;
     }
 
@@ -154,6 +156,12 @@ namespace DBADash.DailyReport
             ["JobStatus"] = "Agent jobs"
         };
 
+        /// <summary>
+        /// The section for the jobs of elastic job agents.  An Azure server's JobStatus in the summary is the status of its elastic jobs, so
+        /// it feeds this section rather than Agent jobs.  The jobs are listed against the server, as the summary shows Azure.
+        /// </summary>
+        public const string ElasticJobsGroup = "Elastic jobs";
+
         /// <summary>Order of the object-level sections, and what their items are called</summary>
         private static readonly (string Group, string Singular, string Plural)[] Sections =
         {
@@ -161,8 +169,13 @@ namespace DBADash.DailyReport
             ("Backups - Diff", "database", "databases"),
             ("Backups - Log", "database", "databases"),
             ("Drive space", "drive", "drives"),
-            ("Agent jobs", "job", "jobs")
+            ("Agent jobs", "job", "jobs"),
+            (ElasticJobsGroup, "job", "jobs")
         };
+
+        /// <summary>The section a summary status column feeds - an Azure server's job status is its elastic jobs</summary>
+        private static string ColumnGroup(SummaryIssue issue) =>
+            issue.IsAzure && issue.Column.Equals("JobStatus", StringComparison.OrdinalIgnoreCase) ? ElasticJobsGroup : ColumnGroups[issue.Column];
 
         // Trimble Modus palette
         private const string TrimbleGray = "#252a2e";
@@ -220,7 +233,7 @@ namespace DBADash.DailyReport
             var instanceOnly = new List<DailyReportIssue>();
             foreach (var s in summaryIssues.Where(i => ColumnGroups.ContainsKey(i.Column)))
             {
-                var group = ColumnGroups[s.Column];
+                var group = ColumnGroup(s);
                 if (covered.Contains((group, s.Instance))) continue;
                 instanceOnly.Add(new DailyReportIssue { CheckGroup = group, Status = s.Status, Instance = s.Instance, ObjectName = string.Empty, Detail = s.Detail });
             }
@@ -985,9 +998,11 @@ namespace DBADash.DailyReport
                 .Where(c => c.ColumnName.EndsWith("Status", StringComparison.Ordinal) && c.DataType != typeof(string))
                 .ToList();
 
+            var hasIsAzure = summary.Columns.Contains("IsAzure");
             foreach (DataRow row in summary.Rows)
             {
                 var instance = InstanceName(row);
+                var isAzure = hasIsAzure && !row.IsNull("IsAzure") && Convert.ToBoolean(row["IsAzure"], CultureInfo.InvariantCulture);
                 foreach (var col in statusColumns)
                 {
                     if (row.IsNull(col)) continue;
@@ -1007,7 +1022,8 @@ namespace DBADash.DailyReport
                         Column = col.ColumnName,
                         Check = FriendlyName(col.ColumnName),
                         Status = status,
-                        Detail = detail
+                        Detail = detail,
+                        IsAzure = isAzure
                     });
                 }
             }

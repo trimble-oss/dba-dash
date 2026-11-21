@@ -60,6 +60,7 @@ EXEC Alert.DatabaseMailAlert_Upd
 EXEC Alert.AzureDBSpaceAlert_Upd
 EXEC Alert.ElasticPoolSpaceAlert_Upd
 EXEC Alert.ServiceBrokerAlert_Upd
+EXEC Alert.ElasticJobAlert_Upd
 
 EXEC sp_set_session_context @key = N'DBADash.AlertRun', @value = NULL
 

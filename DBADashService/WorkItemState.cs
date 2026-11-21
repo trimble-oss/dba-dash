@@ -11,6 +11,14 @@ namespace DBADashService
     public class WorkItemState
     {
         public int JobInstanceId { get; set; }
+
+        /// <summary>Where the next Elastic Jobs collection starts from - see DBCollector.ElasticJobsFromUtc.  Null collects the default lookback.</summary>
+        public DateTime? ElasticJobsFromUtc { get; set; }
+
+        /// <summary>The elastic job definitions last sent, and when - see DBCollector.ElasticJobsDefinitionsHash.</summary>
+        public byte[] ElasticJobsDefinitionsHash { get; set; }
+
+        public DateTime? ElasticJobsDefinitionsSentUtc { get; set; }
         public bool IsExtendedEventsNotSupportedException { get; set; }
         public DateTime JobLastModified { get; set; } = DateTime.MinValue;
         public DateTime JobCollectDate { get; set; } = DateTime.MinValue;

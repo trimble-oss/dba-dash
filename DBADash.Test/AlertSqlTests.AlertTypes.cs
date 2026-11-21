@@ -144,6 +144,69 @@ EXEC Alert.AgentJobAlert_Upd", "Alert");
             Assert.AreEqual("Job:Backup job", alerts[0].AlertKey);
         }
 
+        /// <summary>
+        /// Elastic jobs on @Alert (the agent's job database): one that failed against two of three databases, one excluded by the rule and one
+        /// that failed over an hour ago.  The job of the same name on @OK has succeeded since it failed.
+        /// </summary>
+        private const string FailedElasticJobs = @"
+DECLARE @Type VARCHAR(50)='ElasticJob'
+DECLARE @Job UNIQUEIDENTIFIER = NEWID(), @Exec UNIQUEIDENTIFIER = NEWID(), @Failed DATETIME2(2) = DATEADD(mi,-10,SYSUTCDATETIME())
+INSERT INTO dbo.ElasticJobs(InstanceID,job_id,job_name,enabled,IsActive,SnapshotCreatedDate,SnapshotUpdatedDate,LastSucceeded,LastFailed)
+VALUES(@Alert,@Job,N'Purge',1,1,SYSUTCDATETIME(),SYSUTCDATETIME(),DATEADD(d,-1,SYSUTCDATETIME()),@Failed),
+	(@Alert,NEWID(),N'Noisy job',1,1,SYSUTCDATETIME(),SYSUTCDATETIME(),NULL,@Failed), /* Excluded by the rule */
+	(@Alert,NEWID(),N'Old failure',1,1,SYSUTCDATETIME(),SYSUTCDATETIME(),NULL,DATEADD(mi,-90,SYSUTCDATETIME())), /* Failed more than an hour ago */
+	(@OK,NEWID(),N'Purge',1,1,SYSUTCDATETIME(),SYSUTCDATETIME(),DATEADD(mi,-5,SYSUTCDATETIME()),@Failed) /* Succeeded since */
+INSERT INTO dbo.ElasticJobExecutions(InstanceID,create_time,job_execution_id,step_id,TargetKey,job_id,is_active,lifecycle,start_time,end_time,target_type,target_database_name)
+VALUES(@Alert,DATEADD(mi,-20,@Failed),@Exec,0,0x01,@Job,0,N'Failed',DATEADD(mi,-20,@Failed),@Failed,NULL,NULL),
+	(@Alert,DATEADD(mi,-20,@Failed),@Exec,1,0x02,@Job,0,N'Failed',DATEADD(mi,-20,@Failed),@Failed,N'SqlDatabase',N'db1'),
+	(@Alert,DATEADD(mi,-20,@Failed),@Exec,1,0x03,@Job,0,N'TimedOut',DATEADD(mi,-20,@Failed),@Failed,N'SqlDatabase',N'db2'),
+	(@Alert,DATEADD(mi,-20,@Failed),@Exec,1,0x04,@Job,0,N'Succeeded',DATEADD(mi,-20,@Failed),@Failed,N'SqlDatabase',N'db3')
+";
+
+        [TestMethod]
+        public void ElasticJobAlertForFailedJobs()
+        {
+            var alerts = AssertAlerted(TwoInstances + FailedElasticJobs
+                + Rule("ElasticJob", "ElasticJob", details: @"{""ExcludeJobName"":""Noisy%""}") + @"
+EXEC Alert.ElasticJobAlert_Upd", "Alert");
+            Assert.AreEqual("ElasticJob:Purge", alerts[0].AlertKey);
+            Assert.AreEqual("Purge elastic job failed against db1, db2", alerts[0].Message);
+        }
+
+        /// <summary>A job deleted and created again with the same name leaves the deleted one behind, inactive - it mustn't resolve the alert</summary>
+        [TestMethod]
+        public void ElasticJobAlertNotResolvedByDeletedJobOfTheSameName()
+        {
+            AssertAlerted(TwoInstances + FailedElasticJobs + @"
+INSERT INTO dbo.ElasticJobs(InstanceID,job_id,job_name,enabled,IsActive,SnapshotCreatedDate,SnapshotUpdatedDate,LastSucceeded,LastFailed)
+VALUES(@Alert,NEWID(),N'Purge',1,0,SYSUTCDATETIME(),SYSUTCDATETIME(),SYSUTCDATETIME(),NULL)
+" + Rule("ElasticJob", "ElasticJob", details: @"{""ExcludeJobName"":""Noisy%""}") + @"
+EXEC Alert.ElasticJobAlert_Upd
+EXEC Alert.ElasticJobAlert_Upd", "Alert");
+        }
+
+        [TestMethod]
+        public void ElasticJobAlertListsFiveTargetsThenACount()
+        {
+            var alerts = AssertAlerted(TwoInstances + FailedElasticJobs + @"
+INSERT INTO dbo.ElasticJobExecutions(InstanceID,create_time,job_execution_id,step_id,TargetKey,job_id,is_active,lifecycle,start_time,end_time,target_type,target_database_name)
+SELECT @Alert,DATEADD(mi,-20,@Failed),@Exec,1,CAST(10 + N.N AS BINARY(16)),@Job,0,N'Failed',DATEADD(mi,-20,@Failed),@Failed,N'SqlDatabase',CONCAT(N'db', 3 + N.N)
+FROM (VALUES(1),(2),(3),(4),(5)) N(N) /* db4..db8 */
+" + Rule("ElasticJob", "ElasticJob", details: @"{""ExcludeJobName"":""Noisy%""}") + @"
+EXEC Alert.ElasticJobAlert_Upd", "Alert");
+            Assert.AreEqual("Purge elastic job failed against db1, db2, db4, db5, db6 and 2 others", alerts[0].Message);
+        }
+
+        [TestMethod]
+        public void ElasticJobAlertResolvesWhenJobSucceeds()
+        {
+            AssertAlerted(TwoInstances + FailedElasticJobs
+                + Rule("ElasticJob", "ElasticJob", details: @"{""ExcludeJobName"":""Noisy%""}") + @"
+EXEC Alert.ElasticJobAlert_Upd
+UPDATE dbo.ElasticJobs SET LastSucceeded = SYSUTCDATETIME() WHERE InstanceID = @Alert AND job_name = N'Purge'
+EXEC Alert.ElasticJobAlert_Upd");
+        }
+
         [TestMethod]
         public void AgentJobAlertResolvesWhenJobSucceeds()
         {

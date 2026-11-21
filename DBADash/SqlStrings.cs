@@ -84,6 +84,7 @@ namespace DBADash
         public static string LatchStats => GetSqlString("LatchStats");
         public static string SpinlockStats => GetSqlString("SpinlockStats");
         public static string ServiceBroker => GetSqlString("ServiceBroker");
+        public static string ElasticJobs => GetSqlString("ElasticJobs");
         public static string HasWorkloadGroups => GetSqlString("HasWorkloadGroups");
     }
 }
