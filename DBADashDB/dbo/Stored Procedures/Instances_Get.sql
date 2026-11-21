@@ -52,6 +52,10 @@ SELECT  I.InstanceID,
 	CASE WHEN EXISTS(SELECT 1 FROM dbo.ScheduleInfo SI WHERE SI.InstanceID = I.InstanceID AND SI.Reference = ''ServiceBroker'' AND SI.IsEnabled = 1)
 			OR EXISTS(SELECT 1 FROM dbo.CollectionDates SBCD WHERE SBCD.InstanceID = I.InstanceID AND SBCD.Reference = ''ServiceBroker'')
 		THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS HasServiceBroker,
+	/* The job database of an elastic job agent - elastic jobs have been collected from it */
+	CASE WHEN EXISTS(SELECT 1 FROM dbo.ElasticJobs EJ WHERE EJ.InstanceID = I.InstanceID)
+			OR EXISTS(SELECT 1 FROM dbo.CollectionDates EJCD WHERE EJCD.InstanceID = I.InstanceID AND EJCD.Reference = ''ElasticJobs'')
+		THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS HasElasticJobs,
 	I.UTCOffset,
 	I.IsReadOnlyReplica,
 	Paused.CollectionsPausedUntil

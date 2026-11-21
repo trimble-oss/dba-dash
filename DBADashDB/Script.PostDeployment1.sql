@@ -1327,6 +1327,11 @@ FROM (VALUES('dbo','ObjectExecutionStats',120),
 				('dbo','ServiceBrokerQueueHistory',90),
 				('dbo','ServiceBrokerStats',180),
 				('dbo','ServiceBrokerDatabaseStats',90),
+				/* Elastic job executions - a row for each step against each target, so more rows than SQL Agent job history.  More than the
+				   7 days the collection goes back to after a service restart - ElasticJobs_Upd won't add executions older than this, as
+				   they would be counted in the stats again. */
+				('dbo','ElasticJobExecutions',14),
+				('dbo','ElasticJobStats_60MIN',730),
 				/* Each run - only kept with LogInternalPerformanceCounters on.  The hourly rollup is always kept. */
 				('dbo','CollectionRuns',30),
 				('dbo','CollectionRuns_60MIN',365),

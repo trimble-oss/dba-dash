@@ -44,6 +44,7 @@
     <EmbeddedResource Include="SQL\SQLSpinlockStats.sql" />
     <EmbeddedResource Include="SQL\SQLLiveProfiles.sql" />
     <EmbeddedResource Include="SQL\SQLServiceBroker.sql" />
+    <EmbeddedResource Include="SQL\SQLElasticJobs.sql" />
     <EmbeddedResource Include="SQL\SQLAvailableCounters.sql" />
     <EmbeddedResource Include="SQL\SQLAvailableProcs.sql" />
     <EmbeddedResource Include="SQL\SQLDeadlockSession.sql" />

@@ -1,0 +1,3 @@
+CREATE PARTITION SCHEME [PS_ElasticJobStats_60MIN]
+    AS PARTITION [PF_ElasticJobStats_60MIN]
+    ALL TO ([PRIMARY])
