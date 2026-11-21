@@ -173,6 +173,7 @@ namespace DBADashGUI
                                 new SQLTreeItem("Tags", SQLTreeItem.TreeType.Tags),
                                 new SQLTreeItem("Storage", SQLTreeItem.TreeType.Storage)
                             });
+                            AddAzureServerElasticJobsNode(AzureNode, azureServerRows);
 
                             // Deadlocks get their own folder here as they do on a regular instance, and are
                             // taken out of the flat Reports list so nothing is listed twice.  At this level
@@ -253,6 +254,38 @@ namespace DBADashGUI
             if (DBADashUser.IsAdmin) root.Nodes.Add(new SQLTreeItem("Recycle Bin", SQLTreeItem.TreeType.RecycleBin));
 
             return root;
+        }
+
+        /// <summary>
+        /// An Elastic Jobs node on an Azure server where any of its databases (in this folder) is the job database of an elastic job agent -
+        /// the same tabs as the job database's own Elastic Jobs node, without having to find which database it is.  With more than one job
+        /// database on the server, the node has the status of them all and a node for each job database beneath it, as the timeline and
+        /// stats are of one agent.
+        /// </summary>
+        private static void AddAzureServerElasticJobsNode(SQLTreeItem azureServerNode, IEnumerable<DataRow> azureServerRows)
+        {
+            var jobDatabases = azureServerRows
+                .Where(r => r.Table.Columns.Contains("HasElasticJobs") && r["HasElasticJobs"] is true)
+                .OrderBy(r => r["AzureDBName"] as string, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+            if (jobDatabases.Count == 0) return;
+
+            var elasticJobs = new SQLTreeItem("Elastic Jobs", SQLTreeItem.TreeType.ElasticJobs);
+            if (jobDatabases.Count == 1)
+            {
+                elasticJobs.InstanceID = (int)jobDatabases[0]["InstanceID"];
+            }
+            else
+            {
+                foreach (var row in jobDatabases)
+                {
+                    elasticJobs.Nodes.Add(new SQLTreeItem(row["AzureDBName"] as string ?? row["InstanceDisplayName"] as string, SQLTreeItem.TreeType.ElasticJobs)
+                    {
+                        InstanceID = (int)row["InstanceID"]
+                    });
+                }
+            }
+            azureServerNode.Nodes.Add(elasticJobs);
         }
 
         /// <summary>
@@ -348,7 +381,10 @@ namespace DBADashGUI
             Latches,
             Spinlocks,
             ServiceBroker,
-            CollectionHealth
+            CollectionHealth,
+            ElasticJobs,
+            ElasticJobTimeline,
+            ElasticJobStats
         }
 
         private static readonly List<Main.Tabs> InstanceOnlyTabs = new() { Main.Tabs.PerformanceSummary, Tabs.Metrics, Tabs.Waits, Tabs.Memory, Tabs.RunningQueries };
@@ -417,6 +453,15 @@ namespace DBADashGUI
         /// so at instance level the tab is only shown where it's enabled or has data (see <see cref="DBADashContext.HasServiceBroker"/>).
         /// </summary>
         private TabPage tabServiceBroker;
+
+        /// <summary>
+        /// Elastic jobs - status, timeline and stats - on the Elastic Jobs folder of an Azure DB that is the job database of an
+        /// elastic job agent (see <see cref="DBADashContext.HasElasticJobs"/>).
+        /// </summary>
+        private TabPage tabElasticJobs;
+
+        private TabPage tabElasticJobTimeline;
+        private TabPage tabElasticJobStats;
 
         /// <summary>
         /// Success rate, failures in a row and cost of each collection over the selected period - next to Collection Dates,
@@ -613,6 +658,13 @@ namespace DBADashGUI
             tabServiceBroker = new TabPage("Service Broker") { Name = Tabs.ServiceBroker.TabName() };
             tabServiceBroker.Controls.Add(new ServiceBrokerView { Dock = DockStyle.Fill });
 
+            tabElasticJobs = new TabPage("Elastic Jobs") { Name = Tabs.ElasticJobs.TabName() };
+            tabElasticJobs.Controls.Add(new ElasticJobs.ElasticJobsView { Dock = DockStyle.Fill });
+            tabElasticJobTimeline = new TabPage("Timeline") { Name = Tabs.ElasticJobTimeline.TabName() };
+            tabElasticJobTimeline.Controls.Add(new ElasticJobs.ElasticJobTimeline { Dock = DockStyle.Fill });
+            tabElasticJobStats = new TabPage("Job Stats") { Name = Tabs.ElasticJobStats.TabName() };
+            tabElasticJobStats.Controls.Add(new JobStats { Dock = DockStyle.Fill, ElasticJobs = true });
+
             tabCollectionHealth = new TabPage("Collection Health") { Name = Tabs.CollectionHealth.TabName() };
             tabCollectionHealth.Controls.Add(new CollectionDates.CollectionHealthView { Dock = DockStyle.Fill });
 
@@ -762,6 +814,8 @@ namespace DBADashGUI
             || SelectedDeadlockTabReport(tv1.SelectedNode as SQLTreeItem)?.TimeFilterSupported == true
             || tabs.SelectedTab == tabQueryStats
             || tabs.SelectedTab == tabServiceBroker
+            || tabs.SelectedTab == tabElasticJobTimeline
+            || tabs.SelectedTab == tabElasticJobStats
             || tabs.SelectedTab == tabCollectionHealth
             || tabs.SelectedTab == tabDBADashErrorLog;
 
@@ -1773,6 +1827,12 @@ namespace DBADashGUI
                 azureDBNode.Nodes.Add(new SQLTreeItem("Extended Events", SQLTreeItem.TreeType.ExtendedEvents)
                 { InstanceID = azureDBNode.InstanceID });
             }
+            // The job database of an elastic job agent - its jobs are here, as SQL Agent jobs are in an instance's Jobs folder
+            if (azureDBNode.Context.HasElasticJobs)
+            {
+                azureDBNode.Nodes.Add(new SQLTreeItem("Elastic Jobs", SQLTreeItem.TreeType.ElasticJobs)
+                { InstanceID = azureDBNode.InstanceID });
+            }
             // Deadlock collection on Azure SQL Database is per database - the session is database
             // scoped - so the database node is where its deadlocks belong.  Added before the
             // database folders so it sits in the same place as on a regular instance: after the
@@ -2024,6 +2084,18 @@ namespace DBADashGUI
                 allowedTabs.AddRange(parent.Type is SQLTreeItem.TreeType.DBADashRoot or SQLTreeItem.TreeType.InstanceFolder
                     ? new[] { tabJobs, tabJobTimeline, tabRunningJobs }
                     : new[] { tabJobs, tabJobStats, tabJobTimeline, tabRunningJobs });
+                // Across instances, elastic jobs too - of the elastic job agents in the group
+                if (parent.Type is SQLTreeItem.TreeType.DBADashRoot or SQLTreeItem.TreeType.InstanceFolder && n.Context.HasElasticJobs)
+                {
+                    allowedTabs.Add(tabElasticJobs);
+                }
+            }
+            else if (n.Type == SQLTreeItem.TreeType.ElasticJobs)
+            {
+                // The timeline and stats are of one agent.  An Azure server with more than one job database has a node for each beneath it.
+                allowedTabs.AddRange(n.InstanceID > 0
+                    ? new[] { tabElasticJobs, tabElasticJobTimeline, tabElasticJobStats }
+                    : new[] { tabElasticJobs });
             }
             else if (n.Type == SQLTreeItem.TreeType.AgentJob)
             {
@@ -2866,6 +2938,21 @@ namespace DBADashGUI
                         case Tabs.Jobs or Tabs.RunningJobs or Tabs.JobTimeline or Tabs.JobStats:
                             selectedNode.Expand();
                             selectedNode = nInstance.FindChildOfType(SQLTreeItem.TreeType.AgentJobs);
+                            break;
+
+                        // The Elastic Jobs node of the job database, or of an Azure server (the summary page links to the server).  A
+                        // group has the Elastic Jobs tab in its Jobs folder.
+                        case Tabs.ElasticJobs or Tabs.ElasticJobTimeline or Tabs.ElasticJobStats:
+                            if (selectedNode.Type is SQLTreeItem.TreeType.AzureDatabase or SQLTreeItem.TreeType.AzureInstance)
+                            {
+                                selectedNode.Expand();
+                                selectedNode = nInstance.FindChildOfType(SQLTreeItem.TreeType.ElasticJobs) ?? selectedNode;
+                            }
+                            else if (selectedNode.Type is SQLTreeItem.TreeType.DBADashRoot or SQLTreeItem.TreeType.InstanceFolder)
+                            {
+                                selectedNode.Expand();
+                                selectedNode = nInstance.FindChildOfType(SQLTreeItem.TreeType.AgentJobs) ?? selectedNode;
+                            }
                             break;
 
                         case Tabs.ExtendedEvents or Tabs.AdhocTrace or Tabs.XETraceSessions:

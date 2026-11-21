@@ -82,7 +82,9 @@ namespace DBADashGUI
             DirectSystemReport,
             DatabaseExtendedProperties,
             ExtendedEvents,
-            DeadlocksFolder
+            DeadlocksFolder,
+            /// <summary>Elastic jobs of an elastic job agent - under the Azure DB that is its job database</summary>
+            ElasticJobs
         }
 
         private DatabaseEngineEdition _engineEdition = DatabaseEngineEdition.Unknown;
@@ -206,6 +208,11 @@ namespace DBADashGUI
                     // Return a list with a single ID of the Instance
                     case TreeType.Instance:
                         InternalContext.RegularInstanceIDsWithHidden.Add(instanceID);
+                        break;
+
+                    // An agent's elastic jobs - its job database only, also where the node is under the Azure server
+                    case TreeType.ElasticJobs when instanceID > 0:
+                        InternalContext.AzureInstanceIDsWithHidden.Add(instanceID);
                         break;
 
                     case TreeType.ElasticPool:
@@ -537,7 +544,7 @@ namespace DBADashGUI
                     ImageIndex = IsReadOnlyReplica ? 33 : 9;
                     break;
 
-                case TreeType.AgentJobs:
+                case TreeType.AgentJobs or TreeType.ElasticJobs:
                     ImageIndex = 22;
                     break;
 

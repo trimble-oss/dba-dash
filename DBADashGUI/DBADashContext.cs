@@ -155,6 +155,24 @@ namespace DBADashGUI
             }
         }
 
+        private bool? _hasElasticJobs;
+
+        /// <summary>
+        /// True if the instance (an Azure DB) is the job database of an elastic job agent - elastic jobs have been collected from it.
+        /// Above instance level, true if this applies to any instance.
+        /// </summary>
+        public bool HasElasticJobs
+        {
+            get
+            {
+                if (_hasElasticJobs != null) return _hasElasticJobs.Value;
+                GetAdditionalInfo();
+                _hasElasticJobs ??= false;
+
+                return _hasElasticJobs.Value;
+            }
+        }
+
         /// <summary>
         /// Latch stats collection is off by default.  True if it's enabled for the instance or there is data collected from when it was.
         /// </summary>
@@ -209,6 +227,10 @@ namespace DBADashGUI
             {
                 _hasResourceGovernorWorkloadGroups = CommonData.Instances.Select("HasResourceGovernorWorkloadGroups=1").Any();
                 _hasServiceBroker = CommonData.Instances.Columns.Contains("HasServiceBroker") && CommonData.Instances.Select("HasServiceBroker=1").Any();
+                // Only the instances in scope - an Azure server node shows elastic jobs where one of its databases has them
+                var inScope = InstanceIDs;
+                _hasElasticJobs = CommonData.Instances.Columns.Contains("HasElasticJobs") && CommonData.Instances.Select("HasElasticJobs=1")
+                    .Any(r => inScope.Contains((int)r["InstanceID"]));
                 return;
             }
             var row = CommonData.Instances.Select($"InstanceID={InstanceID}").FirstOrDefault();
@@ -220,6 +242,7 @@ namespace DBADashGUI
             _hasLatchStats = row.Table.Columns.Contains("HasLatchStats") && row["HasLatchStats"] is true;
             _hasSpinlockStats = row.Table.Columns.Contains("HasSpinlockStats") && row["HasSpinlockStats"] is true;
             _hasServiceBroker = row.Table.Columns.Contains("HasServiceBroker") && row["HasServiceBroker"] is true;
+            _hasElasticJobs = row.Table.Columns.Contains("HasElasticJobs") && row["HasElasticJobs"] is true;
             try
             {
                 _productVersion = new Version((string)row["ProductVersion"]);
