@@ -8,7 +8,7 @@ AS
 	Partition switching is used to efficiently remove data from the elastic job history tables (dbo.ElasticJobExecutions and
 	dbo.ElasticJobStats_60MIN) for all instances.  This proc provides an alternative way to remove data associated with a specific
 	instance - the job database of an elastic job agent.  Batched, as the executions are a row for each step against each target.
-	With @DaysToKeep=0, the jobs, their steps, and target group members for the instance are also removed.
+	With @DaysToKeep=0, the jobs, their steps, target group members and alert snapshot for the instance are also removed.
 */
 SET NOCOUNT ON
 DECLARE @MaxDate DATETIME2(2)
@@ -40,6 +40,9 @@ END
 
 IF @DaysToKeep = 0
 BEGIN
+	DELETE Alert.ElasticJobSnapshot
+	WHERE InstanceID = @InstanceID
+
 	/* Steps reference the jobs */
 	DELETE dbo.ElasticJobSteps
 	WHERE InstanceID = @InstanceID

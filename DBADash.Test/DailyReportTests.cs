@@ -434,6 +434,39 @@ namespace DBADash.Test
             Assert.IsFalse(issues.Single(i => i.Check == "Job").IsCritical);
         }
 
+        /// <summary>An Azure server row's job status is its elastic jobs - it goes in the Elastic jobs section, not Agent jobs</summary>
+        [TestMethod]
+        public void Classify_AzureJobStatusIsElasticJobs()
+        {
+            var dt = new DataTable();
+            dt.Columns.Add("InstanceID", typeof(int));
+            dt.Columns.Add("Instance", typeof(string));
+            dt.Columns.Add("JobStatus", typeof(int));
+            dt.Columns.Add("IsAzure", typeof(bool));
+            dt.Rows.Add(1, "SQL1", 1, false);
+            dt.Rows.Add(DBNull.Value, "azsrv.database.windows.net", 1, true);
+            dt.Rows.Add(DBNull.Value, "azsrv2.database.windows.net", 2, true);
+
+            var objects = new[] { Obj(DailyReportRenderer.ElasticJobsGroup, 1, "azsrv.database.windows.net", "Purge") };
+            var classified = DailyReportRenderer.Classify(dt, objects);
+
+            Assert.AreEqual("Agent jobs", classified.InstanceOnly.Single(i => i.Instance == "SQL1").CheckGroup);
+            Assert.IsFalse(classified.InstanceOnly.Any(i => i.Instance == "azsrv.database.windows.net"), "Covered by the elastic job listed against the server");
+            Assert.AreEqual(DailyReportRenderer.ElasticJobsGroup, classified.InstanceOnly.Single(i => i.Instance == "azsrv2.database.windows.net").CheckGroup);
+        }
+
+        [TestMethod]
+        public void ObjectSection_ElasticJobs()
+        {
+            var config = new DailyReportConfig { ReportName = "Ops", TimeZone = "UTC" };
+            var issues = new[] { Obj(DailyReportRenderer.ElasticJobsGroup, 1, "azsrv.database.windows.net", "Purge", "last failed 2026-11-20 01:00 UTC (job database azsrv|jobs)") };
+            var content = DailyReportRenderer.Render(config, DateTime.UtcNow, "{All}", new DataTable(), issues, null, "UTC");
+
+            Assert.IsTrue(content.TextBody.Contains("ELASTIC JOBS"), content.TextBody);
+            Assert.IsTrue(content.TextBody.Contains("Purge on azsrv.database.windows.net - last failed 2026-11-20 01:00 UTC (job database azsrv|jobs)"), content.TextBody);
+            Assert.AreEqual(1, content.CriticalCount);
+        }
+
         [TestMethod]
         public void FriendlyName_SplitsCamelCaseAndDropsStatus()
         {

@@ -284,6 +284,7 @@ namespace DBADashGUI.DBADashAlerts
                             AlertRuleBase.RuleTypes.SQLAgentAlert => Tabs.SQLAgentAlerts,
                             AlertRuleBase.RuleTypes.Offline => Tabs.OfflineInstances,
                             AlertRuleBase.RuleTypes.ServiceBroker => Tabs.ServiceBroker,
+                            AlertRuleBase.RuleTypes.ElasticJob => Tabs.ElasticJobs,
                             _ => Tabs.Performance
                         };
                         Instance_Selected?.Invoke(this,

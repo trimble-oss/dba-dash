@@ -159,7 +159,7 @@ SELECT 	NULL AS InstanceID,
 		3 AS DriveStatus,
 		ISNULL(MIN(NULLIF(S.FileFreeSpaceStatus,3)),3) AS FileFreeSpaceStatus,
 		ISNULL(MIN(NULLIF(S.LogFreeSpaceStatus,3)),3) AS LogFreeSpaceStatus,
-		3 AS JobStatus,
+		ISNULL(MIN(NULLIF(S.JobStatus,3)),3) AS JobStatus, /* Elastic jobs of a job database on the server */
 		3 AS AGStatus,
 		NULL AS DetectedCorruptionDateUtc,
 		3 AS CorruptionStatus,
