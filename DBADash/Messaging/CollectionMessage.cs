@@ -146,6 +146,10 @@ namespace DBADash.Messaging
             collector.ServiceBrokerMaxDatabases = cfg.GetServiceBrokerMaxDatabases();
             collector.OnDemandDeadlockXESessionName = onDemandDeadlockSession;
             collector.ForceAGHealthEventsCheck = true;
+            // No state from the scheduled collection here.  Executions from the last day and everything still running is enough to
+            // bring what's shown up to date - the scheduled collection covers the rest.  The default would re-read 7 days each time.
+            collector.ElasticJobsFromUtc = DateTime.UtcNow.AddHours(-ElasticJobsTables.OnDemandLookbackHours);
+            collector.ElasticJobsCollectAllActive = true;
             // The schedule the connection's query stats collection runs on, though this run wasn't scheduled: the
             // gap it measures is from the previous collection, which usually was.
             collector.QueryStatsScheduleInterval = cfg.GetMaxScheduleInterval(src, CollectionType.QueryStats);

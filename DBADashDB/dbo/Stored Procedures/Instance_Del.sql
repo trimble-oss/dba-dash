@@ -52,6 +52,10 @@ BEGIN
 	DELETE dbo.AgentJobThresholds
 	WHERE InstanceID = @InstanceID
 
+	/* Instance level exclusions - of SQL Agent jobs, or elastic jobs where the instance is an elastic job agent's job database */
+	DELETE dbo.AgentJobExclusions
+	WHERE InstanceID = @InstanceID
+
 	DELETE dbo.Alerts
 	WHERE InstanceID=@InstanceID
 
@@ -312,7 +316,7 @@ BEGIN
 	DELETE dbo.JobSteps
 	WHERE InstanceID = @InstanceID
 
-	DELETE dbo.JobHistory 
+	DELETE dbo.JobHistory
 	WHERE InstanceID = @InstanceID
 
 	DELETE 
@@ -492,6 +496,8 @@ BEGIN
 	EXEC dbo.SpinlockStats_Del @InstanceID=@InstanceID,@DaysToKeep=0
 
 	EXEC dbo.ServiceBroker_Del @InstanceID=@InstanceID,@DaysToKeep=0
+
+	EXEC dbo.ElasticJobs_Del @InstanceID=@InstanceID,@DaysToKeep=0
 
 	DELETE dbo.IdentityColumnsHistory
 	WHERE InstanceID = @InstanceID

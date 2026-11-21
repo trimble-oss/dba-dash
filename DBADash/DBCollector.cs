@@ -97,7 +97,8 @@ namespace DBADash
         QueryStats,
         LatchStats,
         SpinlockStats,
-        ServiceBroker
+        ServiceBroker,
+        ElasticJobs
     }
 
     public enum HostPlatform
@@ -143,8 +144,8 @@ namespace DBADash
             = new(StringComparer.OrdinalIgnoreCase);
 
         private string computerName;
-        private readonly CollectionType[] azureCollectionTypes = new[] { CollectionType.SlowQueries, CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceStats, CollectionType.CPU, CollectionType.DBFiles, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ObjectExecutionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions, CollectionType.SysConfig, CollectionType.DatabasePrincipals, CollectionType.DatabaseRoleMembers, CollectionType.DatabasePermissions, CollectionType.OSInfo, CollectionType.CustomChecks, CollectionType.PerformanceCounters, CollectionType.VLF, CollectionType.DatabaseQueryStoreOptions, CollectionType.AzureDBResourceGovernance, CollectionType.RunningQueries, CollectionType.IdentityColumns, CollectionType.TableSize, CollectionType.AvailableProcs, CollectionType.DatabaseExtendedProperties, CollectionType.Deadlocks, CollectionType.QueryStats, CollectionType.LatchStats, CollectionType.SpinlockStats };
-        private readonly CollectionType[] azureOnlyCollectionTypes = new[] { CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceGovernance };
+        private readonly CollectionType[] azureCollectionTypes = new[] { CollectionType.SlowQueries, CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceStats, CollectionType.CPU, CollectionType.DBFiles, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ObjectExecutionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions, CollectionType.SysConfig, CollectionType.DatabasePrincipals, CollectionType.DatabaseRoleMembers, CollectionType.DatabasePermissions, CollectionType.OSInfo, CollectionType.CustomChecks, CollectionType.PerformanceCounters, CollectionType.VLF, CollectionType.DatabaseQueryStoreOptions, CollectionType.AzureDBResourceGovernance, CollectionType.RunningQueries, CollectionType.IdentityColumns, CollectionType.TableSize, CollectionType.AvailableProcs, CollectionType.DatabaseExtendedProperties, CollectionType.Deadlocks, CollectionType.QueryStats, CollectionType.LatchStats, CollectionType.SpinlockStats, CollectionType.ElasticJobs };
+        private readonly CollectionType[] azureOnlyCollectionTypes = new[] { CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceGovernance, CollectionType.ElasticJobs };
         private readonly CollectionType[] azureMasterOnlyCollectionTypes = new[] { CollectionType.AzureDBElasticPoolResourceStats };
         public DBADashSource Source;
         private bool noWMI;
@@ -266,6 +267,35 @@ namespace DBADash
         /// Most databases the Service Broker collection will visit - see <see cref="CollectionConfig.ServiceBrokerMaxDatabases"/>.  0 is no limit.
         /// </summary>
         public int ServiceBrokerMaxDatabases { get; set; } = CollectionConfig.DefaultServiceBrokerMaxDatabases;
+
+        /// <summary>
+        /// Elastic job executions created since this time (UTC) are collected.  Held by the service between runs - null for the
+        /// first, which goes back <see cref="ElasticJobsTables.InitialLookbackDays"/> and also collects every active execution.
+        /// Moved on by each Elastic Jobs collection to the time it ran on the job database's server, less
+        /// <see cref="ElasticJobsTables.OverlapMinutes"/> - or to the creation time of the oldest execution still active, if that's
+        /// earlier, so an execution keeps being collected until it's seen complete.
+        /// </summary>
+        public DateTime? ElasticJobsFromUtc { get; set; }
+
+        /// <summary>
+        /// Collect every active elastic job execution, however old, as well as those created since <see cref="ElasticJobsFromUtc"/>.
+        /// Always the case for the first collection (no <see cref="ElasticJobsFromUtc"/>).  For a collection run on demand, which
+        /// has no state from the previous collection.
+        /// </summary>
+        public bool ElasticJobsCollectAllActive { get; set; }
+
+        /// <summary>
+        /// Hash of the elastic job definitions (jobs, steps, target group members) last sent, and when.  The collection only returns the
+        /// definitions when they've changed - or at least every <see cref="ElasticJobsTables.DefinitionsRefreshMinutes"/>.  Held by the service
+        /// between runs; null sends them.
+        /// </summary>
+        public byte[] ElasticJobsDefinitionsHash { get; set; }
+
+        /// <inheritdoc cref="ElasticJobsDefinitionsHash"/>
+        public DateTime? ElasticJobsDefinitionsSentUtc { get; set; }
+
+        /// <summary>How long to cache whether a database is an elastic job database - see <see cref="IsElasticJobDatabase"/></summary>
+        public const int ElasticJobDatabaseCacheMinutes = 60;
 
         /// <summary>
         /// True for a scheduled collection, which schedules the system_health backfill on an instance's first
@@ -1218,6 +1248,12 @@ namespace DBADash
             {
                 return false;
             }
+            else if (collectionType == CollectionType.ElasticJobs)
+            {
+                // Azure only (see above).  The job database of an elastic job agent is an ordinary Azure SQL database
+                // with the jobs schema, so the collection is on by default and runs where that schema can be read.
+                return !isAzureMasterDB && IsElasticJobDatabase();
+            }
             else if (collectionType == CollectionType.ScheduleInfo)
             {
                 // Reported independently of the monitored instance (see ScheduleInfoReporter) - should
@@ -1992,6 +2028,10 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             {
                 await CollectServiceBrokerAsync();
             }
+            else if (collectionType == CollectionType.ElasticJobs)
+            {
+                await CollectElasticJobsAsync();
+            }
             else if (collectionType == CollectionType.RunningJobs)
             {
                 await CollectRunningJobsAsync();
@@ -2411,6 +2451,97 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
                 dt.TableName = ServiceBrokerTables.TableNames[i];
                 AddDT(dt);
             }
+        }
+
+        /// <summary>
+        /// Elastic job definitions and executions from the job database of an elastic job agent.  One query returning a
+        /// result set for each - see <see cref="ElasticJobsTables"/> for the table names, which DBImporter keys off.
+        /// </summary>
+        private async Task CollectElasticJobsAsync()
+        {
+            var since = ElasticJobsFromUtc ?? DateTime.UtcNow.AddDays(-ElasticJobsTables.InitialLookbackDays);
+            await using var cn = new SqlConnection(ConnectionString);
+            await using var cmd = new SqlCommand(SqlStrings.ElasticJobs, cn) { CommandTimeout = CollectionType.ElasticJobs.GetCommandTimeout() };
+            cmd.Parameters.Add(new SqlParameter("Since", SqlDbType.DateTime2) { Value = since });
+            cmd.Parameters.Add(new SqlParameter("AllActive", SqlDbType.Bit) { Value = ElasticJobsCollectAllActive || ElasticJobsFromUtc == null });
+            var definitionsHash = ElasticJobsTables.DefinitionsHashToCompare(ElasticJobsDefinitionsHash, ElasticJobsDefinitionsSentUtc, DateTime.UtcNow);
+            cmd.Parameters.Add(new SqlParameter("DefinitionsHash", SqlDbType.VarBinary, 32) { Value = (object)definitionsHash ?? DBNull.Value });
+            using var da = new SqlDataAdapter(cmd);
+            await cn.OpenAsync();
+            await using var usage = await MeasureAsync(cn);
+            var ds = new DataSet();
+            da.Fill(ds);
+            if (ds.Tables.Count != ElasticJobsTables.TableNames.Length + 1)
+            {
+                throw new Exception($"Elastic Jobs collection returned {ds.Tables.Count} result sets.  Expected {ElasticJobsTables.TableNames.Length + 1}.");
+            }
+
+            var snapshot = ds.Tables[ElasticJobsTables.SnapshotDateResultIndex].Rows[0];
+            var collectedAtUtc = (DateTime)snapshot["SnapshotDateUtc"];
+            var definitionsIncluded = (bool)snapshot["DefinitionsIncluded"];
+            for (var i = 0; i < ElasticJobsTables.TableNames.Length; i++)
+            {
+                var dt = ds.Tables[0];
+                ds.Tables.Remove(dt);
+                dt.TableName = ElasticJobsTables.TableNames[i];
+                // Definitions that haven't changed aren't sent - an empty jobs table would say there are no jobs
+                if (definitionsIncluded || dt.TableName == ElasticJobsTables.ExecutionsTableName)
+                {
+                    AddDT(dt);
+                }
+            }
+            // The service only keeps these once the data has reached a destination - see WorkItem
+            ElasticJobsFromUtc = ElasticJobsTables.NextFromUtc(Data.Tables[ElasticJobsTables.ExecutionsTableName], collectedAtUtc);
+            if (definitionsIncluded)
+            {
+                ElasticJobsDefinitionsHash = snapshot["DefinitionsHash"] as byte[];
+                ElasticJobsDefinitionsSentUtc = DateTime.UtcNow;
+            }
+        }
+
+        /// <summary>
+        /// The four views of the jobs schema the collection reads.  All four must be views: an application's own "jobs" schema with
+        /// tables of these names (a job queue, say) isn't an elastic job database, and collecting from it would fail on every run.
+        /// OBJECT_ID only returns what the login can see, so a job database the login can't read (no jobs_reader) isn't detected either.
+        /// </summary>
+        internal const string IsElasticJobDatabaseSql =@"SELECT CAST(CASE WHEN OBJECT_ID('jobs.jobs','V') IS NOT NULL
+	AND OBJECT_ID('jobs.jobsteps','V') IS NOT NULL
+	AND OBJECT_ID('jobs.target_group_members','V') IS NOT NULL
+	AND OBJECT_ID('jobs.job_executions','V') IS NOT NULL
+	THEN 1 ELSE 0 END AS BIT)";
+
+        /// <summary>
+        /// True if the database is the job database of an elastic job agent and the jobs schema can be read (membership of
+        /// jobs_reader) - see <see cref="IsElasticJobDatabaseSql"/>.  Cached, as it's checked for every Azure database on each Elastic Jobs schedule.
+        /// </summary>
+        private bool IsElasticJobDatabase()
+        {
+            var cacheKey = $"ElasticJobDatabase_{ConnectionID}";
+            if (cache.Get(cacheKey) is bool cachedResult)
+            {
+                return cachedResult;
+            }
+
+            bool isJobDatabase;
+            try
+            {
+                using var cn = new SqlConnection(ConnectionString);
+                using var cmd = new SqlCommand(IsElasticJobDatabaseSql, cn);
+                cn.Open();
+                isJobDatabase = (bool)cmd.ExecuteScalar();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error checking if {ConnectionID} is an elastic job database. Assuming it isn't.", ConnectionID);
+                return false;
+            }
+
+            cache.Set(cacheKey, isJobDatabase, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(ElasticJobDatabaseCacheMinutes) });
+            if (isJobDatabase)
+            {
+                Log.Information("{ConnectionID} is an elastic job database.  Elastic Jobs will be collected.", ConnectionID);
+            }
+            return isJobDatabase;
         }
 
         private async Task CollectDeadlocksAsync()

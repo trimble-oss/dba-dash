@@ -620,6 +620,10 @@ namespace DBADash
             {
                 await TryUpdateAsync(async _ => await UpdateServiceBrokerAsync(), CollectionType.ServiceBroker.ToString(), exceptions);
             }
+            if (tablesInDataSet.Contains(ElasticJobsTables.ExecutionsTableName))
+            {
+                await TryUpdateAsync(async _ => await UpdateElasticJobsAsync(), CollectionType.ElasticJobs.ToString(), exceptions);
+            }
 
             // After everything else, so the runs of a collection whose data couldn't be imported are recorded as failures
             if (tablesInDataSet.Contains(CollectionRunsTable.TableName))
@@ -842,6 +846,34 @@ namespace DBADash
 
             cmd.Parameters.AddWithValue("InstanceID", instanceID);
             cmd.Parameters.AddWithValue("SnapshotDate", snapshotDate);
+            await cmd.ExecuteNonQueryAsync();
+        }
+
+        /// <summary>
+        /// Elastic job definitions and executions, sent to dbo.ElasticJobs_Upd together.  Keyed on the executions table, which is sent for
+        /// every collection that ran.  The definitions (jobs, steps, target group members) are only sent when they've changed: without the
+        /// jobs table they're left as they are.  With it, an empty one marks every job deleted.
+        /// </summary>
+        private async Task UpdateElasticJobsAsync()
+        {
+            await using var cn = new SqlConnection(connectionString);
+            await using var cmd = new SqlCommand("dbo.ElasticJobs_Upd", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = CommandTimeout };
+            await cn.OpenAsync();
+            await using var usage = await SessionUsageMeasurement.StartAsync(cn, activeMeter);
+
+            // A table-valued parameter that isn't supplied defaults to an empty table, so only send what we have.
+            foreach (var tableName in ElasticJobsTables.TableNames)
+            {
+                var dt = data.Tables[tableName];
+                if (dt is { Rows.Count: > 0 })
+                {
+                    cmd.Parameters.AddWithValue(tableName, dt);
+                }
+            }
+
+            cmd.Parameters.AddWithValue("InstanceID", instanceID);
+            cmd.Parameters.AddWithValue("SnapshotDate", snapshotDate);
+            cmd.Parameters.AddWithValue("DefinitionsIncluded", data.Tables.Contains(ElasticJobsTables.JobsTableName));
             await cmd.ExecuteNonQueryAsync();
         }
 
