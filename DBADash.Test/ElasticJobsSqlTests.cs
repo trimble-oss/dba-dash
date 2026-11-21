@@ -246,19 +246,119 @@ CREATE TABLE jobs.job_executions(id INT PRIMARY KEY, job_id INT, status NVARCHAR
         /// </summary>
         private static void Import(DataSet ds)
         {
-            var definitionsIncluded = DefinitionsIncluded(ds);
             using var cn = new SqlConnection(RepositoryConnectionString);
-            using var cmd = new SqlCommand("dbo.ElasticJobs_Upd", cn) { CommandType = CommandType.StoredProcedure };
+            cn.Open();
+            Import(ds, DateTime.UtcNow, cn, null);
+        }
+
+        private static void Import(DataSet ds, DateTime snapshotDate, SqlConnection cn, SqlTransaction? tran)
+        {
+            var definitionsIncluded = DefinitionsIncluded(ds);
+            using var cmd = new SqlCommand("dbo.ElasticJobs_Upd", cn, tran) { CommandType = CommandType.StoredProcedure };
             for (var i = 0; i < ElasticJobsTables.TableNames.Length; i++)
             {
                 if (!definitionsIncluded && ElasticJobsTables.TableNames[i] != ElasticJobsTables.ExecutionsTableName) continue;
                 if (ds.Tables[i].Rows.Count > 0) cmd.Parameters.AddWithValue(ElasticJobsTables.TableNames[i], ds.Tables[i]);
             }
             cmd.Parameters.AddWithValue("InstanceID", instanceID);
-            cmd.Parameters.AddWithValue("SnapshotDate", DateTime.UtcNow);
+            cmd.Parameters.AddWithValue("SnapshotDate", snapshotDate);
             cmd.Parameters.AddWithValue("DefinitionsIncluded", definitionsIncluded);
-            cn.Open();
             cmd.ExecuteNonQuery();
+        }
+
+        /// <summary>
+        /// The first collection imported again after the others - as a file imported out of order would be (in a transaction that's
+        /// rolled back, as the other tests read the data).  Its definitions are older than the last collection, so PurgeLogs keeps its new version
+        /// and doesn't get its removed step back.  The executions it saw running have completed since, and stay complete - going back to
+        /// running would count them in the stats again when next seen complete.  Imported twice: the first mustn't move the collection date
+        /// back, letting the second's definitions through.
+        /// </summary>
+        [TestMethod]
+        public void OutOfOrderImportChangesNothing()
+        {
+            const string state = @"
+SELECT (SELECT job_id, job_version, IsActive FROM dbo.ElasticJobs WHERE InstanceID = {0} ORDER BY job_id FOR JSON PATH) AS Jobs,
+	(SELECT job_id, step_id FROM dbo.ElasticJobSteps WHERE InstanceID = {0} ORDER BY job_id, step_id FOR JSON PATH) AS Steps,
+	(SELECT COUNT(*) FROM dbo.ElasticJobExecutions WHERE InstanceID = {0} AND is_active = 1) AS Active,
+	(SELECT SUM(SucceededCount) FROM dbo.ElasticJobStats_60MIN WHERE InstanceID = {0}) AS Succeeded,
+	(SELECT SnapshotDate FROM dbo.CollectionDates WHERE InstanceID = {0} AND Reference = 'ElasticJobs') AS CollectionDate";
+            using var cn = new SqlConnection(RepositoryConnectionString);
+            cn.Open();
+            string State(SqlTransaction tran)
+            {
+                using var cmd = new SqlCommand(string.Format(state, instanceID), cn, tran);
+                using var rdr = cmd.ExecuteReader();
+                rdr.Read();
+                return string.Join(Environment.NewLine, Enumerable.Range(0, rdr.FieldCount).Select(i => $"{rdr.GetName(i)}: {rdr[i]}"));
+            }
+            using var tran = cn.BeginTransaction();
+            var before = State(tran);
+            Assert.IsTrue(DefinitionsIncluded(firstCollection));
+            Assert.IsTrue(firstCollection.Tables[3].AsEnumerable().Any(r => (bool)r["is_active"]), "The first collection saw executions running");
+
+            var snapshotDate = (DateTime)firstCollection.Tables[ElasticJobsTables.SnapshotDateResultIndex].Rows[0]["SnapshotDateUtc"];
+            Import(firstCollection, snapshotDate, cn, tran);
+            Assert.AreEqual(before, State(tran));
+            Import(firstCollection, snapshotDate, cn, tran);
+            Assert.AreEqual(before, State(tran), "Imported again");
+            tran.Rollback();
+        }
+
+        /// <summary>
+        /// An execution created before the retention of the executions (14 days) is added while it's running, and counted when it completes.
+        /// Once complete, it's left out if it isn't there to complete - purged since, it would be counted again.  In a transaction that's
+        /// rolled back, as the other tests read the data.
+        /// </summary>
+        [TestMethod]
+        public void ExecutionRunningLongerThanTheRetentionIsCountedWhenItCompletes()
+        {
+            using var cn = new SqlConnection(RepositoryConnectionString);
+            cn.Open();
+            using var tran = cn.BeginTransaction();
+            var created = DateTime.UtcNow.AddDays(-20);
+            var executionId = Guid.NewGuid();
+            DataSet Collection(bool active)
+            {
+                var ds = firstCollection.Clone();
+                var snapshot = ds.Tables[ElasticJobsTables.SnapshotDateResultIndex];
+                snapshot.Rows.Add(firstCollection.Tables[ElasticJobsTables.SnapshotDateResultIndex].Rows[0].ItemArray);
+                snapshot.Rows[0]["DefinitionsIncluded"] = false;
+                var execution = ds.Tables[3].NewRow();
+                execution["job_execution_id"] = executionId;
+                execution["job_id"] = IndexJob;
+                execution["job_version"] = 1;
+                execution["is_active"] = active;
+                execution["lifecycle"] = active ? "InProgress" : "Succeeded";
+                execution["create_time"] = created;
+                execution["start_time"] = created;
+                execution["end_time"] = active ? DBNull.Value : DateTime.UtcNow;
+                execution["current_attempts"] = 0;
+                ds.Tables[3].Rows.Add(execution);
+                return ds;
+            }
+            int Count(string sql)
+            {
+                using var cmd = new SqlCommand(string.Format(sql, instanceID, executionId, IndexJob), cn, tran);
+                return Convert.ToInt32(cmd.ExecuteScalar());
+            }
+            const string stored = "SELECT COUNT(*) FROM dbo.ElasticJobExecutions WHERE InstanceID = {0} AND job_execution_id = '{1}' AND is_active = {3}";
+            const string succeeded = "SELECT ISNULL(SUM(SucceededCount),0) FROM dbo.ElasticJobStats_60MIN WHERE InstanceID = {0} AND job_id = '{2}' AND step_id = 0";
+            var succeededBefore = Count(succeeded);
+
+            Import(Collection(true), DateTime.UtcNow, cn, tran);
+            Assert.AreEqual(1, Count(stored.Replace("{3}", "1")), "Added while running");
+            Import(Collection(false), DateTime.UtcNow, cn, tran);
+            Assert.AreEqual(1, Count(stored.Replace("{3}", "0")), "Completed");
+            Assert.AreEqual(succeededBefore + 1, Count(succeeded), "Counted when it completed");
+
+            using (var cmd = new SqlCommand($"DELETE dbo.ElasticJobExecutions WHERE InstanceID = {instanceID} AND job_execution_id = '{executionId}'", cn, tran))
+            {
+                cmd.ExecuteNonQuery(); // Purged
+            }
+            Import(Collection(false), DateTime.UtcNow, cn, tran);
+            Assert.AreEqual(0, Count(stored.Replace("{3}", "0")), "Complete and not there to complete - left out");
+            Assert.AreEqual(succeededBefore + 1, Count(succeeded), "Not counted again");
+            tran.Rollback();
         }
 
         /// <summary>
@@ -431,7 +531,7 @@ EXEC dbo.ElasticJobsReport_Get @InstanceIDs = @IDs, @IncludeNA = 1, @IncludeOK =
             Execute(cn, "EXEC dbo.Summary_Upd");
             Assert.AreEqual(2, Scalar(cn, $"SELECT JobStatus FROM dbo.Summary WHERE InstanceID = {instanceID}"), "An Azure DB's job status is its elastic jobs");
             var issues = Query($"EXEC dbo.DailyReport_Issues_Get @InstanceIDs = '{instanceID}'");
-            Assert.AreEqual("IndexMaint", issues.AsEnumerable().Single(r => (string)r["CheckGroup"] == "Elastic jobs")["ObjectName"]);
+            Assert.AreEqual("IndexMaint (azsrv|jobs)", issues.AsEnumerable().Single(r => (string)r["CheckGroup"] == "Elastic jobs")["ObjectName"], "Named with its job database - a server can have more than one agent");
         }
 
         /// <summary>A job's executions, and one execution's steps against each target - by the ID they share</summary>

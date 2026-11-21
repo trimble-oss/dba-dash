@@ -2,15 +2,20 @@
 	Imports the Elastic Jobs collection - the jobs, steps, target group members and executions of an elastic job agent, from its job database.
 
 	Jobs, steps and target group members (the definitions) are the full set, sent only when they've changed - @DefinitionsIncluded.  Jobs
-	that are no longer there are marked inactive.  Steps and members that are no longer there are removed.
+	that are no longer there are marked inactive.  Steps and members that are no longer there are removed.  Collections can be imported
+	out of order, so definitions from a collection older than the last imported (dbo.CollectionDates) are ignored.  Where that collection
+	had no definitions, a change in them waits for the collector to send them again - at least hourly.  An older collection doesn't move
+	the collection date back, so importing it again is ignored too.
 
 	Executions are the ones created since a little before the previous collection, and any still running then.  They are updated
 	in place in the job database as they progress, so they are upserted here.  Collecting a row again does no harm - only a change is
 	written.  When an execution is first seen complete (inactive) it is added to dbo.ElasticJobStats_60MIN and to the last succeeded/failed
 	dates of its job, so each execution is counted once however many times it's collected.
 
-	Executions older than the retention of dbo.ElasticJobExecutions are not added.  They would be counted again in the stats, having been
-	purged since they were last imported - the first collection after a service restart goes back 7 days.
+	Executions created before the retention of dbo.ElasticJobExecutions are not added if they're complete.  They would be counted again
+	in the stats, having been purged since they were last imported - the first collection after a service restart goes back 7 days.  An
+	execution still running is added however old, and its completion is recorded where it was stored running.  One purged while running
+	is added again as running, and counted when it completes - unless it completes before the next import after the purge.
 */
 CREATE PROC dbo.ElasticJobs_Upd(
 	@InstanceID INT,
@@ -86,7 +91,20 @@ FROM (
 			ROW_NUMBER() OVER(PARTITION BY E.job_execution_id, ISNULL(E.step_id,0), K.TargetKey, CAST(E.create_time AS DATETIME2(2)) ORDER BY E.is_active, E.end_time DESC) AS rnum
 	FROM @ElasticJobExecutions E
 	CROSS APPLY(SELECT CAST(HASHBYTES('SHA2_256', CONCAT(E.target_type, N'|', CAST(E.target_id AS NCHAR(36)), N'|', E.target_group_name, N'|', E.target_server_name, N'|', E.target_database_name, N'|', E.target_elastic_pool_name)) AS BINARY(16)) AS TargetKey) K
-	WHERE E.create_time >= @MinCreateTime
+	WHERE (
+		E.create_time >= @MinCreateTime
+		OR E.is_active = 1
+		/* Completing an execution stored running */
+		OR EXISTS(	SELECT 1
+					FROM dbo.ElasticJobExecutions A
+					WHERE A.InstanceID = @InstanceID
+					AND A.create_time = CAST(E.create_time AS DATETIME2(2))
+					AND A.job_execution_id = E.job_execution_id
+					AND A.step_id = ISNULL(E.step_id,0)
+					AND A.TargetKey = K.TargetKey
+					AND A.is_active = 1
+					)
+		)
 	) T
 WHERE T.rnum = 1
 
@@ -94,9 +112,9 @@ WHERE T.rnum = 1
 CREATE TABLE #Changed(
 	job_id UNIQUEIDENTIFIER NOT NULL,
 	step_id INT NOT NULL,
-	target_type NVARCHAR(128) NULL,
+	target_type NVARCHAR(128) COLLATE DATABASE_DEFAULT NULL,
 	is_active BIT NOT NULL,
-	lifecycle NVARCHAR(50) NOT NULL,
+	lifecycle NVARCHAR(50) COLLATE DATABASE_DEFAULT NOT NULL,
 	create_time DATETIME2(2) NOT NULL,
 	start_time DATETIME2(2) NULL,
 	end_time DATETIME2(2) NULL,
@@ -104,10 +122,27 @@ CREATE TABLE #Changed(
 	WasActive BIT NULL
 )
 
+DECLARE @OutOfOrder BIT = 0
+DECLARE @ApplyDefinitions BIT
+
 BEGIN TRAN
 
+/* Older than the last collection imported - imported out of order */
+IF EXISTS(
+		SELECT 1
+		FROM dbo.CollectionDates WITH(UPDLOCK,HOLDLOCK)
+		WHERE InstanceID = @InstanceID
+		AND Reference = @Ref
+		AND SnapshotDate > @SnapshotDate
+		)
+BEGIN
+	SET @OutOfOrder = 1
+END
+
+SET @ApplyDefinitions = CASE WHEN @DefinitionsIncluded = 1 AND @OutOfOrder = 0 THEN 1 ELSE 0 END
+
 /* The definitions are only sent when they have changed.  Without them, the jobs are left as they are - an empty @ElasticJobs would mark them all deleted. */
-IF @DefinitionsIncluded = 1
+IF @ApplyDefinitions = 1
 BEGIN
 	/* Jobs */
 	UPDATE J
@@ -202,7 +237,7 @@ WHERE NOT EXISTS(
 GROUP BY E.job_id
 
 /* Steps and target group members - only sent with the jobs */
-IF @DefinitionsIncluded = 1
+IF @ApplyDefinitions = 1
 BEGIN
 	/* Steps (current version of each job) */
 	DELETE S
@@ -414,6 +449,8 @@ JOIN #Executions T ON E.create_time = T.create_time
 					AND E.step_id = T.step_id
 					AND E.TargetKey = T.TargetKey
 WHERE E.InstanceID = @InstanceID
+/* Complete is final.  An execution seen running in a collection imported out of order doesn't go back to running. */
+AND NOT (E.is_active = 0 AND T.is_active = 1)
 /* Only where something changed - active executions are collected every time */
 AND EXISTS(
 		SELECT E.job_version, E.is_active, E.lifecycle, E.start_time, E.end_time, E.current_attempts, E.current_attempt_start_time, E.next_attempt_start_time, E.last_message, E.step_name
@@ -597,8 +634,12 @@ WHERE NOT EXISTS(
 			AND S.RunDateTime = T.RunDateTime
 			)
 
-EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,
-							 @Reference = @Ref,
-							 @SnapshotDate = @SnapshotDate
+/* Not moved back by an older collection */
+IF @OutOfOrder = 0
+BEGIN
+	EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,
+								 @Reference = @Ref,
+								 @SnapshotDate = @SnapshotDate
+END
 
 COMMIT

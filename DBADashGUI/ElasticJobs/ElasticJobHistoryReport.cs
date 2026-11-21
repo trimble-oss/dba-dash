@@ -139,6 +139,8 @@ namespace DBADashGUI.ElasticJobs
                 new() { ParamName = "@StepID", ParamType = "INT" },
                 new() { ParamName = "@job_execution_id", ParamType = "UNIQUEIDENTIFIER" },
                 new() { ParamName = "@FailedOnly", ParamType = "BIT" },
+                // Shown as the Top picker.  Ignored when drilling down to an execution - all its rows are returned.
+                new() { ParamName = "@Top", ParamType = "INT" },
             }
         };
 

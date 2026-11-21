@@ -14,7 +14,8 @@
 	@MaxRows: merge (with @MergeGapSec) only where there are more executions than this - so the GUI gets each execution when there
 	aren't too many to draw, and merged spans when there are, in one call rather than fetching them all to find out.
 	instance_id (the SQL Agent job history ID) is always NULL.  job_execution_id identifies a single execution.  Unmerged, each step
-	execution also has its target, so the timeline can show a row per target beneath the step.
+	execution also has its target, so the timeline can show a row per target beneath the step, whether it's still active (is_active -
+	run_status is its outcome so far, Failed for a target waiting for a retry, say), and its start in UTC (RunDateTimeUtc).
 */
 CREATE PROC dbo.ElasticJobTimeline_Get(
 	@InstanceID INT,
@@ -54,7 +55,9 @@ SELECT	J.job_name AS name,
 		E.target_type,
 		E.target_server_name,
 		E.target_elastic_pool_name,
-		E.target_database_name
+		E.target_database_name,
+		E.is_active,
+		B.RunDateTime AS RunDateTimeUtc /* Stays UTC when RunDateTime is shown in the app's time zone - for durations across a DST change */
 INTO #Timeline
 FROM (
 	SELECT	E.job_id, E.job_execution_id, E.step_id, E.lifecycle, E.is_active, E.create_time, E.start_time, E.end_time,
@@ -119,7 +122,7 @@ BEGIN
 			MAX(step_name) AS step_name,
 			step_id,
 			MIN(RunDateTime) AS RunDateTime,
-			AVG(RunDurationSec) AS RunDurationSec,
+			CAST(AVG(CAST(RunDurationSec AS BIGINT)) AS INT) AS RunDurationSec, /* Summed as BIGINT - 20,000 runs of 30 hours overflow an INT */
 			MAX(FinishDateTime) AS FinishDateTime,
 			CASE MAX(CASE run_status WHEN 0 THEN 5 WHEN 2 THEN 4 WHEN 3 THEN 3 WHEN 4 THEN 2 ELSE 1 END) WHEN 5 THEN 0 WHEN 4 THEN 2 WHEN 3 THEN 3 WHEN 2 THEN 4 ELSE 1 END AS run_status,
 			SUM(Executions) AS Executions,
@@ -171,7 +174,9 @@ BEGIN
 			target_type,
 			target_server_name,
 			target_elastic_pool_name,
-			target_database_name
+			target_database_name,
+			is_active,
+			RunDateTimeUtc
 	FROM #Timeline
 	ORDER BY name,
 			step_id,
