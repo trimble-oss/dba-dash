@@ -61,6 +61,15 @@ WHERE JobStatus<>3
 AND enabled=1
 GROUP BY InstanceID
 
+/* Elastic jobs - the job status of an Azure DB that is the job database of an elastic job agent */
+SELECT InstanceID,
+	MIN(JobStatus) AS JobStatus
+INTO #ElasticJobStatus
+FROM dbo.ElasticJobStatus J
+WHERE JobStatus<>3
+AND enabled=1
+GROUP BY InstanceID
+
 SELECT D.InstanceID, 
 	MIN(hadr.synchronization_health) AS synchronization_health
 INTO #AGStatus
@@ -405,7 +414,7 @@ SELECT I.InstanceID,
 	3 AS DriveStatus,
 	ISNULL(F.FileFreeSpaceStatus,3) AS FileFreeSpaceStatus,
 	ISNULL(F.LogFreeSpaceStatus,3) AS LogFreeSpaceStatus,
-	3 AS JobStatus,
+	ISNULL(EJ.JobStatus,3) AS JobStatus, /* Elastic jobs, where the database is the job database of an elastic job agent */
 	3 AS AGStatus,
 	NULL AS DetectedCorruptionDateUtc,
 	3 AS CorruptionStatus,
@@ -472,6 +481,7 @@ LEFT JOIN #ElasticPoolStatus EPS ON I.InstanceID = EPS.InstanceID
 LEFT JOIN #QueryStoreStatus QS ON QS.InstanceID = I.InstanceID
 LEFT JOIN #IdentityStatus Ident ON Ident.InstanceID = I.InstanceID
 LEFT JOIN #DatabaseStateStatus DBState ON I.InstanceID = DBState.InstanceID
+LEFT JOIN #ElasticJobStatus EJ ON I.InstanceID = EJ.InstanceID
 OUTER APPLY(
 			SELECT TOP(1)	FirstFail,
 							LastFail,

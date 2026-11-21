@@ -447,7 +447,13 @@ namespace DBADashGUI
                 dgvSummary.Rows[idx].Cells["DiffBackupStatus"].Value = isAzure ? "" : "View";
                 dgvSummary.Rows[idx].Cells["LogBackupStatus"].Value = isAzure ? "" : "View";
                 dgvSummary.Rows[idx].Cells["DriveStatus"].Value = isAzure ? "" : "View";
-                dgvSummary.Rows[idx].Cells["JobStatus"].Value = isAzure ? "" : "View";
+                // Azure: the status of elastic jobs, where a database on the server is the job database of an elastic job agent
+                var hasElasticJobStatus = isAzure && Convert.ToInt32(row["JobStatus"]) != 3;
+                dgvSummary.Rows[idx].Cells["JobStatus"].Value = !isAzure || hasElasticJobStatus ? "View" : "";
+                if (hasElasticJobStatus)
+                {
+                    dgvSummary.Rows[idx].Cells["JobStatus"].ToolTipText = "Elastic jobs of the server's elastic job agents";
+                }
                 dgvSummary.Rows[idx].Cells["LogShippingStatus"].Value = isAzure ? "" : "View";
                 dgvSummary.Rows[idx].Cells["AGStatus"].Value = (int)row["AGStatus"] == 3 ? "" : "View";
                 dgvSummary.Rows[idx].Cells["QueryStoreStatus"].Value = (int)row["QueryStoreStatus"] == 3 ? "" : "View";
@@ -675,7 +681,8 @@ namespace DBADashGUI
         /// <summary>Tab for the report's object sections (check groups).  Other sections use the summary's tab for their column</summary>
         private static readonly Dictionary<string, Tabs?> ReportSectionTabs = new()
         {
-            { "Backups - Full", Tabs.Backups }, { "Backups - Diff", Tabs.Backups }, { "Backups - Log", Tabs.Backups }, { "Drive space", Tabs.Drives }, { "Agent jobs", Tabs.Jobs }
+            { "Backups - Full", Tabs.Backups }, { "Backups - Diff", Tabs.Backups }, { "Backups - Log", Tabs.Backups }, { "Drive space", Tabs.Drives }, { "Agent jobs", Tabs.Jobs },
+            { DailyReportRenderer.ElasticJobsGroup, Tabs.ElasticJobs }
         };
 
         /// <summary>
@@ -724,7 +731,9 @@ namespace DBADashGUI
             string html;
             try
             {
-                var content = await Task.Run(() => DailyReportRunner.BuildSummaryPage(summary, Common.ConnectionString, scope, TimeZoneInfo.Local.Id, DateTime.UtcNow, ReportSectionLink));
+                // Azure rows are a server each, with no InstanceID - their databases are in scope for their object problems (elastic jobs)
+                var azureInstanceIDs = context.AzureInstanceIDs.ToList();
+                var content = await Task.Run(() => DailyReportRunner.BuildSummaryPage(summary, Common.ConnectionString, scope, TimeZoneInfo.Local.Id, DateTime.UtcNow, ReportSectionLink, azureInstanceIDs));
                 html = content.PreviewHtml();
             }
             catch (Exception ex)
@@ -749,6 +758,12 @@ namespace DBADashGUI
             var col = dgvSummary.Columns[e.ColumnIndex].Name;
             var tab = tabMapping.ContainsKey(col) ? tabMapping[dgvSummary.Columns[e.ColumnIndex].Name] : null;
             var row = (DataRowView)dgvSummary.Rows[e.RowIndex].DataBoundItem;
+            if (col == "JobStatus" && row["InstanceID"] == DBNull.Value)
+            {
+                // An Azure server's job status is its elastic jobs.  Nothing to show where there are none (no link).
+                if (Convert.ToInt32(row["JobStatus"]) == 3) return;
+                tab = Tabs.ElasticJobs;
+            }
             if (e.ColumnIndex == UptimeStatus.Index)
             {
                 ShowUptimeThresholdConfig((int)row["InstanceID"]);
@@ -874,6 +889,10 @@ namespace DBADashGUI
             var row = (DataRowView)dgvTests.Rows[e.RowIndex].DataBoundItem;
             var test = (string)row["Test"];
             var tab = tabMapping[test];
+            if (test == "JobStatus" && context.RegularInstanceIDs.Count == 0 && context.AzureInstanceIDs.Count > 0)
+            {
+                tab = Tabs.ElasticJobs; // Azure only - the job status is of elastic jobs
+            }
             switch (e.ColumnIndex)
             {
                 case 0 when test == CorruptionStatus.Name:

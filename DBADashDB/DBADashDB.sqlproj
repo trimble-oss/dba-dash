@@ -1089,6 +1089,7 @@
     <Build Include="Alert\Procedures\AzureDBSpaceAlert_Upd.sql" />
     <Build Include="Alert\Procedures\ElasticPoolSpaceAlert_Upd.sql" />
     <Build Include="Alert\Procedures\ServiceBrokerAlert_Upd.sql" />
+    <Build Include="Alert\Procedures\ElasticJobAlert_Upd.sql" />
     <Build Include="Alert\Tables\BackoutPeriod.sql" />
     <Build Include="Alert\Procedures\BlackoutPeriod_Add.sql" />
     <Build Include="Alert\Procedures\BlackoutPeriod_Del.sql" />
@@ -1134,6 +1135,7 @@
     <Build Include="dbo\User Defined Types\BigIDs.sql" />
     <Build Include="dbo\Stored Procedures\PurgeClosedAlerts.sql" />
     <Build Include="Alert\Tables\AgentJobSnapshot.sql" />
+    <Build Include="Alert\Tables\ElasticJobSnapshot.sql" />
     <Build Include="Alert\Procedures\AgentJobAlert_Upd.sql" />
     <Build Include="dbo\Views\RunningQueriesPerformanceCounters.sql" />
     <Build Include="dbo\Functions\PerformanceCountersBetweenDates.sql" />
