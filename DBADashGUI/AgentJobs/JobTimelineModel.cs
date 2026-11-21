@@ -40,7 +40,8 @@ namespace DBADashGUI.AgentJobs
 
         /// <summary>How many of the bar's runs had <paramref name="status"/>.</summary>
         public int RunsWith(RunStatus status) =>
-            StatusRuns == null ? (status == Status ? Executions : 0)
+            IsRollup ? 0
+            : StatusRuns == null ? (status == Status ? Executions : 0)
             // Counted only for the statuses history has: none are predicted
             : (int)status < StatusRuns.Length ? StatusRuns[(int)status] : 0;
 
@@ -114,7 +115,19 @@ namespace DBADashGUI.AgentJobs
 
         public TimelineRowModel Row { get; set; }
 
-        public bool IsRunning => Status == RunStatus.InProgress;
+        public bool IsRunning => Active ?? Status == RunStatus.InProgress;
+
+        /// <summary>
+        /// Whether the execution is still going, where <see cref="Status"/> doesn't say - an elastic job target waiting for a retry, or a
+        /// step's run coloured by a target that failed while others still run.  Null to go by the status.
+        /// </summary>
+        public bool? Active { get; init; }
+
+        /// <summary>
+        /// A bar drawn over the bars of the rows beneath it - an elastic job step's run, over its targets.  Its runs are theirs, so it
+        /// counts none of its own (<see cref="RunsWith"/>): a collapsed row's failures would otherwise be counted twice.
+        /// </summary>
+        public bool IsRollup { get; init; }
 
         public string StepLabel => StepId == 0 ? "Job outcome" : $"Step {StepId}: {StepName}";
 

@@ -180,10 +180,15 @@ namespace DBADashService
                         // JobHistory_Upd derives its own watermark from the repository, so re-reading the same
                         // rows imports nothing twice.
                         State.JobInstanceId = collector.Job_instance_id;
-                        // Same reasoning for elastic job executions, which ElasticJobs_Upd upserts
-                        State.ElasticJobsFromUtc = collector.ElasticJobsFromUtc;
-                        State.ElasticJobsDefinitionsHash = collector.ElasticJobsDefinitionsHash;
-                        State.ElasticJobsDefinitionsSentUtc = collector.ElasticJobsDefinitionsSentUtc;
+                        // Same reasoning for elastic job executions, which ElasticJobs_Upd upserts.  Only when this
+                        // work item collected them: the state is shared by the connection's work items, so another
+                        // running at the same time would otherwise put back the values it started with.
+                        if (collector.Data.Tables.Contains(ElasticJobsTables.ExecutionsTableName))
+                        {
+                            State.ElasticJobsFromUtc = collector.ElasticJobsFromUtc;
+                            State.ElasticJobsDefinitionsHash = collector.ElasticJobsDefinitionsHash;
+                            State.ElasticJobsDefinitionsSentUtc = collector.ElasticJobsDefinitionsSentUtc;
+                        }
                         written = true;
                     }
                     catch (Exception ex)

@@ -459,11 +459,11 @@ namespace DBADash.Test
         public void ObjectSection_ElasticJobs()
         {
             var config = new DailyReportConfig { ReportName = "Ops", TimeZone = "UTC" };
-            var issues = new[] { Obj(DailyReportRenderer.ElasticJobsGroup, 1, "azsrv.database.windows.net", "Purge", "last failed 2026-11-20 01:00 UTC (job database azsrv|jobs)") };
+            var issues = new[] { Obj(DailyReportRenderer.ElasticJobsGroup, 1, "azsrv.database.windows.net", "Purge (azsrv|jobs)", "last failed 2026-11-20 01:00 UTC") };
             var content = DailyReportRenderer.Render(config, DateTime.UtcNow, "{All}", new DataTable(), issues, null, "UTC");
 
             Assert.IsTrue(content.TextBody.Contains("ELASTIC JOBS"), content.TextBody);
-            Assert.IsTrue(content.TextBody.Contains("Purge on azsrv.database.windows.net - last failed 2026-11-20 01:00 UTC (job database azsrv|jobs)"), content.TextBody);
+            Assert.IsTrue(content.TextBody.Contains("Purge (azsrv|jobs) on azsrv.database.windows.net - last failed 2026-11-20 01:00 UTC"), content.TextBody);
             Assert.AreEqual(1, content.CriticalCount);
         }
 

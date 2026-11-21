@@ -5,7 +5,9 @@
 	steps against each target.  A step ID is that step's executions against each target.
 	@job_execution_id: the executions of the steps of one job execution, against each target.  Rows of an execution share its
 	job_execution_id.  Where none do, the job's step executions created while it ran are returned instead.  An ID that isn't a job
-	execution's (a step's execution against a target) returns the rows with that ID.
+	execution's (a step's execution against a target) returns the rows with that ID.  All of them - @Top doesn't apply, so a step that
+	ran against many targets isn't cut short.
+	@Top: the most recent executions returned, where @job_execution_id isn't given.
 	@FailedOnly leaves out executions that succeeded, or are in progress.
 
 	Executions that are still running have their duration so far.  Times are UTC.
@@ -28,6 +30,7 @@ DECLARE @ByExecutionID BIT = 0
 IF @job_execution_id IS NOT NULL
 BEGIN
 	SET @StepID = NULL
+	SET @Top = 2147483647
 	SELECT TOP(1)	@ExecutionFrom = E.create_time,
 					@ExecutionTo = ISNULL(E.end_time,@AsOf)
 	FROM dbo.ElasticJobExecutions E

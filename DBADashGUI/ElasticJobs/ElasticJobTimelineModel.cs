@@ -21,9 +21,10 @@ namespace DBADashGUI.ElasticJobs
     {
         /// <summary>
         /// What the chart's bars don't carry.  For a bar of a target's execution, the <see cref="Target"/> and its <see cref="Lifecycle"/>
-        /// (Skipped rather than the chart's Cancelled, say).  For a bar of a step's run, its targets by lifecycle, worst first.
+        /// (Skipped rather than the chart's Cancelled, say).  For a bar of a step's run, its targets by lifecycle, worst first.  StartUtc:
+        /// the bar's start in UTC, for a run's duration across a DST change.
         /// </summary>
-        internal sealed record BarInfo(string Target, string Lifecycle, IReadOnlyList<(string Lifecycle, int Count)> TargetOutcomes);
+        internal sealed record BarInfo(string Target, string Lifecycle, IReadOnlyList<(string Lifecycle, int Count)> TargetOutcomes, DateTime? StartUtc = null);
 
         /// <summary>A step row's key, to keep it expanded or collapsed when the data is loaded again</summary>
         internal static string StepKey(TimelineRowModel row) => row.JobName + "|" + row.Label;
@@ -31,7 +32,7 @@ namespace DBADashGUI.ElasticJobs
         /// <summary>True if the data has the target of each execution - not merged, so a row per target can be shown</summary>
         public static bool HasTargets(DataTable dt) => dt.Columns.Contains("target_database_name") && !dt.Columns.Contains("FailedRuns");
 
-        /// <param name="dt">Timeline data with dates already converted to the app time zone.  The bars' HistoryId is the index of their row.</param>
+        /// <param name="dt">Timeline data with dates already converted to the app time zone, except RunDateTimeUtc.  The bars' HistoryId is the index of their row.</param>
         /// <param name="instanceId">The instance (job database) the data is for</param>
         /// <param name="stepCollapsed">Step rows by <see cref="StepKey"/> that the user expanded or collapsed.  Others start collapsed.</param>
         /// <param name="info">Gets the details of the bars for the tooltip</param>
@@ -70,7 +71,8 @@ namespace DBADashGUI.ElasticJobs
                     Status = (RunStatus)r["run_status"],
                     Executions = 1,
                     HistoryId = executionId.HasValue ? i : null,
-                    SourceIndex = i
+                    SourceIndex = i,
+                    Active = r.Table.Columns.Contains("is_active") && r["is_active"] is bool active ? active : null
                 };
                 if (bar.End <= bar.Start) bar.End = bar.Start.AddSeconds(1);
                 model.Bars.Add(bar);
@@ -110,7 +112,8 @@ namespace DBADashGUI.ElasticJobs
                 }, step.Children);
                 bar.Row = target;
                 target.Bars.Add(bar);
-                info[bar] = new BarInfo(description, r.Table.Columns.Contains("lifecycle") ? r["lifecycle"] as string : null, null);
+                info[bar] = new BarInfo(description, r.Table.Columns.Contains("lifecycle") ? r["lifecycle"] as string : null, null,
+                    r.Table.Columns.Contains("RunDateTimeUtc") && r["RunDateTimeUtc"] is DateTime startUtc ? startUtc : null);
 
                 // Without an execution ID a target's execution is a run on its own
                 var runKey = (jobName, stepId, executionId ?? Guid.NewGuid());
@@ -128,6 +131,10 @@ namespace DBADashGUI.ElasticJobs
                 var first = runBars[0];
                 var start = runBars.Min(b => b.Start);
                 var end = runBars.Max(b => b.End);
+                // First start to last finish - in UTC, as the shown times jump at a DST change.  Each target's duration is its own.
+                var durationSec = runBars.All(b => info[b].StartUtc.HasValue)
+                    ? (int)(runBars.Max(b => info[b].StartUtc.Value.AddSeconds(b.DurationSec)) - runBars.Min(b => info[b].StartUtc.Value)).TotalSeconds
+                    : (int)(end - start).TotalSeconds;
                 var outcomes = runBars
                     .GroupBy(b => (Lifecycle: info[b].Lifecycle ?? TimelineBar.StatusText(b.Status), b.Status))
                     .OrderByDescending(g => Severity(g.Key.Status)).ThenBy(g => g.Key.Lifecycle)
@@ -142,8 +149,10 @@ namespace DBADashGUI.ElasticJobs
                     StepName = first.StepName,
                     Start = start,
                     End = end,
-                    DurationSec = (int)(end - start).TotalSeconds,
+                    DurationSec = durationSec,
                     Status = runBars.Select(b => b.Status).MaxBy(Severity),
+                    Active = runBars.Any(b => b.IsRunning),
+                    IsRollup = true,
                     // One run of the step - its targets are described in the tooltip and counted on the rows beneath
                     Executions = 1,
                     HistoryId = first.HistoryId,
@@ -198,7 +207,8 @@ namespace DBADashGUI.ElasticJobs
             }
             else if (!string.IsNullOrEmpty(pool))
             {
-                label = pool + " (pool)";
+                // Qualified as a database is - the label is the target's row, so pools of the same name on two servers would share one
+                label = (includeServer && !string.IsNullOrEmpty(server) ? ShortServerName(server) + "/" + pool : pool) + " (pool)";
             }
             else
             {

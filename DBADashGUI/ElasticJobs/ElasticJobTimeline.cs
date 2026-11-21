@@ -173,7 +173,8 @@ namespace DBADashGUI.ElasticJobs
             cmd.Parameters.AddWithValue("@MaxRows", maxRows);
             var dt = new DataTable();
             da.Fill(dt);
-            DateHelper.ConvertUTCToAppTimeZone(ref dt);
+            // RunDateTimeUtc stays UTC - the model works out a step's run's duration from it
+            DateHelper.ConvertUTCToAppTimeZone(ref dt, new List<string> { "RunDateTime", "FinishDateTime" });
             return dt;
         }
 

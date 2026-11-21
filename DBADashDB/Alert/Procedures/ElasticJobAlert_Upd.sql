@@ -100,7 +100,8 @@ SELECT	J.InstanceID,
 FROM dbo.ElasticJobs J
 JOIN #ElasticJobApplicable EJA ON J.InstanceID = EJA.InstanceID
 LEFT JOIN Alert.ElasticJobSnapshot EJS ON EJS.InstanceID = J.InstanceID AND EJS.job_id = J.job_id /* previous snapshot of recently failed jobs */
-/* The last failed execution of the job - the one LastFailed is from */
+/* The last failed execution of the job - the one LastFailed is from.  LastFailed is when it completed, so the last to complete rather than to be created,
+	and however long before that it was created. */
 OUTER APPLY(SELECT TOP(1) E.job_execution_id, E.create_time
 			FROM dbo.ElasticJobExecutions E
 			CROSS APPLY dbo.ElasticJobOutcome(E.lifecycle,E.is_active) EO
@@ -109,9 +110,9 @@ OUTER APPLY(SELECT TOP(1) E.job_execution_id, E.create_time
 			AND E.step_id = 0
 			AND E.is_active = 0
 			AND EO.IsFailed = 1
-			AND E.create_time >= DATEADD(d,-1,J.LastFailed)
 			AND E.create_time <= J.LastFailed
-			ORDER BY E.create_time DESC) LastExec
+			AND ISNULL(E.end_time,E.create_time) <= J.LastFailed
+			ORDER BY ISNULL(E.end_time,E.create_time) DESC) LastExec
 /* The databases it failed against - the first 5 by name, then a count of the rest */
 OUTER APPLY(SELECT STUFF((	SELECT N', ' + FT.Target + CASE WHEN FT.rnum = 5 AND FT.TargetCount > 5 THEN CONCAT(N' and ', FT.TargetCount - 5, N' others') ELSE N'' END
 							FROM (	SELECT	COALESCE(F.target_database_name,F.target_elastic_pool_name,F.target_server_name) AS Target,

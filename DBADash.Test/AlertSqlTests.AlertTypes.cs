@@ -197,6 +197,27 @@ EXEC Alert.ElasticJobAlert_Upd", "Alert");
             Assert.AreEqual("Purge elastic job failed against db1, db2, db4, db5, db6 and 2 others", alerts[0].Message);
         }
 
+        /// <summary>
+        /// The targets are those of the execution that failed last - created 3 days ago and only now complete.  Not those of an execution
+        /// created since that failed earlier.
+        /// </summary>
+        [TestMethod]
+        public void ElasticJobAlertListsTheTargetsOfALongRunningExecution()
+        {
+            var alerts = AssertAlerted(TwoInstances + FailedElasticJobs + @"
+DECLARE @LongJob UNIQUEIDENTIFIER = NEWID(), @Long UNIQUEIDENTIFIER = NEWID(), @Short UNIQUEIDENTIFIER = NEWID(), @Created DATETIME2(2) = DATEADD(d,-3,@Failed)
+INSERT INTO dbo.ElasticJobs(InstanceID,job_id,job_name,enabled,IsActive,SnapshotCreatedDate,SnapshotUpdatedDate,LastSucceeded,LastFailed)
+VALUES(@Alert,@LongJob,N'Rebuild',1,1,SYSUTCDATETIME(),SYSUTCDATETIME(),NULL,@Failed)
+INSERT INTO dbo.ElasticJobExecutions(InstanceID,create_time,job_execution_id,step_id,TargetKey,job_id,is_active,lifecycle,start_time,end_time,target_type,target_database_name)
+VALUES(@Alert,@Created,@Long,0,0x21,@LongJob,0,N'Failed',@Created,@Failed,NULL,NULL),
+	(@Alert,@Created,@Long,1,0x22,@LongJob,0,N'Failed',@Created,@Failed,N'SqlDatabase',N'bigdb'),
+	(@Alert,DATEADD(hh,-3,@Failed),@Short,0,0x23,@LongJob,0,N'Failed',DATEADD(hh,-3,@Failed),DATEADD(hh,-2,@Failed),NULL,NULL),
+	(@Alert,DATEADD(hh,-3,@Failed),@Short,1,0x24,@LongJob,0,N'Failed',DATEADD(hh,-3,@Failed),DATEADD(hh,-2,@Failed),N'SqlDatabase',N'smalldb')
+" + Rule("ElasticJob", "ElasticJob", details: @"{""ExcludeJobName"":""Noisy%""}") + @"
+EXEC Alert.ElasticJobAlert_Upd", "Alert", "Alert");
+            Assert.AreEqual("Rebuild elastic job failed against bigdb", alerts.Single(a => a.AlertKey == "ElasticJob:Rebuild").Message);
+        }
+
         [TestMethod]
         public void ElasticJobAlertResolvesWhenJobSucceeds()
         {

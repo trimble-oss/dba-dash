@@ -72,18 +72,18 @@ AND J.enabled = 1
 AND I.ShowInSummary = 1
 UNION ALL
 /*	Elastic jobs.  Listed against the Azure server (InstanceGroupName), as the summary shows Azure - its job status is the status of
-	these jobs.  The detail names the job database, as a server can have more than one elastic job agent. */
+	these jobs.  The object names the job database too: a server can have more than one elastic job agent, each with a job of the same
+	name, and the report tells issues apart by section, instance and object. */
 SELECT 'Elastic jobs',
 	J.JobStatus,
 	I.InstanceGroupName,
-	J.name,
+	J.name + ' (' + J.InstanceDisplayName + ')',
 	CASE WHEN J.IsLastFail = 1 THEN 'last failed ' + CONVERT(VARCHAR(16), J.LastFailed, 120) + ' UTC'
 		WHEN J.LastSucceeded IS NULL THEN 'no successful execution'
 		ELSE 'last succeeded ' + CONVERT(VARCHAR(16), J.LastSucceeded, 120) + ' UTC' END
 		+ CASE WHEN J.JobStepFails24Hrs = 1 THEN ', 1 step execution against a target failed in the last 24hrs'
 			WHEN J.JobStepFails24Hrs > 1 THEN ', ' + CAST(J.JobStepFails24Hrs AS VARCHAR(10)) + ' step executions against targets failed in the last 24hrs'
 			ELSE '' END
-		+ ' (job database ' + J.InstanceDisplayName + ')'
 FROM dbo.ElasticJobStatus J
 JOIN Scope S ON S.InstanceID = J.InstanceID
 JOIN dbo.Instances I ON I.InstanceID = J.InstanceID
