@@ -892,6 +892,13 @@
     <Build Include="Storage\PS_ElasticJobExecutions.sql" />
     <Build Include="Storage\PS_ElasticJobStats_60MIN.sql" />
     <Build Include="dbo\Functions\ElasticJobOutcome.sql" />
+    <Build Include="dbo\Stored Procedures\ElasticJobErrorAck.sql" />
+    <Build Include="dbo\Stored Procedures\ElasticJobHistory_Get.sql" />
+    <Build Include="dbo\Stored Procedures\ElasticJobStatsSummary_Get.sql" />
+    <Build Include="dbo\Stored Procedures\ElasticJobStats_Get.sql" />
+    <Build Include="dbo\Stored Procedures\ElasticJobSteps_Get.sql" />
+    <Build Include="dbo\Stored Procedures\ElasticJobTimeline_Get.sql" />
+    <Build Include="dbo\Stored Procedures\ElasticJobsReport_Get.sql" />
     <Build Include="dbo\Stored Procedures\ElasticJobs_Upd.sql" />
     <Build Include="dbo\Tables\ElasticJobExecutions.sql" />
     <Build Include="dbo\Tables\ElasticJobStats_60MIN.sql" />
@@ -902,6 +909,9 @@
     <Build Include="dbo\User Defined Types\ElasticJobSteps.sql" />
     <Build Include="dbo\User Defined Types\ElasticJobTargetGroupMembers.sql" />
     <Build Include="dbo\User Defined Types\ElasticJobs.sql" />
+    <Build Include="dbo\Views\ElasticJob7Day.sql" />
+    <Build Include="dbo\Views\ElasticJobStats_RAW.sql" />
+    <Build Include="dbo\Views\ElasticJobStatus.sql" />
     <Build Include="dbo\Tables\IdentityColumnThresholds.sql" />
     <Build Include="dbo\User Defined Types\DatabaseExtendedProperties.sql" />
     <Build Include="dbo\Tables\DatabaseExtendedProperties.sql" />

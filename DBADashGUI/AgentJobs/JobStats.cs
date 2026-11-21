@@ -23,6 +23,14 @@ namespace DBADashGUI.AgentJobs
         }
 
         private int InstanceID { get; set; }
+
+        /// <summary>
+        /// Stats of elastic jobs (dbo.ElasticJobStats_Get) rather than SQL Agent jobs.  The same shape, so the same grid and chart -
+        /// a step's counts are of its executions against each target.
+        /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool ElasticJobs { get; set; }
+
         private Guid JobID { get; set; }
         private int StepID { get; set; }
 
@@ -50,7 +58,7 @@ namespace DBADashGUI.AgentJobs
         public DataTable GetJobStats()
         {
             using var cn = new SqlConnection(Common.ConnectionString);
-            using var cmd = new SqlCommand("dbo.JobStats_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var cmd = new SqlCommand(ElasticJobs ? "dbo.ElasticJobStats_Get" : "dbo.JobStats_Get", cn) { CommandType = CommandType.StoredProcedure };
             using var da = new SqlDataAdapter(cmd);
             cmd.Parameters.AddWithValue("InstanceID", InstanceID);
             cmd.Parameters.AddWithValue("JobID", selectedJobID == Guid.Empty ? JobID : selectedJobID);
@@ -69,7 +77,7 @@ namespace DBADashGUI.AgentJobs
         public DataTable GetJobStatsSummary()
         {
             using var cn = new SqlConnection(Common.ConnectionString);
-            using var cmd = new SqlCommand("dbo.JobStatsSummary_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var cmd = new SqlCommand(ElasticJobs ? "dbo.ElasticJobStatsSummary_Get" : "dbo.JobStatsSummary_Get", cn) { CommandType = CommandType.StoredProcedure };
             using var da = new SqlDataAdapter(cmd);
             cmd.Parameters.AddWithValue("InstanceID", InstanceID);
             cmd.Parameters.AddWithValue("JobID", JobID);
@@ -205,6 +213,11 @@ namespace DBADashGUI.AgentJobs
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Failed", DataPropertyName = "FailedCount" });
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Succeeded", DataPropertyName = "SucceededCount" });
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "colRetry", HeaderText = "Retry", DataPropertyName = "RetryCount" });
+            if (ElasticJobs)
+            {
+                // Executions that didn't run as the previous execution of the step was still running against the target
+                dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Skipped", DataPropertyName = "SkippedCount" });
+            }
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Avg Duration (sec)", DataPropertyName = "AvgDurationSec" });
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Max Duration (sec)", DataPropertyName = "MaxDurationSec" });
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Min Duration (sec)", DataPropertyName = "MinDurationSec" });
@@ -225,7 +238,10 @@ namespace DBADashGUI.AgentJobs
                 dd.Click += MeasureDropDown_Click;
                 tsMeasures.DropDownItems.Add(dd);
             }
-            AgentJobsView.AddContextMenuItems(dgv, this);
+            if (!ElasticJobs) // SQL Agent job actions
+            {
+                AgentJobsView.AddContextMenuItems(dgv, this);
+            }
 
             if (UseGlobalTime) return;
             if (DateRange.SelectedTimeSpan.HasValue)
