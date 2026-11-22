@@ -149,6 +149,12 @@ Describe 'CI Workflow checks' {
 		$results = Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "DECLARE @Prefix NVARCHAR(128) = $prefixLiteral; SELECT COUNT(*) cnt FROM dbo.Instances P JOIN dbo.Instances U ON P.ConnectionID = @Prefix + U.ConnectionID WHERE P.Instance = U.Instance AND P.InstanceID <> U.InstanceID"
 		$results.cnt | Should -Be 1
 	}
+	It 'Prefixed instance has its own collecting agent' -Skip:(-not $ConnectionIDPrefix) {
+		# Agents are registered by host and service name.  The prefix on the service name keeps the agent separate for
+		# the source, so the two instances don't share a CollectAgentID (offline incidents) or an S3 path and SQS queue.
+		$results = Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "DECLARE @Prefix NVARCHAR(128) = $prefixLiteral; SELECT COUNT(*) cnt FROM dbo.Instances P JOIN dbo.Instances U ON P.ConnectionID = @Prefix + U.ConnectionID JOIN dbo.DBADashAgent PA ON PA.DBADashAgentID = P.CollectAgentID JOIN dbo.DBADashAgent UA ON UA.DBADashAgentID = U.CollectAgentID WHERE PA.DBADashAgentID <> UA.DBADashAgentID AND PA.AgentServiceName = @Prefix + UA.AgentServiceName AND PA.AgentHostName = UA.AgentHostName"
+		$results.cnt | Should -BeGreaterThan 0
+	}
 	It 'Prefix added once' -Skip:(-not $ConnectionIDPrefix) {
 		$results = Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "DECLARE @Prefix NVARCHAR(128) = $prefixLiteral; SELECT COUNT(*) cnt FROM dbo.Instances WHERE LEFT(ConnectionID, LEN(@Prefix) * 2) = @Prefix + @Prefix"
 		$results.cnt | Should -Be 0
