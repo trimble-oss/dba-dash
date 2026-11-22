@@ -461,7 +461,7 @@ namespace DBADash.Messaging
             // from, as the relayed message had it removed - see ConnectionIDPrefix.PrepareForRelay.
             if (responseMessage.Data != null)
             {
-                ConnectionIDPrefix.Apply(responseMessage.Data, await GetConnectionIDPrefixAsync(replyAgent, destination.ConnectionString));
+                ConnectionIDPrefix.Apply(responseMessage.Data, await GetConnectionIDPrefixAsync(responseMessage.MessageDataPath, replyAgent, destination.ConnectionString));
             }
             if (responseMessage.Data != null && responseMessage.Data.Tables.Contains("DBADash"))
             {
@@ -543,13 +543,18 @@ namespace DBADash.Messaging
         }
 
         /// <summary>
-        /// The ConnectionID prefix of the source the remote service's data is imported from, matched by the S3 path it
-        /// registered.  Null if no source has a prefix, so the repository isn't queried when the feature isn't used.
+        /// The ConnectionID prefix of the source the remote service's data is imported from.  Matched by the S3 folder the
+        /// reply data was written to, which is the path the relay gave the remote service, or else by the S3 path the remote
+        /// service registered.  Null if no source has a prefix, so the repository isn't queried when the feature isn't used.
         /// </summary>
-        private async Task<string> GetConnectionIDPrefixAsync(string remoteAgentIdentifier, string connectionString)
+        private async Task<string> GetConnectionIDPrefixAsync(string messageDataPath, string remoteAgentIdentifier, string connectionString)
         {
             var sources = Config.GetSourceConnectionsSnapshot();
-            if (ConnectionIDPrefix.ConfiguredPrefixes(sources).Count == 0 || string.IsNullOrEmpty(remoteAgentIdentifier)) return null;
+            if (ConnectionIDPrefix.ConfiguredPrefixes(sources).Count == 0) return null;
+            // Not by identity when there's a data path: the registration under the remote service's own identity is
+            // shared by remote services with the same names, and one imported with a prefix is registered under another
+            if (ConnectionIDPrefix.TryMatchMessageDataPath(sources, messageDataPath, out var prefix)) return prefix;
+            if (string.IsNullOrEmpty(remoteAgentIdentifier)) return null;
             var (_, s3Path) = await MessageProcessing.GetRegisteredRelayAsync(remoteAgentIdentifier, connectionString);
             return ConnectionIDPrefix.ForS3Path(sources, s3Path);
         }

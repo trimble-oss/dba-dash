@@ -81,6 +81,45 @@ namespace DBADash.Test
             Assert.AreEqual(Prefix, row[ConnectionIDPrefix.AppliedColumnName]);
         }
 
+        /// <summary>
+        /// Agents are registered by host and service name, so the prefix on the service name keeps the collecting agent
+        /// separate for each source - its own CollectAgentID (offline incidents) and its own S3 path and SQS queue.
+        /// </summary>
+        [TestMethod]
+        public void ApplyScopesTheCollectingAgentToTheSource()
+        {
+            var ds = CollectedDataSet();
+            ds.Tables["DBADash"]!.Columns.Add("AgentServiceName", typeof(string));
+            ds.Tables["DBADash"]!.Rows[0]["AgentServiceName"] = "DBADashService";
+
+            ConnectionIDPrefix.Apply(ds, Prefix);
+
+            Assert.AreEqual("CustomerA:DBADashService", ds.Tables["DBADash"]!.Rows[0]["AgentServiceName"]);
+        }
+
+        [TestMethod]
+        public void ApplyScopesTheCollectingAgentOfAFileWithoutAServiceName()
+        {
+            // An older service doesn't include one, and the importer registers it as {DBADashService}
+            var ds = CollectedDataSet();
+
+            ConnectionIDPrefix.Apply(ds, Prefix);
+
+            Assert.AreEqual("CustomerA:{DBADashService}", ds.Tables["DBADash"]!.Rows[0]["AgentServiceName"]);
+        }
+
+        [TestMethod]
+        public void ApplyChangesNothingIfTheAgentServiceNameWouldBeTooLong()
+        {
+            var ds = CollectedDataSet();
+            ds.Tables["DBADash"]!.Columns.Add("AgentServiceName", typeof(string));
+            ds.Tables["DBADash"]!.Rows[0]["AgentServiceName"] = new string('x', 256 - Prefix.Length + 1);
+
+            Assert.ThrowsExactly<InvalidOperationException>(() => ConnectionIDPrefix.Apply(ds, Prefix));
+            Assert.AreEqual("SRV-SQL01", ds.Tables["DBADash"]!.Rows[0]["ConnectionID"]);
+            Assert.IsFalse(ds.Tables["DBADash"]!.Columns.Contains(ConnectionIDPrefix.AppliedColumnName));
+        }
+
         [TestMethod]
         public void ApplyIsOnlyDoneOnce()
         {
@@ -197,6 +236,55 @@ namespace DBADash.Test
             Assert.AreEqual(AgentS3Path, relayed.CollectAgent.S3Path);
             Assert.AreEqual(msg.CollectAgent.ServiceSQSQueueUrl, relayed.CollectAgent.ServiceSQSQueueUrl, "The queue the message is relayed to");
             Assert.AreEqual(msg.Id, relayed.Id);
+        }
+
+        /// <summary>
+        /// The GUI addresses the message to the registration, which has the prefix on the service name.  The remote
+        /// service only accepts a message for its own identity, so the relay removes it.
+        /// </summary>
+        [TestMethod]
+        public void RelayAddressesTheRemoteServiceByItsOwnIdentity()
+        {
+            var registered = RemoteAgent();
+            registered.AgentServiceName = "CustomerA:DBADashService";
+            registered.AgentPath = @"C:\DBADash";
+            var own = new DBADashAgent { AgentHostName = registered.AgentHostName, AgentServiceName = "DBADashService", AgentPath = registered.AgentPath };
+            var msg = new CollectionMessage { ConnectionID = "CustomerA:SRV-SQL01", CollectAgent = registered };
+
+            var relayed = ConnectionIDPrefix.PrepareForRelay(msg, [PrefixedS3Source()]);
+
+            Assert.AreEqual("DBADashService", relayed.CollectAgent.AgentServiceName);
+            Assert.AreEqual(own.AgentIdentifier, relayed.CollectAgent.AgentIdentifier);
+            Assert.AreNotEqual(registered.AgentIdentifier, relayed.CollectAgent.AgentIdentifier);
+            Assert.AreEqual(registered.ServiceSQSQueueUrl, relayed.CollectAgent.ServiceSQSQueueUrl);
+        }
+
+        [TestMethod]
+        public void RelayLeavesARegistrationWithoutThePrefixOnTheServiceNameAlone()
+        {
+            // Registered before the prefix was added to the service name
+            var msg = new CollectionMessage { ConnectionID = "CustomerA:SRV-SQL01", CollectAgent = RemoteAgent() };
+            msg.CollectAgent.AgentServiceName = "DBADashService";
+
+            var relayed = ConnectionIDPrefix.PrepareForRelay(msg, [PrefixedS3Source()]);
+
+            Assert.AreEqual("DBADashService", relayed.CollectAgent.AgentServiceName);
+        }
+
+        [TestMethod]
+        public void ReplyDataPathMatchesTheSourceItWasRelayedFor()
+        {
+            var sources = new[] { PrefixedS3Source(), new DBADashSource("s3://dbadash-bucket/customer-b") };
+            var handle = Guid.NewGuid();
+
+            Assert.IsTrue(ConnectionIDPrefix.TryMatchMessageDataPath(sources, AgentS3Path.AppendToUrl($"{handle}.message"), out var prefix));
+            Assert.AreEqual(Prefix, prefix);
+
+            Assert.IsTrue(ConnectionIDPrefix.TryMatchMessageDataPath(sources, $"s3://dbadash-bucket/customer-b/{handle}.message", out prefix));
+            Assert.IsNull(prefix, "A source without a prefix");
+
+            Assert.IsFalse(ConnectionIDPrefix.TryMatchMessageDataPath(sources, $"s3://other-bucket/{handle}.message", out _));
+            Assert.IsFalse(ConnectionIDPrefix.TryMatchMessageDataPath(sources, null, out _));
         }
 
         [TestMethod]

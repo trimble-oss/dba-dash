@@ -20,6 +20,12 @@ namespace DBADash
     /// ConnectionIDs in the reply on the way back.  The remote service is matched to its source by the S3 path it writes
     /// to (dbo.DBADashAgent.S3Path).  A remote service that writes to a folder has no S3 path, so messages for its
     /// instances can't be relayed.</para>
+    ///
+    /// <para>The prefix is also added to the service name of the agent that collected the data.  Agents are registered by
+    /// host and service name (dbo.DBADashAgent_Upd), so without it remote services with the same names - or one remote
+    /// service imported through more than one source - would share one registration: one S3 path and SQS queue to relay
+    /// to, and one CollectAgentID, which dbo.OfflineInstances_Add uses to close offline incidents.  The relay removes it
+    /// again, so the message carries the remote service's own identity (<see cref="DBADashAgent.AgentIdentifier"/>).</para>
     /// </summary>
     public static class ConnectionIDPrefix
     {
@@ -33,6 +39,14 @@ namespace DBADash
 
         /// <summary>dbo.Instances.ConnectionID is sysname</summary>
         private const int MaxConnectionIDLength = 128;
+
+        /// <summary>dbo.DBADashAgent.AgentServiceName</summary>
+        private const int MaxAgentServiceNameLength = 256;
+
+        /// <summary>The service name the importer uses for a file from a service too old to include one (DBImporter.GetAgent)</summary>
+        private const string DefaultAgentServiceName = "{DBADashService}";
+
+        private const string AgentServiceNameColumn = "AgentServiceName";
 
         private const string ConnectionIDName = "ConnectionID";
         private const string ConnectionIDsName = "ConnectionIDs";
@@ -62,8 +76,9 @@ namespace DBADash
 
         /// <summary>
         /// Adds the prefix to every ConnectionID in the DataSet: the ConnectionID columns of its tables, and the ConnectionIDs
-        /// in the JSON payload of a connection change reply (<see cref="ConnectionChanges.ToDataSet"/>).  Nothing is changed
-        /// if any of them would be too long, so a DataSet is never left partly prefixed.
+        /// in the JSON payload of a connection change reply (<see cref="ConnectionChanges.ToDataSet"/>).  Also adds it to the
+        /// service name of the agent that collected the data, so the agent is registered separately for this source.  Nothing
+        /// is changed if any of them would be too long, so a DataSet is never left partly prefixed.
         /// </summary>
         public static void Apply(DataSet ds, string prefix)
         {
@@ -99,6 +114,21 @@ namespace DBADash
                 }
             }
 
+            // The collecting agent - registered by host and service name, so this keeps it separate for this source
+            if (dbadash != null)
+            {
+                var hasServiceName = dbadash.Columns.Contains(AgentServiceNameColumn);
+                foreach (DataRow row in dbadash.Rows)
+                {
+                    var serviceName = AddToAgentServiceName(hasServiceName && row[AgentServiceNameColumn] is string name ? name : DefaultAgentServiceName, prefix);
+                    changes.Add(() => row[AgentServiceNameColumn] = serviceName);
+                }
+                if (!hasServiceName)
+                {
+                    changes.Insert(0, () => dbadash.Columns.Add(AgentServiceNameColumn, typeof(string)));
+                }
+            }
+
             changes.ForEach(change => change());
             if (dbadash != null)
             {
@@ -110,9 +140,20 @@ namespace DBADash
             }
         }
 
+        /// <summary>The agent service name with the prefix added.  Throws if the result is too long to register.</summary>
+        public static string AddToAgentServiceName(string serviceName, string prefix)
+        {
+            var prefixed = prefix + serviceName;
+            if (prefixed.Length > MaxAgentServiceNameLength)
+            {
+                throw new InvalidOperationException($"Agent service name {prefixed} is longer than {MaxAgentServiceNameLength} characters with the prefix {prefix} added.");
+            }
+            return prefixed;
+        }
+
         /// <summary>
         /// The message to relay to the remote service it's for, with the prefix of that service's source removed from its
-        /// ConnectionIDs.  Throws if the message names an instance that isn't imported through that source, or names a
+        /// ConnectionIDs and from the service name of <see cref="MessageBase.CollectAgent"/>.  Throws if the message names an instance that isn't imported through that source, or names a
         /// prefixed instance when the remote service can't be matched to a source - the remote service would otherwise be
         /// asked about an instance it doesn't know by that ConnectionID.  The message is returned as it is if no source has
         /// a prefix.
@@ -143,6 +184,15 @@ namespace DBADash
             RewriteJson(json, id => id.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) && id.Length > prefix.Length
                 ? id[prefix.Length..]
                 : throw new InvalidOperationException($"Unable to relay the message for {id}.  The remote service {msg.CollectAgent.AgentHostName} is imported with the ConnectionID prefix {prefix}, which {id} doesn't have."));
+            // The registration has the prefix on the service name (see Apply).  The message is addressed to the remote
+            // service by its own identity, so it's removed.  A registration from before the prefix was added to the
+            // service name doesn't have it.
+            if (json[nameof(MessageBase.CollectAgent)] is JObject agent
+                && agent[nameof(DBADashAgent.AgentServiceName)] is { Type: JTokenType.String } serviceName
+                && ((string)serviceName).StartsWith(prefix, StringComparison.Ordinal))
+            {
+                agent[nameof(DBADashAgent.AgentServiceName)] = ((string)serviceName)[prefix.Length..];
+            }
             return (MessageBase)json.ToObject(msg.GetType());
         }
 
@@ -181,6 +231,20 @@ namespace DBADash
                 default:
                     throw new InvalidOperationException($"More than one source reads from {s3Path} and they have different ConnectionID prefixes.");
             }
+        }
+
+        /// <summary>
+        /// Whether an S3 source reads from the folder a remote service wrote reply data to, and its prefix.  The remote
+        /// service writes it to the S3 path the relay gave it in <see cref="MessageBase.CollectAgent"/> - its registered
+        /// path - so this finds the source without looking the remote service up by identity, which is shared when remote
+        /// services have the same names.
+        /// </summary>
+        public static bool TryMatchMessageDataPath(IEnumerable<DBADashSource> sources, string messageDataPath, out string prefix)
+        {
+            prefix = null;
+            if (string.IsNullOrEmpty(messageDataPath)) return false;
+            var folderEnd = messageDataPath.LastIndexOf('/');
+            return folderEnd > 0 && TryMatchS3Path(sources, messageDataPath[..folderEnd], out prefix);
         }
 
         /// <summary>The distinct prefixes of the sources.  Empty if none has one - the common case, where nothing needs translating.</summary>
