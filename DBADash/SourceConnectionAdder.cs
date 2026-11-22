@@ -252,9 +252,14 @@ namespace DBADash
             };
         }
 
-        /// <summary>True if the instance is marked deleted in the repository - it won't show in the GUI until it's restored.</summary>
+        /// <summary>
+        /// True if the instance is marked deleted in the repository - it won't show in the GUI until it's restored.  False
+        /// without a ConnectionID - an S3 or folder source has none, as it isn't an instance.
+        /// </summary>
         public static async Task<bool> IsInstanceDeletedAsync(string connectionID, string repositoryConnectionString)
         {
+            // dbo.Instances_Get doesn't filter on a NULL ConnectionID, so it would return every deleted instance
+            if (string.IsNullOrEmpty(connectionID)) return false;
             await using var cn = new SqlConnection(repositoryConnectionString);
             await using var cmd = new SqlCommand("dbo.Instances_Get", cn) { CommandType = CommandType.StoredProcedure };
             cmd.Parameters.AddWithValue("IsActive", 0);
