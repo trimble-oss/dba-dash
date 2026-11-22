@@ -525,6 +525,10 @@ EXEC dbo.ElasticJobsReport_Get @InstanceIDs = @IDs, @IncludeNA = 1, @IncludeOK =
             Assert.AreEqual(true, purge["IsRunning"]);
             Assert.AreEqual("Every 15 Minutes", purge["Schedule"]);
             Assert.AreEqual(1, index["JobStepFails24Hrs"]);
+            var collected = Query($"SELECT SnapshotDate FROM dbo.CollectionDates WHERE InstanceID = {instanceID} AND Reference = 'ElasticJobs'").Rows[0]["SnapshotDate"];
+            Assert.AreEqual(collected, index["SnapshotDate"], "When the job database was last collected");
+            Assert.IsFalse(index.IsNull("SnapshotAge"));
+            Assert.IsFalse(index.IsNull("SnapshotStatus"));
 
             using var cn = new SqlConnection(RepositoryConnectionString);
             cn.Open();
