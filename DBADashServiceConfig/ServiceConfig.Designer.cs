@@ -736,7 +736,7 @@ namespace DBADashServiceConfig
             txtAllowedJobs.Name = "txtAllowedJobs";
             txtAllowedJobs.Size = new System.Drawing.Size(370, 27);
             txtAllowedJobs.TabIndex = 13;
-            toolTip1.SetToolTip(txtAllowedJobs, "Comma-separated list of allowed agent jobs, categories or job IDs.  Prefix with \"-\" to deny (deny wins).  Use \"*\" or \"%\" as wildcard characters.  Blank = None.");
+            toolTip1.SetToolTip(txtAllowedJobs, "Comma-separated list of allowed agent jobs, categories or job IDs - also elastic jobs, by name or job ID.  Prefix with \"-\" to deny (deny wins).  Use \"*\" or \"%\" as wildcard characters.  Blank = None.");
             txtAllowedJobs.TextChanged += AllowedJobs_TextChanged;
             // 
             // txtAllowScripts
