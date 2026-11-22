@@ -137,6 +137,7 @@ namespace DBADashService
             {
                 var ds = DataSetSerialization.DeserializeFromFile(f);
                 var id = GetID(ds);
+                ConnectionIDPrefix.Apply(ds, source.ConnectionIDPrefix);
                 using (await Locker.AsyncLocker.LockAsync(id))
                 {
                     await DestinationHandling.WriteAllDestinationsAsync(ds, source, fileName, config);

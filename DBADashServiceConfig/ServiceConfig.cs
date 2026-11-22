@@ -540,6 +540,7 @@ namespace DBADashServiceConfig
 
             cboDeleteAction.SelectedIndex = 0;
             dgvConnections.ColumnHeaderMouseClick += dgvConnections_ColumnHeaderMouseClick;
+            dgvConnections.CellValidating += DgvConnections_CellValidating;
 
             await AboutHelper.CheckForIncompleteUpgrade();
             if (Upgrade.IsUpgradeIncomplete) return;
@@ -559,6 +560,18 @@ namespace DBADashServiceConfig
                 HeaderText = "Connection ID",
                 ToolTipText =
                     "The ConnectionID is used to uniquely identify the SQL Instance in the repository database.  The ConnectionID is automatically assigned to @@SERVERNAME but you can override this with a custom value.  If you change the ConnectionID for an existing server it will appear as a new instance in the repository database."
+            });
+            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn()
+            {
+                Name = "ConnectionIDPrefix",
+                DataPropertyName = "ConnectionIDPrefix",
+                HeaderText = "Connection ID Prefix",
+                ToolTipText =
+                    "S3 and folder sources only.  Added to the ConnectionID of every instance imported from this source, e.g. CustomerA: to import SRV-SQL01 as CustomerA:SRV-SQL01.  " +
+                    "Use it when services that write to different paths could collect instances with the same ConnectionID, so they aren't merged into one instance in the repository.  " +
+                    "The remote services keep their own ConnectionIDs.\r\n" +
+                    "Adding or changing the prefix for a source that's already imported makes its instances appear as new instances in the repository database.\r\n" +
+                    "Messages from the GUI can be sent to instances imported from an S3 source with a prefix, but not from a folder source."
             });
             dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn()
             { DataPropertyName = "NoWMI", HeaderText = "No WMI" });
@@ -2214,13 +2227,23 @@ namespace DBADashServiceConfig
             }
         }
 
+        private void DgvConnections_CellValidating(object sender, DataGridViewCellValidatingEventArgs e)
+        {
+            if (dgvConnections.Columns[e.ColumnIndex].DataPropertyName != "ConnectionIDPrefix") return;
+            var error = ConnectionIDPrefix.Validate(e.FormattedValue as string);
+            dgvConnections.Rows[e.RowIndex].ErrorText = error ?? string.Empty;
+            e.Cancel = error != null;
+        }
+
         private void SetCellsReadOnly(int row, ConnectionType connectionType)
         {
             foreach (DataGridViewColumn col in dgvConnections.Columns)
             {
-                var isReadOnly = connectionType != ConnectionType.SQL &&
-                                 !(col.DataPropertyName == "WriteToSecondaryDestinations" ||
-                                   col.Name is "Delete" or "Edit");
+                var isReadOnly = col.DataPropertyName == "ConnectionIDPrefix"
+                    ? !ConnectionIDPrefix.IsSupported(connectionType)
+                    : connectionType != ConnectionType.SQL &&
+                      !(col.DataPropertyName == "WriteToSecondaryDestinations" ||
+                        col.Name is "Delete" or "Edit");
 
                 dgvConnections.Rows[row].Cells[col.Index].ReadOnly = isReadOnly;
                 dgvConnections.Rows[row].Cells[col.Index].Style.BackColor = isReadOnly ? Color.Silver : Color.White;

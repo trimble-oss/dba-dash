@@ -201,6 +201,8 @@ namespace DBADash.Messaging
                 {
                     // Relay to the queue and S3 path the agent registered in the repository, not the ones in the message - the message could name any
                     await ApplyRegisteredRelayAsync(msg.CollectAgent, dest.ConnectionString);
+                    // The remote service knows its instances by the ConnectionIDs they have before a source's prefix is added
+                    msg = ConnectionIDPrefix.PrepareForRelay(msg, Config.GetSourceConnectionsSnapshot());
 
                     Log.Information("Message {MessageId} with handle {Handle} needs to be relayed to the remote service {Host} via {Sqs}", msg.Id, handle, msg.CollectAgent.AgentHostName, msg.CollectAgent.ServiceSQSQueueUrl);
                     // The message needs to be relayed to the remote agent via SQS queue
@@ -323,20 +325,26 @@ namespace DBADash.Messaging
         /// </summary>
         private static async Task ApplyRegisteredRelayAsync(DBADashAgent agent, string connectionString)
         {
-            await using var cn = new SqlConnection(connectionString);
-            await using var cmd = new SqlCommand("dbo.DBADashAgentRelay_Get", cn) { CommandType = CommandType.StoredProcedure };
-            // Stored truncated to 22 characters (the identifier's base64 padding)
-            var identifier = agent.AgentIdentifier;
-            cmd.Parameters.Add("@AgentIdentifier", SqlDbType.Char, 22).Value = identifier.Length > 22 ? identifier[..22] : identifier;
-            await cn.OpenAsync();
-            await using var rdr = await cmd.ExecuteReaderAsync();
-            var queueUrl = await rdr.ReadAsync() && rdr["ServiceSQSQueueUrl"] is string url ? url : null;
+            var (queueUrl, s3Path) = await GetRegisteredRelayAsync(agent.AgentIdentifier, connectionString);
             if (string.IsNullOrEmpty(queueUrl))
             {
                 throw new Exception($"Unable to relay the message.  The remote service {agent.AgentHostName} hasn't registered an SQS queue in the repository.");
             }
             agent.ServiceSQSQueueUrl = queueUrl;
-            agent.S3Path = rdr["S3Path"] as string;
+            agent.S3Path = s3Path;
+        }
+
+        /// <summary>The SQS queue and S3 path a remote agent registered in the repository (dbo.DBADashAgentRelay_Get).  Nulls if it isn't registered.</summary>
+        internal static async Task<(string QueueUrl, string S3Path)> GetRegisteredRelayAsync(string agentIdentifier, string connectionString)
+        {
+            await using var cn = new SqlConnection(connectionString);
+            await using var cmd = new SqlCommand("dbo.DBADashAgentRelay_Get", cn) { CommandType = CommandType.StoredProcedure };
+            // Stored truncated to 22 characters (the identifier's base64 padding)
+            cmd.Parameters.Add("@AgentIdentifier", SqlDbType.Char, 22).Value = agentIdentifier.Length > 22 ? agentIdentifier[..22] : agentIdentifier;
+            await cn.OpenAsync();
+            await using var rdr = await cmd.ExecuteReaderAsync();
+            if (!await rdr.ReadAsync()) return (null, null);
+            return (rdr["ServiceSQSQueueUrl"] as string, rdr["S3Path"] as string);
         }
 
         public static async Task EndConversation(Guid handle, string connectionString)

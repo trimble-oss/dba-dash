@@ -114,7 +114,7 @@ namespace DBADash.Messaging
 
                                 if (messageType == "REPLY") // Reply message sent from remote service
                                 {
-                                    await ProcessReply(message, handle, destinationConnectionHash);
+                                    await ProcessReply(message, handle, destinationConnectionHash, replyAgent);
                                 }
                                 else // A message for this service to action
                                 {
@@ -443,8 +443,9 @@ namespace DBADash.Messaging
         /// <param name="message"></param>
         /// <param name="handle">Service broker conversation handle to reply to</param>
         /// <param name="destinationConnectionHash">Hash of destination connection so we know which repository database to send the reply to if there are multiple destinations</param>
+        /// <param name="replyAgent">Identifier of the remote service the reply is from</param>
         /// <returns></returns>
-        private async Task ProcessReply(Message message, Guid handle, string destinationConnectionHash)
+        private async Task ProcessReply(Message message, Guid handle, string destinationConnectionHash, string replyAgent)
         {
             using var logHandle = LogScope.Handle(handle);
             if (Config.DestinationConnection.Type != DBADashConnection.ConnectionType.SQL)
@@ -456,6 +457,12 @@ namespace DBADash.Messaging
             var responseMessage = ResponseMessage.Deserialize(Convert.FromBase64String(message.Body));
 
             await responseMessage.DownloadData(Config);
+            // The ConnectionIDs in the reply are the remote service's own.  Add the prefix of the source its data is imported
+            // from, as the relayed message had it removed - see ConnectionIDPrefix.PrepareForRelay.
+            if (responseMessage.Data != null)
+            {
+                ConnectionIDPrefix.Apply(responseMessage.Data, await GetConnectionIDPrefixAsync(replyAgent, destination.ConnectionString));
+            }
             if (responseMessage.Data != null && responseMessage.Data.Tables.Contains("DBADash"))
             {
                 Log.Debug("Writing data to SQL");
@@ -533,6 +540,18 @@ namespace DBADash.Messaging
                     DeferEndConversation(handle, responseMessage.ExpectedProgressCount);
                     break;
             }
+        }
+
+        /// <summary>
+        /// The ConnectionID prefix of the source the remote service's data is imported from, matched by the S3 path it
+        /// registered.  Null if no source has a prefix, so the repository isn't queried when the feature isn't used.
+        /// </summary>
+        private async Task<string> GetConnectionIDPrefixAsync(string remoteAgentIdentifier, string connectionString)
+        {
+            var sources = Config.GetSourceConnectionsSnapshot();
+            if (ConnectionIDPrefix.ConfiguredPrefixes(sources).Count == 0 || string.IsNullOrEmpty(remoteAgentIdentifier)) return null;
+            var (_, s3Path) = await MessageProcessing.GetRegisteredRelayAsync(remoteAgentIdentifier, connectionString);
+            return ConnectionIDPrefix.ForS3Path(sources, s3Path);
         }
 
         private void TrackProgressReceived(Guid handle)

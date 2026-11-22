@@ -575,6 +575,15 @@ namespace DBADash
             }
         }
 
+        /// <summary>A copy of the source list, so it can be read while the list is changed (e.g. a connection added by a message).</summary>
+        public List<DBADashSource> GetSourceConnectionsSnapshot()
+        {
+            lock (SourceConnections)
+            {
+                return SourceConnections.ToList();
+            }
+        }
+
         private static string SourceName(DBADashSource s) =>
             string.IsNullOrEmpty(s.ConnectionID) ? s.SourceConnection.ConnectionForPrint : s.ConnectionID;
 
