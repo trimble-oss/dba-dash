@@ -1,5 +1,4 @@
 ﻿using Microsoft.Data.SqlClient;
-using Org.BouncyCastle.Crypto.Engines;
 using Serilog;
 using SerilogTimings;
 using System;
@@ -7,7 +6,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -88,66 +86,10 @@ namespace DBADash.Messaging
 
         private static void ThrowIfJobExecutionIsNotAllowed(CollectionConfig cfg, DataTable dtJob)
         {
-            // Quick check for "allow all" case
-            if ((cfg.AllowedJobs is "*" or "%"))
-            {
-                return;
-            }
-
             var jobInfo = new HelpJobInfo(dtJob);
-            var jobValues = new[] { jobInfo.Category, jobInfo.Name, jobInfo.JobId.ToString() };
-            // Check denied first
-            if (IsValueDenied(jobValues, cfg.AllowedJobs))
-            {
-                throw new Exception($"Job execution is denied for {jobInfo.Name} with category {jobInfo.Category} and id {jobInfo.JobId}");
-            }
-
-            // Check allowed
-            if (IsValueAllowed(jobValues, cfg.AllowedJobs))
-            {
-                return;
-            }
-
-            throw new Exception($"Job execution is not allowed for {jobInfo.Name} with category {jobInfo.Category} and id {jobInfo.JobId}");
-        }
-
-        private static bool IsValueDenied(string[] jobValues, string configValue)
-        {
-            if (string.IsNullOrEmpty(configValue)) return false;
-
-            return configValue.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
-                .Where(s => s.StartsWith('-'))
-                .Select(s => s[1..])
-                .Any(pattern => jobValues.Any(value => IsWildcardMatch(value, pattern)));
-        }
-
-        private static bool IsValueAllowed(string[] jobValues, string configValue)
-        {
-            if (string.IsNullOrEmpty(configValue)) return false;
-
-            return configValue.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
-                .Where(s => !s.StartsWith('-'))
-                .Any(pattern => jobValues.Any(value => IsWildcardMatch(value, pattern)));
-        }
-
-        private static bool IsWildcardMatch(string value, string pattern)
-        {
-            if (string.IsNullOrEmpty(pattern))
-                return string.IsNullOrEmpty(value);
-
-            if (pattern is "*" or "%")
-                return true;
-
-            // For exact matches (no wildcards), use simple comparison
-            if (!pattern.Contains('*') && !pattern.Contains('%'))
-                return string.Equals(value, pattern, StringComparison.OrdinalIgnoreCase);
-
-            // Use regex for wildcard patterns
-            var regexPattern = Regex.Escape(pattern)
-                .Replace("\\*", ".*")
-                .Replace("\\%", ".*");
-
-            return Regex.IsMatch(value, $"^{regexPattern}$", RegexOptions.IgnoreCase);
+            AllowedJobsFilter.ThrowIfNotAllowed(cfg.AllowedJobs,
+                new[] { jobInfo.Category, jobInfo.Name, jobInfo.JobId.ToString() },
+                $"{jobInfo.Name} with category {jobInfo.Category} and id {jobInfo.JobId}");
         }
 
         private async Task<DataTable> RunJob(string connectionString, CancellationToken cancellationToken)

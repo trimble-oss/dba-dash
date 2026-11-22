@@ -148,6 +148,7 @@ namespace DBADashGUI.ElasticJobs
                 if (subscribedGrids.Add(grid))
                 {
                     grid.RowsAdded += JobsGrid_RowsAdded;
+                    AddContextMenuItems(grid);
                 }
                 JobsGrid_RowsAdded(grid, new DataGridViewRowsAddedEventArgs(0, grid.RowCount));
             }
@@ -175,6 +176,50 @@ namespace DBADashGUI.ElasticJobs
                     _ => "",
                 };
             }
+        }
+
+        /// <summary>Start/stop the job - as for SQL Agent jobs (<see cref="AgentJobsView.AddContextMenuItems"/>)</summary>
+        private static void AddContextMenuItems(DBADashDataGridView grid)
+        {
+            grid.CellContextMenu ??= new ContextMenuStrip();
+            var strip = grid.CellContextMenu;
+            var lblJobName = new ToolStripLabel();
+            lblJobName.Font = new Font(lblJobName.Font, FontStyle.Italic);
+            var tsStartJob = new ToolStripMenuItem("Start/Stop Job", Properties.Resources.ProjectSystemModelRefresh_16x)
+            {
+                ToolTipText = "Start the job, or stop (cancel) it while it's running.  Needs the service login to be a member of jobs_admin in the job database."
+            };
+            var tsHistory = new ToolStripMenuItem("History", Properties.Resources.history);
+            var tsJobActions = new ToolStripMenuItem("Elastic Job Actions", Properties.Resources.MonthCalendar_16x);
+            tsJobActions.DropDownItems.AddRange(new ToolStripItem[] { lblJobName, new ToolStripSeparator(), tsHistory, tsStartJob });
+
+            DataRowView ClickedRow() => grid.ClickedRowIndex >= 0 && grid.ClickedRowIndex < grid.RowCount
+                ? grid.Rows[grid.ClickedRowIndex].DataBoundItem as DataRowView
+                : null;
+
+            tsStartJob.Click += (_, _) =>
+            {
+                if (ClickedRow() is not { } row) return;
+                new ElasticJobExecutionDialog((int)row["InstanceID"], (Guid)row["job_id"], AgentJobsView.GetJobName(row)).Show();
+            };
+            tsHistory.Click += (_, _) =>
+            {
+                if (ClickedRow() is not { } row) return;
+                var instanceId = (int)row["InstanceID"];
+                ElasticJobHistoryReport.ShowHistory(CommonData.GetDBADashContext(instanceId), instanceId, (Guid)row["job_id"]);
+            };
+            strip.Opening += (_, _) =>
+            {
+                var row = ClickedRow();
+                var isJobRow = row != null && row.Row.Table.Columns.Contains("job_id") && row.Row.Table.Columns.Contains("InstanceID");
+                tsJobActions.Visible = isJobRow;
+                if (!isJobRow) return;
+                lblJobName.Text = AgentJobsView.GetJobName(row);
+                lblJobName.Visible = !string.IsNullOrEmpty(lblJobName.Text);
+                tsStartJob.Visible = DBADashUser.AllowJobExecution;
+            };
+            strip.Items.Insert(0, new ToolStripSeparator());
+            strip.Items.Insert(0, tsJobActions);
         }
 
         #endregion Grid post-processing
