@@ -133,11 +133,15 @@ namespace DBADashService
             const int RetryDelay = 10;
             Log.Information("Processing file {Path}", f);
             var fileName = Path.GetFileName(f);
+            // The DataSet once the source's ConnectionID prefix has been added - quarantined in place of the file, so the
+            // prefix isn't lost if it's imported again from the failed message folder (shared by every source)
+            DataSet prefixed = null;
             try
             {
                 var ds = DataSetSerialization.DeserializeFromFile(f);
                 var id = GetID(ds);
                 ConnectionIDPrefix.Apply(ds, source.ConnectionIDPrefix);
+                if (!string.IsNullOrEmpty(source.ConnectionIDPrefix)) prefixed = ds;
                 using (await Locker.AsyncLocker.LockAsync(id))
                 {
                     await DestinationHandling.WriteAllDestinationsAsync(ds, source, fileName, config);
@@ -178,7 +182,7 @@ namespace DBADashService
                 // A quarantined file can never be imported, so the files behind it aren't overtaking anything
                 // by continuing.  One that's still in the source folder is imported again on the next
                 // iteration, so they wait for it instead.
-                return QuarantineFile(f, lockedFilesFirstSeen) ? FileResult.Skip : FileResult.Retry;
+                return await QuarantineFileAsync(f, lockedFilesFirstSeen, prefixed, config) ? FileResult.Skip : FileResult.Retry;
             }
         }
 
@@ -238,8 +242,10 @@ namespace DBADashService
         /// behind it, keeping a copy in the failed message folder for 7 days (SchedulerService.FolderCleanup).
         /// Returns false if the file is still in the source folder afterwards, as it's then imported again on
         /// the next iteration and the files behind it can't be allowed to overtake it.
+        /// A file that had a ConnectionID prefix added is quarantined as the prefixed DataSet rather than copied, as the
+        /// failed message folder holds files from every source - see <see cref="ConnectionIDPrefix.AppliedColumnName"/>.
         /// </summary>
-        private static bool QuarantineFile(string filePath, ConcurrentDictionary<string, DateTime> lockedFilesFirstSeen)
+        private static async Task<bool> QuarantineFileAsync(string filePath, ConcurrentDictionary<string, DateTime> lockedFilesFirstSeen, DataSet prefixed, CollectionConfig config)
         {
             var fileName = Path.GetFileName(filePath);
             try
@@ -252,7 +258,17 @@ namespace DBADashService
                 // second argument unchanged, which would make this a copy of the file over itself.
                 // Copy rather than move: the source folder is often a file share and the failed message folder
                 // is always local to the service, and File.Move has volume restrictions that a copy doesn't.
-                FailedMessageFolder.Copy(filePath, SchedulerServiceConfig.FailedMessageFolder, fileName);
+                if (prefixed != null)
+                {
+                    if (await FailedMessageFolder.WriteAsync(prefixed, SchedulerServiceConfig.FailedMessageFolder, fileName, config) == null)
+                    {
+                        throw new Exception("Failed message folder doesn't exist");
+                    }
+                }
+                else
+                {
+                    FailedMessageFolder.Copy(filePath, SchedulerServiceConfig.FailedMessageFolder, fileName);
+                }
                 if (!TryDeleteFile(filePath))
                 {
                     Log.Warning("{FileName} has been copied to the failed message folder but couldn't be removed from the source folder.  The import will be attempted again on the next iteration", fileName);
