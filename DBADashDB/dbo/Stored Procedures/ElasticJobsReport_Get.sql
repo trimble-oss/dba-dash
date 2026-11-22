@@ -1,6 +1,7 @@
 /*
 	Elastic jobs with their status (dbo.ElasticJobStatus) - the Elastic Jobs tab.  The same parameters as dbo.AgentJobsReport_Get.
-	Also returns the job's schedule and its most recent execution (whether it's running now, and its message).
+	Also returns the job's schedule and its most recent execution (whether it's running now, and its message), and when the job database was
+	last collected (dbo.CollectionDatesStatus), so it's clear how up to date the rest is.
 */
 CREATE PROC dbo.ElasticJobsReport_Get(
 	@InstanceIDs IDs READONLY,
@@ -82,8 +83,12 @@ SELECT	J.Instance,
 		J.JobStatus,
 		J.AckDate,
 		J.AckStatus,
-		J.StepLastFailed
+		J.StepLastFailed,
+		CD.SnapshotDate,
+		CD.HumanSnapshotAge AS SnapshotAge,
+		CD.Status AS SnapshotStatus
 FROM dbo.ElasticJobStatus J
+LEFT JOIN dbo.CollectionDatesStatus CD ON CD.InstanceID = J.InstanceID AND CD.Reference = ''ElasticJobs''
 OUTER APPLY(SELECT TOP(1)	E.lifecycle,
 							E.is_active,
 							ISNULL(E.start_time,E.create_time) AS LastExecutionStart,

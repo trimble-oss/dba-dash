@@ -311,6 +311,8 @@ namespace DBADashGUI.ElasticJobs
                         ["MaxDuration"] = new() { Alias = "Max Duration" },
                         ["AvgDurationSec"] = new() { Alias = "Avg Duration (sec)", Visible = false },
                         ["AvgDuration"] = new() { Alias = "Avg Duration" },
+                        ["SnapshotAge"] = new() { Alias = "Snapshot Age", Highlighting = StatusHighlight("SnapshotStatus"), Description = "Time since the job database was last collected" },
+                        ["SnapshotDate"] = new() { Alias = "Snapshot Date", Highlighting = StatusHighlight("SnapshotStatus"), Description = "When the job database was last collected - how up to date the jobs and their status are" },
                         ["ConfiguredLevel"] = new() { Alias = "Configured Level" },
                         ["Configure"] = new()
                         {
@@ -352,6 +354,7 @@ namespace DBADashGUI.ElasticJobs
                         ["LastFailIsCritical"] = Hidden(),
                         ["LastFailIsWarning"] = Hidden(),
                         ["AckStatus"] = Hidden(),
+                        ["SnapshotStatus"] = Hidden(),
                     }
                 }.SetDisplayIndexBasedOnColumnOrder()
             },
