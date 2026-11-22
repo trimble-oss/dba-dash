@@ -163,6 +163,29 @@ namespace DBADash.Test
             Assert.IsNull(read[1].ConnectionID);
         }
 
+        /// <summary>
+        /// A connection test reply about a connection that's already configured: the GUI looks the instance up in the
+        /// repository by <see cref="SourceConnectionCheck.RepositoryConnectionID"/>, which prefers ExistingConnectionID.
+        /// </summary>
+        [TestMethod]
+        public void ApplyPrefixesConnectionTestReplyForAConfiguredConnection()
+        {
+            var checks = new List<SourceConnectionCheck>
+            {
+                new() { ConnectionID = "SRV-SQL01", Existing = ExistingConnectionStates.Configured, ExistingConnectionID = "SRV-SQL01-Custom" },
+                new() { ConnectionID = "SRV-SQL02", Existing = ExistingConnectionStates.None }
+            };
+            var ds = ConnectionChanges.ToDataSet(checks);
+
+            ConnectionIDPrefix.Apply(ds, Prefix);
+
+            var read = ConnectionChanges.FromDataSet<List<SourceConnectionCheck>>(ds);
+            Assert.AreEqual("CustomerA:SRV-SQL01-Custom", read[0].RepositoryConnectionID);
+            Assert.AreEqual("CustomerA:SRV-SQL01", read[0].ConnectionID);
+            Assert.AreEqual("CustomerA:SRV-SQL02", read[1].RepositoryConnectionID);
+            Assert.IsNull(read[1].ExistingConnectionID);
+        }
+
         [TestMethod]
         public void RelayRemovesThePrefix()
         {
@@ -215,6 +238,22 @@ namespace DBADash.Test
             Assert.AreSame(msg, ConnectionIDPrefix.PrepareForRelay(msg, [PrefixedS3Source(), new DBADashSource("s3://other-bucket/path")]));
         }
 
+        /// <summary>
+        /// The remote service is imported through a source without a prefix.  Its ConnectionIDs are its own even when one
+        /// starts with another source's prefix, so the message is relayed as it is.
+        /// </summary>
+        [TestMethod]
+        public void RelayLeavesAMatchedUnprefixedSourceAloneWhenAnIDLooksPrefixed()
+        {
+            var sources = new[]
+            {
+                new DBADashSource("s3://other-bucket/customer-x") { ConnectionIDPrefix = "SRV-" },
+                new DBADashSource(AgentS3Path)
+            };
+            var msg = new CollectionMessage { ConnectionID = "SRV-SQL01", CollectAgent = RemoteAgent() };
+            Assert.AreSame(msg, ConnectionIDPrefix.PrepareForRelay(msg, sources));
+        }
+
         [TestMethod]
         public void RelayIsUnchangedWithoutPrefixes()
         {
@@ -245,19 +284,40 @@ namespace DBADash.Test
         }
 
         /// <summary>
-        /// The relay finds the ConnectionIDs in a message by property name (ConnectionID, ConnectionIDs).  An instance
-        /// named by a property called anything else would be relayed with the prefix still on it.
+        /// The relay finds the ConnectionIDs in a message or reply payload by property name (ending in ConnectionID or
+        /// ConnectionIDs).  An instance named by a property called anything else would cross the relay with the prefix
+        /// on it, or without it.  Checks the messaging types and the types they serialize, plus the reply payloads built
+        /// outside the messaging namespace (<see cref="ConnectionChanges.ToDataSet"/> takes an object).
         /// </summary>
         [TestMethod]
         public void MessagesOnlyNameInstancesWithPropertiesTheRelayRewrites()
         {
-            var unexpected = typeof(MessageBase).Assembly.GetExportedTypes()
-                .Where(t => t.Namespace == typeof(MessageBase).Namespace)
-                .SelectMany(t => t.GetProperties().Select(p => (Type: t, Property: p)))
-                .Where(x => x.Property.Name.Contains("ConnectionID", StringComparison.OrdinalIgnoreCase)
-                            && x.Property.Name is not ("ConnectionID" or "ConnectionIDs"))
-                .Select(x => $"{x.Type.Name}.{x.Property.Name}")
-                .ToList();
+            var assembly = typeof(MessageBase).Assembly;
+            var replyPayloads = new[] { typeof(SourceConnectionCheck) };
+            var pending = new Queue<Type>(assembly.GetExportedTypes().Where(t => t.Namespace == typeof(MessageBase).Namespace).Concat(replyPayloads));
+            var seen = new HashSet<Type>();
+            var unexpected = new List<string>();
+            while (pending.Count > 0)
+            {
+                var type = pending.Dequeue();
+                if (!seen.Add(type)) continue;
+                foreach (var property in type.GetProperties())
+                {
+                    if (Attribute.IsDefined(property, typeof(JsonIgnoreAttribute))) continue;
+                    if (property.Name.Contains("ConnectionID", StringComparison.OrdinalIgnoreCase)
+                        && !ConnectionIDPrefix.IsConnectionIDName(property.Name)
+                        && !ConnectionIDPrefix.IsConnectionIDsName(property.Name))
+                    {
+                        unexpected.Add($"{type.Name}.{property.Name}");
+                    }
+                    // Follow what's serialized with the type - nested classes and the items of lists and dictionaries
+                    var types = property.PropertyType.IsGenericType ? property.PropertyType.GetGenericArguments() : [property.PropertyType];
+                    foreach (var t in types.Select(t => t.IsArray ? t.GetElementType()! : t).Where(t => t.Assembly == assembly && t.IsClass))
+                    {
+                        pending.Enqueue(t);
+                    }
+                }
+            }
             Assert.AreEqual(0, unexpected.Count, string.Join(", ", unexpected));
         }
     }

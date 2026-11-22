@@ -124,9 +124,13 @@ namespace DBADash
             var prefixes = ConfiguredPrefixes(sources);
             if (prefixes.Count == 0) return msg;
 
-            var prefix = ForS3Path(sources, msg.CollectAgent?.S3Path);
+            var matched = TryMatchS3Path(sources, msg.CollectAgent?.S3Path, out var prefix);
+            // Imported through a source without a prefix - its ConnectionIDs are the remote service's own, even one that
+            // happens to start with another source's prefix
+            if (matched && prefix == null) return msg;
+
             var json = JObject.Parse(msg.SerializeString());
-            if (prefix == null)
+            if (!matched)
             {
                 var prefixed = GetConnectionIDs(json).FirstOrDefault(id => prefixes.Any(p => id.StartsWith(p, StringComparison.OrdinalIgnoreCase)));
                 if (prefixed != null)
@@ -148,7 +152,18 @@ namespace DBADash
         /// </summary>
         public static string ForS3Path(IEnumerable<DBADashSource> sources, string s3Path)
         {
-            if (!TryParseS3Location(s3Path, out var location)) return null;
+            TryMatchS3Path(sources, s3Path, out var prefix);
+            return prefix;
+        }
+
+        /// <summary>
+        /// Whether an S3 source reads from the S3 path, and its prefix - null if it has none.  Throws if more than one source
+        /// reads from the path and they have different prefixes, as which to use is ambiguous.
+        /// </summary>
+        public static bool TryMatchS3Path(IEnumerable<DBADashSource> sources, string s3Path, out string prefix)
+        {
+            prefix = null;
+            if (!TryParseS3Location(s3Path, out var location)) return false;
             var prefixes = sources
                 .Where(s => s.SourceConnection?.Type == ConnectionType.AWSS3
                             && TryParseS3Location(s.SourceConnection.ConnectionString, out var sourceLocation)
@@ -156,12 +171,16 @@ namespace DBADash
                 .Select(s => s.ConnectionIDPrefix)
                 .Distinct(StringComparer.Ordinal)
                 .ToList();
-            return prefixes.Count switch
+            switch (prefixes.Count)
             {
-                0 => null,
-                1 => prefixes[0],
-                _ => throw new InvalidOperationException($"More than one source reads from {s3Path} and they have different ConnectionID prefixes.")
-            };
+                case 0:
+                    return false;
+                case 1:
+                    prefix = prefixes[0];
+                    return true;
+                default:
+                    throw new InvalidOperationException($"More than one source reads from {s3Path} and they have different ConnectionID prefixes.");
+            }
         }
 
         /// <summary>The distinct prefixes of the sources.  Empty if none has one - the common case, where nothing needs translating.</summary>
@@ -172,28 +191,38 @@ namespace DBADash
                 .ToList();
 
         /// <summary>
-        /// Replaces every ConnectionID in a message or reply payload: the values of properties named ConnectionID, and the
-        /// items of properties named ConnectionIDs, at any depth.  Names are matched ignoring case, as they are when the
-        /// message is deserialized.
+        /// Replaces every ConnectionID in a message or reply payload, at any depth: the values of properties whose names end in
+        /// ConnectionID (e.g. ExistingConnectionID), and the items of properties whose names end in ConnectionIDs.  Names
+        /// are matched ignoring case, as they are when the message is deserialized.  Empty values aren't ConnectionIDs and
+        /// are left alone.
         /// </summary>
         internal static void RewriteJson(JToken token, Func<string, string> map)
         {
             if (token is not JContainer container) return;
             foreach (var property in container.DescendantsAndSelf().OfType<JProperty>().ToList())
             {
-                if (property.Name.Equals(ConnectionIDName, StringComparison.OrdinalIgnoreCase) && property.Value.Type == JTokenType.String)
+                if (IsConnectionIDName(property.Name) && property.Value.Type == JTokenType.String)
                 {
-                    property.Value = map((string)property.Value);
+                    if (!string.IsNullOrEmpty((string)property.Value))
+                    {
+                        property.Value = map((string)property.Value);
+                    }
                 }
-                else if (property.Name.Equals(ConnectionIDsName, StringComparison.OrdinalIgnoreCase) && property.Value is JArray items)
+                else if (IsConnectionIDsName(property.Name) && property.Value is JArray items)
                 {
-                    foreach (var item in items.Where(i => i.Type == JTokenType.String).ToList())
+                    foreach (var item in items.Where(i => i.Type == JTokenType.String && !string.IsNullOrEmpty((string)i)).ToList())
                     {
                         item.Replace(map((string)item));
                     }
                 }
             }
         }
+
+        /// <summary>A property that holds a ConnectionID - see <see cref="RewriteJson"/></summary>
+        internal static bool IsConnectionIDName(string name) => name.EndsWith(ConnectionIDName, StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>A property that holds a list of ConnectionIDs - see <see cref="RewriteJson"/></summary>
+        internal static bool IsConnectionIDsName(string name) => name.EndsWith(ConnectionIDsName, StringComparison.OrdinalIgnoreCase);
 
         private static List<string> GetConnectionIDs(JToken token)
         {
