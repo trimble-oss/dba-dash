@@ -273,6 +273,7 @@ namespace DBADashServiceConfig
 
         private void RestoreInstance(string connectionID)
         {
+            if (string.IsNullOrEmpty(connectionID)) return;
             foreach (var dest in collectionConfig.SQLDestinations)
             {
                 try

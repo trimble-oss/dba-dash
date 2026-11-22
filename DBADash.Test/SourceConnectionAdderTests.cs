@@ -17,6 +17,27 @@ namespace DBADash.Test
     {
         private static CollectionConfig NewConfig() => new() { Destination = "Data Source=Repo;Integrated Security=True;Initial Catalog=DBADashDB" };
 
+        /// <summary>
+        /// An S3 or folder source has no ConnectionID.  dbo.Instances_Get doesn't filter on a NULL ConnectionID, so asking
+        /// the repository would find any deleted instance and offer to restore one for the new source, which then failed.
+        /// The repository mustn't be asked at all - the connection string here can't connect.
+        /// </summary>
+        [TestMethod]
+        [DataRow(null)]
+        [DataRow("")]
+        public async Task IsInstanceDeletedAsync_NoConnectionID_IsNotDeleted(string connectionID)
+        {
+            Assert.IsFalse(await SourceConnectionAdder.IsInstanceDeletedAsync(connectionID, "Data Source=NoSuchServer;Connect Timeout=1;Integrated Security=True"));
+        }
+
+        [TestMethod]
+        public async Task CheckAsync_S3Source_HasNoRepositoryConnectionID()
+        {
+            var check = await SourceConnectionAdder.CheckAsync(NewConfig(), new DBADashSource("s3://bucket/path"), validate: false);
+            Assert.IsFalse(check.IsInvalid);
+            Assert.IsTrue(string.IsNullOrEmpty(check.RepositoryConnectionID));
+        }
+
         [TestMethod]
         public void GetConnectionString_BuildsWindowsAuthForInstanceName()
         {
