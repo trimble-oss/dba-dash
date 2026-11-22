@@ -34,6 +34,20 @@ namespace DBADash
         private bool useDualXESession = true;
         public bool WriteToSecondaryDestinations { get; set; } = true;
         public string ConnectionID { get; set; }
+
+        private string connectionIDPrefix;
+
+        /// <summary>
+        /// Added to the ConnectionID of everything imported from this S3 or folder source, so instances collected by
+        /// different remote services can have the same ConnectionID without being merged in the repository.  See
+        /// <see cref="DBADash.ConnectionIDPrefix"/>.  Only S3 and folder sources have one.
+        /// </summary>
+        public string ConnectionIDPrefix
+        {
+            get => SourceConnection != null && DBADash.ConnectionIDPrefix.IsSupported(SourceConnection.Type) ? connectionIDPrefix : null;
+            set => connectionIDPrefix = string.IsNullOrEmpty(value) ? null : value;
+        }
+
         public bool ScriptAgentJobs { get; set; } = true;
         private Dictionary<string, CustomCollection> customCollections = new();
 

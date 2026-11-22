@@ -128,6 +128,7 @@ namespace DBADashService
                     var fileName = Path.GetFileName(s3Path);
                     try
                     {
+                        ConnectionIDPrefix.Apply(ds, source.ConnectionIDPrefix);
                         await DestinationHandling.WriteAllDestinationsAsync(ds, source, fileName, config);
                     }
                     catch (Exception ex)

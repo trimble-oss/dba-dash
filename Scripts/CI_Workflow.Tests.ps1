@@ -17,7 +17,10 @@ param(
 	# keeps a read position - its existence is what shows the event file path ran and committed.
 	[string]$SlowQueryCursorFile,
 	# Only a leg that scheduled the ServiceBroker collection (off by default) asserts it ran.
-	[bool]$ServiceBroker = $false
+	[bool]$ServiceBroker = $false,
+	# Set by a leg that imports the same instance twice: once as written, and once from a secondary destination read by
+	# a source with this ConnectionID prefix.  The repository should then hold it as two instances.
+	[string]$ConnectionIDPrefix
 )
 
 # Get SQL Server version at the script level
@@ -125,11 +128,36 @@ Describe 'CI Workflow checks' {
                 ServerInstance = $Server
                 Database = $Database
             }
+            # The prefix as a T-SQL string literal, for the ConnectionID prefix checks
+            $prefixLiteral = "N'" + ([string]$ConnectionIDPrefix).Replace("'", "''") + "'"
         }
     It 'Test Instance Count' {
          $result= Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "SELECT COUNT(*) AS CountOfInstances FROM dbo.Instances"
-         $result.CountOfInstances | Should -Be 1
+         # A leg with a ConnectionID prefix imports the instance a second time under the prefixed ConnectionID
+         $result.CountOfInstances | Should -Be ($(if ($ConnectionIDPrefix) { 2 } else { 1 }))
     }
+
+	# ConnectionID prefix.  Skipped unless the leg imports a secondary destination through a source with a prefix.
+	# The same instance's data arrives twice - once as written and once with the prefix added on import - so the
+	# repository should hold two instances that differ only by the prefix.
+	It 'Prefixed source imported as its own instance' -Skip:(-not $ConnectionIDPrefix) {
+		$results = Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "DECLARE @Prefix NVARCHAR(128) = $prefixLiteral; SELECT COUNT(*) cnt FROM dbo.Instances P JOIN dbo.Instances U ON P.ConnectionID = @Prefix + U.ConnectionID"
+		$results.cnt | Should -Be 1
+	}
+	It 'Prefixed instance is the same SQL instance' -Skip:(-not $ConnectionIDPrefix) {
+		# Only the ConnectionID is prefixed - the instance name (@@SERVERNAME) is what was collected
+		$results = Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "DECLARE @Prefix NVARCHAR(128) = $prefixLiteral; SELECT COUNT(*) cnt FROM dbo.Instances P JOIN dbo.Instances U ON P.ConnectionID = @Prefix + U.ConnectionID WHERE P.Instance = U.Instance AND P.InstanceID <> U.InstanceID"
+		$results.cnt | Should -Be 1
+	}
+	It 'Prefix added once' -Skip:(-not $ConnectionIDPrefix) {
+		$results = Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "DECLARE @Prefix NVARCHAR(128) = $prefixLiteral; SELECT COUNT(*) cnt FROM dbo.Instances WHERE LEFT(ConnectionID, LEN(@Prefix) * 2) = @Prefix + @Prefix"
+		$results.cnt | Should -Be 0
+	}
+	It 'Both instances have their own data' -Skip:(-not $ConnectionIDPrefix) {
+		# Each import writes against its own InstanceID, so neither instance is an empty shell
+		$results = Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "SELECT COUNT(*) cnt FROM dbo.Instances I WHERE NOT EXISTS(SELECT 1 FROM dbo.CPU C WHERE C.InstanceID = I.InstanceID) OR NOT EXISTS(SELECT 1 FROM dbo.Databases D WHERE D.InstanceID = I.InstanceID) OR NOT EXISTS(SELECT 1 FROM dbo.CollectionDates CD WHERE CD.InstanceID = I.InstanceID)"
+		$results.cnt | Should -Be 0
+	}
     It 'Check for errors' {
          $result= Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database -TrustServerCertificate -Query "SELECT COUNT(*) AS CountOfErrors FROM dbo.CollectionErrorLog"
          $result.CountOfErrors  | Should -Be 0

@@ -207,6 +207,21 @@ namespace DBADashConfig
             {
                 source.TableSizeMaxDatabaseThreshold = o.TableSizeMaxDatabaseThreshold.Value;
             }
+            if (!string.IsNullOrEmpty(o.ConnectionIDPrefix))
+            {
+                if (!ConnectionIDPrefix.IsSupported(source.SourceConnection.Type))
+                {
+                    Log.Error("A ConnectionID prefix can only be set for an S3 or folder source");
+                    Environment.Exit(1);
+                }
+                var prefixError = ConnectionIDPrefix.Validate(o.ConnectionIDPrefix);
+                if (prefixError != null)
+                {
+                    Log.Error(prefixError);
+                    Environment.Exit(1);
+                }
+                source.ConnectionIDPrefix = o.ConnectionIDPrefix;
+            }
             if (!o.SkipValidation)
             {
                 Log.Information("Validating connection...");
@@ -284,6 +299,13 @@ namespace DBADashConfig
                 if (o.Replace)
                 {
                     Log.Information("Replace existing connection");
+                    // Dropping the prefix would import the source's instances under new ConnectionIDs, and could merge them
+                    // with other instances, so it's kept unless --ConnectionIDPrefix is given ("" to remove it).
+                    if (o.ConnectionIDPrefix == null && !string.IsNullOrEmpty(oldSource.ConnectionIDPrefix))
+                    {
+                        source.ConnectionIDPrefix = oldSource.ConnectionIDPrefix;
+                        Log.Information("Keeping ConnectionID prefix {Prefix}", oldSource.ConnectionIDPrefix);
+                    }
                     config.SourceConnections.Remove(oldSource);
                 }
                 else

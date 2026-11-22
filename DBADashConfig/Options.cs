@@ -210,6 +210,9 @@ AddCommunityToolKnownVersions - For DBA Dash maintainers.  Adds every release of
         [Option("ScriptAgentJobs", Default = true, Required = false, HelpText = "Option to script agent jobs.  Use with -a Add")]
         public bool? ScriptAgentJobs { get; set; }
 
+        [Option("ConnectionIDPrefix", Required = false, HelpText = "S3 and folder sources only.  Added to the ConnectionID of every instance imported from the source, so instances from different remote services with the same ConnectionID aren't merged in the repository.  Use with -a Add")]
+        public string? ConnectionIDPrefix { get; set; }
+
         [Option("AWSAccessKey", Required = false, HelpText = "Use with -a SetAWS to set AWS Access Key for S3 storage")]
         public string? AWSAccessKey { get; set; }
 
