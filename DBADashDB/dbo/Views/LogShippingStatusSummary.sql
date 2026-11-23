@@ -28,7 +28,9 @@ WITH Summary AS (
 		   SUM(CASE WHEN LSS.ThresholdConfiguredLevel='Database' AND LSS.Status<>3 THEN 1 ELSE 0 END) AS DatabaseLevelThresholds,
 		   LSS.ShowInSummary,
 		   SUM(CASE WHEN LSS.IsMissing=1 AND LSS.Status<>3 THEN 1 ELSE 0 END) AS MissingCount,
-		   SUM(CASE WHEN LSS.IsNewDatabase=1 THEN 1 ELSE 0 END) AS NewDatabaseCount
+		   SUM(CASE WHEN LSS.IsNewDatabase=1 THEN 1 ELSE 0 END) AS NewDatabaseCount,
+		   /* Counted whatever the status (unless excluded) to highlight databases that might no longer need to be log shipped */
+		   SUM(CASE WHEN LSS.IsNotOnPrimary=1 AND LSS.IsExcluded=0 THEN 1 ELSE 0 END) AS NotOnPrimaryCount
 	FROM dbo.LogShippingStatus LSS
 	LEFT JOIN dbo.LogRestoreThresholds T ON LSS.InstanceID = T.InstanceID AND T.DatabaseID=-1
 	/*
@@ -78,7 +80,8 @@ SELECT	InstanceID,
 		DatabaseLevelThresholds,
 		ShowInSummary,
 		MissingCount,
-		NewDatabaseCount
+		NewDatabaseCount,
+		NotOnPrimaryCount
 FROM Summary
 OUTER APPLY dbo.SecondsToHumanDuration(MaxTimeSinceLast*60.0) AS MaxTimeSinceLastHD
 OUTER APPLY dbo.SecondsToHumanDuration(MinTimeSinceLast*60.0) AS MinTimeSinceLastHD

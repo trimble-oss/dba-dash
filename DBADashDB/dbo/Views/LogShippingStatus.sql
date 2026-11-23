@@ -20,7 +20,11 @@ SELECT I.InstanceID,
 	SSD.SnapshotDate,
 	SSD.Status AS SnapshotAgeStatus,
 	chk.Status,
-	CASE WHEN excl.DatabaseName IS NOT NULL THEN 'N/A (Excluded)' WHEN nd.IsNewDatabase=1 THEN 'N/A (New Database)' WHEN chk.Status = 1 THEN 'Critical' WHEN chk.Status = 2 THEN 'Warning' WHEN chk.Status = 3 THEN 'N/A' WHEN chk.Status = 4 THEN 'OK' ELSE 'N/A' END AS StatusDescription,
+	CASE WHEN excl.DatabaseName IS NOT NULL THEN 'N/A (Excluded)'
+		WHEN nd.IsNewDatabase=1 THEN 'N/A (New Database)'
+		ELSE CONCAT(CASE chk.Status WHEN 1 THEN 'Critical' WHEN 2 THEN 'Warning' WHEN 4 THEN 'OK' ELSE 'N/A' END,
+					CASE WHEN nop.IsNotOnPrimary=1 THEN ' (Not on Primary)' ELSE '' END)
+		END AS StatusDescription,
 	LR.last_file,
 	D.state_desc,
 	CASE WHEN cfg.InstanceID=D.InstanceID AND cfg.DatabaseID=D.DatabaseID THEN 'Database' WHEN cfg.InstanceID = D.InstanceID THEN 'Instance' ELSE 'Root' END AS ThresholdConfiguredLevel,
@@ -31,7 +35,8 @@ SELECT I.InstanceID,
 	CASE WHEN excl.DatabaseName IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS IsExcluded,
 	CASE WHEN excl.DatabaseName IS NULL THEN NULL ELSE CONCAT(excl.DatabaseName,CASE WHEN excl.InstanceID = -1 THEN ' (Root)' ELSE ' (Instance)' END) END AS ExcludedBy,
 	nd.IsNewDatabase,
-	utc.create_date_utc AS create_date
+	utc.create_date_utc AS create_date,
+	nop.IsNotOnPrimary
 FROM dbo.Instances I
 JOIN dbo.Databases D ON I.InstanceID = D.InstanceID
 JOIN dbo.CollectionDatesStatus SSD ON SSD.InstanceID = I.InstanceID AND SSD.Reference='LogRestores'
@@ -85,16 +90,6 @@ OUTER APPLY(SELECT TOP(1) X.InstanceID,
 			) excl
 /* Created within the new database exclude period.  Excluded databases take precedence */
 OUTER APPLY(SELECT CASE WHEN excl.DatabaseName IS NULL AND utc.create_date_utc > DATEADD(mi,-cfg.NewDatabaseExcludePeriodMin,GETUTCDATE()) THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS IsNewDatabase) nd
-OUTER APPLY(SELECT CASE WHEN excl.DatabaseName IS NOT NULL THEN 3
-	WHEN nd.IsNewDatabase=1 THEN 3
-	WHEN l.TimeSinceLast >cfg.TimeSinceLastCriticalThreshold THEN 1
-	WHEN l.TimeSinceLast IS NULL AND cfg.TimeSinceLastCriticalThreshold IS NOT NULL THEN 1
-	WHEN l.LatencyOfLast IS NULL AND cfg.LatencyCriticalThreshold IS NOT NULL THEN 1
-	WHEN l.LatencyOfLast > cfg.LatencyCriticalThreshold THEN 1
-	WHEN l.TimeSinceLast >cfg.TimeSinceLastWarningThreshold THEN 2
-	WHEN l.LatencyOfLast > cfg.LatencyWarningThreshold THEN 2
-	WHEN cfg.LatencyCriticalThreshold IS NULL AND cfg.TimeSinceLastCriticalThreshold IS NULL AND cfg.LatencyWarningThreshold IS NULL AND cfg.TimeSinceLastWarningThreshold IS NULL  THEN 3
-	ELSE 4 END AS Status) chk
 /*
 	Primary instance for the database if the instance is configured as a secondary in dbo.LogShippingPairs.
 	If more than one primary has the database, the lowest PrimaryInstanceID is used - index order, so no sort per database.
@@ -109,6 +104,31 @@ OUTER APPLY(SELECT TOP(1) P.PrimaryInstanceID,
 			AND PD.IsActive=1
 			ORDER BY P.PrimaryInstanceID
 			) pri
+/*
+	Not on primary: the instance is configured as a secondary (dbo.LogShippingPairs with an active primary) but none of its
+	primaries has a database with this name.  e.g. The database was dropped or renamed on the primary.
+	Status is evaluated using the thresholds unless NotOnPrimaryStatus is configured to override it.
+*/
+OUTER APPLY(SELECT CASE WHEN pri.PrimaryInstanceID IS NULL
+						AND EXISTS(SELECT 1
+									FROM dbo.LogShippingPairs P
+									JOIN dbo.Instances PI ON P.PrimaryInstanceID = PI.InstanceID
+									WHERE P.SecondaryInstanceID = I.InstanceID
+									AND PI.IsActive=1
+									)
+					THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS IsNotOnPrimary
+			) nop
+OUTER APPLY(SELECT CASE WHEN excl.DatabaseName IS NOT NULL THEN 3
+	WHEN nd.IsNewDatabase=1 THEN 3
+	WHEN nop.IsNotOnPrimary=1 AND cfg.NotOnPrimaryStatus IS NOT NULL THEN cfg.NotOnPrimaryStatus
+	WHEN l.TimeSinceLast >cfg.TimeSinceLastCriticalThreshold THEN 1
+	WHEN l.TimeSinceLast IS NULL AND cfg.TimeSinceLastCriticalThreshold IS NOT NULL THEN 1
+	WHEN l.LatencyOfLast IS NULL AND cfg.LatencyCriticalThreshold IS NOT NULL THEN 1
+	WHEN l.LatencyOfLast > cfg.LatencyCriticalThreshold THEN 1
+	WHEN l.TimeSinceLast >cfg.TimeSinceLastWarningThreshold THEN 2
+	WHEN l.LatencyOfLast > cfg.LatencyWarningThreshold THEN 2
+	WHEN cfg.LatencyCriticalThreshold IS NULL AND cfg.TimeSinceLastCriticalThreshold IS NULL AND cfg.LatencyWarningThreshold IS NULL AND cfg.TimeSinceLastWarningThreshold IS NULL  THEN 3
+	ELSE 4 END AS Status) chk
 /* RECOVERING (state 2) is reported only while it has a recent restore (within the critical threshold in minutes, if configured) */
 WHERE (D.state = 1 OR D.is_in_standby=1 OR (D.state = 2 AND LR.restore_date IS NOT NULL AND (cfg.TimeSinceLastCriticalThreshold IS NULL OR utc.restore_date_utc > DATEADD(mi,-cfg.TimeSinceLastCriticalThreshold,GETUTCDATE()))))
 AND D.IsActive=1
@@ -153,7 +173,8 @@ SELECT SI.InstanceID,
 	CASE WHEN excl.DatabaseName IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS IsExcluded,
 	CASE WHEN excl.DatabaseName IS NULL THEN NULL ELSE CONCAT(excl.DatabaseName,CASE WHEN excl.InstanceID = -1 THEN ' (Root)' ELSE ' (Instance)' END) END AS ExcludedBy,
 	nd.IsNewDatabase,
-	utc.create_date_utc AS create_date
+	utc.create_date_utc AS create_date,
+	CAST(0 AS BIT) AS IsNotOnPrimary
 FROM dbo.LogShippingPairs P
 JOIN dbo.Instances PI ON P.PrimaryInstanceID = PI.InstanceID
 JOIN dbo.Instances SI ON P.SecondaryInstanceID = SI.InstanceID

@@ -70,7 +70,8 @@ SELECT LSS.InstanceID,
 	LSS.ExcludedBy,
 	LSS.ShowInSummary,
 	LSS.IsNewDatabase,
-LSS.create_date
+	LSS.create_date,
+	LSS.IsNotOnPrimary
 INTO #LogShippingStatus
 FROM dbo.LogShippingStatus LSS
 WHERE EXISTS(SELECT 1 FROM #Instances I WHERE I.InstanceID = LSS.InstanceID)
@@ -103,7 +104,9 @@ AND (LSS.ShowInSummary=1 OR @ShowHidden=1)
 		   CASE WHEN T.InstanceID IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS InstanceLevelThreshold,
 		   SUM(CASE WHEN LSS.ThresholdConfiguredLevel='Database' AND LSS.Status<>3 THEN 1 ELSE 0 END) AS DatabaseLevelThresholds,
 		   SUM(CASE WHEN LSS.IsMissing=1 AND LSS.Status<>3 THEN 1 ELSE 0 END) AS MissingCount,
-		   SUM(CASE WHEN LSS.IsNewDatabase=1 THEN 1 ELSE 0 END) AS NewDatabaseCount
+		   SUM(CASE WHEN LSS.IsNewDatabase=1 THEN 1 ELSE 0 END) AS NewDatabaseCount,
+		   /* Counted whatever the status (unless excluded) to highlight databases that might no longer need to be log shipped */
+		   SUM(CASE WHEN LSS.IsNotOnPrimary=1 AND LSS.IsExcluded=0 THEN 1 ELSE 0 END) AS NotOnPrimaryCount
 	FROM #LogShippingStatus LSS
 	LEFT JOIN dbo.LogRestoreThresholds T ON LSS.InstanceID = T.InstanceID AND T.DatabaseID=-1
 	/*
@@ -153,7 +156,8 @@ SELECT S.InstanceID,
        CAST('Configure' AS NVARCHAR(20)) AS Configure,
        S.MissingCount,
        S.NewDatabaseCount,
-       pri.PrimaryInstances
+       pri.PrimaryInstances,
+       S.NotOnPrimaryCount
 FROM Summary S
 /* Primary instance(s) configured for the instance in dbo.LogShippingPairs.  NULL if not configured.  FOR XML PATH rather than STRING_AGG for SQL 2016 */
 OUTER APPLY(SELECT STUFF((SELECT ', ' + PI.InstanceDisplayName
@@ -206,7 +210,8 @@ SELECT LSS.InstanceID,
        LSS.IsExcluded,
        LSS.ExcludedBy,
        LSS.create_date,
-       DatabaseAgeHD.HumanDuration AS DatabaseAgeDuration
+       DatabaseAgeHD.HumanDuration AS DatabaseAgeDuration,
+       LSS.IsNotOnPrimary
 FROM #LogShippingStatus LSS
 CROSS APPLY dbo.ParseFileName(LSS.last_file) f
 OUTER APPLY dbo.SecondsToHumanDuration(DATEDIFF_BIG(s,LSS.create_date,GETUTCDATE())) AS DatabaseAgeHD

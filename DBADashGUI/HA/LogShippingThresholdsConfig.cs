@@ -49,7 +49,9 @@ namespace DBADashGUI.LogShipping
                     InstanceID = InstanceID,
                     DatabaseID = DatabaseID,
                     Inherited = chkLRInherit.Checked,
-                    NewDatabaseExcludePeriod = Convert.ToInt32(numExcludePeriod.Value)
+                    NewDatabaseExcludePeriod = Convert.ToInt32(numExcludePeriod.Value),
+                    // Combo index matches the status value (1=Critical, 2=Warning, 3=N/A).  0 = Use Thresholds (null)
+                    NotOnPrimaryStatus = cboNotOnPrimaryStatus.SelectedIndex > 0 ? (byte?)cboNotOnPrimaryStatus.SelectedIndex : null
                 };
                 if (chkLRLatency.Checked & !chkLRInherit.Checked)
                 {
@@ -69,6 +71,7 @@ namespace DBADashGUI.LogShipping
                 chkLRTimeSinceLast.Checked = value.TimeSinceLastCriticalThreshold != null && value.TimeSinceLastWarningThreshold != null;
                 chkExcludePeriod.Checked = value.NewDatabaseExcludePeriod > 0;
                 numExcludePeriod.Value = value.NewDatabaseExcludePeriod;
+                cboNotOnPrimaryStatus.SelectedIndex = value.NotOnPrimaryStatus is >= 1 and <= 3 ? value.NotOnPrimaryStatus.Value : 0;
                 if (chkLRTimeSinceLast.Checked)
                 {
                     numLRTimeSinceLastCritical.Value = (int)value.TimeSinceLastCriticalThreshold;

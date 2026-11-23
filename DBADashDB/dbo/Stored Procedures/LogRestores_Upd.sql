@@ -69,7 +69,8 @@ BEGIN TRAN
 			CAST(CriticalCount AS DECIMAL(28,9)) AS [Critical Count],
 			CAST(WarningCount AS DECIMAL(28,9)) AS [Warning Count],
 			CAST(LogShippedDBCount AS DECIMAL(28,9)) AS [Log Shipped Database Count],
-			CAST(MissingCount AS DECIMAL(28,9)) AS [Missing Database Count]
+			CAST(MissingCount AS DECIMAL(28,9)) AS [Missing Database Count],
+			CAST(NotOnPrimaryCount AS DECIMAL(28,9)) AS [Not On Primary Count]
 	FROM dbo.LogShippingStatusSummary
 	WHERE InstanceID = @InstanceID
 	) AS Summary
@@ -86,7 +87,8 @@ BEGIN TRAN
 			[Critical Count],
 			[Warning Count],
 			[Log Shipped Database Count],
-			[Missing Database Count]
+			[Missing Database Count],
+			[Not On Primary Count]
 			)
 	 ) UNPVT
 	WHERE EXISTS(	SELECT 1 

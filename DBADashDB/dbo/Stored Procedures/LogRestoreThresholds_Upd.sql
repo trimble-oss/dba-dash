@@ -6,7 +6,8 @@
 	@TimeSinceLastWarning INT=NULL,
 	@TimeSinceLastCritical INT=NULL,
 	@Inherit BIT=0,
-	@NewDatabaseExcludePeriodMin INT=1440
+	@NewDatabaseExcludePeriodMin INT=1440,
+	@NotOnPrimaryStatus TINYINT=NULL /* NULL to use the thresholds.  1=Critical, 2=Warning, 3=N/A */
 )
 AS
 SET XACT_ABORT ON
@@ -24,7 +25,8 @@ INSERT INTO dbo.LogRestoreThresholds
     TimeSinceLastCriticalThreshold,
     LatencyWarningThreshold,
 	LatencyCriticalThreshold,
-	NewDatabaseExcludePeriodMin
+	NewDatabaseExcludePeriodMin,
+	NotOnPrimaryStatus
 )
 VALUES
 (  @InstanceID,
@@ -33,7 +35,8 @@ VALUES
    @TimeSinceLastCritical,
    @LatencyWarning,
    @LatencyCritical,
-   @NewDatabaseExcludePeriodMin
+   @NewDatabaseExcludePeriodMin,
+   @NotOnPrimaryStatus
     )
 END
 COMMIT

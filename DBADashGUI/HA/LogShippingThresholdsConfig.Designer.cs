@@ -49,6 +49,8 @@
             this.chkExcludePeriod = new System.Windows.Forms.CheckBox();
             this.panel1 = new System.Windows.Forms.Panel();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.lblNotOnPrimaryStatus = new System.Windows.Forms.Label();
+            this.cboNotOnPrimaryStatus = new System.Windows.Forms.ComboBox();
             this.pnlThresholds.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numExcludePeriod)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numLRTimeSinceLastWarning)).BeginInit();
@@ -60,6 +62,8 @@
             // 
             // pnlThresholds
             // 
+            this.pnlThresholds.Controls.Add(this.cboNotOnPrimaryStatus);
+            this.pnlThresholds.Controls.Add(this.lblNotOnPrimaryStatus);
             this.pnlThresholds.Controls.Add(this.panel1);
             this.pnlThresholds.Controls.Add(this.chkExcludePeriod);
             this.pnlThresholds.Controls.Add(this.label1);
@@ -67,11 +71,40 @@
             this.pnlThresholds.Location = new System.Drawing.Point(13, 39);
             this.pnlThresholds.Margin = new System.Windows.Forms.Padding(4);
             this.pnlThresholds.Name = "pnlThresholds";
-            this.pnlThresholds.Size = new System.Drawing.Size(569, 197);
+            this.pnlThresholds.Size = new System.Drawing.Size(569, 230);
             this.pnlThresholds.TabIndex = 40;
-            // 
+            //
+            // lblNotOnPrimaryStatus
+            //
+            this.lblNotOnPrimaryStatus.AutoSize = true;
+            this.lblNotOnPrimaryStatus.Location = new System.Drawing.Point(2, 191);
+            this.lblNotOnPrimaryStatus.Name = "lblNotOnPrimaryStatus";
+            this.lblNotOnPrimaryStatus.Size = new System.Drawing.Size(152, 17);
+            this.lblNotOnPrimaryStatus.TabIndex = 55;
+            this.lblNotOnPrimaryStatus.Text = "Not on Primary Status:";
+            this.toolTip1.SetToolTip(this.lblNotOnPrimaryStatus, "Status for databases that are not on the configured primary (Configure > Log Shipping Pairs).\r\n" +
+        "e.g. The database was dropped or renamed on the primary.\r\n" +
+        "Use Thresholds evaluates them like any other log shipped database.");
+            //
+            // cboNotOnPrimaryStatus
+            //
+            this.cboNotOnPrimaryStatus.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cboNotOnPrimaryStatus.FormattingEnabled = true;
+            this.cboNotOnPrimaryStatus.Items.AddRange(new object[] {
+            "Use Thresholds",
+            "Critical",
+            "Warning",
+            "N/A"});
+            this.cboNotOnPrimaryStatus.Location = new System.Drawing.Point(235, 188);
+            this.cboNotOnPrimaryStatus.Name = "cboNotOnPrimaryStatus";
+            this.cboNotOnPrimaryStatus.Size = new System.Drawing.Size(144, 24);
+            this.cboNotOnPrimaryStatus.TabIndex = 56;
+            this.toolTip1.SetToolTip(this.cboNotOnPrimaryStatus, "Status for databases that are not on the configured primary (Configure > Log Shipping Pairs).\r\n" +
+        "e.g. The database was dropped or renamed on the primary.\r\n" +
+        "Use Thresholds evaluates them like any other log shipped database.");
+            //
             // label1
-            // 
+            //
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(342, 153);
             this.label1.Name = "label1";
@@ -265,7 +298,7 @@
             // 
             // bttnUpdate
             // 
-            this.bttnUpdate.Location = new System.Drawing.Point(507, 262);
+            this.bttnUpdate.Location = new System.Drawing.Point(507, 295);
             this.bttnUpdate.Name = "bttnUpdate";
             this.bttnUpdate.Size = new System.Drawing.Size(75, 23);
             this.bttnUpdate.TabIndex = 41;
@@ -313,7 +346,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(600, 301);
+            this.ClientSize = new System.Drawing.Size(600, 334);
             this.Controls.Add(this.bttnUpdate);
             this.Controls.Add(this.pnlThresholds);
             this.Controls.Add(this.chkLRInherit);
@@ -358,5 +391,7 @@
         private System.Windows.Forms.CheckBox chkExcludePeriod;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.ToolTip toolTip1;
+        private System.Windows.Forms.Label lblNotOnPrimaryStatus;
+        private System.Windows.Forms.ComboBox cboNotOnPrimaryStatus;
     }
 }
