@@ -14,6 +14,12 @@ namespace DBADashGUI.LogShipping
         public int? TimeSinceLastCriticalThreshold { get; set; }
         public int NewDatabaseExcludePeriod { get; set; } = 1440;
 
+        /// <summary>
+        /// Status override for databases on a secondary that are not on the configured primary (e.g. dropped on the
+        /// primary).  Null to evaluate them using the thresholds.  1=Critical, 2=Warning, 3=N/A
+        /// </summary>
+        public byte? NotOnPrimaryStatus { get; set; }
+
         public bool Inherited { get; set; }
 
         public static LogShippingThreshold GetLogShippingThreshold(int InstanceID, int DatabaseID)
@@ -45,6 +51,7 @@ namespace DBADashGUI.LogShipping
                         threshold.TimeSinceLastWarningThreshold = (int?)rdr["TimeSinceLastWarningThreshold"];
                     }
                     threshold.NewDatabaseExcludePeriod = (int)rdr["NewDatabaseExcludePeriodMin"];
+                    threshold.NotOnPrimaryStatus = rdr["NotOnPrimaryStatus"] as byte?;
                     threshold.Inherited = false;
                     if (rdr.Read())
                     {
@@ -74,6 +81,7 @@ namespace DBADashGUI.LogShipping
                 cmd.Parameters.AddWithNullableValue("TimeSinceLastCritical", TimeSinceLastCriticalThreshold);
                 cmd.Parameters.AddWithValue("Inherit", Inherited);
                 cmd.Parameters.AddWithValue("NewDatabaseExcludePeriodMin", NewDatabaseExcludePeriod);
+                cmd.Parameters.AddWithNullableValue("NotOnPrimaryStatus", NotOnPrimaryStatus);
                 cmd.ExecuteNonQuery();
             }
         }

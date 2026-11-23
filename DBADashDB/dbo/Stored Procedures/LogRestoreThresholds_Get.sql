@@ -11,7 +11,8 @@ SELECT T.InstanceID,
        T.LatencyWarningThreshold,
        T.TimeSinceLastCriticalThreshold,
 	   T.TimeSinceLastWarningThreshold,
-       T.NewDatabaseExcludePeriodMin
+       T.NewDatabaseExcludePeriodMin,
+       T.NotOnPrimaryStatus
 FROM dbo.LogRestoreThresholds T
 LEFT JOIN dbo.Instances I ON I.InstanceID = T.InstanceID
 LEFT JOIN dbo.Databases D ON D.DatabaseID = T.DatabaseID
