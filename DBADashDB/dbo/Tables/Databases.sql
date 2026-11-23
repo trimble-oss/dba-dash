@@ -114,6 +114,7 @@
                                 WHEN log_reuse_wait=13 THEN 'OLDEST_PAGE'
                                 WHEN log_reuse_wait=16 THEN 'XTP_CHECKPOINT'
                                 ELSE CONVERT(NVARCHAR(60),log_reuse_wait) END),
+    family_guid UNIQUEIDENTIFIER NULL,
     CONSTRAINT PK_Databases PRIMARY KEY CLUSTERED (DatabaseID ASC),
     CONSTRAINT FK_Databases_Instances FOREIGN KEY (InstanceID) REFERENCES dbo.Instances (InstanceID)
 );

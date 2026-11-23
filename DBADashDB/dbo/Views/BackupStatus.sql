@@ -2,48 +2,60 @@
 AS
 WITH B AS(
 	SELECT B.DatabaseID,
-			MAX(CASE WHEN B.type='D' THEN B.backup_start_date_utc ELSE NULL END) AS LastFull,
-			MAX(CASE WHEN B.type='I' THEN B.backup_start_date_utc ELSE NULL END) AS LastDiff,
-			MAX(CASE WHEN B.type='L' THEN B.backup_start_date_utc ELSE NULL END) AS LastLog,
-			MAX(CASE WHEN B.type='F' THEN B.backup_start_date_utc ELSE NULL END) AS LastFG,
-			MAX(CASE WHEN B.type='G' THEN B.backup_start_date_utc ELSE NULL END) AS LastFGDiff,
-			MAX(CASE WHEN B.type='P' THEN B.backup_start_date_utc ELSE NULL END) AS LastPartial,
-			MAX(CASE WHEN B.type='Q' THEN B.backup_start_date_utc ELSE NULL END) AS LastPartialDiff,
-			MAX(CASE WHEN B.type='D' THEN B.BackupDuration ELSE NULL END) AS LastFullDuration,
-			MAX(CASE WHEN B.type='D' THEN B.BackupDurationSec ELSE NULL END) AS LastFullDurationSec,
-			MAX(CASE WHEN B.type='D' THEN B.BackupMBsec ELSE NULL END) AS FullBackupMBsec,
-			MAX(CASE WHEN B.type='D' THEN B.BackupWriteMBsec ELSE NULL END) AS FullBackupWriteMBsec,
-			MAX(CASE WHEN B.type='D' THEN B.BackupSizeGB ELSE NULL END) AS FullBackupSizeGB,
-			MAX(CASE WHEN B.type='D' THEN B.BackupSizeCompressedGB ELSE NULL END) AS FullBackupSizeCompressedGB,
-			MAX(CASE WHEN B.type='D' THEN B.CompressionSavingPct ELSE NULL END) AS FullCompressionSavingPct,
-			MAX(CASE WHEN B.type='I' THEN B.BackupDuration ELSE NULL END) AS LastDiffDuration,
-			MAX(CASE WHEN B.type='I' THEN B.BackupDurationSec ELSE NULL END) AS LastDiffDurationSec,
-			MAX(CASE WHEN B.type='I' THEN B.BackupMBsec ELSE NULL END) AS DiffBackupMBsec,
-			MAX(CASE WHEN B.type='I' THEN B.BackupWriteMBsec ELSE NULL END) AS DiffBackupWriteMBsec,
-			MAX(CASE WHEN B.type='I' THEN B.BackupSizeGB ELSE NULL END) AS DiffBackupSizeGB,
-			MAX(CASE WHEN B.type='I' THEN B.BackupSizeCompressedGB ELSE NULL END) AS DiffBackupSizeCompressedGB,
-			MAX(CASE WHEN B.type='I' THEN B.CompressionSavingPct ELSE NULL END) AS DiffCompressionSavingPct,
-			MAX(CASE WHEN B.type IN('D','F','P') THEN CAST(B.is_damaged AS INT) ELSE 0 END) IsFullDamaged,
-			MAX(CASE WHEN B.type IN('I','G','Q') THEN CAST(B.is_damaged AS INT) ELSE 0 END) IsDiffDamaged,
-			MAX(CASE WHEN B.type IN('L') THEN CAST(B.is_damaged AS INT) ELSE 0 END) IsLogDamaged,
-			CAST(MAX(CASE WHEN B.type ='D' THEN CAST(B.has_backup_checksums AS INT) ELSE NULL END) AS BIT) as IsFullChecksum,
-			CAST(MAX(CASE WHEN B.type ='I' THEN CAST(B.has_backup_checksums AS INT) ELSE NULL END) AS BIT) as IsDiffChecksum,
-			CAST(MAX(CASE WHEN B.type ='L' THEN CAST(B.has_backup_checksums AS INT) ELSE NULL END) AS BIT) as IsLogChecksum,		
-			CAST(MAX(CASE WHEN B.type ='D' THEN CAST(B.is_password_protected AS INT) ELSE NULL END) AS BIT) as IsFullPasswordProtected,
-			CAST(MAX(CASE WHEN B.type ='I' THEN CAST(B.is_password_protected AS INT) ELSE NULL END) AS BIT) as IsDiffPasswordProtected,
-			CAST(MAX(CASE WHEN B.type ='L' THEN CAST(B.is_password_protected AS INT) ELSE NULL END) AS BIT) as IsLogPasswordProtected,
-			CAST(MAX(CASE WHEN B.type ='D' THEN CAST(B.IsEncrypted AS INT) ELSE NULL END) AS BIT) as IsFullEncrypted,
-			CAST(MAX(CASE WHEN B.type ='I' THEN CAST(B.IsEncrypted AS INT) ELSE NULL END) AS BIT) as IsDiffEncrypted,
-			CAST(MAX(CASE WHEN B.type ='L' THEN CAST(B.IsEncrypted AS INT) ELSE NULL END) AS BIT) as IsLogEncrypted,			
-			CAST(MAX(CASE WHEN B.type ='D' THEN CAST(B.IsCompressed AS INT) ELSE NULL END) AS BIT) as IsFullCompressed,
-			CAST(MAX(CASE WHEN B.type ='I' THEN CAST(B.IsCompressed AS INT) ELSE NULL END) AS BIT) as IsDiffCompressed,
-			CAST(MAX(CASE WHEN B.type ='L' THEN CAST(B.IsCompressed AS INT) ELSE NULL END) AS BIT) as IsLogCompressed,	
-			CASE WHEN MIN(CAST(B.is_snapshot AS INT))=1 THEN 'Y' WHEN MAX(CAST(B.is_snapshot AS INT))=1 THEN '(Y)' ELSE 'N' END AS SnapshotBackups,
-			CAST(MAX(CAST(B.IsPartnerBackup AS INT)) AS BIT) AS IsPartnerBackup,
-			MAX(CASE WHEN B.type ='D' THEN B.compression_algorithm ELSE NULL END) as FullCompressionAlgorithm,
-			MAX(CASE WHEN B.type ='I' THEN B.compression_algorithm ELSE NULL END) as DiffCompressionAlgorithm,
-			MAX(CASE WHEN B.type ='L' THEN B.compression_algorithm ELSE NULL END) as LogCompressionAlgorithm	
+			MAX(CASE WHEN V.type='D' THEN B.backup_start_date_utc ELSE NULL END) AS LastFull,
+			MAX(CASE WHEN V.type='I' THEN B.backup_start_date_utc ELSE NULL END) AS LastDiff,
+			MAX(CASE WHEN V.type='L' THEN B.backup_start_date_utc ELSE NULL END) AS LastLog,
+			MAX(CASE WHEN V.type='F' THEN B.backup_start_date_utc ELSE NULL END) AS LastFG,
+			MAX(CASE WHEN V.type='G' THEN B.backup_start_date_utc ELSE NULL END) AS LastFGDiff,
+			MAX(CASE WHEN V.type='P' THEN B.backup_start_date_utc ELSE NULL END) AS LastPartial,
+			MAX(CASE WHEN V.type='Q' THEN B.backup_start_date_utc ELSE NULL END) AS LastPartialDiff,
+			MAX(CASE WHEN V.type='D' THEN B.BackupDuration ELSE NULL END) AS LastFullDuration,
+			MAX(CASE WHEN V.type='D' THEN B.BackupDurationSec ELSE NULL END) AS LastFullDurationSec,
+			MAX(CASE WHEN V.type='D' THEN B.BackupMBsec ELSE NULL END) AS FullBackupMBsec,
+			MAX(CASE WHEN V.type='D' THEN B.BackupWriteMBsec ELSE NULL END) AS FullBackupWriteMBsec,
+			MAX(CASE WHEN V.type='D' THEN B.BackupSizeGB ELSE NULL END) AS FullBackupSizeGB,
+			MAX(CASE WHEN V.type='D' THEN B.BackupSizeCompressedGB ELSE NULL END) AS FullBackupSizeCompressedGB,
+			MAX(CASE WHEN V.type='D' THEN B.CompressionSavingPct ELSE NULL END) AS FullCompressionSavingPct,
+			MAX(CASE WHEN V.type='I' THEN B.BackupDuration ELSE NULL END) AS LastDiffDuration,
+			MAX(CASE WHEN V.type='I' THEN B.BackupDurationSec ELSE NULL END) AS LastDiffDurationSec,
+			MAX(CASE WHEN V.type='I' THEN B.BackupMBsec ELSE NULL END) AS DiffBackupMBsec,
+			MAX(CASE WHEN V.type='I' THEN B.BackupWriteMBsec ELSE NULL END) AS DiffBackupWriteMBsec,
+			MAX(CASE WHEN V.type='I' THEN B.BackupSizeGB ELSE NULL END) AS DiffBackupSizeGB,
+			MAX(CASE WHEN V.type='I' THEN B.BackupSizeCompressedGB ELSE NULL END) AS DiffBackupSizeCompressedGB,
+			MAX(CASE WHEN V.type='I' THEN B.CompressionSavingPct ELSE NULL END) AS DiffCompressionSavingPct,
+			MAX(CASE WHEN V.type IN('D','F','P') THEN CAST(B.is_damaged AS INT) ELSE 0 END) IsFullDamaged,
+			MAX(CASE WHEN V.type IN('I','G','Q') THEN CAST(B.is_damaged AS INT) ELSE 0 END) IsDiffDamaged,
+			MAX(CASE WHEN V.type IN('L') THEN CAST(B.is_damaged AS INT) ELSE 0 END) IsLogDamaged,
+			CAST(MAX(CASE WHEN V.type ='D' THEN CAST(B.has_backup_checksums AS INT) ELSE NULL END) AS BIT) as IsFullChecksum,
+			CAST(MAX(CASE WHEN V.type ='I' THEN CAST(B.has_backup_checksums AS INT) ELSE NULL END) AS BIT) as IsDiffChecksum,
+			CAST(MAX(CASE WHEN V.type ='L' THEN CAST(B.has_backup_checksums AS INT) ELSE NULL END) AS BIT) as IsLogChecksum,
+			CAST(MAX(CASE WHEN V.type ='D' THEN CAST(B.is_password_protected AS INT) ELSE NULL END) AS BIT) as IsFullPasswordProtected,
+			CAST(MAX(CASE WHEN V.type ='I' THEN CAST(B.is_password_protected AS INT) ELSE NULL END) AS BIT) as IsDiffPasswordProtected,
+			CAST(MAX(CASE WHEN V.type ='L' THEN CAST(B.is_password_protected AS INT) ELSE NULL END) AS BIT) as IsLogPasswordProtected,
+			CAST(MAX(CASE WHEN V.type ='D' THEN CAST(B.IsEncrypted AS INT) ELSE NULL END) AS BIT) as IsFullEncrypted,
+			CAST(MAX(CASE WHEN V.type ='I' THEN CAST(B.IsEncrypted AS INT) ELSE NULL END) AS BIT) as IsDiffEncrypted,
+			CAST(MAX(CASE WHEN V.type ='L' THEN CAST(B.IsEncrypted AS INT) ELSE NULL END) AS BIT) as IsLogEncrypted,
+			CAST(MAX(CASE WHEN V.type ='D' THEN CAST(B.IsCompressed AS INT) ELSE NULL END) AS BIT) as IsFullCompressed,
+			CAST(MAX(CASE WHEN V.type ='I' THEN CAST(B.IsCompressed AS INT) ELSE NULL END) AS BIT) as IsDiffCompressed,
+			CAST(MAX(CASE WHEN V.type ='L' THEN CAST(B.IsCompressed AS INT) ELSE NULL END) AS BIT) as IsLogCompressed,
+			CASE WHEN COUNT(V.type)=0 THEN NULL /* No valid backups - as for a database with no backups */
+				WHEN MIN(CASE WHEN V.type IS NOT NULL THEN CAST(B.is_snapshot AS INT) END)=1 THEN 'Y'
+				WHEN MAX(CASE WHEN V.type IS NOT NULL THEN CAST(B.is_snapshot AS INT) END)=1 THEN '(Y)' ELSE 'N' END AS SnapshotBackups,
+			CAST(MAX(CASE WHEN V.type IS NOT NULL THEN CAST(B.IsPartnerBackup AS INT) END) AS BIT) AS IsPartnerBackup,
+			MAX(CASE WHEN V.type ='D' THEN B.compression_algorithm ELSE NULL END) as FullCompressionAlgorithm,
+			MAX(CASE WHEN V.type ='I' THEN B.compression_algorithm ELSE NULL END) as DiffCompressionAlgorithm,
+			MAX(CASE WHEN V.type ='L' THEN B.compression_algorithm ELSE NULL END) as LogCompressionAlgorithm,
+			/* Backup types where the only backup is of a previous database with the same name.  Combined with the excluded reasons below. */
+			MAX(CASE WHEN B.IsPreviousDatabaseBackup=1 AND B.type='D' THEN 1 ELSE 0 END) AS PreviousFull,
+			MAX(CASE WHEN B.IsPreviousDatabaseBackup=1 AND B.type='I' THEN 1 ELSE 0 END) AS PreviousDiff,
+			MAX(CASE WHEN B.IsPreviousDatabaseBackup=1 AND B.type='L' THEN 1 ELSE 0 END) AS PreviousLog,
+			MAX(CASE WHEN B.IsPreviousDatabaseBackup=1 AND B.type='F' THEN 1 ELSE 0 END) AS PreviousFG,
+			MAX(CASE WHEN B.IsPreviousDatabaseBackup=1 AND B.type='G' THEN 1 ELSE 0 END) AS PreviousFGDiff,
+			MAX(CASE WHEN B.IsPreviousDatabaseBackup=1 AND B.type='P' THEN 1 ELSE 0 END) AS PreviousPartial,
+			MAX(CASE WHEN B.IsPreviousDatabaseBackup=1 AND B.type='Q' THEN 1 ELSE 0 END) AS PreviousPartialDiff
 	FROM dbo.LastBackup B
+	/* Backups of a previous database with the same name don't count.  V.type is NULL for those so they are ignored by the aggregates above. */
+	CROSS APPLY(SELECT CASE WHEN B.IsPreviousDatabaseBackup = 0 THEN B.type ELSE NULL END AS type) V
 	GROUP BY B.DatabaseID
 )
 SELECT I.InstanceID,
@@ -122,7 +134,15 @@ SELECT I.InstanceID,
 	B.FullCompressionAlgorithm,
 	B.DiffCompressionAlgorithm,
 	B.LogCompressionAlgorithm,
-	I.ShowInSummary
+	I.ShowInSummary,
+	/* Only warn about backups of a previous database for backup types that are checked.  e.g. A stale log backup isn't replaced if the database
+	   is recreated in SIMPLE recovery, but it's not relevant. */
+	CASE WHEN f.FullBackupExcludedReason IS NULL
+				AND (B.PreviousFull=1 OR (cfg.ConsiderFGBackups=1 AND B.PreviousFG=1) OR (cfg.ConsiderPartialBackups=1 AND B.PreviousPartial=1)) THEN CAST(1 AS BIT)
+		WHEN f.DiffBackupExcludedReason IS NULL
+				AND (B.PreviousDiff=1 OR (cfg.ConsiderFGBackups=1 AND B.PreviousFGDiff=1) OR (cfg.ConsiderPartialBackups=1 AND B.PreviousPartialDiff=1)) THEN CAST(1 AS BIT)
+		WHEN f.LogBackupExcludedReason IS NULL AND B.PreviousLog=1 THEN CAST(1 AS BIT)
+		ELSE CAST(0 AS BIT) END AS HasPreviousDatabaseBackups
 FROM dbo.Databases d 
 JOIN dbo.Instances I ON d.InstanceID = I.InstanceID
 JOIN dbo.CollectionDatesStatus SSD ON SSD.InstanceID = I.InstanceID AND SSD.Reference='Backups'

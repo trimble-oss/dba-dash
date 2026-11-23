@@ -185,6 +185,10 @@ namespace DBADash
                     dtDatabasesHADR.Columns.Add("filestream_send_rate", typeof(long));
                     dtDatabasesHADR.Columns.Add("last_commit_time", typeof(DateTimeOffset));
                 }
+                if (!dtDatabasesHADR.Columns.Contains("database_name"))
+                {
+                    dtDatabasesHADR.Columns.Add("database_name", typeof(string));
+                }
             }
             if (data.Tables.Contains("AvailabilityReplicas"))
             {
@@ -232,6 +236,10 @@ namespace DBADash
                 if (!dtDB.Columns.Contains("service_broker_guid"))
                 {
                     dtDB.Columns.Add("service_broker_guid", typeof(Guid));
+                }
+                if (!dtDB.Columns.Contains("family_guid"))
+                {
+                    dtDB.Columns.Add("family_guid", typeof(Guid));
                 }
             }
             if (data.Tables.Contains("Backups"))
