@@ -13,6 +13,27 @@ IF NOT EXISTS(	SELECT 1
 				AND Reference=@Ref
 			 )
 BEGIN
+	/*	Map each database_id in the collection to a database in the repository.  Databases are matched by name (the natural key for
+		dbo.Databases).  database_id isn't reliable - in a contained AG the DMV reports the node's database_id for the AG's master while
+		sys.databases (and dbo.Databases) has master as database_id 1.  Older agents don't collect database_name, so fall back to database_id.
+	*/
+	DECLARE @DatabaseMap TABLE(
+		database_id INT NOT NULL,
+		DatabaseID INT NOT NULL,
+		name SYSNAME NOT NULL,
+		INDEX IX_DatabaseMap CLUSTERED(database_id) /* Not unique - matching on database_id (older agents) can match more than one database, as before */
+	);
+	INSERT INTO @DatabaseMap(database_id, DatabaseID, name)
+	SELECT hadr.database_id, d.DatabaseID, d.name
+	FROM (SELECT DISTINCT database_id, database_name FROM @DatabasesHADR WHERE database_name IS NOT NULL) hadr
+	JOIN dbo.Databases d ON d.InstanceID = @InstanceID AND d.name = hadr.database_name
+	WHERE d.IsActive = 1
+	UNION ALL
+	SELECT hadr.database_id, d.DatabaseID, d.name
+	FROM (SELECT DISTINCT database_id FROM @DatabasesHADR WHERE database_name IS NULL) hadr
+	JOIN dbo.Databases d ON d.InstanceID = @InstanceID AND d.database_id = hadr.database_id
+	WHERE d.IsActive = 1;
+
 	BEGIN TRAN;
 
 	DELETE hadr
@@ -47,7 +68,7 @@ BEGIN
 		last_commit_time
 	)
 	SELECT @InstanceID,
-		   d.DatabaseID,
+		   map.DatabaseID,
 		   hadr.group_database_id,
 		   hadr.is_primary_replica,
 		   hadr.synchronization_state,
@@ -71,9 +92,7 @@ BEGIN
 		   hadr.filestream_send_rate,
 		   hadr.last_commit_time
 	FROM @DatabasesHADR hadr
-		JOIN dbo.Databases d ON hadr.database_id = d.database_id
-	WHERE d.InstanceID = @InstanceID
-	AND d.IsActive=1;
+	JOIN @DatabaseMap map ON map.database_id = hadr.database_id;
 
 	EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  
 										 @Reference = @Ref,
@@ -156,14 +175,14 @@ BEGIN
 				UNPVT.instance_name,
 				UNPVT.cntr_value,
 				65792 AS cntr_type
-		FROM (	SELECT	CASE WHEN HADR.is_local=1 THEN '' ELSE AR.replica_server_name + ' \ ' END + D.name AS instance_name,
+		FROM (	SELECT	CASE WHEN HADR.is_local=1 THEN '' ELSE AR.replica_server_name + ' \ ' END + map.name AS instance_name,
 						CAST(CASE WHEN HADR.is_primary_replica = 1 THEN NULL WHEN HADR.synchronization_state=2 THEN 0 ELSE ISNULL(DATEDIFF(ss, HADR.last_commit_time, PrimaryHADR.last_commit_time), -2) END AS DECIMAL(28,9)) [Estimated Data Loss (sec)],
 						CAST(CASE WHEN HADR.is_primary_replica = 1 THEN NULL WHEN HADR.redo_queue_size IS NULL THEN -2 WHEN HADR.redo_queue_size = 0 THEN 0 WHEN HADR.redo_rate IS NULL OR HADR.redo_rate = 0 THEN -2 ELSE CAST(HADR.redo_queue_size AS DECIMAL(28,9)) / HADR.redo_rate END AS DECIMAL(28,9)) AS [Estimated Recovery Time (sec)],
 						CAST(HADR.secondary_lag_seconds AS DECIMAL(28,9)) AS [Secondary Lag (sec)],
 						CAST(HADR.redo_queue_size AS DECIMAL(28,9)) AS [Redo Queue Size (KB)],
 						CAST(HADR.log_send_queue_size AS DECIMAL(28,9)) AS [Log Send Queue Size (KB)]
 				FROM @DatabasesHADR HADR
-				JOIN dbo.Databases D ON HADR.database_id = D.database_id AND D.InstanceID = @InstanceID AND D.IsActive = 1
+				JOIN @DatabaseMap map ON map.database_id = HADR.database_id
 				JOIN dbo.AvailabilityReplicas AR ON AR.InstanceID = @InstanceID AND AR.replica_id = HADR.replica_id
 				LEFT JOIN @DatabasesHADR PrimaryHADR ON PrimaryHADR.group_database_id = HADR.group_database_id 
 											 AND PrimaryHADR.is_primary_replica = 1

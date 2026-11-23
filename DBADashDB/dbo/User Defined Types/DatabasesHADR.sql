@@ -21,6 +21,7 @@
     redo_queue_size BIGINT NULL,
     redo_rate BIGINT NULL,	
     filestream_send_rate BIGINT NULL,
-    last_commit_time DATETIMEOFFSET NULL
+    last_commit_time DATETIMEOFFSET NULL,
+    database_name SYSNAME NULL
 );
 

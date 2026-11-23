@@ -30,7 +30,11 @@ BEGIN
 		   redo_queue_size,
 		   redo_rate,	
 		   filestream_send_rate,
-		   ' + REPLACE(@OffsetConversionTemplate,'{column_name}','last_commit_time') + '		   
+		   ' + REPLACE(@OffsetConversionTemplate,'{column_name}','last_commit_time') + ',
+		   /* The repository matches databases by name.  database_id can differ from sys.databases - in a contained AG the DMV reports the
+		      node''s database_id for the AG''s master (<AG>_master) while sys.databases reports master as database_id 1.  DB_NAME resolves it
+		      in the session''s context. */
+		   DB_NAME(database_id) AS database_name
     FROM sys.dm_hadr_database_replica_states;'
 	EXEC sp_executesql @SQL
 END;

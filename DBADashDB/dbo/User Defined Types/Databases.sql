@@ -76,5 +76,6 @@
     is_temporal_history_retention_enabled BIT NULL,
     is_optimized_locking_on BIT NULL,
     service_broker_guid UNIQUEIDENTIFIER NULL,
+    family_guid UNIQUEIDENTIFIER NULL,
     PRIMARY KEY CLUSTERED (database_id ASC)
 );

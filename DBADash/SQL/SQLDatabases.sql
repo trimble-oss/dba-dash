@@ -75,7 +75,8 @@
     is_memory_optimized_enabled BIT NULL,
     is_temporal_history_retention_enabled BIT NULL,
     is_optimized_locking_on BIT NULL,
-    service_broker_guid UNIQUEIDENTIFIER NULL
+    service_broker_guid UNIQUEIDENTIFIER NULL,
+    family_guid UNIQUEIDENTIFIER NULL
 );
 
 SELECT *
@@ -102,6 +103,17 @@ SELECT @SQL = 'INSERT INTO #sysdb(' + @cols + ')
 		' + CASE WHEN @IsAzureDB=CAST(1 AS BIT) THEN ' WHERE name = DB_NAME()' ELSE '' END -- current DB only for azure
 
 EXEC sp_executesql @SQL
+
+/* family_guid changes when a database is dropped and recreated, or another database's backup is restored over it.  Used to identify backups of a previous database with the same name.
+   (database_guid also changes in those cases, but it's different on each availability group replica so it changes on failover for a contained AG) */
+IF OBJECT_ID('sys.database_recovery_status') IS NOT NULL
+BEGIN
+	EXEC sp_executesql N'
+	UPDATE D
+		SET D.family_guid = rs.family_guid
+	FROM #sysdb D
+	JOIN sys.database_recovery_status rs ON rs.database_id = D.database_id'
+END
 
 SELECT name,
        database_id,
@@ -179,7 +191,8 @@ SELECT name,
        is_memory_optimized_enabled,
        is_temporal_history_retention_enabled,
        is_optimized_locking_on,
-       service_broker_guid
+       service_broker_guid,
+       family_guid
 FROM #sysdb
 
 DROP TABLE #sysdb

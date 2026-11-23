@@ -32,7 +32,8 @@ SELECT LB.DatabaseID,
        LB.IsEncrypted,
        LB.IsPartnerBackup,
        PDBI.Instance as Partner,
-       LB.compression_algorithm
+       LB.compression_algorithm,
+       LB.IsPreviousDatabaseBackup
 FROM dbo.LastBackup LB
 JOIN dbo.Databases D ON D.DatabaseID = LB.DatabaseID
 JOIN dbo.Instances I ON I.InstanceID = D.InstanceID

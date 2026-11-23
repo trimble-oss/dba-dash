@@ -127,6 +127,7 @@ SELECT BS.InstanceID,
 	SUM(CASE WHEN BS.ThresholdsConfiguredLevel='DATABASE' THEN 1 ELSE 0 END) AS DBThresholdConfiguration,
 	CASE WHEN EXISTS(SELECT 1 FROM dbo.BackupThresholds T WHERE T.InstanceID = BS.InstanceID AND T.DatabaseID = -1) THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS InstanceThresholdConfiguration,
 	CAST(MAX(CAST(BS.IsPartnerBackup AS INT)) AS BIT) AS IsPartnerBackup,
+	SUM(CAST(BS.HasPreviousDatabaseBackups AS INT)) AS PreviousDatabaseBackupsCount,
 	MIN(CASE WHEN BS.FullBackupExcludedReason IS NULL THEN BS.LastFull ELSE NULL END) AS OldestFull,
 	MIN(CASE WHEN BS.DiffBackupExcludedReason IS NULL THEN BS.LastDiff ELSE NULL END) AS OldestDiff,
 	MIN(CASE WHEN BS.LogBackupExcludedReason IS NULL THEN BS.LastLog ELSE NULL END) AS OldestLog,
@@ -250,6 +251,7 @@ SELECT	BS.InstanceID,
 		BS.FullCompressionAlgorithm,
 		BS.DiffCompressionAlgorithm,
 		BS.LogCompressionAlgorithm,
+		BS.HasPreviousDatabaseBackups,
 		CAST('Configure' AS NVARCHAR(20)) AS Configure
 FROM #BackupStatus BS
 WHERE EXISTS(SELECT 1 FROM BackupStatuses s WHERE BS.BackupStatus=s.BackupStatus)

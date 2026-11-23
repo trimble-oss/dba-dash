@@ -165,6 +165,7 @@ BEGIN
 		  ,is_temporal_history_retention_enabled=T.is_temporal_history_retention_enabled
 		  ,is_optimized_locking_on = T.is_optimized_locking_on
 		  ,service_broker_guid = T.service_broker_guid
+		  ,family_guid = T.family_guid
 		  ,UpdatedDate = @SnapshotDate
 	FROM dbo.Databases D
 	JOIN @Databases T ON D.name = T.name
@@ -245,7 +246,8 @@ BEGIN
 						   T.is_memory_optimized_enabled,
 						   T.is_temporal_history_retention_enabled,
 						   T.is_optimized_locking_on,
-						   T.service_broker_guid
+						   T.service_broker_guid,
+						   T.family_guid
 			EXCEPT
 			SELECT 	   D.database_id,
 						   D.source_database_id,
@@ -323,7 +325,8 @@ BEGIN
 						   D.is_memory_optimized_enabled,
 						   D.is_temporal_history_retention_enabled,
 						   D.is_optimized_locking_on,
-						   D.service_broker_guid
+						   D.service_broker_guid,
+						   D.family_guid
 						   )
 	/* Capture history if settings have been updated */
 	IF @@ROWCOUNT>0
@@ -449,7 +452,8 @@ BEGIN
 		   is_memory_optimized_enabled,
 		   is_temporal_history_retention_enabled,
 		   is_optimized_locking_on,
-		   service_broker_guid
+		   service_broker_guid,
+		   family_guid
 	)
 	SELECT  @InstanceID,
 			name,
@@ -529,7 +533,8 @@ BEGIN
 		   is_memory_optimized_enabled,
 		   is_temporal_history_retention_enabled,
 		   is_optimized_locking_on,
-		   service_broker_guid
+		   service_broker_guid,
+		   family_guid
 	FROM @Databases T
 	WHERE NOT EXISTS(SELECT 1 
 					FROM dbo.Databases D 
