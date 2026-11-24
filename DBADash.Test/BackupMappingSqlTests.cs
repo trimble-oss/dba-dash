@@ -311,6 +311,45 @@ namespace DBADash.Test
             Assert.AreEqual(legacyGroup, hadr["master"], "Older agent - matched on database_id");
         }
 
+        /// <summary>
+        /// A stale DatabasesHADR link (e.g. the database was recreated and HADR is no longer collected) doesn't credit a database with
+        /// its "partner's" backups.  Replicas share family_guid, so partner backups are also checked against the database's own GUID.
+        /// </summary>
+        [TestMethod]
+        public void StalePartnerLinkBackupsAreFlagged()
+        {
+            using var repo = new SqlConnection(RepositoryConnectionString);
+            repo.Open();
+            int DatabaseId(string name) => (int)Scalar(repo, $"SELECT database_id FROM dbo.Databases WHERE InstanceID = {instanceID} AND name = N'{name}' AND IsActive = 1");
+            var group = Guid.NewGuid();
+            UpdateHADR((DatabaseId(Recreated), Recreated, group), (DatabaseId(Normal), Normal, group));
+            try
+            {
+                using var cmd = new SqlCommand(@"SELECT COUNT(*), SUM(CAST(LB.IsPreviousDatabaseBackup AS INT))
+                                                FROM dbo.LastBackup LB
+                                                JOIN dbo.Databases D ON D.DatabaseID = LB.DatabaseID
+                                                WHERE D.InstanceID = @InstanceID AND D.name = @name AND D.IsActive = 1", repo);
+                cmd.Parameters.AddWithValue("@InstanceID", instanceID);
+                cmd.Parameters.AddWithValue("@name", Recreated);
+                using (var rdr = cmd.ExecuteReader())
+                {
+                    rdr.Read();
+                    Assert.IsTrue(rdr.GetInt32(0) > 0);
+                    Assert.AreEqual(rdr.GetInt32(0), rdr.GetInt32(1), "All flagged - the partner's family_guid doesn't match, so its backups don't rank first");
+                }
+                var recreated = Status(BackupStatus(), Recreated);
+                Assert.IsTrue(recreated.IsNull("LastFull"));
+                Assert.AreEqual(1, recreated["FullBackupStatus"]);
+
+                var normal = Status(BackupStatus(), Normal);
+                Assert.AreEqual(4, normal["FullBackupStatus"], "Normal's own backups still count");
+            }
+            finally
+            {
+                UpdateHADR(); // Remove the links - other tests check BackupStatus
+            }
+        }
+
         private static void UpdateHADR(params (int DatabaseID, string? Name, Guid Group)[] rows)
         {
             var dt = new DataTable();

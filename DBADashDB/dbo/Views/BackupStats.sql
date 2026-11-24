@@ -40,7 +40,7 @@ SELECT 		B.DatabaseID,
 			CASE WHEN B.encryptor_type IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS IsEncrypted,
             B.compression_algorithm
 FROM dbo.Backups B
-OUTER APPLY (SELECT DATEADD(mi,ISNULL(NULLIF(-B.time_zone,127)*15,0),B.backup_start_date) AS backup_start_date_utc,
-				DATEADD(mi,ISNULL(NULLIF(-B.time_zone,127)*15,0),B.backup_finish_date) AS backup_finish_date_utc,
+OUTER APPLY (SELECT DATEADD(mi,ISNULL(-NULLIF(B.time_zone,127)*15,0),B.backup_start_date) AS backup_start_date_utc,
+				DATEADD(mi,ISNULL(-NULLIF(B.time_zone,127)*15,0),B.backup_finish_date) AS backup_finish_date_utc,
 					DATEDIFF(s,B.backup_start_date,B.backup_finish_date) AS BackupDurationSec) calc
 OUTER APPLY dbo.SecondsToHumanDuration(calc.BackupDurationSec) HD
