@@ -454,7 +454,7 @@ namespace DBADashGUI
                 {
                     dgvSummary.Rows[idx].Cells["JobStatus"].ToolTipText = "Elastic jobs of the server's elastic job agents";
                 }
-                dgvSummary.Rows[idx].Cells["LogShippingStatus"].Value = isAzure ? "" : "View";
+                SetLogShippingCell(dgvSummary.Rows[idx].Cells["LogShippingStatus"], row, isAzure);
                 dgvSummary.Rows[idx].Cells["AGStatus"].Value = (int)row["AGStatus"] == 3 ? "" : "View";
                 dgvSummary.Rows[idx].Cells["QueryStoreStatus"].Value = (int)row["QueryStoreStatus"] == 3 ? "" : "View";
                 var identPct = (row["MaxIdentityPctUsed"] == DBNull.Value
@@ -655,6 +655,60 @@ namespace DBADashGUI
                                                                         "Total Alerts:" + totalAlerts;
                 dgvSummary.Rows[idx].Cells["ElasticPoolStorageStatus"].Value = isAzure ? "View" : "";
             }
+        }
+
+        /// <summary>
+        /// The log shipping cell: the databases needing attention (critical + warning) of those checked, or how many are OK, with the
+        /// breakdown by status in the tooltip.  "View" where there are no counts (no log shipped databases, or only N/A ones).
+        /// </summary>
+        private static void SetLogShippingCell(DataGridViewCell cell, DataRowView row, bool isAzure)
+        {
+            if (isAzure)
+            {
+                cell.Value = "";
+                return;
+            }
+            var (text, toolTip) = LogShippingCellText(
+                Convert.ToInt32(row["LogShippingCriticalCount"].DBNullToNull() ?? 0),
+                Convert.ToInt32(row["LogShippingWarningCount"].DBNullToNull() ?? 0),
+                Convert.ToInt32(row["LogShippingOKCount"].DBNullToNull() ?? 0),
+                Convert.ToInt32(row["LogShippingNACount"].DBNullToNull() ?? 0),
+                (decimal?)row["LogShippingMaxTotalTimeBehind"].DBNullToNull(),
+                Convert.ToInt32(row["LogShippingNoRestoreCount"].DBNullToNull() ?? 0));
+            cell.Value = text;
+            cell.ToolTipText = toolTip;
+        }
+
+        internal static (string Text, string ToolTip) LogShippingCellText(int critical, int warning, int ok, int na, decimal? maxTotalTimeBehindMins, int noRestore)
+        {
+            var problems = critical + warning;
+            var checkedCount = problems + ok;
+            if (checkedCount == 0 && na == 0) return ("View", null);
+
+            var text = problems > 0 ? $"{problems} of {checkedCount}"
+                : checkedCount > 0 ? $"{checkedCount} OK"
+                : "View";
+
+            var sb = new StringBuilder();
+            sb.AppendLine($"Critical: {critical}");
+            sb.AppendLine($"Warning: {warning}");
+            sb.AppendLine($"OK: {ok}");
+            sb.AppendLine($"N/A: {na} (excluded, new or no thresholds)");
+            if (checkedCount > 0)
+            {
+                sb.AppendLine($"Needing attention: {problems} of {checkedCount} ({(decimal)problems / checkedCount:P1})");
+            }
+            if (maxTotalTimeBehindMins.HasValue)
+            {
+                sb.AppendLine("Furthest behind: " + TimeSpan.FromMinutes((double)maxTotalTimeBehindMins.Value).Humanize(2, minUnit: TimeUnit.Minute, maxUnit: TimeUnit.Day));
+            }
+            if (noRestore > 0)
+            {
+                // These have no time behind, so aren't included in furthest behind
+                sb.AppendLine($"No log restore recorded: {noRestore}" + (maxTotalTimeBehindMins.HasValue ? " (not included in furthest behind)" : ""));
+            }
+            sb.Append("Click to view the Log Shipping tab");
+            return (text, sb.ToString());
         }
 
         private void DgvSummary_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)

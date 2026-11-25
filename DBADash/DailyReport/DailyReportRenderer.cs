@@ -1,3 +1,4 @@
+using Humanizer;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -89,6 +90,8 @@ namespace DBADash.DailyReport
         public string Check { get; init; }
         public int Status { get; init; }
         public string Detail { get; init; }
+        /// <summary>Shown after the instance name where the check is listed by instance (Other checks), e.g. the log shipping counts</summary>
+        public string ShortDetail { get; init; }
         /// <summary>An Azure server row of the summary (no InstanceID)</summary>
         public bool IsAzure { get; init; }
         public bool IsCritical => Status == 1;
@@ -870,6 +873,7 @@ namespace DBADash.DailyReport
         private static void AppendOtherChecks(List<SummaryIssue> other, IssueHistory history, Func<string, string, string, string> sectionLink, StringBuilder html, StringBuilder text)
         {
             string Name(SummaryIssue i) => history.IsNew(IssueHistory.CheckKey(i.Column, i.Instance)) ? $"{i.Instance} (new)" : i.Instance;
+            string TextName(SummaryIssue i) => string.IsNullOrEmpty(i.ShortDetail) ? Name(i) : $"{Name(i)} ({i.ShortDetail})";
 
             var byCheck = other.GroupBy(i => i.Check, StringComparer.OrdinalIgnoreCase)
                 .Select(g => new
@@ -889,17 +893,46 @@ namespace DBADash.DailyReport
             var n = 0;
             foreach (var c in byCheck)
             {
-                var parts = new List<string>();
-                if (c.Critical.Count > 0) parts.Add($"critical on {JoinNames(c.Critical.Select(Name).ToList())}");
-                if (c.Warning.Count > 0) parts.Add($"warning on {JoinNames(c.Warning.Select(Name).ToList())}");
-                text.AppendLine($"  - {c.Check} - {string.Join("; ", parts)}");
+                var all = c.Critical.Concat(c.Warning).ToList();
+                // A check with detail for each instance (log shipping counts) gets a line per instance, so the detail reads with its instance
+                var perInstance = all.Any(i => !string.IsNullOrEmpty(i.ShortDetail));
+                var shownLines = all.Take(MaxNamesPerLine).ToList();
+                if (perInstance)
+                {
+                    foreach (var i in shownLines)
+                    {
+                        text.AppendLine($"  - {c.Check} - {(i.IsCritical ? "critical" : "warning")} on {TextName(i)}");
+                    }
+                    if (all.Count > shownLines.Count) text.AppendLine($"  - {c.Check} - and {all.Count - shownLines.Count} others");
+                }
+                else
+                {
+                    var parts = new List<string>();
+                    if (c.Critical.Count > 0) parts.Add($"critical on {JoinNames(c.Critical.Select(TextName).ToList())}");
+                    if (c.Warning.Count > 0) parts.Add($"warning on {JoinNames(c.Warning.Select(TextName).ToList())}");
+                    text.AppendLine($"  - {c.Check} - {string.Join("; ", parts)}");
+                }
 
                 var bg = n++ % 2 == 1 ? GrayFaint : White;
                 var cell = $"padding:6px 8px;border-bottom:1px solid {GrayLight};vertical-align:top";
-                var checkHref = sectionLink?.Invoke(c.Critical.Concat(c.Warning).First().Column, null, null);
+                var checkHref = sectionLink?.Invoke(all[0].Column, null, null);
                 html.Append($"<tr class=\"dr-row\" bgcolor=\"{bg}\" style=\"background:{bg}\"><td class=\"dr-b\" width=\"170\" style=\"{cell};font-weight:bold\">{Link(c.Check, checkHref, "color:inherit")}</td><td class=\"dr-b\" style=\"{cell}\">");
-                if (c.Critical.Count > 0) html.Append($"<div>{SeverityBadge(1)} {LinkedNames(c.Critical, sectionLink, Name)}</div>");
-                if (c.Warning.Count > 0) html.Append($"<div style=\"{(c.Critical.Count > 0 ? "margin-top:4px" : string.Empty)}\">{SeverityBadge(2)} {LinkedNames(c.Warning, sectionLink, Name)}</div>");
+                if (perInstance)
+                {
+                    for (var idx = 0; idx < shownLines.Count; idx++)
+                    {
+                        html.Append($"<div style=\"{(idx > 0 ? "margin-top:4px" : string.Empty)}\">{SeverityBadge(shownLines[idx].Status)} {LinkedNames(new List<SummaryIssue> { shownLines[idx] }, sectionLink, Name)}</div>");
+                    }
+                    if (all.Count > shownLines.Count)
+                    {
+                        html.Append($"<div style=\"margin-top:4px\">{Link($"and {all.Count - shownLines.Count} others", checkHref, "color:inherit")}</div>");
+                    }
+                }
+                else
+                {
+                    if (c.Critical.Count > 0) html.Append($"<div>{SeverityBadge(1)} {LinkedNames(c.Critical, sectionLink, Name)}</div>");
+                    if (c.Warning.Count > 0) html.Append($"<div style=\"{(c.Critical.Count > 0 ? "margin-top:4px" : string.Empty)}\">{SeverityBadge(2)} {LinkedNames(c.Warning, sectionLink, Name)}</div>");
+                }
                 html.Append("</td></tr>");
             }
             html.Append("</table>");
@@ -912,7 +945,8 @@ namespace DBADash.DailyReport
         /// </summary>
         private static string LinkedNames(List<SummaryIssue> items, Func<string, string, string, string> sectionLink, Func<SummaryIssue, string> label)
         {
-            var shown = string.Join(", ", items.Take(MaxNamesPerLine).Select(i => Link(label(i), sectionLink?.Invoke(i.Column, i.Instance, null), "color:inherit")));
+            var shown = string.Join(", ", items.Take(MaxNamesPerLine).Select(i => Link(label(i), sectionLink?.Invoke(i.Column, i.Instance, null), "color:inherit") +
+                (string.IsNullOrEmpty(i.ShortDetail) ? string.Empty : $" <span style=\"color:{Gray6}\">({Enc(i.ShortDetail)})</span>")));
             if (items.Count <= MaxNamesPerLine) return shown;
             var others = Link($"and {items.Count - MaxNamesPerLine} others", sectionLink?.Invoke(items[0].Column, null, null), "color:inherit");
             return $"{shown}, {others}";
@@ -1011,9 +1045,15 @@ namespace DBADash.DailyReport
 
                     var detailColumn = col.ColumnName.Substring(0, col.ColumnName.Length - "Status".Length) + "StatusDescription";
                     string detail = null;
+                    string shortDetail = null;
                     if (summary.Columns.Contains(detailColumn) && !row.IsNull(detailColumn))
                     {
                         detail = row[detailColumn].ToString();
+                    }
+                    else if (col.ColumnName == "LogShippingStatus")
+                    {
+                        detail = LogShippingDetail(row, shortForm: false);
+                        shortDetail = LogShippingDetail(row, shortForm: true);
                     }
 
                     issues.Add(new SummaryIssue
@@ -1023,11 +1063,55 @@ namespace DBADash.DailyReport
                         Check = FriendlyName(col.ColumnName),
                         Status = status,
                         Detail = detail,
+                        ShortDetail = shortDetail,
                         IsAzure = isAzure
                     });
                 }
             }
             return issues;
+        }
+
+        /// <summary>
+        /// The log shipping counts of a summary row, e.g. "2 critical, 1 warning of 50 databases (6%).  Furthest behind: 3 days 10 minutes",
+        /// or in short form (after the instance name in Other checks) "2 critical, 1 warning of 50 DBs, 3 days behind".  Databases with no
+        /// log restore recorded have no time behind, so they're counted on the end, e.g. ", 2 with no log restore recorded".
+        /// Null when the summary doesn't have the counts (a repository from before they were added).
+        /// </summary>
+        public static string LogShippingDetail(DataRow row, bool shortForm = false)
+        {
+            int Count(string column) => row.Table.Columns.Contains(column) && !row.IsNull(column) ? Convert.ToInt32(row[column], CultureInfo.InvariantCulture) : 0;
+            if (!row.Table.Columns.Contains("LogShippingCriticalCount")) return null;
+            var critical = Count("LogShippingCriticalCount");
+            var warning = Count("LogShippingWarningCount");
+            var checkedCount = critical + warning + Count("LogShippingOKCount");
+            if (checkedCount == 0) return null;
+
+            var parts = new List<string>();
+            if (critical > 0) parts.Add($"{critical} critical");
+            if (warning > 0) parts.Add($"{warning} warning");
+            TimeSpan? behind = row.Table.Columns.Contains("LogShippingMaxTotalTimeBehind") && !row.IsNull("LogShippingMaxTotalTimeBehind")
+                ? TimeSpan.FromMinutes(Convert.ToDouble(row["LogShippingMaxTotalTimeBehind"], CultureInfo.InvariantCulture))
+                : null;
+            // Checked databases without a log restore recorded (including missing on the secondary) have no time behind, so they're reported separately
+            var noRestore = Count("LogShippingNoRestoreCount");
+            if (shortForm)
+            {
+                var shortDetail = $"{string.Join(", ", parts)} of {Plural(checkedCount, "DB")}";
+                if (behind.HasValue) shortDetail += $", {behind.Value.Humanize(1, CultureInfo.InvariantCulture, maxUnit: TimeUnit.Day, minUnit: TimeUnit.Minute)} behind";
+                if (noRestore > 0) shortDetail += $", {noRestore} with no log restore recorded";
+                return shortDetail;
+            }
+            var pct = ((critical + warning) * 100.0 / checkedCount).ToString("0.#", CultureInfo.InvariantCulture);
+            var detail = $"{string.Join(", ", parts)} of {Plural(checkedCount, "database")} ({pct}%)";
+            if (behind.HasValue)
+            {
+                detail += ".  Furthest behind: " + behind.Value.Humanize(2, CultureInfo.InvariantCulture, maxUnit: TimeUnit.Day, minUnit: TimeUnit.Minute, collectionSeparator: " ");
+            }
+            if (noRestore > 0)
+            {
+                detail += $".  No log restore recorded for {Plural(noRestore, "database")}";
+            }
+            return detail;
         }
 
         /// <summary>Display name, then Instance, then the InstanceID, so a row is never listed without a name</summary>

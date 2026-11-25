@@ -66,5 +66,11 @@
     OSInfoSnapshotDate DATETIME2 NULL,
     ServiceBrokerStatus INT NOT NULL CONSTRAINT DF_Summary_ServiceBrokerStatus DEFAULT(3),
     ServiceBrokerStatusDescription NVARCHAR(500) NULL,
+    LogShippingCriticalCount INT NULL,
+    LogShippingWarningCount INT NULL,
+    LogShippingOKCount INT NULL,
+    LogShippingNACount INT NULL,
+    LogShippingMaxTotalTimeBehind DECIMAL(19,1) NULL,
+    LogShippingNoRestoreCount INT NULL,
 	CONSTRAINT PK_Summary PRIMARY KEY(InstanceID)
 );

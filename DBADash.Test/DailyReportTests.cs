@@ -434,6 +434,61 @@ namespace DBADash.Test
             Assert.IsFalse(issues.Single(i => i.Check == "Job").IsCritical);
         }
 
+        /// <summary>The log shipping issue says how many databases are critical/warning of those checked, and how far behind the furthest is</summary>
+        [TestMethod]
+        public void Summary_LogShippingIssueHasCounts()
+        {
+            var dt = new DataTable();
+            dt.Columns.Add("InstanceID", typeof(int));
+            dt.Columns.Add("Instance", typeof(string));
+            dt.Columns.Add("LogShippingStatus", typeof(int));
+            dt.Columns.Add("LogShippingCriticalCount", typeof(int));
+            dt.Columns.Add("LogShippingWarningCount", typeof(int));
+            dt.Columns.Add("LogShippingOKCount", typeof(int));
+            dt.Columns.Add("LogShippingNACount", typeof(int));
+            dt.Columns.Add("LogShippingMaxTotalTimeBehind", typeof(decimal));
+            dt.Rows.Add(1, "SQL1", 1, 2, 1, 47, 3, 3 * 24 * 60 + 10m);
+            dt.Rows.Add(2, "SQL2", 2, 0, 1, 0, 0, DBNull.Value);
+
+            var issues = DailyReportRenderer.GetIssues(dt);
+
+            Assert.AreEqual("2 critical, 1 warning of 50 databases (6%).  Furthest behind: 3 days 10 minutes", issues.Single(i => i.Instance == "SQL1").Detail);
+            Assert.AreEqual("1 warning of 1 database (100%)", issues.Single(i => i.Instance == "SQL2").Detail);
+            Assert.AreEqual("2 critical, 1 warning of 50 DBs, 3 days behind", issues.Single(i => i.Instance == "SQL1").ShortDetail);
+            Assert.AreEqual("1 warning of 1 DB", issues.Single(i => i.Instance == "SQL2").ShortDetail);
+
+            // Other checks lists a line per instance, with the counts after its name
+            var content = DailyReportRenderer.Render(new DailyReportConfig { ReportName = "Ops", TimeZone = "UTC" }, DateTime.UtcNow, "{All}", dt, Array.Empty<DailyReportIssue>(), null, "UTC");
+            Assert.IsTrue(content.TextBody.Contains("  - Log Shipping - critical on SQL1 (2 critical, 1 warning of 50 DBs, 3 days behind)" + Environment.NewLine +
+                                                    "  - Log Shipping - warning on SQL2 (1 warning of 1 DB)"), content.TextBody);
+            Assert.IsTrue(content.HtmlBody.Contains("(2 critical, 1 warning of 50 DBs, 3 days behind)"), content.HtmlBody);
+        }
+
+        /// <summary>Databases with no log restore recorded have no time behind - they're counted separately rather than left out of the detail</summary>
+        [TestMethod]
+        public void Summary_LogShippingNoRestoreRecorded()
+        {
+            var dt = new DataTable();
+            dt.Columns.Add("InstanceID", typeof(int));
+            dt.Columns.Add("Instance", typeof(string));
+            dt.Columns.Add("LogShippingStatus", typeof(int));
+            dt.Columns.Add("LogShippingCriticalCount", typeof(int));
+            dt.Columns.Add("LogShippingWarningCount", typeof(int));
+            dt.Columns.Add("LogShippingOKCount", typeof(int));
+            dt.Columns.Add("LogShippingNACount", typeof(int));
+            dt.Columns.Add("LogShippingMaxTotalTimeBehind", typeof(decimal));
+            dt.Columns.Add("LogShippingNoRestoreCount", typeof(int));
+            dt.Rows.Add(1, "SQL1", 1, 2, 0, 8, 0, 15m, 1); // One a quarter of an hour behind, one with no restore
+            dt.Rows.Add(2, "SQL2", 1, 1, 0, 0, 0, DBNull.Value, 1); // Only one with no restore
+
+            var issues = DailyReportRenderer.GetIssues(dt);
+
+            Assert.AreEqual("2 critical of 10 databases (20%).  Furthest behind: 15 minutes.  No log restore recorded for 1 database", issues.Single(i => i.Instance == "SQL1").Detail);
+            Assert.AreEqual("2 critical of 10 DBs, 15 minutes behind, 1 with no log restore recorded", issues.Single(i => i.Instance == "SQL1").ShortDetail);
+            Assert.AreEqual("1 critical of 1 database (100%).  No log restore recorded for 1 database", issues.Single(i => i.Instance == "SQL2").Detail);
+            Assert.AreEqual("1 critical of 1 DB, 1 with no log restore recorded", issues.Single(i => i.Instance == "SQL2").ShortDetail);
+        }
+
         /// <summary>An Azure server row's job status is its elastic jobs - it goes in the Elastic jobs section, not Agent jobs</summary>
         [TestMethod]
         public void Classify_AzureJobStatusIsElasticJobs()
