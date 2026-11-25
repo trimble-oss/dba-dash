@@ -28,138 +28,152 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            this.txtLogFilter = new System.Windows.Forms.TextBox();
-            this.label2 = new System.Windows.Forms.Label();
-            this.bttnRefreshLog = new System.Windows.Forms.Button();
-            this.cboLogs = new System.Windows.Forms.ComboBox();
-            this.txtLog = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.bttnNotepad = new System.Windows.Forms.Button();
-            this.lnkSwitchFormat = new System.Windows.Forms.LinkLabel();
-            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.panel1.SuspendLayout();
-            this.SuspendLayout();
+            components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ServiceLog));
+            txtLogFilter = new System.Windows.Forms.TextBox();
+            label2 = new System.Windows.Forms.Label();
+            bttnRefreshLog = new System.Windows.Forms.Button();
+            cboLogs = new System.Windows.Forms.ComboBox();
+            txtLog = new System.Windows.Forms.TextBox();
+            label1 = new System.Windows.Forms.Label();
+            panel1 = new System.Windows.Forms.Panel();
+            chkWatch = new System.Windows.Forms.CheckBox();
+            lnkSwitchFormat = new System.Windows.Forms.LinkLabel();
+            bttnNotepad = new System.Windows.Forms.Button();
+            toolTip1 = new System.Windows.Forms.ToolTip(components);
+            panel1.SuspendLayout();
+            SuspendLayout();
             // 
             // txtLogFilter
             // 
-            this.txtLogFilter.Location = new System.Drawing.Point(75, 23);
-            this.txtLogFilter.Name = "txtLogFilter";
-            this.txtLogFilter.Size = new System.Drawing.Size(144, 27);
-            this.txtLogFilter.TabIndex = 9;
-            this.txtLogFilter.KeyDown += new System.Windows.Forms.KeyEventHandler(this.TxtLogFilter_KeyDown);
+            txtLogFilter.Location = new System.Drawing.Point(75, 23);
+            txtLogFilter.Name = "txtLogFilter";
+            txtLogFilter.Size = new System.Drawing.Size(144, 27);
+            txtLogFilter.TabIndex = 9;
+            txtLogFilter.KeyDown += TxtLogFilter_KeyDown;
             // 
             // label2
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(241, 23);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(64, 20);
-            this.label2.TabIndex = 8;
-            this.label2.Text = "Log File:";
-            this.toolTip1.SetToolTip(this.label2, "Select a log file to read from");
+            label2.AutoSize = true;
+            label2.Location = new System.Drawing.Point(241, 23);
+            label2.Name = "label2";
+            label2.Size = new System.Drawing.Size(64, 20);
+            label2.TabIndex = 8;
+            label2.Text = "Log File:";
+            toolTip1.SetToolTip(label2, "Select a log file to read from");
             // 
             // bttnRefreshLog
             // 
-            this.bttnRefreshLog.Image = global::DBADashServiceConfig.Properties.Resources._112_RefreshArrow_Green_16x16_72;
-            this.bttnRefreshLog.Location = new System.Drawing.Point(642, 23);
-            this.bttnRefreshLog.Name = "bttnRefreshLog";
-            this.bttnRefreshLog.Size = new System.Drawing.Size(41, 29);
-            this.bttnRefreshLog.TabIndex = 7;
-            this.toolTip1.SetToolTip(this.bttnRefreshLog, "Click to get latest entries from the log file");
-            this.bttnRefreshLog.UseVisualStyleBackColor = true;
-            this.bttnRefreshLog.Click += new System.EventHandler(this.BttnRefreshLog_Click);
+            bttnRefreshLog.Image = Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            bttnRefreshLog.Location = new System.Drawing.Point(642, 23);
+            bttnRefreshLog.Name = "bttnRefreshLog";
+            bttnRefreshLog.Size = new System.Drawing.Size(41, 29);
+            bttnRefreshLog.TabIndex = 7;
+            toolTip1.SetToolTip(bttnRefreshLog, "Click to get latest entries from the log file");
+            bttnRefreshLog.UseVisualStyleBackColor = true;
+            bttnRefreshLog.Click += BttnRefreshLog_Click;
             // 
             // cboLogs
             // 
-            this.cboLogs.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cboLogs.FormattingEnabled = true;
-            this.cboLogs.Location = new System.Drawing.Point(311, 23);
-            this.cboLogs.Name = "cboLogs";
-            this.cboLogs.Size = new System.Drawing.Size(325, 28);
-            this.cboLogs.TabIndex = 6;
-            this.toolTip1.SetToolTip(this.cboLogs, "Select a log file to read from");
-            this.cboLogs.SelectedIndexChanged += new System.EventHandler(this.CboLogs_SelectedIndexChanged);
+            cboLogs.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            cboLogs.FormattingEnabled = true;
+            cboLogs.Location = new System.Drawing.Point(311, 23);
+            cboLogs.Name = "cboLogs";
+            cboLogs.Size = new System.Drawing.Size(325, 28);
+            cboLogs.TabIndex = 6;
+            toolTip1.SetToolTip(cboLogs, "Select a log file to read from");
+            cboLogs.SelectedIndexChanged += CboLogs_SelectedIndexChanged;
             // 
             // txtLog
             // 
-            this.txtLog.BackColor = System.Drawing.Color.Black;
-            this.txtLog.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txtLog.Font = new System.Drawing.Font("Lucida Console", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.txtLog.ForeColor = System.Drawing.Color.White;
-            this.txtLog.Location = new System.Drawing.Point(0, 77);
-            this.txtLog.Multiline = true;
-            this.txtLog.Name = "txtLog";
-            this.txtLog.ReadOnly = true;
-            this.txtLog.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txtLog.Size = new System.Drawing.Size(1083, 703);
-            this.txtLog.TabIndex = 5;
+            txtLog.BackColor = System.Drawing.Color.Black;
+            txtLog.Dock = System.Windows.Forms.DockStyle.Fill;
+            txtLog.Font = new System.Drawing.Font("Lucida Console", 10F);
+            txtLog.ForeColor = System.Drawing.Color.White;
+            txtLog.Location = new System.Drawing.Point(0, 77);
+            txtLog.Multiline = true;
+            txtLog.Name = "txtLog";
+            txtLog.ReadOnly = true;
+            txtLog.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            txtLog.Size = new System.Drawing.Size(1124, 703);
+            txtLog.TabIndex = 5;
             // 
             // label1
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(12, 23);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(45, 20);
-            this.label1.TabIndex = 10;
-            this.label1.Text = "Filter:";
-            this.toolTip1.SetToolTip(this.label1, "Enter text to filter by or leave empty to return the full log");
+            label1.AutoSize = true;
+            label1.Location = new System.Drawing.Point(12, 23);
+            label1.Name = "label1";
+            label1.Size = new System.Drawing.Size(45, 20);
+            label1.TabIndex = 10;
+            label1.Text = "Filter:";
+            toolTip1.SetToolTip(label1, "Enter text to filter by or leave empty to return the full log");
             // 
             // panel1
             // 
-            this.panel1.Controls.Add(this.lnkSwitchFormat);
-            this.panel1.Controls.Add(this.bttnNotepad);
-            this.panel1.Controls.Add(this.label2);
-            this.panel1.Controls.Add(this.label1);
-            this.panel1.Controls.Add(this.txtLogFilter);
-            this.panel1.Controls.Add(this.cboLogs);
-            this.panel1.Controls.Add(this.bttnRefreshLog);
-            this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panel1.Location = new System.Drawing.Point(0, 0);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(1083, 77);
-            this.panel1.TabIndex = 11;
+            panel1.Controls.Add(chkWatch);
+            panel1.Controls.Add(lnkSwitchFormat);
+            panel1.Controls.Add(bttnNotepad);
+            panel1.Controls.Add(label2);
+            panel1.Controls.Add(label1);
+            panel1.Controls.Add(txtLogFilter);
+            panel1.Controls.Add(cboLogs);
+            panel1.Controls.Add(bttnRefreshLog);
+            panel1.Dock = System.Windows.Forms.DockStyle.Top;
+            panel1.Location = new System.Drawing.Point(0, 0);
+            panel1.Name = "panel1";
+            panel1.Size = new System.Drawing.Size(1124, 77);
+            panel1.TabIndex = 11;
+            // 
+            // chkWatch
+            // 
+            chkWatch.AutoSize = true;
+            chkWatch.Location = new System.Drawing.Point(689, 26);
+            chkWatch.Name = "chkWatch";
+            chkWatch.Size = new System.Drawing.Size(72, 24);
+            chkWatch.TabIndex = 13;
+            chkWatch.Text = "Watch";
+            chkWatch.UseVisualStyleBackColor = true;
+            // 
+            // lnkSwitchFormat
+            // 
+            lnkSwitchFormat.AutoSize = true;
+            lnkSwitchFormat.Location = new System.Drawing.Point(887, 27);
+            lnkSwitchFormat.Name = "lnkSwitchFormat";
+            lnkSwitchFormat.Size = new System.Drawing.Size(225, 20);
+            lnkSwitchFormat.TabIndex = 12;
+            lnkSwitchFormat.TabStop = true;
+            lnkSwitchFormat.Text = "Switch service log format to Text";
+            lnkSwitchFormat.Visible = false;
+            lnkSwitchFormat.LinkClicked += LnkSwitchFormat_LinkClicked;
             // 
             // bttnNotepad
             // 
-            this.bttnNotepad.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.bttnNotepad.Location = new System.Drawing.Point(689, 23);
-            this.bttnNotepad.Name = "bttnNotepad";
-            this.bttnNotepad.Size = new System.Drawing.Size(105, 29);
-            this.bttnNotepad.TabIndex = 11;
-            this.bttnNotepad.Text = "Notepad";
-            this.toolTip1.SetToolTip(this.bttnNotepad, "Open log in Notepad");
-            this.bttnNotepad.UseVisualStyleBackColor = true;
-            this.bttnNotepad.Click += new System.EventHandler(this.BttnNotepad_Click);
-            // 
-            // lnkSwitchFormat
-            //
-            this.lnkSwitchFormat.AutoSize = true;
-            this.lnkSwitchFormat.Location = new System.Drawing.Point(812, 27);
-            this.lnkSwitchFormat.Name = "lnkSwitchFormat";
-            this.lnkSwitchFormat.Size = new System.Drawing.Size(234, 20);
-            this.lnkSwitchFormat.TabIndex = 12;
-            this.lnkSwitchFormat.TabStop = true;
-            this.lnkSwitchFormat.Text = "Switch service log format to Text";
-            this.lnkSwitchFormat.Visible = false;
-            this.lnkSwitchFormat.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkSwitchFormat_LinkClicked);
+            bttnNotepad.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            bttnNotepad.Location = new System.Drawing.Point(767, 23);
+            bttnNotepad.Name = "bttnNotepad";
+            bttnNotepad.Size = new System.Drawing.Size(105, 29);
+            bttnNotepad.TabIndex = 11;
+            bttnNotepad.Text = "Notepad";
+            toolTip1.SetToolTip(bttnNotepad, "Open log in Notepad");
+            bttnNotepad.UseVisualStyleBackColor = true;
+            bttnNotepad.Click += BttnNotepad_Click;
             // 
             // ServiceLog
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1083, 780);
-            this.Controls.Add(this.txtLog);
-            this.Controls.Add(this.panel1);
-            this.Name = "ServiceLog";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Service Log";
-            this.Load += new System.EventHandler(this.ServiceLog_Load);
-            this.panel1.ResumeLayout(false);
-            this.panel1.PerformLayout();
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            ClientSize = new System.Drawing.Size(1124, 780);
+            Controls.Add(txtLog);
+            Controls.Add(panel1);
+            Icon = (System.Drawing.Icon)resources.GetObject("$this.Icon");
+            Name = "ServiceLog";
+            StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            Text = "Service Log";
+            Load += ServiceLog_Load;
+            panel1.ResumeLayout(false);
+            panel1.PerformLayout();
+            ResumeLayout(false);
+            PerformLayout();
 
         }
 
@@ -175,5 +189,6 @@
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.Button bttnNotepad;
         private System.Windows.Forms.LinkLabel lnkSwitchFormat;
+        private System.Windows.Forms.CheckBox chkWatch;
     }
 }

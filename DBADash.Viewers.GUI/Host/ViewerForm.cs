@@ -45,6 +45,7 @@ namespace DBADashGUI.Viewers
 
         private ViewerForm()
         {
+            ViewerSettings.ConnectDateTimeFormat();
             Text = ViewerApp.Identity.DisplayName;
             Icon = Resources.PlanViewerIcon;
             Width = 1300;
@@ -336,6 +337,9 @@ namespace DBADashGUI.Viewers
             // Built after the form's own ApplyTheme() already ran, as the start tab's content is.
             loading.ApplyTheme();
 
+            // Taken before the read, so a change made while it's read is seen by the grid's watch.
+            var stamp = GridViewerControl.FileStamp(path);
+
             // The load is handed back to the window with BeginInvoke, which needs its handle - and a new window isn't
             // shown until after this returns, possibly after a small file has already loaded.
             _ = Handle;
@@ -343,7 +347,7 @@ namespace DBADashGUI.Viewers
             {
                 try
                 {
-                    BeginInvoke(() => ShowLoadedGridFile(page, path, fileName, load));
+                    BeginInvoke(() => ShowLoadedGridFile(page, path, fileName, load, stamp));
                 }
                 catch (Exception ex) when (ex is ObjectDisposedException or InvalidOperationException)
                 {
@@ -358,7 +362,8 @@ namespace DBADashGUI.Viewers
         /// that couldn't be read is reported and its tab closed - leaving the start tab if it was the only one, as a
         /// file that fails to open from Explorer does.
         /// </summary>
-        private void ShowLoadedGridFile(TabPage page, string path, string fileName, Task<DataSet> load)
+        private void ShowLoadedGridFile(TabPage page, string path, string fileName, Task<DataSet> load,
+            (DateTime WriteUtc, long Length)? stamp)
         {
             try
             {
@@ -394,6 +399,11 @@ namespace DBADashGUI.Viewers
                     {
                         Dock = DockStyle.Fill
                     };
+                    if (messages == null && stamp is { } fileStamp)
+                    {
+                        grid.SetSource(path, fileStamp);
+                        WireGridReload(page, grid);
+                    }
                     (viewer, title, tooltip) = (grid, grid.Title, grid.TabToolTip);
                 }
                 else
@@ -430,6 +440,99 @@ namespace DBADashGUI.Viewers
                 }
 
                 CommonShared.ShowExceptionDialog(ex, "Error opening grid", text: $"{path} could not be opened as a grid.");
+            }
+        }
+
+        /// <summary>Lets the grid's Reload button and Watch setting read its file again on this tab.</summary>
+        private void WireGridReload(TabPage page, GridViewerControl grid) =>
+            grid.ReloadRequested += (source, manual) => ReloadGridFile(page, source, manual);
+
+        /// <summary>
+        /// Reads a grid's file again, for one still being written: a log that has had records added since it was opened.
+        /// The new grid keeps the filter and the Watch setting, but starts again at the top with the columns' widths
+        /// fitted to the data - the file is read on a background thread, as opening one is.  A watch that finds nothing
+        /// wrong with the read says nothing; the Reload button reports a file that can't be read.
+        /// </summary>
+        private void ReloadGridFile(TabPage page, GridViewerControl grid, bool manual)
+        {
+            var path = grid.SourcePath;
+            if (GridViewerControl.FileStamp(path) is not { } stamp)
+            {
+                if (manual) MessageBox.Show(this, $"{path} is no longer there.", "Reload", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // One read at a time: a change made during it is seen by the watch once it's done.  The stamp is only taken
+            // as read when the read succeeds (SetSource) - a read that fails is tried again at the next change.
+            if (grid.ReloadInProgress) return;
+            grid.ReloadInProgress = true;
+            Task.Run(() => GridSerializer.LoadDataSet(path)).ContinueWith(load =>
+            {
+                try
+                {
+                    BeginInvoke(() => ShowReloadedGridFile(page, grid, path, stamp, load, manual));
+                }
+                catch (Exception ex) when (ex is ObjectDisposedException or InvalidOperationException)
+                {
+                    // The window closed while the file loaded.
+                    grid.ReloadInProgress = false;
+                    if (load.Status == TaskStatus.RanToCompletion) load.Result.Dispose();
+                }
+            }, TaskScheduler.Default);
+        }
+
+        private void ShowReloadedGridFile(TabPage page, GridViewerControl old, string path, (DateTime WriteUtc, long Length) stamp,
+            Task<DataSet> load, bool manual)
+        {
+            DataSet dataSet = null;
+            try
+            {
+                dataSet = load.GetAwaiter().GetResult();
+
+                // The tab was closed, or its grid replaced by a later reload, while the file loaded.
+                if (page.IsDisposed || page.Controls.Count == 0 || !ReferenceEquals(page.Controls[0], old) ||
+                    dataSet.Tables.Count != 1)
+                {
+                    dataSet.Dispose();
+                    return;
+                }
+
+                var table = dataSet.Tables[0];
+
+                // A log that has only gained records: those are added, and the grid is left as it is - its scroll
+                // position, sort, filter and column widths included.
+                if (old.TryAppendRows(table))
+                {
+                    old.SetSource(path, stamp);
+                    dataSet.Dispose();
+                    return;
+                }
+
+                // Anything else - a file rewritten, or with columns changed - is shown as a fresh grid.
+                var grid = new GridViewerControl(table, old.Title) { Dock = DockStyle.Fill };
+                grid.ApplyRowFilter(old.RowFilter);
+                grid.SetSource(path, stamp);
+                WireGridReload(page, grid);
+                // After SetSource: the watch needs the file to check.
+                grid.WatchForNewData = old.WatchForNewData;
+
+                page.Controls.Clear();
+                page.Controls.Add(grid);
+                old.Dispose();
+                page.ToolTipText = grid.TabToolTip;
+                if (_documents.SelectedTab == page) ShowTitle();
+            }
+            catch (Exception ex)
+            {
+                dataSet?.Dispose();
+                if (manual)
+                {
+                    CommonShared.ShowExceptionDialog(ex, "Error reloading grid", text: $"{path} could not be read again.");
+                }
+            }
+            finally
+            {
+                old.ReloadInProgress = false;
             }
         }
 

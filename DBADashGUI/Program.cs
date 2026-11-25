@@ -47,6 +47,7 @@ namespace DBADashGUI
             CommonShared.AppNow = () => DateHelper.AppNow;
             // The plan and deadlock viewers keep their settings with the GUI's, and offer what needs the repository.
             ViewerSettings.Store = new GuiViewerSettingsStore();
+            ViewerSettings.ConnectDateTimeFormat();
             ViewerLauncher.DefaultHost = new DBADashViewerHost();
             if (Updates.GuiInstaller.IsInstalled)
             {
