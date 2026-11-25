@@ -446,6 +446,61 @@ INSERT INTO Alert.Rules(Type,AlertKey,Priority,ApplyToTagID,IsActive,NotifyAfter
 SELECT COUNT(DISTINCT RuleHash) FROM Alert.Rules WHERE Type='AGHealth'", cmd => Assert.AreEqual(3, (int)cmd.ExecuteScalar()));
         }
 
+        /// <summary>A job that keeps failing isn't reported again (the failure isn't new), but its pending alert mustn't be closed as stale before the notify delay passes</summary>
+        [TestMethod]
+        public void PendingJobAlertIsNotClosedAsStale()
+        {
+            RunDelayScenario(3000, null, s =>
+            {
+                s.Exec("INSERT INTO dbo.Jobs(InstanceID,job_id,name,enabled,category,IsActive,LastSucceeded,LastFailed) VALUES(@InstanceID,NEWID(),N'Flaky job',1,N'Test',1,DATEADD(d,-1,SYSUTCDATETIME()),SYSUTCDATETIME())");
+                s.Exec("EXEC Alert.AgentJobAlert_Upd");
+                s.Wait(1500);
+                s.Exec("EXEC Alert.Alerts_Upd");
+                Assert.IsTrue(s.IsPending, "Pending for 1500 of 3000 mins");
+            }, "AgentJob", "AgentJob");
+        }
+
+        /// <summary>Desktop notifications: an alert escalated while pending has no notification date until an alert run marks it due - it mustn't be returned without one</summary>
+        [TestMethod]
+        public void NewAlertsGetWaitsForNotifyReadyDate()
+        {
+            RunDelayScenario(2, null, s =>
+            {
+                s.Fail();
+                s.Exec("UPDATE Alert.ActiveAlerts SET Escalated = SYSUTCDATETIME() WHERE InstanceID = @InstanceID");
+                s.Wait(2); /* Past the notify delay, but no alert run since */
+                s.Exec("UPDATE Alert.ActiveAlerts SET Escalated = SYSUTCDATETIME() WHERE InstanceID = @InstanceID");
+                Assert.IsFalse(s.IsNewAlert(), "Not due until an alert run marks it");
+                s.Fail();
+                Assert.IsTrue(s.IsNewAlert());
+            });
+        }
+
+        /// <summary>Renumbering alerts that clash with closed alert IDs keeps their episode dates</summary>
+        [TestMethod]
+        public void FixIdentitySeedKeepsEpisodeDates()
+        {
+            RunDelayScenario(2, null, s =>
+            {
+                s.Fail();
+                s.Wait(2);
+                s.Fail();
+                s.Clear();
+                Assert.IsTrue(s.IsResolving);
+                s.Exec(@"INSERT INTO Alert.ClosedAlerts(AlertID,InstanceID,Priority,AlertType,AlertKey,FirstMessage,LastMessage,TriggerDate,UpdatedDate,FirstNotification,LastNotification,
+	UpdateCount,ResolvedCount,NotificationCount,FailedNotificationCount,IsAcknowledged,IsResolved,ResolvedDate,Notes,RuleID,GroupID,AcknowledgedDate)
+SELECT AlertID,InstanceID,Priority,AlertType,AlertKey,FirstMessage,LastMessage,TriggerDate,UpdatedDate,FirstNotification,LastNotification,
+	UpdateCount,ResolvedCount,NotificationCount,FailedNotificationCount,IsAcknowledged,IsResolved,ResolvedDate,Notes,RuleID,GroupID,AcknowledgedDate
+FROM Alert.ActiveAlerts
+WHERE InstanceID = @InstanceID
+EXEC Alert.ActiveAlerts_FixIdentitySeed");
+                Assert.AreEqual(1, (int)s.Value("COUNT(*) OVER()"), "Renumbered, not lost");
+                Assert.IsTrue((bool)s.Value("CAST(CASE WHEN AlertID NOT IN(SELECT AlertID FROM Alert.ClosedAlerts) THEN 1 ELSE 0 END AS BIT)"), "Renumbered");
+                Assert.IsTrue(s.IsResolving, "ResolvingSince kept");
+                Assert.IsTrue((bool)s.Value("CAST(CASE WHEN ActiveSince IS NOT NULL AND NotifyReadyDate IS NOT NULL THEN 1 ELSE 0 END AS BIT)"), "ActiveSince & NotifyReadyDate kept");
+            });
+        }
+
         private static void RunDelayScenario(int? notifyAfterMins, int? resolveAfterMins, Action<DelayScenario> steps, string alertType = "AGHealth", string ruleAlertKey = "AG HEALTH", string? details = null)
         {
             using var cn = new SqlConnection(ConnectionString);

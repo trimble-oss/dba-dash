@@ -14,7 +14,7 @@ AS
 	in Alert.Notifications_Get.
 	A resolving alert that's in neither list - e.g. its custom SQL proc failed - keeps waiting.  It isn't treated as active again, unless
 	@UnclearedAreActive=1: the caller checked every alert of the type, so one that hasn't cleared still has the issue - e.g. a failing job
-	that isn't reported again because the failure isn't new.
+	that isn't reported again because the failure isn't new.  Such an alert that's still pending is refreshed too.
 	UpdatedDate is refreshed each time an alert is confirmed clear, so Alert.Alerts_Upd doesn't close it as stale during a long resolve delay.
 
 	Also records when each alert of the type is first due for notification in its episode (NotifyReadyDate) - for desktop notifications.
@@ -58,6 +58,22 @@ BEGIN
 	AND AA.IsResolved = 0
 	AND AA.IsBlackout = 0
 	AND AA.ResolvingSince IS NOT NULL
+	AND NOT EXISTS(SELECT 1
+				FROM @AlertIDs T
+				WHERE T.ID = AA.AlertID
+				)
+
+	/*
+		Pending and the issue is still there.  Refresh it so Alert.Alerts_Upd doesn't close it as stale before the notify delay passes.
+		Once it's due it's left as before: an alert that isn't reported again is closed after AlertAutoCloseThresholdMins.
+	*/
+	UPDATE AA
+		SET UpdatedDate = @Now
+	FROM Alert.ActiveAlerts AA
+	CROSS APPLY Alert.AlertDelayStatus_Get(AA.IsResolved,ISNULL(AA.ActiveSince,AA.TriggerDate),AA.ResolvingSince,AA.RuleID) DS
+	WHERE AA.AlertType = @AlertType
+	AND AA.IsBlackout = 0
+	AND DS.IsPending = 1
 	AND NOT EXISTS(SELECT 1
 				FROM @AlertIDs T
 				WHERE T.ID = AA.AlertID

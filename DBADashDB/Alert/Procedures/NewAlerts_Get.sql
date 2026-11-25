@@ -26,6 +26,7 @@ WHERE (ND.NotifyDate > @FromDate
 		OR AA.Escalated > @FromDate
 		)
 AND DS.IsHeld = 0 /* Not pending or resolving */
+AND ND.NotifyDate IS NOT NULL /* Due for notification - e.g. not escalated while pending, then past its delay before the next alert run marked it due */
 AND AA.IsBlackout=0
 AND AA.IsResolved=0
 AND AA.IsAcknowledged=0
