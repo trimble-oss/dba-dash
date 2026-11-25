@@ -21,6 +21,8 @@ namespace DBADash.Test
                 s.Fail();
                 Assert.IsTrue(s.IsNotifying(), "Notifies as soon as the issue is seen");
                 s.Notified();
+                /* Notifications_Get needs UpdatedDate > LastNotification.  Without a wait they can share a SYSUTCDATETIME() tick (~15ms on Windows). */
+                s.Wait(1);
                 s.Clear();
                 Assert.IsTrue(s.IsResolved, "Resolves as soon as the issue clears");
                 Assert.IsTrue(s.IsNotifying(), "Notifies the resolution");
