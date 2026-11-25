@@ -183,7 +183,8 @@ AND NOT EXISTS(	SELECT 1
 				AND (J.LastSucceeded < J.LastFailed OR J.LastSucceeded IS NULL)
 				)
 
-EXEC Alert.ActiveAlerts_Resolve @AlertIDs=@Cleared, @AlertType=@Type
+/* Every alert of the type was checked - one that hasn't cleared still has a failing job, even if the failure isn't new */
+EXEC Alert.ActiveAlerts_Resolve @AlertIDs=@Cleared, @AlertType=@Type, @UnclearedAreActive=1
 
 /* Update the snapshot of recently failed jobs */
 TRUNCATE TABLE Alert.ElasticJobSnapshot

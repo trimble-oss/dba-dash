@@ -65,7 +65,7 @@ namespace DBADashAI.Services.Tools
                     {
                         Source = "Alert.ActiveAlerts + dbo.Instances",
                         Detail = "Includes InstanceDisplayName, AlertKey, LastMessage, and trigger/update timestamps. IsPending: not notified yet, waiting for the rule's Notify After delay. IsResolving: the issue has cleared, waiting for the rule's Resolve After delay"
-}
+                    }
                 ]
             };
         }

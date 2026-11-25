@@ -296,6 +296,9 @@ EXEC Alert.DatabaseStatusAlert_Upd");
                 s.Wait(2);
                 s.Exec("EXEC Alert.CustomSqlAlert_Upd");
                 Assert.IsTrue(s.IsResolving, "Not resolved while the proc can't say whether the issue is still clear");
+                s.Wait(1500);
+                s.Exec("EXEC Alert.Alerts_Upd");
+                Assert.IsTrue(s.IsResolving, "Not closed as stale while the proc is failing");
                 s.Exec(clear + " EXEC Alert.CustomSqlAlert_Upd");
                 Assert.IsTrue(s.IsResolved);
                 Assert.IsTrue(s.IsNotifying(), "Resolution of a notified alert is sent");
@@ -357,6 +360,90 @@ EXEC Alert.DatabaseStatusAlert_Upd");
                 Assert.IsTrue(s.IsResolved);
                 Assert.IsFalse(s.IsNotifying(), "Never notified, so neither is the resolution");
             });
+        }
+
+        /// <summary>Alert.Alerts_Upd closes alerts that haven't been updated for a day.  A resolving alert is updated each time it's confirmed clear.</summary>
+        [TestMethod]
+        public void LongResolveDelayIsNotClosedAsStale()
+        {
+            RunDelayScenario(null, 3000, s =>
+            {
+                s.Fail();
+                s.Clear();
+                Assert.IsTrue(s.IsResolving);
+                s.Wait(1500);
+                s.Exec("EXEC Alert.Alerts_Upd"); /* No AG data - still clear */
+                Assert.IsTrue(s.IsResolving, "Resolving for 1500 of 3000 mins");
+            });
+        }
+
+        /// <summary>A disabled job isn't in the snapshot of recently failed jobs, so it mustn't be reported as a new failure every run</summary>
+        [TestMethod]
+        public void DisabledJobResolvesAfterResolveDelay()
+        {
+            RunDelayScenario(2, null, s =>
+            {
+                s.Exec("INSERT INTO dbo.Jobs(InstanceID,job_id,name,enabled,category,IsActive,LastSucceeded,LastFailed) VALUES(@InstanceID,NEWID(),N'Flaky job',1,N'Test',1,DATEADD(d,-1,SYSUTCDATETIME()),SYSUTCDATETIME())");
+                s.Exec("EXEC Alert.AgentJobAlert_Upd");
+                s.Wait(1);
+                s.Exec("UPDATE dbo.Jobs SET enabled = 0 WHERE InstanceID = @InstanceID EXEC Alert.AgentJobAlert_Upd");
+                Assert.IsTrue(s.IsResolving);
+                s.Wait(1);
+                s.Exec("EXEC Alert.AgentJobAlert_Upd");
+                Assert.IsTrue(s.IsResolving, "Not reported again once it's dropped out of the snapshot");
+                s.Wait(1);
+                s.Exec("EXEC Alert.AgentJobAlert_Upd");
+                Assert.IsTrue(s.IsResolved);
+                Assert.IsFalse(s.IsNotifying());
+            }, "AgentJob", "AgentJob");
+        }
+
+        /// <summary>A job that's still failing but isn't reported again (the failure isn't new) mustn't stay resolving</summary>
+        [TestMethod]
+        public void JobRenamedAwayAndBackIsActiveAgain()
+        {
+            RunDelayScenario(2, null, s =>
+            {
+                s.Exec("INSERT INTO dbo.Jobs(InstanceID,job_id,name,enabled,category,IsActive,LastSucceeded,LastFailed) VALUES(@InstanceID,NEWID(),N'Flaky job',1,N'Test',1,DATEADD(d,-1,SYSUTCDATETIME()),SYSUTCDATETIME())");
+                s.Exec("EXEC Alert.AgentJobAlert_Upd");
+                s.Wait(1);
+                s.Exec("UPDATE dbo.Jobs SET name = N'Other name' WHERE InstanceID = @InstanceID EXEC Alert.AgentJobAlert_Upd");
+                Assert.IsTrue(s.IsResolving);
+                s.Wait(1);
+                s.Exec("UPDATE dbo.Jobs SET name = N'Flaky job' WHERE InstanceID = @InstanceID EXEC Alert.AgentJobAlert_Upd");
+                Assert.IsFalse(s.IsResolving, "The job is still failing");
+                Assert.AreEqual(0, s.ResolvedCount);
+                Assert.IsTrue(s.IsNotifying());
+            }, "AgentJob", "AgentJob");
+        }
+
+        /// <summary>Desktop notifications: an episode that's already been shown isn't new again each time the issue comes back</summary>
+        [TestMethod]
+        public void NewAlertsGetDoesNotRepeatAnEpisode()
+        {
+            RunDelayScenario(2, null, s =>
+            {
+                s.Fail();
+                s.Wait(2);
+                s.Fail();
+                Assert.IsTrue(s.IsNewAlert());
+                s.Wait(1);
+                s.Clear();
+                s.Fail();
+                Assert.IsFalse(s.IsResolving);
+                Assert.IsFalse(s.IsNewAlert(), "Already shown for this episode");
+            });
+        }
+
+        /// <summary>Rules that differ only by their delays aren't duplicates - e.g. when a notification channel group is deleted and its rules move to the default group</summary>
+        [TestMethod]
+        public void RulesDifferingByDelayAreNotDuplicates()
+        {
+            RunAndRollback(@"
+INSERT INTO Alert.Rules(Type,AlertKey,Priority,ApplyToTagID,IsActive) VALUES('AGHealth','AG HEALTH',10,-1,1)
+INSERT INTO Alert.Rules(Type,AlertKey,Priority,ApplyToTagID,IsActive,NotifyAfterMins) VALUES('AGHealth','AG HEALTH',10,-1,1,5)
+INSERT INTO Alert.Rules(Type,AlertKey,Priority,ApplyToTagID,IsActive,NotifyAfterMins,ResolveAfterMins) VALUES('AGHealth','AG HEALTH',10,-1,1,5,0)
+SELECT COUNT(DISTINCT RuleHash) FROM Alert.Rules WHERE Type='AGHealth'", cmd => Assert.AreEqual(3, (int)cmd.ExecuteScalar()));
         }
 
         private static void RunDelayScenario(int? notifyAfterMins, int? resolveAfterMins, Action<DelayScenario> steps, string alertType = "AGHealth", string ruleAlertKey = "AG HEALTH", string? details = null)
@@ -440,6 +527,7 @@ UPDATE Alert.ActiveAlerts
 	ResolvedDate = DATEADD(mi,-@Mins,ResolvedDate),
 	FirstNotification = DATEADD(mi,-@Mins,FirstNotification),
 	LastNotification = DATEADD(mi,-@Mins,LastNotification),
+	NotifyReadyDate = DATEADD(mi,-@Mins,NotifyReadyDate),
 	Escalated = DATEADD(mi,-@Mins,Escalated),
 	DeEscalated = DATEADD(mi,-@Mins,DeEscalated)
 WHERE InstanceID = @InstanceID", ("@Mins", mins), ("@InstanceID", instanceID)).ExecuteNonQuery();

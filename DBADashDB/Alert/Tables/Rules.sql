@@ -15,7 +15,7 @@ CREATE TABLE Alert.Rules(
 	   Tags with different names must all match (AND).  Tags with the same name are alternatives (OR).  e.g. (Role:Production OR Role:UAT) AND Region:APAC
 	   Resolved to instances once per alert run by Alert.ApplicableInstances_Upd */
 	ApplyToTagIDs VARCHAR(800) NULL,
-	RuleHash AS HASHBYTES('SHA2_256',CONCAT(Type,'|',AlertKey,'|',ApplyToTagID,'|',ApplyToInstanceID,'|',Threshold,'|',EvaluationPeriodMins,'|',IsActive,'|',Details,'|',ApplyToHidden,'|',ApplyToTagIDs)),
+	RuleHash AS HASHBYTES('SHA2_256',CONCAT(Type,'|',AlertKey,'|',ApplyToTagID,'|',ApplyToInstanceID,'|',Threshold,'|',EvaluationPeriodMins,'|',IsActive,'|',Details,'|',ApplyToHidden,'|',ApplyToTagIDs,'|N'+CAST(NotifyAfterMins AS VARCHAR(11)),'|R'+CAST(ResolveAfterMins AS VARCHAR(11)))),
 	GroupID INT NOT NULL CONSTRAINT DF_Alert_Rules_GroupID DEFAULT(0),
 	/* Only notify once the issue has persisted for this many minutes.  NULL/0 notifies straight away.  See Alert.ActiveAlerts_Upd & Alert.Notifications_Get */
 	NotifyAfterMins INT NULL,

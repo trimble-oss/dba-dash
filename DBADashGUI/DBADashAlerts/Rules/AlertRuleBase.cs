@@ -162,7 +162,7 @@ namespace DBADashGUI.DBADashAlerts.Rules
         [DisplayName("Resolve After"), Category("DBA Dash Notification")]
         [Description("Only resolve the alert once the issue has cleared for this long.  Until then the alert shows as Resolving, and if the issue comes back it carries on as the same alert.  This stops an issue that keeps clearing briefly from restarting the Notify After delay.  Leave blank to use the Notify After value.  Enter days / hours / minutes.")]
         [TypeConverter(typeof(MinuteDurationConverter))]
-        [Editor(typeof(MinuteDurationEditor), typeof(UITypeEditor))]
+        [Editor(typeof(NullableMinuteDurationEditor), typeof(UITypeEditor))]
         public virtual int? ResolveAfterMins { get; set; }
 
         public string GetDetails() => JsonConvert.SerializeObject(this);
