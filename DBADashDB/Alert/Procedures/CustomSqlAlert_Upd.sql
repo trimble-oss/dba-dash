@@ -16,7 +16,9 @@ AS
 	(both Alert.* and UserAlert.* are owned by dbo).
 
 	Robustness: if a proc errors, its currently active alerts are carried forward so a transient failure
-	does not incorrectly resolve/close them.
+	does not incorrectly resolve/close them.  Alerts that were waiting out the rule's resolve delay are left
+	as they are: carrying them forward would make them active again, and resolving them would assume the
+	issue is still clear.
 */
 SET NOCOUNT ON
 DECLARE @Type VARCHAR(50) = 'CustomSql';
@@ -36,6 +38,7 @@ PRINT CONCAT('Processing alerts of type ', @Type)
 EXEC Alert.ApplicableInstances_Ensure;
 
 DECLARE @AlertDetails Alert.AlertDetails;
+DECLARE @FailedRules TABLE(RuleID INT NOT NULL PRIMARY KEY);
 
 CREATE TABLE #ProcOutput(
 	InstanceID INT NOT NULL,
@@ -117,6 +120,9 @@ BEGIN
 			WHERE AA.AlertType = @Type
 			AND AA.RuleID = @RuleID
 			AND AA.IsResolved = 0
+			AND AA.ResolvingSince IS NULL
+
+			INSERT INTO @FailedRules(RuleID) VALUES(@RuleID)
 		END CATCH
 	END
 	ELSE
@@ -136,6 +142,9 @@ BEGIN
 		WHERE AA.AlertType = @Type
 		AND AA.RuleID = @RuleID
 		AND AA.IsResolved = 0
+		AND AA.ResolvingSince IS NULL
+
+		INSERT INTO @FailedRules(RuleID) VALUES(@RuleID)
 	END
 
 	FETCH NEXT FROM cur INTO @RuleID, @ProcName, @Priority, @GroupID, @RuleAlertKey, @ApplyToTagID, @ApplyToInstanceID, @ApplyToHidden
@@ -143,4 +152,25 @@ END
 CLOSE cur
 DEALLOCATE cur
 
-EXEC Alert.ActiveAlerts_Upd @AlertDetails = @AlertDetails, @AlertType = @Type
+EXEC Alert.ActiveAlerts_Upd @AlertDetails = @AlertDetails, @AlertType = @Type, @ResolveAlertsOfType = 0
+
+/* Resolve alerts that are no longer reported - except for rules whose proc failed on this run */
+DECLARE @Cleared dbo.BigIDs
+INSERT INTO @Cleared(ID)
+SELECT AA.AlertID
+FROM Alert.ActiveAlerts AA
+WHERE AA.AlertType = @Type
+AND NOT EXISTS(SELECT 1
+			FROM @AlertDetails AD
+			WHERE AD.InstanceID = AA.InstanceID
+			AND AD.AlertKey = AA.AlertKey
+			AND AD.GroupID = AA.GroupID
+			)
+AND NOT EXISTS(SELECT 1
+			FROM @FailedRules FR
+			WHERE FR.RuleID = AA.RuleID
+			)
+AND AA.IsResolved = 0
+AND AA.IsBlackout = 0
+
+EXEC Alert.ActiveAlerts_Resolve @AlertIDs = @Cleared, @AlertType = @Type

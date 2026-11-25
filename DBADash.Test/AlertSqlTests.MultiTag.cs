@@ -179,7 +179,7 @@ IF NOT EXISTS(SELECT 1 FROM Alert.Rules WHERE RuleID = @RuleID AND ApplyToTagID 
             RunAndRollback(TaggedInstances + TagRule("@Prod,@UAT,@APAC") + @"
 DECLARE @Rules TABLE(RuleID INT, Type VARCHAR(50), AlertKey NVARCHAR(256), Priority TINYINT, PriorityDescription NVARCHAR(100), ApplyToTagID INT, Threshold DECIMAL(28,9),
 	EvaluationPeriodMins INT, IsActive BIT, Details NVARCHAR(MAX), ApplyToTag NVARCHAR(MAX), ApplyToInstanceID INT, ApplyToInstance NVARCHAR(256), ApplyToHidden BIT,
-	Notes NVARCHAR(MAX), GroupID INT, GroupName NVARCHAR(256), ApplyToTagIDs VARCHAR(800))
+	Notes NVARCHAR(MAX), GroupID INT, GroupName NVARCHAR(256), ApplyToTagIDs VARCHAR(800), NotifyAfterMins INT, ResolveAfterMins INT)
 INSERT INTO @Rules EXEC Alert.Rules_Get @RuleID = @RuleID
 SELECT ApplyToTag FROM @Rules", cmd => description = (string)cmd.ExecuteScalar());
             Assert.AreEqual("Region:APAC AND (Role:Production OR Role:UAT)", description);

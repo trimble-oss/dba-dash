@@ -31,6 +31,8 @@ namespace DBADashAI.Services.Tools
                     AlertType = Get(r, "AlertType"),
                     IsResolved = Get(r, "IsResolved"),
                     IsAcknowledged = Get(r, "IsAcknowledged"),
+                    IsPending = Get(r, "IsPending"),
+                    IsResolving = Get(r, "IsResolving"),
                     Priority = Get(r, "Priority")
                 })
                 .Select(g => new
@@ -38,6 +40,8 @@ namespace DBADashAI.Services.Tools
                     g.Key.AlertType,
                     g.Key.IsResolved,
                     g.Key.IsAcknowledged,
+                    g.Key.IsPending,
+                    g.Key.IsResolving,
                     g.Key.Priority,
                     AlertCount = g.Count(),
                     Instances = g.Select(x => Get(x, "InstanceDisplayName")).Where(x => !string.IsNullOrWhiteSpace(x)).Distinct().Take(10).ToList()
@@ -60,8 +64,8 @@ namespace DBADashAI.Services.Tools
                     new AiEvidenceItem
                     {
                         Source = "Alert.ActiveAlerts + dbo.Instances",
-                        Detail = "Includes InstanceDisplayName, AlertKey, LastMessage, and trigger/update timestamps"
-                    }
+                        Detail = "Includes InstanceDisplayName, AlertKey, LastMessage, and trigger/update timestamps. IsPending: not notified yet, waiting for the rule's Notify After delay. IsResolving: the issue has cleared, waiting for the rule's Resolve After delay"
+}
                 ]
             };
         }

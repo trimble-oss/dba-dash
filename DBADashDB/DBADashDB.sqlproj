@@ -1083,6 +1083,7 @@
     <Build Include="Alert\Procedures\ClosedAlerts_Add.sql" />
     <Build Include="Alert\User Defined Types\AlertDetails.sql" />
     <Build Include="Alert\Procedures\ActiveAlerts_Upd.sql" />
+    <Build Include="Alert\Procedures\ActiveAlerts_Resolve.sql" />
     <Build Include="Alert\Procedures\CounterAlert_Upd.sql" />
     <Build Include="Alert\Procedures\FailedLoginsAlert_Upd.sql" />
     <Build Include="Alert\Procedures\DatabaseMailAlert_Upd.sql" />
@@ -1130,6 +1131,7 @@
     <Build Include="Alert\Tables\CurrentAgent.sql" />
     <Build Include="Alert\Procedures\CurrentAgent_Upd.sql" />
     <Build Include="Alert\Functions\IsBlackoutPeriod.sql" />
+    <Build Include="Alert\Functions\AlertDelayStatus_Get.sql" />
     <Build Include="Alert\Procedures\CollectionDatesAlert_Upd.sql" />
     <Build Include="Alert\Procedures\NotificationLog_Get.sql" />
     <Build Include="dbo\User Defined Types\BigIDs.sql" />

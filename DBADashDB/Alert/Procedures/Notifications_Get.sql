@@ -37,7 +37,15 @@ LEFT JOIN Alert.CustomThreadKey CTK ON AA.AlertID = CTK.AlertID AND NC.Notificat
 LEFT JOIN dbo.InstanceMetadata IM ON I.InstanceID = IM.InstanceID AND IM.Provider IN('AWS','Azure')
 /* Guard against invalid JSON so a bad metadata row can't break alert notifications */
 OUTER APPLY(SELECT CASE WHEN ISJSON(IM.Metadata) = 1 THEN IM.Metadata END AS Metadata) IMJ
+CROSS APPLY Alert.AlertDelayStatus_Get(AA.IsResolved,ISNULL(AA.ActiveSince,AA.TriggerDate),AA.ResolvingSince,AA.RuleID) DS
 WHERE (AA.UpdatedDate > AA.LastNotification OR AA.LastNotification IS NULL)
+/* Pending or resolving - nothing to say until the issue persists for the notify delay, resolves or comes back */
+AND DS.IsHeld = 0
+/* Resolved while it was pending - nobody was told about this episode so there's nothing to resolve */
+AND NOT (AA.IsResolved=1
+		AND DS.NotifyAfterMins > 0
+		AND (AA.LastNotification IS NULL OR AA.LastNotification < ISNULL(AA.ActiveSince,AA.TriggerDate))
+		)
 AND (AA.IsAcknowledged = 0 OR (AA.AcknowledgedDate > AA.LastNotification AND NC.AcknowledgedNotification=1))
 AND AA.NotificationCount < @AlertMaxNotificationCount
 AND (NC.DisableFrom IS NULL /* Not disabled */

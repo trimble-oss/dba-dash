@@ -157,23 +157,25 @@ AND NOT EXISTS(	SELECT 1
 
 EXEC Alert.ActiveAlerts_Upd @AlertDetails=@AlertDetails,@AlertType=@Type,@ResolveAlertsOfType=0
 
-/* Resolve any existing AgentJob alerts if the job has succeeded since it last failed */
-UPDATE AA
-		SET ResolvedDate = SYSUTCDATETIME(),
-		IsResolved = 1,
-		LastMessage = 'Issue resolved',
-		UpdateCount +=1,
-		ResolvedCount +=1,
-		UpdatedDate = SYSUTCDATETIME()
+/*	Resolve AgentJob alerts unless the job is still failing: an enabled job of that name that hasn't succeeded since it last failed.
+	Succeeded since, disabled, deleted or renamed resolves it, once that has been the case for the rule's resolve delay. */
+DECLARE @Cleared dbo.BigIDs
+INSERT INTO @Cleared(ID)
+SELECT AA.AlertID
 FROM Alert.ActiveAlerts AA
 WHERE AA.AlertType = @Type
-AND EXISTS(SELECT 1 
-			FROM dbo.Jobs J 
-			WHERE J.InstanceID = AA.InstanceID 
-			AND J.name = STUFF(AA.AlertKey,1,LEN(@AlertKeyPrefix),'') 
-			AND (J.LastSucceeded>LastFailed OR J.enabled=0)
+AND NOT EXISTS(SELECT 1
+			FROM dbo.Jobs J
+			WHERE J.InstanceID = AA.InstanceID
+			AND J.name = STUFF(AA.AlertKey,1,LEN(@AlertKeyPrefix),'')
+			AND J.IsActive = 1
+			AND J.enabled = 1
+			AND J.LastFailed IS NOT NULL
+			AND (J.LastSucceeded <= J.LastFailed OR J.LastSucceeded IS NULL)
 			)
 AND AA.IsResolved=0
+
+EXEC Alert.ActiveAlerts_Resolve @AlertIDs=@Cleared, @AlertType=@Type
 
 /* Update the snapshot or recently failed jobs */
 TRUNCATE TABLE Alert.AgentJobSnapshot

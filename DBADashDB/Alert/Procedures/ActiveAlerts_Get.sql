@@ -22,7 +22,9 @@ SELECT  AA.AlertID,
 				ELSE 'Success' END)
 			+ CASE WHEN AA.IsResolved=1 THEN ' (Resolved)'
 				WHEN AA.IsAcknowledged=1 THEN ' (Acknowledged)'
-				WHEN AA.IsBlackout=1 THEN ' (Blackout)' ELSE '' END AS PriorityDescription,
+				WHEN AA.IsBlackout=1 THEN ' (Blackout)' 
+				WHEN S.IsResolving=1 THEN ' (Resolving)'
+				WHEN S.IsPending=1 THEN ' (Pending)' ELSE '' END AS PriorityDescription,
 		AA.Priority,
 		AA.AlertType,
 		AA.AlertKey,
@@ -43,9 +45,14 @@ SELECT  AA.AlertID,
 		AA.IsResolved,
 		AA.ResolvedDate,
 		AA.IsBlackout,
+		S.IsPending,
+		S.IsResolving,
+		ISNULL(AA.ActiveSince,AA.TriggerDate) AS ActiveSince,
+		AA.ResolvingSince,
 		CASE WHEN AA.IsResolved=1 THEN 4
 			WHEN AA.IsAcknowledged=1 THEN 5
 			WHEN AA.IsBlackout=1 THEN 3
+			WHEN S.IsResolving=1 OR S.IsPending=1 THEN 3
 			WHEN AA.Priority =0 THEN 1
 			WHEN AA.Priority>=1 AND AA.Priority<=10 THEN 1
 			WHEN AA.Priority>=11 AND AA.Priority<=20 THEN 2
@@ -60,6 +67,7 @@ SELECT  AA.AlertID,
 		ROW_NUMBER() OVER(ORDER BY AA.IsResolved,
 								AA.IsBlackout,
 								AA.IsAcknowledged,
+								S.IsHeld,
 								AA.Priority,
 								I.InstanceDisplayName,
 								AA.AlertKey) AS DefaultSortOrder
@@ -67,6 +75,8 @@ FROM Alert.ActiveAlerts AA
 LEFT JOIN Alert.Rules R ON AA.RuleID = R.RuleID
 JOIN dbo.Instances I ON I.InstanceID = AA.InstanceID
 LEFT JOIN Alert.NotificationChannelGroup NCG ON NCG.GroupID = AA.GroupID
+/* Pending: waiting for the issue to persist for the rule's notify delay.  Resolving: cleared, waiting out the rule's resolve delay */
+CROSS APPLY Alert.AlertDelayStatus_Get(AA.IsResolved,ISNULL(AA.ActiveSince,AA.TriggerDate),AA.ResolvingSince,AA.RuleID) S
 OUTER APPLY dbo.SecondsToHumanDuration(DATEDIFF(SECOND,AA.TriggerDate,CASE WHEN AA.IsResolved=1 THEN AA.ResolvedDate ELSE SYSUTCDATETIME() END)) AS AlertDuration
 OUTER APPLY dbo.SecondsToHumanDuration(DATEDIFF(SECOND,AA.UpdatedDate,SYSUTCDATETIME())) AS LastUpdate
 OUTER APPLY dbo.SecondsToHumanDuration(DATEDIFF(SECOND,AA.LastNotification,SYSUTCDATETIME())) AS LastNotification

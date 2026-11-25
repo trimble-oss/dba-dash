@@ -7,8 +7,12 @@ AS
 /* 
 	Updates the list of active alerts for the alert type, inserting new alerts, updating existing ones and resolving alerts that are no longer present in alert details.
 
+	A rule's resolve delay keeps the alert open while the issue has cleared for less than that time - see Alert.ActiveAlerts_Resolve.
+	If the issue comes back in the meantime it's the same episode: ActiveSince isn't reset.
+	@ResolveAlertsOfType=0 is for alert procs that work out for themselves when their alerts are resolved.  They call Alert.ActiveAlerts_Resolve.
 */
 DECLARE @AD AlertDetails;
+DECLARE @Now DATETIME2 = SYSUTCDATETIME();
 /* 
 	Ensure AlertKey is unique for each instance and group.  
 	Take the highest priority rule.
@@ -42,30 +46,34 @@ WHERE rnum=1
 
 IF @ResolveAlertsOfType=1
 BEGIN
-	/* Resolve existing issues if there is an existing alert that is no longer active */
-	UPDATE AA
-		SET ResolvedDate = SYSUTCDATETIME(),
-		IsResolved = 1,
-		LastMessage = 'Issue resolved',
-		UpdateCount +=1,
-		ResolvedCount +=1,
-		UpdatedDate = SYSUTCDATETIME()
+	/* Existing alerts that are no longer active */
+	DECLARE @Cleared dbo.BigIDs
+	INSERT INTO @Cleared(ID)
+	SELECT AA.AlertID
 	FROM Alert.ActiveAlerts AA
-	WHERE AlertType = @AlertType
+	WHERE AA.AlertType = @AlertType
 	AND NOT EXISTS(SELECT 1 
 				FROM @AD AD
 				WHERE AD.InstanceID = AA.InstanceID
 				AND AD.AlertKey = AA.AlertKey
 				AND AD.GroupID = AA.GroupID
 				)
-	AND IsResolved=0
-	AND IsBlackout=0
+	AND AA.IsResolved=0
+	AND AA.IsBlackout=0
+
+	EXEC Alert.ActiveAlerts_Resolve @AlertIDs=@Cleared, @AlertType=@AlertType
 END
 
-/* Update active alerts with current date and message */
+/* 
+	Update active alerts with current date and message.
+	A resolved alert that's triggered again starts a new episode.  An alert that was waiting out its resolve delay carries on with the same one.
+*/
 UPDATE AA
 	SET UpdatedDate = SYSUTCDATETIME(),
 	LastMessage = A.Message,
+	ActiveSince = CASE WHEN AA.IsResolved=1 THEN @Now ELSE ISNULL(AA.ActiveSince,AA.TriggerDate) END,
+	ResumedDate = CASE WHEN AA.IsResolved=0 AND AA.ResolvingSince IS NOT NULL THEN @Now ELSE AA.ResumedDate END,
+	ResolvingSince = NULL,
 	IsResolved = 0,
 	UpdateCount +=1,
 	Escalated = CASE WHEN A.Priority < AA.Priority THEN SYSUTCDATETIME() ELSE AA.Escalated END,
@@ -79,8 +87,8 @@ WHERE AA.AlertType = @AlertType
 AND AA.IsBlackout=0
 
 /* Add new alerts */
-INSERT INTO Alert.ActiveAlerts(InstanceID,Priority,AlertType,AlertKey,FirstMessage,LastMessage,RuleID,GroupID)
-SELECT AD.InstanceID,AD.Priority,@AlertType,AD.AlertKey,AD.Message,AD.Message,AD.RuleID,AD.GroupID
+INSERT INTO Alert.ActiveAlerts(InstanceID,Priority,AlertType,AlertKey,FirstMessage,LastMessage,RuleID,GroupID,TriggerDate,ActiveSince)
+SELECT AD.InstanceID,AD.Priority,@AlertType,AD.AlertKey,AD.Message,AD.Message,AD.RuleID,AD.GroupID,@Now,@Now
 FROM @AD AD
 OUTER APPLY Alert.IsBlackoutPeriod(AD.InstanceID,AD.AlertKey) BP
 WHERE NOT EXISTS(SELECT 1 

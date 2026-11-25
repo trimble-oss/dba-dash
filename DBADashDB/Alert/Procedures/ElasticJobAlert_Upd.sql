@@ -165,14 +165,11 @@ EXEC Alert.ActiveAlerts_Upd @AlertDetails=@AlertDetails,@AlertType=@Type,@Resolv
 
 /*	Resolve alerts unless the job is still failing: an enabled job of that name whose last execution failed.  Succeeded since, disabled,
 	deleted or renamed resolves it.  Only the current job of that name counts - a job deleted and created again with the same name (a
-	common way to redeploy elastic jobs) leaves the deleted one behind, inactive, and that mustn't resolve the new one's alert. */
-UPDATE AA
-		SET ResolvedDate = SYSUTCDATETIME(),
-		IsResolved = 1,
-		LastMessage = 'Issue resolved',
-		UpdateCount +=1,
-		ResolvedCount +=1,
-		UpdatedDate = SYSUTCDATETIME()
+	common way to redeploy elastic jobs) leaves the deleted one behind, inactive, and that mustn't resolve the new one's alert.
+	Resolved once that has been the case for the rule's resolve delay. */
+DECLARE @Cleared dbo.BigIDs
+INSERT INTO @Cleared(ID)
+SELECT AA.AlertID
 FROM Alert.ActiveAlerts AA
 WHERE AA.AlertType = @Type
 AND AA.IsResolved=0
@@ -185,6 +182,8 @@ AND NOT EXISTS(	SELECT 1
 				AND J.LastFailed IS NOT NULL
 				AND (J.LastSucceeded < J.LastFailed OR J.LastSucceeded IS NULL)
 				)
+
+EXEC Alert.ActiveAlerts_Resolve @AlertIDs=@Cleared, @AlertType=@Type
 
 /* Update the snapshot of recently failed jobs */
 TRUNCATE TABLE Alert.ElasticJobSnapshot

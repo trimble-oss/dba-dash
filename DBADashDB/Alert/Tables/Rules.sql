@@ -17,10 +17,16 @@ CREATE TABLE Alert.Rules(
 	ApplyToTagIDs VARCHAR(800) NULL,
 	RuleHash AS HASHBYTES('SHA2_256',CONCAT(Type,'|',AlertKey,'|',ApplyToTagID,'|',ApplyToInstanceID,'|',Threshold,'|',EvaluationPeriodMins,'|',IsActive,'|',Details,'|',ApplyToHidden,'|',ApplyToTagIDs)),
 	GroupID INT NOT NULL CONSTRAINT DF_Alert_Rules_GroupID DEFAULT(0),
+	/* Only notify once the issue has persisted for this many minutes.  NULL/0 notifies straight away.  See Alert.ActiveAlerts_Upd & Alert.Notifications_Get */
+	NotifyAfterMins INT NULL,
+	/* Only resolve once the issue has cleared for this many minutes.  NULL uses NotifyAfterMins so a brief recovery doesn't restart the notify delay */
+	ResolveAfterMins INT NULL,
 	CONSTRAINT PK_Alert_Rules PRIMARY KEY(RuleID),
 	CONSTRAINT CK_Rule_Priority CHECK(Priority >= 0 AND Priority <= 41),
 	CONSTRAINT CK_Rule_ApplyTo CHECK(NOT (ApplyToInstanceID IS NOT NULL AND (ApplyToTagID > 0 OR ApplyToTagID = -2))), /* Should be one or the other */
 	CONSTRAINT CK_Rule_ApplyToTagIDs CHECK((ApplyToTagID = -2 AND ApplyToTagIDs IS NOT NULL) OR (ApplyToTagID <> -2 AND ApplyToTagIDs IS NULL)),
+	CONSTRAINT CK_Rule_NotifyAfterMins CHECK(NotifyAfterMins >= 0),
+	CONSTRAINT CK_Rule_ResolveAfterMins CHECK(ResolveAfterMins >= 0),
 	CONSTRAINT FK_Alert_Rules_Instances FOREIGN KEY(ApplyToInstanceID) REFERENCES dbo.Instances(InstanceID)
 )
 GO

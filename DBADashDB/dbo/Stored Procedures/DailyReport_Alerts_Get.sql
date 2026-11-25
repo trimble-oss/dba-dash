@@ -6,7 +6,7 @@ AS
 	Open alerts (Alert.ActiveAlerts not yet resolved) for the instances in a daily report, from Critical to Low priority - informational
 	ones are left out.  An alert has a row per notification channel group, so it's returned once per instance and AlertKey: the row that
 	most needs attention - not acknowledged or in a blackout if any is, then the highest priority.  IsAcknowledged and IsBlackout let the
-	report count the alerts it doesn't list.
+	report count the alerts it doesn't list.  Pending and resolving alerts are left out: their rule's delays hold back notifications for them.
 */
 SET NOCOUNT ON
 
@@ -27,7 +27,9 @@ Ranked AS (
 						ORDER BY CASE WHEN AA.IsAcknowledged = 1 OR AA.IsBlackout = 1 THEN 1 ELSE 0 END, AA.Priority, AA.UpdatedDate DESC) AS rnum
 	FROM Alert.ActiveAlerts AA
 	JOIN Scope S ON S.InstanceID = AA.InstanceID
+	CROSS APPLY Alert.AlertDelayStatus_Get(AA.IsResolved,ISNULL(AA.ActiveSince,AA.TriggerDate),AA.ResolvingSince,AA.RuleID) DS
 	WHERE AA.IsResolved = 0
+	AND DS.IsHeld = 0
 	AND AA.Priority <= 30
 )
 SELECT I.InstanceDisplayName AS Instance,

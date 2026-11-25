@@ -12,7 +12,9 @@ CREATE PROC Alert.Rule_Upd(
 	@Notes NVARCHAR(MAX)=NULL,
 	@ApplyToHidden BIT=0,
 	@GroupID INT=0,
-	@ApplyToTagIDs VARCHAR(MAX)=NULL /* Comma-separated TagIDs.  Takes precedence over @ApplyToTagID when not empty */
+	@ApplyToTagIDs VARCHAR(MAX)=NULL, /* Comma-separated TagIDs.  Takes precedence over @ApplyToTagID when not empty */
+	@NotifyAfterMins INT=NULL,
+	@ResolveAfterMins INT=NULL
 )
 AS
 IF EXISTS(SELECT 1 FROM Alert.TagScope_Normalize(@ApplyToTagID,@ApplyToTagIDs) N WHERE LEN(N.ApplyToTagIDs) > 800)
@@ -32,7 +34,9 @@ UPDATE R SET
 	Details = @Details,
 	Notes = @Notes,
 	ApplyToHidden = @ApplyToHidden,
-	GroupID = @GroupID
+	GroupID = @GroupID,
+	NotifyAfterMins = @NotifyAfterMins,
+	ResolveAfterMins = @ResolveAfterMins
 FROM Alert.Rules R
 CROSS APPLY Alert.TagScope_Normalize(@ApplyToTagID, @ApplyToTagIDs) N
 WHERE R.RuleID = @RuleID
