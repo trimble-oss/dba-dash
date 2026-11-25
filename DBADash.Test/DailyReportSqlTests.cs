@@ -332,13 +332,14 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);");
             CreatedYesterday(id);
             CollectionAssert.Contains(DailyReportRepository.ClaimDueReports(ConnectionString), id);
 
-            // The service stopped mid-run: no result, nothing sent.  Once the claim is stale, today's slot is tried again
-            Exec($"UPDATE dbo.DailyReport SET LastRunUTC = DATEADD(mi,-61,SYSUTCDATETIME()), RunningSinceUTC = DATEADD(mi,-61,SYSUTCDATETIME()) WHERE DailyReportID = {id}");
+            // The service stopped mid-run: no result, nothing sent.  Once the claim is stale, today's slot is tried again.
+            // A scheduled claim has RunningSinceUTC = LastRunUTC exactly, so both are set from one value - two SYSUTCDATETIME() calls in a statement can differ
+            Exec($"DECLARE @Claimed DATETIME2(3) = DATEADD(mi,-61,SYSUTCDATETIME()); UPDATE dbo.DailyReport SET LastRunUTC = @Claimed, RunningSinceUTC = @Claimed WHERE DailyReportID = {id}");
             CollectionAssert.Contains(DailyReportRepository.ClaimDueReports(ConnectionString), id, "Unfinished and unsent");
             Assert.AreEqual(1, Scalar($"SELECT RetryAttempts FROM dbo.DailyReport WHERE DailyReportID = {id}"));
 
             // The same, but the mail server accepted it before the service stopped: not sent twice
-            Exec($"UPDATE dbo.DailyReport SET LastRunUTC = DATEADD(mi,-61,SYSUTCDATETIME()), RunningSinceUTC = DATEADD(mi,-61,SYSUTCDATETIME()), LastSentUTC = DATEADD(mi,-60,SYSUTCDATETIME()) WHERE DailyReportID = {id}");
+            Exec($"DECLARE @Claimed DATETIME2(3) = DATEADD(mi,-61,SYSUTCDATETIME()); UPDATE dbo.DailyReport SET LastRunUTC = @Claimed, RunningSinceUTC = @Claimed, LastSentUTC = DATEADD(mi,1,@Claimed) WHERE DailyReportID = {id}");
             CollectionAssert.DoesNotContain(DailyReportRepository.ClaimDueReports(ConnectionString), id, "Already sent");
         }
 
