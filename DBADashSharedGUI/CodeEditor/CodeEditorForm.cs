@@ -33,6 +33,82 @@ namespace DBADashGUI.SchemaCompare
                 codeEditor1.IsReadOnly = !value;
                 this.Text = value ? "Code Editor" : "Code Viewer";
                 pnlDialog.Visible = value;
+                UpdateFormatButton();
+            }
+        }
+
+        /// <summary>
+        /// Whether XML or JSON starts formatted - null for the mode's default, XML formatted and JSON as given.  The
+        /// Format button switches it either way - see <see cref="CodeEditor.Format"/>.
+        /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool? Format
+        {
+            get => codeEditor1.Format;
+            set
+            {
+                codeEditor1.Format = value;
+                UpdateFormatButton();
+            }
+        }
+
+        private string unformattedLabel = DefaultUnformattedLabel;
+
+        /// <summary>What the text is when it isn't formatted, if nothing more is known: the text the viewer was given.</summary>
+        public const string DefaultUnformattedLabel = "as given";
+
+        /// <summary>
+        /// What the text is when it isn't formatted, for the Format button's tooltip - "as written in the file" for a
+        /// file's text, "as the cell holds it" for a grid cell's, which a JSON file's nested value is a one-line copy of.
+        /// Says where the text came from, so the unformatted text isn't taken for something it isn't.
+        /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public string UnformattedLabel
+        {
+            get => unformattedLabel;
+            set
+            {
+                unformattedLabel = string.IsNullOrWhiteSpace(value) ? DefaultUnformattedLabel : value;
+                UpdateFormatButton();
+            }
+        }
+
+        /// <summary>Formats the XML or JSON shown, or puts it back as it was given.</summary>
+        private readonly ToolStripButton tsFormat = new()
+        {
+            DisplayStyle = ToolStripItemDisplayStyle.Image,
+            Image = DBADashSharedGUI.Properties.Resources.PrettyCode,
+            ImageTransparentColor = Color.Magenta,
+            Name = "tsFormat",
+            Visible = false
+        };
+
+        /// <summary>
+        /// Only for XML and JSON in a viewer: in an editor, switching would replace what's been typed with the text
+        /// given.  Pressed while the text shown is formatted, and off - saying why - for text that can't be.
+        /// </summary>
+        private void UpdateFormatButton()
+        {
+            tsFormat.Visible = CodeEditor.CanFormat(codeEditor1.Mode) && codeEditor1.IsReadOnly;
+            tsFormat.Checked = codeEditor1.IsFormatted;
+            tsFormat.Enabled = codeEditor1.FormatError == null;
+            tsFormat.Text = codeEditor1.FormatError != null
+                ? "Format - this text can't be formatted: " + codeEditor1.FormatError
+                : codeEditor1.IsFormatted
+                    ? $"Format - click to show the text {unformattedLabel}"
+                    : $"Format - showing the text {unformattedLabel}; click to indent it, a node or property to a line";
+        }
+
+        private void TsFormat_Click(object sender, EventArgs e)
+        {
+            Cursor = Cursors.WaitCursor;
+            try
+            {
+                Format = !codeEditor1.IsFormatted;
+            }
+            finally
+            {
+                Cursor = Cursors.Default;
             }
         }
 
@@ -43,6 +119,7 @@ namespace DBADashGUI.SchemaCompare
             set
             {
                 codeEditor1.Mode = value;
+                UpdateFormatButton();
                 splitContainer1.Panel2Collapsed = value != CodeEditor.CodeEditorModes.Markdown;
                 tsMarkdownView.Visible = value == CodeEditor.CodeEditorModes.Markdown;
                 _ = ShowMarkdownPreview();
@@ -86,12 +163,15 @@ namespace DBADashGUI.SchemaCompare
                 // Through the editor's Text rather than straight into txtCode: XML mode formats the editor's own copy
                 // of the text, so setting Syntax to XML after Code would otherwise replace the code with nothing.
                 codeEditor1.Text = value;
+                UpdateFormatButton();
             }
         }
 
         public CodeEditorForm()
         {
             InitializeComponent();
+            tsFormat.Click += TsFormat_Click;
+            toolStrip1.Items.Insert(toolStrip1.Items.IndexOf(tsWrapText) + 1, tsFormat);
             InitializeAsync();
             splitContainer1.Panel2Collapsed = codeEditor1.Mode != CodeEditor.CodeEditorModes.Markdown;
             tsMarkdownView.Visible = codeEditor1.Mode == CodeEditor.CodeEditorModes.Markdown;

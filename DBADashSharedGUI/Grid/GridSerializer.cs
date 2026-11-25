@@ -192,9 +192,13 @@ namespace DBADashGUI.CustomReports
         /// </summary>
         public static string ReadText(string path)
         {
-            using var reader = new StreamReader(OpenRead(path, EndsWith(path, ".gz")), Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
+            using var reader = OpenText(path);
             return reader.ReadToEnd();
         }
+
+        /// <summary>The text of a grid file, decompressed where it's a .gz, to read a part at a time - see <see cref="ReadText"/>.</summary>
+        public static StreamReader OpenText(string path) =>
+            new(OpenRead(path, EndsWith(path, ".gz")), Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
 
         /// <summary>True for a grid file whose text is XML - a DataSet saved as XML, or a results grid SSMS saved.</summary>
         public static bool IsXmlText(string path) => EndsWith(path, XmlExtension) || EndsWith(path, CompressedXmlExtension);
