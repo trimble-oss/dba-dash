@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using DBADashGUI.CustomReports;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 
 namespace DBADashGUI.Viewers
@@ -44,10 +45,32 @@ namespace DBADashGUI.Viewers
         public static bool QueryPlanShowNodeIds { get => Get(false); set => Set(value); }
         public static int QueryPlanMinFitZoom { get => Get(100); set => Set(value); }
 
+        /// <summary>The format date and time cells in the grids are shown with - see <see cref="DBADashDataGridView.DateTimeFormat"/>.</summary>
+        public static string DateTimeFormat { get => Get(DBADashDataGridView.DefaultDateTimeFormat); set => Set(value); }
+
         /// <summary>An SSMS extension update the user chose to skip - not offered again until a newer one.</summary>
         public static string SsmsExtensionSkippedVersion { get => Get(string.Empty); set => Set(value); }
 
         public static void Save() => Store.Save();
+
+        private static bool _dateTimeFormatConnected;
+
+        /// <summary>
+        /// Shows the grids the date and time format the store holds, and stores the one chosen from a grid's menu.  Done
+        /// once a host has set <see cref="Store"/>; further calls do nothing.
+        /// </summary>
+        public static void ConnectDateTimeFormat()
+        {
+            if (_dateTimeFormatConnected) return;
+            _dateTimeFormatConnected = true;
+
+            DBADashDataGridView.DateTimeFormat = DateTimeFormat;
+            DBADashDataGridView.DateTimeFormatChanged += (_, _) =>
+            {
+                DateTimeFormat = DBADashDataGridView.DateTimeFormat;
+                Save();
+            };
+        }
 
         private static T Get<T>(T fallback, [CallerMemberName] string name = null)
         {

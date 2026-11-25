@@ -5,7 +5,9 @@ using DBADashGUI.SchemaCompare;
 using DBADashGUI.Theme;
 using DBADashGUI.Viewers;
 using System;
+using System;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Text.Encodings.Web;
 using System.Text.Json;
@@ -30,8 +32,16 @@ namespace DBADashGUI.Grids
     {
         private readonly DBADashDataGridView _grid;
         private readonly DataTable _table;
-        private readonly ToolStripLabel _rowCount = new() { Alignment = ToolStripItemAlignment.Right };
+        private readonly ToolStripStatusLabel _rowCount = new() { Alignment = ToolStripItemAlignment.Right };
         private bool _columnsConfigured;
+
+        /// <summary>Checks the file a grid was read from, when Watch is on - see <see cref="FileWatch"/>.</summary>
+        private readonly FileWatch _watch;
+        private ToolStripButton _reloadButton;
+        private ToolStripButton _watchButton;
+        private readonly ToolStripStatusLabel _watchStatus = new();
+        private readonly ToolStripStatusLabel _pendingStatus = new();
+        private DateTime? _lastRead;
 
         public GridViewerControl(DataTable table, string title)
         {
@@ -63,15 +73,16 @@ namespace DBADashGUI.Grids
             };
             _grid.CellDoubleClick += Grid_CellDoubleClick;
             _grid.CellContentClick += Grid_CellContentClick;
+            _watch = new FileWatch(CheckForNewData);
 
             Controls.Add(_grid);
-            // Docked after the toolbar, so below it: what went wrong reading the file, where something did.
-            if (table.ExtendedProperties[JsonRecords.LoadWarningProperty] is string warning)
-            {
-                Controls.Add(new NoticeLabel { Text = warning, Dock = DockStyle.Top });
-            }
+            // Docked after the toolbar, so below it: what went wrong reading the file, where something did.  Always
+            // there, so a later read of a growing file can show or clear it without rebuilding the grid.
+            Controls.Add(_notice);
+            UpdateReadState();
 
             Controls.Add(BuildToolbar());
+            Controls.Add(BuildStatusBar());
 
             // A DataView rather than the table, as that's what the grid's filtering works through.
             _grid.DataSource = new DataView(table);
@@ -80,7 +91,26 @@ namespace DBADashGUI.Grids
         }
 
         /// <summary>The warning shown above the grid, or null - see <see cref="JsonRecords.LoadWarningProperty"/>.</summary>
-        public string Notice => Controls.OfType<NoticeLabel>().FirstOrDefault()?.Text;
+        public string Notice => _notice.Visible ? _notice.Text : null;
+
+        private readonly NoticeLabel _notice = new() { Dock = DockStyle.Top, Visible = false };
+
+        /// <summary>Incomplete records at the end of the file - see <see cref="JsonRecordsGrowth.UnreadableCounts"/>.</summary>
+        public int PendingRecordCount => JsonRecordsGrowth.UnreadableCounts(_table).Pending;
+
+        /// <summary>
+        /// Sorts out what the read says.  A record at the end that isn't complete yet is what a file being written looks
+        /// like, so it goes on the status bar.  Only an unreadable part before the end - a problem in the file itself -
+        /// is shown above the grid.
+        /// </summary>
+        private void UpdateReadState()
+        {
+            var (pending, unreadable) = JsonRecordsGrowth.UnreadableCounts(_table);
+            var problemText = JsonRecordsGrowth.ProblemText(unreadable - pending);
+            _notice.Text = problemText ?? string.Empty;
+            _notice.Visible = problemText is not null;
+            _pendingStatus.Text = JsonRecordsGrowth.PendingText(pending) ?? string.Empty;
+        }
 
         /// <summary>A one-line warning across the top of the grid, in the theme's warning colours.</summary>
         private sealed class NoticeLabel : Label, IThemedControl
@@ -100,6 +130,96 @@ namespace DBADashGUI.Grids
                 ForeColor = theme.WarningLowForeColor;
             }
         }
+
+        /// <summary>
+        /// The file the grid was read from, once a host has said so with <see cref="SetSource"/> - it's then the grid can
+        /// be read again, and watched for new data.  Null for a grid from anywhere else.
+        /// </summary>
+        public string SourcePath => _watch.Path;
+
+        /// <summary>
+        /// Raised when the grid's file should be read again - by the Reload button (<c>manual</c> is true), or when the
+        /// Watch button is on and the file has changed (false).
+        /// </summary>
+        public event Action<GridViewerControl, bool> ReloadRequested;
+
+        /// <summary>Whether the file is checked every few seconds, and read again when it changes - the Watch button.</summary>
+        [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+        public bool WatchForNewData
+        {
+            get => _watchButton?.Checked ?? false;
+            set
+            {
+                if (_watchButton is not null) _watchButton.Checked = value;
+            }
+        }
+
+        /// <summary>The filter in force on the grid, so a grid read again from the file can show the same rows.</summary>
+        public string RowFilter => _grid.RowFilter;
+
+        /// <summary>Applies a filter from <see cref="RowFilter"/> - ignored if it doesn't apply to the grid's columns.</summary>
+        public void ApplyRowFilter(string filter)
+        {
+            if (!string.IsNullOrEmpty(filter)) _grid.TrySetFilter(filter);
+        }
+
+        /// <summary>
+        /// Records the file the grid was read from, and when it was last changed, so Reload and Watch can tell a change
+        /// since.  Taken before the file is read - a change while it's read is then caught by the next check.
+        /// </summary>
+        public void SetSource(string path, (DateTime WriteUtc, long Length) stamp)
+        {
+            _watch.Start(path, stamp);
+            _reloadButton.Enabled = true;
+            _watchButton.Enabled = true;
+            _lastRead = DateTime.Now;
+            ShowWatchStatus();
+        }
+
+        /// <summary>Says on the status bar whether the file is being watched, and when it was last read.</summary>
+        private void ShowWatchStatus()
+        {
+            _watchStatus.Text = WatchForNewData && SourcePath is not null
+                ? $"Watching {Path.GetFileName(SourcePath)} - last read {_lastRead:HH:mm:ss}"
+                : string.Empty;
+        }
+
+        /// <summary>The file's last write time and length, or null when it isn't there - see <see cref="FileWatch.Stamp"/>.</summary>
+        public static (DateTime WriteUtc, long Length)? FileStamp(string path) => FileWatch.Stamp(path);
+
+        /// <summary>
+        /// Brings the grid up to date with a fresh read of the same file, by adding the rows the file has gained since -
+        /// the rows already shown are left as they are, so the scroll position, sort, filter and column layout all stay.
+        /// Returns false, changing nothing, when the read isn't the file grown; the grid is then replaced instead.
+        /// See <see cref="JsonRecordsGrowth.TryAppend"/>.
+        /// </summary>
+        public bool TryAppendRows(DataTable fresh)
+        {
+            if (!JsonRecordsGrowth.TryAppend(_table, fresh, () => JsonRecordsGrowth.AddUnreadableGridColumn(_grid), out _, out _)) return false;
+
+            UpdateReadState();
+            ShowRowCount();
+            return true;
+        }
+
+        /// <summary>
+        /// Set by the host while the file is being read again.  One read at a time, and the watch waits for it: a change
+        /// made during the read is then seen once it's done.
+        /// </summary>
+        [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+        public bool ReloadInProgress { get; set; }
+
+        private void CheckForNewData()
+        {
+            if (!ReloadInProgress) ReloadRequested?.Invoke(this, false);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing) _watch.Dispose();
+            base.Dispose(disposing);
+        }
+
 
         /// <summary>What the tab is called: the name the result set was opened with.</summary>
         public string Title { get; }
@@ -229,13 +349,34 @@ namespace DBADashGUI.Grids
                 ToolTipText = "Open a query plan, deadlock graph or grid file"
             });
             toolbar.Items.Add(new ToolStripSeparator());
+            // Only for a grid read from a file: a log still being written is read again to get what's new.
+            _reloadButton = new ToolStripButton(null, Resources.Refresh_16x, (_, _) => ReloadRequested?.Invoke(this, true))
+            {
+                DisplayStyle = ToolStripItemDisplayStyle.Image,
+                Enabled = false,
+                ToolTipText = "Reload - read the file again, to show what has been added to it"
+            };
+            _watchButton = new ToolStripButton(Resources.Watch_16x)
+            {
+                DisplayStyle = ToolStripItemDisplayStyle.Image,
+                Enabled = false,
+                CheckOnClick = true,
+                ToolTipText = "Watch - read the file again whenever it changes"
+            };
+            _watchButton.CheckedChanged += (_, _) =>
+            {
+                _watch.Enabled = _watchButton.Checked;
+                ShowWatchStatus();
+            };
+            toolbar.Items.Add(_reloadButton);
+            toolbar.Items.Add(_watchButton);
+            toolbar.Items.Add(new ToolStripSeparator());
             // The grid's own copy, export, transpose, Group By and filter actions - the same as its context menus.
             var items = _grid.CreateToolbarItems();
             _exportMenu = items.OfType<ToolStripDropDownButton>().FirstOrDefault(i => i.Text == "Export");
             toolbar.Items.AddRange(items);
             toolbar.Items.Add(new ToolStripSeparator());
             toolbar.Items.Add(BuildSettingsMenu());
-            toolbar.Items.Add(_rowCount);
 
             return toolbar;
         }
@@ -257,6 +398,20 @@ namespace DBADashGUI.Grids
         /// <summary>The text of the Export menu's items, separators aside.</summary>
         public string[] ExportItemNames => _exportMenu?.DropDownItems.Cast<ToolStripItem>()
             .Where(i => i is not ToolStripSeparator).Select(i => i.Text).ToArray() ?? [];
+
+        /// <summary>
+        /// The bottom bar: rows and the file's watch state, and what the read says about records still being written.
+        /// Its own line, so messages coming and going don't move the grid.
+        /// </summary>
+        private ToolStrip BuildStatusBar()
+        {
+            var bar = new ToolStrip { GripStyle = ToolStripGripStyle.Hidden, Dock = DockStyle.Bottom, RenderMode = ToolStripRenderMode.System };
+            bar.Items.Add(_rowCount);
+            bar.Items.Add(new ToolStripSeparator());
+            bar.Items.Add(_watchStatus);
+            bar.Items.Add(_pendingStatus);
+            return bar;
+        }
 
         private static ToolStripDropDownButton BuildSettingsMenu()
         {

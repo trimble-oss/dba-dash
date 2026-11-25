@@ -258,7 +258,9 @@ namespace DBADash.Viewers.GUI.Test
             var partial = Load("partial.jsonl", "{\"id\":1}\n{\"id\":\n").Tables[0];
             using (var control = new GridViewerControl(partial, "partial"))
             {
-                StringAssert.StartsWith(control.Notice, "1 part of the file couldn't be read as JSON");
+                // Still being written, most likely: on the status bar, not above the grid.
+                Assert.IsNull(control.Notice);
+                Assert.AreEqual(1, control.PendingRecordCount);
             }
 
             var whole = Load("whole.jsonl", "{\"id\":1}\n{\"id\":2}\n").Tables[0];

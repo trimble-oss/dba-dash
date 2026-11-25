@@ -272,6 +272,7 @@ namespace DBADashGUI.CustomReports
             AddCellContextMenuItems();
             AddColumnContextMenuItems();
             WireDataBars();
+            DateTimeFormatChanged += DateFormat_Changed;
             this.ApplyTheme();
             this.AllowUserToOrderColumns = true;
             this.DataError += DBADashDataGridView_DataError;
@@ -356,6 +357,7 @@ namespace DBADashGUI.CustomReports
                     GetColumnsMenuItem(),
                     GetAutoResizeColumns(),
                     GetRowHeadersMenuItem(),
+                    GetDateTimeFormatMenuItem(),
                     hideColumn,
                     freezeColumn,
                     new ToolStripSeparator(),
@@ -462,6 +464,7 @@ namespace DBADashGUI.CustomReports
                     GetColumnsMenuItem(),
                     GetAutoResizeColumns(),
                     GetRowHeadersMenuItem(),
+                    GetDateTimeFormatMenuItem(),
                     cellGroupByMenuItem,
                     GetDataBarMenuItem(),
                     new ToolStripSeparator(),
@@ -1667,6 +1670,14 @@ namespace DBADashGUI.CustomReports
                 e.Value = "0x" + BitConverter.ToString(bytes).Replace("-", string.Empty);
                 e.FormattingApplied = true; // Indicate that formatting was applied
             }
+            else if (e.Value is DateTime or DateTimeOffset && string.IsNullOrEmpty(e.CellStyle.Format))
+            {
+                // The grid's own general format leaves out the seconds - see DateTimeFormat.
+                e.Value = e.Value is DateTime date
+                    ? date.ToString(DateTimeFormat, CultureInfo.CurrentCulture)
+                    : ((DateTimeOffset)e.Value).ToString(DateTimeFormat, CultureInfo.CurrentCulture);
+                e.FormattingApplied = true;
+            }
             else if (Columns[e.ColumnIndex].ValueType == typeof(string) && e.Value != null &&
                      e.Value != DBNull.Value && ((string)e.Value).Length > CellTruncateLength)
             {
@@ -2259,6 +2270,7 @@ GO
                 MouseUp -= Dgv_MouseUp;
                 DataSourceChanged -= Dgv_DataSourceChanged;
                 ColumnAdded -= Dgv_ColumnsAdded;
+                DateTimeFormatChanged -= DateFormat_Changed;
                 DataSource = null;
                 ColumnContextMenu.Dispose();
                 CellContextMenu.Dispose();

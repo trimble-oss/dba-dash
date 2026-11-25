@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using DBADash;
 using DBADashGUI.CustomReports;
@@ -51,6 +52,8 @@ namespace DBADashServiceConfig
             gridLog.ColumnStateChanged += GridLog_ColumnStateChanged;
             gridLog.ColumnWidthChanged += GridLog_ColumnWidthChanged;
             gridLog.GridFilterChanged += (_, _) => rowFilter = gridLog.RowFilter;
+            _watch = new FileWatch(OnLogChanged);
+            Disposed += (_, _) => _watch.Dispose();
             // Docked in reverse order: the panel at the top, the warning below it, the status at the bottom, then the log
             // filling the rest.
             Controls.Add(gridLog);
@@ -59,6 +62,13 @@ namespace DBADashServiceConfig
             txtLog.BringToFront();
             gridLog.BringToFront();
             panel1.SendToBack();
+            chkWatch.CheckedChanged += (_, _) =>
+            {
+                _watch.Enabled = chkWatch.Checked;
+                ShowStatus();
+            };
+            toolTip1.SetToolTip(chkWatch, "Watch the log, and add its entries as the service writes them.  A JSON log only.");
+            panel1.Controls.Add(chkWatch);
             this.ApplyTheme();
         }
 
@@ -194,20 +204,23 @@ namespace DBADashServiceConfig
 
         private void LoadJsonLog(string filePath, string filter)
         {
-            var ds = JsonRecords.Load(() => OpenLog(filePath));
-            var table = ds.Tables.Count > 0 ? ds.Tables[0] : new DataTable();
-            if (filter != string.Empty) table = Filter(table, filter);
-            ToLocalTime(table);
-            OrderLogColumns(table);
+            // The stamp is taken before the read, so a change made while it's read is seen by the watch.
+            var stamp = FileWatch.Stamp(filePath);
+            _viewSource = null;
+            _sourcePath = filePath;
+            _sourceTable = ReadJsonTable(filePath);
+            _textFilter = filter;
+            _viewTable = filter == string.Empty ? _sourceTable : Filter(_sourceTable, filter, out _viewSource);
+            _lastRead = DateTime.Now;
+            chkWatch.Enabled = stamp is not null;
+            if (stamp is { } fileStamp) _watch.Start(filePath, fileStamp);
 
-            // A DataView rather than the table, as that's what the grid's own filtering works through.  With the filter
+            // A DataView rather than the table, as that's what the grid's filtering works through.  With the filter
             // the grid had, so a refresh or another log file keeps it.
-            var view = new DataView(table);
-            var filterWarning = ApplyRowFilter(view);
+            var view = new DataView(_viewTable);
+            _filterWarning = ApplyRowFilter(view);
+            ShowReadState();
 
-            lblWarning.Text = string.Join("  ", new[] { table.ExtendedProperties[JsonRecords.LoadWarningProperty] as string, filterWarning }
-                .Where(w => !string.IsNullOrEmpty(w)));
-            lblWarning.Visible = !string.IsNullOrEmpty(lblWarning.Text);
             txtLog.Visible = false;
             gridLog.Visible = true;
             // The new log's columns are added visible and at the default width - not the user's choice
@@ -258,9 +271,10 @@ namespace DBADashServiceConfig
         /// The rows with <paramref name="filter"/> in any column - as the text log keeps the lines it's in.  The grid's own
         /// filters can narrow it down from there.
         /// </summary>
-        private static DataTable Filter(DataTable table, string filter)
+        private static DataTable Filter(DataTable table, string filter, out Dictionary<DataRow, DataRow> sources)
         {
             var filtered = table.Clone();
+            sources = new Dictionary<DataRow, DataRow>();
             foreach (var key in table.ExtendedProperties.Keys)
             {
                 filtered.ExtendedProperties[key] = table.ExtendedProperties[key];
@@ -268,14 +282,19 @@ namespace DBADashServiceConfig
 
             foreach (DataRow row in table.Rows)
             {
-                if (row.ItemArray.Any(value => value is not DBNull && value?.ToString()?.Contains(filter, StringComparison.OrdinalIgnoreCase) == true))
+                if (RowMatches(row, filter))
                 {
                     filtered.ImportRow(row);
+                    sources[filtered.Rows[filtered.Rows.Count - 1]] = row;
                 }
             }
 
             return filtered;
         }
+
+        /// <summary>Whether any value in the row has <paramref name="filter"/> in it, ignoring case.</summary>
+        private static bool RowMatches(DataRow row, string filter) =>
+            row.ItemArray.Any(value => value is not DBNull && value?.ToString()?.Contains(filter, StringComparison.OrdinalIgnoreCase) == true);
 
         /// <summary>
         /// Serilog writes a compact log's timestamps in UTC.  The service runs on this machine, and its text log is in
@@ -313,7 +332,10 @@ namespace DBADashServiceConfig
             }
         }
 
-        /// <summary>The rows shown - of how many, when the grid's filter leaves some out - and the columns hidden.</summary>
+        /// <summary>
+        /// The rows shown - of how many, when the grid's filter leaves some out - the columns hidden, the records still being
+        /// written, and whether the log is being watched.
+        /// </summary>
         private void ShowStatus()
         {
             if (gridLog.DataSource is not DataView view)
@@ -324,11 +346,23 @@ namespace DBADashServiceConfig
 
             var total = view.Table?.Rows.Count ?? 0;
             var shown = gridLog.Rows.Count;
-            var rows = shown == total ? $"{shown:N0} {(shown == 1 ? "row" : "rows")}" : $"{shown:N0} of {total:N0} rows";
+            var parts = new List<string>
+            {
+                shown == total ? $"{shown:N0} {(shown == 1 ? "row" : "rows")}" : $"{shown:N0} of {total:N0} rows"
+            };
+
             var hidden = gridLog.Columns.Cast<DataGridViewColumn>().Count(c => !c.Visible);
-            lblStatus.Text = hidden == 0
-                ? rows
-                : $"{rows}.  {hidden:N0} {(hidden == 1 ? "column" : "columns")} hidden - right-click a column header, Columns, to show them.";
+            if (hidden > 0) parts.Add($"{hidden:N0} {(hidden == 1 ? "column" : "columns")} hidden - right-click a column header, Columns, to show them");
+
+            var (pending, _) = JsonRecordsGrowth.UnreadableCounts(_sourceTable);
+            if (JsonRecordsGrowth.PendingText(pending) is { } pendingText) parts.Add(pendingText);
+
+            if (chkWatch.Checked && _sourcePath is not null)
+            {
+                parts.Add($"Watching {Path.GetFileName(_sourcePath)} - last read {_lastRead:HH:mm:ss}");
+            }
+
+            lblStatus.Text = string.Join(".  ", parts);
             lblStatus.Visible = true;
         }
 
@@ -420,12 +454,130 @@ namespace DBADashServiceConfig
             }
         }
 
+        /// <summary>Watches the log shown, when Watch is on.</summary>
+        private readonly FileWatch _watch;
+
+        /// <summary>The log as read - every record - and what the grid shows of it: the same, or the records matching the text filter.</summary>
+        private DataTable _sourceTable;
+        private DataTable _viewTable;
+
+        /// <summary>For a text filter's copy: the row it shows for each record of the source.</summary>
+        private Dictionary<DataRow, DataRow> _viewSource;
+        private string _sourcePath;
+        private string _textFilter = string.Empty;
+        private string _filterWarning;
+        private DateTime? _lastRead;
+
+        /// <summary>True while a changed log is being read, so it isn't read again until that's done.</summary>
+        private bool _reading;
+
+        /// <summary>
+        /// The log changed on disk.  Its new records are read on a background thread and added to the grid, so the view stays
+        /// where it is.  A change that can't be added - the file rewritten, or its columns changed - shows the log afresh.
+        /// </summary>
+        private async void OnLogChanged()
+        {
+            if (_reading || _sourceTable is null || _sourcePath is null) return;
+            var path = _sourcePath;
+            if (FileWatch.Stamp(path) is not { } current) return;
+
+            _reading = true;
+            DataTable fresh;
+            try
+            {
+                fresh = await Task.Run(() => ReadJsonTable(path));
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException)
+            {
+                // Locked, or caught mid-write.  The change isn't noted as read, so the next check tries again.
+                return;
+            }
+            finally
+            {
+                _reading = false;
+            }
+
+            // Another log may have been chosen while it was read.
+            if (path != _sourcePath || _sourceTable is null) return;
+
+            if (!JsonRecordsGrowth.TryAppend(_sourceTable, fresh, AddUnreadableColumnToView, out var added, out var removed))
+            {
+                LoadJsonLog(path, _textFilter);
+                return;
+            }
+
+            _watch.NoteRead(current);
+
+            if (_viewSource is not null)
+            {
+                // A text filter's view is a copy: the rows for the records the read replaced come out, and the new records
+                // that match are added.
+                var replaced = new HashSet<DataRow>(removed);
+                foreach (var (viewRow, sourceRow) in _viewSource.ToList())
+                {
+                    if (!replaced.Contains(sourceRow)) continue;
+                    _viewTable.Rows.Remove(viewRow);
+                    _viewSource.Remove(viewRow);
+                }
+
+                foreach (var row in added)
+                {
+                    if (!RowMatches(row, _textFilter)) continue;
+                    _viewTable.ImportRow(row);
+                    _viewSource[_viewTable.Rows[_viewTable.Rows.Count - 1]] = row;
+                }
+            }
+
+            _lastRead = DateTime.Now;
+            ShowReadState();
+        }
+
+        /// <summary>The unreadable column came to the log: to the copy the text filter shows, and to the grid.</summary>
+        private void AddUnreadableColumnToView()
+        {
+            if (!ReferenceEquals(_viewTable, _sourceTable) && !_viewTable.Columns.Contains(JsonRecords.UnreadableColumnName))
+            {
+                _viewTable.Columns.Add(JsonRecords.UnreadableColumnName, typeof(string));
+            }
+
+            JsonRecordsGrowth.AddUnreadableGridColumn(gridLog);
+        }
+
+        /// <summary>
+        /// Shows what the read says: a problem in the file, above the log.  Records still being written go on the status bar,
+        /// with the rows and the watch - see <see cref="ShowStatus"/>.
+        /// </summary>
+        private void ShowReadState()
+        {
+            var (pending, unreadable) = JsonRecordsGrowth.UnreadableCounts(_sourceTable);
+            var warning = string.Join("  ", new[] { JsonRecordsGrowth.ProblemText(unreadable - pending), _filterWarning }
+                .Where(w => !string.IsNullOrEmpty(w)));
+            lblWarning.Text = warning;
+            lblWarning.Visible = warning.Length > 0;
+            ShowStatus();
+        }
+
+        /// <summary>A JSON log as records, in local time and in the order the log shows its columns.</summary>
+        private static DataTable ReadJsonTable(string filePath)
+        {
+            var ds = JsonRecords.Load(() => OpenLog(filePath));
+            var table = ds.Tables.Count > 0 ? ds.Tables[0] : new DataTable();
+            ToLocalTime(table);
+            OrderLogColumns(table);
+            return table;
+        }
+
         private void ShowText(string text)
         {
             gridLog.Visible = false;
             gridLog.DataSource = null;
             lblWarning.Visible = false;
             lblStatus.Visible = false;
+            _sourcePath = null;
+            _sourceTable = null;
+            _viewTable = null;
+            chkWatch.Checked = false;
+            chkWatch.Enabled = false;
             txtLog.Visible = true;
             txtLog.Text = text;
             txtLog.SelectionStart = txtLog.TextLength;

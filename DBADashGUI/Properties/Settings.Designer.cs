@@ -434,6 +434,18 @@ namespace DBADashGUI.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string DateTimeFormat {
+            get {
+                return ((string)(this["DateTimeFormat"]));
+            }
+            set {
+                this["DateTimeFormat"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string CollapsedInsightsReports {
             get {
                 return ((string)(this["CollapsedInsightsReports"]));

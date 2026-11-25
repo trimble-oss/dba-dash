@@ -68,6 +68,17 @@ time after each release.
 The DBA Dash GUI has these viewers too, and registers its own entry for the same file types.  Both can be offered side by
 side.
 
+## Grid files
+
+A grid file - a result set saved from DBA Dash or SSMS, or JSON records such as a log - opens in a grid.
+
+- **Dates and times** show seconds and milliseconds.  Right-click a cell or a column header and choose *Date and Time Format*
+  to show them another way, or enter your own .NET format under *Custom...*.  The choice is remembered for the next time
+  the Visualizer opens.
+- **Reload** reads the file again, to show what has been added to it - such as a log that is still being written to.  The
+  filter stays on, but the grid starts again at the top.
+- **Watch** does the same whenever the file changes, checking it every couple of seconds, until it is turned off.
+
 ## Settings
 
 Kept per user in `%LOCALAPPDATA%\DBADash\Visualizer\settings.json`.  Most are the choices made in the viewers' Settings
