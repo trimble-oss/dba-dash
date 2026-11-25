@@ -139,7 +139,10 @@ BEGIN
             Notes NVARCHAR(MAX),
             RuleID INT,
             GroupID INT,
-            AcknowledgedDate DATETIME2
+            AcknowledgedDate DATETIME2,
+            ActiveSince DATETIME2,
+            ResolvingSince DATETIME2,
+            NotifyReadyDate DATETIME2
         );
 
         -- Capture the data with new AlertIDs before deleting
@@ -170,7 +173,10 @@ BEGIN
             AA.Notes,
             AA.RuleID,
             AA.GroupID,
-            AA.AcknowledgedDate
+            AA.AcknowledgedDate,
+            AA.ActiveSince,
+            AA.ResolvingSince,
+            AA.NotifyReadyDate
         FROM Alert.ActiveAlerts AA
         INNER JOIN @AlertIDMapping M ON AA.AlertID = M.OldAlertID;
 
@@ -225,7 +231,10 @@ BEGIN
                 Notes,
                 RuleID,
                 GroupID,
-                AcknowledgedDate
+                AcknowledgedDate,
+                ActiveSince,
+                ResolvingSince,
+                NotifyReadyDate
             )
             SELECT 
                 NewAlertID,
@@ -252,7 +261,10 @@ BEGIN
                 Notes,
                 RuleID,
                 GroupID,
-                AcknowledgedDate
+                AcknowledgedDate,
+                ActiveSince,
+                ResolvingSince,
+                NotifyReadyDate
             FROM @AlertDataToMove;
 
             PRINT 'Inserted ' + CAST(@@ROWCOUNT AS NVARCHAR(20)) + ' alert(s) with new IDs'
