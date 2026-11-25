@@ -174,3 +174,15 @@ AND AA.IsResolved = 0
 AND AA.IsBlackout = 0
 
 EXEC Alert.ActiveAlerts_Resolve @AlertIDs = @Cleared, @AlertType = @Type
+
+/* Resolving alerts of rules whose proc failed keep waiting.  Refresh them so Alert.Alerts_Upd doesn't close them as stale, as it doesn't the alerts carried forward */
+UPDATE AA
+	SET UpdatedDate = SYSUTCDATETIME()
+FROM Alert.ActiveAlerts AA
+WHERE AA.AlertType = @Type
+AND AA.IsResolved = 0
+AND AA.ResolvingSince IS NOT NULL
+AND EXISTS(SELECT 1
+			FROM @FailedRules FR
+			WHERE FR.RuleID = AA.RuleID
+			)

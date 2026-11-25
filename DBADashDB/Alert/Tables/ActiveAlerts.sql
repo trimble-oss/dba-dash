@@ -28,8 +28,8 @@ CREATE TABLE Alert.ActiveAlerts(
 	ActiveSince DATETIME2 NULL,
 	/* When the issue was first seen to have cleared while the alert waits out the rule's resolve delay.  NULL while the issue is present */
 	ResolvingSince DATETIME2 NULL,
-	/* When the issue last came back while the alert was resolving.  If that's after the notify delay passed, it's when the alert became due for notification */
-	ResumedDate DATETIME2 NULL,
+	/* When the current episode first became due for notification: the first alert run where it wasn't pending or resolving.  For desktop notifications.  See Alert.ActiveAlerts_Resolve */
+	NotifyReadyDate DATETIME2 NULL,
 	CONSTRAINT FK_ActiveAlerts_Instances FOREIGN KEY(InstanceID) REFERENCES dbo.Instances(InstanceID),
 	CONSTRAINT FK_ActiveAlerts_Rules FOREIGN KEY(RuleID) REFERENCES Alert.Rules(RuleID),
 	CONSTRAINT PK_ActiveAlerts PRIMARY KEY(AlertID),

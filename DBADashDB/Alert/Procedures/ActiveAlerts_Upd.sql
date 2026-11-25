@@ -10,6 +10,7 @@ AS
 	A rule's resolve delay keeps the alert open while the issue has cleared for less than that time - see Alert.ActiveAlerts_Resolve.
 	If the issue comes back in the meantime it's the same episode: ActiveSince isn't reset.
 	@ResolveAlertsOfType=0 is for alert procs that work out for themselves when their alerts are resolved.  They call Alert.ActiveAlerts_Resolve.
+	Alerts are resolved after they're updated - see Alert.ActiveAlerts_Resolve.
 */
 DECLARE @AD AlertDetails;
 DECLARE @Now DATETIME2 = SYSUTCDATETIME();
@@ -44,26 +45,6 @@ SELECT InstanceID,
 FROM DeDupe
 WHERE rnum=1
 
-IF @ResolveAlertsOfType=1
-BEGIN
-	/* Existing alerts that are no longer active */
-	DECLARE @Cleared dbo.BigIDs
-	INSERT INTO @Cleared(ID)
-	SELECT AA.AlertID
-	FROM Alert.ActiveAlerts AA
-	WHERE AA.AlertType = @AlertType
-	AND NOT EXISTS(SELECT 1 
-				FROM @AD AD
-				WHERE AD.InstanceID = AA.InstanceID
-				AND AD.AlertKey = AA.AlertKey
-				AND AD.GroupID = AA.GroupID
-				)
-	AND AA.IsResolved=0
-	AND AA.IsBlackout=0
-
-	EXEC Alert.ActiveAlerts_Resolve @AlertIDs=@Cleared, @AlertType=@AlertType
-END
-
 /* 
 	Update active alerts with current date and message.
 	A resolved alert that's triggered again starts a new episode.  An alert that was waiting out its resolve delay carries on with the same one.
@@ -72,7 +53,6 @@ UPDATE AA
 	SET UpdatedDate = SYSUTCDATETIME(),
 	LastMessage = A.Message,
 	ActiveSince = CASE WHEN AA.IsResolved=1 THEN @Now ELSE ISNULL(AA.ActiveSince,AA.TriggerDate) END,
-	ResumedDate = CASE WHEN AA.IsResolved=0 AND AA.ResolvingSince IS NOT NULL THEN @Now ELSE AA.ResumedDate END,
 	ResolvingSince = NULL,
 	IsResolved = 0,
 	UpdateCount +=1,
@@ -98,3 +78,24 @@ WHERE NOT EXISTS(SELECT 1
 			AND AD.GroupID = AA.GroupID
 			)
 AND BP.IsBlackout=0
+
+/* Alert procs that resolve their own alerts call Alert.ActiveAlerts_Resolve themselves, after this */
+IF @ResolveAlertsOfType=1
+BEGIN
+	/* Existing alerts that are no longer active */
+	DECLARE @Cleared dbo.BigIDs
+	INSERT INTO @Cleared(ID)
+	SELECT AA.AlertID
+	FROM Alert.ActiveAlerts AA
+	WHERE AA.AlertType = @AlertType
+	AND NOT EXISTS(SELECT 1
+				FROM @AD AD
+				WHERE AD.InstanceID = AA.InstanceID
+				AND AD.AlertKey = AA.AlertKey
+				AND AD.GroupID = AA.GroupID
+				)
+	AND AA.IsResolved=0
+	AND AA.IsBlackout=0
+
+	EXEC Alert.ActiveAlerts_Resolve @AlertIDs=@Cleared, @AlertType=@AlertType
+END

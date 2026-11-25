@@ -108,6 +108,8 @@ LEFT JOIN Alert.AgentJobSnapshot AJS ON AJS.InstanceID = J.InstanceID AND AJS.jo
 WHERE (J.LastFailed > AJS.LastFailed OR AJS.LastFailed IS NULL) /* Job has failed since the last time this proc was run */
 AND J.LastFailed>=DATEADD(mi,-60,SYSUTCDATETIME()) /* Job has failed within the last hour */
 AND (J.LastSucceeded< J.LastFailed OR J.LastSucceeded IS NULL) /* Last execution status is failed */
+AND J.IsActive=1 /* As #RecentJobs - a job missing from the snapshot would look like a new failure every run */
+AND J.enabled=1
 /* Job name matches one of the supplied values or no values supplied */
 AND	(
 	AJA.JobName IS NULL 
@@ -175,7 +177,8 @@ AND NOT EXISTS(SELECT 1
 			)
 AND AA.IsResolved=0
 
-EXEC Alert.ActiveAlerts_Resolve @AlertIDs=@Cleared, @AlertType=@Type
+/* Every alert of the type was checked - one that hasn't cleared still has a failing job, even if the failure isn't new */
+EXEC Alert.ActiveAlerts_Resolve @AlertIDs=@Cleared, @AlertType=@Type, @UnclearedAreActive=1
 
 /* Update the snapshot or recently failed jobs */
 TRUNCATE TABLE Alert.AgentJobSnapshot
