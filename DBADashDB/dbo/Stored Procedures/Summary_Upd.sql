@@ -23,11 +23,30 @@ EXEC dbo.MemoryDumpThresholds_Get @MemoryDumpWarningThresholdHrs=@MemoryDumpWarn
 
 SET @ErrorsFrom = CASE WHEN @ErrorsFrom > DATEADD(d,-1,GETUTCDATE()) THEN @ErrorsFrom ELSE DATEADD(d,-1,GETUTCDATE())  END;
 
+/*
+	Counts by status for the summary cell & tooltip.  N/A is excluded, new or no thresholds.  Furthest behind is of the databases that are checked.
+	NoRestoreCount is those checked without a log restore recorded: restoring with no restore history, or missing on the secondary.
+	A conflict (online on the secondary) or a restore without backup details has no time behind either, but isn't counted as no restore.
+	The missing/conflict rows are per primary, so they are collapsed to one row per secondary database first (worst status, ignoring N/A unless that's all there is)
+*/
 SELECT	InstanceID,
-		MIN(Status) AS LogShippingStatus
+		MIN(NULLIF(Status,3)) AS LogShippingStatus,
+		COUNT(CASE WHEN Status=1 THEN 1 END) AS LogShippingCriticalCount,
+		COUNT(CASE WHEN Status=2 THEN 1 END) AS LogShippingWarningCount,
+		COUNT(CASE WHEN Status=4 THEN 1 END) AS LogShippingOKCount,
+		COUNT(CASE WHEN Status=3 THEN 1 END) AS LogShippingNACount,
+		MAX(CASE WHEN Status<>3 THEN TotalTimeBehind END) AS LogShippingMaxTotalTimeBehind,
+		COUNT(CASE WHEN Status<>3 AND NoRestore=1 THEN 1 END) AS LogShippingNoRestoreCount
 INTO #LogShippingStatus
-FROM dbo.LogShippingStatus L
-WHERE Status<>3
+FROM (
+	SELECT	L.InstanceID,
+			L.name,
+			ISNULL(MIN(NULLIF(L.Status,3)),3) AS Status,
+			MAX(L.TotalTimeBehind) AS TotalTimeBehind,
+			MAX(CASE WHEN L.IsMissing=1 OR (L.DatabaseID IS NOT NULL AND L.restore_date IS NULL) THEN 1 ELSE 0 END) AS NoRestore
+	FROM dbo.LogShippingStatus L
+	GROUP BY L.InstanceID,L.name
+	) AS DB
 GROUP BY InstanceID
 
 SELECT InstanceID,
@@ -348,7 +367,13 @@ SELECT I.InstanceID,
 	LastOffline.LastFail,
 	OSInfoCD.SnapshotDate AS OSInfoSnapshotDate,
 	ISNULL(SB.ServiceBrokerStatus,3) AS ServiceBrokerStatus,
-	SB.ServiceBrokerStatusDescription
+	SB.ServiceBrokerStatusDescription,
+	LS.LogShippingCriticalCount,
+	LS.LogShippingWarningCount,
+	LS.LogShippingOKCount,
+	LS.LogShippingNACount,
+	LS.LogShippingMaxTotalTimeBehind,
+	LS.LogShippingNoRestoreCount
 INTO #Summary
 FROM dbo.Instances I 
 OUTER APPLY(
@@ -470,7 +495,13 @@ SELECT I.InstanceID,
 	LastOffline.FirstFail,
 	CAST(NULL AS DATETIME2) AS OSInfoSnapshotDate,
 	3 AS ServiceBrokerStatus,
-	NULL AS ServiceBrokerStatusDescription
+	NULL AS ServiceBrokerStatusDescription,
+	NULL AS LogShippingCriticalCount,
+	NULL AS LogShippingWarningCount,
+	NULL AS LogShippingOKCount,
+	NULL AS LogShippingNACount,
+	NULL AS LogShippingMaxTotalTimeBehind,
+	NULL AS LogShippingNoRestoreCount
 FROM dbo.Instances I
 LEFT JOIN #CollectionErrorStatus errSummary  ON I.InstanceID = errSummary.InstanceID
 LEFT JOIN #CollectionHealth CH ON I.InstanceID = CH.InstanceID
@@ -568,7 +599,13 @@ INSERT INTO dbo.Summary(
 	LastFail,
 	OSInfoSnapshotDate,
 	ServiceBrokerStatus,
-	ServiceBrokerStatusDescription
+	ServiceBrokerStatusDescription,
+	LogShippingCriticalCount,
+	LogShippingWarningCount,
+	LogShippingOKCount,
+	LogShippingNACount,
+	LogShippingMaxTotalTimeBehind,
+	LogShippingNoRestoreCount
 )
 SELECT InstanceID,
 	Instance,
@@ -636,7 +673,13 @@ SELECT InstanceID,
 	LastFail,
 	OSInfoSnapshotDate,
 	ServiceBrokerStatus,
-	ServiceBrokerStatusDescription
+	ServiceBrokerStatusDescription,
+	LogShippingCriticalCount,
+	LogShippingWarningCount,
+	LogShippingOKCount,
+	LogShippingNACount,
+	LogShippingMaxTotalTimeBehind,
+	LogShippingNoRestoreCount
 FROM #Summary
 
 COMMIT
