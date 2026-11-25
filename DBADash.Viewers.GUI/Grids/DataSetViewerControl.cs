@@ -45,6 +45,21 @@ namespace DBADashGUI.Grids
         // another.
         private readonly Dictionary<DataTable, GridViewerControl> _grids = new();
 
+        private readonly ToolStripButton _fileTextButton;
+        private string _sourcePath;
+
+        /// <summary>The file the tables were read from, for View File Text - null for tables from anywhere else.</summary>
+        [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+        public string SourcePath
+        {
+            get => _sourcePath;
+            set
+            {
+                _sourcePath = value;
+                _fileTextButton.Visible = value is not null;
+            }
+        }
+
         public DataSetViewerControl(DataSet dataSet, string title)
         {
             _dataSet = dataSet;
@@ -82,6 +97,14 @@ namespace DBADashGUI.Grids
             });
             var toolbar = new ToolStrip { GripStyle = ToolStripGripStyle.Hidden, Dock = DockStyle.Top };
             toolbar.Items.Add(saveAll);
+            // The file the tables were read from, as text - only once a host has said which, with SourcePath.
+            _fileTextButton = new ToolStripButton(null, Resources.Code_16x, (_, _) => FileTextViewer.Show(FindForm(), SourcePath))
+            {
+                DisplayStyle = ToolStripItemDisplayStyle.Image,
+                Visible = false,
+                ToolTipText = "View File Text - the file as it is, in the code viewer"
+            };
+            toolbar.Items.Add(_fileTextButton);
 
             var list = new Panel { Dock = DockStyle.Fill };
             list.Controls.Add(_tables);

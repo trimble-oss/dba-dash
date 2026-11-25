@@ -5,7 +5,7 @@ using DBADashGUI.SchemaCompare;
 using DBADashGUI.Theme;
 using DBADashGUI.Viewers;
 using System;
-using System;
+using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
@@ -25,6 +25,11 @@ namespace DBADashGUI.Grids
     /// sp_BlitzLock's deadlock_graph - opens in its viewer on a tab of the same window, anything else in a code
     /// window.  A plan or graph in a column of any other type opens in its viewer when double-clicked.
     ///
+    /// A text column whose every value is a JSON object or array - nested JSON in a JSON file's records, or JSON held
+    /// as text - is a link too, opening in a code window the same way.  Right-clicking a cell of JSON offers it as a
+    /// grid of its own, on a new tab, so nested records can be filtered and sorted like the rest - see
+    /// <see cref="NestedJson"/>.
+    ///
     /// Data bars added to the grid are remembered for the next result set with the same columns - see
     /// <see cref="GridDataBarMemory"/>.
     /// </summary>
@@ -42,6 +47,10 @@ namespace DBADashGUI.Grids
         private readonly ToolStripStatusLabel _watchStatus = new();
         private readonly ToolStripStatusLabel _pendingStatus = new();
         private DateTime? _lastRead;
+        private ToolStripButton _fileTextButton;
+
+        /// <summary>The columns shown as JSON links: a json column from SSMS, or one whose values are all JSON.</summary>
+        private readonly HashSet<string> _jsonColumns = new(StringComparer.OrdinalIgnoreCase);
 
         public GridViewerControl(DataTable table, string title)
         {
@@ -73,6 +82,7 @@ namespace DBADashGUI.Grids
             };
             _grid.CellDoubleClick += Grid_CellDoubleClick;
             _grid.CellContentClick += Grid_CellContentClick;
+            AddJsonMenuItems();
             _watch = new FileWatch(CheckForNewData);
 
             Controls.Add(_grid);
@@ -172,6 +182,7 @@ namespace DBADashGUI.Grids
             _watch.Start(path, stamp);
             _reloadButton.Enabled = true;
             _watchButton.Enabled = true;
+            _fileTextButton.Enabled = true;
             _lastRead = DateTime.Now;
             ShowWatchStatus();
         }
@@ -249,12 +260,18 @@ namespace DBADashGUI.Grids
                 }
 
                 // The column's SQL type, where the SSMS extension recorded it - the grid only knows the .NET one.
-                if (SqlType(column) is not { } sqlType) continue;
+                var sqlType = SqlType(column);
+                var isJson = sqlType?.Equals("json", StringComparison.OrdinalIgnoreCase) == true ||
+                             (!IsLinkType(sqlType) && _table.Columns[column.DataPropertyName] is { } dataColumn &&
+                              NestedJson.IsJsonColumn(_table, dataColumn));
+                if (isJson) _jsonColumns.Add(column.DataPropertyName);
+                if (sqlType is null && !isJson) continue;
 
-                var configured = IsLinkType(sqlType)
+                var configured = isJson || IsLinkType(sqlType)
                     ? ReplaceColumn(column, new DataGridViewLinkColumn { TrackVisitedState = false })
                     : column;
-                configured.ToolTipText = $"{configured.HeaderText} ({sqlType})";
+                configured.ToolTipText = $"{configured.HeaderText} ({sqlType ?? "JSON"})" +
+                                         (isJson ? " - Ctrl+click a value to view it as a grid" : string.Empty);
             }
 
             // Link columns are added after the grid was themed, so they need their link colours now.
@@ -302,8 +319,9 @@ namespace DBADashGUI.Grids
         /// IsJsonColumn compare the server's type name the same way.
         /// </summary>
         private static bool IsLinkType(string sqlType) =>
-            sqlType.Equals("xml", StringComparison.OrdinalIgnoreCase) ||
-            sqlType.Equals("json", StringComparison.OrdinalIgnoreCase);
+            sqlType is not null &&
+            (sqlType.Equals("xml", StringComparison.OrdinalIgnoreCase) ||
+             sqlType.Equals("json", StringComparison.OrdinalIgnoreCase));
 
         /// <summary>Swaps a bound column for another kind of column over the same data, in the same place.</summary>
         private T ReplaceColumn<T>(DataGridViewColumn column, T replacement) where T : DataGridViewColumn
@@ -370,6 +388,14 @@ namespace DBADashGUI.Grids
             };
             toolbar.Items.Add(_reloadButton);
             toolbar.Items.Add(_watchButton);
+            // The file itself, as text - also only for a grid read from one.
+            _fileTextButton = new ToolStripButton(null, Resources.Code_16x, (_, _) => FileTextViewer.Show(FindForm(), SourcePath))
+            {
+                DisplayStyle = ToolStripItemDisplayStyle.Image,
+                Enabled = false,
+                ToolTipText = "View File Text - the file as it is, in the code viewer"
+            };
+            toolbar.Items.Add(_fileTextButton);
             toolbar.Items.Add(new ToolStripSeparator());
             // The grid's own copy, export, transpose, Group By and filter actions - the same as its context menus.
             var items = _grid.CreateToolbarItems();
@@ -457,13 +483,14 @@ namespace DBADashGUI.Grids
 
             try
             {
-                var isJson = SqlType(column)?.Equals("json", StringComparison.OrdinalIgnoreCase) == true;
+                var isJson = _jsonColumns.Contains(column.DataPropertyName);
                 if (!isJson && TryOpenInViewer(text, e.RowIndex)) return;
 
-                // The code editor indents XML itself; JSON it shows as it is, so that's indented here.
-                CommonShared.ShowCodeViewer(isJson ? FormatJson(text) : text,
-                    $"{column.HeaderText} - {RowCaption(e.RowIndex)}",
-                    isJson ? CodeEditor.CodeEditorModes.Json : CodeEditor.CodeEditorModes.XML);
+                // Ctrl+click opens it as a grid instead - View as Grid without the menu.
+                if (isJson && (ModifierKeys & Keys.Control) == Keys.Control) OpenJsonAsGrid(e.RowIndex, e.ColumnIndex);
+                else if (isJson) ShowJson(text, column, e.RowIndex);
+                // The code editor indents XML itself.
+                else CommonShared.ShowCodeViewer(text, CellCaption(column, e.RowIndex), CodeEditor.CodeEditorModes.XML);
             }
             catch (Exception ex)
             {
@@ -514,6 +541,83 @@ namespace DBADashGUI.Grids
 
         /// <summary>Which row something was opened from, so what's opened from several can be told apart.</summary>
         private static string RowCaption(int rowIndex) => $"row {rowIndex + 1:N0}";
+
+        /// <summary>Which cell something was opened from: its column and row.</summary>
+        private static string CellCaption(DataGridViewColumn column, int rowIndex) => $"{column.HeaderText} - {RowCaption(rowIndex)}";
+
+        /// <summary>JSON in the code viewer, indented: the editor shows JSON as it is.</summary>
+        private static void ShowJson(string json, DataGridViewColumn column, int rowIndex) =>
+            CommonShared.ShowCodeViewer(FormatJson(json), CellCaption(column, rowIndex), CodeEditor.CodeEditorModes.Json);
+
+        /// <summary>
+        /// View JSON and View as Grid at the top of a cell's menu, where the cell holds a JSON object or array - in a JSON
+        /// link column or not, as a column can mix JSON with other values.
+        /// </summary>
+        private void AddJsonMenuItems()
+        {
+            var cell = (Row: -1, Column: -1);
+            var viewJson = new ToolStripMenuItem("View JSON", Resources.Code_16x, (_, _) =>
+            {
+                if (JsonCellText(cell.Row, cell.Column) is { } json) ShowJson(json, _grid.Columns[cell.Column], cell.Row);
+            })
+            {
+                ToolTipText = "Show the cell's JSON in the code viewer"
+            };
+            var viewAsGrid = new ToolStripMenuItem("View as Grid", Resources.DataTable_16x, (_, _) => OpenJsonAsGrid(cell.Row, cell.Column))
+            {
+                ToolTipText = "Show the cell's JSON as a grid of its own, on a new tab",
+                // A hint only - Ctrl+click on a JSON link does it, which a menu shortcut can't express.
+                ShortcutKeyDisplayString = "Ctrl+Click"
+            };
+            var separator = new ToolStripSeparator();
+
+            var menu = _grid.CellContextMenu.Items;
+            menu.Insert(0, separator);
+            menu.Insert(0, viewAsGrid);
+            menu.Insert(0, viewJson);
+
+            _grid.CellContextMenuOpening += (_, e) =>
+            {
+                cell = (e.RowIndex, e.ColumnIndex);
+                var isJson = JsonCellText(e.RowIndex, e.ColumnIndex) is not null;
+                viewJson.Visible = viewAsGrid.Visible = separator.Visible = isJson;
+            };
+        }
+
+        /// <summary>The cell's text, if it looks like a JSON object or array, else null.</summary>
+        private string JsonCellText(int rowIndex, int columnIndex)
+        {
+            if (rowIndex < 0 || columnIndex < 0 || rowIndex >= _grid.Rows.Count || columnIndex >= _grid.Columns.Count) return null;
+            return _grid.Rows[rowIndex].Cells[columnIndex].Value is string text && NestedJson.LooksLikeJson(text) ? text : null;
+        }
+
+        /// <summary>
+        /// Opens a cell's JSON as a grid on a new tab of the window - nested records, filtered and sorted as any other
+        /// grid, whose own JSON can be opened the same way.
+        /// </summary>
+        private void OpenJsonAsGrid(int rowIndex, int columnIndex)
+        {
+            if (JsonCellText(rowIndex, columnIndex) is not { } json) return;
+
+            var column = _grid.Columns[columnIndex];
+            var title = $"{Title} - {column.HeaderText} ({RowCaption(rowIndex)})";
+            try
+            {
+                var dataSet = NestedJson.ToDataSet(json);
+                if (dataSet.Tables.Count == 0)
+                {
+                    MessageBox.Show(FindForm(), "There is nothing in the JSON to show as a grid.", "View as Grid",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                ViewerForm.OpenGrid(dataSet, title, FindForm());
+            }
+            catch (Exception ex)
+            {
+                CommonShared.ShowExceptionDialog(ex, "Error opening cell", text: "The cell's JSON could not be shown as a grid.");
+            }
+        }
 
         private static string FormatJson(string json)
         {

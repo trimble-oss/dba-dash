@@ -78,6 +78,12 @@ A grid file - a result set saved from DBA Dash or SSMS, or JSON records such as 
 - **Reload** reads the file again, to show what has been added to it - such as a log that is still being written to.  The
   filter stays on, but the grid starts again at the top.
 - **Watch** does the same whenever the file changes, checking it every couple of seconds, until it is turned off.
+- **View File Text** shows the file itself - the JSON or XML as it is - in the code viewer.
+- **Nested JSON.**  A column whose values are all JSON objects or arrays is shown as links - nested JSON in a file's records,
+  or JSON held as text, such as a log property that is itself JSON.  Click one to see it, indented, in the code viewer, or
+  Ctrl+click it to open it as a grid.
+  Right-click any cell of JSON for *View JSON*, or *View as Grid* to open it as a grid of its own on a new tab, where it can
+  be filtered and sorted like the rest, and its own nested JSON opened the same way.
 
 ## Settings
 
