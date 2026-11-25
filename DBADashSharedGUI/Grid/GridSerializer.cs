@@ -187,6 +187,19 @@ namespace DBADashGUI.CustomReports
         }
 
         /// <summary>
+        /// The text of a grid file as it is on disk - decompressed, where it's a .gz - for showing the file itself rather
+        /// than the grid read from it.
+        /// </summary>
+        public static string ReadText(string path)
+        {
+            using var reader = new StreamReader(OpenRead(path, EndsWith(path, ".gz")), Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
+            return reader.ReadToEnd();
+        }
+
+        /// <summary>True for a grid file whose text is XML - a DataSet saved as XML, or a results grid SSMS saved.</summary>
+        public static bool IsXmlText(string path) => EndsWith(path, XmlExtension) || EndsWith(path, CompressedXmlExtension);
+
+        /// <summary>
         /// Shared for reading and writing, so a log file can be opened while the program writing it still has it open.
         /// </summary>
         private static Stream OpenRead(string path, bool compressed)

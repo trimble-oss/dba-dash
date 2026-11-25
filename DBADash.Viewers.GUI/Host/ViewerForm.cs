@@ -322,6 +322,42 @@ namespace DBADashGUI.Viewers
             window.Activate();
         }
 
+        /// <summary>
+        /// Shows tables already in memory on a new tab - JSON from a grid's cell, opened as a grid of its own.  On the
+        /// window <paramref name="from"/> is on, where that's a viewer window, else the one used last.
+        /// </summary>
+        public static void OpenGrid(DataSet dataSet, string title, Form from = null)
+        {
+            var window = from as ViewerForm ?? (_current is { IsDisposed: false } ? _current : null);
+
+            if (window is null)
+            {
+                window = _current = new ViewerForm();
+                window.AddGridTab(dataSet, title);
+                window.Show();
+                return;
+            }
+
+            window.AddGridTab(dataSet, title);
+
+            if (window.WindowState == FormWindowState.Minimized) window.WindowState = FormWindowState.Normal;
+            window.Activate();
+        }
+
+        private void AddGridTab(DataSet dataSet, string title)
+        {
+            if (dataSet.Tables.Count == 1)
+            {
+                var grid = new GridViewerControl(dataSet.Tables[0], title) { Dock = DockStyle.Fill };
+                AddTab(grid, grid.Title, grid.TabToolTip);
+            }
+            else
+            {
+                var dataSetViewer = new DataSetViewerControl(dataSet, title) { Dock = DockStyle.Fill };
+                AddTab(dataSetViewer, dataSetViewer.Title, dataSetViewer.TabToolTip);
+            }
+        }
+
         private void AddGridFileTab(string path)
         {
             var fileName = Path.GetFileName(path);
@@ -413,7 +449,9 @@ namespace DBADashGUI.Viewers
                     var dataSetTitle = dataSet.ExtendedProperties["Title"] as string;
                     var dataSetViewer = new DataSetViewerControl(dataSet, string.IsNullOrWhiteSpace(dataSetTitle) ? fileName : dataSetTitle)
                     {
-                        Dock = DockStyle.Fill
+                        Dock = DockStyle.Fill,
+                        // Not for the SSMS extension's temp file: the results came from a query, not a file.
+                        SourcePath = messages == null ? path : null
                     };
                     (viewer, title, tooltip) = (dataSetViewer, dataSetViewer.Title, dataSetViewer.TabToolTip);
                 }
