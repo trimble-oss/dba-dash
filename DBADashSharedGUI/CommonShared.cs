@@ -198,9 +198,20 @@ namespace DBADashSharedGUI
             return result; // Return the result of the dialog box
         }
 
-        public static void ShowCodeViewer(string sql, string title = "", CodeEditor.CodeEditorModes Language = CodeEditor.CodeEditorModes.SQL)
+        /// <param name="format">
+        /// For XML and JSON, whether the text starts formatted - the viewer's Format button switches it either way.  Null
+        /// is each mode's default: XML formatted, JSON as given.
+        /// </param>
+        /// <param name="unformattedLabel">
+        /// What the text is when it isn't formatted - "as written in the file", "as the cell holds it" - for the Format
+        /// button's tooltip.  Null for <see cref="CodeEditorForm.DefaultUnformattedLabel"/>.
+        /// </param>
+        public static void ShowCodeViewer(string sql, string title = "", CodeEditor.CodeEditorModes Language = CodeEditor.CodeEditorModes.SQL,
+            bool? format = null, string unformattedLabel = null)
         {
-            if (Language != CodeEditor.CodeEditorModes.None && ShouldDisableSyntaxHighlighting(sql)) // Turn off syntax highlighting if it's likely to be problematic
+            // Turn off syntax highlighting if it's likely to be problematic.  XML and JSON are left to the editor, which
+            // checks the text it shows: formatted, a single long line no longer is one.
+            if (Language != CodeEditor.CodeEditorModes.None && !CodeEditor.CanFormat(Language) && ShouldDisableSyntaxHighlighting(sql))
             {
                 Language = CodeEditor.CodeEditorModes.None;
             }
@@ -208,6 +219,9 @@ namespace DBADashSharedGUI
             CodeViewer frmCodeViewer = new()
             {
                 Language = Language,
+                // Before the code, so it's formatted - or not - once.
+                Format = format,
+                UnformattedLabel = unformattedLabel,
                 Code = sql,
                 Text = "Code Viewer" + (string.IsNullOrEmpty(title) ? "" : " - " + title)
             };

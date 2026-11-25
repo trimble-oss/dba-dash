@@ -132,8 +132,35 @@ namespace DBADashGUI.SchemaCompare
             return resourceBytes;
         }
 
+        /// <summary>
+        /// A line longer than this turns highlighting off for XML and JSON: long single lines can hang the editor (#1561).
+        /// Checked on the text shown, so minified JSON can still be formatted, and highlighted once it is.
+        /// </summary>
+        public const int MaxHighlightedLineLength = 50000;
+
+        /// <summary>Whether any line of <paramref name="text"/> is longer than <see cref="MaxHighlightedLineLength"/>.</summary>
+        public static bool HasLongLine(string text)
+        {
+            if (text == null || text.Length <= MaxHighlightedLineLength) return false;
+            var run = 0;
+            foreach (var c in text)
+            {
+                run = c is '\r' or '\n' ? 0 : run + 1;
+                if (run > MaxHighlightedLineLength) return true;
+            }
+
+            return false;
+        }
+
         private void SetHighlighting()
         {
+            if (CanFormat(mode) && HasLongLine(txtCode.Text))
+            {
+                txtCode.SyntaxHighlighting = null;
+                currentHighlighting = null;
+                return;
+            }
+
             var theme = ThemeExtensions.CurrentTheme;
             string resourceName = null;
             if (mode == CodeEditorModes.SQL && theme is DarkTheme)
@@ -150,14 +177,6 @@ namespace DBADashGUI.SchemaCompare
             }
             else if (mode == CodeEditorModes.XML)
             {
-                try
-                {
-                    txtCode.Text = FormatXml(_text);
-                }
-                catch
-                {
-                    // ignored
-                }
                 txtCode.SyntaxHighlighting = ICSharpCode.AvalonEdit.Highlighting.HighlightingManager.Instance.GetDefinitionByExtension(".xml");
                 return;
             }
@@ -184,6 +203,89 @@ namespace DBADashGUI.SchemaCompare
                 SetHighlighting(GetResource(resourceName));
             }
             currentHighlighting = resourceName;
+        }
+
+        private bool? format;
+
+        /// <summary>
+        /// Whether XML or JSON is shown formatted - indented, a node or property to a line - or as it was given.  Null,
+        /// the default, is what each mode has always done: XML formatted, JSON as given.  The text given is kept, so
+        /// formatting can be turned off again to show it as it was.
+        /// </summary>
+        public bool? Format
+        {
+            get => format;
+            set
+            {
+                format = value;
+                ShowText();
+                SetHighlighting();
+            }
+        }
+
+        /// <summary>Whether the text shown is the formatted version of the text given.</summary>
+        public bool IsFormatted { get; private set; }
+
+        /// <summary>Why the text couldn't be formatted, the last time it was asked to be - else null.</summary>
+        public string FormatError { get; private set; }
+
+        /// <summary>The modes whose text can be formatted.</summary>
+        public static bool CanFormat(CodeEditorModes mode) => mode is CodeEditorModes.XML or CodeEditorModes.Json;
+
+        /// <summary>
+        /// Shows the text given, formatted or not as <see cref="Format"/> and the mode say.  Text that's shown as given
+        /// is only replaced when it was showing formatted, so switching modes doesn't throw away edits.
+        /// </summary>
+        private void ShowText()
+        {
+            var wasFormatted = IsFormatted;
+            IsFormatted = false;
+            FormatError = null;
+            if (_text == null) return;
+
+            if (CanFormat(mode) && (format ?? mode == CodeEditorModes.XML) && !string.IsNullOrWhiteSpace(_text))
+            {
+                try
+                {
+                    txtCode.Text = mode == CodeEditorModes.XML ? FormatXml(_text) : FormatJson(_text);
+                    IsFormatted = true;
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    FormatError = ex.Message;
+                }
+            }
+
+            if (wasFormatted) txtCode.Text = _text;
+        }
+
+        /// <summary>
+        /// JSON indented - each value of several, as JSON lines or a log hold, on lines of its own.  Characters aren't
+        /// escaped beyond what JSON requires, so text reads as it was written.
+        /// </summary>
+        public static string FormatJson(string json)
+        {
+            var options = new System.Text.Json.JsonSerializerOptions
+            {
+                WriteIndented = true,
+                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+            };
+            var reader = new System.Text.Json.Utf8JsonReader(Encoding.UTF8.GetBytes(json), new System.Text.Json.JsonReaderOptions
+            {
+                AllowMultipleValues = true,
+                CommentHandling = System.Text.Json.JsonCommentHandling.Skip
+            });
+
+            var formatted = new StringBuilder();
+            while (reader.Read())
+            {
+                using var document = System.Text.Json.JsonDocument.ParseValue(ref reader);
+                if (formatted.Length > 0) formatted.AppendLine();
+                formatted.Append(System.Text.Json.JsonSerializer.Serialize(document.RootElement, options));
+            }
+
+            return formatted.Length == 0 ? json : formatted.ToString();
         }
 
         public static string FormatXml(string xml)
@@ -214,6 +316,7 @@ namespace DBADashGUI.SchemaCompare
             set
             {
                 mode = value;
+                ShowText();
                 SetHighlighting();
                 // The colours go with the highlighting, so a mode set after the text gets the right ones too.
                 if (_text != null) ApplyColours();
@@ -242,6 +345,8 @@ namespace DBADashGUI.SchemaCompare
             {
                 _text = value;
                 txtCode.Text = value;
+                IsFormatted = false;
+                ShowText();
                 SetHighlighting();
                 ApplyColours();
             }

@@ -172,6 +172,40 @@ namespace DBADash.Viewers.GUI.Test
             Assert.AreEqual(text, GridSerializer.ReadText(path));
         }
 
+        /// <summary>
+        /// View File Text reads up to its limit before asking about the rest - counted in text, so a .gz is judged by what
+        /// it decompresses to.
+        /// </summary>
+        [TestMethod]
+        [DataRow(10, 20, false)]
+        [DataRow(20, 20, false)]
+        [DataRow(21, 20, true)]
+        [DataRow(200000, 100000, true)]
+        public void ReadUpTo_StopsAtTheLimit(int length, int limit, bool more)
+        {
+            var text = new string('x', length);
+
+            var read = FileTextViewer.ReadUpTo(new StringReader(text), limit);
+
+            Assert.AreEqual(Math.Min(length, limit), read.Text.Length);
+            Assert.AreEqual(more, read.More);
+        }
+
+        [TestMethod]
+        public void ReadUpTo_GzipCountsDecompressedText()
+        {
+            var path = Path.Combine(_folder, "big.json.gz");
+            using (var stream = File.Create(path))
+            using (var gzip = new GZipStream(stream, CompressionLevel.Optimal))
+            {
+                gzip.Write(Encoding.UTF8.GetBytes(new string(' ', 100000)));
+            }
+
+            Assert.IsTrue(new FileInfo(path).Length < 1000, "compresses to almost nothing");
+            using var reader = GridSerializer.OpenText(path);
+            Assert.IsTrue(FileTextViewer.ReadUpTo(reader, 50000).More);
+        }
+
         [TestMethod]
         [DataRow("grid.xml", true)]
         [DataRow("grid.xml.gz", true)]

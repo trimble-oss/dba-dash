@@ -9,9 +9,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
-using System.Text.Encodings.Web;
-using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Windows.Forms;
 
 namespace DBADashGUI.Grids
@@ -490,7 +487,8 @@ namespace DBADashGUI.Grids
                 if (isJson && (ModifierKeys & Keys.Control) == Keys.Control) OpenJsonAsGrid(e.RowIndex, e.ColumnIndex);
                 else if (isJson) ShowJson(text, column, e.RowIndex);
                 // The code editor indents XML itself.
-                else CommonShared.ShowCodeViewer(text, CellCaption(column, e.RowIndex), CodeEditor.CodeEditorModes.XML);
+                else CommonShared.ShowCodeViewer(text, CellCaption(column, e.RowIndex), CodeEditor.CodeEditorModes.XML,
+                    unformattedLabel: CellTextLabel);
             }
             catch (Exception ex)
             {
@@ -545,9 +543,16 @@ namespace DBADashGUI.Grids
         /// <summary>Which cell something was opened from: its column and row.</summary>
         private static string CellCaption(DataGridViewColumn column, int rowIndex) => $"{column.HeaderText} - {RowCaption(rowIndex)}";
 
-        /// <summary>JSON in the code viewer, indented: the editor shows JSON as it is.</summary>
+        /// <summary>
+        /// What a cell's text is, unformatted.  Not "as written": a JSON file's nested object or array is held as a
+        /// one-line copy, not the file's own text - that's View File Text.
+        /// </summary>
+        private const string CellTextLabel = "as the cell holds it";
+
+        /// <summary>A cell's JSON in the code viewer, formatted - a cell's is often all on one line.  Format puts it back.</summary>
         private static void ShowJson(string json, DataGridViewColumn column, int rowIndex) =>
-            CommonShared.ShowCodeViewer(FormatJson(json), CellCaption(column, rowIndex), CodeEditor.CodeEditorModes.Json);
+            CommonShared.ShowCodeViewer(json, CellCaption(column, rowIndex), CodeEditor.CodeEditorModes.Json, format: true,
+                unformattedLabel: CellTextLabel);
 
         /// <summary>
         /// View JSON and View as Grid at the top of a cell's menu, where the cell holds a JSON object or array - in a JSON
@@ -616,22 +621,6 @@ namespace DBADashGUI.Grids
             catch (Exception ex)
             {
                 CommonShared.ShowExceptionDialog(ex, "Error opening cell", text: "The cell's JSON could not be shown as a grid.");
-            }
-        }
-
-        private static string FormatJson(string json)
-        {
-            try
-            {
-                return JsonNode.Parse(json)?.ToJsonString(new JsonSerializerOptions
-                {
-                    WriteIndented = true,
-                    Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-                }) ?? json;
-            }
-            catch (JsonException)
-            {
-                return json;
             }
         }
     }
