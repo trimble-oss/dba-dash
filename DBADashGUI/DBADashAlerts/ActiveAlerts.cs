@@ -483,6 +483,10 @@ namespace DBADashGUI.DBADashAlerts
                             { "IsResolved", new ColumnMetadata { Alias = "Resolved?" } },
                             { "ResolvedDate", new ColumnMetadata { Alias = "Resolved Date" } },
                             { "IsBlackout", new ColumnMetadata { Alias = "Is Blackout" } },
+                            { "IsPending", new ColumnMetadata { Alias = "Pending?", Visible = false, Description = "Waiting for the issue to persist for the rule's Notify After delay before sending a notification" } },
+                            { "IsResolving", new ColumnMetadata { Alias = "Resolving?", Visible = false, Description = "The issue has cleared. Waiting for the rule's Resolve After delay before resolving the alert" } },
+                            { "ActiveSince", new ColumnMetadata { Alias = "Active Since", Visible = false, Description = "When the issue started. Unlike Trigger Date, this resets when a resolved alert is triggered again" } },
+                            { "ResolvingSince", new ColumnMetadata { Alias = "Resolving Since", Visible = false, Description = "When the issue was first seen to have cleared" } },
                             { "Notes", new ColumnMetadata {
                                 Alias = "Notes",
                                 NullValue = "Add Notes...",

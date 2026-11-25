@@ -151,6 +151,20 @@ namespace DBADashGUI.DBADashAlerts.Rules
         [Description("Set to false to disable this rule")]
         [JsonIgnore] public bool IsActive { get; set; } = true;
 
+        [JsonIgnore]
+        [DisplayName("Notify After"), Category("DBA Dash Notification")]
+        [Description("Only send a notification once the issue has persisted for this long.  Until then the alert shows as Pending, and it's resolved without a notification if the issue clears first.  Leave blank to notify straight away.  Enter days / hours / minutes.")]
+        [TypeConverter(typeof(MinuteDurationConverter))]
+        [Editor(typeof(MinuteDurationEditor), typeof(UITypeEditor))]
+        public virtual int? NotifyAfterMins { get; set; }
+
+        [JsonIgnore]
+        [DisplayName("Resolve After"), Category("DBA Dash Notification")]
+        [Description("Only resolve the alert once the issue has cleared for this long.  Until then the alert shows as Resolving, and if the issue comes back it carries on as the same alert.  This stops an issue that keeps clearing briefly from restarting the Notify After delay.  Leave blank to use the Notify After value.  Enter days / hours / minutes.")]
+        [TypeConverter(typeof(MinuteDurationConverter))]
+        [Editor(typeof(MinuteDurationEditor), typeof(UITypeEditor))]
+        public virtual int? ResolveAfterMins { get; set; }
+
         public string GetDetails() => JsonConvert.SerializeObject(this);
 
         [JsonIgnore]
@@ -171,6 +185,10 @@ namespace DBADashGUI.DBADashAlerts.Rules
 
         public void Save()
         {
+            if (NotifyAfterMins < 0 || ResolveAfterMins < 0)
+            {
+                throw new Exception("Notify After and Resolve After can't be negative");
+            }
             var validationResult = Validate();
             if (!validationResult.isValid)
             {
@@ -201,6 +219,8 @@ namespace DBADashGUI.DBADashAlerts.Rules
             cmd.Parameters.AddWithValue("@Notes", Notes);
             cmd.Parameters.AddWithValue("@ApplyToHidden", ApplyToHidden);
             cmd.Parameters.AddWithValue("@GroupID", GroupID);
+            cmd.Parameters.AddWithValue("@NotifyAfterMins", NotifyAfterMins is > 0 ? NotifyAfterMins : DBNull.Value);
+            cmd.Parameters.AddWithValue("@ResolveAfterMins", ResolveAfterMins == null ? DBNull.Value : ResolveAfterMins);
             cn.Open();
             cmd.ExecuteNonQuery();
         }
@@ -239,7 +259,9 @@ namespace DBADashGUI.DBADashAlerts.Rules
                 (string)rdr["Notes"].DBNullToNull(),
                      (bool)rdr["ApplyToHidden"],
                 rdr.IsDBNull("GroupID") ? 0 : rdr.GetInt32("GroupID"),
-                rdr.IsDBNull("ApplyToTagIDs") ? null : rdr.GetString("ApplyToTagIDs"));
+                rdr.IsDBNull("ApplyToTagIDs") ? null : rdr.GetString("ApplyToTagIDs"),
+                rdr.IsDBNull("NotifyAfterMins") ? null : rdr.GetInt32("NotifyAfterMins"),
+                rdr.IsDBNull("ResolveAfterMins") ? null : rdr.GetInt32("ResolveAfterMins"));
             }
             else
             {
@@ -249,7 +271,8 @@ namespace DBADashGUI.DBADashAlerts.Rules
 
         public static AlertRuleBase GetRule(int ruleID, RuleTypes ruleType, short priority, int applyToTagID, decimal? threshold,
             int? evaluationPeriodMins, bool isActive, string details, string applyToTag, int? applyToInstanceId,
-            string applyToInstance, string notes, bool applyToHidden, int groupID = 0, string applyToTagIDs = null)
+            string applyToInstance, string notes, bool applyToHidden, int groupID = 0, string applyToTagIDs = null,
+            int? notifyAfterMins = null, int? resolveAfterMins = null)
         {
             AlertRuleBase rule = ruleType switch
             {
@@ -291,6 +314,8 @@ namespace DBADashGUI.DBADashAlerts.Rules
             rule.Notes = notes;
             rule.ApplyToHidden = applyToHidden;
             rule.GroupID = groupID;
+            rule.NotifyAfterMins = notifyAfterMins;
+            rule.ResolveAfterMins = resolveAfterMins;
             return rule;
         }
     }

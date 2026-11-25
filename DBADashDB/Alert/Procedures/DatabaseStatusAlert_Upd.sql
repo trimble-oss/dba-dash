@@ -76,14 +76,11 @@ EXEC Alert.ActiveAlerts_Upd @AlertDetails = @AlertDetails, @AlertType = @Type, @
 /* Resolve alerts when the database is no longer in the triggered set:
    - Database returned to an excluded state (e.g. back ONLINE)
    - Database was dropped (IsActive = 0) or renamed
-   - Rule was updated (e.g. ExcludedStates now includes the current state) */
-UPDATE AA
-		SET ResolvedDate  = SYSUTCDATETIME(),
-		IsResolved    = 1,
-		LastMessage   = 'Issue resolved',
-		UpdateCount  += 1,
-		ResolvedCount += 1,
-		UpdatedDate   = SYSUTCDATETIME()
+   - Rule was updated (e.g. ExcludedStates now includes the current state)
+   Resolved once it has stayed that way for the rule's resolve delay */
+DECLARE @Cleared dbo.BigIDs
+INSERT INTO @Cleared(ID)
+SELECT AA.AlertID
 FROM Alert.ActiveAlerts AA
 WHERE AA.AlertType = @Type
 AND NOT EXISTS(
@@ -94,3 +91,5 @@ AND NOT EXISTS(
 			AND AD.GroupID = AA.GroupID
 )
 AND AA.IsResolved = 0
+
+EXEC Alert.ActiveAlerts_Resolve @AlertIDs=@Cleared, @AlertType=@Type

@@ -21,6 +21,13 @@ namespace DBADashGUI.DBADashAlerts.Rules
         [Browsable(false)]
         public override int? EvaluationPeriodMins => null;
 
+        /* SQL Agent alerts aren't resolved automatically, so a notify delay would only postpone every notification and a resolve delay doesn't apply */
+        [Browsable(false)]
+        public override int? NotifyAfterMins => null;
+
+        [Browsable(false)]
+        public override int? ResolveAfterMins => null;
+
         [DisplayName("Message IDs"), Category("Filters"),
          Description("Message IDs to filter on.  Leave empty to apply to all Message IDs")]
         public List<int> MessageIDList { get; set; } = new();

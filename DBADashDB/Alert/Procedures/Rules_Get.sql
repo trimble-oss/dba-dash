@@ -27,7 +27,9 @@ SELECT R.RuleID,
        R.Notes,
        R.GroupID,
        G.GroupName,
-       R.ApplyToTagIDs
+       R.ApplyToTagIDs,
+       R.NotifyAfterMins,
+       R.ResolveAfterMins
 FROM Alert.Rules R
 LEFT JOIN dbo.Tags T ON R.ApplyToTagID = T.TagID
 LEFT JOIN dbo.Instances I ON R.ApplyToInstanceID = I.InstanceID
