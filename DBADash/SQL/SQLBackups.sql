@@ -66,9 +66,10 @@ WITH T AS (
 	' + CASE WHEN NOT EXISTS(SELECT 1 FROM msdb.sys.columns WHERE object_id = OBJECT_ID('msdb.dbo.backupset') AND name = 'compression_algorithm') THEN 'CAST(NULL AS NVARCHAR(32)) AS compression_algorithm,' ELSE 'compression_algorithm,' END + '
 	/*	Backups are ranked by UTC time.  backup_finish_date is the local time of the server that took the backup, and a contained AG''s history
 		can come from replicas in different time zones.  time_zone is the local time''s offset from UTC in 15 minute intervals (127 = unknown),
-		so UTC = local time - time_zone * 15 minutes.  e.g. UTC+2: time_zone = 8, 12:00 local = 10:00 UTC */
+		so UTC = local time - time_zone * 15 minutes.  e.g. UTC+2: time_zone = 8, 12:00 local = 10:00 UTC
+		backup_finish_date is to the second, so backups that finish in the same second are ranked by backup_set_id (the order msdb recorded them). */
 	DATEADD(mi,-15*ISNULL(NULLIF(time_zone,127),0),backup_finish_date) AS backup_finish_date_utc,
-	ROW_NUMBER() OVER(PARTITION BY family_guid,database_name,type,is_snapshot,is_copy_only ORDER BY DATEADD(mi,-15*ISNULL(NULLIF(time_zone,127),0),backup_finish_date) DESC) rnum
+	ROW_NUMBER() OVER(PARTITION BY family_guid,database_name,type,is_snapshot,is_copy_only ORDER BY DATEADD(mi,-15*ISNULL(NULLIF(time_zone,127),0),backup_finish_date) DESC,backup_set_id DESC) rnum
 	FROM msdb.dbo.backupset bs
 	WHERE (server_name=CAST(SERVERPROPERTY(''SERVERNAME'') AS NVARCHAR(128)) COLLATE SQL_Latin1_General_CP1_CI_AS
 		' + CASE WHEN @ContainedAGID IS NOT NULL THEN 'OR server_name COLLATE SQL_Latin1_General_CP1_CI_AS IN(SELECT AR.replica_server_name COLLATE SQL_Latin1_General_CP1_CI_AS FROM sys.availability_replicas AR WHERE AR.group_id = @ContainedAGID)' ELSE '' END + '
@@ -87,7 +88,7 @@ M AS (
 /* More than one history name can map to the same database (e.g. <AG>_master and master).  Keep the latest. */
 L AS (
 	SELECT	M.*,
-			ROW_NUMBER() OVER(PARTITION BY M.mapped_database_id,M.type,M.is_snapshot,M.is_copy_only ORDER BY M.backup_finish_date_utc DESC) AS mapped_rnum
+			ROW_NUMBER() OVER(PARTITION BY M.mapped_database_id,M.type,M.is_snapshot,M.is_copy_only ORDER BY M.backup_finish_date_utc DESC,M.backup_set_id DESC) AS mapped_rnum
 	FROM M
 )
 SELECT	d.name AS database_name,
