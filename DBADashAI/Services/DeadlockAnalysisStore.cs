@@ -84,7 +84,10 @@ namespace DBADashAI.Services
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Could not record the deadlock analysis for {Signature}", signature);
+                // The signature is caller-supplied.  Validate() only lets 0x plus 16 hex digits through,
+                // but this store does not re-check that, so strip control characters before logging.
+                _logger.LogWarning(ex, "Could not record the deadlock analysis for {Signature}",
+                    LogSanitizer.SanitizeForLog(signature));
             }
         }
     }
